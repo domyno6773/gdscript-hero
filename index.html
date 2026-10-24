@@ -722,6 +722,15 @@
                     </div>
                     <button type="button" class="btn-subtle" id="btn-settings-import">📥 Importa</button>
                 </div>
+
+                <!-- Accesso Dashboard Amministratore -->
+                <div class="settings-row admin-settings-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">👑 Statistiche &amp; Dashboard Admin</span>
+                        <span class="settings-item-sub">Visualizza utenti registrati, XP globali e metriche</span>
+                    </div>
+                    <button type="button" class="btn-subtle btn-admin-accent" id="btn-settings-open-admin">Visualizza Stats</button>
+                </div>
             </div>
 
             <!-- Gruppo 4: Dati e Reset (Doppia Conferma) -->
@@ -1044,6 +1053,103 @@
         </div>
     </div>
 
+    <!-- MODAL 4: PANNELLO DI CONTROLLO AMMINISTRATORE (Admin Dashboard) -->
+    <div class="modal-overlay hidden" id="admin-modal">
+        <div class="modal-card modal-large admin-modal-card">
+            <div class="modal-header-row">
+                <div class="admin-header-title">
+                    <span class="admin-icon-crown">👑</span>
+                    <div>
+                        <h2>Pannello Amministratore</h2>
+                        <span class="modal-subtitle">Statistiche globali del sito, utenti registrati e metriche</span>
+                    </div>
+                </div>
+                <div class="admin-header-actions">
+                    <button type="button" class="btn-refresh-admin" id="btn-refresh-admin" title="Aggiorna metriche">↻ Aggiorna</button>
+                    <button class="modal-close-btn" id="btn-close-admin">✕</button>
+                </div>
+            </div>
+
+            <!-- Badge Stato Cloud -->
+            <div class="admin-cloud-status" id="admin-cloud-status">
+                <span class="cloud-indicator-dot" id="cloud-indicator-dot"></span>
+                <span id="cloud-status-text">Stato Connessione: Sincronizzazione Locale (Offline)</span>
+            </div>
+
+            <!-- KPI Cards Grid -->
+            <div class="admin-kpi-grid">
+                <div class="kpi-card">
+                    <span class="kpi-icon">👥</span>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-total-users">0</span>
+                        <span class="kpi-label">Utenti Registrati</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-icon">⚡</span>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-total-xp">0</span>
+                        <span class="kpi-label">XP Erogati</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-icon">📚</span>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-avg-lessons">0.0</span>
+                        <span class="kpi-label">Media Lezioni Finite</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-icon">🔥</span>
+                    <div class="kpi-content">
+                        <span class="kpi-value" id="kpi-top-level">Lv. 1</span>
+                        <span class="kpi-label">Livello Massimo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabella Utenti Registrati -->
+            <div class="admin-table-section">
+                <div class="admin-table-header">
+                    <h3>📋 Elenco Giocatori &amp; Account</h3>
+                    <span class="admin-table-count" id="admin-table-count">0 giocatori trovati</span>
+                </div>
+                
+                <div class="admin-table-wrapper">
+                    <table class="admin-users-table">
+                        <thead>
+                            <tr>
+                                <th>Utente / Email</th>
+                                <th>Accesso</th>
+                                <th>Livello &amp; XP</th>
+                                <th>Lezioni</th>
+                                <th>Ultima Attività</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-tbody">
+                            <!-- Popolato dinamicamente da app.js -->
+                            <tr>
+                                <td colspan="5" class="table-empty-row">Caricamento statistiche...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Banner Guida Configurazione Cloud (mostrato se non configurato) -->
+            <div class="admin-setup-card" id="admin-setup-card">
+                <div class="setup-icon">🚀</div>
+                <div class="setup-info">
+                    <h4>Come vedere gli utenti di tutto il mondo in tempo reale?</h4>
+                    <p>
+                        Collega il tuo progetto gratuito Supabase: inserisci <code>url</code> e <code>anonKey</code> in 
+                        <code>supabase-config.js</code> ed esegui la query SQL da <code>supabase_schema.sql</code>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- BARRA DI NAVIGAZIONE INFERIORE MOBILE (Attiva solo su smartphone e schermi <= 820px) -->
     <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
         <button type="button" class="mob-nav-item active" id="mob-nav-roadmap" title="Mappa dei Livelli">
@@ -1069,6 +1175,8 @@
     </nav>
 
     <!-- Script inclusi in ordine -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script src="audio.js"></script>
     <script src="confetti.js"></script>
     <script src="runtime.js"></script>

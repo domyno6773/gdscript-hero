@@ -1,8 +1,8 @@
 /**
  * ===================================================================
  * GDSCRIPT HERO - AUTH & CLOUD SYNC MANAGER (auth.js)
- * Gestione Autenticazione (Ospite, Email/Password, Google)
- * ed Esportazione / Importazione Dati di Gioco (.json / codice Base64)
+ * Gestione Autenticazione (Ospite, Email/Password, Google OAuth)
+ * Integrazione Database Cloud Gratuito Supabase & Backup Locale
  * Supporto nativo per PC e Dispositivi Mobili.
  * ===================================================================
  */
@@ -12,19 +12,61 @@ const AuthManager = {
     ACCOUNTS_KEY: 'gdscript_hero_accounts_db',
 
     currentUser: null,
+    supabaseClient: null,
     listeners: [],
 
     /**
-     * Inizializzazione: ripristina la sessione utente o imposta Ospite di default
+     * Inizializzazione: verifica se Supabase è configurato,
+     * ripristina la sessione o imposta la modalità Ospite.
      */
-    init() {
+    async init() {
+        // 1. Inizializza client Supabase se le credenziali sono presenti
+        if (typeof window.supabase !== 'undefined' && window.SupabaseConfig && window.SupabaseConfig.isConfigured()) {
+            try {
+                this.supabaseClient = window.supabase.createClient(
+                    window.SupabaseConfig.url,
+                    window.SupabaseConfig.anonKey
+                );
+                console.log('[AuthManager] Supabase Cloud connesso con successo!');
+
+                // Ascolta gli eventi di sessione Supabase (OAuth redirect, login, refresh)
+                this.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    if (session && session.user) {
+                        const u = session.user;
+                        const sessionUser = {
+                            id: u.id,
+                            isGuest: false,
+                            provider: u.app_metadata?.provider || (u.email?.includes('gmail') ? 'google' : 'email'),
+                            name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
+                            email: u.email,
+                            photoURL: u.user_metadata?.avatar_url || null,
+                            createdAt: u.created_at || new Date().toISOString()
+                        };
+                        this.saveSession(sessionUser);
+
+                        // Carica i progressi cloud salvati per questo utente
+                        const cloudSave = await this.fetchFromCloud();
+                        if (cloudSave && window.App && typeof window.App.applyImportedState === 'function') {
+                            window.App.applyImportedState(cloudSave, false);
+                        }
+                    } else if (event === 'SIGNED_OUT') {
+                        this.currentUser = this.createGuestUser();
+                        this.notifyListeners();
+                    }
+                });
+            } catch (err) {
+                console.warn('[AuthManager] Errore inizializzazione Supabase:', err);
+                this.supabaseClient = null;
+            }
+        }
+
+        // 2. Ripristina sessione locale o imposta Ospite
         try {
             const rawSession = localStorage.getItem(this.SESSION_KEY);
             if (rawSession) {
                 this.currentUser = JSON.parse(rawSession);
             }
         } catch (e) {
-            console.warn('[AuthManager] Impossibile leggere la sessione salvata:', e);
             this.currentUser = null;
         }
 
@@ -33,6 +75,13 @@ const AuthManager = {
         }
 
         this.notifyListeners();
+    },
+
+    /**
+     * Verifica se il client Supabase Cloud è attualmente attivo e configurato
+     */
+    isCloudActive() {
+        return !!(this.supabaseClient && window.SupabaseConfig && window.SupabaseConfig.isConfigured());
     },
 
     /**
@@ -50,27 +99,17 @@ const AuthManager = {
         };
     },
 
-    /**
-     * Verifica se l'utente corrente è in modalità ospite
-     */
     isGuest() {
         return !this.currentUser || this.currentUser.isGuest === true;
     },
 
-    /**
-     * Ottiene l'utente corrente
-     */
     getUser() {
         return this.currentUser;
     },
 
-    /**
-     * Registra un callback per gli eventi di cambio autenticazione
-     */
     onAuthStateChanged(callback) {
         if (typeof callback === 'function') {
             this.listeners.push(callback);
-            // Esegui subito con lo stato corrente
             callback(this.currentUser);
         }
     },
@@ -85,9 +124,6 @@ const AuthManager = {
         });
     },
 
-    /**
-     * Salva la sessione attiva
-     */
     saveSession(user) {
         this.currentUser = user;
         try {
@@ -96,9 +132,6 @@ const AuthManager = {
         this.notifyListeners();
     },
 
-    /**
-     * Ottiene il database locale degli account
-     */
     getAccountsDB() {
         try {
             const raw = localStorage.getItem(this.ACCOUNTS_KEY);
@@ -108,18 +141,12 @@ const AuthManager = {
         }
     },
 
-    /**
-     * Salva il database locale degli account
-     */
     saveAccountsDB(db) {
         try {
             localStorage.setItem(this.ACCOUNTS_KEY, JSON.stringify(db));
         } catch (e) {}
     },
 
-    /**
-     * Calcola un hash rapido per la password (SHA-256 via SubtleCrypto se disponibile)
-     */
     async hashPassword(password) {
         if (window.crypto && window.crypto.subtle) {
             try {
@@ -130,7 +157,6 @@ const AuthManager = {
                 return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
             } catch (e) {}
         }
-        // Fallback leggero in assenza di SubtleCrypto
         let hash = 0;
         const str = password + "_gdscript_salt_2026";
         for (let i = 0; i < str.length; i++) {
@@ -142,7 +168,7 @@ const AuthManager = {
     },
 
     /**
-     * Registrazione nuovo account con Email e Password
+     * Registrazione nuovo account con Email e Password (Cloud o Locale)
      */
     async registerWithEmail(name, email, password, currentProgress = null) {
         const cleanEmail = email.trim().toLowerCase();
@@ -156,6 +182,43 @@ const AuthManager = {
             throw new Error('La password deve contenere almeno 6 caratteri.');
         }
 
+        // 1. Se Supabase è attivo: registrazione remota
+        if (this.isCloudActive()) {
+            const { data, error } = await this.supabaseClient.auth.signUp({
+                email: cleanEmail,
+                password: password,
+                options: {
+                    data: {
+                        name: cleanName,
+                        full_name: cleanName
+                    }
+                }
+            });
+
+            if (error) {
+                throw new Error(error.message);
+            }
+
+            const sessionUser = {
+                id: data.user.id,
+                isGuest: false,
+                provider: 'email',
+                name: cleanName,
+                email: cleanEmail,
+                photoURL: null,
+                createdAt: data.user.created_at || new Date().toISOString()
+            };
+
+            this.saveSession(sessionUser);
+
+            if (currentProgress) {
+                await this.syncToCloud(currentProgress);
+            }
+
+            return { user: sessionUser, account: data.user };
+        }
+
+        // 2. Fallback autonomo locale
         const db = this.getAccountsDB();
         if (db[cleanEmail]) {
             throw new Error('Un account con questa email esiste già. Effettua l\'accesso!');
@@ -194,7 +257,7 @@ const AuthManager = {
     },
 
     /**
-     * Accesso con Email e Password
+     * Accesso con Email e Password (Cloud o Locale)
      */
     async loginWithEmail(email, password) {
         const cleanEmail = email.trim().toLowerCase();
@@ -203,6 +266,35 @@ const AuthManager = {
             throw new Error('Inserisci email e password.');
         }
 
+        // 1. Se Supabase è attivo: login remoto
+        if (this.isCloudActive()) {
+            const { data, error } = await this.supabaseClient.auth.signInWithPassword({
+                email: cleanEmail,
+                password: password
+            });
+
+            if (error) {
+                throw new Error(error.message);
+            }
+
+            const u = data.user;
+            const sessionUser = {
+                id: u.id,
+                isGuest: false,
+                provider: 'email',
+                name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
+                email: u.email,
+                photoURL: null,
+                createdAt: u.created_at
+            };
+
+            this.saveSession(sessionUser);
+
+            const cloudSave = await this.fetchFromCloud();
+            return { user: sessionUser, account: { progress: cloudSave } };
+        }
+
+        // 2. Fallback autonomo locale
         const db = this.getAccountsDB();
         const account = db[cleanEmail];
 
@@ -234,10 +326,25 @@ const AuthManager = {
     },
 
     /**
-     * Accesso Rapido con Account Google
+     * Accesso Rapido con Account Google (Cloud OAuth o Locale)
      */
     async loginWithGoogle(customProfile = null, currentProgress = null) {
-        // Se non viene passato un profilo personalizzato, crea/seleziona un profilo Google predefinito
+        // 1. Se Supabase è attivo: avvia Google OAuth ufficiale
+        if (this.isCloudActive()) {
+            const { data, error } = await this.supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.href.split('#')[0]
+                }
+            });
+
+            if (error) {
+                throw new Error(error.message);
+            }
+            return data;
+        }
+
+        // 2. Fallback autonomo locale
         const googleName = customProfile?.name || 'Sviluppatore Google';
         const googleEmail = (customProfile?.email || 'godot.dev@gmail.com').toLowerCase();
         const googleAvatar = customProfile?.photoURL || 'https://lh3.googleusercontent.com/a/default-user=s96-c';
@@ -246,7 +353,6 @@ const AuthManager = {
         let account = db[googleEmail];
 
         if (!account) {
-            // Primo accesso con Google: crea l'account
             const userId = 'goog_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
             account = {
                 id: userId,
@@ -282,11 +388,39 @@ const AuthManager = {
     },
 
     /**
-     * Salva i progressi dell'utente loggato nel database account
+     * Disconnette l'utente e ripristina la modalità Ospite
      */
-    syncUserProgress(progressData) {
+    async logout() {
+        if (this.isCloudActive()) {
+            try {
+                await this.supabaseClient.auth.signOut();
+            } catch (e) {}
+        }
+
+        try {
+            localStorage.removeItem(this.SESSION_KEY);
+        } catch (e) {}
+
+        this.currentUser = this.createGuestUser();
+        this.notifyListeners();
+    },
+
+    /**
+     * Salva i progressi nel Database Cloud (Supabase) e nel database locale
+     */
+    async syncUserProgress(progressData) {
         if (this.isGuest() || !this.currentUser || !this.currentUser.email) return;
 
+        // 1. Sincronizzazione Cloud Supabase
+        if (this.isCloudActive()) {
+            try {
+                await this.syncToCloud(progressData);
+            } catch (err) {
+                console.warn('[AuthManager] Sync cloud non riuscito, salvataggio locale preservato:', err);
+            }
+        }
+
+        // 2. Sincronizzazione database locale
         const db = this.getAccountsDB();
         if (db[this.currentUser.email]) {
             db[this.currentUser.email].progress = progressData;
@@ -296,7 +430,58 @@ const AuthManager = {
     },
 
     /**
-     * Recupera i progressi salvati per l'account attualmente loggato
+     * Salva record su tabella Supabase 'game_saves'
+     */
+    async syncToCloud(saveData) {
+        if (!this.isCloudActive() || this.isGuest()) return;
+        const { data: { user } } = await this.supabaseClient.auth.getUser();
+        if (!user) return;
+
+        const payload = {
+            user_id: user.id,
+            email: user.email,
+            xp: saveData.xp || 0,
+            level: Math.floor((saveData.xp || 0) / 100) + 1,
+            streak: saveData.streak || 0,
+            streak_weeks: saveData.streakWeeks || 0,
+            finished_lessons_count: (saveData.finishedLessons || []).length,
+            save_data: saveData,
+            updated_at: new Date().toISOString()
+        };
+
+        const { error } = await this.supabaseClient
+            .from('game_saves')
+            .upsert(payload, { onConflict: 'user_id' });
+
+        if (error) {
+            console.warn('[AuthManager] Errore upsert game_saves:', error.message);
+        }
+    },
+
+    /**
+     * Recupera il salvataggio salvato nel cloud Supabase
+     */
+    async fetchFromCloud() {
+        if (!this.isCloudActive() || this.isGuest()) return null;
+        try {
+            const { data: { user } } = await this.supabaseClient.auth.getUser();
+            if (!user) return null;
+
+            const { data, error } = await this.supabaseClient
+                .from('game_saves')
+                .select('save_data')
+                .eq('user_id', user.id)
+                .single();
+
+            if (error || !data) return null;
+            return data.save_data;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    /**
+     * Recupera i progressi salvati (Cloud o Locale)
      */
     getSavedUserProgress() {
         if (this.isGuest() || !this.currentUser || !this.currentUser.email) return null;
@@ -305,25 +490,100 @@ const AuthManager = {
         return acc ? acc.progress : null;
     },
 
-    /**
-     * Disconnette l'utente e torna in modalità Ospite
-     */
-    logout() {
-        try {
-            localStorage.removeItem(this.SESSION_KEY);
-        } catch (e) {}
+    // ===================================================================
+    // METRICHE E STATISTICHE AMMINISTRATORE (Admin Dashboard)
+    // ===================================================================
 
-        this.currentUser = this.createGuestUser();
-        this.notifyListeners();
+    /**
+     * Raccoglie le statistiche della piattaforma (utenti, XP, lezioni)
+     */
+    async fetchAdminStats() {
+        // 1. Se Supabase è connesso, recupera dati reali dal cloud
+        if (this.isCloudActive()) {
+            try {
+                const { data: saves, error } = await this.supabaseClient
+                    .from('game_saves')
+                    .select('user_id, email, xp, level, finished_lessons_count, updated_at');
+
+                if (!error && saves) {
+                    const totalUsers = saves.length;
+                    const totalXp = saves.reduce((acc, row) => acc + (row.xp || 0), 0);
+                    const avgLessons = totalUsers > 0 ? (saves.reduce((acc, r) => acc + (r.finished_lessons_count || 0), 0) / totalUsers).toFixed(1) : 0;
+
+                    const usersList = saves.map(s => ({
+                        id: s.user_id,
+                        email: s.email,
+                        name: s.email.split('@')[0],
+                        provider: s.email.includes('gmail') ? 'google' : 'email',
+                        xp: s.xp || 0,
+                        level: s.level || 1,
+                        finishedLessons: s.finished_lessons_count || 0,
+                        lastLogin: s.updated_at
+                    }));
+
+                    return {
+                        isCloud: true,
+                        totalUsers,
+                        totalXp,
+                        avgLessons,
+                        usersList
+                    };
+                }
+            } catch (e) {
+                console.warn('[AuthManager] Fallback alle statistiche locali per l\'admin:', e);
+            }
+        }
+
+        // 2. Statistiche dal database locale
+        const db = this.getAccountsDB();
+        const emails = Object.keys(db);
+        const usersList = emails.map(email => {
+            const acc = db[email];
+            const p = acc.progress || {};
+            return {
+                id: acc.id,
+                email: acc.email,
+                name: acc.name,
+                provider: acc.provider || 'email',
+                xp: p.xp || 0,
+                level: Math.floor((p.xp || 0) / 100) + 1,
+                finishedLessons: (p.finishedLessons || []).length,
+                createdAt: acc.createdAt,
+                lastLogin: acc.lastLogin
+            };
+        });
+
+        // Aggiungi utente ospite se ha fatto progressi
+        if (window.App && window.App.state && (window.App.state.xp > 0 || window.App.state.finishedLessons.length > 0)) {
+            usersList.unshift({
+                id: 'guest_local',
+                email: 'ospite.locale@browser',
+                name: window.App.state.profile?.username || 'Ospite Locale',
+                provider: 'guest',
+                xp: window.App.state.xp || 0,
+                level: window.App.getCurrentLevelInfo ? window.App.getCurrentLevelInfo().tier.level : 1,
+                finishedLessons: window.App.state.finishedLessons.length,
+                lastLogin: new Date().toISOString()
+            });
+        }
+
+        const totalUsers = usersList.length;
+        const totalXp = usersList.reduce((acc, u) => acc + (u.xp || 0), 0);
+        const avgLessons = totalUsers > 0 ? (usersList.reduce((acc, u) => acc + u.finishedLessons, 0) / totalUsers).toFixed(1) : 0;
+
+        return {
+            isCloud: false,
+            totalUsers,
+            totalXp,
+            avgLessons,
+            usersList
+        };
     },
 
     // ===================================================================
     // ESPORTAZIONE & IMPORTAZIONE DATI (BACKUP & RIPRISTINO)
     // ===================================================================
 
-    /**
-     * Prepara il payload completo di salvataggio da esportare
-     */
     createBackupPayload(appState) {
         const payload = {
             app: 'GDScript Hero',
@@ -359,14 +619,10 @@ const AuthManager = {
             }
         };
 
-        // Genera un checksum di integrità semplice
         payload.checksum = this.generateChecksum(payload.data);
         return payload;
     },
 
-    /**
-     * Calcola un checksum semplice per verificare l'integrità del salvataggio
-     */
     generateChecksum(dataObj) {
         const str = JSON.stringify(dataObj);
         let hash = 5381;
@@ -377,9 +633,6 @@ const AuthManager = {
         return 'gd_' + Math.abs(hash).toString(36);
     },
 
-    /**
-     * Esporta i dati come file JSON scaricabile
-     */
     exportToFile(appState) {
         const payload = this.createBackupPayload(appState);
         const jsonString = JSON.stringify(payload, null, 2);
@@ -388,7 +641,6 @@ const AuthManager = {
         const dateStr = new Date().toISOString().slice(0, 10);
         const fileName = `gdscript_hero_backup_${dateStr}.json`;
 
-        // Download cross-browser (PC e Mobile)
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = fileName;
@@ -400,22 +652,15 @@ const AuthManager = {
         return fileName;
     },
 
-    /**
-     * Esporta i dati come codice di testo compatto (Base64)
-     */
     exportToCode(appState) {
         const payload = this.createBackupPayload(appState);
         const jsonString = JSON.stringify(payload);
-        // UTF-8 safe Base64 encoding
         const encoded = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, (match, p1) => {
             return String.fromCharCode('0x' + p1);
         }));
         return "GDHERO-" + encoded;
     },
 
-    /**
-     * Analizza e valida una stringa di salvataggio (JSON o Codice Base64)
-     */
     parseBackupString(rawInput) {
         if (!rawInput || typeof rawInput !== 'string') {
             throw new Error('Dati di salvataggio non validi o vuoti.');
@@ -424,7 +669,6 @@ const AuthManager = {
         let parsed = null;
         const trimmed = rawInput.trim();
 
-        // Caso 1: Codice Base64 "GDHERO-..."
         if (trimmed.startsWith('GDHERO-')) {
             try {
                 const b64 = trimmed.substring(7);
@@ -436,7 +680,6 @@ const AuthManager = {
                 throw new Error('Il codice di backup inserito è corrotto o non valido.');
             }
         } else {
-            // Caso 2: JSON Diretto
             try {
                 parsed = JSON.parse(trimmed);
             } catch (e) {
@@ -444,9 +687,7 @@ const AuthManager = {
             }
         }
 
-        // Validazione della struttura
         if (!parsed || !parsed.data) {
-            // Supporta anche il formato grezzo legacy di localStorage
             if (parsed && (parsed.xp !== undefined || parsed.finishedLessons !== undefined)) {
                 return {
                     app: 'GDScript Hero',
@@ -462,40 +703,29 @@ const AuthManager = {
         return parsed;
     },
 
-    /**
-     * Unione intelligente dei progressi tra dati correnti e dati importati
-     */
     mergeProgress(current, imported) {
         const merged = { ...current };
 
-        // Punti Esperienza: conserva il punteggio massimo
         merged.xp = Math.max(current.xp || 0, imported.xp || 0);
-
-        // Serie: conserva la serie maggiore
         merged.streak = Math.max(current.streak || 1, imported.streak || 1);
         merged.streakWeeks = Math.max(current.streakWeeks || 0, imported.streakWeeks || 0);
 
-        // Lezioni Completate: unione degli insiemi (nessuna perdita)
         const finishedSet = new Set([...(current.finishedLessons || []), ...(imported.finishedLessons || [])]);
         merged.finishedLessons = Array.from(finishedSet).sort((a, b) => a - b);
 
         const completedSet = new Set([...(current.completedLessons || [1]), ...(imported.completedLessons || [1])]);
         merged.completedLessons = Array.from(completedSet).sort((a, b) => a - b);
 
-        // Traguardi Sbloccati: unione degli insiemi
         const achSet = new Set([...(current.unlockedAchievements || []), ...(imported.unlockedAchievements || [])]);
         merged.unlockedAchievements = Array.from(achSet);
 
-        // Codice Utente scritto: unione dei dizionari (i file più recenti hanno la precedenza)
         merged.userCode = { ...(current.userCode || {}), ...(imported.userCode || {}) };
 
-        // Profilo: se importato ha personalizzazioni, mantieni quelle
         if (imported.profileCustomized) {
             merged.profile = { ...(current.profile || {}), ...(imported.profile || {}) };
             merged.profileCustomized = true;
         }
 
-        // Missioni Giornaliere: unione
         if (imported.dailyQuests) {
             merged.dailyQuests = imported.dailyQuests;
         }
@@ -505,7 +735,6 @@ const AuthManager = {
     }
 };
 
-// Inizializza immediatamente al caricamento dello script
 if (typeof window !== 'undefined') {
     window.AuthManager = AuthManager;
 }

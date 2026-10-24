@@ -2642,6 +2642,28 @@ const App = {
                 document.getElementById('import-preview-box').classList.add('hidden');
             };
         }
+
+        // 6. Apertura e Gestione Pannello Amministratore (Admin Dashboard)
+        const btnOpenAdmin = document.getElementById('btn-settings-open-admin');
+        if (btnOpenAdmin) {
+            btnOpenAdmin.onclick = () => {
+                SoundFX.playClick();
+                this.openAdminModal();
+            };
+        }
+
+        const btnCloseAdmin = document.getElementById('btn-close-admin');
+        if (btnCloseAdmin) {
+            btnCloseAdmin.onclick = () => this.closeAdminModal();
+        }
+
+        const btnRefreshAdmin = document.getElementById('btn-refresh-admin');
+        if (btnRefreshAdmin) {
+            btnRefreshAdmin.onclick = () => {
+                SoundFX.playClick();
+                this.renderAdminStats();
+            };
+        }
     },
 
     async completeGoogleLogin(profile) {
@@ -2799,6 +2821,140 @@ const App = {
         if (modal) modal.classList.add('hidden');
         const previewBox = document.getElementById('import-preview-box');
         if (previewBox) previewBox.classList.add('hidden');
+    },
+
+    openAdminModal() {
+        SoundFX.playClick();
+        const settingsModal = document.getElementById('settings-modal');
+        if (settingsModal) settingsModal.classList.add('hidden');
+
+        const modal = document.getElementById('admin-modal');
+        if (!modal) return;
+
+        modal.classList.remove('hidden');
+        this.renderAdminStats();
+    },
+
+    closeAdminModal() {
+        SoundFX.playClick();
+        const modal = document.getElementById('admin-modal');
+        if (modal) modal.classList.add('hidden');
+    },
+
+    async renderAdminStats() {
+        const cloudStatusText = document.getElementById('cloud-status-text');
+        const cloudDot = document.getElementById('cloud-indicator-dot');
+        const setupCard = document.getElementById('admin-setup-card');
+        const kpiTotalUsers = document.getElementById('kpi-total-users');
+        const kpiTotalXp = document.getElementById('kpi-total-xp');
+        const kpiAvgLessons = document.getElementById('kpi-avg-lessons');
+        const kpiTopLevel = document.getElementById('kpi-top-level');
+        const tbody = document.getElementById('admin-users-tbody');
+        const tableCount = document.getElementById('admin-table-count');
+
+        if (!window.AuthManager || typeof window.AuthManager.fetchAdminStats !== 'function') return;
+
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="5" class="table-empty-row">Caricamento statistiche in corso...</td></tr>';
+        }
+
+        try {
+            const stats = await window.AuthManager.fetchAdminStats();
+
+            if (cloudStatusText && cloudDot) {
+                if (stats.isCloud) {
+                    cloudStatusText.innerText = 'Stato Connessione: Supabase Cloud Connesso (Realtime Sync)';
+                    cloudDot.className = 'cloud-indicator-dot active';
+                    if (setupCard) setupCard.classList.add('hidden');
+                } else {
+                    cloudStatusText.innerText = 'Stato Connessione: Sincronizzazione Locale (Offline / Storage Browser)';
+                    cloudDot.className = 'cloud-indicator-dot';
+                    if (setupCard) setupCard.classList.remove('hidden');
+                }
+            }
+
+            const users = stats.usersList || [];
+            const totalUsers = stats.totalUsers !== undefined ? stats.totalUsers : users.length;
+            const totalXp = stats.totalXp || 0;
+            const avgLessons = stats.avgLessons || 0;
+            const topLevel = users.length > 0 ? Math.max(...users.map(u => u.level || 1)) : 1;
+
+            if (kpiTotalUsers) kpiTotalUsers.innerText = totalUsers;
+            if (kpiTotalXp) kpiTotalXp.innerText = totalXp.toLocaleString();
+            if (kpiAvgLessons) kpiAvgLessons.innerText = avgLessons;
+            if (kpiTopLevel) kpiTopLevel.innerText = `Lv. ${topLevel}`;
+            if (tableCount) tableCount.innerText = `${totalUsers} ${totalUsers === 1 ? 'giocatore trovato' : 'giocatori trovati'}`;
+
+            if (tbody) {
+                tbody.innerHTML = '';
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="table-empty-row">Nessun giocatore registrato trovato. Registra un account per visualizzarlo qui.</td></tr>';
+                    return;
+                }
+
+                users.forEach(u => {
+                    const tr = document.createElement('tr');
+
+                    let badgeClass = 'email';
+                    let badgeText = 'Email';
+                    if (u.provider === 'google') {
+                        badgeClass = 'google';
+                        badgeText = 'Google';
+                    } else if (u.provider === 'guest') {
+                        badgeClass = 'guest';
+                        badgeText = 'Ospite';
+                    }
+
+                    const initial = (u.name || u.email || 'U').charAt(0).toUpperCase();
+                    const lastActiveDate = u.lastLogin ? new Date(u.lastLogin).toLocaleString('it-IT', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : 'Di recente';
+
+                    tr.innerHTML = `
+                        <td>
+                            <div class="user-cell-meta">
+                                <div class="user-avatar-mini">${initial}</div>
+                                <div class="user-text-info">
+                                    <strong class="user-display-name">${this.escapeHTML(u.name || 'Utente')}</strong>
+                                    <span class="user-display-email">${this.escapeHTML(u.email || 'Nessuna email')}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge-tag-pill ${badgeClass}">${badgeText}</span>
+                        </td>
+                        <td>
+                            <span class="stat-highlight-xp">⚡ ${(u.xp || 0).toLocaleString()} XP</span>
+                            <span class="stat-sub-level">Livello ${u.level || 1}</span>
+                        </td>
+                        <td>
+                            <strong>${u.finishedLessons || 0}</strong> / 36
+                        </td>
+                        <td class="last-seen-cell">${lastActiveDate}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (e) {
+            console.error('Errore durante il recupero delle statistiche admin:', e);
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="5" class="table-empty-row" style="color: #ef4444;">Errore nel recupero dati: ${e.message}</td></tr>`;
+            }
+        }
+    },
+
+    escapeHTML(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     },
 
     refreshBackupExportInfo() {
