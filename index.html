@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDScript Hero - Impara Godot 4 Offline</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Canvas per coriandoli -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Notifica Toast per Traguardi & Missioni -->
+    <div id="achievement-toast" class="achievement-toast hidden">
+        <div class="toast-icon" id="toast-icon">🏆</div>
+        <div class="toast-body">
+            <div class="toast-tag">TRAGUARDO SBLOCCATO!</div>
+            <div class="toast-title" id="toast-title">Primi Passi</div>
+            <div class="toast-desc" id="toast-desc">+25 XP Guadagnati</div>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar con divisione Sezioni del Sito | Obiettivi | Statistiche Personali -->
+    <header class="navbar">
+        <!-- 1. SEZIONI PRINCIPALI DEL SITO & ATTIVITÀ -->
+        <div class="nav-left">
+            <div class="logo" id="btn-home" title="Torna alla Mappa">
+                <span class="logo-icon">🎮</span>
+                <span class="logo-text">GDScript<span class="accent">Hero</span></span>
+            </div>
+            <div class="nav-separator"></div>
+            <button class="nav-btn active" id="nav-roadmap-btn" title="Mappa dei Livelli">
+                <span class="icon">🗺️</span> <span class="nav-btn-text">Mappa</span>
+            </button>
+            <button class="nav-btn" id="nav-editor-btn" title="Editor Esercizio">
+                <span class="icon">💻</span> <span class="nav-btn-text">Esercizio</span>
+            </button>
+            <button class="nav-btn" id="nav-practice-btn" title="Palestra Libera">
+                <span class="icon">🏋️</span> <span class="nav-btn-text">Pratica</span>
+            </button>
+            <button class="nav-btn" id="nav-projects-btn" title="Progetti (In Sviluppo)">
+                <span class="icon">🛠️</span> <span class="nav-btn-text">Progetti</span> <span class="nav-wip-pill">WIP</span>
+            </button>
+            <button class="nav-btn nav-btn-activity" id="btn-open-achievements" title="Traguardi & Obiettivi">
+                <span class="icon">🏆</span> <span class="nav-btn-text">Traguardi</span> <span id="achievements-count-badge" class="badge-count">0/10</span>
+            </button>
+        </div>
+
+        <!-- 2. STATISTICHE PERSONALI & PROFILO (DESTRA) -->
+        <div class="nav-right">
+            <!-- Gruppo Statistiche Personali -->
+            <div class="nav-stats-group">
+                <!-- Streak Flame -->
+                <div class="stat-pill streak-pill clickable" id="btn-streak-modal" title="Gestisci Obiettivo Serie Settimanale">
+                    <span class="fire-icon" id="streak-flame">🔥</span>
+                    <span class="stat-value" id="streak-count">0 sett.</span>
+                    <span class="stat-label" id="streak-sub-label">(0/2 gg)</span>
+                </div>
+
+                <!-- XP Pill -->
+                <div class="stat-pill xp-pill" title="Punti Esperienza Totali">
+                    <span class="xp-icon">⚡</span>
+                    <span class="stat-value" id="xp-count">0</span>
+                    <span class="stat-label">XP</span>
+                </div>
+
+                <!-- Level Badge con barra progresso integrata -->
+                <div class="stat-pill level-pill" id="level-pill" title="Livello Giocatore">
+                    <span class="trophy-icon">🎖️</span>
+                    <div class="level-badge-group">
+                        <span id="level-badge">Lv. 1 Recluta</span>
+                        <div class="level-mini-bar" title="Progresso prossimo livello">
+                            <div id="level-mini-fill" class="level-mini-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-separator"></div>
+
+            <!-- Gruppo Utente & Impostazioni -->
+            <div class="nav-user-group">
+                <!-- Profilo Giocatore -->
+                <div class="stat-pill profile-pill clickable" id="btn-open-profile" title="Il Tuo Profilo">
+                    <div class="nav-avatar" id="nav-profile-avatar" style="border-color: #478cbf;">🤖</div>
+                    <span class="nav-profile-name" id="nav-profile-name">Eroe Godot</span>
+                </div>
+
+                <!-- Settings Button -->
+                <button class="icon-btn" id="btn-open-settings" title="Impostazioni & Audio">
+                    ⚙️
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- VISTA 1: ROADMAP / MAPPA DEI LIVELLI A CAPITOLI (Stile Duolingo & Coddy) -->
+    <main id="view-roadmap" class="view-container">
+        <div class="roadmap-layout-container">
+            <!-- Colonna Principale: Intestazione Corso + Flusso Capitoli a Nodi -->
+            <div class="roadmap-main-col">
+                <div class="roadmap-header">
+                    <div class="chapter-card overall-course-card">
+                        <div class="chapter-badge">PROGRAMMA UFFICIALE CODDY • GDSCRIPT 4</div>
+                        <h1>Accademia di Sviluppo Godot</h1>
+                        <p class="subtitle">9 Capitoli completi: Introduzione, Variabili (Parte 1 e 2), Operazioni, Condizioni, Array, Cicli, Funzioni e Vettori 2D con relative Sfide di Padronanza!</p>
+                        <div class="overall-progress-bar">
+                            <div class="progress-fill" id="overall-progress-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span id="completed-count-text">0 di 36 completati</span>
+                            <span class="demo-tag" id="xp-to-next-level-tag">50 XP al prossimo livello</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenitore dei capitoli renderizzati dinamicamente -->
+                <div class="chapters-roadmap-flow" id="chapters-roadmap-flow">
+                    <!-- Iniettato da app.js -->
+                </div>
+            </div>
+
+            <!-- Colonna Destra: Riquadro Missioni Giornaliere con Bordi Stondati & Barra di Progresso -->
+            <aside class="roadmap-sidebar-col">
+                <div class="daily-quests-sidebar-card" id="sidebar-quests-card">
+                    <div class="sidebar-card-header">
+                        <div class="sidebar-card-title-group">
+                            <span class="sidebar-card-icon">🎯</span>
+                            <div>
+                                <h3 class="sidebar-card-title">Missioni Giornaliere</h3>
+                                <span class="sidebar-card-subtitle">Obiettivi del giorno</span>
+                            </div>
+                        </div>
+                        <span class="sidebar-card-badge" id="sidebar-quests-badge">0/3</span>
+                    </div>
+
+                    <div class="sidebar-quests-countdown">
+                        <span>⏳ Reset a mezzanotte</span>
+                        <span class="sidebar-today-label" id="sidebar-today-date">Oggi</span>
+                    </div>
+
+                    <div class="sidebar-quests-list" id="sidebar-quests-list">
+                        <!-- Popolato dinamicamente da app.js -->
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- VISTA 2: WORKSPACE ESERCIZIO (Editor + Test stile Coddy) -->
+    <main id="view-exercise" class="view-container hidden">
+        <div class="workspace-grid">
+            <!-- Colonna Sinistra: Teoria, Obiettivo, Consigli -->
+            <section class="panel panel-lesson">
+                <div class="lesson-meta">
+                    <button class="back-link" id="btn-back-to-roadmap">← Torna alla Mappa</button>
+                    <span class="xp-reward-tag" id="lesson-xp-badge">+50 XP</span>
+                </div>
+
+                <div class="lesson-content">
+                    <h2 id="lesson-title">Caricamento...</h2>
+                    <div id="lesson-theory" class="theory-body">
+                        <!-- Spiegazione teorica -->
+                    </div>
+
+                    <div class="task-box">
+                        <div class="task-header">
+                            <span class="target-icon">🎯</span>
+                            <h3>Il Tuo Obiettivo:</h3>
+                        </div>
+                        <div id="lesson-task" class="task-body">
+                            <!-- Obiettivo -->
+                        </div>
+                    </div>
+
+                    <!-- Accordion dei Consigli / Hints -->
+                    <div class="hints-section">
+                        <div class="hints-toggle-btn" id="btn-toggle-hint">
+                            <span class="hint-icon">💡</span>
+                            <span id="hint-toggle-text">Ti serve un consiglio? (0/2 usati)</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="hint-box hidden" id="hint-box">
+                            <div class="hint-content" id="hint-text">
+                                Leggi attentamente il compito e usa la funzione corretta.
+                            </div>
+                            <div class="hint-actions">
+                                <button class="btn-subtle" id="btn-next-hint">Altro Consiglio ➔</button>
+                                <button class="btn-danger-subtle" id="btn-reveal-solution">Mostra Soluzione</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Colonna Destra: Editor di Codice GDScript e Risultati -->
+            <section class="panel panel-code">
+                <div class="editor-header">
+                    <div class="tab">
+                        <span class="lang-tag">GDScript 4</span>
+                        <span class="file-name">Player.gd</span>
+                    </div>
+                    <div class="editor-tools">
+                        <button class="btn-tool" id="btn-reset-code" title="Ripristina codice iniziale">Ripristina</button>
+                        <button class="btn-tool btn-tool-next hidden" id="btn-header-next" title="Vai al livello successivo">Prossimo ➔</button>
+                    </div>
+                </div>
+
+                <div class="editor-wrapper">
+                    <div class="line-numbers" id="line-numbers">1</div>
+                    <textarea id="code-editor" spellcheck="false" placeholder="Scrivi qui il tuo codice GDScript..."></textarea>
+                    
+                    <!-- Autocomplete popup contestuale -->
+                    <div id="autocomplete-popup" class="autocomplete-popup hidden"></div>
+                </div>
+
+                <!-- Barra di Azione & Esecuzione Stile Coddy -->
+                <div class="action-bar">
+                    <div class="hint-tip">
+                        <span>Scorciatoia: premi <kbd>Ctrl</kbd> + <kbd>Enter</kbd> per verificare</span>
+                    </div>
+                    <button class="btn-run" id="btn-run-code">
+                        <span class="run-icon">▶</span>
+                        <span class="run-text">Verifica Codice</span>
+                    </button>
+                </div>
+
+                <!-- Scheda Risultati & Confronto Output Stile Coddy -->
+                <div class="validation-panel">
+                    <div class="validation-tabs">
+                        <button class="vtab active">
+                            <span>Risultati Verifica</span>
+                            <span class="vtab-status" id="test-status-badge">• Non verificato</span>
+                        </button>
+                    </div>
+
+                    <div class="validation-body">
+                        <!-- Griglia Confronto Output Previsto vs Output Reale -->
+                        <div class="output-comparison-grid">
+                            <div class="output-box expected-box">
+                                <div class="output-box-header">
+                                    <span class="output-icon">🎯</span>
+                                    <span class="output-label">OUTPUT PREVISTO:</span>
+                                </div>
+                                <pre class="output-pre" id="expected-output-pre">// In attesa di verifica...</pre>
+                            </div>
+                            <div class="output-box real-box">
+                                <div class="output-box-header">
+                                    <span class="output-icon">💻</span>
+                                    <span class="output-label">OUTPUT DEL TUO CODICE:</span>
+                                </div>
+                                <pre class="output-pre" id="real-output-pre">// Clicca su "Verifica Codice" per eseguire</pre>
+                            </div>
+                        </div>
+
+                        <!-- Lista Dettagliata dei Test Unitari Superati/Falliti -->
+                        <div class="test-results" id="test-results-view">
+                            <div class="empty-state">In attesa della verifica...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- VISTA 3: PALESTRA DI CODICE / PRATICA (Sandbox Libera) -->
+    <main id="view-practice" class="view-container hidden">
+        <div class="practice-header-card">
+            <div class="practice-header-info">
+                <div class="practice-badge">AMBITO DI SPERIMENTAZIONE LIBERA</div>
+                <h2>🏋️ Palestra di Codice GDScript 4</h2>
+                <p>Scrivi qualsiasi script Godot, prova algoritmi e visualizza istantaneamente i log della console senza restrizioni o test vincolanti!</p>
+            </div>
+            <div class="practice-controls">
+                <select id="practice-template-select" class="practice-select">
+                    <option value="">📋 Carica un Template di Esempio...</option>
+                    <option value="hello">👋 Saluto e Stampa Multipla</option>
+                    <option value="rpg">❤️ Scheda Statistiche RPG</option>
+                    <option value="math">⚔️ Calcolo Danno e Bottino</option>
+                    <option value="logic">🔮 Condizioni If / Elif / Else</option>
+                    <option value="vector">🚀 Movimento e Vettori 2D</option>
+                </select>
+                <button class="btn-subtle" id="btn-practice-reset">↺ Svuota</button>
+                <button class="btn-run" id="btn-practice-run">
+                    <span class="run-icon">▶</span>
+                    <span>Esegui Script</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="practice-workspace-grid">
+            <div class="practice-editor-col">
+                <div class="practice-col-header">
+                    <span class="tab">💻 sandbox.gd</span>
+                    <span class="practice-tip">Supporta Vector2, tipi statici, print, if/else</span>
+                </div>
+                <div class="editor-wrapper">
+                    <div class="line-numbers" id="practice-line-numbers">1</div>
+                    <textarea id="practice-code-editor" spellcheck="false" placeholder="Scrivi qui il tuo codice GDScript..."></textarea>
+                </div>
+            </div>
+
+            <div class="practice-console-col">
+                <div class="practice-col-header">
+                    <span class="tab">🖥️ Console di Output</span>
+                    <div class="practice-console-tools">
+                        <span id="practice-status-tag" class="practice-status-tag">Pronto</span>
+                        <button class="btn-tool" id="btn-practice-clear">🗑️ Pulisci</button>
+                    </div>
+                </div>
+                <div class="practice-console-body">
+                    <pre class="practice-console-pre" id="practice-console-output">// Premi 'Esegui Script' per avviare il codice nella sandbox</pre>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- VISTA 4: PROGETTI PRATICI DI GIOCO (W.I.P.) -->
+    <main id="view-projects" class="view-container hidden">
+        <div class="projects-hero-card">
+            <div class="wip-banner-badge">🚧 WORK IN PROGRESS - IN ARRIVO</div>
+            <h2>🛠️ Progetti Pratici per Godot Engine</h2>
+            <p class="projects-subtitle">
+                Metti alla prova tutte le tue conoscenze costruendo veri mini-giochi completi con GDScript 4.<br>
+                Questi progetti guidati sono attualmente in sviluppo e saranno sbloccati nei prossimi aggiornamenti dell'applicazione!
+            </p>
+        </div>
+
+        <div class="projects-grid" id="projects-grid-container">
+            <!-- Popolato dinamicamente da app.js -->
+        </div>
+    </main>
+
+    <!-- MODAL PROFILO GIOCATORE (Nome, Tag, Colore, Avatar & Carriera) -->
+    <div class="modal-overlay hidden" id="profile-modal">
+        <div class="modal-card modal-large">
+            <div class="modal-header-row">
+                <h2>👤 Profilo Giocatore</h2>
+                <button class="modal-close-btn" id="btn-close-profile">✕</button>
+            </div>
+            <p class="modal-subtitle">Personalizza la tua identità di sviluppatore e visualizza le statistiche della tua carriera.</p>
+
+            <div class="profile-layout-grid">
+                <!-- Colonna Sinistra: Card Preview -->
+                <div class="profile-preview-card" id="profile-preview-box">
+                    <div class="profile-avatar-large" id="profile-avatar-display" style="border-color: #478cbf; box-shadow: 0 0 25px rgba(71, 140, 191, 0.4);">
+                        🤖
+                    </div>
+                    <h3 class="profile-name-display" id="profile-name-display">Eroe Godot</h3>
+                    <div class="profile-tag-badge" id="profile-tag-display">Sviluppatore GDScript</div>
+                    <div class="profile-level-badge" id="profile-level-display">Livello 1 • Recluta Godot</div>
+
+                    <!-- Mini statistiche carriera -->
+                    <div class="profile-career-stats">
+                        <div class="career-stat-item">
+                            <span class="career-val" id="profile-stat-xp">0</span>
+                            <span class="career-label">XP Totali</span>
+                        </div>
+                        <div class="career-stat-item">
+                            <span class="career-val" id="profile-stat-lessons">0/36</span>
+                            <span class="career-label">Lezioni</span>
+                        </div>
+                        <div class="career-stat-item">
+                            <span class="career-val" id="profile-stat-mastery">0/9</span>
+                            <span class="career-label">Padronanze</span>
+                        </div>
+                        <div class="career-stat-item">
+                            <span class="career-val" id="profile-stat-streak">0</span>
+                            <span class="career-label">Sett. Serie</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonna Destra: Modulo di Personalizzazione -->
+                <div class="profile-edit-form">
+                    <div class="form-group">
+                        <label class="form-label">Nome Utente:</label>
+                        <input type="text" id="profile-username-input" class="form-input" maxlength="25" placeholder="Inserisci il tuo nome da sviluppatore">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Titolo / Tag Eroe:</label>
+                        <select id="profile-tag-select" class="form-input">
+                            <option value="Sviluppatore GDScript">Sviluppatore GDScript</option>
+                            <option value="Creatore di Mondi 2D">Creatore di Mondi 2D</option>
+                            <option value="Maestro della Logica">Maestro della Logica</option>
+                            <option value="Apprendista Godot">Apprendista Godot</option>
+                            <option value="Indie Game Developer">Indie Game Developer</option>
+                            <option value="Pilota di Vettori">Pilota di Vettori</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Scegli Avatar:</label>
+                        <div class="avatar-picker-row" id="avatar-picker-row">
+                            <button class="avatar-option selected" data-avatar="🤖">🤖</button>
+                            <button class="avatar-option" data-avatar="🧙">🧙</button>
+                            <button class="avatar-option" data-avatar="⚔️">⚔️</button>
+                            <button class="avatar-option" data-avatar="👾">👾</button>
+                            <button class="avatar-option" data-avatar="🐱">🐱</button>
+                            <button class="avatar-option" data-avatar="🦊">🦊</button>
+                            <button class="avatar-option" data-avatar="🐉">🐉</button>
+                            <button class="avatar-option" data-avatar="🚀">🚀</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Colore Profilo & Aura:</label>
+                        <div class="color-picker-row" id="color-picker-row">
+                            <button class="color-swatch selected" data-color="#478cbf" style="background: #478cbf;" title="Ciano Godot"></button>
+                            <button class="color-swatch" data-color="#10b981" style="background: #10b981;" title="Verde Smeraldo"></button>
+                            <button class="color-swatch" data-color="#a855f7" style="background: #a855f7;" title="Viola Neon"></button>
+                            <button class="color-swatch" data-color="#f59e0b" style="background: #f59e0b;" title="Oro Eroe"></button>
+                            <button class="color-swatch" data-color="#ef4444" style="background: #ef4444;" title="Rosso Fuoco"></button>
+                            <button class="color-swatch" data-color="#ec4899" style="background: #ec4899;" title="Rosa Cyber"></button>
+                        </div>
+                    </div>
+
+                    <button class="btn-save-profile" id="btn-save-profile">
+                        💾 Salva Modifiche Profilo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MISSIONI GIORNALIERE (Daily Quests) -->
+    <div class="modal-overlay hidden" id="quests-modal">
+        <div class="modal-card modal-medium">
+            <div class="modal-header-row">
+                <h2>🎯 Missioni Giornaliere</h2>
+                <button class="modal-close-btn" id="btn-close-quests">✕</button>
+            </div>
+            <p class="modal-subtitle">Completa gli obiettivi ogni giorno per conquistare XP bonus e accelerare il tuo apprendimento!</p>
+
+            <div class="quests-countdown-bar">
+                <span>⏳ Si resettano ogni giorno a mezzanotte</span>
+                <span id="quests-today-date">Oggi</span>
+            </div>
+
+            <div class="quests-list" id="quests-list-container">
+                <!-- Popolato dinamicamente da app.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ANTEPRIMA PROGETTO (W.I.P.) -->
+    <div class="modal-overlay hidden" id="project-preview-modal">
+        <div class="modal-card modal-medium">
+            <div class="modal-header-row">
+                <h2 id="project-preview-title">🎮 Progetto</h2>
+                <button class="modal-close-btn" id="btn-close-project-preview">✕</button>
+            </div>
+            <div class="project-modal-badge-row">
+                <span class="wip-banner-badge" id="project-preview-badge">IN SVILUPPO</span>
+                <span class="project-level-req" id="project-preview-req">Capitolo 5</span>
+            </div>
+            <p class="project-modal-desc" id="project-preview-desc">Descrizione del progetto in sviluppo...</p>
+
+            <div class="project-topics-section">
+                <h4>Concetti e Tecniche che Imparerai:</h4>
+                <div class="project-topics-pills" id="project-preview-topics">
+                    <!-- Pills -->
+                </div>
+            </div>
+
+            <div class="project-interest-box">
+                <div class="interest-info">
+                    <span class="interest-spark">🌟</span>
+                    <span>Questo progetto è in fase di realizzazione da parte del team didattico.</span>
+                </div>
+                <button class="btn-interest" id="btn-project-interest">
+                    ❤️ Mi Interessa! (<span id="project-interest-count">24</span>)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL GESTIONE DELLA SERIE SETTIMANALE (STREAK) -->
+    <div class="modal-overlay hidden" id="streak-modal">
+        <div class="modal-card modal-medium">
+            <div class="modal-header-row">
+                <h2>🔥 Obiettivo Serie Settimanale</h2>
+                <button class="modal-close-btn" id="btn-close-streak">✕</button>
+            </div>
+            <p class="modal-subtitle">Mantieni viva la fiamma completando gli esercizi durante la settimana.</p>
+
+            <div class="streak-calendar-card">
+                <div class="calendar-title">Settimana Corrente:</div>
+                <div class="calendar-days-row" id="streak-days-row">
+                    <!-- Lunedì a Domenica popolati da app.js -->
+                </div>
+            </div>
+
+            <div class="streak-selection-section">
+                <div class="selection-title">Scegli il tuo Ritmo di Studio:</div>
+                <div class="streak-tiers-grid">
+                    <div class="streak-tier-card" id="tier-rilassato">
+                        <div class="tier-icon">☕</div>
+                        <div class="tier-info">
+                            <div class="tier-name">Rilassato</div>
+                            <div class="tier-desc">2 giorni a settimana</div>
+                        </div>
+                        <div class="tier-status-tag">Attivo</div>
+                    </div>
+                    <div class="streak-tier-card" id="tier-concentrato">
+                        <div class="tier-icon">🎯</div>
+                        <div class="tier-info">
+                            <div class="tier-name">Concentrato</div>
+                            <div class="tier-desc">4 giorni a settimana</div>
+                        </div>
+                        <div class="tier-status-tag">Seleziona</div>
+                    </div>
+                    <div class="streak-tier-card" id="tier-lockin">
+                        <div class="tier-icon">⚡</div>
+                        <div class="tier-info">
+                            <div class="tier-name">Lock in</div>
+                            <div class="tier-desc">6 giorni a settimana</div>
+                        </div>
+                        <div class="tier-status-tag">Seleziona</div>
+                    </div>
+                </div>
+                <div class="streak-rule-note">
+                    ⚠️ Se la settimana finisce senza raggiungere i giorni previsti dal tuo ritmo, la serie verrà azzerata!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL IMPOSTAZIONI (Audio, Volume, Reset Dati con Doppia Conferma) -->
+    <div class="modal-overlay hidden" id="settings-modal">
+        <div class="modal-card modal-medium">
+            <div class="modal-header-row">
+                <h2>⚙️ Impostazioni</h2>
+                <button class="modal-close-btn" id="btn-close-settings">✕</button>
+            </div>
+            <p class="modal-subtitle">Personalizza l'audio e gestisci la memoria dei progressi.</p>
+
+            <!-- Gruppo 1: Controlli Audio -->
+            <div class="settings-group">
+                <div class="settings-group-title">🔊 Audio ed Effetti Sonori</div>
+                
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Effetti Sonori</span>
+                        <span class="settings-item-sub">Suoni di successo, errori, click e fanfare</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="setting-sound-enabled" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row" id="volume-setting-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Volume Effetti</span>
+                        <span class="settings-item-sub" id="volume-percent-label">80%</span>
+                    </div>
+                    <div class="volume-slider-wrapper">
+                        <span class="volume-icon-min">🔈</span>
+                        <input type="range" min="0" max="100" value="80" class="volume-slider" id="setting-volume-slider">
+                        <span class="volume-icon-max">🔊</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gruppo 2: Dati e Reset (Doppia Conferma) -->
+            <div class="settings-group danger-group">
+                <div class="settings-group-title">⚠️ Dati e Memoria di Studio</div>
+                
+                <div class="settings-row" id="reset-initial-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Azzera Tutti i Dati</span>
+                        <span class="settings-item-sub">Cancella progressi, XP, serie settimanali, profilo e traguardi</span>
+                    </div>
+                    <button class="btn-danger" id="btn-start-reset">Azzera Dati</button>
+                </div>
+
+                <!-- Box Doppia Conferma (Nascosto di default) -->
+                <div class="double-confirm-box hidden" id="reset-confirm-box">
+                    <div class="confirm-alert-icon">🚨</div>
+                    <div class="confirm-content">
+                        <div class="confirm-title">CONFERMA ELIMINAZIONE DEI DATI</div>
+                        <div class="confirm-text">
+                            Sei sicuro al 100%? Questa azione è irreversibile e riporterà il gioco al Livello 1, azzerando tutti gli XP e i traguardi conquistati.
+                        </div>
+                        <div class="confirm-buttons-row">
+                            <button class="btn-cancel" id="btn-cancel-reset">Annulla</button>
+                            <button class="btn-danger-confirm" id="btn-confirm-reset">Sì, Cancella Tutto Definitivamente</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DEI TRAGUARDI / ACHIEVEMENTS -->
+    <div class="modal-overlay hidden" id="achievements-modal">
+        <div class="modal-card modal-large">
+            <div class="modal-header-row">
+                <h2>🏆 I Tuoi Traguardi</h2>
+                <button class="modal-close-btn" id="btn-close-achievements">✕</button>
+            </div>
+            <p class="modal-subtitle">Sblocca trofei completando sfide, mantenendo le serie e salendo di livello!</p>
+            <div class="achievements-grid" id="achievements-list">
+                <!-- Popolato dinamicamente da app.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DI SUCCESSO (Stile Coddy / Duolingo) -->
+    <div class="modal-overlay hidden" id="success-modal">
+        <div class="modal-card">
+            <button class="modal-close-btn top-right" id="btn-modal-close" title="Rimani nell'esercizio">✕</button>
+            <div class="modal-icon-bounce">🎉</div>
+            <h2 class="modal-title" id="modal-success-title">MISSIONE COMPIUTA!</h2>
+            <p class="modal-subtitle" id="modal-success-subtitle">Ottimo lavoro! Il tuo script GDScript funziona alla perfezione.</p>
+
+            <div class="xp-gain-card">
+                <span class="gain-sparkle">⚡</span>
+                <span class="gain-amount" id="modal-xp-gain">+50</span>
+                <span class="gain-text">PUNTI ESPERIENZA</span>
+            </div>
+
+            <div class="modal-actions-row">
+                <button class="btn-stay-level" id="btn-modal-stay">
+                    Rimani nell'Esercizio
+                </button>
+                <button class="btn-next-level" id="btn-modal-next">
+                    Prossima Lezione ➔
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script inclusi in ordine -->
+    <script src="audio.js"></script>
+    <script src="confetti.js"></script>
+    <script src="runtime.js"></script>
+    <script src="lessons.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

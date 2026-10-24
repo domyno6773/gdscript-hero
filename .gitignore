@@ -1,0 +1,12 @@
+# Python & Test scratch
+__pycache__/
+*.pyc
+verify_*.py
+test_*.html
+test_*.py
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
