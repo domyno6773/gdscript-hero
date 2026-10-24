@@ -1297,32 +1297,93 @@ kbd {
 
 .validation-tabs,
 .runner-topbar {
-    height: 38px;
+    height: 40px;
     background: var(--bg-card);
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 12px;
     flex-shrink: 0;
+    gap: 8px;
 }
 
-.vtab,
-.runner-title {
-    background: transparent;
-    border: none;
+.vtabs-left {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
+    gap: 6px;
+}
+
+.vtabs-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vtab {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
     font-weight: 700;
+    color: var(--text-dim);
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.vtab:hover {
     color: var(--text-main);
-    padding: 0;
-    cursor: default;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.vtab.active {
+    color: var(--accent-cyan);
+    background: rgba(6, 182, 212, 0.12);
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+.vtab-icon {
+    font-size: 0.95rem;
+}
+
+.vtab-live-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(71, 140, 191, 0.25);
+    border: 1px solid rgba(71, 140, 191, 0.5);
+    color: #38bdf8;
+}
+
+.vtab-action-btn {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.vtab-action-btn:hover {
+    color: var(--text-main);
+    border-color: var(--border-hover);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .vtab-status {
-    font-size: 0.76rem;
+    font-size: 0.72rem;
     font-weight: 700;
     padding: 2px 8px;
     border-radius: 999px;
@@ -1331,13 +1392,102 @@ kbd {
     color: var(--text-dim);
 }
 
+.val-subview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.val-subview.hidden {
+    display: none !important;
+}
+
+/* Contenitore Viewport 2D Godot Engine */
+.viewport-canvas-wrapper {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #0a0f1d;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+}
+
+#exercise-viewport-canvas,
+#practice-viewport-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Practice Sandbox Viewport & Tabs */
+.practice-tabs-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.practice-tab-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.practice-tab-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.practice-tab-btn.active {
+    background: rgba(6, 182, 212, 0.15);
+    border-color: var(--accent-cyan);
+    color: #ffffff;
+}
+
+.practice-body-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    padding: 14px 16px;
+}
+
+.practice-subview {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.practice-subview.hidden {
+    display: none !important;
+}
+
 .validation-body,
 .runner-body {
     flex: 1;
     overflow-y: auto;
-    padding: 14px 16px;
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
+    gap: 12px;
+}
     gap: 14px;
 }
 
@@ -3817,7 +3967,16 @@ kbd {
 
     .validation-panel {
         height: auto !important;
-        max-height: 380px;
+        max-height: 460px;
+    }
+
+    .viewport-canvas-wrapper {
+        min-height: 190px !important;
+        height: 210px !important;
+    }
+
+    .vtab-live-badge {
+        display: none !important;
     }
 
     .output-comparison-grid {
@@ -4381,7 +4540,57 @@ kbd {
 
 [data-theme="light"] .vtab,
 [data-theme="light"] .runner-title {
+    color: #64748b;
+}
+
+[data-theme="light"] .vtab:hover {
     color: #0f172a;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .vtab.active {
+    background: rgba(2, 132, 199, 0.1);
+    border-color: rgba(2, 132, 199, 0.35);
+    color: #0284c7;
+}
+
+[data-theme="light"] .vtab-live-badge {
+    background: rgba(2, 132, 199, 0.1);
+    border-color: rgba(2, 132, 199, 0.3);
+    color: #0284c7;
+}
+
+[data-theme="light"] .vtab-action-btn {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+[data-theme="light"] .vtab-action-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+[data-theme="light"] .viewport-canvas-wrapper {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .practice-tab-btn {
+    border-color: #cbd5e1;
+    color: #64748b;
+}
+
+[data-theme="light"] .practice-tab-btn:hover {
+    color: #0f172a;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .practice-tab-btn.active {
+    background: rgba(2, 132, 199, 0.12);
+    border-color: #0284c7;
+    color: #0284c7;
 }
 
 [data-theme="light"] .vtab-status {

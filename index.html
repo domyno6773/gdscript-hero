@@ -262,37 +262,58 @@
                     </button>
                 </div>
 
-                <!-- Scheda Risultati & Confronto Output -->
+                <!-- Scheda Risultati: Viewport 2D Godot & Confronto Output -->
                 <div class="validation-panel">
                     <div class="validation-tabs">
-                        <button class="vtab active">
-                            <span>Risultati Verifica</span>
-                            <span class="vtab-status" id="test-status-badge">• Non verificato</span>
-                        </button>
+                        <div class="vtabs-left">
+                            <button type="button" class="vtab active" id="tab-btn-viewport">
+                                <span class="vtab-icon">🎮</span>
+                                <span>Schermo 2D</span>
+                                <span class="vtab-live-badge">Godot 2D</span>
+                            </button>
+                            <button type="button" class="vtab" id="tab-btn-console">
+                                <span class="vtab-icon">💻</span>
+                                <span>Console & Test</span>
+                                <span class="vtab-status" id="test-status-badge">• Non verificato</span>
+                            </button>
+                        </div>
+                        <div class="vtabs-right">
+                            <button type="button" class="vtab-action-btn" id="btn-restart-viewport" title="Riavvia animazione 2D">↺ Riavvia</button>
+                        </div>
                     </div>
 
                     <div class="validation-body">
-                        <!-- Griglia Confronto Output Previsto vs Output Reale -->
-                        <div class="output-comparison-grid">
-                            <div class="output-box expected-box">
-                                <div class="output-box-header">
-                                    <span class="output-icon">🎯</span>
-                                    <span class="output-label">OUTPUT PREVISTO:</span>
-                                </div>
-                                <pre class="output-pre" id="expected-output-pre">// In attesa di verifica...</pre>
-                            </div>
-                            <div class="output-box real-box">
-                                <div class="output-box-header">
-                                    <span class="output-icon">💻</span>
-                                    <span class="output-label">OUTPUT DEL TUO CODICE:</span>
-                                </div>
-                                <pre class="output-pre" id="real-output-pre">// Clicca su "Verifica Codice" per eseguire</pre>
+                        <!-- Scheda 1: Viewport 2D Godot (Attiva di default) -->
+                        <div id="val-view-viewport" class="val-subview active">
+                            <div class="viewport-canvas-wrapper">
+                                <canvas id="exercise-viewport-canvas"></canvas>
                             </div>
                         </div>
 
-                        <!-- Lista Dettagliata dei Test Unitari Superati/Falliti -->
-                        <div class="test-results" id="test-results-view">
-                            <div class="empty-state">In attesa della verifica...</div>
+                        <!-- Scheda 2: Console & Test Unitari -->
+                        <div id="val-view-console" class="val-subview hidden">
+                            <!-- Griglia Confronto Output Previsto vs Output Reale -->
+                            <div class="output-comparison-grid">
+                                <div class="output-box expected-box">
+                                    <div class="output-box-header">
+                                        <span class="output-icon">🎯</span>
+                                        <span class="output-label">OUTPUT PREVISTO:</span>
+                                    </div>
+                                    <pre class="output-pre" id="expected-output-pre">// In attesa di verifica...</pre>
+                                </div>
+                                <div class="output-box real-box">
+                                    <div class="output-box-header">
+                                        <span class="output-icon">💻</span>
+                                        <span class="output-label">OUTPUT DEL TUO CODICE:</span>
+                                    </div>
+                                    <pre class="output-pre" id="real-output-pre">// Clicca su "Verifica Codice" per eseguire</pre>
+                                </div>
+                            </div>
+
+                            <!-- Lista Dettagliata dei Test Unitari Superati/Falliti -->
+                            <div class="test-results" id="test-results-view">
+                                <div class="empty-state">In attesa della verifica...</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -353,14 +374,27 @@
 
             <div class="practice-console-col">
                 <div class="practice-col-header">
-                    <span class="tab">🖥️ Console di Output</span>
+                    <div class="practice-tabs-group">
+                        <button type="button" class="practice-tab-btn active" id="ptab-canvas">🎮 Schermo 2D</button>
+                        <button type="button" class="practice-tab-btn" id="ptab-console">🖥️ Console</button>
+                    </div>
                     <div class="practice-console-tools">
                         <span id="practice-status-tag" class="practice-status-tag">Pronto</span>
-                        <button class="btn-tool" id="btn-practice-clear">🗑️ Pulisci</button>
+                        <button type="button" class="btn-tool" id="btn-practice-restart" title="Riavvia simulazione 2D">↺ Riavvia</button>
+                        <button type="button" class="btn-tool" id="btn-practice-clear">🗑️ Pulisci</button>
                     </div>
                 </div>
-                <div class="practice-console-body">
-                    <pre class="practice-console-pre" id="practice-console-output">// Premi 'Esegui Script' per avviare il codice nella sandbox</pre>
+                <div class="practice-body-wrapper">
+                    <div id="practice-viewport-view" class="practice-subview active">
+                        <div class="viewport-canvas-wrapper">
+                            <canvas id="practice-viewport-canvas"></canvas>
+                        </div>
+                    </div>
+                    <div id="practice-console-view" class="practice-subview hidden">
+                        <div class="practice-console-body">
+                            <pre class="practice-console-pre" id="practice-console-output">// Premi 'Esegui Script' per avviare il codice nella sandbox</pre>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -736,6 +770,7 @@
     <script src="confetti.js"></script>
     <script src="runtime.js"></script>
     <script src="lessons.js"></script>
+    <script src="viewport2d.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

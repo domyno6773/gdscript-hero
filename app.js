@@ -94,6 +94,16 @@ const App = {
         this.checkAchievements();
         this.updateQuestsBadge();
 
+        // Inizializzazione Viewport 2D Godot Engine
+        if (window.GodotViewport) {
+            this.viewport = new GodotViewport('exercise-viewport-canvas');
+            this.practiceViewport = new GodotViewport('practice-viewport-canvas');
+            if (this.state.theme) {
+                this.viewport.setTheme(this.state.theme);
+                this.practiceViewport.setTheme(this.state.theme);
+            }
+        }
+
         window.addEventListener('resize', () => {
             const roadmapView = document.getElementById('view-roadmap');
             if (roadmapView && !roadmapView.classList.contains('hidden')) {
@@ -576,6 +586,7 @@ const App = {
 
         this.updateNavSelection('practice');
         this.updatePracticeLineNumbers();
+        setTimeout(() => this.practiceViewport && this.practiceViewport.resize(), 60);
     },
 
     async runPracticeCode() {
@@ -615,6 +626,10 @@ const App = {
                 outputPre.style.color = '#94a3b8';
                 statusTag.innerText = `OK (${elapsed} ms)`;
                 statusTag.style.color = '#10b981';
+            }
+
+            if (this.practiceViewport) {
+                this.practiceViewport.updateFromExecution(res, null, !res.error);
             }
         } catch (e) {
             outputPre.innerText = `// Errore inaspettato: ${e.message}`;
@@ -764,6 +779,8 @@ const App = {
         if (this.drawConnectingLines) {
             setTimeout(() => this.drawConnectingLines(), 60);
         }
+        if (this.viewport) this.viewport.setTheme(currentTheme);
+        if (this.practiceViewport) this.practiceViewport.setTheme(currentTheme);
     },
 
     openSettingsModal() {
@@ -1393,6 +1410,13 @@ const App = {
 
         document.getElementById('hint-box').classList.add('hidden');
         document.getElementById('hint-toggle-text').innerText = `Ti serve un consiglio? (0/${lesson.hints.length} usati)`;
+
+        // Reset e posizionamento Viewport 2D per il livello corrente
+        if (this.viewport) {
+            this.viewport.reset();
+            this.viewport.statusText = `Livello ${lesson.id}: ${lesson.title}`;
+            setTimeout(() => this.viewport.resize(), 50);
+        }
     },
 
     showRoadmap() {
@@ -1766,6 +1790,11 @@ const App = {
             const tests = await currentLesson.validate(result, GDScriptRuntime);
             const allPassed = tests.every(t => t.passed);
 
+            // Aggiorna Schermo Viewport 2D Godot
+            if (this.viewport) {
+                this.viewport.updateFromExecution(result, currentLesson, allPassed);
+            }
+
             const resultsContainer = document.getElementById('test-results-view');
             resultsContainer.innerHTML = '';
 
@@ -2017,6 +2046,72 @@ const App = {
                 this.saveStorage();
             }
         };
+
+        // Tab Viewport 2D vs Console in Esercizio
+        const tabBtnViewport = document.getElementById('tab-btn-viewport');
+        const tabBtnConsole = document.getElementById('tab-btn-console');
+        const valViewViewport = document.getElementById('val-view-viewport');
+        const valViewConsole = document.getElementById('val-view-console');
+        const btnRestartViewport = document.getElementById('btn-restart-viewport');
+
+        if (tabBtnViewport && tabBtnConsole && valViewViewport && valViewConsole) {
+            tabBtnViewport.onclick = () => {
+                SoundFX.playClick();
+                tabBtnViewport.classList.add('active');
+                tabBtnConsole.classList.remove('active');
+                valViewViewport.classList.remove('hidden');
+                valViewConsole.classList.add('hidden');
+                if (this.viewport) this.viewport.resize();
+            };
+
+            tabBtnConsole.onclick = () => {
+                SoundFX.playClick();
+                tabBtnConsole.classList.add('active');
+                tabBtnViewport.classList.remove('active');
+                valViewConsole.classList.remove('hidden');
+                valViewViewport.classList.add('hidden');
+            };
+        }
+
+        if (btnRestartViewport) {
+            btnRestartViewport.onclick = () => {
+                SoundFX.playClick();
+                if (this.viewport) this.viewport.replay();
+            };
+        }
+
+        // Tab Viewport 2D vs Console in Palestra (Practice Sandbox)
+        const ptabCanvas = document.getElementById('ptab-canvas');
+        const ptabConsole = document.getElementById('ptab-console');
+        const practiceViewportView = document.getElementById('practice-viewport-view');
+        const practiceConsoleView = document.getElementById('practice-console-view');
+        const btnPracticeRestart = document.getElementById('btn-practice-restart');
+
+        if (ptabCanvas && ptabConsole && practiceViewportView && practiceConsoleView) {
+            ptabCanvas.onclick = () => {
+                SoundFX.playClick();
+                ptabCanvas.classList.add('active');
+                ptabConsole.classList.remove('active');
+                practiceViewportView.classList.remove('hidden');
+                practiceConsoleView.classList.add('hidden');
+                if (this.practiceViewport) this.practiceViewport.resize();
+            };
+
+            ptabConsole.onclick = () => {
+                SoundFX.playClick();
+                ptabConsole.classList.add('active');
+                ptabCanvas.classList.remove('active');
+                practiceConsoleView.classList.remove('hidden');
+                practiceViewportView.classList.add('hidden');
+            };
+        }
+
+        if (btnPracticeRestart) {
+            btnPracticeRestart.onclick = () => {
+                SoundFX.playClick();
+                if (this.practiceViewport) this.practiceViewport.replay();
+            };
+        }
 
         // Impostazioni & Audio & Reset
         const btnOpenSettings = document.getElementById('btn-open-settings');
