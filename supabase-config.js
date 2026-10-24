@@ -25,7 +25,8 @@ const SupabaseConfig = {
 
     // 3. Email autorizzate ad accedere al "👑 Pannello Amministratore"
     adminEmails: [
-        'gianlucachifari@hotmail.com'
+        'gianlucachifari@hotmail.com',
+        'gianlucachifari@gmail.com'
     ],
 
     // Verifica se le credenziali cloud sono attive
