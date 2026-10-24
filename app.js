@@ -2047,32 +2047,8 @@ const App = {
             }
         };
 
-        // Tab Viewport 2D vs Console in Esercizio
-        const tabBtnViewport = document.getElementById('tab-btn-viewport');
-        const tabBtnConsole = document.getElementById('tab-btn-console');
-        const valViewViewport = document.getElementById('val-view-viewport');
-        const valViewConsole = document.getElementById('val-view-console');
+        // Pulsanti Riavvia Simulazione Viewport 2D
         const btnRestartViewport = document.getElementById('btn-restart-viewport');
-
-        if (tabBtnViewport && tabBtnConsole && valViewViewport && valViewConsole) {
-            tabBtnViewport.onclick = () => {
-                SoundFX.playClick();
-                tabBtnViewport.classList.add('active');
-                tabBtnConsole.classList.remove('active');
-                valViewViewport.classList.remove('hidden');
-                valViewConsole.classList.add('hidden');
-                if (this.viewport) this.viewport.resize();
-            };
-
-            tabBtnConsole.onclick = () => {
-                SoundFX.playClick();
-                tabBtnConsole.classList.add('active');
-                tabBtnViewport.classList.remove('active');
-                valViewConsole.classList.remove('hidden');
-                valViewViewport.classList.add('hidden');
-            };
-        }
-
         if (btnRestartViewport) {
             btnRestartViewport.onclick = () => {
                 SoundFX.playClick();
@@ -2080,32 +2056,7 @@ const App = {
             };
         }
 
-        // Tab Viewport 2D vs Console in Palestra (Practice Sandbox)
-        const ptabCanvas = document.getElementById('ptab-canvas');
-        const ptabConsole = document.getElementById('ptab-console');
-        const practiceViewportView = document.getElementById('practice-viewport-view');
-        const practiceConsoleView = document.getElementById('practice-console-view');
         const btnPracticeRestart = document.getElementById('btn-practice-restart');
-
-        if (ptabCanvas && ptabConsole && practiceViewportView && practiceConsoleView) {
-            ptabCanvas.onclick = () => {
-                SoundFX.playClick();
-                ptabCanvas.classList.add('active');
-                ptabConsole.classList.remove('active');
-                practiceViewportView.classList.remove('hidden');
-                practiceConsoleView.classList.add('hidden');
-                if (this.practiceViewport) this.practiceViewport.resize();
-            };
-
-            ptabConsole.onclick = () => {
-                SoundFX.playClick();
-                ptabConsole.classList.add('active');
-                ptabCanvas.classList.remove('active');
-                practiceConsoleView.classList.remove('hidden');
-                practiceViewportView.classList.add('hidden');
-            };
-        }
-
         if (btnPracticeRestart) {
             btnPracticeRestart.onclick = () => {
                 SoundFX.playClick();

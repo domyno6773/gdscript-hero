@@ -1283,21 +1283,27 @@ kbd {
     box-shadow: 0 1px 0 var(--accent-green-shadow);
 }
 
-/* Runner & Validation Panel con Confronto Output */
+/* Runner & Validation Panel con Confronto Output & Schermo 2D Affiancati */
 .validation-panel,
 .runner-panel {
-    height: 290px;
+    height: 330px;
     background: #090d16;
     display: flex;
     flex-direction: column;
     border-top: 1px solid var(--border);
     flex-shrink: 0;
     overflow: hidden;
+    padding: 10px;
 }
 
-.validation-tabs,
-.runner-topbar {
-    height: 40px;
+.validation-body {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+}
+
+.validation-col-header {
+    height: 38px;
     background: var(--bg-card);
     border-bottom: 1px solid var(--border);
     display: flex;
@@ -1305,46 +1311,45 @@ kbd {
     justify-content: space-between;
     padding: 0 12px;
     flex-shrink: 0;
+    border-radius: 8px 8px 0 0;
+}
+
+.validation-tabs,
+.runner-topbar {
+    height: 38px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    flex-shrink: 0;
     gap: 8px;
 }
 
 .vtabs-left {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--text-main);
 }
 
 .vtabs-right {
     display: flex;
     align-items: center;
-    gap: 6px;
-}
-
-.vtab {
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--text-dim);
-    padding: 5px 10px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    user-select: none;
-}
-
-.vtab:hover {
+    gap: 8px;
+    font-size: 0.84rem;
+    font-weight: 800;
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.04);
 }
 
-.vtab.active {
-    color: var(--accent-cyan);
-    background: rgba(6, 182, 212, 0.12);
-    border-color: rgba(6, 182, 212, 0.3);
+.vtab-title-tag {
+    font-weight: 800;
+    font-size: 0.84rem;
+    color: var(--text-main);
+    letter-spacing: -0.2px;
 }
 
 .vtab-icon {
@@ -1356,7 +1361,7 @@ kbd {
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 2px 6px;
+    padding: 2px 7px;
     border-radius: 999px;
     background: rgba(71, 140, 191, 0.25);
     border: 1px solid rgba(71, 140, 191, 0.5);
@@ -1392,24 +1397,64 @@ kbd {
     color: var(--text-dim);
 }
 
-.val-subview {
-    width: 100%;
+/* Griglia Affiancata: Console a Sinistra & Schermo 2D a Destra */
+.validation-split-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 12px;
     height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.validation-console-col {
     display: flex;
     flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.validation-col-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     flex: 1;
+    overflow-y: auto;
+    padding: 10px;
 }
 
-.val-subview.hidden {
-    display: none !important;
+.validation-viewport-col {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
 }
 
-/* Contenitore Viewport 2D Godot Engine */
+.validation-viewport-col .viewport-canvas-wrapper {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    position: relative;
+    border-radius: 0 0 8px 8px;
+    border: none;
+    box-shadow: none;
+    background: #0a0f1d;
+    display: flex;
+}
+
+/* Contenitore Viewport 2D Godot Engine Generico */
 .viewport-canvas-wrapper {
     flex: 1;
     width: 100%;
     height: 100%;
-    min-height: 200px;
+    min-height: 180px;
     position: relative;
     border-radius: 10px;
     overflow: hidden;
@@ -1426,35 +1471,38 @@ kbd {
     display: block;
 }
 
-/* Practice Sandbox Viewport & Tabs */
-.practice-tabs-group {
+/* Practice Sandbox Split: Console a Sinistra & Schermo 2D a Destra */
+.practice-header-left {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
-.practice-tab-btn {
-    background: transparent;
+.practice-split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.practice-console-half {
+    flex: 1;
+    background: #070a12;
+    border-radius: 10px;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-muted);
-    font-family: var(--font-ui);
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 5px 12px;
-    cursor: pointer;
-    transition: all 0.15s ease;
+    padding: 12px;
+    overflow-y: auto;
+    height: 100%;
 }
 
-.practice-tab-btn:hover {
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.practice-tab-btn.active {
-    background: rgba(6, 182, 212, 0.15);
-    border-color: var(--accent-cyan);
-    color: #ffffff;
+.practice-viewport-half {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .practice-body-wrapper {
@@ -1466,27 +1514,13 @@ kbd {
     padding: 14px 16px;
 }
 
-.practice-subview {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
-.practice-subview.hidden {
-    display: none !important;
-}
-
 .validation-body,
 .runner-body {
     flex: 1;
-    overflow-y: auto;
-    padding: 12px 14px;
+    overflow: hidden;
+    padding: 10px 14px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
 }
     gap: 14px;
 }
@@ -3967,12 +4001,55 @@ kbd {
 
     .validation-panel {
         height: auto !important;
-        max-height: 460px;
+        max-height: none !important;
+        padding: 10px 8px !important;
     }
 
-    .viewport-canvas-wrapper {
-        min-height: 190px !important;
-        height: 210px !important;
+    .validation-body {
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .validation-split-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .validation-console-col {
+        order: 1 !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding-right: 0 !important;
+    }
+
+    .validation-viewport-col {
+        order: 2 !important;
+        height: 240px !important;
+        min-height: 220px !important;
+    }
+
+    .validation-viewport-col .viewport-canvas-wrapper {
+        height: calc(240px - 38px) !important;
+        min-height: 180px !important;
+    }
+
+    .practice-split-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .practice-viewport-half {
+        order: 1 !important;
+        height: 200px !important;
+    }
+
+    .practice-console-half {
+        order: 2 !important;
+        height: 160px !important;
     }
 
     .vtab-live-badge {
@@ -4533,9 +4610,16 @@ kbd {
 }
 
 [data-theme="light"] .validation-tabs,
+[data-theme="light"] .validation-col-header,
 [data-theme="light"] .runner-topbar {
     background: #ffffff;
     border-bottom-color: #e2e8f0;
+}
+
+[data-theme="light"] .validation-console-col,
+[data-theme="light"] .validation-viewport-col {
+    background: #ffffff;
+    border-color: #cbd5e1;
 }
 
 [data-theme="light"] .vtab,
@@ -4571,10 +4655,19 @@ kbd {
     color: #0f172a;
 }
 
+[data-theme="light"] .vtab-title-tag {
+    color: #0f172a;
+}
+
 [data-theme="light"] .viewport-canvas-wrapper {
     background: #f1f5f9;
     border-color: #cbd5e1;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .practice-console-half {
+    background: #f8fafc;
+    border-color: #e2e8f0;
 }
 
 [data-theme="light"] .practice-tab-btn {
