@@ -2798,42 +2798,257 @@ kbd {
     align-items: center;
 }
 
-/* Sfida di Padronanza Node */
-.node-item.mastery {
+/* ===================================================================
+   CODDY-STYLE 3D HEXAGON NODES & MASTERY BONUS BRANCH
+   =================================================================== */
+
+.tree-milestone-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    position: relative;
+    width: 100%;
+    margin: 8px 0;
+}
+
+.node-button.hex-node {
+    width: 84px;
+    height: 84px;
+    border-radius: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
 }
 
-.node-item.mastery .node-button {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    box-shadow: 0 6px 0 #b45309, 0 10px 20px rgba(245, 158, 11, 0.35);
-    border: 2px solid #fbbf24;
+.hex-svg {
+    width: 84px;
+    height: 84px;
+    overflow: visible;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.node-item.mastery.completed .node-button {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    box-shadow: 0 6px 0 #047857, 0 10px 20px rgba(16, 185, 129, 0.35);
-    border: 2px solid #34d399;
+.node-item:hover .hex-svg {
+    transform: scale(1.1);
 }
 
-.mastery-crown-tag {
+.node-item:active .hex-svg {
+    transform: translateY(4px);
+}
+
+/* Pulsating glow for active core & mastery nodes */
+.pulse-mastery {
+    animation: pulseMasteryGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseMasteryGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.45));
+    }
+    50% {
+        filter: drop-shadow(0 0 22px rgba(245, 158, 11, 0.85));
+    }
+}
+
+.pulse-current {
+    animation: pulseCurrentGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseCurrentGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.4));
+    }
+    50% {
+        filter: drop-shadow(0 0 22px rgba(56, 189, 248, 0.85));
+    }
+}
+
+/* CONTINUA Tag below active node */
+.tag-continua {
     position: absolute;
-    bottom: -10px;
-    background: #f59e0b;
-    color: #000;
-    font-size: 0.65rem;
-    font-weight: 900;
-    padding: 2px 8px;
-    border-radius: 10px;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    bottom: -12px;
+    background: #0f172a;
+    border: 1.5px solid #38bdf8;
+    color: #38bdf8;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.6px;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35);
+    z-index: 5;
     white-space: nowrap;
-    animation: pulseGlow 2s infinite alternate;
+    pointer-events: none;
+    text-transform: uppercase;
 }
 
-@keyframes pulseGlow {
-    0% { transform: scale(1); filter: brightness(1); }
-    100% { transform: scale(1.05); filter: brightness(1.2); }
+/* Dotted SVG connector from milestone core to mastery */
+.mastery-branch-dots {
+    stroke-linecap: round;
+    transition: all 0.3s ease;
 }
+
+.mastery-branch-dots.unlocked {
+    stroke: #f59e0b;
+    stroke-width: 7;
+    stroke-dasharray: 0 14;
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+}
+
+.mastery-branch-dots.locked {
+    stroke: #334155;
+    stroke-width: 6;
+    stroke-dasharray: 0 14;
+    opacity: 0.55;
+}
+
+/* Sfida di Padronanza Node */
+.node-item.mastery {
+    position: relative;
+    z-index: 10;
+}
+
+/* Popover Card ancorato al Nodo di Padronanza (Stile Coddy) */
+.mastery-popover {
+    position: absolute;
+    top: 94px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 250px;
+    background: #1e242d;
+    border: 1.5px solid rgba(245, 158, 11, 0.4);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 20px rgba(245, 158, 11, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 99;
+    animation: popoverFadeIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: left;
+}
+
+.mastery-popover.hidden {
+    display: none !important;
+}
+
+@keyframes popoverFadeIn {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -8px) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
+
+.mastery-popover-arrow {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 14px;
+    height: 14px;
+    background: #1e242d;
+    border-left: 1.5px solid rgba(245, 158, 11, 0.4);
+    border-top: 1.5px solid rgba(245, 158, 11, 0.4);
+}
+
+.mastery-popover-badge {
+    font-size: 10px;
+    font-weight: 900;
+    color: #f59e0b;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.mastery-popover-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.25;
+}
+
+.mastery-popover-desc {
+    font-size: 12.5px;
+    color: #94a3b8;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.mastery-popover-reward {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 800;
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.12);
+    padding: 5px 9px;
+    border-radius: 6px;
+    border: 1px dashed rgba(245, 158, 11, 0.35);
+    margin: 3px 0 6px 0;
+}
+
+.mastery-popover-btn {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    border: 1px solid #38bdf8;
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 13.5px;
+    padding: 10px 18px;
+    border-radius: 9px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.mastery-popover-btn:hover {
+    background: #0284c7;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.55);
+}
+
+.mastery-popover-btn:active {
+    transform: translateY(1px);
+}
+
+/* Light theme overrides */
+[data-theme="light"] .mastery-popover {
+    background: #ffffff;
+    border-color: #f59e0b;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16), 0 0 20px rgba(245, 158, 11, 0.15);
+}
+
+[data-theme="light"] .mastery-popover-arrow {
+    background: #ffffff;
+    border-color: #f59e0b;
+}
+
+[data-theme="light"] .mastery-popover-title {
+    color: #0f172a;
+}
+
+[data-theme="light"] .mastery-popover-desc {
+    color: #64748b;
+}
+
+[data-theme="light"] .tag-continua {
+    background: #ffffff;
+    color: #0284c7;
+    border-color: #0284c7;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+
 
 .mastery-banner {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.08) 100%);

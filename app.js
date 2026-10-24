@@ -82,6 +82,7 @@ const App = {
 
     init() {
         this.loadStorage();
+        this.ensureUnlockedConsistency();
         this.applyTheme(this.state.theme || 'dark');
         this.checkDailyQuestsReset();
         this.bindEvents();
@@ -1199,14 +1200,154 @@ const App = {
     // ==========================================
     // MAPPA A NODI E CAPITOLI
     // ==========================================
+    // Garantisce che i livelli completati sblocchino coerentemente sia il percorso principale che i bonus
+    ensureUnlockedConsistency() {
+        if (!this.state.completedLessons || !Array.isArray(this.state.completedLessons)) {
+            this.state.completedLessons = [1];
+        }
+        if (!this.state.completedLessons.includes(1)) {
+            this.state.completedLessons.unshift(1);
+        }
+
+        CHAPTERS_DATA.forEach(chapter => {
+            const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id);
+            const coreLessons = chapterLessons.filter(l => !l.isMastery);
+            const masteryLesson = chapterLessons.find(l => l.isMastery);
+
+            coreLessons.forEach((core, idx) => {
+                if (this.state.finishedLessons.includes(core.id)) {
+                    if (idx < coreLessons.length - 1) {
+                        const nextCore = coreLessons[idx + 1];
+                        if (!this.state.completedLessons.includes(nextCore.id)) {
+                            this.state.completedLessons.push(nextCore.id);
+                        }
+                    } else {
+                        // Ultimo core del capitolo: sblocca la sfida bonus di padronanza!
+                        if (masteryLesson && !this.state.completedLessons.includes(masteryLesson.id)) {
+                            this.state.completedLessons.push(masteryLesson.id);
+                        }
+                        // E sblocca il primo livello core del capitolo successivo!
+                        const nextChapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id + 1 && !l.isMastery);
+                        if (nextChapterLessons.length > 0) {
+                            const nextCore = nextChapterLessons[0];
+                            if (!this.state.completedLessons.includes(nextCore.id)) {
+                                this.state.completedLessons.push(nextCore.id);
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    },
+
+    toggleMasteryPopover(lessonId) {
+        const popover = document.getElementById(`mastery-popover-${lessonId}`);
+        if (!popover) return;
+        const isCurrentlyOpen = !popover.classList.contains('hidden');
+        this.closeAllMasteryPopovers();
+        if (!isCurrentlyOpen) {
+            popover.classList.remove('hidden');
+        }
+    },
+
+    closeAllMasteryPopovers() {
+        document.querySelectorAll('.mastery-popover').forEach(p => {
+            p.classList.add('hidden');
+        });
+    },
+
+    // Generatore SVG 3D Hexagon fedele allo stile Coddy
+    renderHexNodeSVG(isMastery, status) {
+        if (isMastery) {
+            if (status === 'completed') {
+                return `
+                    <svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84">
+                        <defs>
+                            <linearGradient id="hexGoldComp" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#b45309"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#78350f" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexGoldComp)" stroke="#fde68a" stroke-width="2.5" />
+                        <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#fffbeb" />
+                    </svg>
+                `;
+            } else if (status === 'current') {
+                return `
+                    <svg class="hex-svg pulse-mastery" width="84" height="84" viewBox="0 0 84 84">
+                        <defs>
+                            <linearGradient id="hexGoldActive" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#fbbf24"/>
+                                <stop offset="100%" stop-color="#d97706"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#92400e" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexGoldActive)" stroke="#fef08a" stroke-width="3" />
+                        <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#ffffff" />
+                    </svg>
+                `;
+            } else {
+                return `
+                    <svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84">
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#0f172a" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="#1e293b" stroke="#334155" stroke-width="2" />
+                        <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#475569" opacity="0.6" />
+                    </svg>
+                `;
+            }
+        } else {
+            // Core Node
+            if (status === 'completed') {
+                return `
+                    <svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84">
+                        <defs>
+                            <linearGradient id="hexGreen" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#34d399"/>
+                                <stop offset="100%" stop-color="#059669"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#047857" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexGreen)" stroke="#6ee7b7" stroke-width="2" />
+                        <path d="M 27 39 L 37 49 L 57 29" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                `;
+            } else if (status === 'current') {
+                return `
+                    <svg class="hex-svg pulse-current" width="84" height="84" viewBox="0 0 84 84">
+                        <defs>
+                            <linearGradient id="hexCyan" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#38bdf8"/>
+                                <stop offset="100%" stop-color="#0284c7"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#075985" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexCyan)" stroke="#bae6fd" stroke-width="2.5" />
+                        <polygon points="36,28 36,52 54,40" fill="#ffffff" />
+                    </svg>
+                `;
+            } else {
+                return `
+                    <svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84">
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#0f172a" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="#1e293b" stroke="#334155" stroke-width="2" />
+                        <path d="M 36 34 L 36 30 C 36 26.7 38.7 24 42 24 C 45.3 24 48 26.7 48 30 L 48 34 M 32 34 L 52 34 C 53.1 34 54 34.9 54 36 L 54 50 C 54 51.1 53.1 52 52 52 L 32 52 C 30.9 52 30 51.1 30 50 L 30 36 C 30 34.9 30.9 34 32 34 Z" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" />
+                    </svg>
+                `;
+            }
+        }
+    },
+
     renderRoadmap() {
-        const container = document.getElementById('chapters-roadmap-flow');
+        const container = document.getElementById('chapters-flow-container');
         if (!container) return;
         container.innerHTML = '';
 
-        const total = LESSONS_DATA.length;
+        this.ensureUnlockedConsistency();
+
         const finishedCount = this.state.finishedLessons.length;
-        const percent = Math.round((finishedCount / total) * 100);
+        const total = LESSONS_DATA.length;
+        const percent = Math.min(100, Math.round((finishedCount / total) * 100));
 
         const progressFill = document.getElementById('overall-progress-fill');
         if (progressFill) progressFill.style.width = `${percent}%`;
@@ -1218,14 +1359,18 @@ const App = {
 
         CHAPTERS_DATA.forEach(chapter => {
             const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id);
+            const coreLessons = chapterLessons.filter(l => !l.isMastery);
+            const masteryLesson = chapterLessons.find(l => l.isMastery);
+
             const chapterFinished = chapterLessons.filter(l => this.state.finishedLessons.includes(l.id)).length;
             const chapterTotal = chapterLessons.length;
-            // Il capitolo è sbloccato se è il capitolo 1, oppure se l'ultima lezione del capitolo precedente è stata completata
+
+            // Il capitolo è sbloccato se è il capitolo 1, oppure se tutti i livelli core del capitolo precedente sono completati
             let isChapterUnlocked = chapter.id === 1;
             if (chapter.id > 1) {
-                const prevChapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id - 1);
-                const lastPrev = prevChapterLessons[prevChapterLessons.length - 1];
-                if (lastPrev && this.state.finishedLessons.includes(lastPrev.id)) {
+                const prevCoreLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id - 1 && !l.isMastery);
+                const lastPrevCore = prevCoreLessons[prevCoreLessons.length - 1];
+                if (lastPrevCore && this.state.finishedLessons.includes(lastPrevCore.id)) {
                     isChapterUnlocked = true;
                 }
             }
@@ -1263,44 +1408,101 @@ const App = {
             nodesList.className = "nodes-list";
             nodesList.id = `nodes-container-chapter-${chapter.id}`;
 
-            chapterLessons.forEach((lesson, index) => {
+            // Helper per costruire un nodo
+            const buildNode = (lesson, isMastery, offset = 0) => {
                 const isFinished = this.state.finishedLessons.includes(lesson.id);
                 const isUnlocked = this.state.completedLessons.includes(lesson.id);
                 const isCurrent = isUnlocked && !isFinished;
 
-                let statusClass = 'locked';
-                if (isFinished) {
-                    statusClass = 'completed';
-                } else if (isCurrent || (isUnlocked && lesson.id === 1)) {
-                    statusClass = 'current';
-                }
+                let statusClass = isFinished ? 'completed' : (isCurrent ? 'current' : 'locked');
 
                 const node = document.createElement('div');
-                node.className = `node-item ${statusClass} ${lesson.isMastery ? 'mastery' : ''}`;
-                node.onclick = () => {
-                    if (isUnlocked) {
+                node.className = `node-item ${statusClass} ${isMastery ? 'mastery' : ''}`;
+                node.id = `node-lesson-${lesson.id}`;
+
+                if (!isMastery && offset !== 0) {
+                    node.style.transform = `translateX(${offset}px)`;
+                }
+
+                if (isMastery) {
+                    node.onclick = (e) => {
+                        e.stopPropagation();
+                        if (!isUnlocked) {
+                            SoundFX.playError();
+                            this.showToast({
+                                icon: '🔒',
+                                tag: 'LIVELLO BONUS',
+                                title: 'Sfida di Padronanza Bloccata',
+                                desc: 'Completa tutti i livelli del capitolo per sbloccare questa sfida bonus!'
+                            });
+                            return;
+                        }
                         SoundFX.playClick();
-                        this.openLesson(lesson.id);
-                    } else {
-                        SoundFX.playError();
-                    }
-                };
+                        this.toggleMasteryPopover(lesson.id);
+                    };
+                } else {
+                    node.onclick = () => {
+                        if (isUnlocked) {
+                            SoundFX.playClick();
+                            this.openLesson(lesson.id);
+                        } else {
+                            SoundFX.playError();
+                        }
+                    };
+                }
 
-                const zigzagOffset = (index % 2 === 0 ? -45 : 45);
-                node.style.transform = `translateX(${zigzagOffset}px)`;
-
-                node.innerHTML = `
-                    <div class="node-pedestal"></div>
-                    <div class="node-button">
-                        <span class="node-emoji">${lesson.icon}</span>
-                        ${isFinished ? '<div class="node-status-badge">✓</div>' : ''}
-                        ${isCurrent ? '<div class="node-current-tag">INIZIA</div>' : ''}
+                // Costruisci contenuto del nodo
+                let innerHtml = `
+                    <div class="node-button hex-node">
+                        ${this.renderHexNodeSVG(isMastery, statusClass)}
+                        ${(!isMastery && isCurrent) ? '<div class="tag-continua">CONTINUA</div>' : ''}
                     </div>
-                    ${lesson.isMastery ? `<div class="mastery-crown-tag">⚔️ PADRONANZA (+${lesson.xp} XP)</div>` : ''}
-                    <div class="node-label">${lesson.title}</div>
+                    <div class="node-label">${lesson.title.replace(/^\d+\.\s*/, '')}</div>
                 `;
 
-                nodesList.appendChild(node);
+                // Se è Mastery, aggiungi la Popover card in stile Coddy
+                if (isMastery) {
+                    innerHtml += `
+                        <div class="mastery-popover hidden" id="mastery-popover-${lesson.id}">
+                            <div class="mastery-popover-arrow"></div>
+                            <div class="mastery-popover-badge">⭐ LIVELLO BONUS</div>
+                            <h4 class="mastery-popover-title">Sfida di padronanza</h4>
+                            <p class="mastery-popover-desc">Dimostra le tue conoscenze con la Padronanza!</p>
+                            <div class="mastery-popover-reward">
+                                <span>+${lesson.xp} XP</span>
+                                <span>🏆 Capitolo ${chapter.id}</span>
+                            </div>
+                            <button class="mastery-popover-btn" onclick="event.stopPropagation(); App.closeAllMasteryPopovers(); App.openLesson(${lesson.id});">
+                                ${isFinished ? 'RIGIOCA' : 'INIZIA'}
+                            </button>
+                        </div>
+                    `;
+                }
+
+                node.innerHTML = innerHtml;
+                return node;
+            };
+
+            // Disposizione dei nodi: i livelli core scorrono in sequenza, l'ultimo core è affiancato alla Mastery!
+            coreLessons.forEach((lesson, index) => {
+                const isLastCore = (index === coreLessons.length - 1);
+
+                if (isLastCore && masteryLesson) {
+                    // Riga traguardo: Core lesson a sinistra, Mastery Bonus a destra!
+                    const row = document.createElement('div');
+                    row.className = "tree-milestone-row";
+
+                    const coreNode = buildNode(lesson, false, 0);
+                    const masteryNode = buildNode(masteryLesson, true, 0);
+
+                    row.appendChild(coreNode);
+                    row.appendChild(masteryNode);
+                    nodesList.appendChild(row);
+                } else {
+                    const zigzagOffset = (index % 2 === 0 ? -36 : 36);
+                    const node = buildNode(lesson, false, zigzagOffset);
+                    nodesList.appendChild(node);
+                }
             });
 
             treeWrapper.appendChild(nodesList);
@@ -1313,7 +1515,7 @@ const App = {
         }, 60);
     },
 
-    // Generatore tracciati curvi SVG per ciascun capitolo
+    // Generatore tracciati curvi SVG per ciascun capitolo + ramo bonus tratteggiato
     drawConnectingLines() {
         CHAPTERS_DATA.forEach(chapter => {
             const svg = document.getElementById(`tree-svg-chapter-${chapter.id}`);
@@ -1321,19 +1523,25 @@ const App = {
             const nodesContainer = document.getElementById(`nodes-container-chapter-${chapter.id}`);
             if (!svg || !wrapper || !nodesContainer) return;
 
-            const nodeElements = nodesContainer.querySelectorAll('.node-item');
-            if (nodeElements.length < 2) return;
-
             const contRect = wrapper.getBoundingClientRect();
             svg.setAttribute('width', contRect.width);
             svg.setAttribute('height', contRect.height);
             svg.innerHTML = '';
 
             const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id);
+            const coreLessons = chapterLessons.filter(l => !l.isMastery);
+            const masteryLesson = chapterLessons.find(l => l.isMastery);
 
-            for (let i = 0; i < nodeElements.length - 1; i++) {
-                const btn1 = nodeElements[i].querySelector('.node-button');
-                const btn2 = nodeElements[i + 1].querySelector('.node-button');
+            // 1. Linee del percorso principale tra i nodi Core
+            const coreNodeElements = [];
+            coreLessons.forEach(l => {
+                const el = nodesContainer.querySelector(`#node-lesson-${l.id}`);
+                if (el) coreNodeElements.push(el);
+            });
+
+            for (let i = 0; i < coreNodeElements.length - 1; i++) {
+                const btn1 = coreNodeElements[i].querySelector('.node-button');
+                const btn2 = coreNodeElements[i + 1].querySelector('.node-button');
                 if (!btn1 || !btn2) continue;
 
                 const r1 = btn1.getBoundingClientRect();
@@ -1347,16 +1555,11 @@ const App = {
                 const midY = Math.round((y1 + y2) / 2);
                 const pathD = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`;
 
-                const nextLesson = chapterLessons[i + 1];
+                const nextLesson = coreLessons[i + 1];
                 const isNextFinished = this.state.finishedLessons.includes(nextLesson.id);
                 const isNextUnlocked = this.state.completedLessons.includes(nextLesson.id);
 
-                let pathClass = 'locked';
-                if (isNextFinished) {
-                    pathClass = 'completed';
-                } else if (isNextUnlocked) {
-                    pathClass = 'unlocked';
-                }
+                let pathClass = isNextFinished ? 'completed' : (isNextUnlocked ? 'unlocked' : 'locked');
 
                 // Linea nera sottostante per effetto spessore 3D
                 const bgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -1364,11 +1567,42 @@ const App = {
                 bgPath.setAttribute('class', 'tree-path-bg');
                 svg.appendChild(bgPath);
 
-                // Linea principale (tratteggiata / solida ciano / verde)
+                // Linea principale
                 const mainPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 mainPath.setAttribute('d', pathD);
                 mainPath.setAttribute('class', `tree-path ${pathClass}`);
                 svg.appendChild(mainPath);
+            }
+
+            // 2. Ramo Bonus a Puntini Orizzontale verso la Sfida di Padronanza
+            if (masteryLesson && coreNodeElements.length > 0) {
+                const lastCoreEl = coreNodeElements[coreNodeElements.length - 1];
+                const masteryEl = nodesContainer.querySelector(`#node-lesson-${masteryLesson.id}`);
+
+                if (lastCoreEl && masteryEl) {
+                    const btnCore = lastCoreEl.querySelector('.node-button');
+                    const btnMast = masteryEl.querySelector('.node-button');
+
+                    if (btnCore && btnMast) {
+                        const rCore = btnCore.getBoundingClientRect();
+                        const rMast = btnMast.getBoundingClientRect();
+
+                        const x1 = Math.round(rCore.right - contRect.left - 4);
+                        const y1 = Math.round(rCore.top + rCore.height / 2 - contRect.top);
+                        const x2 = Math.round(rMast.left - contRect.left + 4);
+                        const y2 = Math.round(rMast.top + rMast.height / 2 - contRect.top);
+
+                        const isMastUnlocked = this.state.completedLessons.includes(masteryLesson.id);
+
+                        const dotLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        dotLine.setAttribute('x1', x1);
+                        dotLine.setAttribute('y1', y1);
+                        dotLine.setAttribute('x2', x2);
+                        dotLine.setAttribute('y2', y2);
+                        dotLine.setAttribute('class', `mastery-branch-dots ${isMastUnlocked ? 'unlocked' : 'locked'}`);
+                        svg.appendChild(dotLine);
+                    }
+                }
             }
         });
     },
@@ -1831,9 +2065,45 @@ const App = {
                     this.state.finishedLessons.push(currentLesson.id);
                     this.state.xp += currentLesson.xp;
 
-                    const nextId = currentLesson.id + 1;
-                    if (nextId <= LESSONS_DATA.length && !this.state.completedLessons.includes(nextId)) {
-                        this.state.completedLessons.push(nextId);
+                    const isCore = !currentLesson.isMastery;
+                    const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === currentLesson.chapterId);
+                    const coreLessons = chapterLessons.filter(l => !l.isMastery);
+                    const lastCore = coreLessons[coreLessons.length - 1];
+                    const mastery = chapterLessons.find(l => l.isMastery);
+
+                    if (isCore) {
+                        if (currentLesson.id === lastCore.id) {
+                            // Ultimo livello core del capitolo: sblocca la sfida bonus di padronanza!
+                            if (mastery && !this.state.completedLessons.includes(mastery.id)) {
+                                this.state.completedLessons.push(mastery.id);
+                            }
+                            // E sblocca SUBITO il primo livello del capitolo successivo!
+                            const nextChapterLessons = LESSONS_DATA.filter(l => l.chapterId === currentLesson.chapterId + 1 && !l.isMastery);
+                            if (nextChapterLessons.length > 0) {
+                                const nextCore = nextChapterLessons[0];
+                                if (!this.state.completedLessons.includes(nextCore.id)) {
+                                    this.state.completedLessons.push(nextCore.id);
+                                }
+                            }
+                        } else {
+                            // Livello core intermedio: sblocca il livello core successivo
+                            const currentIdx = coreLessons.findIndex(l => l.id === currentLesson.id);
+                            if (currentIdx !== -1 && currentIdx < coreLessons.length - 1) {
+                                const nextCore = coreLessons[currentIdx + 1];
+                                if (!this.state.completedLessons.includes(nextCore.id)) {
+                                    this.state.completedLessons.push(nextCore.id);
+                                }
+                            }
+                        }
+                    } else {
+                        // È una sfida di padronanza: assicura che il prossimo capitolo sia aperto
+                        const nextChapterLessons = LESSONS_DATA.filter(l => l.chapterId === currentLesson.chapterId + 1 && !l.isMastery);
+                        if (nextChapterLessons.length > 0) {
+                            const nextCore = nextChapterLessons[0];
+                            if (!this.state.completedLessons.includes(nextCore.id)) {
+                                this.state.completedLessons.push(nextCore.id);
+                            }
+                        }
                     }
 
                     this.saveStorage();
@@ -1869,12 +2139,20 @@ const App = {
                 const modalGain = document.getElementById('modal-xp-gain');
 
                 if (currentLesson.isMastery) {
-                    if (modalTitle) modalTitle.innerText = "⚔️ SFIDA DI PADRONANZA SUPERATA!";
-                    if (modalSubtitle) modalSubtitle.innerText = "Incredibile! Hai dimostrato la tua padronanza assoluta conquistando il capitolo!";
+                    if (modalTitle) modalTitle.innerText = "⭐ SFIDA DI PADRONANZA SUPERATA!";
+                    if (modalSubtitle) modalSubtitle.innerText = "Incredibile! Hai completato la sfida bonus e dimostrato la tua padronanza!";
                     if (modalGain) modalGain.innerText = `+${currentLesson.xp}`;
                 } else {
-                    if (modalTitle) modalTitle.innerText = "MISSIONE COMPIUTA!";
-                    if (modalSubtitle) modalSubtitle.innerText = "Ottimo lavoro! Il tuo script GDScript funziona alla perfezione.";
+                    const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === currentLesson.chapterId);
+                    const coreLessons = chapterLessons.filter(l => !l.isMastery);
+                    const isLastCore = (currentLesson.id === coreLessons[coreLessons.length - 1].id);
+
+                    if (modalTitle) modalTitle.innerText = isLastCore ? "CAPITOLO COMPLETATO!" : "MISSIONE COMPIUTA!";
+                    if (modalSubtitle) {
+                        modalSubtitle.innerText = isLastCore 
+                            ? "Ottimo lavoro! Hai sbloccato il capitolo successivo e la ⭐ Sfida di Padronanza Bonus!"
+                            : "Ottimo lavoro! Il tuo script GDScript funziona alla perfezione.";
+                    }
                     if (modalGain) modalGain.innerText = `+${currentLesson.xp}`;
                 }
 
@@ -1901,6 +2179,11 @@ const App = {
     },
 
     bindEvents() {
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.mastery-popover') && !e.target.closest('.node-item.mastery')) {
+                this.closeAllMasteryPopovers();
+            }
+        });
         document.getElementById('btn-home').onclick = () => this.showRoadmap();
         document.getElementById('nav-roadmap-btn').onclick = () => this.showRoadmap();
         document.getElementById('nav-editor-btn').onclick = () => {

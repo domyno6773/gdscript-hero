@@ -186,13 +186,13 @@ const LESSONS_DATA = [
         id: 4,
         chapterId: 1,
         isMastery: true,
-        title: "4. ⚔️ Sfida di Padronanza: Introduzione",
+        title: "4. ⭐ Sfida di Padronanza: Introduzione",
         icon: "🏆",
         xp: 100,
         expectedOutput: "=== ACCADEMIA GODOT ===\nPronto a sviluppare!",
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⚔️ SFIDA DI PADRONANZA - INTRODUZIONE</span>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: INTRODUZIONE</span>
                 <h3>Metti alla prova i Fondamenti!</h3>
                 <p>Nelle sfide di padronanza verifichi tutti i concetti appresi finora per sbloccare il trofeo del capitolo e ottenere +100 XP!</p>
             </div>
@@ -348,13 +348,13 @@ const LESSONS_DATA = [
         id: 8,
         chapterId: 2,
         isMastery: true,
-        title: "8. ⚔️ Sfida: Variabili (Parte 1)",
+        title: "8. ⭐ Sfida: Variabili (Parte 1)",
         icon: "🏆",
         xp: 100,
         expectedOutput: "Benvenuto Guerriero\nVita: 100",
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⚔️ SFIDA DI PADRONANZA - VARIABILI PARTE 1</span>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: VARIABILI PARTE 1</span>
                 <h3>Crea il Messaggio di Benvenuto del Personaggio!</h3>
                 <p>Combina variabili testuali, numeri e concatenazione di stringhe.</p>
             </div>
@@ -511,13 +511,13 @@ const LESSONS_DATA = [
         id: 12,
         chapterId: 3,
         isMastery: true,
-        title: "12. ⚔️ Sfida: Variabili (Parte 2 & Tipizzazione)",
+        title: "12. ⭐ Sfida: Variabili (Parte 2 & Tipizzazione)",
         icon: "🏆",
         xp: 100,
         expectedOutput: "100\n5.5\ntrue\n9.8",
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⚔️ SFIDA DI PADRONANZA - VARIABILI PARTE 2</span>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: VARIABILI PARTE 2</span>
                 <h3>Scheda Tipizzata con Costanti!</h3>
                 <p>Combina int, float, bool tipizzati e una costante di sistema.</p>
             </div>
@@ -672,13 +672,13 @@ const LESSONS_DATA = [
         id: 16,
         chapterId: 4,
         isMastery: true,
-        title: "16. ⚔️ Sfida: Operatori e Matematica di Gioco",
+        title: "16. ⭐ Sfida: Operatori e Matematica di Gioco",
         icon: "🏆",
         xp: 100,
         expectedOutput: "70\n25\n2",
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⚔️ SFIDA DI PADRONANZA - MATEMATICA RPG</span>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: MATEMATICA RPG</span>
                 <h3>Simula una Battaglia e Dividi il Bottino!</h3>
                 <p>Combina danno subito, divisione del forziere tra compagni e resto con modulo (<code>%</code>).</p>
             </div>
@@ -828,13 +828,13 @@ const LESSONS_DATA = [
         id: 20,
         chapterId: 5,
         isMastery: true,
-        title: "20. ⚔️ Sfida: Condizioni e Logica",
+        title: "20. ⭐ Sfida: Condizioni e Logica",
         icon: "🏆",
         xp: 100,
         expectedOutput: "Vittoria Epica!",
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⚔️ SFIDA DI PADRONANZA - CONDIZIONI</span>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: CONDIZIONI</span>
                 <h3>La Sconfitta del Boss del Dungeon!</h3>
                 <p>Verifica se il boss è sconfitto (<code>salute_boss <= 0</code>) e il party è sopravvissuto (<code>eroi_vivi > 0</code>).</p>
             </div>
@@ -983,13 +983,13 @@ const LESSONS_DATA = [
         id: 24,
         chapterId: 6,
         isMastery: true,
-        title: "24. ⚔️ Sfida: Liste e Collezioni (Array)",
+        title: "24. ⭐ Sfida: Liste e Collezioni (Array)",
         icon: "🏆",
         xp: 100,
         expectedOutput: "Pozione Magica\n4",
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⚔️ SFIDA DI PADRONANZA - ARRAY</span>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: ARRAY</span>
                 <h3>Gestione dell'Equipaggiamento dell'Eroe!</h3>
                 <p>Crea un inventario, inserisci un drop speciale con <code>append()</code> e verifica gli elementi e la dimensione.</p>
             </div>
@@ -1143,13 +1143,13 @@ const LESSONS_DATA = [
         id: 28,
         chapterId: 7,
         isMastery: true,
-        title: "28. ⚔️ Sfida: Cicli (For e While)",
+        title: "28. ⭐ Sfida: Cicli (For e While)",
         icon: "🏆",
         xp: 100,
         expectedOutput: "Onda 1 pronta\nOnda 2 pronta\nOnda 3 pronta",
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⚔️ SFIDA DI PADRONANZA - CICLI</span>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: CICLI</span>
                 <h3>Generatore di Ondate di Mostri!</h3>
                 <p>Usa un ciclo <code>for</code> con <code>range(1, 4)</code> per annunciare le tre ondate di nemici del dungeon.</p>
             </div>
@@ -1294,13 +1294,13 @@ const LESSONS_DATA = [
         id: 32,
         chapterId: 8,
         isMastery: true,
-        title: "32. ⚔️ Sfida: Funzioni e Nodi Godot",
+        title: "32. ⭐ Sfida: Funzioni e Nodi Godot",
         icon: "🏆",
         xp: 100,
         expectedOutput: "Bonus calcolato: 150",
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⚔️ SFIDA DI PADRONANZA - FUNZIONI</span>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: FUNZIONI</span>
                 <h3>Crea una Funzione di Calcolo Ricompensa!</h3>
                 <p>Costruisci una funzione che accetta punti base e moltiplicatore, restituisce il totale e stampalo in <code>_ready()</code>.</p>
             </div>
@@ -1461,7 +1461,7 @@ const LESSONS_DATA = [
         id: 36,
         chapterId: 9,
         isMastery: true,
-        title: "36. ⚔️ Sfida: Vettori e Movimento 2D",
+        title: "36. ⭐ Sfida: Vettori e Movimento 2D",
         icon: "🏆",
         xp: 100,
         expectedOutput: "Vector2(140, 250)",
