@@ -12,7 +12,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     print(f"==================================================")
-    print(f"  Coddy GDScript Server avviato su http://localhost:{PORT}")
+    print(f"  GDScript Hero Server avviato su http://localhost:{PORT}")
     print(f"==================================================")
     webbrowser.open(f"http://localhost:{PORT}")
     with socketserver.TCPServer(("", PORT), Handler) as httpd:

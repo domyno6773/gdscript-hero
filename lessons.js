@@ -1,4 +1,4 @@
-// Dataset delle Lezioni e Capitoli per GDScript Hero (100% fedele alla scaletta di Coddy, 100% Italiano)
+// Dataset delle Lezioni e Capitoli per GDScript Hero (100% Italiano)
 
 const CHAPTERS_DATA = [
     {
@@ -79,7 +79,7 @@ const LESSONS_DATA = [
         xp: 50,
         expectedOutput: "Ciao Godot!",
         theory: `
-            <p>Benvenuto in <strong>GDScript Hero</strong>! In questo corso imparerai a programmare per <strong>Godot Engine</strong> seguendo la progressione esatta di Coddy.</p>
+            <p>Benvenuto in <strong>GDScript Hero</strong>! In questo corso imparerai a programmare per <strong>Godot Engine</strong> passo dopo passo attraverso sfide pratiche ed interattive.</p>
             <p>In GDScript, quando un nodo entra nella scena, Godot esegue automaticamente la funzione <code>_ready()</code>.</p>
             <p>Per inviare un messaggio alla console di debug, usiamo la funzione incorporata <code>print(...)</code> inserendo il testo tra virgolette:</p>
             <div class="code-preview">

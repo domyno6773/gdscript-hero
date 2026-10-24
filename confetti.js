@@ -23,7 +23,7 @@ const ConfettiFX = {
         this.init();
         if (!this.canvas) return;
 
-        // Colori vivaci stile Coddy / Duolingo
+        // Colori vivaci festosi
         const colors = ['#10b981', '#06b6d4', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6', '#eab308'];
         const particleCount = 100;
 

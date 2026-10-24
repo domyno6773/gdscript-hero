@@ -9,7 +9,7 @@ Un'applicazione educativa, interattiva e gamificata per imparare a programmare v
 1. **Nuova Identità: GDScript Hero**:
    - Branding rinnovato con look moderno, icone personalizzate e stile dark gaming.
 
-2. **Pannello Output Stile Coddy (Affiancato)**:
+2. **Pannello Output Interattivo (Affiancato)**:
    - **Tuo Output (Reale)**: mostra esattamente ciò che il tuo codice stampa in console o gli eventuali errori di sintassi.
    - **Output Previsto (Atteso)**: mostra l'output obiettivo che la lezione richiede di produrre.
    - **Verifica Requisiti**: checklist con esito verde (✅) o rosso (❌) per ogni singolo test.

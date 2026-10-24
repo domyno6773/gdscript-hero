@@ -1,4 +1,4 @@
-/* Stile Identico a Coddy.tech & Gamification Duolingo */
+/* GDScript Hero - Design Dark & Gamification */
 :root {
     --bg-main: #0b0f19;
     --bg-card: #111827;
@@ -256,7 +256,7 @@ body {
     display: none !important;
 }
 
-/* VISTA ROADMAP A 2 COLONNE (STILE DUOLINGO / CODDY) */
+/* VISTA ROADMAP A 2 COLONNE */
 .roadmap-layout-container {
     display: flex;
     justify-content: center;
@@ -1267,7 +1267,7 @@ kbd {
     box-shadow: 0 1px 0 var(--accent-green-shadow);
 }
 
-/* Runner & Validation Panel con Confronto Output Stile Coddy */
+/* Runner & Validation Panel con Confronto Output */
 .validation-panel,
 .runner-panel {
     height: 290px;
@@ -1325,7 +1325,7 @@ kbd {
     gap: 14px;
 }
 
-/* Griglia Confronto Output (Affiancato Stile Coddy) */
+/* Griglia Confronto Output (Affiancato) */
 .output-comparison-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

@@ -1132,7 +1132,7 @@ const App = {
     },
 
     // ==========================================
-    // MAPPA A NODI E CAPITOLI (STILE DUOLINGO / CODDY)
+    // MAPPA A NODI E CAPITOLI
     // ==========================================
     renderRoadmap() {
         const container = document.getElementById('chapters-roadmap-flow');

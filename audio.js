@@ -29,7 +29,7 @@ const SoundFX = {
         this.volume = Math.max(0, Math.min(1, parseFloat(val)));
     },
 
-    // Suono di vittoria stile Duolingo / Coddy: arpeggio squillante (Do - Mi - Sol - Do)
+    // Suono di vittoria: arpeggio squillante (Do - Mi - Sol - Do)
     playSuccess() {
         if (!this.enabled || this.volume <= 0.001) return;
         this.init();

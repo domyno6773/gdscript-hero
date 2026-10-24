@@ -1,4 +1,4 @@
-// Runtime & Interprete GDScript per Coddy (Funzionamento 100% Client-Side)
+// Runtime & Interprete GDScript per GDScript Hero (Funzionamento 100% Client-Side)
 
 // Implementazione di Vector2 fedele a Godot
 class Vector2 {
