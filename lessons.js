@@ -63,6 +63,27 @@ const CHAPTERS_DATA = [
         badge: "CAPITOLO 9",
         desc: "Vector2(x, y), coordinate 2D nello spazio di Godot e calcolo della nuova posizione con velocità.",
         icon: "🚀"
+    },
+    {
+        id: 10,
+        title: "Capitolo 10: Dizionari (Dictionary)",
+        badge: "CAPITOLO 10",
+        desc: "Coppie chiave-valore con {}, accesso per chiave, aggiunta elementi e metodi has(), keys(), values().",
+        icon: "📖"
+    },
+    {
+        id: 11,
+        title: "Capitolo 11: I Segnali di Godot (Signals)",
+        badge: "CAPITOLO 11",
+        desc: "La comunicazione disaccoppiata di Godot: dichiarare segnali, connettere funzioni ed emettere eventi con emit().",
+        icon: "📡"
+    },
+    {
+        id: 12,
+        title: "Capitolo 12: Classi e Oggetti (OOP in Godot 4)",
+        badge: "CAPITOLO 12",
+        desc: "Programmazione a oggetti: definizione di classi con class e costruttore _init(), istanziazione con .new() ed ereditarietà.",
+        icon: "🏛️"
     }
 ];
 
@@ -1631,6 +1652,554 @@ const LESSONS_DATA = [
             tests.push({ desc: "Output della missione stampato con successo", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
+    },
+// ==========================================
+    // CAPITOLO 10: DIZIONARI (DICTIONARY)
+    // ==========================================
+    {
+        id: 37,
+        chapterId: 10,
+        isMastery: false,
+        title: "37. Creare e accedere ai Dizionari",
+        icon: "📖",
+        xp: 50,
+        expectedOutput: "Classe: Guerriero\nLivello: 10",
+        theory: `
+            <p>Mentre gli <strong>Array</strong> memorizzano liste ordinate per indice numerico (<code>0, 1, 2...</code>), un <strong>Dizionario (Dictionary)</strong> memorizza dati in coppie <strong>chiave-valore</strong> racchiuse tra parentesi graffe <code>{}</code>:</p>
+            <pre class="code-block"><span class="k">var</span> eroe = { <span class="s">"classe"</span>: <span class="s">"Guerriero"</span>, <span class="s">"livello"</span>: <span class="m">10</span> }
+<span class="nb">print</span>(eroe[<span class="s">"classe"</span>]) <span class="c"># Stampa "Guerriero"</span></pre>
+            <p>Per leggere un valore dal dizionario, inserisci la chiave tra parentesi quadre: <code>dizionario["nome_chiave"]</code>.</p>
+        `,
+        task: `
+            <ul>
+                <li>Crea la variabile <code>var eroe = { "classe": "Guerriero", "livello": 10 }</code>.</li>
+                <li>Stampa la classe: <code>print("Classe: ", eroe["classe"])</code>.</li>
+                <li>Stampa il livello: <code>print("Livello: ", eroe["livello"])</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    # Crea il dizionario eroe e stampa classe e livello sotto\n    pass\n`,
+        hints: [
+            'var eroe = { "classe": "Guerriero", "livello": 10 }',
+            'print("Classe: ", eroe["classe"])',
+            'print("Livello: ", eroe["livello"])'
+        ],
+        solution: `func _ready():\n    var eroe = { "classe": "Guerriero", "livello": 10 }\n    print("Classe: ", eroe["classe"])\n    print("Livello: ", eroe["livello"])\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const s = result.scope || {};
+            const d = s.eroe || {};
+            const heroOk = d["classe"] === "Guerriero" && Number(d["livello"]) === 10;
+            tests.push({ desc: "Dizionario eroe creato con chiavi classe e livello", passed: heroOk, diff: heroOk ? null : `Ricevuto: ${JSON.stringify(d)}` });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Classe: Guerriero") && out.includes("Livello: 10");
+            tests.push({ desc: "Classe e livello stampati correttamente", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+            return tests;
+        }
+    },
+    {
+        id: 38,
+        chapterId: 10,
+        isMastery: false,
+        title: "38. Modificare e aggiungere chiavi al Dizionario",
+        icon: "🛡️",
+        xp: 50,
+        expectedOutput: "Arma: Spada Laser\nArmatura: Scudo",
+        theory: `
+            <p>I dizionari in GDScript sono <strong>mutabili</strong>. Puoi aggiungere una nuova chiave semplicemente assegnandole un valore, o modificare una chiave esistente:</p>
+            <pre class="code-block"><span class="k">var</span> equip = { <span class="s">"arma"</span>: <span class="s">"Spada"</span> }
+equip[<span class="s">"armatura"</span>] = <span class="s">"Scudo"</span>     <span class="c"># Aggiunge una nuova chiave</span>
+equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <span class="c"># Aggiorna il valore esistente</span></pre>
+        `,
+        task: `
+            <ul>
+                <li>Inizializza <code>var equip = { "arma": "Spada" }</code>.</li>
+                <li>Aggiungi la chiave armatura: <code>equip["armatura"] = "Scudo"</code>.</li>
+                <li>Aggiorna l'arma: <code>equip["arma"] = "Spada Laser"</code>.</li>
+                <li>Stampa: <code>print("Arma: ", equip["arma"])</code> e <code>print("Armatura: ", equip["armatura"])</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    var equip = { "arma": "Spada" }\n    # Aggiungi armatura, aggiorna arma e stampa sotto\n    pass\n`,
+        hints: [
+            'equip["armatura"] = "Scudo"',
+            'equip["arma"] = "Spada Laser"',
+            'print("Arma: ", equip["arma"]) e print("Armatura: ", equip["armatura"])'
+        ],
+        solution: `func _ready():\n    var equip = { "arma": "Spada" }\n    equip["armatura"] = "Scudo"\n    equip["arma"] = "Spada Laser"\n    print("Arma: ", equip["arma"])\n    print("Armatura: ", equip["armatura"])\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const s = result.scope || {};
+            const eq = s.equip || {};
+            const modOk = eq["arma"] === "Spada Laser" && eq["armatura"] === "Scudo";
+            tests.push({ desc: "Chiavi aggiornate correttamente (arma e armatura)", passed: modOk, diff: modOk ? null : `Equip: ${JSON.stringify(eq)}` });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Arma: Spada Laser") && out.includes("Armatura: Scudo");
+            tests.push({ desc: "Output della console esatto", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+            return tests;
+        }
+    },
+    {
+        id: 39,
+        chapterId: 10,
+        isMastery: false,
+        title: "39. Metodi dei Dizionari (has, keys)",
+        icon: "🔍",
+        xp: 50,
+        expectedOutput: "Possiede oro: true\nPossiede chiave: false",
+        theory: `
+            <p>GDScript offre metodi integrati per verificare e ispezionare i dati di un dizionario:</p>
+            <ul>
+                <li><code>dizionario.has("chiave")</code>: restituisce <code>true</code> se la chiave esiste, altrimenti <code>false</code>.</li>
+                <li><code>dizionario.keys()</code>: restituisce un array contenente tutte le chiavi.</li>
+            </ul>
+        `,
+        task: `
+            <ul>
+                <li>Inizializza <code>var forziere = { "oro": 100, "gemme": 3 }</code>.</li>
+                <li>Salva in <code>var ha_oro</code> il risultato di <code>forziere.has("oro")</code>.</li>
+                <li>Salva in <code>var ha_chiave</code> il risultato di <code>forziere.has("chiave")</code>.</li>
+                <li>Stampa: <code>print("Possiede oro: ", ha_oro)</code> e <code>print("Possiede chiave: ", ha_chiave)</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    var forziere = { "oro": 100, "gemme": 3 }\n    # Verifica la presenza con .has() e stampa sotto\n    pass\n`,
+        hints: [
+            'var ha_oro = forziere.has("oro")',
+            'var ha_chiave = forziere.has("chiave")',
+            'print("Possiede oro: ", ha_oro) e print("Possiede chiave: ", ha_chiave)'
+        ],
+        solution: `func _ready():\n    var forziere = { "oro": 100, "gemme": 3 }\n    var ha_oro = forziere.has("oro")\n    var ha_chiave = forziere.has("chiave")\n    print("Possiede oro: ", ha_oro)\n    print("Possiede chiave: ", ha_chiave)\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const s = result.scope || {};
+            const goldOk = s.ha_oro === true;
+            const keyOk = s.ha_chiave === false;
+            tests.push({ desc: "Verifica ha_oro (true) e ha_chiave (false)", passed: goldOk && keyOk, diff: (goldOk && keyOk) ? null : `ha_oro=${s.ha_oro}, ha_chiave=${s.ha_chiave}` });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Possiede oro: true") && out.includes("Possiede chiave: false");
+            tests.push({ desc: "Output della console stampato con precisione", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+            return tests;
+        }
+    },
+    {
+        id: 40,
+        chapterId: 10,
+        isMastery: true,
+        title: "40. ⭐ Sfida di Apprendimento: Statistiche del Boss Finale",
+        icon: "🏆",
+        xp: 100,
+        difficulty: "media",
+        difficultyLabel: "Media",
+        scenario: "Il bestiario del dungeon deve registrare e aggiornare la scheda tecnica del boss del dungeon durante lo scontro. Sotto il commento, manipola il dizionario <code>boss</code>:",
+        requirements: [
+            'Crea il dizionario iniziale: <code>var boss = { "nome": "Drago Antico", "hp": 500 }</code>',
+            'Aggiungi la statistica dell\'attacco: <code>boss["attacco"] = 75</code>',
+            'Aggiorna la salute sottraendo i danni del primo turno: <code>boss["hp"] = 420</code>',
+            'Controlla se il boss è entrato in stato di furia con <code>boss.has("furia")</code> e assegna il risultato a <code>var in_furia</code>'
+        ],
+        notice: "Non modificare le righe print(). Il programma stampa:",
+        expectedOutput: "Boss: Drago Antico\nHP rimanenti: 420\nAttacco: 75\nFuria attiva: false",
+        initialCode: `extends Node\n\nfunc _ready():\n    # Crea e aggiorna boss e crea in_furia sotto\n    \n    # Non modificare le righe sotto\n    print("Boss: ", boss["nome"])\n    print("HP rimanenti: ", boss["hp"])\n    print("Attacco: ", boss["attacco"])\n    print("Furia attiva: ", in_furia)\n`,
+        aiExplanation: "In GDScript i dizionari sono la struttura dati prediletta per memorizzare entità complesse con proprietà eterogenee (testi, numeri, booleani). Puoi accedere e modificare chiavi con le parentesi quadre <code>diz[\"chiave\"] = valore</code> e testare l'esistenza di parametri opzionali usando <code>diz.has(\"chiave\")</code>.",
+        hints: [
+            'Inizializza: var boss = { "nome": "Drago Antico", "hp": 500 }',
+            'Aggiungi e modifica con le quadre: boss["attacco"] = 75 e boss["hp"] = 420',
+            'Usa il metodo has per la furia: var in_furia = boss.has("furia")'
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    var boss = { "nome": "Drago Antico", "hp": 500 }\n    boss["attacco"] = 75\n    boss["hp"] = 420\n    var in_furia = boss.has("furia")\n    \n    # Non modificare le righe sotto\n    print("Boss: ", boss["nome"])\n    print("HP rimanenti: ", boss["hp"])\n    print("Attacco: ", boss["attacco"])\n    print("Furia attiva: ", in_furia)\n`,
+        theory: `
+            <div class="mastery-banner">
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Statistiche del Boss Finale</h3>
+                <p>Verifica la creazione, manipolazione ed interrogazione di dizionari complessi in GDScript.</p>
+            </div>
+        `,
+        task: `
+            <ul>
+                <li>Crea <code>boss = { "nome": "Drago Antico", "hp": 500 }</code></li>
+                <li>Aggiungi <code>boss["attacco"] = 75</code></li>
+                <li>Imposta <code>boss["hp"] = 420</code></li>
+                <li>Verifica <code>var in_furia = boss.has("furia")</code></li>
+            </ul>
+        `,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const s = result.scope || {};
+            const b = s.boss || {};
+            const bossOk = b["nome"] === "Drago Antico" && Number(b["hp"]) === 420 && Number(b["attacco"]) === 75;
+            const furyOk = s.in_furia === false;
+            tests.push({ desc: "Dizionario del boss aggiornato (hp: 420, attacco: 75)", passed: bossOk, diff: bossOk ? null : `Boss: ${JSON.stringify(b)}` });
+            tests.push({ desc: "Verifica stato furia con .has() corretta (false)", passed: furyOk, diff: furyOk ? null : `in_furia=${s.in_furia}` });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Boss: Drago Antico") && out.includes("HP rimanenti: 420") && out.includes("Attacco: 75") && out.includes("Furia attiva: false");
+            tests.push({ desc: "Report di combattimento stampato con successo", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+
+    // ==========================================
+    // CAPITOLO 11: I SEGNALI DI GODOT (SIGNALS)
+    // ==========================================
+    {
+        id: 41,
+        chapterId: 11,
+        isMastery: false,
+        title: "41. Dichiarare ed emettere un Segnale",
+        icon: "📡",
+        xp: 50,
+        expectedOutput: "Apertura in corso...\nPorta aperta con successo!",
+        theory: `
+            <p>I <strong>Segnali (Signals)</strong> sono il meccanismo di comunicazione disaccoppiata di Godot ("Observer pattern"). Permettono a un nodo di annunciare un evento senza dover conoscere chi lo ascolterà.</p>
+            <p>In Godot 4, un segnale si dichiara a inizio script con la parola chiave <code>signal</code> e si emette invocando il metodo <code>.emit()</code>:</p>
+            <pre class="code-block"><span class="k">signal</span> porta_aperta
+
+<span class="k">func</span> _ready():
+    porta_aperta.<span class="nb">emit</span>() <span class="c"># Lancia il segnale!</span></pre>
+        `,
+        task: `
+            <ul>
+                <li>Dichiara in cima allo script: <code>signal porta_aperta</code>.</li>
+                <li>In <code>_ready()</code>, dopo la stampa, emetti il segnale: <code>porta_aperta.emit()</code>.</li>
+            </ul>
+        `,
+        initialCode: `extends Node\n\n# Dichiara il segnale porta_aperta sotto\n\n\nfunc _ready():\n    porta_aperta.connect(quando_aperta)\n    print("Apertura in corso...")\n    # Emetti il segnale sotto\n\n\nfunc quando_aperta():\n    print("Porta aperta con successo!")\n`,
+        hints: [
+            "Dichiara: signal porta_aperta",
+            "In _ready() scrivi: porta_aperta.emit()",
+            "Il metodo .emit() avviserà automaticamente la funzione connessa"
+        ],
+        solution: `extends Node\n\nsignal porta_aperta\n\nfunc _ready():\n    porta_aperta.connect(quando_aperta)\n    print("Apertura in corso...")\n    porta_aperta.emit()\n\nfunc quando_aperta():\n    print("Porta aperta con successo!")\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const ok = out.includes("Apertura in corso...") && out.includes("Porta aperta con successo!");
+            tests.push({ desc: "Segnale porta_aperta dichiarato ed emesso con successo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            return tests;
+        }
+    },
+    {
+        id: 42,
+        chapterId: 11,
+        isMastery: false,
+        title: "42. Connettere un Segnale a una Funzione (connect)",
+        icon: "🔗",
+        xp: 50,
+        expectedOutput: "+10 Monete raccolte!",
+        theory: `
+            <p>Per fare in modo che una funzione risponda all'evento annunciato da un segnale, dobbiamo <strong>connetterli</strong> con <code>segnale.connect(nome_funzione)</code>:</p>
+            <pre class="code-block"><span class="k">signal</span> evento
+
+<span class="k">func</span> _ready():
+    evento.<span class="nb">connect</span>(quando_accade) <span class="c"># Connessione</span>
+    evento.<span class="nb">emit</span>()                   <span class="c"># Esecuzione automatica</span>
+
+<span class="k">func</span> quando_accade():
+    <span class="nb">print</span>(<span class="s">"Evento catturato!"</span>)</pre>
+        `,
+        task: `
+            <ul>
+                <li>Nel corpo di <code>_ready()</code>, connetti il segnale alla funzione: <code>moneta_raccolta.connect(aggiungi_punti)</code>.</li>
+                <li>Subito dopo, lancia il segnale con: <code>moneta_raccolta.emit()</code>.</li>
+            </ul>
+        `,
+        initialCode: `extends Node\n\nsignal moneta_raccolta\n\nfunc _ready():\n    # Connetti moneta_raccolta ad aggiungi_punti ed emettila sotto\n    pass\n\nfunc aggiungi_punti():\n    print("+10 Monete raccolte!")\n`,
+        hints: [
+            "Usa moneta_raccolta.connect(aggiungi_punti)",
+            "Poi chiama moneta_raccolta.emit()",
+            "Non mettere le parentesi tonde dentro connect()"
+        ],
+        solution: `extends Node\n\nsignal moneta_raccolta\n\nfunc _ready():\n    moneta_raccolta.connect(aggiungi_punti)\n    moneta_raccolta.emit()\n\nfunc aggiungi_punti():\n    print("+10 Monete raccolte!")\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const ok = out.includes("+10 Monete raccolte!");
+            tests.push({ desc: "Segnale moneta_raccolta connesso ed intercettato", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            return tests;
+        }
+    },
+    {
+        id: 43,
+        chapterId: 11,
+        isMastery: false,
+        title: "43. Segnali con Parametri",
+        icon: "📨",
+        xp: 50,
+        expectedOutput: "Danno registrato: 35",
+        theory: `
+            <p>I segnali possono trasportare informazioni verso chi li ascolta. Basta specificare i parametri nella dichiarazione:</p>
+            <pre class="code-block"><span class="k">signal</span> danno_inflitto(valore)
+
+<span class="k">func</span> _ready():
+    danno_inflitto.<span class="nb">connect</span>(on_danno)
+    danno_inflitto.<span class="nb">emit</span>(<span class="m">35</span>) <span class="c"># Invia 35 alla funzione connessa!</span>
+
+<span class="k">func</span> on_danno(v):
+    <span class="nb">print</span>(<span class="s">"Danno registrato: "</span>, v)</pre>
+        `,
+        task: `
+            <ul>
+                <li>Dichiara in cima: <code>signal danno_inflitto(valore)</code>.</li>
+                <li>In <code>_ready()</code>, emetti il segnale passando il valore 35: <code>danno_inflitto.emit(35)</code>.</li>
+            </ul>
+        `,
+        initialCode: `extends Node\n\n# Dichiara signal danno_inflitto(valore) sotto\n\n\nfunc _ready():\n    danno_inflitto.connect(on_danno)\n    # Emetti danno_inflitto con 35 sotto\n\n\nfunc on_danno(v):\n    print("Danno registrato: ", v)\n`,
+        hints: [
+            "signal danno_inflitto(valore)",
+            "danno_inflitto.emit(35)",
+            "Il valore 35 viene ricevuto dal parametro v di on_danno"
+        ],
+        solution: `extends Node\n\nsignal danno_inflitto(valore)\n\nfunc _ready():\n    danno_inflitto.connect(on_danno)\n    danno_inflitto.emit(35)\n\nfunc on_danno(v):\n    print("Danno registrato: ", v)\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const ok = out.includes("Danno registrato: 35");
+            tests.push({ desc: "Segnale con parametro valore 35 ricevuto con successo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            return tests;
+        }
+    },
+    {
+        id: 44,
+        chapterId: 11,
+        isMastery: true,
+        title: "44. ⭐ Sfida di Apprendimento: Sistema di Eventi Battaglia",
+        icon: "🏆",
+        xp: 100,
+        difficulty: "avanzata",
+        difficultyLabel: "Avanzata",
+        scenario: "Il modulo di interfaccia utente di gioco (UI) deve sincronizzare la barra della salute ogni volta che il personaggio viene colpito in battaglia, usando un segnale disaccoppiato. Sotto i commenti:",
+        requirements: [
+            'Dichiara in cima il segnale: <code>signal salute_aggiornata(nuova_salute)</code>',
+            'Crea la funzione di risposta: <code>func quando_salute_cambia(hp): print("UI: Barra salute a ", hp)</code>',
+            'In <code>_ready()</code>, connetti il segnale alla funzione: <code>salute_aggiornata.connect(quando_salute_cambia)</code>',
+            'Emetti il segnale due volte: prima con <code>salute_aggiornata.emit(75)</code> e poi con <code>salute_aggiornata.emit(40)</code>'
+        ],
+        notice: "Non modificare la riga finale print(). Il programma stampa:",
+        expectedOutput: "UI: Barra salute a 75\nUI: Barra salute a 40\n=== EVENTI BATTAGLIA COMPLETATI ===",
+        initialCode: `extends Node\n\n# Dichiara il segnale salute_aggiornata sotto\n\n\n# Crea la funzione quando_salute_cambia(hp) sotto\n\n\nfunc _ready():\n    # Connetti il segnale ed emetti due volte (75 e 40) sotto\n    \n    # Non modificare la riga sotto\n    print("=== EVENTI BATTAGLIA COMPLETATI ===")\n`,
+        aiExplanation: "In Godot 4 l'architettura a segnali garantisce che nodi diversi (come il Player e la barra HP della UI) non abbiano bisogno di riferimenti diretti l'uno verso l'altro. Il Player lancia <code>salute_aggiornata.emit(nuova_salute)</code> e qualunque elemento collegato aggiorna autonomamente la propria grafica.",
+        hints: [
+            "In cima dichiara: signal salute_aggiornata(nuova_salute)",
+            "Definisci la funzione: func quando_salute_cambia(hp): print(\"UI: Barra salute a \", hp)",
+            "In _ready() connetti ed emetti: salute_aggiornata.connect(quando_salute_cambia) poi salute_aggiornata.emit(75) e salute_aggiornata.emit(40)"
+        ],
+        solution: `extends Node\n\nsignal salute_aggiornata(nuova_salute)\n\nfunc quando_salute_cambia(hp):\n    print("UI: Barra salute a ", hp)\n\nfunc _ready():\n    salute_aggiornata.connect(quando_salute_cambia)\n    salute_aggiornata.emit(75)\n    salute_aggiornata.emit(40)\n    \n    # Non modificare la riga sotto\n    print("=== EVENTI BATTAGLIA COMPLETATI ===")\n`,
+        theory: `
+            <div class="mastery-banner">
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Sistema di Eventi Battaglia</h3>
+                <p>Verifica la dichiarazione, connessione ed emissione multipla di segnali con parametri.</p>
+            </div>
+        `,
+        task: `
+            <ul>
+                <li>Dichiara <code>signal salute_aggiornata(nuova_salute)</code></li>
+                <li>Crea <code>func quando_salute_cambia(hp)</code> con stampa</li>
+                <li>Connetti ed emetti con <code>75</code> e <code>40</code></li>
+            </ul>
+        `,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const ok = out.includes("UI: Barra salute a 75") && out.includes("UI: Barra salute a 40") && out.includes("=== EVENTI BATTAGLIA COMPLETATI ===");
+            tests.push({ desc: "Due eventi di salute emessi ed intercettati dalla UI", passed: ok, diff: ok ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+
+    // ==========================================
+    // CAPITOLO 12: CLASSI E OGGETTI (OOP IN GODOT 4)
+    // ==========================================
+    {
+        id: 45,
+        chapterId: 12,
+        isMastery: false,
+        title: "45. Definire una Classe e il Costruttore _init()",
+        icon: "🏛️",
+        xp: 50,
+        expectedOutput: "Pozione creata: Elisir (Cura: 50)",
+        theory: `
+            <p>La <strong>Programmazione Orientata agli Oggetti (OOP)</strong> permette di creare tipi di dato personalizzati definiti con <code>class NomeClasse:</code>.</p>
+            <p>Il metodo speciale <code>func _init(parametri):</code> è il <strong>costruttore</strong>: viene invocato automaticamente quando si crea un nuovo oggetto, permettendo di inizializzarne i campi con <code>self.campo = valore</code>:</p>
+            <pre class="code-block"><span class="k">class</span> Pozione:
+    <span class="k">var</span> nome
+    <span class="k">var</span> cura
+    <span class="k">func</span> _init(n, c):
+        self.nome = n
+        self.cura = c</pre>
+        `,
+        task: `
+            <ul>
+                <li>Definisci la classe <code>class Pozione:</code> con campi <code>var nome</code> e <code>var cura</code>.</li>
+                <li>Nel costruttore <code>func _init(n, c):</code> assegna <code>self.nome = n</code> e <code>self.cura = c</code>.</li>
+                <li>In <code>_ready()</code>, crea l'oggetto: <code>var elisir = Pozione.new("Elisir", 50)</code>.</li>
+                <li>Stampa: <code>print("Pozione creata: ", elisir.nome, " (Cura: ", elisir.cura, ")")</code>.</li>
+            </ul>
+        `,
+        initialCode: `extends Node\n\n# Definisci la classe Pozione sotto\n\n\nfunc _ready():\n    # Crea elisir con Pozione.new e stampa sotto\n    pass\n`,
+        hints: [
+            "class Pozione:\n    var nome\n    var cura\n    func _init(n, c):\n        self.nome = n\n        self.cura = c",
+            "var elisir = Pozione.new(\"Elisir\", 50)",
+            "print(\"Pozione creata: \", elisir.nome, \" (Cura: \", elisir.cura, \")\")"
+        ],
+        solution: `extends Node\n\nclass Pozione:\n    var nome\n    var cura\n    func _init(n, c):\n        self.nome = n\n        self.cura = c\n\nfunc _ready():\n    var elisir = Pozione.new("Elisir", 50)\n    print("Pozione creata: ", elisir.nome, " (Cura: ", elisir.cura, ")")\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const s = result.scope || {};
+            const item = s.elisir;
+            const itemOk = item && item.nome === "Elisir" && Number(item.cura) === 50;
+            tests.push({ desc: "Istanza elisir creata correttamente con classe Pozione", passed: itemOk, diff: itemOk ? null : `Ricevuto: ${JSON.stringify(item)}` });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Pozione creata: Elisir (Cura: 50)");
+            tests.push({ desc: "Output della console stampato con precisione", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+            return tests;
+        }
+    },
+    {
+        id: 46,
+        chapterId: 12,
+        isMastery: false,
+        title: "46. Creare Istanze Multiple con .new()",
+        icon: "👥",
+        xp: 50,
+        expectedOutput: "Eroe 1: Arthur (HP: 100)\nEroe 2: Lancelot (HP: 90)",
+        theory: `
+            <p>Una volta definita una classe, puoi istanziare quanti oggetti desideri usando <code>NomeClasse.new(...)</code>. Ciascuna istanza possiede i propri valori indipendenti in memoria:</p>
+            <pre class="code-block"><span class="k">var</span> g1 = Guerriero.<span class="nb">new</span>(<span class="s">"Arthur"</span>, <span class="m">100</span>)
+<span class="k">var</span> g2 = Guerriero.<span class="nb">new</span>(<span class="s">"Lancelot"</span>, <span class="m">90</span>)</pre>
+        `,
+        task: `
+            <ul>
+                <li>In <code>_ready()</code> crea due guerrieri: <code>var g1 = Guerriero.new("Arthur", 100)</code> e <code>var g2 = Guerriero.new("Lancelot", 90)</code>.</li>
+                <li>Stampa: <code>print("Eroe 1: ", g1.nome, " (HP: ", g1.hp, ")")</code>.</li>
+                <li>Stampa: <code>print("Eroe 2: ", g2.nome, " (HP: ", g2.hp, ")")</code>.</li>
+            </ul>
+        `,
+        initialCode: `extends Node\n\nclass Guerriero:\n    var nome\n    var hp\n    func _init(n, h):\n        self.nome = n\n        self.hp = h\n\nfunc _ready():\n    # Crea g1 e g2 con .new() e stampa i loro stati sotto\n    pass\n`,
+        hints: [
+            'var g1 = Guerriero.new("Arthur", 100)',
+            'var g2 = Guerriero.new("Lancelot", 90)',
+            'print("Eroe 1: ", g1.nome, " (HP: ", g1.hp, ")") e print("Eroe 2: ", g2.nome, " (HP: ", g2.hp, ")")'
+        ],
+        solution: `extends Node\n\nclass Guerriero:\n    var nome\n    var hp\n    func _init(n, h):\n        self.nome = n\n        self.hp = h\n\nfunc _ready():\n    var g1 = Guerriero.new("Arthur", 100)\n    var g2 = Guerriero.new("Lancelot", 90)\n    print("Eroe 1: ", g1.nome, " (HP: ", g1.hp, ")")\n    print("Eroe 2: ", g2.nome, " (HP: ", g2.hp, ")")\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const s = result.scope || {};
+            const g1Ok = s.g1 && s.g1.nome === "Arthur" && Number(s.g1.hp) === 100;
+            const g2Ok = s.g2 && s.g2.nome === "Lancelot" && Number(s.g2.hp) === 90;
+            tests.push({ desc: "Istanze indipendenti g1 e g2 create correttamente", passed: g1Ok && g2Ok, diff: (g1Ok && g2Ok) ? null : "Dati guerrieri errati" });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Eroe 1: Arthur (HP: 100)") && out.includes("Eroe 2: Lancelot (HP: 90)");
+            tests.push({ desc: "Stato dei due guerrieri stampato correttamente", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+            return tests;
+        }
+    },
+    {
+        id: 47,
+        chapterId: 12,
+        isMastery: false,
+        title: "47. Metodi di Classe (Comportamento)",
+        icon: "⚔️",
+        xp: 50,
+        expectedOutput: "Danno colpo caricato: 50",
+        theory: `
+            <p>Oltre alle proprietà, una classe può contenere <strong>metodi</strong> che ne descrivono il comportamento. I metodi possono accedere ai campi dell'oggetto usando <code>self.campo</code>:</p>
+            <pre class="code-block"><span class="k">class</span> Personaggio:
+    <span class="k">var</span> nome
+    <span class="k">var</span> attacco
+    <span class="k">func</span> _init(n, a):
+        self.nome = n
+        self.attacco = a
+    <span class="k">func</span> colpo_caricato():
+        <span class="k">return</span> self.attacco * <span class="m">2</span></pre>
+        `,
+        task: `
+            <ul>
+                <li>Nella classe <code>Personaggio</code>, aggiungi il metodo <code>func colpo_caricato(): return self.attacco * 2</code>.</li>
+                <li>In <code>_ready()</code>, crea <code>var eroe = Personaggio.new("Eroe", 25)</code>.</li>
+                <li>Stampa: <code>print("Danno colpo caricato: ", eroe.colpo_caricato())</code>.</li>
+            </ul>
+        `,
+        initialCode: `extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    # Aggiungi func colpo_caricato() sotto\n\n\nfunc _ready():\n    # Istanzia eroe con attacco 25 e stampa il colpo caricato sotto\n    pass\n`,
+        hints: [
+            "func colpo_caricato():\n    return self.attacco * 2",
+            'var eroe = Personaggio.new("Eroe", 25)',
+            'print("Danno colpo caricato: ", eroe.colpo_caricato())'
+        ],
+        solution: `extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    func colpo_caricato():\n        return self.attacco * 2\n\nfunc _ready():\n    var eroe = Personaggio.new("Eroe", 25)\n    print("Danno colpo caricato: ", eroe.colpo_caricato())\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const ok = out.includes("Danno colpo caricato: 50");
+            tests.push({ desc: "Metodo colpo_caricato() eseguito con successo (25 x 2 = 50)", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            return tests;
+        }
+    },
+    {
+        id: 48,
+        chapterId: 12,
+        isMastery: true,
+        title: "48. ⭐ Sfida di Apprendimento Finale: Creazione Party RPG ad Oggetti",
+        icon: "🏆",
+        xp: 100,
+        difficulty: "avanzata",
+        difficultyLabel: "Avanzata",
+        scenario: "La gilda degli avventurieri registra la spedizione dungeon creando i due compagni con la classe personalizzata Avventuriero e calcolando la salute complessiva della squadra. Sotto i commenti:",
+        requirements: [
+            'Definisci la classe <code>class Avventuriero:</code> con le proprietà <code>var nome</code>, <code>var ruolo</code>, <code>var vita</code>',
+            'Nel costruttore <code>func _init(n, r, v):</code> assegna <code>self.nome = n</code>, <code>self.ruolo = r</code> e <code>self.vita = v</code>',
+            'In <code>_ready()</code> crea <code>var membro1 = Avventuriero.new("Aria", "Maga", 80)</code>',
+            'Crea il secondo membro: <code>var membro2 = Avventuriero.new("Krag", "Guerriero", 120)</code>',
+            'Calcola la salute totale del party in <code>var vita_totale = membro1.vita + membro2.vita</code>'
+        ],
+        notice: "Non modificare le righe print(). Il programma stampa:",
+        expectedOutput: "Membro 1: Aria (Maga)\nMembro 2: Krag (Guerriero)\nSalute totale party: 200",
+        initialCode: `extends Node\n\n# Definisci la classe Avventuriero con _init sotto\n\n\nfunc _ready():\n    # Crea membro1, membro2 e calcola vita_totale sotto\n    \n    # Non modificare le righe sotto\n    print("Membro 1: ", membro1.nome, " (", membro1.ruolo, ")")\n    print("Membro 2: ", membro2.nome, " (", membro2.ruolo, ")")\n    print("Salute totale party: ", vita_totale)\n`,
+        aiExplanation: "Congratulazioni per essere arrivato alla Sfida Finale del Corso! In Godot Engine l'incapsulamento dei dati in classi personalizzate è la base per creare entità complesse, gestire party di gioco, inventari ed elementi della scena in modo pulito ed espandibile.",
+        hints: [
+            'class Avventuriero:\n    var nome\n    var ruolo\n    var vita\n    func _init(n, r, v):\n        self.nome = n\n        self.ruolo = r\n        self.vita = v',
+            'var membro1 = Avventuriero.new("Aria", "Maga", 80)\nvar membro2 = Avventuriero.new("Krag", "Guerriero", 120)',
+            'var vita_totale = membro1.vita + membro2.vita'
+        ],
+        solution: `extends Node\n\nclass Avventuriero:\n    var nome\n    var ruolo\n    var vita\n    func _init(n, r, v):\n        self.nome = n\n        self.ruolo = r\n        self.vita = v\n\nfunc _ready():\n    var membro1 = Avventuriero.new("Aria", "Maga", 80)\n    var membro2 = Avventuriero.new("Krag", "Guerriero", 120)\n    var vita_totale = membro1.vita + membro2.vita\n    \n    # Non modificare le righe sotto\n    print("Membro 1: ", membro1.nome, " (", membro1.ruolo, ")")\n    print("Membro 2: ", membro2.nome, " (", membro2.ruolo, ")")\n    print("Salute totale party: ", vita_totale)\n`,
+        theory: `
+            <div class="mastery-banner">
+                <span class="mastery-badge">🏆 SFIDA DI APPRENDIMENTO FINALE • CORSO GODOT 4 COMPLETATO</span>
+                <h3>Creazione Party RPG ad Oggetti</h3>
+                <p>La sfida suprema di GDScript Hero: unisci classi, costruttori, istanze multiple e calcolo di statistiche collettive.</p>
+            </div>
+        `,
+        task: `
+            <ul>
+                <li>Crea la classe <code>Avventuriero</code> con <code>_init</code></li>
+                <li>Istanzia <code>membro1</code> e <code>membro2</code> con <code>.new()</code></li>
+                <li>Calcola <code>var vita_totale = membro1.vita + membro2.vita</code></li>
+            </ul>
+        `,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const s = result.scope || {};
+            const m1 = s.membro1;
+            const m2 = s.membro2;
+            const m1Ok = m1 && m1.nome === "Aria" && m1.ruolo === "Maga" && Number(m1.vita) === 80;
+            const m2Ok = m2 && m2.nome === "Krag" && m2.ruolo === "Guerriero" && Number(m2.vita) === 120;
+            const totOk = Number(s.vita_totale) === 200;
+            tests.push({ desc: "Entrambi gli avventurieri istanziati correttamente", passed: m1Ok && m2Ok, diff: (m1Ok && m2Ok) ? null : "Dati membri party non corretti" });
+            tests.push({ desc: "Salute totale del party calcolata a 200 HP", passed: totOk, diff: totOk ? null : `vita_totale=${s.vita_totale}` });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Membro 1: Aria (Maga)") && out.includes("Membro 2: Krag (Guerriero)") && out.includes("Salute totale party: 200");
+            tests.push({ desc: "Report finale del party stampato con successo", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
     }
 ];
 
@@ -1747,6 +2316,30 @@ const ACHIEVEMENTS_DATA = [
         desc: "Riscatta la tua prima missione giornaliera.",
         xpReward: 30,
         condition: (state) => state.claimedQuestsCount > 0
+    },
+    {
+        id: "dict_master",
+        title: "Custode del Sapere",
+        icon: "📖",
+        desc: "Supera la Sfida di Apprendimento del Capitolo 10 (Dizionari).",
+        xpReward: 50,
+        condition: (state) => state.finishedLessons.includes(40)
+    },
+    {
+        id: "signal_master",
+        title: "Maestro delle Frequenze",
+        icon: "📡",
+        desc: "Supera la Sfida di Apprendimento del Capitolo 11 (Segnali di Godot).",
+        xpReward: 50,
+        condition: (state) => state.finishedLessons.includes(44)
+    },
+    {
+        id: "oop_grandmaster",
+        title: "Gran Maestro di Godot 4",
+        icon: "👑",
+        desc: "Supera la Sfida di Apprendimento Finale del Capitolo 12 (Classi e Oggetti).",
+        xpReward: 150,
+        condition: (state) => state.finishedLessons.includes(48)
     }
 ];
 
@@ -1760,7 +2353,10 @@ const LEVELS_CONFIG = [
     { level: 7, title: "Architetto di Cicli", minXp: 1400, maxXp: 1899 },
     { level: 8, title: "Ingegnere di Nodi", minXp: 1900, maxXp: 2499 },
     { level: 9, title: "Pilota dei Vettori", minXp: 2500, maxXp: 3199 },
-    { level: 10, title: "Godot Hero Leggendario", minXp: 3200, maxXp: 99999 }
+    { level: 10, title: "Custode dei Dizionari", minXp: 3200, maxXp: 3999 },
+    { level: 11, title: "Comandante di Segnali", minXp: 4000, maxXp: 4899 },
+    { level: 12, title: "Architetto di Classi", minXp: 4900, maxXp: 5899 },
+    { level: 13, title: "Godot Hero Trascendente", minXp: 5900, maxXp: 99999 }
 ];
 
 const STREAK_TIERS = {

@@ -99,6 +99,72 @@ if (!Array.prototype.has) {
     };
 }
 
+// Metodi Dictionary di Godot (definiti non-enumerabili per sicurezza)
+if (!Object.prototype.has) {
+    Object.defineProperty(Object.prototype, 'has', {
+        value: function(key) {
+            return Object.prototype.hasOwnProperty.call(this, key);
+        },
+        enumerable: false,
+        writable: true,
+        configurable: true
+    });
+}
+if (!Object.prototype.keys) {
+    Object.defineProperty(Object.prototype, 'keys', {
+        value: function() {
+            return Object.keys(this);
+        },
+        enumerable: false,
+        writable: true,
+        configurable: true
+    });
+}
+if (!Object.prototype.values) {
+    Object.defineProperty(Object.prototype, 'values', {
+        value: function() {
+            return Object.values(this);
+        },
+        enumerable: false,
+        writable: true,
+        configurable: true
+    });
+}
+if (!Object.prototype.erase) {
+    Object.defineProperty(Object.prototype, 'erase', {
+        value: function(key) {
+            delete this[key];
+        },
+        enumerable: false,
+        writable: true,
+        configurable: true
+    });
+}
+
+// Classe Signal di Godot Engine
+class GD_Signal {
+    constructor(name = "signal") {
+        this.name = name;
+        this.callbacks = [];
+    }
+    connect(cb) {
+        if (typeof cb === 'function') {
+            this.callbacks.push(cb);
+        }
+    }
+    emit(...args) {
+        for (const cb of this.callbacks) {
+            cb(...args);
+        }
+    }
+    emit_signal(...args) {
+        this.emit(...args);
+    }
+    toString() {
+        return `[Signal: ${this.name}]`;
+    }
+}
+
 // Transpiler da GDScript a JavaScript moderno
 const GDScriptRuntime = {
     transpile(gdCode) {
@@ -106,6 +172,8 @@ const GDScriptRuntime = {
         const jsLines = [];
         const indentStack = [0];
         const declaredVars = new Set();
+        let classIndent = -1;
+        let currentClassName = '';
 
         for (let idx = 0; idx < lines.length; idx++) {
             let line = lines[idx];
@@ -149,13 +217,29 @@ const GDScriptRuntime = {
             // Chiusura blocchi in base all'indentazione
             while (indentStack.length > 1 && currentIndent < indentStack[indentStack.length - 1]) {
                 const poppedIndent = indentStack.pop();
-                // Prima di chiudere una funzione (livello 4 -> 0), sincronizza le variabili
-                if (indentStack.length === 1) {
-                    declaredVars.forEach(v => {
-                        jsLines.push(' '.repeat(poppedIndent) + `try { __scope["${v}"] = ${v}; } catch(e) {}`);
-                    });
+                if (classIndent !== -1) {
+                    // Siamo all'interno di una classe
+                    if (indentStack.length === 1 || indentStack[indentStack.length - 1] <= classIndent) {
+                        // Stiamo chiudendo il corpo della classe
+                        jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                        if (currentClassName) {
+                            jsLines.push(`try { __scope["${currentClassName}"] = ${currentClassName}; } catch(e) {}`);
+                        }
+                        classIndent = -1;
+                        currentClassName = '';
+                    } else {
+                        // Stiamo chiudendo un metodo dentro la classe
+                        jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                    }
+                } else {
+                    // Chiusura di un normale blocco/funzione
+                    if (indentStack.length === 1) {
+                        declaredVars.forEach(v => {
+                            jsLines.push(' '.repeat(poppedIndent) + `try { __scope["${v}"] = ${v}; } catch(e) {}`);
+                        });
+                    }
+                    jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
                 }
-                jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
             }
 
             // Verifica direttive Godot
@@ -169,8 +253,38 @@ const GDScriptRuntime = {
                 content = content.slice(0, -1).trim();
             }
 
-            // var name: Type = Val  OPPURE  const name: Type = Val
-            if (content.startsWith('var ') || content.startsWith('const ')) {
+            const inClass = (classIndent !== -1 && currentIndent > classIndent);
+
+            // signal nome(parametri)
+            if (content.startsWith('signal ')) {
+                const rawSig = content.substring(7).trim();
+                const sigName = rawSig.split('(')[0].trim();
+                declaredVars.add(sigName);
+                content = `__scope["${sigName}"] = new GD_Signal("${sigName}"); let ${sigName} = __scope["${sigName}"]`;
+            }
+
+            // class NomeClasse:
+            else if (content.startsWith('class ')) {
+                classIndent = currentIndent;
+                let cName = content.substring(6).trim();
+                let baseClass = '';
+                if (cName.includes('extends')) {
+                    const parts = cName.split('extends');
+                    cName = parts[0].trim();
+                    baseClass = 'extends ' + parts[1].trim();
+                }
+                declaredVars.add(cName);
+                currentClassName = cName;
+                content = `class ${cName} ${baseClass}`.trim();
+            }
+
+            // class_name Nome
+            else if (content.startsWith('class_name ')) {
+                content = `/* ${content} */`;
+            }
+
+            // var name: Type = Val (in class field vs local/global var)
+            else if (content.startsWith('var ') || content.startsWith('const ')) {
                 let isConst = content.startsWith('const ');
                 let rest = isConst ? content.substring(6).trim() : content.substring(4).trim();
                 let varName = '';
@@ -192,8 +306,12 @@ const GDScriptRuntime = {
                     varName = rest;
                 }
 
-                declaredVars.add(varName);
-                content = `__scope["${varName}"] = ${varValue}; let ${varName} = __scope["${varName}"]`;
+                if (inClass) {
+                    content = `${varName} = ${varValue}`;
+                } else {
+                    declaredVars.add(varName);
+                    content = `__scope["${varName}"] = ${varValue}; var ${varName} = __scope["${varName}"]`;
+                }
             }
 
             // func nome(parametri) -> Ritorno:
@@ -213,11 +331,15 @@ const GDScriptRuntime = {
                         return cleanP;
                     }).filter(Boolean).join(', ');
 
-                    if (funcName === '_ready' || funcName === '_process') {
+                    if (inClass && funcName === '_init') {
+                        content = `constructor(${cleanParams})`;
+                    } else if (inClass) {
+                        content = `${funcName}(${cleanParams})`;
+                    } else if (funcName === '_ready' || funcName === '_process') {
                         content = `async function ${funcName}(${cleanParams})`;
                     } else {
                         content = `function ${funcName}(${cleanParams})`;
-                    };
+                    }
                 }
             }
 
@@ -276,11 +398,15 @@ const GDScriptRuntime = {
             content = content.replace(/\band\b/g, '&&');
             content = content.replace(/\bor\b/g, '||');
             content = content.replace(/\bnot\b/g, '!');
+            content = content.replace(/\bself\./g, 'this.');
 
             // Costruzione riga finale
             if (isBlockStart) {
                 indentStack.push(currentIndent + 4);
                 jsLines.push(' '.repeat(currentIndent) + content + ' {');
+                if (content.startsWith('class ')) {
+                    jsLines.push(' '.repeat(currentIndent + 4) + `static new(...args) { return new ${currentClassName}(...args); }`);
+                }
                 // Guardia anti-ciclo infinito per while/for
                 if (content.startsWith('while') || content.startsWith('for')) {
                     jsLines.push(' '.repeat(currentIndent + 4) + '__checkLoopTimeout();');
@@ -293,13 +419,31 @@ const GDScriptRuntime = {
         // Chiudi tutti i blocchi pendenti
         while (indentStack.length > 1) {
             const poppedIndent = indentStack.pop();
-            if (indentStack.length === 1) {
-                declaredVars.forEach(v => {
-                    jsLines.push(' '.repeat(poppedIndent) + `try { __scope["${v}"] = ${v}; } catch(e) {}`);
-                });
+            if (classIndent !== -1) {
+                if (indentStack.length === 1 || indentStack[indentStack.length - 1] <= classIndent) {
+                    jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                    if (currentClassName) {
+                        jsLines.push(`try { __scope["${currentClassName}"] = ${currentClassName}; } catch(e) {}`);
+                    }
+                    classIndent = -1;
+                    currentClassName = '';
+                } else {
+                    jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                }
+            } else {
+                if (indentStack.length === 1) {
+                    declaredVars.forEach(v => {
+                        jsLines.push(' '.repeat(poppedIndent) + `try { __scope["${v}"] = ${v}; } catch(e) {}`);
+                    });
+                }
+                jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
             }
-            jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
         }
+
+        // Variabili a livello globale / script
+        declaredVars.forEach(v => {
+            jsLines.push(`try { __scope["${v}"] = ${v}; } catch(e) {}`);
+        });
 
         return jsLines.join('\n');
     },
@@ -319,7 +463,7 @@ const GDScriptRuntime = {
                 if (i === 0) {
                     res = str;
                 } else {
-                    if (res.endsWith(' ') || str.startsWith(' ')) {
+                    if (res.endsWith(' ') || str.startsWith(' ') || res.endsWith('(') || res.endsWith('[') || /^[,.:;!?\)\]]/.test(str)) {
                         res += str;
                     } else {
                         res += ' ' + str;
@@ -358,6 +502,7 @@ const GDScriptRuntime = {
                 '__gd_range',
                 '__gd_len',
                 '__gd_str',
+                'GD_Signal',
                 `return (async () => {
                     ${transpiledCode}
                     if (typeof _ready === 'function') {
@@ -374,7 +519,8 @@ const GDScriptRuntime = {
                 Vector2,
                 __gd_range,
                 __gd_len,
-                __gd_str
+                __gd_str,
+                GD_Signal
             );
 
             return {
