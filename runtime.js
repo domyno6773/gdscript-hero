@@ -85,6 +85,19 @@ if (!Array.prototype.size) {
         return this.length;
     };
 }
+if (!Array.prototype.erase) {
+    Array.prototype.erase = function(item) {
+        const idx = this.indexOf(item);
+        if (idx !== -1) {
+            this.splice(idx, 1);
+        }
+    };
+}
+if (!Array.prototype.has) {
+    Array.prototype.has = function(item) {
+        return this.includes(item);
+    };
+}
 
 // Transpiler da GDScript a JavaScript moderno
 const GDScriptRuntime = {
@@ -200,7 +213,11 @@ const GDScriptRuntime = {
                         return cleanP;
                     }).filter(Boolean).join(', ');
 
-                    content = `async function ${funcName}(${cleanParams})`;
+                    if (funcName === '_ready' || funcName === '_process') {
+                        content = `async function ${funcName}(${cleanParams})`;
+                    } else {
+                        content = `function ${funcName}(${cleanParams})`;
+                    };
                 }
             }
 
@@ -296,13 +313,20 @@ const GDScriptRuntime = {
         const startTime = Date.now();
 
         const customPrint = (...args) => {
-            const formatted = args.map(a => {
-                if (a === null) return "null";
-                if (a === undefined) return "null";
-                if (typeof a === 'object' && a.toString) return a.toString();
-                return String(a);
-            }).join(' ');
-            logs.push(formatted);
+            let res = '';
+            for (let i = 0; i < args.length; i++) {
+                const str = (args[i] === null || args[i] === undefined) ? "null" : (typeof args[i] === 'object' && args[i].toString ? args[i].toString() : String(args[i]));
+                if (i === 0) {
+                    res = str;
+                } else {
+                    if (res.endsWith(' ') || str.startsWith(' ')) {
+                        res += str;
+                    } else {
+                        res += ' ' + str;
+                    }
+                }
+            }
+            logs.push(res);
         };
 
         const checkLoop = () => {

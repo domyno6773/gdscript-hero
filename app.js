@@ -1432,8 +1432,8 @@ const App = {
                             this.showToast({
                                 icon: '🔒',
                                 tag: 'LIVELLO BONUS',
-                                title: 'Sfida di Padronanza Bloccata',
-                                desc: 'Completa tutti i livelli del capitolo per sbloccare questa sfida bonus!'
+                                title: 'Sfida di Apprendimento Bloccata',
+                                desc: 'Completa tutti i livelli del capitolo per sbloccare questa sfida di apprendimento bonus!'
                             });
                             return;
                         }
@@ -1457,23 +1457,23 @@ const App = {
                         ${this.renderHexNodeSVG(isMastery, statusClass)}
                         ${(!isMastery && isCurrent) ? '<div class="tag-continua">CONTINUA</div>' : ''}
                     </div>
-                    <div class="node-label">${lesson.title.replace(/^\d+\.\s*/, '')}</div>
+                    <div class="node-label">${isMastery ? '⭐ Sfida di apprendimento' : lesson.title.replace(/^\d+\.\s*/, '')}</div>
                 `;
 
-                // Se è Mastery, aggiungi la Popover card in stile Coddy
+                // Se è Mastery (Sfida di apprendimento), aggiungi la Popover card in stile Coddy
                 if (isMastery) {
                     innerHtml += `
                         <div class="mastery-popover hidden" id="mastery-popover-${lesson.id}">
                             <div class="mastery-popover-arrow"></div>
                             <div class="mastery-popover-badge">⭐ LIVELLO BONUS</div>
-                            <h4 class="mastery-popover-title">Sfida di padronanza</h4>
-                            <p class="mastery-popover-desc">Dimostra le tue conoscenze con la Padronanza!</p>
+                            <h4 class="mastery-popover-title">Sfida di apprendimento</h4>
+                            <p class="mastery-popover-desc">Metti alla prova le conoscenze del capitolo con una sfida pratica!</p>
                             <div class="mastery-popover-reward">
                                 <span>+${lesson.xp} XP</span>
                                 <span>🏆 Capitolo ${chapter.id}</span>
                             </div>
                             <button class="mastery-popover-btn" onclick="event.stopPropagation(); App.closeAllMasteryPopovers(); App.openLesson(${lesson.id});">
-                                ${isFinished ? 'RIGIOCA' : 'INIZIA'}
+                                ${isFinished ? 'RIGIOCA' : 'INIZIA LA SFIDA'}
                             </button>
                         </div>
                     `;
@@ -1623,9 +1623,95 @@ const App = {
         this.updateNavSelection('exercise');
         this.setMobileExerciseTab('instructions', false);
 
-        document.getElementById('lesson-title').innerText = lesson.title;
-        document.getElementById('lesson-theory').innerHTML = lesson.theory;
-        document.getElementById('lesson-task').innerHTML = lesson.task;
+        const lessonContent = document.querySelector('.lesson-content');
+        if (lesson.isMastery) {
+            // Render del layout dedicato Sfida di Apprendimento in stile Coddy
+            lessonContent.innerHTML = `
+                <div class="coddy-challenge-card">
+                    <div class="coddy-challenge-header">
+                        <div class="coddy-challenge-title-row">
+                            <span class="coddy-bulb-icon">💡</span>
+                            <h2 class="coddy-challenge-title">Sfida di apprendimento</h2>
+                            <span class="coddy-diff-badge ${lesson.difficulty || 'facile'}">${lesson.difficultyLabel || 'Facile'}</span>
+                        </div>
+                    </div>
+
+                    <div class="coddy-challenge-body">
+                        <p class="coddy-challenge-narrative">${lesson.scenario}</p>
+                        <ul class="coddy-challenge-reqs">
+                            ${(lesson.requirements || []).map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                        <p class="coddy-challenge-notice">${lesson.notice || 'Non modificare le righe print(). Il programma stampa:'}</p>
+                        <div class="coddy-expected-box">
+                            <pre>${lesson.expectedOutput}</pre>
+                        </div>
+
+                        <button type="button" class="btn-coddy-explain" id="btn-coddy-explain" onclick="App.toggleCoddyExplanation()">
+                            <span class="explain-robot-icon">👾</span>
+                            <span>Spiega la sfida</span>
+                        </button>
+                        <div class="coddy-explain-box hidden" id="coddy-explain-box">
+                            <div class="explain-bubble-header">🤖 Assistente Didattico GDScript:</div>
+                            <div class="explain-bubble-content">${lesson.aiExplanation || 'Applica le conoscenze del capitolo per completare la sfida!'}</div>
+                        </div>
+                    </div>
+
+                    <div class="coddy-hints-container">
+                        <div class="coddy-hints-header">
+                            <span class="hints-header-icon">🎯</span>
+                            <span>Suggerimenti</span>
+                        </div>
+                        <div class="coddy-hints-list">
+                            ${(lesson.hints || []).map((hint, idx) => `
+                                <div class="coddy-hint-item" id="coddy-hint-item-${idx}">
+                                    <div class="coddy-hint-trigger" onclick="App.toggleCoddyHint(${idx})">
+                                        <span>Suggerimento ${idx + 1}</span>
+                                        <span class="coddy-hint-arrow" id="coddy-hint-arrow-${idx}">›</span>
+                                    </div>
+                                    <div class="coddy-hint-text hidden" id="coddy-hint-text-${idx}">
+                                        ${hint}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="coddy-solution-row">
+                            <button type="button" class="btn-coddy-sol-toggle" onclick="App.revealChallengeSolution()">Mostra Soluzione</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Ripristina layout standard lezione con teoria e obiettivo
+            lessonContent.innerHTML = `
+                <h2 id="lesson-title">${lesson.title}</h2>
+                <div id="lesson-theory" class="theory-body">${lesson.theory}</div>
+                <div class="task-box">
+                    <div class="task-header">
+                        <span class="target-icon">🎯</span>
+                        <h3>Il Tuo Obiettivo:</h3>
+                    </div>
+                    <div id="lesson-task" class="task-body">${lesson.task}</div>
+                </div>
+                <div class="hints-section">
+                    <div class="hints-toggle-btn" id="btn-toggle-hint">
+                        <span class="hint-icon">💡</span>
+                        <span id="hint-toggle-text">Ti serve un consiglio? (0/${lesson.hints.length} usati)</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="hint-box hidden" id="hint-box">
+                        <div class="hint-content" id="hint-text">
+                            Leggi attentamente il compito e usa la funzione corretta.
+                        </div>
+                        <div class="hint-actions">
+                            <button class="btn-subtle" id="btn-next-hint">Altro Consiglio ➔</button>
+                            <button class="btn-danger-subtle" id="btn-reveal-solution">Mostra Soluzione</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            this.bindStandardHintEvents();
+        }
+
         document.getElementById('lesson-xp-badge').innerText = `+${lesson.xp} XP`;
 
         const savedCode = this.state.userCode[lessonId] || lesson.initialCode;
@@ -1652,8 +1738,10 @@ const App = {
         document.getElementById('test-status-badge').innerText = '• Non verificato';
         document.getElementById('test-status-badge').style.color = '#94a3b8';
 
-        document.getElementById('hint-box').classList.add('hidden');
-        document.getElementById('hint-toggle-text').innerText = `Ti serve un consiglio? (0/${lesson.hints.length} usati)`;
+        const hintBox = document.getElementById('hint-box');
+        if (hintBox) hintBox.classList.add('hidden');
+        const hintToggleText = document.getElementById('hint-toggle-text');
+        if (hintToggleText) hintToggleText.innerText = `Ti serve un consiglio? (0/${lesson.hints.length} usati)`;
 
         // Reset e posizionamento Viewport 2D per il livello corrente
         if (this.viewport) {
@@ -2425,44 +2513,7 @@ const App = {
             };
         }
 
-        const btnToggleHint = document.getElementById('btn-toggle-hint');
-        btnToggleHint.onclick = () => {
-            const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
-            if (!currentLesson) return;
-
-            const hintBox = document.getElementById('hint-box');
-            if (hintBox.classList.contains('hidden')) {
-                SoundFX.playHint();
-                hintBox.classList.remove('hidden');
-                if (this.state.hintsRevealed === 0) {
-                    this.state.hintsRevealed = 1;
-                }
-                this.displayHint(currentLesson);
-                this.checkAchievements();
-            } else {
-                hintBox.classList.add('hidden');
-            }
-        };
-
-        document.getElementById('btn-next-hint').onclick = () => {
-            const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
-            if (!currentLesson) return;
-            if (this.state.hintsRevealed < currentLesson.hints.length) {
-                SoundFX.playHint();
-                this.state.hintsRevealed++;
-                this.displayHint(currentLesson);
-            }
-        };
-
-        document.getElementById('btn-reveal-solution').onclick = () => {
-            const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
-            if (!currentLesson) return;
-            if (confirm("Vuoi visualizzare la soluzione completa?")) {
-                SoundFX.playHint();
-                document.getElementById('code-editor').value = currentLesson.solution;
-                this.updateLineNumbers();
-            }
-        };
+        this.bindStandardHintEvents();
 
         // Modal di Vittoria: Avanzamento o Rimani nell'Esercizio
         document.getElementById('btn-modal-next').onclick = () => {
@@ -2510,14 +2561,110 @@ const App = {
 
     displayHint(lesson) {
         const hintIdx = Math.min(this.state.hintsRevealed - 1, lesson.hints.length - 1);
-        document.getElementById('hint-text').innerText = lesson.hints[hintIdx];
-        document.getElementById('hint-toggle-text').innerText = `Consiglio (${this.state.hintsRevealed}/${lesson.hints.length})`;
+        const hintText = document.getElementById('hint-text');
+        if (hintText) hintText.innerText = lesson.hints[hintIdx];
+        const hintToggleText = document.getElementById('hint-toggle-text');
+        if (hintToggleText) hintToggleText.innerText = `Consiglio (${this.state.hintsRevealed}/${lesson.hints.length})`;
 
         const nextBtn = document.getElementById('btn-next-hint');
-        if (this.state.hintsRevealed >= lesson.hints.length) {
-            nextBtn.style.display = 'none';
+        if (nextBtn) {
+            if (this.state.hintsRevealed >= lesson.hints.length) {
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'inline-block';
+            }
+        }
+    },
+
+    bindStandardHintEvents() {
+        const btnToggleHint = document.getElementById('btn-toggle-hint');
+        if (btnToggleHint) {
+            btnToggleHint.onclick = () => {
+                const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+                if (!currentLesson) return;
+
+                const hintBox = document.getElementById('hint-box');
+                if (hintBox && hintBox.classList.contains('hidden')) {
+                    SoundFX.playHint();
+                    hintBox.classList.remove('hidden');
+                    if (this.state.hintsRevealed === 0) {
+                        this.state.hintsRevealed = 1;
+                    }
+                    this.displayHint(currentLesson);
+                    this.checkAchievements();
+                } else if (hintBox) {
+                    hintBox.classList.add('hidden');
+                }
+            };
+        }
+
+        const btnNextHint = document.getElementById('btn-next-hint');
+        if (btnNextHint) {
+            btnNextHint.onclick = () => {
+                const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+                if (!currentLesson) return;
+                if (this.state.hintsRevealed < currentLesson.hints.length) {
+                    SoundFX.playHint();
+                    this.state.hintsRevealed++;
+                    this.displayHint(currentLesson);
+                }
+            };
+        }
+
+        const btnRevealSolution = document.getElementById('btn-reveal-solution');
+        if (btnRevealSolution) {
+            btnRevealSolution.onclick = () => {
+                const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+                if (!currentLesson) return;
+                if (confirm("Vuoi visualizzare la soluzione completa?")) {
+                    SoundFX.playHint();
+                    document.getElementById('code-editor').value = currentLesson.solution;
+                    this.updateLineNumbers();
+                }
+            };
+        }
+    },
+
+    toggleCoddyExplanation() {
+        const box = document.getElementById('coddy-explain-box');
+        if (!box) return;
+        const isHidden = box.classList.contains('hidden');
+        if (isHidden) {
+            SoundFX.playHint();
+            box.classList.remove('hidden');
         } else {
-            nextBtn.style.display = 'inline-block';
+            box.classList.add('hidden');
+        }
+    },
+
+    toggleCoddyHint(idx) {
+        const item = document.getElementById(`coddy-hint-item-${idx}`);
+        const text = document.getElementById(`coddy-hint-text-${idx}`);
+        const arrow = document.getElementById(`coddy-hint-arrow-${idx}`);
+        if (!text) return;
+
+        const isHidden = text.classList.contains('hidden');
+        if (isHidden) {
+            SoundFX.playHint();
+            text.classList.remove('hidden');
+            if (item) item.classList.add('open');
+            if (arrow) arrow.innerText = '▼';
+            this.state.hintsRevealed = Math.max(this.state.hintsRevealed, idx + 1);
+            this.checkAchievements();
+        } else {
+            text.classList.add('hidden');
+            if (item) item.classList.remove('open');
+            if (arrow) arrow.innerText = '›';
+        }
+    },
+
+    revealChallengeSolution() {
+        const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+        if (!currentLesson) return;
+        if (confirm("Vuoi visualizzare la soluzione completa per questa sfida?")) {
+            SoundFX.playHint();
+            document.getElementById('code-editor').value = currentLesson.solution;
+            this.updateLineNumbers();
         }
     },
 

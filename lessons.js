@@ -182,41 +182,53 @@ const LESSONS_DATA = [
             return tests;
         }
     },
-    {
+{
         id: 4,
         chapterId: 1,
         isMastery: true,
-        title: "4. ⭐ Sfida di Padronanza: Introduzione",
+        title: "4. ⭐ Sfida di Apprendimento: Terminale di Avvio della Nave",
         icon: "🏆",
         xp: 100,
-        expectedOutput: "=== ACCADEMIA GODOT ===\nPronto a sviluppare!",
+        difficulty: "facile",
+        difficultyLabel: "Facile",
+        scenario: "Il computer di bordo della navetta spaziale ha bisogno di verificare la diagnostica dei sistemi. Sotto il commento, aggiungi un commento e usa <code>print()</code> per completare la sequenza:",
+        requirements: [
+            'Aggiungi un commento con cancelletto: <code># Diagnostica reattori</code>',
+            'Stampa la riga di sistema: <code>"Sistema: Godot OS"</code>',
+            'Stampa l\'energia passando i tre valori separati da virgola: <code>"Energia: ", 100, "%"</code>'
+        ],
+        notice: "Non modificare le righe print() esistenti. Il programma stampa:",
+        expectedOutput: "=== AVVIO SISTEMA ===\nSistema: Godot OS\nEnergia: 100 %\n=== DIAGNOSTICA COMPLETATA ===",
+        initialCode: `extends Node\n\nfunc _ready():\n    print("=== AVVIO SISTEMA ===")\n    # Aggiungi il commento e le due istruzioni print() sotto\n    \n    # Non modificare la riga sotto\n    print("=== DIAGNOSTICA COMPLETATA ===")\n`,
+        aiExplanation: "In questo esercizio applichi i fondamenti del Capitolo 1: i commenti con <code>#</code> vengono ignorati dal motore ma servono a documentare il codice. La funzione <code>print()</code> accetta sia singoli testi tra virgolette, sia argomenti multipli separati da virgola come <code>print(\"Energia: \", 100, \"%\")</code>, che Godot formatta automaticamente con gli spazi corretti.",
+        hints: [
+            "Inizia inserendo il cancelletto # seguito dal testo: # Diagnostica reattori",
+            "Per la prima stampa scrivi: print(\"Sistema: Godot OS\")",
+            "Per stampare più valori separati da virgola scrivi: print(\"Energia: \", 100, \"%\")"
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    print("=== AVVIO SISTEMA ===")\n    # Diagnostica reattori\n    print("Sistema: Godot OS")\n    print("Energia: ", 100, "%")\n    print("=== DIAGNOSTICA COMPLETATA ===")
+`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: INTRODUZIONE</span>
-                <h3>Metti alla prova i Fondamenti!</h3>
-                <p>Nelle sfide di padronanza verifichi tutti i concetti appresi finora per sbloccare il trofeo del capitolo e ottenere +100 XP!</p>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Terminale di Avvio della Nave</h3>
+                <p>Metti alla prova i fondamenti del Capitolo 1 completando la sequenza di diagnostica del terminale di bordo.</p>
             </div>
         `,
         task: `
             <ul>
-                <li>Aggiungi un commento iniziale (es. <code># Schermata iniziale</code>).</li>
-                <li>Stampa l'intestazione esatta: <code>"=== ACCADEMIA GODOT ==="</code>.</li>
-                <li>Nella riga successiva stampa: <code>"Pronto a sviluppare!"</code>.</li>
+                <li>Aggiungi il commento <code># Diagnostica reattori</code></li>
+                <li>Stampa <code>"Sistema: Godot OS"</code></li>
+                <li>Stampa con valori multipli: <code>"Energia: ", 100, "%"</code></li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # SFIDA: Crea la schermata iniziale\n    pass\n`,
-        hints: [
-            "Usa il cancelletto per il commento",
-            "print(\"=== ACCADEMIA GODOT ===\")",
-            "print(\"Pronto a sviluppare!\")"
-        ],
-        solution: `func _ready():\n    # Schermata iniziale\n    print("=== ACCADEMIA GODOT ===")\n    print("Pronto a sviluppare!")\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("=== ACCADEMIA GODOT ===") && out.includes("Pronto a sviluppare!");
-            tests.push({ desc: "Intestazione e messaggio stampati con precisione", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            const out = (result.logs || []).join('\n');
+            const clean = out.replace(/\s+/g, ' ');
+            const ok = clean.includes("=== AVVIO SISTEMA ===") && clean.includes("Sistema: Godot OS") && clean.includes("Energia: 100 %") && clean.includes("=== DIAGNOSTICA COMPLETATA ===");
+            tests.push({ desc: "Diagnostica completata con output esatto", passed: ok, diff: ok ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     },
@@ -344,42 +356,59 @@ const LESSONS_DATA = [
             return tests;
         }
     },
-    {
+{
         id: 8,
         chapterId: 2,
         isMastery: true,
-        title: "8. ⭐ Sfida: Variabili (Parte 1)",
+        title: "8. ⭐ Sfida di Apprendimento: Dialoghi e Codice Segreto",
         icon: "🏆",
         xp: 100,
-        expectedOutput: "Benvenuto Guerriero\nVita: 100",
+        difficulty: "facile",
+        difficultyLabel: "Facile",
+        scenario: "Un gioco d'avventura ha bisogno di tre elementi di testo. Sotto il commento, crea tre variabili <code>String</code>:",
+        requirements: [
+            '<code>title</code> contiene <code>The \"Lost\" Key</code>, comprese le due virgolette doppie',
+            '<code>npc_line</code> contiene <code>It\'s dangerous to go alone!</code>, compreso l\'apostrofo',
+            '<code>door_code</code> contiene i quattro caratteri <code>0420</code>'
+        ],
+        notice: "Non modificare le righe print(). Il programma stampa:",
+        expectedOutput: "Title: The \"Lost\" Key\nNPC: It's dangerous to go alone!\nDoor code: 0420",
+        initialCode: `extends Node\n\nfunc _ready():\n    # Crea title, npc_line e door_code sotto\n    \n    # Non modificare le righe sotto\n    print("Title: ", title)\n    print("NPC: ", npc_line)\n    print("Door code: ", door_code)\n`,
+        aiExplanation: "In GDScript puoi creare stringhe sia con virgolette doppie <code>\"...\"</code> sia con apici singoli <code>'...'</code>. Se il testo contiene virgolette doppie interne (come <code>\"Lost\"</code>), racchiudi la stringa tra apici singoli come <code>'The \"Lost\" Key'</code> oppure usa il carattere di escape <code>\\\"</code>. Per includere un apostrofo, racchiudi la stringa tra virgolette doppie. Per codici con zero iniziale come <code>\"0420\"</code>, usa sempre una stringa di caratteri altrimenti verrebbe troncato a numero.",
+        hints: [
+            "Dichiara ogni variabile usando la parola chiave var: var nome_variabile = ...",
+            "Per racchiudere virgolette doppie all'interno puoi usare apici singoli: var title = 'The \"Lost\" Key'",
+            "Il codice della porta deve essere racchiuso tra virgolette: var door_code = \"0420\""
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    var title = 'The "Lost" Key'\n    var npc_line = "It's dangerous to go alone!"\n    var door_code = "0420"\n    \n    # Non modificare le righe sotto\n    print("Title: ", title)\n    print("NPC: ", npc_line)\n    print("Door code: ", door_code)\n`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: VARIABILI PARTE 1</span>
-                <h3>Crea il Messaggio di Benvenuto del Personaggio!</h3>
-                <p>Combina variabili testuali, numeri e concatenazione di stringhe.</p>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Dialoghi e Codice Segreto</h3>
+                <p>Metti alla prova la gestione delle variabili String, apici ed escape di caratteri in GDScript.</p>
             </div>
         `,
         task: `
             <ul>
-                <li>Dichiara <code>nome = "Guerriero"</code>.</li>
-                <li>Stampa con concatenazione: <code>"Benvenuto " + nome</code>.</li>
-                <li>Dichiara <code>punti_vita = 100</code> e stampa: <code>"Vita: 100"</code>.</li>
+                <li>Crea <code>title</code> con <code>The "Lost" Key</code></li>
+                <li>Crea <code>npc_line</code> con <code>It's dangerous to go alone!</code></li>
+                <li>Crea <code>door_code</code> con la stringa <code>0420</code></li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # SFIDA: Crea nome e punti_vita e stampa i messaggi composti\n    pass\n`,
-        hints: [
-            "var nome = \"Guerriero\"",
-            "print(\"Benvenuto \" + nome)",
-            "var punti_vita = 100",
-            "print(\"Vita: 100\")"
-        ],
-        solution: `func _ready():\n    var nome = "Guerriero"\n    print("Benvenuto " + nome)\n    var punti_vita = 100\n    print("Vita: 100")\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("Benvenuto Guerriero") && out.includes("Vita: 100");
-            tests.push({ desc: "Messaggi dell'eroe stampati con successo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            const s = result.scope || {};
+            const titleOk = s.title === 'The "Lost" Key';
+            const npcOk = s.npc_line === "It's dangerous to go alone!";
+            const doorOk = s.door_code === "0420";
+            tests.push({ desc: "Variabile 'title' con virgolette interne corretta", passed: titleOk, diff: titleOk ? null : `Ricevuto: ${s.title}` });
+            tests.push({ desc: "Variabile 'npc_line' con apostrofo corretta", passed: npcOk, diff: npcOk ? null : `Ricevuto: ${s.npc_line}` });
+            tests.push({ desc: "Variabile 'door_code' impostata a \"0420\"", passed: doorOk, diff: doorOk ? null : `Ricevuto: ${s.door_code}` });
+            const out = (result.logs || []).join('\n');
+            const clean = out.replace(/\s+/g, ' ');
+            const outOk = clean.includes('Title: The "Lost" Key') && clean.includes("NPC: It's dangerous to go alone!") && clean.includes("Door code: 0420");
+            tests.push({ desc: "Output della console corrispondente", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     },
@@ -507,44 +536,62 @@ const LESSONS_DATA = [
             return tests;
         }
     },
-    {
+{
         id: 12,
         chapterId: 3,
         isMastery: true,
-        title: "12. ⭐ Sfida: Variabili (Parte 2 & Tipizzazione)",
+        title: "12. ⭐ Sfida di Apprendimento: Scheda Eroe RPG Tipizzata",
         icon: "🏆",
         xp: 100,
-        expectedOutput: "100\n5.5\ntrue\n9.8",
+        difficulty: "facile",
+        difficultyLabel: "Facile",
+        scenario: "Il database degli eroi richiede tipi statici espliciti per prevenire bug e garantire prestazioni ottimali. Sotto il commento, dichiara una costante e tre variabili con la sintassi richiesta:",
+        requirements: [
+            'Dichiara la costante globale: <code>const MAX_HP: int = 200</code>',
+            'Dichiara la variabile tipizzata: <code>var eroe: String = \"Valerius\"</code>',
+            'Dichiara la variabile tipizzata: <code>var salute: int = 150</code>',
+            'Dichiara con inferenza automatica: <code>var scudo_attivo := true</code> (usando l\'operatore <code>:=</code>)'
+        ],
+        notice: "Non modificare le righe print(). Il programma stampa:",
+        expectedOutput: "Eroe: Valerius\nHP: 150 / 200\nScudo: true",
+        initialCode: `extends Node\n\n# Dichiara la costante MAX_HP sotto\n\nfunc _ready():\n    # Crea eroe, salute e scudo_attivo sotto\n    \n    # Non modificare le righe sotto\n    print("Eroe: ", eroe)\n    print("HP: ", salute, " / ", MAX_HP)\n    print("Scudo: ", scudo_attivo)\n`,
+        aiExplanation: "In GDScript 4, le costanti si dichiarano con <code>const NOME: Tipo = Valore</code> e non possono essere modificate durante il gioco. La tipizzazione statica usa la sintassi <code>var nome: Tipo = valore</code>, consentendo all'autocompletamento di suggerire i metodi corretti. L'operatore speciale di inferenza <code>:=</code> assegna il tipo automaticamente in base al valore iniziale.",
+        hints: [
+            "Dichiara la costante in cima allo script: const MAX_HP: int = 200",
+            "Dichiara le variabili specificando il tipo con i due punti: var eroe: String = \"Valerius\" e var salute: int = 150",
+            "Per l'inferenza di tipo usa := senza scrivere il tipo a mano: var scudo_attivo := true"
+        ],
+        solution: `extends Node\n\nconst MAX_HP: int = 200\n\nfunc _ready():\n    var eroe: String = "Valerius"\n    var salute: int = 150\n    var scudo_attivo := true\n    \n    # Non modificare le righe sotto\n    print("Eroe: ", eroe)\n    print("HP: ", salute, " / ", MAX_HP)\n    print("Scudo: ", scudo_attivo)\n`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: VARIABILI PARTE 2</span>
-                <h3>Scheda Tipizzata con Costanti!</h3>
-                <p>Combina int, float, bool tipizzati e una costante di sistema.</p>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Scheda Eroe RPG Tipizzata</h3>
+                <p>Applica tipi statici rigorosi, costanti e inferenza per configurare la scheda dell'avventuriero.</p>
             </div>
         `,
         task: `
             <ul>
-                <li>Dichiara <code>var vita: int = 100</code></li>
-                <li>Dichiara <code>var velocita: float = 5.5</code></li>
-                <li>Dichiara <code>var vivo: bool = true</code></li>
-                <li>Dichiara <code>const GRAVITA = 9.8</code></li>
-                <li>Stampa ciascuna variabile in sequenza su una riga separata.</li>
+                <li>Dichiara <code>const MAX_HP: int = 200</code></li>
+                <li>Dichiara <code>var eroe: String = "Valerius"</code></li>
+                <li>Dichiara <code>var salute: int = 150</code></li>
+                <li>Dichiara <code>var scudo_attivo := true</code> con inferenza <code>:=</code></li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # SFIDA: Dichiara le 3 variabili tipizzate e la costante, poi stampale\n    pass\n`,
-        hints: [
-            "var vita: int = 100",
-            "var velocita: float = 5.5",
-            "var vivo: bool = true",
-            "const GRAVITA = 9.8"
-        ],
-        solution: `func _ready():\n    var vita: int = 100\n    var velocita: float = 5.5\n    var vivo: bool = true\n    const GRAVITA = 9.8\n    print(vita)\n    print(velocita)\n    print(vivo)\n    print(GRAVITA)\n`,
         validate: async (result) => {
             const tests = [];
-            tests.push({ desc: "Codice eseguito correttamente", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scope;
-            const ok = sc["vita"] === 100 && sc["velocita"] === 5.5 && sc["vivo"] === true && sc["GRAVITA"] === 9.8;
-            tests.push({ desc: "Tutte le variabili e la costante sono definite", passed: ok, diff: ok ? null : "Una o più variabili non corrispondono" });
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const s = result.scope || {};
+            const heroOk = s.eroe === "Valerius";
+            const hpOk = s.salute === 150;
+            const shieldOk = s.scudo_attivo === true;
+            const maxHpOk = s.MAX_HP === 200;
+            tests.push({ desc: "Costante MAX_HP: int = 200 dichiarata correttamente", passed: maxHpOk, diff: maxHpOk ? null : `Ricevuto: ${s.MAX_HP}` });
+            tests.push({ desc: "Variabili tipizzate eroe e salute configurate", passed: heroOk && hpOk, diff: (heroOk && hpOk) ? null : `eroe=${s.eroe}, salute=${s.salute}` });
+            tests.push({ desc: "Variabile scudo_attivo impostata a true con inferenza", passed: shieldOk, diff: shieldOk ? null : `Ricevuto: ${s.scudo_attivo}` });
+            const out = (result.logs || []).join('\n');
+            const clean = out.replace(/\s+/g, ' ');
+            const outOk = clean.includes("Eroe: Valerius") && clean.includes("HP: 150 / 200") && clean.includes("Scudo: true");
+            tests.push({ desc: "Output scheda eroe stampato con precisione", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     },
@@ -668,41 +715,55 @@ const LESSONS_DATA = [
             return tests;
         }
     },
-    {
+{
         id: 16,
         chapterId: 4,
         isMastery: true,
-        title: "16. ⭐ Sfida: Operatori e Matematica di Gioco",
+        title: "16. ⭐ Sfida di Apprendimento: Bottino del Dungeon e Danno Subito",
         icon: "🏆",
         xp: 100,
-        expectedOutput: "70\n25\n2",
+        difficulty: "media",
+        difficultyLabel: "Media",
+        scenario: "Al termine di uno scontro nel dungeon, il party di 3 avventurieri calcola i punti ferita rimasti e si spartisce equamente un forziere di 100 monete d'oro. Sotto il commento, esegui i calcoli con gli operatori adatti:",
+        requirements: [
+            '<code>salute_rimasta</code>: parte da <code>100</code>; sottrai un danno di <code>35</code> usando l\'operatore rapido <code>-=</code>',
+            '<code>monete_per_membro</code>: calcola quante monete intere spettano a ciascuno dividendo <code>100 / 3</code>',
+            '<code>monete_avanzate</code>: calcola quante monete restano nel forziere usando l\'operatore modulo <code>%</code> (<code>100 % 3</code>)'
+        ],
+        notice: "Non modificare le righe print(). Il programma stampa:",
+        expectedOutput: "Salute Guerriero: 65\nMonete per membro: 33\nMonete avanzate: 1",
+        initialCode: `extends Node\n\nfunc _ready():\n    var salute_rimasta = 100\n    # Aggiorna salute_rimasta e calcola monete_per_membro e monete_avanzate sotto\n    \n    # Non modificare le righe sotto\n    print("Salute Guerriero: ", salute_rimasta)\n    print("Monete per membro: ", monete_per_membro)\n    print("Monete avanzate: ", monete_avanzate)\n`,
+        aiExplanation: "In GDScript l'operatore <code>-=</code> sottrae un valore direttamente da una variabile esistente (es. <code>salute_rimasta -= 35</code>). La divisione intera tra due numeri interi <code>100 / 3</code> calcola la parte intera (33), mentre l'operatore resto <code>%</code> (modulo) calcola quante unità avanzano dalla divisione (1).",
+        hints: [
+            "Per sottrarre il danno scrivi: salute_rimasta -= 35",
+            "Per la divisione usa lo slash: var monete_per_membro = 100 / 3",
+            "Per il resto della divisione usa il modulo %: var monete_avanzate = 100 % 3"
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    var salute_rimasta = 100\n    salute_rimasta -= 35\n    var monete_per_membro = 100 / 3\n    var monete_avanzate = 100 % 3\n    \n    # Non modificare le righe sotto\n    print("Salute Guerriero: ", salute_rimasta)\n    print("Monete per membro: ", monete_per_membro)\n    print("Monete avanzate: ", monete_avanzate)\n`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: MATEMATICA RPG</span>
-                <h3>Simula una Battaglia e Dividi il Bottino!</h3>
-                <p>Combina danno subito, divisione del forziere tra compagni e resto con modulo (<code>%</code>).</p>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Bottino del Dungeon e Danno Subito</h3>
+                <p>Verifica l'uso degli operatori di assegnazione rapida (-=), divisione intera (/) e resto modulo (%).</p>
             </div>
         `,
         task: `
             <ul>
-                <li><code>salute = 100</code>; sottrai un danno di <code>30</code> (<code>salute -= 30</code>) e stampa <code>salute</code>.</li>
-                <li><code>monete = 77</code>; dividi per <code>3</code> avventurieri (<code>monete / 3</code>) e stampa la quota intera.</li>
-                <li>Calcola il resto nello scrigno (<code>monete % 3</code>) e stampalo.</li>
+                <li>Sottrai 35 da <code>salute_rimasta</code> con <code>-=</code></li>
+                <li>Calcola <code>var monete_per_membro = 100 / 3</code></li>
+                <li>Calcola <code>var monete_avanzate = 100 % 3</code></li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # SFIDA: Calcola salute rimanente, quota monete e resto\n    pass\n`,
-        hints: [
-            "var salute = 100; salute -= 30; print(salute)",
-            "var monete = 77; print(monete / 3)",
-            "print(monete % 3)"
-        ],
-        solution: `func _ready():\n    var salute = 100\n    salute -= 30\n    print(salute)\n    var monete = 77\n    print(monete / 3)\n    print(monete % 3)\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("70") && out.includes("25") && out.includes("2");
-            tests.push({ desc: "Salute (70), quota (25) e resto (2) corretti", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            const s = result.scope || {};
+            const hpOk = s.salute_rimasta === 65;
+            const coinsOk = Math.floor(Number(s.monete_per_membro)) === 33;
+            const restOk = s.monete_avanzate === 1;
+            tests.push({ desc: "Salute rimasta aggiornata con -= a 65", passed: hpOk, diff: hpOk ? null : `Ricevuto: ${s.salute_rimasta}` });
+            tests.push({ desc: "Monete per membro calcolate a 33", passed: coinsOk, diff: coinsOk ? null : `Ricevuto: ${s.monete_per_membro}` });
+            tests.push({ desc: "Monete avanzate calcolate con % a 1", passed: restOk, diff: restOk ? null : `Ricevuto: ${s.monete_avanzate}` });
             return tests;
         }
     },
@@ -824,41 +885,55 @@ const LESSONS_DATA = [
             return tests;
         }
     },
-    {
+{
         id: 20,
         chapterId: 5,
         isMastery: true,
-        title: "20. ⭐ Sfida: Condizioni e Logica",
+        title: "20. ⭐ Sfida di Apprendimento: Il Portale Antico del Tempio",
         icon: "🏆",
         xp: 100,
-        expectedOutput: "Vittoria Epica!",
+        difficulty: "media",
+        difficultyLabel: "Media",
+        scenario: "Un antico portale magico si apre solo se l'avventuriero possiede abbastanza energia e almeno una reliquia chiave. Sotto il commento, assegna alla variabile <code>stato_portale</code> il messaggio corretto con una catena <code>if</code>, <code>elif</code>, <code>else</code>:",
+        requirements: [
+            'Se <code>energia >= 50</code> AND (<code>ha_amuleto</code> OR <code>ha_chiave</code>): imposta <code>stato_portale = \"Portale Attivato\"</code>',
+            'Altrimenti se <code>energia < 50</code>: imposta <code>stato_portale = \"Energia Insufficiente\"</code>',
+            'Altrimenti: imposta <code>stato_portale = \"Nessuna Reliquia Trovata\"</code>'
+        ],
+        notice: "Non modificare le variabili iniziali né la riga print(). Il programma stampa:",
+        expectedOutput: "Stato: Portale Attivato",
+        initialCode: `extends Node\n\nfunc _ready():\n    var energia = 75\n    var ha_amuleto = true\n    var ha_chiave = false\n    var stato_portale = ""\n    \n    # Scrivi la catena if / elif / else sotto\n    \n    # Non modificare la riga sotto\n    print("Stato: ", stato_portale)\n`,
+        aiExplanation: "In GDScript si combinano le condizioni booleane usando <code>and</code> e <code>or</code>. Racchiudere tra parentesi <code>(ha_amuleto or ha_chiave)</code> assicura che basti una qualsiasi delle due reliquie purché l'energia sia maggiore o uguale a 50. Ogni blocco condizionale deve terminare con <code>:</code> e il corpo deve essere indentato di 4 spazi.",
+        hints: [
+            "Inizia con: if energia >= 50 and (ha_amuleto or ha_chiave):",
+            "Nel ramo elif controlla l'energia: elif energia < 50: stato_portale = \"Energia Insufficiente\"",
+            "Chiudi con else: stato_portale = \"Nessuna Reliquia Trovata\""
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    var energia = 75\n    var ha_amuleto = true\n    var ha_chiave = false\n    var stato_portale = ""\n    \n    if energia >= 50 and (ha_amuleto or ha_chiave):\n        stato_portale = "Portale Attivato"\n    elif energia < 50:\n        stato_portale = "Energia Insufficiente"\n    else:\n        stato_portale = "Nessuna Reliquia Trovata"\n        \n    # Non modificare la riga sotto\n    print("Stato: ", stato_portale)\n`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: CONDIZIONI</span>
-                <h3>La Sconfitta del Boss del Dungeon!</h3>
-                <p>Verifica se il boss è sconfitto (<code>salute_boss <= 0</code>) e il party è sopravvissuto (<code>eroi_vivi > 0</code>).</p>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Il Portale Antico del Tempio</h3>
+                <p>Verifica le decisioni di gioco logiche combinando if, elif, else con gli operatori and e or.</p>
             </div>
         `,
         task: `
             <ul>
-                <li>Dichiara <code>salute_boss: int = 0</code> e <code>eroi_vivi: int = 2</code>.</li>
-                <li>Se <code>salute_boss <= 0 and eroi_vivi > 0:</code> stampa <code>"Vittoria Epica!"</code>.</li>
-                <li>Altrimenti stampa <code>"Sconfitta..."</code>.</li>
+                <li>Se <code>energia >= 50 and (ha_amuleto or ha_chiave)</code>: imposta <code>"Portale Attivato"</code></li>
+                <li>Se <code>energia < 50</code>: imposta <code>"Energia Insufficiente"</code></li>
+                <li>Altrimenti: imposta <code>"Nessuna Reliquia Trovata"</code></li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # SFIDA: Controlla le condizioni di vittoria finale\n    pass\n`,
-        hints: [
-            "var salute_boss: int = 0",
-            "var eroi_vivi: int = 2",
-            "if salute_boss <= 0 and eroi_vivi > 0:",
-            "    print(\"Vittoria Epica!\")"
-        ],
-        solution: `func _ready():\n    var salute_boss: int = 0\n    var eroi_vivi: int = 2\n    if salute_boss <= 0 and eroi_vivi > 0:\n        print("Vittoria Epica!")\n    else:\n        print("Sconfitta...")\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.logs.some(l => l.includes("Vittoria Epica!"));
-            tests.push({ desc: "Condizione di vittoria verificata ('Vittoria Epica!')", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+            const s = result.scope || {};
+            const stateOk = s.stato_portale === "Portale Attivato";
+            tests.push({ desc: "Stato portale impostato a 'Portale Attivato'", passed: stateOk, diff: stateOk ? null : `Ricevuto: "${s.stato_portale}"` });
+            const out = (result.logs || []).join('\n');
+            const clean = out.replace(/\s+/g, ' ');
+            const outOk = clean.includes("Stato: Portale Attivato");
+            tests.push({ desc: "Messaggio stampato a console correttamente", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     },
@@ -979,43 +1054,59 @@ const LESSONS_DATA = [
             return tests;
         }
     },
-    {
+{
         id: 24,
         chapterId: 6,
         isMastery: true,
-        title: "24. ⭐ Sfida: Liste e Collezioni (Array)",
+        title: "24. ⭐ Sfida di Apprendimento: Gestione dello Zaino d'Avventura",
         icon: "🏆",
         xp: 100,
-        expectedOutput: "Pozione Magica\n4",
+        difficulty: "media",
+        difficultyLabel: "Media",
+        scenario: "Il giocatore organizza gli oggetti nel proprio inventario prima del duello finale. Sotto il commento, esegui le operazioni richieste sull'array <code>zaino</code>:",
+        requirements: [
+            'Aggiungi <code>\"Arco Elfico\"</code> in coda allo zaino usando <code>.append()</code>',
+            'Rimuovi l\'oggetto <code>\"Ramo Secco\"</code> dallo zaino usando <code>.erase()</code>',
+            'Verifica se possiedi <code>\"Pozione di Vita\"</code> con <code>.has()</code> e assegna il booleano a <code>var ha_cura</code>',
+            'Conta gli oggetti totali rimasti con <code>.size()</code> e assegna il numero a <code>var totale_slot</code>'
+        ],
+        notice: "Non modificare le righe print(). Il programma stampa:",
+        expectedOutput: "Zaino: [\"Spada\", \"Pozione di Vita\", \"Arco Elfico\"]\nHa pozione: true\nTotale slot: 3",
+        initialCode: `extends Node\n\nfunc _ready():\n    var zaino = ["Spada", "Ramo Secco", "Pozione di Vita"]\n    \n    # Modifica lo zaino e crea ha_cura e totale_slot sotto\n    \n    # Non modificare le righe sotto\n    print("Zaino: ", zaino)\n    print("Ha pozione: ", ha_cura)\n    print("Totale slot: ", totale_slot)\n`,
+        aiExplanation: "Gli array in GDScript offrono potenti metodi nativi: <code>.append(elemento)</code> inserisce in ultima posizione, <code>.erase(elemento)</code> cerca ed elimina la prima occorrenza specificata, <code>.has(elemento)</code> restituisce <code>true</code> se l'elemento è presente e <code>.size()</code> restituisce la dimensione totale della lista.",
+        hints: [
+            "Usa zaino.append(\"Arco Elfico\") per inserire il nuovo arco",
+            "Usa zaino.erase(\"Ramo Secco\") per togliere l'oggetto inutile",
+            "Crea le due variabili: var ha_cura = zaino.has(\"Pozione di Vita\") e var totale_slot = zaino.size()"
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    var zaino = ["Spada", "Ramo Secco", "Pozione di Vita"]\n    \n    zaino.append("Arco Elfico")\n    zaino.erase("Ramo Secco")\n    var ha_cura = zaino.has("Pozione di Vita")\n    var totale_slot = zaino.size()\n    \n    # Non modificare le righe sotto\n    print("Zaino: ", zaino)\n    print("Ha pozione: ", ha_cura)\n    print("Totale slot: ", totale_slot)\n`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: ARRAY</span>
-                <h3>Gestione dell'Equipaggiamento dell'Eroe!</h3>
-                <p>Crea un inventario, inserisci un drop speciale con <code>append()</code> e verifica gli elementi e la dimensione.</p>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Gestione dello Zaino d'Avventura</h3>
+                <p>Verifica le operazioni essenziali sugli array: aggiunta con append, rimozione con erase, ricerca con has e conteggio con size.</p>
             </div>
         `,
         task: `
             <ul>
-                <li>Dichiara <code>zaino = ["Chiave", "Pane", "Spada"]</code>.</li>
-                <li>Aggiungi <code>"Pozione Magica"</code> con <code>append()</code>.</li>
-                <li>Stampa l'ultimo oggetto aggiunto (<code>zaino[3]</code>).</li>
-                <li>Stampa il numero totale di oggetti nello zaino con <code>size()</code>.</li>
+                <li><code>zaino.append("Arco Elfico")</code></li>
+                <li><code>zaino.erase("Ramo Secco")</code></li>
+                <li><code>var ha_cura = zaino.has("Pozione di Vita")</code></li>
+                <li><code>var totale_slot = zaino.size()</code></li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # SFIDA: Gestisci lo zaino con append e size\n    pass\n`,
-        hints: [
-            "var zaino = [\"Chiave\", \"Pane\", \"Spada\"]",
-            "zaino.append(\"Pozione Magica\")",
-            "print(zaino[3])",
-            "print(zaino.size())"
-        ],
-        solution: `func _ready():\n    var zaino = ["Chiave", "Pane", "Spada"]\n    zaino.append("Pozione Magica")\n    print(zaino[3])\n    print(zaino.size())\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("Pozione Magica") && out.includes("4");
-            tests.push({ desc: "Nuovo drop e dimensione totale 4 stampati", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            const s = result.scope || {};
+            const inv = s.zaino || [];
+            const hasBow = inv.includes("Arco Elfico");
+            const noStick = !inv.includes("Ramo Secco");
+            const cureOk = s.ha_cura === true;
+            const sizeOk = s.totale_slot === 3 && inv.length === 3;
+            tests.push({ desc: "Arco Elfico aggiunto e Ramo Secco rimosso", passed: hasBow && noStick, diff: (hasBow && noStick) ? null : `Zaino: ${JSON.stringify(inv)}` });
+            tests.push({ desc: "Controllo ha_cura valido (true)", passed: cureOk, diff: cureOk ? null : `Ricevuto: ${s.ha_cura}` });
+            tests.push({ desc: "Totale slot calcolato a 3", passed: sizeOk, diff: sizeOk ? null : `Ricevuto: ${s.totale_slot}` });
             return tests;
         }
     },
@@ -1139,39 +1230,55 @@ const LESSONS_DATA = [
             return tests;
         }
     },
-    {
+{
         id: 28,
         chapterId: 7,
         isMastery: true,
-        title: "28. ⭐ Sfida: Cicli (For e While)",
+        title: "28. ⭐ Sfida di Apprendimento: Annuncio Ondate e Calcolo XP",
         icon: "🏆",
         xp: 100,
-        expectedOutput: "Onda 1 pronta\nOnda 2 pronta\nOnda 3 pronta",
+        difficulty: "avanzata",
+        difficultyLabel: "Avanzata",
+        scenario: "Il sistema di difesa dell'arena deve elaborare un'ondata di nemici in arrivo, avvisare la guarnigione e calcolare i punti esperienza complessivi della battaglia. Sotto il commento, scrivi un ciclo <code>for</code> che itera sull'array <code>nemici</code>:",
+        requirements: [
+            'Scrivi il ciclo: <code>for nemico in nemici:</code>',
+            'All\'interno del ciclo, stampa per ogni nemico: <code>\"Allerta: \" + nemico</code>',
+            'All\'interno del ciclo, incrementa <code>xp_totali</code> di <code>25</code> (usando <code>+= 25</code>)'
+        ],
+        notice: "Non modificare le righe print() finali. Il programma stampa:",
+        expectedOutput: "Allerta: Slime\nAllerta: Scheletro\nAllerta: Spettro\nAllerta: Boss Drago\nXP Totali: 100",
+        initialCode: `extends Node\n\nfunc _ready():\n    var nemici = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali = 0\n    \n    # Scrivi il ciclo for sotto\n    \n    # Non modificare la riga sotto\n    print("XP Totali: ", xp_totali)\n`,
+        aiExplanation: "Il ciclo <code>for elemento in collezione:</code> scorre in sequenza tutti gli elementi di un array o di una sequenza. Ad ogni passaggio la variabile temporanea (in questo caso <code>nemico</code>) assume il valore dell'elemento corrente, consentendo di eseguire operazioni ripetute come stampare messaggi e sommare punti in un accumulatore.",
+        hints: [
+            "Inizia con la dichiarazione del ciclo: for nemico in nemici:",
+            "Indenta di 4 spazi le due righe all'interno del blocco for",
+            "Dentro il ciclo scrivi: print(\"Allerta: \" + nemico) e xp_totali += 25"
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    var nemici = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali = 0\n    \n    for nemico in nemici:\n        print("Allerta: " + nemico)\n        xp_totali += 25\n        \n    # Non modificare la riga sotto\n    print("XP Totali: ", xp_totali)\n`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: CICLI</span>
-                <h3>Generatore di Ondate di Mostri!</h3>
-                <p>Usa un ciclo <code>for</code> con <code>range(1, 4)</code> per annunciare le tre ondate di nemici del dungeon.</p>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Annuncio Ondate e Calcolo XP</h3>
+                <p>Verifica l'iterazione con i cicli for su collezioni e l'accumulo di valori numerici.</p>
             </div>
         `,
         task: `
             <ul>
-                <li>Scrivi un ciclo <code>for onda in range(1, 4):</code>.</li>
-                <li>All'interno stampa: <code>"Onda " + str(onda) + " pronta"</code>.</li>
+                <li>Itera con <code>for nemico in nemici:</code></li>
+                <li>Stampa <code>"Allerta: " + nemico</code></li>
+                <li>Incrementa <code>xp_totali += 25</code></li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # SFIDA: Genera le 3 ondate con un ciclo for\n    pass\n`,
-        hints: [
-            "for onda in range(1, 4):",
-            "    print(\"Onda \" + str(onda) + \" pronta\")"
-        ],
-        solution: `func _ready():\n    for onda in range(1, 4):\n        print("Onda " + str(onda) + " pronta")\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("Onda 1 pronta") && out.includes("Onda 2 pronta") && out.includes("Onda 3 pronta");
-            tests.push({ desc: "Tutte e 3 le ondate annunciate correttamente", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            const s = result.scope || {};
+            const xpOk = s.xp_totali === 100;
+            tests.push({ desc: "XP Totali accumulati a 100 (4 x 25)", passed: xpOk, diff: xpOk ? null : `Ricevuto: ${s.xp_totali}` });
+            const out = (result.logs || []).join('\n');
+            const clean = out.replace(/\s+/g, ' ');
+            const logsOk = clean.includes("Allerta: Slime") && clean.includes("Allerta: Scheletro") && clean.includes("Allerta: Spettro") && clean.includes("Allerta: Boss Drago");
+            tests.push({ desc: "Tutte le 4 allerte dei nemici stampate", passed: logsOk, diff: logsOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     },
@@ -1290,41 +1397,52 @@ const LESSONS_DATA = [
             return tests;
         }
     },
-    {
+{
         id: 32,
         chapterId: 8,
         isMastery: true,
-        title: "32. ⭐ Sfida: Funzioni e Nodi Godot",
+        title: "32. ⭐ Sfida di Apprendimento: Motore di Calcolo Danno Critico",
         icon: "🏆",
         xp: 100,
-        expectedOutput: "Bonus calcolato: 150",
+        difficulty: "avanzata",
+        difficultyLabel: "Avanzata",
+        scenario: "Il modulo di combattimento di Godot richiede una funzione pura e riutilizzabile per calcolare i colpi inflitti dai personaggi in base ai colpi critici. Sotto il commento iniziale, definisci la funzione richiesta:",
+        requirements: [
+            'Definisci la funzione: <code>func calcola_colpo(attacco: int, critico: bool) -> int:</code>',
+            'Se <code>critico</code> è <code>true</code>, restituisci con return il doppio dell\'attacco (<code>attacco * 2</code>)',
+            'Altrimenti restituisci con return semplicemente il valore di <code>attacco</code>'
+        ],
+        notice: "Non modificare il codice dentro _ready(). Il programma stampa:",
+        expectedOutput: "Colpo normale: 30\nColpo critico: 60",
+        initialCode: `extends Node\n\n# Definisci la funzione calcola_colpo sotto\n\n\nfunc _ready():\n    # Non modificare le righe sotto\n    var normale = calcola_colpo(30, false)\n    var critico = calcola_colpo(30, true)\n    print("Colpo normale: ", normale)\n    print("Colpo critico: ", critico)\n`,
+        aiExplanation: "Le funzioni personalizzate si dichiarano con <code>func nome_funzione(argomenti):</code>. La parola chiave <code>return</code> interrompe l'esecuzione della funzione e restituisce il valore al chiamante. Specificare il tipo con <code>-> int</code> rende la funzione auto-documentante ed efficiente.",
+        hints: [
+            "Inizia la funzione con: func calcola_colpo(attacco: int, critico: bool) -> int:",
+            "Verifica la condizione booleana: if critico: return attacco * 2",
+            "Nel ramo else scrivi: else: return attacco"
+        ],
+        solution: `extends Node\n\nfunc calcola_colpo(attacco: int, critico: bool) -> int:\n    if critico:\n        return attacco * 2\n    else:\n        return attacco\n\nfunc _ready():\n    var normale = calcola_colpo(30, false)\n    var critico = calcola_colpo(30, true)\n    print("Colpo normale: ", normale)\n    print("Colpo critico: ", critico)\n`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI PADRONANZA: FUNZIONI</span>
-                <h3>Crea una Funzione di Calcolo Ricompensa!</h3>
-                <p>Costruisci una funzione che accetta punti base e moltiplicatore, restituisce il totale e stampalo in <code>_ready()</code>.</p>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Motore di Calcolo Danno Critico</h3>
+                <p>Verifica la creazione di funzioni con parametri multipli, logica condizionale interna e valore di ritorno return.</p>
             </div>
         `,
         task: `
             <ul>
-                <li>Crea la funzione <code>calcola_bonus(base, bonus): return base * bonus</code>.</li>
-                <li>In <code>_ready():</code>, chiama <code>var ris = calcola_bonus(50, 3)</code>.</li>
-                <li>Stampa: <code>"Bonus calcolato: " + str(ris)</code>.</li>
+                <li>Crea <code>func calcola_colpo(attacco: int, critico: bool) -> int:</code></li>
+                <li>Se critico è true ritorna <code>attacco * 2</code></li>
+                <li>Altrimenti ritorna <code>attacco</code></li>
             </ul>
         `,
-        initialCode: `func calcola_bonus(base, bonus):\n    # SFIDA: Calcola e ritorna base * bonus\n    pass\n\nfunc _ready():\n    # Chiama la funzione con 50 e 3, poi stampa il messaggio finale\n    pass\n`,
-        hints: [
-            "return base * bonus",
-            "var ris = calcola_bonus(50, 3)",
-            "print(\"Bonus calcolato: \" + str(ris))"
-        ],
-        solution: `func calcola_bonus(base, bonus):\n    return base * bonus\n\nfunc _ready():\n    var ris = calcola_bonus(50, 3)\n    print("Bonus calcolato: " + str(ris))\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("Bonus calcolato: 150");
-            tests.push({ desc: "Risultato 'Bonus calcolato: 150' stampato", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+            const out = (result.logs || []).join('\n');
+            const clean = out.replace(/\s+/g, ' ');
+            const ok = clean.includes("Colpo normale: 30") && clean.includes("Colpo critico: 60");
+            tests.push({ desc: "Colpo normale (30) e colpo critico (60) calcolati con successo", passed: ok, diff: ok ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     },
@@ -1457,43 +1575,60 @@ const LESSONS_DATA = [
             return tests;
         }
     },
-    {
+{
         id: 36,
         chapterId: 9,
         isMastery: true,
-        title: "36. ⭐ Sfida: Vettori e Movimento 2D",
+        title: "36. ⭐ Sfida di Apprendimento: Navigazione Radar e Atterraggio 2D",
         icon: "🏆",
         xp: 100,
-        expectedOutput: "Vector2(140, 250)",
+        difficulty: "avanzata",
+        difficultyLabel: "Avanzata",
+        scenario: "La sonda spaziale Orion deve calcolare la sua traiettoria di avvicinamento e verificare se le coordinate finali coincidono con la stazione spaziale orbitale. Sotto il commento, completa i calcoli vettoriali 2D:",
+        requirements: [
+            'Inizializza la posizione della sonda: <code>var posizione = Vector2(100, 200)</code>',
+            'Applica la spinta dei motori modificando gli assi: <code>posizione.x += 50</code> e <code>posizione.y -= 30</code>',
+            'Crea la coordinata della stazione: <code>var stazione = Vector2(150, 170)</code>',
+            'Verifica se la sonda ha raggiunto la stazione: <code>var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)</code>'
+        ],
+        notice: "Non modificare le righe print(). Il programma stampa:",
+        expectedOutput: "Posizione finale: Vector2(150, 170)\nStazione raggiunta: true",
+        initialCode: `extends Node\n\nfunc _ready():\n    # Crea posizione, aggiorna le coordinate e verifica atterrato sotto\n    \n    # Non modificare le righe sotto\n    print("Posizione finale: ", posizione)\n    print("Stazione raggiunta: ", atterrato)\n`,
+        aiExplanation: "Un <code>Vector2(x, y)</code> rappresenta un punto o una velocità nello spazio bidimensionale di Godot Engine. Puoi accedere e modificare direttamente le singole componenti <code>.x</code> e <code>.y</code>. Per verificare se la sonda ha raggiunto le coordinate della stazione, puoi confrontare i valori delle coordinate per accertarti dell'allineamento perfetto.",
+        hints: [
+            "Inizializza il vettore: var posizione = Vector2(100, 200)",
+            "Aggiorna i due assi: posizione.x += 50 e posizione.y -= 30",
+            "Crea la stazione e confronta: var stazione = Vector2(150, 170) e var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)"
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    var posizione = Vector2(100, 200)\n    posizione.x += 50\n    posizione.y -= 30\n    var stazione = Vector2(150, 170)\n    var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)\n    \n    # Non modificare le righe sotto\n    print("Posizione finale: ", posizione)\n    print("Stazione raggiunta: ", atterrato)\n`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">⚔️ SFIDA DI PADRONANZA FINALE - VETTORI 2D</span>
-                <h3>Il Propulsore Spaziale di Godot!</h3>
-                <p>Simula il controller di decollo di una navetta spaziale calcolando lo spostamento su entrambi gli assi.</p>
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO FINALE</span>
+                <h3>Navigazione Radar e Atterraggio 2D</h3>
+                <p>Verifica l'uso avanzato di Vector2, modifica degli assi X/Y e confronto vettoriale nello spazio bidimensionale di Godot.</p>
             </div>
         `,
         task: `
             <ul>
-                <li>Dichiara <code>nave = Vector2(100, 300)</code>.</li>
-                <li>Aumenta la coordinata X: <code>nave.x += 40</code>.</li>
-                <li>Riduci la coordinata Y verso l'alto: <code>nave.y -= 50</code>.</li>
-                <li>Stampa la posizione finale con <code>print(nave)</code>.</li>
+                <li>Crea <code>var posizione = Vector2(100, 200)</code></li>
+                <li>Modifica <code>posizione.x += 50</code> e <code>posizione.y -= 30</code></li>
+                <li>Crea <code>var stazione = Vector2(150, 170)</code></li>
+                <li>Verifica <code>var atterrato = (posizione.x == stazione.x and posizione.y == stazione.y)</code></li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # SFIDA FINALE: Calcola la traiettoria della nave spaziale\n    pass\n`,
-        hints: [
-            "var nave = Vector2(100, 300)",
-            "nave.x += 40",
-            "nave.y -= 50",
-            "print(nave)"
-        ],
-        solution: `func _ready():\n    var nave = Vector2(100, 300)\n    nave.x += 40\n    nave.y -= 50\n    print(nave)\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const p = result.scope["nave"];
-            const ok = p && p.x === 140 && p.y === 250;
-            tests.push({ desc: "Posizione finale calcolata a Vector2(140, 250)", passed: ok, diff: ok ? null : "Posizione non corretta" });
+            const s = result.scope || {};
+            const pos = s.posizione;
+            const posOk = pos && Number(pos.x) === 150 && Number(pos.y) === 170;
+            const landOk = s.atterrato === true;
+            tests.push({ desc: "Posizione finale calcolata a Vector2(150, 170)", passed: posOk, diff: posOk ? null : `Ricevuto: ${pos}` });
+            tests.push({ desc: "Atterraggio riuscito con successo (true)", passed: landOk, diff: landOk ? null : `Ricevuto: ${s.atterrato}` });
+            const out = (result.logs || []).join('\n');
+            const clean = out.replace(/\s+/g, ' ');
+            const outOk = clean.includes("Posizione finale: Vector2(150, 170)") && clean.includes("Stazione raggiunta: true");
+            tests.push({ desc: "Output della missione stampato con successo", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     }
