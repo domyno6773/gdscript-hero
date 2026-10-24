@@ -490,6 +490,18 @@ const AuthManager = {
         return acc ? acc.progress : null;
     },
 
+    /**
+     * Verifica se un utente è autorizzato come amministratore
+     */
+    isAdmin(user = null) {
+        const u = user || this.currentUser;
+        if (!u || u.isGuest || !u.email) return false;
+        if (window.SupabaseConfig && typeof window.SupabaseConfig.isAdmin === 'function') {
+            return window.SupabaseConfig.isAdmin(u.email);
+        }
+        return false;
+    },
+
     // ===================================================================
     // METRICHE E STATISTICHE AMMINISTRATORE (Admin Dashboard)
     // ===================================================================
@@ -498,6 +510,17 @@ const AuthManager = {
      * Raccoglie le statistiche della piattaforma (utenti, XP, lezioni)
      */
     async fetchAdminStats() {
+        if (!this.isAdmin()) {
+            console.warn('[AuthManager] Tentativo non autorizzato di accedere alle statistiche admin.');
+            return {
+                isCloud: this.isCloudActive(),
+                totalUsers: 0,
+                totalXp: 0,
+                avgLessons: 0,
+                usersList: []
+            };
+        }
+
         // 1. Se Supabase è connesso, recupera dati reali dal cloud
         if (this.isCloudActive()) {
             try {

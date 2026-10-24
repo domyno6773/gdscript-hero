@@ -25,9 +25,7 @@ const SupabaseConfig = {
 
     // 3. Email autorizzate ad accedere al "👑 Pannello Amministratore"
     adminEmails: [
-        'gianlucachifari@hotmail.com',
-        'admin@godot.it',
-        'godot.dev@gmail.com'
+        'gianlucachifari@hotmail.com'
     ],
 
     // Verifica se le credenziali cloud sono attive

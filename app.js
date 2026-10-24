@@ -2757,6 +2757,17 @@ const App = {
         if (btnSettingsAuth) {
             btnSettingsAuth.innerText = isGuest ? '🔑 Accedi' : '🚪 Esci';
         }
+
+        // Visibilità riga Admin nelle Impostazioni: VISIBILE SOLO SE L'UTENTE È L'ADMIN
+        const adminSettingsRow = document.getElementById('admin-settings-row');
+        if (adminSettingsRow) {
+            const isUserAdmin = window.AuthManager && window.AuthManager.isAdmin(user);
+            if (isUserAdmin) {
+                adminSettingsRow.classList.remove('hidden');
+            } else {
+                adminSettingsRow.classList.add('hidden');
+            }
+        }
     },
 
     openAuthModal(defaultTab = 'login') {
@@ -2824,6 +2835,12 @@ const App = {
     },
 
     openAdminModal() {
+        if (!window.AuthManager || !window.AuthManager.isAdmin()) {
+            SoundFX.playError();
+            alert('⛔ Accesso riservato: Solo l\'amministratore autenticato può accedere al pannello statistiche.');
+            return;
+        }
+
         SoundFX.playClick();
         const settingsModal = document.getElementById('settings-modal');
         if (settingsModal) settingsModal.classList.add('hidden');

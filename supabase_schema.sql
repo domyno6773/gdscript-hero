@@ -88,3 +88,16 @@ SELECT
     COALESCE(AVG(finished_lessons_count), 0) AS avg_lessons_completed,
     COALESCE(MAX(xp), 0) AS max_xp_achieved
 FROM public.game_saves;
+
+-- 8. Policy per consentire agli Admin di visualizzare le statistiche di tutti gli utenti
+CREATE POLICY "Gli amministratori possono leggere tutti i salvataggi"
+    ON public.game_saves FOR SELECT
+    USING (
+        (auth.jwt() ->> 'email') = 'gianlucachifari@hotmail.com'
+    );
+
+CREATE POLICY "Gli amministratori possono leggere tutti i profili"
+    ON public.profiles FOR SELECT
+    USING (
+        (auth.jwt() ->> 'email') = 'gianlucachifari@hotmail.com'
+    );
