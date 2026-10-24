@@ -329,8 +329,8 @@ const AuthManager = {
      * Accesso Rapido con Account Google (Cloud OAuth o Locale)
      */
     async loginWithGoogle(customProfile = null, currentProgress = null) {
-        // 1. Se Supabase è attivo: avvia Google OAuth ufficiale
-        if (this.isCloudActive()) {
+        // 1. Se NON è passato un profilo manuale e Supabase è attivo: avvia Google OAuth ufficiale
+        if (!customProfile && this.isCloudActive()) {
             const { data, error } = await this.supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
@@ -344,7 +344,7 @@ const AuthManager = {
             return data;
         }
 
-        // 2. Fallback autonomo locale
+        // 2. Se è specificato un profilo manuale o fallback autonomo locale
         const googleName = customProfile?.name || 'Sviluppatore Google';
         const googleEmail = (customProfile?.email || 'godot.dev@gmail.com').toLowerCase();
         const googleAvatar = customProfile?.photoURL || 'https://lh3.googleusercontent.com/a/default-user=s96-c';

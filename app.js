@@ -2414,11 +2414,30 @@ const App = {
         const googlePickerModal = document.getElementById('google-picker-modal');
         const btnCloseGooglePicker = document.getElementById('btn-close-google-picker');
 
-        if (btnGoogle && googlePickerModal) {
-            btnGoogle.onclick = () => {
+        if (btnGoogle) {
+            btnGoogle.onclick = async () => {
                 SoundFX.playClick();
-                // Mostra popup di selezione account Google
-                googlePickerModal.classList.remove('hidden');
+                // 1. Se Supabase Cloud è attivo, prova ad avviare Google OAuth ufficiale
+                if (window.AuthManager && window.AuthManager.isCloudActive()) {
+                    try {
+                        await window.AuthManager.loginWithGoogle();
+                        return;
+                    } catch (err) {
+                        console.warn('[Google Auth]', err.message);
+                        // Se il provider Google non è ancora configurato su Supabase, apri il dialogo di fallback
+                        if (googlePickerModal) {
+                            googlePickerModal.classList.remove('hidden');
+                        } else {
+                            this.showAuthAlert('Provider Google non ancora abilitato su Supabase: ' + err.message);
+                        }
+                        return;
+                    }
+                }
+
+                // 2. Modalità locale / offline
+                if (googlePickerModal) {
+                    googlePickerModal.classList.remove('hidden');
+                }
             };
         }
 
