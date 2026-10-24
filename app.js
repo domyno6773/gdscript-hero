@@ -1902,6 +1902,21 @@ const App = {
         const btnCloseQuests = document.getElementById('btn-close-quests');
         if (btnCloseQuests) btnCloseQuests.onclick = () => this.closeQuestsModal();
 
+        // Toggle Sfide Giornaliere a Scomparsa su Mobile
+        const sidebarToggle = document.getElementById('sidebar-quests-toggle');
+        const sidebarCard = document.getElementById('sidebar-quests-card');
+        if (sidebarToggle && sidebarCard) {
+            sidebarToggle.onclick = () => {
+                if (window.innerWidth <= 820) {
+                    SoundFX.playClick();
+                    sidebarCard.classList.toggle('collapsed-mobile');
+                    setTimeout(() => {
+                        this.drawConnectingLines();
+                    }, 100);
+                }
+            };
+        }
+
         // Progetti
         const btnCloseProj = document.getElementById('btn-close-project-preview');
         if (btnCloseProj) btnCloseProj.onclick = () => this.closeProjectPreview();

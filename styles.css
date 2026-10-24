@@ -386,6 +386,22 @@ body {
     border-bottom: 1px solid rgba(51, 65, 85, 0.6);
 }
 
+.sidebar-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar-toggle-chevron {
+    display: none;
+}
+
+.sidebar-quests-collapsible-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
 .sidebar-card-title-group {
     display: flex;
     align-items: center;
@@ -3513,6 +3529,55 @@ kbd {
         width: 100% !important;
         max-width: 100% !important;
         position: static !important;
+    }
+
+    /* Sfide Giornaliere a Scomparsa su Mobile */
+    .sidebar-card-header {
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .sidebar-toggle-chevron {
+        display: inline-block;
+        font-size: 0.72rem;
+        color: var(--text-dim);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s;
+    }
+
+    .daily-quests-sidebar-card {
+        padding: 14px 16px !important;
+        transition: all 0.25s ease;
+    }
+
+    .daily-quests-sidebar-card.collapsed-mobile {
+        gap: 0 !important;
+    }
+
+    .daily-quests-sidebar-card.collapsed-mobile .sidebar-card-header {
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+    }
+
+    .daily-quests-sidebar-card.collapsed-mobile .sidebar-toggle-chevron {
+        transform: rotate(0deg);
+    }
+
+    .daily-quests-sidebar-card.collapsed-mobile .sidebar-quests-collapsible-body {
+        display: none !important;
+    }
+
+    .daily-quests-sidebar-card:not(.collapsed-mobile) .sidebar-toggle-chevron {
+        transform: rotate(180deg);
+        color: var(--accent-cyan);
+    }
+
+    .daily-quests-sidebar-card:not(.collapsed-mobile) .sidebar-quests-collapsible-body {
+        display: flex !important;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 12px;
+        animation: fadeIn 0.2s ease;
     }
 
     .chapter-card.overall-course-card {

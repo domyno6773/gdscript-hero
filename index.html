@@ -124,8 +124,8 @@
 
             <!-- Colonna Destra: Riquadro Missioni Giornaliere con Bordi Stondati & Barra di Progresso -->
             <aside class="roadmap-sidebar-col">
-                <div class="daily-quests-sidebar-card" id="sidebar-quests-card">
-                    <div class="sidebar-card-header">
+                <div class="daily-quests-sidebar-card collapsed-mobile" id="sidebar-quests-card">
+                    <div class="sidebar-card-header" id="sidebar-quests-toggle" title="Tocca per mostrare/nascondere le missioni">
                         <div class="sidebar-card-title-group">
                             <span class="sidebar-card-icon">🎯</span>
                             <div>
@@ -133,16 +133,21 @@
                                 <span class="sidebar-card-subtitle">Obiettivi del giorno</span>
                             </div>
                         </div>
-                        <span class="sidebar-card-badge" id="sidebar-quests-badge">0/3</span>
+                        <div class="sidebar-header-right">
+                            <span class="sidebar-card-badge" id="sidebar-quests-badge">0/3</span>
+                            <span class="sidebar-toggle-chevron" id="sidebar-quests-chevron">▼</span>
+                        </div>
                     </div>
 
-                    <div class="sidebar-quests-countdown">
-                        <span>⏳ Reset a mezzanotte</span>
-                        <span class="sidebar-today-label" id="sidebar-today-date">Oggi</span>
-                    </div>
+                    <div class="sidebar-quests-collapsible-body" id="sidebar-quests-body">
+                        <div class="sidebar-quests-countdown">
+                            <span>⏳ Reset a mezzanotte</span>
+                            <span class="sidebar-today-label" id="sidebar-today-date">Oggi</span>
+                        </div>
 
-                    <div class="sidebar-quests-list" id="sidebar-quests-list">
-                        <!-- Popolato dinamicamente da app.js -->
+                        <div class="sidebar-quests-list" id="sidebar-quests-list">
+                            <!-- Popolato dinamicamente da app.js -->
+                        </div>
                     </div>
                 </div>
             </aside>
