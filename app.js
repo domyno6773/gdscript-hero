@@ -2241,15 +2241,25 @@ const App = {
     // ===================================================================
     // SISTEMA DI AUTENTICAZIONE, ACCOUNT & BACKUP DATI (auth.js integration)
     // ===================================================================
-    initAuthAndSync() {
+    async initAuthAndSync() {
         if (!window.AuthManager) return;
 
-        window.AuthManager.init();
+        const hadOAuthTokens = window.location.hash.includes('access_token=') || window.location.search.includes('code=');
 
         // Listener reattivo al cambio di sessione (Ospite <-> Autenticato)
         window.AuthManager.onAuthStateChanged((user) => {
             this.updateAuthUI(user);
+            if (hadOAuthTokens && user && !user.isGuest) {
+                this.showToast({
+                    icon: '🎉',
+                    tag: 'BENTORNATO!',
+                    title: 'Accesso Google Completato',
+                    desc: `Benvenuto, ${user.name || user.email}!`
+                });
+            }
         });
+
+        await window.AuthManager.init();
 
         // 1. Apertura e Chiusura Modal Auth
         const btnNavAuth = document.getElementById('btn-open-auth-nav');

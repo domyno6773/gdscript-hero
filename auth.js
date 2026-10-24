@@ -20,17 +20,60 @@ const AuthManager = {
      * ripristina la sessione o imposta la modalità Ospite.
      */
     async init() {
+        let supabaseFoundUser = false;
+
         // 1. Inizializza client Supabase se le credenziali sono presenti
         if (typeof window.supabase !== 'undefined' && window.SupabaseConfig && window.SupabaseConfig.isConfigured()) {
             try {
                 this.supabaseClient = window.supabase.createClient(
                     window.SupabaseConfig.url,
-                    window.SupabaseConfig.anonKey
+                    window.SupabaseConfig.anonKey,
+                    {
+                        auth: {
+                            persistSession: true,
+                            autoRefreshToken: true,
+                            detectSessionInUrl: true
+                        }
+                    }
                 );
                 console.log('[AuthManager] Supabase Cloud connesso con successo!');
 
+                // Verifica immediata della sessione attiva (da OAuth redirect, token memorizzato o code exchange)
+                const { data: { session }, error: sessionErr } = await this.supabaseClient.auth.getSession();
+                if (sessionErr) {
+                    console.warn('[AuthManager] Errore getSession:', sessionErr.message);
+                }
+
+                if (session && session.user) {
+                    const u = session.user;
+                    const sessionUser = {
+                        id: u.id,
+                        isGuest: false,
+                        provider: u.app_metadata?.provider || (u.email?.includes('gmail') ? 'google' : 'email'),
+                        name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
+                        email: u.email,
+                        photoURL: u.user_metadata?.avatar_url || null,
+                        createdAt: u.created_at || new Date().toISOString()
+                    };
+                    this.saveSession(sessionUser);
+                    supabaseFoundUser = true;
+                    console.log('[AuthManager] Sessione Supabase autenticata trovata:', sessionUser.email);
+
+                    // Pulisce l'URL dai frammenti di hash OAuth o query code
+                    if (window.location.hash || window.location.search.includes('code=')) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+
+                    // Carica i salvataggi cloud
+                    const cloudSave = await this.fetchFromCloud();
+                    if (cloudSave && window.App && typeof window.App.applyImportedState === 'function') {
+                        window.App.applyImportedState(cloudSave, false);
+                    }
+                }
+
                 // Ascolta gli eventi di sessione Supabase (OAuth redirect, login, refresh)
                 this.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    console.log('[AuthManager] onAuthStateChange event:', event);
                     if (session && session.user) {
                         const u = session.user;
                         const sessionUser = {
@@ -43,6 +86,11 @@ const AuthManager = {
                             createdAt: u.created_at || new Date().toISOString()
                         };
                         this.saveSession(sessionUser);
+
+                        // Pulisce l'URL dai frammenti OAuth se presenti
+                        if (window.location.hash || window.location.search.includes('code=')) {
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        }
 
                         // Carica i progressi cloud salvati per questo utente
                         const cloudSave = await this.fetchFromCloud();
@@ -60,14 +108,19 @@ const AuthManager = {
             }
         }
 
-        // 2. Ripristina sessione locale o imposta Ospite
-        try {
-            const rawSession = localStorage.getItem(this.SESSION_KEY);
-            if (rawSession) {
-                this.currentUser = JSON.parse(rawSession);
+        // 2. Se Supabase non ha fornito un utente valido, controlla localStorage locale
+        if (!supabaseFoundUser) {
+            try {
+                const rawSession = localStorage.getItem(this.SESSION_KEY);
+                if (rawSession) {
+                    const parsed = JSON.parse(rawSession);
+                    if (parsed && !parsed.isGuest) {
+                        this.currentUser = parsed;
+                    }
+                }
+            } catch (e) {
+                this.currentUser = null;
             }
-        } catch (e) {
-            this.currentUser = null;
         }
 
         if (!this.currentUser) {
