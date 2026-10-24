@@ -30,6 +30,7 @@ const AuthManager = {
                     window.SupabaseConfig.anonKey,
                     {
                         auth: {
+                            flowType: 'implicit',
                             persistSession: true,
                             autoRefreshToken: true,
                             detectSessionInUrl: true
@@ -38,12 +39,42 @@ const AuthManager = {
                 );
                 console.log('[AuthManager] Supabase Cloud connesso con successo!');
 
-                // 1. Controlla se c'è un codice di autorizzazione PKCE nell'URL (?code=...)
-                const urlParams = new URLSearchParams(window.location.search);
-                const authCode = urlParams.get('code');
+                // Controllo errori nell'URL di ritorno
+                const searchParams = new URLSearchParams(window.location.search);
+                const hashParams = new URLSearchParams(window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '');
+                const urlError = searchParams.get('error_description') || hashParams.get('error_description');
+                if (urlError) {
+                    console.error('[AuthManager] Errore restituito da OAuth:', urlError);
+                    alert('Errore durante l\'accesso con Google: ' + decodeURIComponent(urlError.replace(/\+/g, ' ')));
+                    window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
+                }
+
                 let activeSession = null;
 
-                if (authCode) {
+                // 1. Controlla prima se sono presenti token nell'hash dell'URL (#access_token=... da Implicit Flow)
+                const accessToken = hashParams.get('access_token');
+                const refreshToken = hashParams.get('refresh_token');
+                if (accessToken) {
+                    try {
+                        console.log('[AuthManager] Rilevato access_token da Google OAuth nell\'hash dell\'URL!');
+                        const { data, error } = await this.supabaseClient.auth.setSession({
+                            access_token: accessToken,
+                            refresh_token: refreshToken || ''
+                        });
+                        if (!error && data && data.session) {
+                            activeSession = data.session;
+                            console.log('[AuthManager] Sessione impostata con successo tramite setSession!');
+                        } else if (error) {
+                            console.warn('[AuthManager] Errore setSession:', error.message);
+                        }
+                    } catch (e) {
+                        console.warn('[AuthManager] Eccezione setSession:', e);
+                    }
+                }
+
+                // 2. Controlla se c'è un codice di autorizzazione PKCE (?code=...)
+                const authCode = searchParams.get('code');
+                if (!activeSession && authCode) {
                     try {
                         console.log('[AuthManager] Rilevato codice OAuth da Google (?code=...), scambio sessione in corso...');
                         const { data, error } = await this.supabaseClient.auth.exchangeCodeForSession(authCode);
@@ -58,7 +89,7 @@ const AuthManager = {
                     }
                 }
 
-                // 2. Se non c'era o è fallito, controlla se c'è una sessione attiva memorizzata (o da hash)
+                // 3. Se non c'era o è fallito, controlla se c'è una sessione attiva già memorizzata
                 if (!activeSession) {
                     const { data: { session }, error: sessionErr } = await this.supabaseClient.auth.getSession();
                     if (!sessionErr && session) {
@@ -82,8 +113,8 @@ const AuthManager = {
                     console.log('[AuthManager] Sessione Supabase autenticata trovata:', sessionUser.email);
 
                     // Pulisce l'URL dai frammenti di hash OAuth o query code
-                    if (window.location.hash || window.location.search.includes('code=')) {
-                        window.history.replaceState({}, document.title, window.location.pathname);
+                    if (window.location.hash || window.location.search.includes('code=') || window.location.search.includes('error=')) {
+                        window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
                     }
 
                     // Carica i salvataggi cloud
