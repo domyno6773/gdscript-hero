@@ -437,7 +437,10 @@ const AuthManager = {
     async loginWithGoogle(customProfile = null, currentProgress = null) {
         // 1. Se NON è passato un profilo manuale e Supabase è attivo: avvia Google OAuth ufficiale
         if (!customProfile && this.isCloudActive()) {
-            const redirectUrl = window.location.origin + window.location.pathname;
+            let redirectUrl = window.location.origin + window.location.pathname;
+            if (!redirectUrl.endsWith('/') && !redirectUrl.endsWith('.html')) {
+                redirectUrl += '/';
+            }
             const { data, error } = await this.supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
