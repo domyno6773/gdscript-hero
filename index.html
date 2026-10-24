@@ -585,9 +585,32 @@
                 <h2>⚙️ Impostazioni</h2>
                 <button class="modal-close-btn" id="btn-close-settings">✕</button>
             </div>
-            <p class="modal-subtitle">Personalizza l'audio e gestisci la memoria dei progressi.</p>
+            <p class="modal-subtitle">Personalizza tema, audio e memoria dei progressi.</p>
 
-            <!-- Gruppo 1: Controlli Audio -->
+            <!-- Gruppo 1: Aspetto e Tema (Chiaro / Scuro) -->
+            <div class="settings-group">
+                <div class="settings-group-title">🎨 Aspetto e Tema</div>
+                
+                <div class="settings-row theme-settings-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Modalità Visiva</span>
+                        <span class="settings-item-sub">Scegli tra modalità scura e chiara</span>
+                    </div>
+                    
+                    <div class="theme-switch-container">
+                        <button type="button" class="theme-btn active" id="btn-theme-dark" title="Tema Scuro">
+                            <span class="theme-btn-icon">🌙</span>
+                            <span class="theme-btn-text">Scuro</span>
+                        </button>
+                        <button type="button" class="theme-btn" id="btn-theme-light" title="Tema Chiaro">
+                            <span class="theme-btn-icon">☀️</span>
+                            <span class="theme-btn-text">Chiaro</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gruppo 2: Controlli Audio -->
             <div class="settings-group">
                 <div class="settings-group-title">🔊 Audio ed Effetti Sonori</div>
                 

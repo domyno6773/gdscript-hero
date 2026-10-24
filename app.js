@@ -1,6 +1,7 @@
 // GDScript Hero - Motore Applicativo con Capitoli, Sfide di Padronanza, Profilo, Missioni, Pratica & Progetti
 const App = {
     state: {
+        theme: "dark", // "dark" | "light"
         currentLessonId: 1,
         completedLessons: [1],
         finishedLessons: [],
@@ -81,6 +82,7 @@ const App = {
 
     init() {
         this.loadStorage();
+        this.applyTheme(this.state.theme || 'dark');
         this.checkDailyQuestsReset();
         this.bindEvents();
         this.applyProfileUI();
@@ -117,6 +119,10 @@ const App = {
                 this.state.lastActiveDate = parsed.lastActiveDate || null;
                 this.state.userCode = parsed.userCode || {};
                 
+                if (parsed.theme) {
+                    this.state.theme = parsed.theme;
+                }
+
                 if (parsed.profile) {
                     this.state.profile = { ...this.state.profile, ...parsed.profile };
                 }
@@ -149,6 +155,7 @@ const App = {
     saveStorage() {
         try {
             localStorage.setItem('gdscript_hero_save_v4', JSON.stringify({
+                theme: this.state.theme,
                 xp: this.state.xp,
                 streak: this.state.streak,
                 finishedLessons: this.state.finishedLessons,
@@ -733,6 +740,32 @@ const App = {
     // ==========================================
     // IMPOSTAZIONI & RESET DATI
     // ==========================================
+    setTheme(theme) {
+        SoundFX.playClick();
+        this.state.theme = theme;
+        this.saveStorage();
+        this.applyTheme(theme);
+    },
+
+    applyTheme(theme) {
+        const currentTheme = theme || 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        const btnDark = document.getElementById('btn-theme-dark');
+        const btnLight = document.getElementById('btn-theme-light');
+        if (btnDark && btnLight) {
+            if (currentTheme === 'light') {
+                btnDark.classList.remove('active');
+                btnLight.classList.add('active');
+            } else {
+                btnLight.classList.remove('active');
+                btnDark.classList.add('active');
+            }
+        }
+        if (this.drawConnectingLines) {
+            setTimeout(() => this.drawConnectingLines(), 60);
+        }
+    },
+
     openSettingsModal() {
         SoundFX.playClick();
         const soundCheckbox = document.getElementById('setting-sound-enabled');
@@ -743,6 +776,19 @@ const App = {
         const percent = Math.round(SoundFX.volume * 100);
         if (volumeSlider) volumeSlider.value = percent;
         if (volumeLabel) volumeLabel.innerText = `${percent}%`;
+
+        // Sincronizza stato pulsanti tema
+        const btnDark = document.getElementById('btn-theme-dark');
+        const btnLight = document.getElementById('btn-theme-light');
+        if (btnDark && btnLight) {
+            if (this.state.theme === 'light') {
+                btnDark.classList.remove('active');
+                btnLight.classList.add('active');
+            } else {
+                btnLight.classList.remove('active');
+                btnDark.classList.add('active');
+            }
+        }
 
         // Ripristina stato tasto reset
         const confirmBox = document.getElementById('reset-confirm-box');
@@ -1981,6 +2027,15 @@ const App = {
         const btnCloseSettings = document.getElementById('btn-close-settings');
         if (btnCloseSettings) {
             btnCloseSettings.onclick = () => this.closeSettingsModal();
+        }
+
+        const btnThemeDark = document.getElementById('btn-theme-dark');
+        const btnThemeLight = document.getElementById('btn-theme-light');
+        if (btnThemeDark) {
+            btnThemeDark.onclick = () => this.setTheme('dark');
+        }
+        if (btnThemeLight) {
+            btnThemeLight.onclick = () => this.setTheme('light');
         }
 
         const settingSoundEnabled = document.getElementById('setting-sound-enabled');
