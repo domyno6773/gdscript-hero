@@ -165,6 +165,157 @@ class GD_Signal {
     }
 }
 
+// ==========================================
+// SISTEMA NODI & SCENE DI GODOT ENGINE
+// ==========================================
+
+class GD_Node {
+    constructor(name = "Node") {
+        this.name = name;
+        this.type = this.constructor.name.replace(/^GD_/, '');
+        this.parent = null;
+        this.children = [];
+        this.position = new Vector2(0, 0);
+        this.size = new Vector2(100, 40);
+        this.visible = true;
+        this.modulate = "#ffffff";
+        this._is_queued_for_deletion = false;
+    }
+
+    static new(name) {
+        return new this(name);
+    }
+
+    add_child(child) {
+        if (!child || !(child instanceof GD_Node)) {
+            throw new Error(`add_child: l'argomento non è un'istanza valida di Node!`);
+        }
+        if (child.parent) {
+            child.parent.remove_child(child);
+        }
+        child.parent = this;
+        this.children.push(child);
+        return child;
+    }
+
+    remove_child(child) {
+        const idx = this.children.indexOf(child);
+        if (idx !== -1) {
+            this.children.splice(idx, 1);
+            child.parent = null;
+        }
+    }
+
+    get_child_count() {
+        return this.children.length;
+    }
+
+    get_children() {
+        return [...this.children];
+    }
+
+    get_node(path) {
+        if (!path || path === "." || path === "self") return this;
+        const parts = String(path).split('/').filter(Boolean);
+        let curr = this;
+        for (const p of parts) {
+            if (p === "..") {
+                curr = curr.parent;
+            } else {
+                const found = curr.children.find(c => c.name === p);
+                if (!found) return null;
+                curr = found;
+            }
+        }
+        return curr;
+    }
+
+    has_node(path) {
+        return this.get_node(path) !== null;
+    }
+
+    queue_free() {
+        this._is_queued_for_deletion = true;
+        if (this.parent) {
+            this.parent.remove_child(this);
+        }
+    }
+
+    is_queued_for_deletion() {
+        return this._is_queued_for_deletion;
+    }
+
+    toTreeObject() {
+        return {
+            name: this.name,
+            type: this.type,
+            text: this.text || null,
+            visible: this.visible,
+            children: this.children.map(c => c.toTreeObject())
+        };
+    }
+
+    toString() {
+        return `[${this.type}: ${this.name}]`;
+    }
+}
+
+class GD_Label extends GD_Node {
+    constructor(name = "Label") {
+        super(name);
+        this.text = "";
+        this.horizontal_alignment = "left";
+    }
+}
+
+class GD_Button extends GD_Node {
+    constructor(name = "Button") {
+        super(name);
+        this.text = "Button";
+        this.disabled = false;
+        this.pressed = new GD_Signal("pressed");
+    }
+}
+
+class GD_Timer extends GD_Node {
+    constructor(name = "Timer") {
+        super(name);
+        this.wait_time = 1.0;
+        this.one_shot = false;
+        this.autostart = false;
+        this.is_stopped = true;
+        this.time_left = 0;
+        this.timeout = new GD_Signal("timeout");
+    }
+
+    start(time = null) {
+        if (time !== null) this.wait_time = Number(time);
+        this.is_stopped = false;
+        this.time_left = this.wait_time;
+    }
+
+    stop() {
+        this.is_stopped = true;
+        this.time_left = 0;
+    }
+}
+
+class GD_ColorRect extends GD_Node {
+    constructor(name = "ColorRect") {
+        super(name);
+        this.color = "#438eff";
+        this.size = new Vector2(100, 30);
+    }
+}
+
+class GD_Node2D extends GD_Node {
+    constructor(name = "Node2D") {
+        super(name);
+        this.rotation = 0;
+        this.scale = new Vector2(1, 1);
+    }
+}
+
 // Transpiler da GDScript a JavaScript moderno
 const GDScriptRuntime = {
     transpile(gdCode) {
@@ -394,6 +545,20 @@ const GDScriptRuntime = {
             content = content.replace(/\blen\s*\(/g, '__gd_len(');
             content = content.replace(/\bstr\s*\(/g, '__gd_str(');
 
+            // Operatore $ di Godot per nodi ($NomeNodo -> get_node("NomeNodo"))
+            // 1. $"Nome con Spazi"
+            content = content.replace(/\$("([^"]+)"|'([^']+)')/g, (_, d1, s1) => `get_node("${d1 || s1}")`);
+            // 2. Maschera stringhe letterali per non alterare simboli $ nei testi (es. "$100")
+            const strTokens = [];
+            content = content.replace(/("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g, (m) => {
+                strTokens.push(m);
+                return `__STR_LIT_${strTokens.length - 1}__`;
+            });
+            // 3. Sostituisci $Nome e $Padre/Figlio con get_node("...")
+            content = content.replace(/\$([a-zA-Z0-9_]+(?:\/[a-zA-Z0-9_]+)*)/g, 'get_node("$1")');
+            // 4. Ripristina stringhe letterali
+            content = content.replace(/__STR_LIT_(\d+)__/g, (_, i) => strTokens[Number(i)]);
+
             // Operatori logici GDScript
             content = content.replace(/\band\b/g, '&&');
             content = content.replace(/\bor\b/g, '||');
@@ -449,7 +614,46 @@ const GDScriptRuntime = {
     },
 
     // Esecuzione protetta con cattura di output e variabili
-    async execute(gdCode) {
+    // Costruisce la scena iniziale a partire dalla configurazione della lezione
+    buildScene(lesson) {
+        const root = new GD_Node("Root");
+        if (lesson && Array.isArray(lesson.initialNodes)) {
+            for (const spec of lesson.initialNodes) {
+                let node;
+                if (spec.type === "Label") {
+                    node = new GD_Label(spec.name);
+                    if (spec.text !== undefined) node.text = spec.text;
+                } else if (spec.type === "Button") {
+                    node = new GD_Button(spec.name);
+                    if (spec.text !== undefined) node.text = spec.text;
+                } else if (spec.type === "Timer") {
+                    node = new GD_Timer(spec.name);
+                    if (spec.wait_time !== undefined) node.wait_time = spec.wait_time;
+                } else if (spec.type === "ColorRect") {
+                    node = new GD_ColorRect(spec.name);
+                    if (spec.color !== undefined) node.color = spec.color;
+                } else if (spec.type === "Node2D") {
+                    node = new GD_Node2D(spec.name);
+                } else {
+                    node = new GD_Node(spec.name);
+                }
+                root.add_child(node);
+            }
+        }
+        return root;
+    },
+    async execute(gdCode, options = {}) {
+        let currentScene = (options && options.initialScene) ? options.initialScene : null;
+        if (!currentScene && options && options.lesson && options.lesson.initialNodes) {
+            currentScene = this.buildScene(options.lesson);
+        }
+        if (!currentScene) {
+            currentScene = new GD_Node("Root");
+        }
+        const add_child = (n) => currentScene.add_child(n);
+        const remove_child = (n) => currentScene.remove_child(n);
+        const get_node = (p) => currentScene.get_node(p);
+        const has_node = (p) => currentScene.has_node(p);
         const logs = [];
         const scope = {};
         let loopCounter = 0;
@@ -488,7 +692,8 @@ const GDScriptRuntime = {
                 success: false,
                 logs: [],
                 error: `Errore di sintassi GDScript: ${syntaxErr.message}`,
-                scope: {}
+                scope: {},
+                scene: currentScene
             };
         }
 
@@ -503,6 +708,18 @@ const GDScriptRuntime = {
                 '__gd_len',
                 '__gd_str',
                 'GD_Signal',
+                'Node',
+                'Label',
+                'Button',
+                'Timer',
+                'ColorRect',
+                'Node2D',
+                'add_child',
+                'remove_child',
+                'get_node',
+                'has_node',
+                'root',
+                'scene',
                 `return (async () => {
                     ${transpiledCode}
                     if (typeof _ready === 'function') {
@@ -520,7 +737,19 @@ const GDScriptRuntime = {
                 __gd_range,
                 __gd_len,
                 __gd_str,
-                GD_Signal
+                GD_Signal,
+                GD_Node,
+                GD_Label,
+                GD_Button,
+                GD_Timer,
+                GD_ColorRect,
+                GD_Node2D,
+                add_child,
+                remove_child,
+                get_node,
+                has_node,
+                currentScene,
+                currentScene
             );
 
             return {
@@ -528,6 +757,7 @@ const GDScriptRuntime = {
                 logs: logs,
                 error: null,
                 scope: scope,
+                scene: currentScene,
                 transpiled: transpiledCode
             };
         } catch (runtimeErr) {
@@ -536,8 +766,20 @@ const GDScriptRuntime = {
                 logs: logs,
                 error: runtimeErr.message,
                 scope: scope,
+                scene: currentScene,
                 transpiled: transpiledCode
             };
         }
     }
 };
+
+// Esporta classi di Godot
+if (typeof window !== 'undefined') {
+    window.GDScriptRuntime = GDScriptRuntime;
+    window.GD_Node = GD_Node;
+    window.GD_Label = GD_Label;
+    window.GD_Button = GD_Button;
+    window.GD_Timer = GD_Timer;
+    window.GD_ColorRect = GD_ColorRect;
+    window.GD_Node2D = GD_Node2D;
+}

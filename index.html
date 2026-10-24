@@ -315,8 +315,25 @@
                                     </div>
                                     <button type="button" class="vtab-action-btn" id="btn-restart-viewport" title="Riavvia simulazione 2D">↺ Riavvia</button>
                                 </div>
-                                <div class="viewport-canvas-wrapper">
+                                <div class="viewport-canvas-wrapper" id="exercise-viewport-wrapper">
                                     <canvas id="exercise-viewport-canvas"></canvas>
+                                    <div class="viewport-ui-overlay" id="exercise-ui-overlay"></div>
+                                </div>
+                                <!-- Mini Scene Dock di Godot Engine -->
+                                <div class="godot-scene-dock" id="exercise-scene-dock">
+                                    <div class="scene-dock-header">
+                                        <div class="scene-dock-title">
+                                            <span class="scene-dock-icon">🎬</span>
+                                            <span>Scena Godot</span>
+                                            <span class="scene-node-count" id="scene-node-count">1 nodo</span>
+                                        </div>
+                                        <button type="button" class="btn-scene-add-node" id="btn-open-add-node-modal" title="Aggiungi un nuovo nodo alla scena">
+                                            <span>➕</span> Aggiungi Nodo
+                                        </button>
+                                    </div>
+                                    <div class="scene-dock-tree" id="exercise-scene-tree">
+                                        <!-- Albero nodi gerarchico generato dinamicamente -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -803,6 +820,79 @@
     </div>
 
     <!-- MODAL 1: AUTENTICAZIONE & ACCESSO (Ospite, Email/Password, Google) -->
+    <!-- MODAL CREA NUOVO NODO (Stile Godot Engine) -->
+    <div class="modal-overlay hidden" id="add-node-modal">
+        <div class="modal-card modal-medium">
+            <div class="modal-header-row">
+                <h2>➕ Crea Nuovo Nodo in Scena</h2>
+                <button class="modal-close-btn" id="btn-close-add-node">✕</button>
+            </div>
+            <p class="modal-subtitle">Seleziona la tipologia di nodo da istanziare nell'albero della scena di Godot:</p>
+
+            <div class="node-type-selector-grid" id="node-type-selector-grid">
+                <div class="node-type-option selected" data-node-type="Button">
+                    <span class="node-opt-icon">🔘</span>
+                    <div class="node-opt-info">
+                        <strong>Button</strong>
+                        <span>Controllo UI cliccabile dal giocatore</span>
+                    </div>
+                </div>
+                <div class="node-type-option" data-node-type="Label">
+                    <span class="node-opt-icon">🏷️</span>
+                    <div class="node-opt-info">
+                        <strong>Label</strong>
+                        <span>Visualizza etichette di testo 2D</span>
+                    </div>
+                </div>
+                <div class="node-type-option" data-node-type="Timer">
+                    <span class="node-opt-icon">⏱️</span>
+                    <div class="node-opt-info">
+                        <strong>Timer</strong>
+                        <span>Conto alla rovescia ed eventi a tempo</span>
+                    </div>
+                </div>
+                <div class="node-type-option" data-node-type="ColorRect">
+                    <span class="node-opt-icon">🟩</span>
+                    <div class="node-opt-info">
+                        <strong>ColorRect</strong>
+                        <span>Rettangolo colorato per sfondi o barre</span>
+                    </div>
+                </div>
+                <div class="node-type-option" data-node-type="Node2D">
+                    <span class="node-opt-icon">📍</span>
+                    <div class="node-opt-info">
+                        <strong>Node2D</strong>
+                        <span>Nodo con posizione 2D e rotazione</span>
+                    </div>
+                </div>
+                <div class="node-type-option" data-node-type="Node">
+                    <span class="node-opt-icon">⚪</span>
+                    <div class="node-opt-info">
+                        <strong>Node</strong>
+                        <span>Nodo base logico universale</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-input-group" style="margin-bottom: 12px;">
+                <label for="node-name-input" style="display:block; font-size:12px; margin-bottom:4px; font-weight:600; color:var(--text-muted);">Nome del Nodo:</label>
+                <input type="text" id="node-name-input" class="modal-input" placeholder="es. MioPulsante, SaluteLabel..." value="MioPulsante" style="width:100%;">
+            </div>
+
+            <div class="profile-input-group" style="margin-bottom: 16px;">
+                <label for="node-text-input" style="display:block; font-size:12px; margin-bottom:4px; font-weight:600; color:var(--text-muted);">Testo Iniziale (opzionale per Label / Button):</label>
+                <input type="text" id="node-text-input" class="modal-input" placeholder="es. Cliccami, Punti: 0..." value="Cliccami!" style="width:100%;">
+            </div>
+
+            <div class="modal-actions-row">
+                <button type="button" class="btn-subtle" id="btn-cancel-add-node">Annulla</button>
+                <button type="button" class="btn-primary" id="btn-confirm-add-node" style="background:#0284c7; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600; cursor:pointer;">
+                    <span>➕ Crea Nodo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay hidden" id="auth-modal">
         <div class="modal-card modal-medium auth-modal-card">
             <div class="modal-header-row">

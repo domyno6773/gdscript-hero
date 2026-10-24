@@ -1623,6 +1623,14 @@ const App = {
         this.updateNavSelection('exercise');
         this.setMobileExerciseTab('instructions', false);
 
+        if (lesson.initialNodes && Array.isArray(lesson.initialNodes) && window.GDScriptRuntime) {
+            this.currentScene = GDScriptRuntime.buildScene(lesson);
+        } else if (window.GD_Node) {
+            this.currentScene = new GD_Node("Root");
+        }
+        this.renderSceneDock();
+        this.renderViewportOverlay();
+
         const lessonContent = document.querySelector('.lesson-content');
         if (lesson.isMastery) {
             // Render del layout dedicato Sfida di Apprendimento in stile Coddy
@@ -2102,7 +2110,12 @@ const App = {
         this.recordDailyQuestProgress('code_runs', 1);
 
         try {
-            const result = await GDScriptRuntime.execute(code);
+            const result = await GDScriptRuntime.execute(code, { initialScene: this.currentScene, lesson: currentLesson });
+            if (result.scene) {
+                this.currentScene = result.scene;
+                this.renderSceneDock();
+                this.renderViewportOverlay();
+            }
 
             const realOutputPre = document.getElementById('real-output-pre');
             if (result.logs && result.logs.length > 0) {
@@ -2436,6 +2449,32 @@ const App = {
                 if (this.viewport) this.viewport.replay();
             };
         }
+
+        // Eventi Mini Scene Dock & Modal Crea Nodo Godot
+        const btnOpenAddNode = document.getElementById('btn-open-add-node-modal');
+        if (btnOpenAddNode) btnOpenAddNode.onclick = () => this.openAddNodeModal();
+
+        const btnCloseAddNode = document.getElementById('btn-close-add-node');
+        if (btnCloseAddNode) btnCloseAddNode.onclick = () => this.closeAddNodeModal();
+
+        const btnCancelAddNode = document.getElementById('btn-cancel-add-node');
+        if (btnCancelAddNode) btnCancelAddNode.onclick = () => this.closeAddNodeModal();
+
+        const btnConfirmAddNode = document.getElementById('btn-confirm-add-node');
+        if (btnConfirmAddNode) btnConfirmAddNode.onclick = () => this.confirmAddNode();
+
+        const nodeTypeOpts = document.querySelectorAll('.node-type-option');
+        nodeTypeOpts.forEach(opt => {
+            opt.addEventListener('click', () => {
+                nodeTypeOpts.forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                const type = opt.getAttribute('data-node-type');
+                const nameInput = document.getElementById('node-name-input');
+                if (nameInput) {
+                    nameInput.value = (type === 'Button' ? 'MioPulsante' : (type === 'Label' ? 'MioTesto' : (type === 'Timer' ? 'MioTimer' : (type === 'ColorRect' ? 'MiaBarra' : 'MioNodo'))));
+                }
+            });
+        });
 
         const btnPracticeRestart = document.getElementById('btn-practice-restart');
         if (btnPracticeRestart) {
@@ -3535,7 +3574,191 @@ const App = {
         this.renderSidebarDailyQuests();
         this.checkAchievements();
         this.updateQuestsBadge();
-    }
+    },
+
+    renderSceneDock() {
+        const treeContainer = document.getElementById('exercise-scene-tree');
+        const countBadge = document.getElementById('scene-node-count');
+        if (!treeContainer) return;
+
+        if (!this.currentScene && window.GD_Node) {
+            this.currentScene = new GD_Node("Root");
+        }
+        if (!this.currentScene) return;
+
+        const countNodes = (node) => {
+            let total = 1;
+            for (const child of node.children) {
+                total += countNodes(child);
+            }
+            return total;
+        };
+
+        const totalNodes = countNodes(this.currentScene);
+        if (countBadge) {
+            countBadge.textContent = `${totalNodes} nod${totalNodes === 1 ? 'o' : 'i'}`;
+        }
+
+        const getNodeIcon = (type) => {
+            switch (type) {
+                case 'Button': return '🔘';
+                case 'Label': return '🏷️';
+                case 'Timer': return '⏱️';
+                case 'ColorRect': return '🟩';
+                case 'Node2D': return '📍';
+                default: return '📦';
+            }
+        };
+
+        const buildTreeHtml = (node, depth = 0) => {
+            const icon = getNodeIcon(node.type);
+            const indentPx = depth * 16;
+            let propSnippet = '';
+            if (node.text !== undefined && node.text !== null && node.text !== '') {
+                propSnippet = `<span class="tree-node-prop">"${node.text}"</span>`;
+            } else if (node.type === 'Timer') {
+                propSnippet = `<span class="tree-node-prop">${node.wait_time}s</span>`;
+            } else if (node.type === 'ColorRect') {
+                propSnippet = `<span class="tree-node-prop" style="color:${node.color}">${node.color}</span>`;
+            }
+
+            let html = `
+                <div class="scene-tree-item" style="padding-left: ${indentPx}px;">
+                    <span class="tree-node-icon">${icon}</span>
+                    <span class="tree-node-name">${node.name}</span>
+                    <span class="tree-node-type">(${node.type})</span>
+                    ${propSnippet}
+                </div>
+            `;
+
+            for (const child of node.children) {
+                html += buildTreeHtml(child, depth + 1);
+            }
+            return html;
+        };
+
+        treeContainer.innerHTML = buildTreeHtml(this.currentScene);
+    },
+
+    renderViewportOverlay() {
+        const overlay = document.getElementById('exercise-ui-overlay');
+        if (!overlay) return;
+
+        overlay.innerHTML = '';
+        if (!this.currentScene) return;
+
+        const collectUiNodes = (node, list = []) => {
+            if (node !== this.currentScene) {
+                if (['Button', 'Label', 'ColorRect'].includes(node.type)) {
+                    list.push(node);
+                }
+            }
+            for (const child of node.children) {
+                collectUiNodes(child, list);
+            }
+            return list;
+        };
+
+        const uiNodes = collectUiNodes(this.currentScene);
+        if (uiNodes.length === 0) {
+            overlay.style.display = 'none';
+            return;
+        }
+
+        overlay.style.display = 'flex';
+
+        for (const node of uiNodes) {
+            if (node.type === 'Button') {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'godot-ui-btn';
+                btn.textContent = node.text || node.name;
+                btn.disabled = !!node.disabled;
+                btn.title = `Clicca nodo Button: $${node.name}`;
+                btn.addEventListener('click', () => {
+                    if (window.SoundFX && window.SoundFX.playClick) {
+                        window.SoundFX.playClick();
+                    }
+                    if (node.pressed) {
+                        node.pressed.emit();
+                    }
+                    this.renderSceneDock();
+                    this.renderViewportOverlay();
+                });
+                overlay.appendChild(btn);
+            } else if (node.type === 'Label') {
+                const lbl = document.createElement('div');
+                lbl.className = 'godot-ui-label';
+                lbl.textContent = node.text !== undefined ? node.text : '';
+                overlay.appendChild(lbl);
+            } else if (node.type === 'ColorRect') {
+                const rect = document.createElement('div');
+                rect.className = 'godot-ui-colorrect';
+                rect.style.backgroundColor = node.color || '#438eff';
+                if (node.size) {
+                    rect.style.width = Math.min(220, Math.max(30, node.size.x)) + 'px';
+                    rect.style.height = Math.min(60, Math.max(10, node.size.y)) + 'px';
+                }
+                overlay.appendChild(rect);
+            }
+        }
+    },
+
+    openAddNodeModal() {
+        const modal = document.getElementById('add-node-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            const nameInput = document.getElementById('node-name-input');
+            if (nameInput) {
+                nameInput.value = 'MioPulsante';
+                nameInput.focus();
+            }
+        }
+    },
+
+    closeAddNodeModal() {
+        const modal = document.getElementById('add-node-modal');
+        if (modal) modal.classList.add('hidden');
+    },
+
+    confirmAddNode() {
+        const selectedOpt = document.querySelector('.node-type-option.selected');
+        const type = selectedOpt ? selectedOpt.getAttribute('data-node-type') : 'Button';
+        const nameInput = document.getElementById('node-name-input');
+        const textInput = document.getElementById('node-text-input');
+        const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : ('Nodo_' + type);
+        const text = textInput ? textInput.value.trim() : '';
+
+        if (!this.currentScene && window.GD_Node) {
+            this.currentScene = new GD_Node("Root");
+        }
+        if (!this.currentScene) return;
+
+        let newNode;
+        if (type === 'Button' && window.GD_Button) {
+            newNode = new GD_Button(name);
+            if (text) newNode.text = text;
+        } else if (type === 'Label' && window.GD_Label) {
+            newNode = new GD_Label(name);
+            if (text) newNode.text = text;
+        } else if (type === 'Timer' && window.GD_Timer) {
+            newNode = new GD_Timer(name);
+        } else if (type === 'ColorRect' && window.GD_ColorRect) {
+            newNode = new GD_ColorRect(name);
+        } else if (type === 'Node2D' && window.GD_Node2D) {
+            newNode = new GD_Node2D(name);
+        } else if (window.GD_Node) {
+            newNode = new GD_Node(name);
+        }
+
+        if (newNode) {
+            this.currentScene.add_child(newNode);
+            this.renderSceneDock();
+            this.renderViewportOverlay();
+            this.closeAddNodeModal();
+            this.showToast(`Nodo '$${name}' (${type}) aggiunto alla scena!`, 'success');
+        }
+    },
 };
 
 window.App = App;

@@ -6868,3 +6868,295 @@ kbd {
     background: #f0f9ff;
     border-left-color: #0284c7;
 }
+
+
+/* ========================================================
+   SISTEMA NODI & SCENE DOCK (GODOT ENGINE STYLE)
+   ======================================================== */
+
+.viewport-canvas-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.viewport-ui-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+    z-index: 10;
+}
+
+.godot-ui-btn {
+    pointer-events: auto;
+    background: #242938;
+    color: #f1f5f9;
+    border: 1px solid #475569;
+    border-radius: 5px;
+    padding: 8px 20px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+}
+
+.godot-ui-btn:hover {
+    background: #334155;
+    border-color: #38bdf8;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px -2px rgba(56, 189, 248, 0.3);
+}
+
+.godot-ui-btn:active {
+    transform: translateY(1px);
+    background: #1e293b;
+}
+
+.godot-ui-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.godot-ui-label {
+    color: #f8fafc;
+    font-size: 16px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(56, 189, 248, 0.4);
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    user-select: none;
+}
+
+.godot-ui-colorrect {
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+.godot-scene-dock {
+    margin-top: 10px;
+    background: var(--bg-card, #1e293b);
+    border: 1px solid var(--border-color, #334155);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.scene-dock-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--border-color, #334155);
+}
+
+.scene-dock-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main, #f8fafc);
+}
+
+.scene-dock-icon {
+    font-size: 14px;
+}
+
+.scene-node-count {
+    font-size: 11px;
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.btn-scene-add-node {
+    background: #0284c7;
+    color: #ffffff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.15s ease;
+}
+
+.btn-scene-add-node:hover {
+    background: #0369a1;
+}
+
+.scene-dock-tree {
+    padding: 8px;
+    max-height: 150px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-family: var(--font-mono, monospace);
+    font-size: 12px;
+}
+
+.scene-tree-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    color: var(--text-main, #f8fafc);
+    transition: background 0.15s ease;
+}
+
+.scene-tree-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tree-node-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.tree-node-name {
+    font-weight: 600;
+    color: #38bdf8;
+}
+
+.tree-node-type {
+    color: var(--text-muted, #94a3b8);
+    font-size: 11px;
+}
+
+.tree-node-prop {
+    margin-left: auto;
+    font-size: 11px;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.12);
+    padding: 1px 6px;
+    border-radius: 3px;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Modal Selezione Nodi */
+.node-type-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.node-type-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color, #334155);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.node-type-option:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.08);
+}
+
+.node-type-option.selected {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.18);
+    box-shadow: 0 0 0 1px #38bdf8;
+}
+
+.node-opt-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.node-opt-info strong {
+    display: block;
+    font-size: 13px;
+    color: var(--text-main, #f8fafc);
+}
+
+.node-opt-info span {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted, #94a3b8);
+    line-height: 1.3;
+}
+
+/* Tema Chiaro */
+[data-theme="light"] .godot-scene-dock {
+    background: #ffffff;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .scene-dock-header {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .scene-tree-item:hover {
+    background: #f1f5f9;
+}
+
+[data-theme="light"] .node-type-option {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+[data-theme="light"] .node-type-option:hover {
+    background: #f0f9ff;
+    border-color: #0284c7;
+}
+
+[data-theme="light"] .node-type-option.selected {
+    background: #e0f2fe;
+    border-color: #0284c7;
+}
+
+[data-theme="light"] .godot-ui-btn {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+[data-theme="light"] .godot-ui-btn:hover {
+    background: #e2e8f0;
+    border-color: #0284c7;
+    color: #0284c7;
+}
+
+[data-theme="light"] .godot-ui-label {
+    background: rgba(255, 255, 255, 0.85);
+    color: #0f172a;
+    border-color: rgba(0, 0, 0, 0.1);
+    text-shadow: none;
+}

@@ -84,6 +84,27 @@ const CHAPTERS_DATA = [
         badge: "CAPITOLO 12",
         desc: "Programmazione a oggetti: definizione di classi con class e costruttore _init(), istanziazione con .new() ed ereditarietà.",
         icon: "🏛️"
+    },
+    {
+        id: 13,
+        title: "Capitolo 13: L'Albero della Scena e i Nodi (Scene Tree)",
+        badge: "CAPITOLO 13",
+        desc: "L'architettura fondamentale di Godot: cos'è un Nodo, SceneTree, istanziare nodi con add_child(), Label e l'operatore $.",
+        icon: "🌳"
+    },
+    {
+        id: 14,
+        title: "Capitolo 14: Nodi di Interfaccia & Interattività (Button & UI)",
+        badge: "CAPITOLO 14",
+        desc: "Controlli utente reattivi: il nodo Button, gestione del segnale pressed al click e creazione di un Clicker Game interattivo.",
+        icon: "🔘"
+    },
+    {
+        id: 15,
+        title: "Capitolo 15: Nodi Temporali e Meccaniche Avanzate",
+        badge: "CAPITOLO 15",
+        desc: "Meccaniche e ciclo di vita: il nodo Timer con segnale timeout, grafica con ColorRect ed eliminazione nodi con queue_free().",
+        icon: "⏱️"
     }
 ];
 
@@ -2200,6 +2221,627 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
             tests.push({ desc: "Report finale del party stampato con successo", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
+    },
+// ==========================================
+    // CAPITOLO 13: L'ALBERO DELLA SCENA E I NODI
+    // ==========================================
+    {
+        id: 49,
+        chapterId: 13,
+        isMastery: false,
+        title: "49. Cos'è un Nodo e l'Albero di Godot",
+        icon: "🌳",
+        xp: 60,
+        expectedOutput: "Nodo aggiunto: Entita",
+        theory: `
+            <p>In Godot Engine tutto è un <strong>Nodo (Node)</strong>: il giocatore, un pulsante, la mappa o un effetto visivo sono tutti nodi organizzati a forma di albero chiamato <strong>SceneTree</strong>.</p>
+            <p>Per creare un nuovo nodo via codice usiamo <code>Node.new("Nome")</code> e per aggiungerlo alla scena usiamo <code>add_child(nodo)</code>:</p>
+            <pre class="code-block"><span class="k">var</span> mio_nodo = Node.<span class="nb">new</span>(<span class="s">"Entita"</span>)
+<span class="nb">add_child</span>(mio_nodo)
+<span class="nb">print</span>(<span class="s">"Nome nodo: "</span>, mio_nodo.name)</pre>
+        `,
+        task: `
+            <ul>
+                <li>Crea un nodo base con <code>var mio_nodo = Node.new("Entita")</code>.</li>
+                <li>Aggiungilo alla scena con <code>add_child(mio_nodo)</code>.</li>
+                <li>Stampa a console: <code>print("Nodo aggiunto: ", mio_nodo.name)</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    # Crea mio_nodo con Node.new("Entita"), aggiungilo con add_child e stampa\n    pass\n`,
+        hints: [
+            'var mio_nodo = Node.new("Entita")',
+            'add_child(mio_nodo)',
+            'print("Nodo aggiunto: ", mio_nodo.name)'
+        ],
+        solution: `func _ready():\n    var mio_nodo = Node.new("Entita")\n    add_child(mio_nodo)\n    print("Nodo aggiunto: ", mio_nodo.name)\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const nodeOk = sc && sc.has_node("Entita");
+            tests.push({ desc: "Nodo 'Entita' aggiunto correttamente alla scena con add_child()", passed: !!nodeOk, diff: nodeOk ? null : "Nodo Entita non presente nella scena" });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Nodo aggiunto: Entita");
+            tests.push({ desc: "Console stampa 'Nodo aggiunto: Entita'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+    {
+        id: 50,
+        chapterId: 13,
+        isMastery: false,
+        title: "50. Testo a Schermo: Il nodo Label",
+        icon: "🏷️",
+        xp: 60,
+        expectedOutput: "Testo a schermo: Benvenuto in Godot 4!",
+        theory: `
+            <p>Il nodo <strong>Label</strong> è il componente dedicato alla visualizzazione di testo nell'interfaccia 2D di Godot.</p>
+            <p>Possiede la proprietà <code>.text</code> che definisce la stringa visualizzata:</p>
+            <pre class="code-block"><span class="k">var</span> etichetta = Label.<span class="nb">new</span>(<span class="s">"Titolo"</span>)
+etichetta.text = <span class="s">"Benvenuto in Godot 4!"</span>
+<span class="nb">add_child</span>(etichetta)</pre>
+        `,
+        task: `
+            <ul>
+                <li>Crea una label: <code>var etichetta = Label.new("Titolo")</code>.</li>
+                <li>Imposta il testo: <code>etichetta.text = "Benvenuto in Godot 4!"</code>.</li>
+                <li>Aggiungila alla scena con <code>add_child(etichetta)</code>.</li>
+                <li>Stampa a console: <code>print("Testo a schermo: ", etichetta.text)</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    # Crea etichetta con Label.new("Titolo"), imposta .text, aggiungila e stampa\n    pass\n`,
+        hints: [
+            'var etichetta = Label.new("Titolo")',
+            'etichetta.text = "Benvenuto in Godot 4!"',
+            'add_child(etichetta)\nprint("Testo a schermo: ", etichetta.text)'
+        ],
+        solution: `func _ready():\n    var etichetta = Label.new("Titolo")\n    etichetta.text = "Benvenuto in Godot 4!"\n    add_child(etichetta)\n    print("Testo a schermo: ", etichetta.text)\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const node = sc ? sc.get_node("Titolo") : null;
+            const labelOk = node && node.text === "Benvenuto in Godot 4!";
+            tests.push({ desc: "Nodo Label 'Titolo' configurato con il testo corretto", passed: !!labelOk, diff: labelOk ? null : `Ricevuto: ${node ? node.text : 'Nodo non trovato'}` });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Testo a schermo: Benvenuto in Godot 4!");
+            tests.push({ desc: "Console stampa 'Testo a schermo: Benvenuto in Godot 4!'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+    {
+        id: 51,
+        chapterId: 13,
+        isMastery: false,
+        title: "51. L'operatore $: Accedere ai Nodi Figli",
+        icon: "🧭",
+        xp: 60,
+        expectedOutput: "Nuova salute: HP: 75",
+        initialNodes: [
+            { type: "Label", name: "SaluteLabel", text: "HP: 100" }
+        ],
+        theory: `
+            <p>In una scena reale di Godot, molti nodi sono già stati creati nell'albero della scena.</p>
+            <p>Per accedere a un nodo figlio esistente non serve cercarlo manualmente: in GDScript si usa la scorciatoia nativa <strong><code>$NomeNodo</code></strong> (che equivale a <code>get_node("NomeNodo")</code>):</p>
+            <pre class="code-block"><span class="c"># Modifica la Label già presente nella scena</span>
+$SaluteLabel.text = <span class="s">"HP: 75"</span>
+<span class="nb">print</span>($SaluteLabel.text)</pre>
+        `,
+        task: `
+            <ul>
+                <li>Nella scena è già presente il nodo <code>$SaluteLabel</code>.</li>
+                <li>Modifica il suo testo: <code>$SaluteLabel.text = "HP: 75"</code>.</li>
+                <li>Stampa il valore aggiornato: <code>print("Nuova salute: ", $SaluteLabel.text)</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    # Accedi a $SaluteLabel con l'operatore $, aggiorna il testo a "HP: 75" e stampa\n    pass\n`,
+        hints: [
+            '$SaluteLabel.text = "HP: 75"',
+            'print("Nuova salute: ", $SaluteLabel.text)'
+        ],
+        solution: `func _ready():\n    $SaluteLabel.text = "HP: 75"\n    print("Nuova salute: ", $SaluteLabel.text)\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const node = sc ? sc.get_node("SaluteLabel") : null;
+            const ok = node && node.text === "HP: 75";
+            tests.push({ desc: "SaluteLabel aggiornata con successo a 'HP: 75' tramite $", passed: !!ok, diff: ok ? null : `Ricevuto: ${node ? node.text : 'null'}` });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Nuova salute: HP: 75");
+            tests.push({ desc: "Console stampa 'Nuova salute: HP: 75'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+    {
+        id: 52,
+        chapterId: 13,
+        isMastery: true,
+        title: "52. ⭐ Sfida di Apprendimento: La Targhetta del Dungeon",
+        icon: "🏆",
+        xp: 120,
+        difficulty: "media",
+        difficultyLabel: "Media",
+        initialNodes: [
+            { type: "Label", name: "TitoloDungeon", text: "In attesa..." },
+            { type: "Label", name: "LivelloLabel", text: "In attesa..." }
+        ],
+        scenario: "Il custode delle rovine antiche deve allestire la schermata d'ingresso del dungeon configurando le etichette informative nella scena. Nella scena sono già presenti i nodi <code>$TitoloDungeon</code> e <code>$LivelloLabel</code>. Sotto il commento, accedi con l'operatore <code>$</code> e crea una terza etichetta:",
+        requirements: [
+            'Imposta <code>$TitoloDungeon.text = "Caverna dei Goblin"</code>',
+            'Imposta <code>$LivelloLabel.text = "Livello: 1"</code>',
+            'Crea un terzo nodo Label: <code>var monete_lbl = Label.new("MoneteLabel")</code>',
+            'Imposta <code>monete_lbl.text = "Oro: 50"</code> e aggiungilo alla scena con <code>add_child(monete_lbl)</code>'
+        ],
+        notice: "Non modificare le righe print(). Il programma stampa:",
+        expectedOutput: "Dungeon: Caverna dei Goblin\nDifficolta: Livello: 1\nBottino: Oro: 50",
+        initialCode: `extends Node\n\nfunc _ready():\n    # Configura $TitoloDungeon, $LivelloLabel e crea monete_lbl sotto\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
+        aiExplanation: `In Godot puoi accedere ai nodi già presenti nell'albero usando <code>$NomeNodo</code> per leggerne o modificarne le proprietà. Inoltre, puoi istanziare nuovi nodi via codice con <code>Label.new('Nome')</code> e innestarli nella gerarchia chiamando <code>add_child(nodo)</code>.`,
+        hints: [
+            '$TitoloDungeon.text = "Caverna dei Goblin"\n$LivelloLabel.text = "Livello: 1"',
+            'var monete_lbl = Label.new("MoneteLabel")\nmonete_lbl.text = "Oro: 50"',
+            'add_child(monete_lbl)'
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    $TitoloDungeon.text = "Caverna dei Goblin"\n    $LivelloLabel.text = "Livello: 1"\n    var monete_lbl = Label.new("MoneteLabel")\n    monete_lbl.text = "Oro: 50"\n    add_child(monete_lbl)\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
+        theory: `
+            <div class="mastery-banner">
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>La Targhetta del Dungeon</h3>
+                <p>Verifica l'accesso ai nodi della scena con l'operatore $ e la creazione di nuovi nodi Label con add_child().</p>
+            </div>
+        `,
+        task: `
+            <ul>
+                <li>Imposta <code>$TitoloDungeon.text = "Caverna dei Goblin"</code></li>
+                <li>Imposta <code>$LivelloLabel.text = "Livello: 1"</code></li>
+                <li>Crea <code>Label.new("MoneteLabel")</code>, imposta <code>"Oro: 50"</code> e usa <code>add_child()</code></li>
+            </ul>
+        `,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const tOk = sc && sc.get_node("TitoloDungeon") && sc.get_node("TitoloDungeon").text === "Caverna dei Goblin";
+            const lOk = sc && sc.get_node("LivelloLabel") && sc.get_node("LivelloLabel").text === "Livello: 1";
+            const mOk = sc && sc.get_node("MoneteLabel") && sc.get_node("MoneteLabel").text === "Oro: 50";
+            tests.push({ desc: "TitoloDungeon e LivelloLabel configurati correttamente", passed: !!(tOk && lOk), diff: (tOk && lOk) ? null : "Proprietà delle Label esistenti non corrette" });
+            tests.push({ desc: "MoneteLabel istanziata e aggiunta alla scena con Oro: 50", passed: !!mOk, diff: mOk ? null : "MoneteLabel non trovata o testo errato" });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Dungeon: Caverna dei Goblin") && out.includes("Difficolta: Livello: 1") && out.includes("Bottino: Oro: 50");
+            tests.push({ desc: "Report del dungeon stampato correttamente a console", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+
+    // ==========================================
+    // CAPITOLO 14: NODI UI & INTERATTIVITÀ (BUTTON)
+    // ==========================================
+    {
+        id: 53,
+        chapterId: 14,
+        isMastery: false,
+        title: "53. Il primo Pulsante: Il nodo Button",
+        icon: "🔘",
+        xp: 60,
+        expectedOutput: "Pulsante creato: Sferra Attacco",
+        theory: `
+            <p>Il nodo <strong>Button</strong> crea un controllo interattivo che l'utente può cliccare a schermo nella Viewport.</p>
+            <p>Possiede la proprietà <code>.text</code> per l'etichetta visualizzata e <code>.disabled</code> per disattivarlo:</p>
+            <pre class="code-block"><span class="k">var</span> btn = Button.<span class="nb">new</span>(<span class="s">"AttaccaBtn"</span>)
+btn.text = <span class="s">"Sferra Attacco"</span>
+<span class="nb">add_child</span>(btn)</pre>
+        `,
+        task: `
+            <ul>
+                <li>Crea un pulsante con <code>var btn = Button.new("AttaccaBtn")</code>.</li>
+                <li>Imposta il testo: <code>btn.text = "Sferra Attacco"</code>.</li>
+                <li>Aggiungilo alla scena con <code>add_child(btn)</code>.</li>
+                <li>Stampa a console: <code>print("Pulsante creato: ", btn.text)</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    # Crea btn con Button.new("AttaccaBtn"), imposta .text, aggiungilo e stampa\n    pass\n`,
+        hints: [
+            'var btn = Button.new("AttaccaBtn")',
+            'btn.text = "Sferra Attacco"',
+            'add_child(btn)\nprint("Pulsante creato: ", btn.text)'
+        ],
+        solution: `func _ready():\n    var btn = Button.new("AttaccaBtn")\n    btn.text = "Sferra Attacco"\n    add_child(btn)\n    print("Pulsante creato: ", btn.text)\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const btn = sc ? sc.get_node("AttaccaBtn") : null;
+            const btnOk = btn && btn.type === "Button" && btn.text === "Sferra Attacco";
+            tests.push({ desc: "Nodo Button 'AttaccaBtn' creato e aggiunto con testo 'Sferra Attacco'", passed: !!btnOk, diff: btnOk ? null : `Ricevuto: ${btn ? btn.text : 'Nodo non trovato'}` });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Pulsante creato: Sferra Attacco");
+            tests.push({ desc: "Console stampa 'Pulsante creato: Sferra Attacco'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+    {
+        id: 54,
+        chapterId: 14,
+        isMastery: false,
+        title: "54. Rendere vivo il pulsante: Il Segnale pressed",
+        icon: "⚡",
+        xp: 60,
+        expectedOutput: "Pulsante connesso\nColpo sferrato con successo!",
+        initialNodes: [
+            { type: "Button", name: "AttaccaBtn", text: "Attacca" }
+        ],
+        theory: `
+            <p>I pulsanti di Godot emettono il segnale nativo <strong><code>pressed</code></strong> ogni volta che l'utente ci clicca sopra.</p>
+            <p>Per far reagire il gioco al click, colleghiamo il segnale a una funzione con <code>connect</code>:</p>
+            <pre class="code-block"><span class="k">func</span> _ready():
+    $AttaccaBtn.pressed.connect(quando_premuto)
+
+<span class="k">func</span> quando_premuto():
+    <span class="nb">print</span>(<span class="s">"Pulsante cliccato!"</span>)</pre>
+        `,
+        task: `
+            <ul>
+                <li>In <code>_ready()</code>, connetti il segnale: <code>$AttaccaBtn.pressed.connect(quando_premuto)</code>.</li>
+                <li>Stampa in <code>_ready()</code>: <code>print("Pulsante connesso")</code>.</li>
+                <li>Definisci la funzione <code>func quando_premuto():</code> che stampa <code>print("Colpo sferrato con successo!")</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    # Connetti $AttaccaBtn.pressed e stampa "Pulsante connesso"\n    pass\n\n# Definisci func quando_premuto() sotto\n`,
+        hints: [
+            '$AttaccaBtn.pressed.connect(quando_premuto)',
+            'print("Pulsante connesso")',
+            'func quando_premuto():\n    print("Colpo sferrato con successo!")'
+        ],
+        solution: `func _ready():\n    $AttaccaBtn.pressed.connect(quando_premuto)\n    print("Pulsante connesso")\n\nfunc quando_premuto():\n    print("Colpo sferrato con successo!")\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const btn = sc ? sc.get_node("AttaccaBtn") : null;
+            const connected = btn && btn.pressed && btn.pressed.callbacks.length > 0;
+            tests.push({ desc: "Segnale $AttaccaBtn.pressed connesso a una funzione", passed: !!connected, diff: connected ? null : "Segnale pressed non connesso" });
+            if (connected) {
+                btn.pressed.emit();
+            }
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Colpo sferrato con successo!");
+            tests.push({ desc: "Callback eseguita con successo al click sul pulsante", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+    {
+        id: 55,
+        chapterId: 14,
+        isMastery: false,
+        title: "55. Costruire un mini Clicker Game",
+        icon: "🎮",
+        xp: 60,
+        expectedOutput: "Clicker pronto\nClick: 1",
+        initialNodes: [
+            { type: "Button", name: "ClickBtn", text: "Cliccami!" },
+            { type: "Label", name: "PuntiLabel", text: "Click: 0" }
+        ],
+        theory: `
+            <p>Unendo un <code>Button</code> e una <code>Label</code> possiamo realizzare un ciclo di gioco reattivo: ogni volta che il giocatore preme il pulsante, incrementiamo una variabile e aggiorniamo il testo a schermo!</p>
+            <pre class="code-block"><span class="k">var</span> punti = <span class="m">0</span>
+
+<span class="k">func</span> _ready():
+    $ClickBtn.pressed.connect(al_click)
+
+<span class="k">func</span> al_click():
+    punti += <span class="m">1</span>
+    $PuntiLabel.text = <span class="s">"Click: "</span> + <span class="nb">str</span>(punti)</pre>
+        `,
+        task: `
+            <ul>
+                <li>Crea la variabile <code>var punti = 0</code>.</li>
+                <li>In <code>_ready()</code> connetti <code>$ClickBtn.pressed.connect(al_click)</code> e stampa <code>print("Clicker pronto")</code>.</li>
+                <li>In <code>func al_click():</code> incrementa <code>punti += 1</code> e aggiorna <code>$PuntiLabel.text = "Click: " + str(punti)</code>.</li>
+                <li>Stampa il testo aggiornato: <code>print($PuntiLabel.text)</code>.</li>
+            </ul>
+        `,
+        initialCode: `var punti = 0\n\nfunc _ready():\n    # Connetti $ClickBtn.pressed ad al_click e stampa "Clicker pronto"\n    pass\n\nfunc al_click():\n    # Incrementa punti, aggiorna $PuntiLabel.text e stampa\n    pass\n`,
+        hints: [
+            '$ClickBtn.pressed.connect(al_click)',
+            'punti += 1\n$PuntiLabel.text = "Click: " + str(punti)',
+            'print($PuntiLabel.text)'
+        ],
+        solution: `var punti = 0\n\nfunc _ready():\n    $ClickBtn.pressed.connect(al_click)\n    print("Clicker pronto")\n\nfunc al_click():\n    punti += 1\n    $PuntiLabel.text = "Click: " + str(punti)\n    print($PuntiLabel.text)\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const btn = sc ? sc.get_node("ClickBtn") : null;
+            const lbl = sc ? sc.get_node("PuntiLabel") : null;
+            const connected = btn && btn.pressed && btn.pressed.callbacks.length > 0;
+            tests.push({ desc: "Pulsante $ClickBtn connesso alla funzione al_click", passed: !!connected, diff: connected ? null : "Segnale pressed non connesso" });
+            if (connected) {
+                btn.pressed.emit();
+            }
+            const lblOk = lbl && lbl.text === "Click: 1";
+            tests.push({ desc: "Etichetta $PuntiLabel aggiornata correttamente a 'Click: 1'", passed: !!lblOk, diff: lblOk ? null : `Ricevuto: ${lbl ? lbl.text : 'null'}` });
+            return tests;
+        }
+    },
+    {
+        id: 56,
+        chapterId: 14,
+        isMastery: true,
+        title: "56. ⭐ Sfida di Apprendimento: Il Pannello di Controllo dell'Astronave",
+        icon: "🚀",
+        xp: 120,
+        difficulty: "media",
+        difficultyLabel: "Media",
+        initialNodes: [
+            { type: "Button", name: "MotoriBtn", text: "Accendi Motori" },
+            { type: "Button", name: "AllarmeBtn", text: "Attiva Allarme" },
+            { type: "Label", name: "StatoNave", text: "Sistemi Normali" }
+        ],
+        scenario: "Sulla plancia di comando della nave interstellare, il navigatore deve configurare i due comandi principali collegando i rispettivi segnali e aggiornando il monitor centrale della cabina. Nella scena sono già posizionati i nodi <code>$MotoriBtn</code>, <code>$AllarmeBtn</code> e la <code>$StatoNave</code>. Sotto i commenti, programma la plancia:",
+        requirements: [
+            'In <code>_ready()</code>, connetti <code>$MotoriBtn.pressed.connect(attiva_motori)</code>',
+            'In <code>_ready()</code>, connetti <code>$AllarmeBtn.pressed.connect(attiva_allarme)</code>',
+            'Nella funzione <code>func attiva_motori():</code> imposta <code>$StatoNave.text = "Motori a Massima Potenza"</code> e stampa <code>"Velocita Aumentata"</code>',
+            'Nella funzione <code>func attiva_allarme():</code> imposta <code>$StatoNave.text = "Allarme Rosso Attivo"</code> e stampa <code>"Scudi al 100%"</code>'
+        ],
+        notice: "Non modificare la riga print() iniziale. Il programma stampa:",
+        expectedOutput: "Plancia Operativa\nVelocita Aumentata\nScudi al 100%",
+        initialCode: `extends Node\n\nfunc _ready():\n    # Connetti $MotoriBtn e $AllarmeBtn sotto\n    \n    # Non modificare la riga sotto\n    print("Plancia Operativa")\n\n# Definisci le funzioni attiva_motori e attiva_allarme sotto\n`,
+        aiExplanation: "In Godot puoi collegare più nodi Button a funzioni diverse per creare pannelli di controllo e interfacce utente complesse. Ogni pulsante ha la propria istanza del segnale <code>pressed</code>, che quando viene emesso esegue il blocco associato modificando le Label e lo stato della scena.",
+        hints: [
+            '$MotoriBtn.pressed.connect(attiva_motori)\n$AllarmeBtn.pressed.connect(attiva_allarme)',
+            'func attiva_motori():\n    $StatoNave.text = "Motori a Massima Potenza"\n    print("Velocita Aumentata")',
+            'func attiva_allarme():\n    $StatoNave.text = "Allarme Rosso Attivo"\n    print("Scudi al 100%")'
+        ],
+        solution: `extends Node\n\nfunc _ready():\n    $MotoriBtn.pressed.connect(attiva_motori)\n    $AllarmeBtn.pressed.connect(attiva_allarme)\n    \n    # Non modificare la riga sotto\n    print("Plancia Operativa")\n\nfunc attiva_motori():\n    $StatoNave.text = "Motori a Massima Potenza"\n    print("Velocita Aumentata")\n\nfunc attiva_allarme():\n    $StatoNave.text = "Allarme Rosso Attivo"\n    print("Scudi al 100%")\n`,
+        theory: `
+            <div class="mastery-banner">
+                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
+                <h3>Il Pannello di Controllo dell'Astronave</h3>
+                <p>Verifica la gestione di pulsanti multipli (Button) e la reazione ai click per aggiornare l'interfaccia di bordo.</p>
+            </div>
+        `,
+        task: `
+            <ul>
+                <li>Connetti <code>$MotoriBtn.pressed</code> a <code>attiva_motori</code></li>
+                <li>Connetti <code>$AllarmeBtn.pressed</code> a <code>attiva_allarme</code></li>
+                <li>Aggiorna <code>$StatoNave.text</code> nelle rispettive funzioni</li>
+            </ul>
+        `,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const mBtn = sc ? sc.get_node("MotoriBtn") : null;
+            const aBtn = sc ? sc.get_node("AllarmeBtn") : null;
+            const sLbl = sc ? sc.get_node("StatoNave") : null;
+            const mConn = mBtn && mBtn.pressed.callbacks.length > 0;
+            const aConn = aBtn && aBtn.pressed.callbacks.length > 0;
+            tests.push({ desc: "Entrambi i pulsanti $MotoriBtn e $AllarmeBtn connessi con successo", passed: !!(mConn && aConn), diff: (mConn && aConn) ? null : "Uno o entrambi i pulsanti non connessi" });
+            if (mConn) mBtn.pressed.emit();
+            const motOk = sLbl && sLbl.text === "Motori a Massima Potenza";
+            tests.push({ desc: "Click su MotoriBtn imposta 'Motori a Massima Potenza'", passed: !!motOk, diff: motOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
+            if (aConn) aBtn.pressed.emit();
+            const almOk = sLbl && sLbl.text === "Allarme Rosso Attivo";
+            tests.push({ desc: "Click su AllarmeBtn imposta 'Allarme Rosso Attivo'", passed: !!almOk, diff: almOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
+            return tests;
+        }
+    },
+
+    // ==========================================
+    // CAPITOLO 15: NODI TEMPORALI E AVANZATI
+    // ==========================================
+    {
+        id: 57,
+        chapterId: 15,
+        isMastery: false,
+        title: "57. Il nodo Timer: wait_time e segnale timeout",
+        icon: "⏱️",
+        xp: 60,
+        expectedOutput: "Timer avviato per: 2.5s\nTempo scaduto!",
+        theory: `
+            <p>Il nodo <strong>Timer</strong> permette di creare conti alla rovescia o azioni periodiche (es. ricarica abilità, spawn di nemici ogni tot secondi).</p>
+            <p>Le sue proprietà e metodi principali sono:</p>
+            <ul>
+                <li><code>wait_time = 2.5</code> (durata in secondi)</li>
+                <li><code>one_shot = true</code> (se fermarsi dopo un solo scatto)</li>
+                <li><code>timeout.connect(funzione)</code> (il segnale emesso allo scadere del tempo)</li>
+                <li><code>start()</code> (avvia il conteggio)</li>
+            </ul>
+        `,
+        task: `
+            <ul>
+                <li>Crea un timer: <code>var t = Timer.new("Cooldown")</code>.</li>
+                <li>Imposta <code>t.wait_time = 2.5</code> e <code>t.one_shot = true</code>.</li>
+                <li>Aggiungilo alla scena con <code>add_child(t)</code>.</li>
+                <li>Connetti <code>t.timeout.connect(quando_scaduto)</code> e avvialo con <code>t.start()</code>.</li>
+                <li>Stampa: <code>print("Timer avviato per: ", t.wait_time, "s")</code>.</li>
+                <li>Definisci <code>func quando_scaduto():</code> che stampa <code>print("Tempo scaduto!")</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    # Crea timer t, imposta wait_time, one_shot, connetti timeout, avvia e stampa\n    pass\n\nfunc quando_scaduto():\n    pass\n`,
+        hints: [
+            'var t = Timer.new("Cooldown")\nt.wait_time = 2.5\nt.one_shot = true',
+            'add_child(t)\nt.timeout.connect(quando_scaduto)\nt.start()',
+            'print("Timer avviato per: ", t.wait_time, "s")'
+        ],
+        solution: `func _ready():\n    var t = Timer.new("Cooldown")\n    t.wait_time = 2.5\n    t.one_shot = true\n    add_child(t)\n    t.timeout.connect(quando_scaduto)\n    t.start()\n    print("Timer avviato per: ", t.wait_time, "s")\n\nfunc quando_scaduto():\n    print("Tempo scaduto!")\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const t = sc ? sc.get_node("Cooldown") : null;
+            const tOk = t && t.type === "Timer" && t.wait_time === 2.5 && t.one_shot === true;
+            tests.push({ desc: "Nodo Timer 'Cooldown' configurato con wait_time 2.5s e one_shot true", passed: !!tOk, diff: tOk ? null : "Proprietà timer errate o nodo assente" });
+            const conn = t && t.timeout.callbacks.length > 0;
+            tests.push({ desc: "Segnale timeout connesso a quando_scaduto", passed: !!conn, diff: conn ? null : "Segnale timeout non connesso" });
+            if (conn) t.timeout.emit();
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Tempo scaduto!");
+            tests.push({ desc: "Callback quando_scaduto eseguita con successo allo scatto del timer", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+    {
+        id: 58,
+        chapterId: 15,
+        isMastery: false,
+        title: "58. Grafica e Forme: Il nodo ColorRect",
+        icon: "🟩",
+        xp: 60,
+        expectedOutput: "Barra salute creata con colore: #22c55e",
+        theory: `
+            <p>Il nodo <strong>ColorRect</strong> disegna un rettangolo colorato a tinta unita nello spazio 2D, ideale per barre della salute, riquadri HUD o sfondi di gioco.</p>
+            <p>Possiede la proprietà <code>.color</code> (stringa esadecimale o codice colore) e <code>.size</code> (Vector2):</p>
+            <pre class="code-block"><span class="k">var</span> barra = ColorRect.<span class="nb">new</span>(<span class="s">"BarraVita"</span>)
+barra.color = <span class="s">"#22c55e"</span>
+barra.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
+<span class="nb">add_child</span>(barra)</pre>
+        `,
+        task: `
+            <ul>
+                <li>Crea un ColorRect: <code>var barra = ColorRect.new("BarraVita")</code>.</li>
+                <li>Imposta il colore verde: <code>barra.color = "#22c55e"</code>.</li>
+                <li>Imposta le dimensioni: <code>barra.size = Vector2(200, 20)</code>.</li>
+                <li>Aggiungilo alla scena con <code>add_child(barra)</code>.</li>
+                <li>Stampa: <code>print("Barra salute creata con colore: ", barra.color)</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    # Crea ColorRect BarraVita, imposta color, size, aggiungi e stampa\n    pass\n`,
+        hints: [
+            'var barra = ColorRect.new("BarraVita")',
+            'barra.color = "#22c55e"\nbarra.size = Vector2(200, 20)',
+            'add_child(barra)\nprint("Barra salute creata con colore: ", barra.color)'
+        ],
+        solution: `func _ready():\n    var barra = ColorRect.new("BarraVita")\n    barra.color = "#22c55e"\n    barra.size = Vector2(200, 20)\n    add_child(barra)\n    print("Barra salute creata con colore: ", barra.color)\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const b = sc ? sc.get_node("BarraVita") : null;
+            const bOk = b && b.type === "ColorRect" && b.color === "#22c55e" && b.size.x === 200 && b.size.y === 20;
+            tests.push({ desc: "ColorRect 'BarraVita' configurato con colore verde e size 200x20", passed: !!bOk, diff: bOk ? null : "Proprietà ColorRect non corrette" });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Barra salute creata con colore: #22c55e");
+            tests.push({ desc: "Console stampa conferma del colore creato", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+    {
+        id: 59,
+        chapterId: 15,
+        isMastery: false,
+        title: "59. Ciclo di Vita: Eliminare Nodi con queue_free()",
+        icon: "🗑️",
+        xp: 60,
+        expectedOutput: "Moneta presente prima: true\nMoneta eliminata con queue_free: true",
+        initialNodes: [
+            { type: "Node", name: "Moneta" }
+        ],
+        theory: `
+            <p>Quando un nemico viene sconfitto, una moneta viene raccolta o un proiettile esce dallo schermo, il nodo deve essere rimosso dalla memoria per non sprecare risorse.</p>
+            <p>In Godot Engine il metodo ufficiale per distruggere un nodo è <strong><code>nodo.queue_free()</code></strong>:</p>
+            <pre class="code-block"><span class="c"># Elimina il nodo dalla scena e dalla memoria</span>
+$Moneta.<span class="nb">queue_free</span>()</pre>
+            <p>Il metodo <code>has_node("Moneta")</code> restituirà <code>false</code> una volta rimosso!</p>
+        `,
+        task: `
+            <ul>
+                <li>Nella scena è presente il nodo <code>$Moneta</code>.</li>
+                <li>Stampa: <code>print("Moneta presente prima: ", has_node("Moneta"))</code>.</li>
+                <li>Rimuovi la moneta con: <code>$Moneta.queue_free()</code>.</li>
+                <li>Stampa la conferma: <code>print("Moneta eliminata con queue_free: ", not has_node("Moneta"))</code>.</li>
+            </ul>
+        `,
+        initialCode: `func _ready():\n    # Stampa has_node("Moneta"), chiama $Moneta.queue_free() e stampa conferma\n    pass\n`,
+        hints: [
+            'print("Moneta presente prima: ", has_node("Moneta"))',
+            '$Moneta.queue_free()',
+            'print("Moneta eliminata con queue_free: ", not has_node("Moneta"))'
+        ],
+        solution: `func _ready():\n    print("Moneta presente prima: ", has_node("Moneta"))\n    $Moneta.queue_free()\n    print("Moneta eliminata con queue_free: ", not has_node("Moneta"))\n`,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const notHas = sc && !sc.has_node("Moneta");
+            tests.push({ desc: "Nodo Moneta rimosso con successo dalla scena tramite queue_free()", passed: !!notHas, diff: notHas ? null : "Moneta ancora presente nella scena" });
+            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
+            const outOk = out.includes("Moneta eliminata con queue_free: true");
+            tests.push({ desc: "Console stampa conferma 'Moneta eliminata con queue_free: true'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            return tests;
+        }
+    },
+    {
+        id: 60,
+        chapterId: 15,
+        isMastery: true,
+        title: "60. 🏆 Sfida di Apprendimento Finale: Il Negozio dell'Avventuriero",
+        icon: "👑",
+        xp: 200,
+        difficulty: "avanzata",
+        difficultyLabel: "Avanzata",
+        initialNodes: [
+            { type: "Label", name: "OroLabel", text: "Monete: 100" },
+            { type: "Button", name: "CompraPozioneBtn", text: "Compra Pozione (-25 Oro)" },
+            { type: "Label", name: "MessaggioLabel", text: "" }
+        ],
+        scenario: "L'armaiolo dell'accademia di Godot apre la bottega. Nella scena sono già presenti l'etichetta <code>$OroLabel</code> con 100 monete, il pulsante <code>$CompraPozioneBtn</code> e un'etichetta di avviso <code>$MessaggioLabel</code> inizialmente vuota. Sotto i commenti, programma la logica della bottega:",
+        requirements: [
+            'Crea la variabile contatore <code>var monete = 100</code>',
+            'In <code>_ready()</code>, connetti <code>$CompraPozioneBtn.pressed.connect(compra_pozione)</code>',
+            'Nella funzione <code>func compra_pozione():</code>',
+            'Se <code>monete >= 25</code>: sottrai <code>monete -= 25</code>, aggiorna <code>$OroLabel.text = "Monete: " + str(monete)</code> e imposta <code>$MessaggioLabel.text = "Pozione Acquistata!"</code>',
+            'Altrimenti: imposta <code>$MessaggioLabel.text = "Oro Insufficiente!"</code>',
+            'Stampa a fine funzione: <code>print($MessaggioLabel.text)</code>'
+        ],
+        notice: "Non modificare la riga print() iniziale. Il programma stampa:",
+        expectedOutput: "Bottega Aperta\nPozione Acquistata!",
+        initialCode: `extends Node\n\nvar monete = 100\n\nfunc _ready():\n    # Connetti $CompraPozioneBtn sotto\n    \n    # Non modificare la riga sotto\n    print("Bottega Aperta")\n\n# Definisci func compra_pozione() sotto\n`,
+        aiExplanation: "Congratulazioni per essere giunto al completamento del corso! Questo esercizio finale unisce tutti i pilastri di Godot Engine: nodi di controllo (Button, Label), segnali di interazione utente in tempo reale, variabili di stato e logica condizionale.",
+        hints: [
+            '$CompraPozioneBtn.pressed.connect(compra_pozione)',
+            'func compra_pozione():\n    if monete >= 25:\n        monete -= 25\n        $OroLabel.text = "Monete: " + str(monete)\n        $MessaggioLabel.text = "Pozione Acquistata!"\n    else:\n        $MessaggioLabel.text = "Oro Insufficiente!"\n    print($MessaggioLabel.text)'
+        ],
+        solution: `extends Node\n\nvar monete = 100\n\nfunc _ready():\n    $CompraPozioneBtn.pressed.connect(compra_pozione)\n    \n    # Non modificare la riga sotto\n    print("Bottega Aperta")\n\nfunc compra_pozione():\n    if monete >= 25:\n        monete -= 25\n        $OroLabel.text = "Monete: " + str(monete)\n        $MessaggioLabel.text = "Pozione Acquistata!"\n    else:\n        $MessaggioLabel.text = "Oro Insufficiente!"\n    print($MessaggioLabel.text)\n`,
+        theory: `
+            <div class="mastery-banner">
+                <span class="mastery-badge">👑 SFIDA FINALE DI ARCHITETTURA NODI • GODOT 4 HERO</span>
+                <h3>Il Negozio dell'Avventuriero</h3>
+                <p>La sfida conclusiva dei nodi: connetti UI, gestione del patrimonio, segnali di click e feedback visivo in tempo reale.</p>
+            </div>
+        `,
+        task: `
+            <ul>
+                <li>Connetti <code>$CompraPozioneBtn.pressed</code> a <code>compra_pozione</code></li>
+                <li>Sottrai 25 oro se disponibile e aggiorna <code>$OroLabel.text</code></li>
+                <li>Aggiorna <code>$MessaggioLabel.text</code> con esito dell'acquisto</li>
+            </ul>
+        `,
+        validate: async (result) => {
+            const tests = [];
+            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
+            const sc = result.scene;
+            const btn = sc ? sc.get_node("CompraPozioneBtn") : null;
+            const oLbl = sc ? sc.get_node("OroLabel") : null;
+            const mLbl = sc ? sc.get_node("MessaggioLabel") : null;
+            const conn = btn && btn.pressed.callbacks.length > 0;
+            tests.push({ desc: "Pulsante d'acquisto connesso alla funzione compra_pozione", passed: !!conn, diff: conn ? null : "Segnale pressed non connesso" });
+            if (conn) {
+                btn.pressed.emit();
+            }
+            const buyOk = oLbl && oLbl.text === "Monete: 75" && mLbl && mLbl.text === "Pozione Acquistata!";
+            tests.push({ desc: "Primo acquisto riuscito: oro scalato a 75 e messaggio 'Pozione Acquistata!'", passed: !!buyOk, diff: buyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
+            if (conn) {
+                btn.pressed.emit(); // 50
+                btn.pressed.emit(); // 25
+                btn.pressed.emit(); // 0
+                btn.pressed.emit(); // Insufficiente!
+            }
+            const emptyOk = oLbl && oLbl.text === "Monete: 0" && mLbl && mLbl.text === "Oro Insufficiente!";
+            tests.push({ desc: "Gestione limite spesa: avviso 'Oro Insufficiente!' quando terminano le monete", passed: !!emptyOk, diff: emptyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
+            return tests;
+        }
     }
 ];
 
@@ -2340,6 +2982,30 @@ const ACHIEVEMENTS_DATA = [
         desc: "Supera la Sfida di Apprendimento Finale del Capitolo 12 (Classi e Oggetti).",
         xpReward: 150,
         condition: (state) => state.finishedLessons.includes(48)
+    },
+    {
+        id: "tree_explorer",
+        title: "Esploratore dell'Albero",
+        icon: "🌳",
+        desc: "Supera la Sfida di Apprendimento del Capitolo 13 (Scene Tree & Label).",
+        xpReward: 60,
+        condition: (state) => state.finishedLessons.includes(52)
+    },
+    {
+        id: "ui_designer",
+        title: "Architetto di Interfacce",
+        icon: "🔘",
+        desc: "Supera la Sfida di Apprendimento del Capitolo 14 (Button & Segnale pressed).",
+        xpReward: 60,
+        condition: (state) => state.finishedLessons.includes(56)
+    },
+    {
+        id: "godot_architect",
+        title: "Maestro delle Scene Godot",
+        icon: "🏛️",
+        desc: "Supera la Sfida di Apprendimento Finale del Capitolo 15 (Timer, UI & Ciclo di Vita).",
+        xpReward: 200,
+        condition: (state) => state.finishedLessons.includes(60)
     }
 ];
 
@@ -2356,7 +3022,10 @@ const LEVELS_CONFIG = [
     { level: 10, title: "Custode dei Dizionari", minXp: 3200, maxXp: 3999 },
     { level: 11, title: "Comandante di Segnali", minXp: 4000, maxXp: 4899 },
     { level: 12, title: "Architetto di Classi", minXp: 4900, maxXp: 5899 },
-    { level: 13, title: "Godot Hero Trascendente", minXp: 5900, maxXp: 99999 }
+    { level: 13, title: "Pioniere della Scena", minXp: 5900, maxXp: 6999 },
+    { level: 14, title: "Mastro d'Interfaccia", minXp: 7000, maxXp: 8199 },
+    { level: 15, title: "Ingegnere di Godot 4", minXp: 8200, maxXp: 9499 },
+    { level: 16, title: "Godot Hero Trascendente", minXp: 9500, maxXp: 99999 }
 ];
 
 const STREAK_TIERS = {
