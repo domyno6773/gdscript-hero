@@ -1339,7 +1339,7 @@ const App = {
     },
 
     renderRoadmap() {
-        const container = document.getElementById('chapters-flow-container');
+        const container = document.getElementById('chapters-roadmap-flow');
         if (!container) return;
         container.innerHTML = '';
 
