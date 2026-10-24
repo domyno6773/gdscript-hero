@@ -18,16 +18,16 @@
 
 const SupabaseConfig = {
     // 1. Inserisci qui l'URL del tuo progetto Supabase
-    url: '', // Es: 'https://abcdefghijklm.supabase.co'
+    url: 'https://wgohflbycprkpcymydkk.supabase.co', // URL del tuo progetto Supabase
 
     // 2. Inserisci qui la chiave Anon pubblica
-    anonKey: '', // Es: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indnb2hmbGJ5Y3Bya3BjeW15ZGtrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4NjAwNDMsImV4cCI6MjEwODQzNjA0M30.58n6ixP36-AB5vISsm5UJkeI6-PsHOJQcP1vGQ9h3Qs',
 
     // 3. Email autorizzate ad accedere al "👑 Pannello Amministratore"
     adminEmails: [
+        'gianlucachifari@hotmail.com',
         'admin@godot.it',
-        'godot.dev@gmail.com',
-        'gianluca@example.com'
+        'godot.dev@gmail.com'
     ],
 
     // Verifica se le credenziali cloud sono attive
