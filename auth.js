@@ -38,14 +38,36 @@ const AuthManager = {
                 );
                 console.log('[AuthManager] Supabase Cloud connesso con successo!');
 
-                // Verifica immediata della sessione attiva (da OAuth redirect, token memorizzato o code exchange)
-                const { data: { session }, error: sessionErr } = await this.supabaseClient.auth.getSession();
-                if (sessionErr) {
-                    console.warn('[AuthManager] Errore getSession:', sessionErr.message);
+                // 1. Controlla se c'è un codice di autorizzazione PKCE nell'URL (?code=...)
+                const urlParams = new URLSearchParams(window.location.search);
+                const authCode = urlParams.get('code');
+                let activeSession = null;
+
+                if (authCode) {
+                    try {
+                        console.log('[AuthManager] Rilevato codice OAuth da Google (?code=...), scambio sessione in corso...');
+                        const { data, error } = await this.supabaseClient.auth.exchangeCodeForSession(authCode);
+                        if (!error && data && data.session) {
+                            activeSession = data.session;
+                            console.log('[AuthManager] Scambio codice completato con successo!');
+                        } else if (error) {
+                            console.warn('[AuthManager] Errore nello scambio codice:', error.message);
+                        }
+                    } catch (e) {
+                        console.warn('[AuthManager] Eccezione exchangeCodeForSession:', e);
+                    }
                 }
 
-                if (session && session.user) {
-                    const u = session.user;
+                // 2. Se non c'era o è fallito, controlla se c'è una sessione attiva memorizzata (o da hash)
+                if (!activeSession) {
+                    const { data: { session }, error: sessionErr } = await this.supabaseClient.auth.getSession();
+                    if (!sessionErr && session) {
+                        activeSession = session;
+                    }
+                }
+
+                if (activeSession && activeSession.user) {
+                    const u = activeSession.user;
                     const sessionUser = {
                         id: u.id,
                         isGuest: false,
@@ -384,10 +406,11 @@ const AuthManager = {
     async loginWithGoogle(customProfile = null, currentProgress = null) {
         // 1. Se NON è passato un profilo manuale e Supabase è attivo: avvia Google OAuth ufficiale
         if (!customProfile && this.isCloudActive()) {
+            const redirectUrl = window.location.origin + window.location.pathname;
             const { data, error } = await this.supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.href.split('#')[0]
+                    redirectTo: redirectUrl
                 }
             });
 
