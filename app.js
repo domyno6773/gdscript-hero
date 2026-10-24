@@ -104,6 +104,9 @@ const App = {
             }
         }
 
+        // Inizializzazione Autenticazione & Salvataggio Cloud / Backup
+        this.initAuthAndSync();
+
         window.addEventListener('resize', () => {
             const roadmapView = document.getElementById('view-roadmap');
             if (roadmapView && !roadmapView.classList.contains('hidden')) {
@@ -163,29 +166,36 @@ const App = {
     },
 
     saveStorage() {
+        const payload = {
+            theme: this.state.theme,
+            xp: this.state.xp,
+            streak: this.state.streak,
+            finishedLessons: this.state.finishedLessons,
+            completedLessons: this.state.completedLessons,
+            unlockedAchievements: this.state.unlockedAchievements,
+            streakMode: this.state.streakMode,
+            streakWeeks: this.state.streakWeeks,
+            activeDaysThisWeek: this.state.activeDaysThisWeek,
+            currentWeekId: this.state.currentWeekId,
+            lastActiveDate: this.state.lastActiveDate,
+            soundEnabled: SoundFX.enabled,
+            soundVolume: SoundFX.volume,
+            userCode: this.state.userCode,
+            profile: this.state.profile,
+            profileCustomized: this.state.profileCustomized,
+            dailyQuests: this.state.dailyQuests,
+            claimedQuestsCount: this.state.claimedQuestsCount,
+            projectInterests: this.state.projectInterests
+        };
+
         try {
-            localStorage.setItem('gdscript_hero_save_v4', JSON.stringify({
-                theme: this.state.theme,
-                xp: this.state.xp,
-                streak: this.state.streak,
-                finishedLessons: this.state.finishedLessons,
-                completedLessons: this.state.completedLessons,
-                unlockedAchievements: this.state.unlockedAchievements,
-                streakMode: this.state.streakMode,
-                streakWeeks: this.state.streakWeeks,
-                activeDaysThisWeek: this.state.activeDaysThisWeek,
-                currentWeekId: this.state.currentWeekId,
-                lastActiveDate: this.state.lastActiveDate,
-                soundEnabled: SoundFX.enabled,
-                soundVolume: SoundFX.volume,
-                userCode: this.state.userCode,
-                profile: this.state.profile,
-                profileCustomized: this.state.profileCustomized,
-                dailyQuests: this.state.dailyQuests,
-                claimedQuestsCount: this.state.claimedQuestsCount,
-                projectInterests: this.state.projectInterests
-            }));
+            localStorage.setItem('gdscript_hero_save_v4', JSON.stringify(payload));
         } catch (e) {}
+
+        // Sincronizza nel database dell'account collegato se autenticato
+        if (window.AuthManager && typeof window.AuthManager.syncUserProgress === 'function') {
+            window.AuthManager.syncUserProgress(payload);
+        }
     },
 
     // ==========================================
@@ -2226,6 +2236,673 @@ const App = {
         } else {
             nextBtn.style.display = 'inline-block';
         }
+    },
+
+    // ===================================================================
+    // SISTEMA DI AUTENTICAZIONE, ACCOUNT & BACKUP DATI (auth.js integration)
+    // ===================================================================
+    initAuthAndSync() {
+        if (!window.AuthManager) return;
+
+        window.AuthManager.init();
+
+        // Listener reattivo al cambio di sessione (Ospite <-> Autenticato)
+        window.AuthManager.onAuthStateChanged((user) => {
+            this.updateAuthUI(user);
+        });
+
+        // 1. Apertura e Chiusura Modal Auth
+        const btnNavAuth = document.getElementById('btn-open-auth-nav');
+        if (btnNavAuth) {
+            btnNavAuth.onclick = () => {
+                SoundFX.playClick();
+                if (window.AuthManager.isGuest()) {
+                    this.openAuthModal('login');
+                } else {
+                    this.openProfileModal();
+                }
+            };
+        }
+
+        const btnProfileAuth = document.getElementById('btn-profile-open-auth');
+        if (btnProfileAuth) {
+            btnProfileAuth.onclick = () => {
+                SoundFX.playClick();
+                if (window.AuthManager.isGuest()) {
+                    this.closeProfileModal();
+                    this.openAuthModal('login');
+                } else {
+                    // Se già autenticato, disconnetti tornando a ospite
+                    if (confirm('Vuoi davvero disconnetterti e tornare alla modalità Ospite Locale?')) {
+                        window.AuthManager.logout();
+                        this.updateStatsUI();
+                        this.applyProfileUI();
+                        SoundFX.playClick();
+                    }
+                }
+            };
+        }
+
+        const btnSettingsAuth = document.getElementById('btn-settings-auth-action');
+        if (btnSettingsAuth) {
+            btnSettingsAuth.onclick = () => {
+                SoundFX.playClick();
+                if (window.AuthManager.isGuest()) {
+                    document.getElementById('settings-modal').classList.add('hidden');
+                    this.openAuthModal('login');
+                } else {
+                    if (confirm('Vuoi davvero disconnetterti e tornare alla modalità Ospite Locale?')) {
+                        window.AuthManager.logout();
+                        this.updateStatsUI();
+                        this.applyProfileUI();
+                        SoundFX.playClick();
+                    }
+                }
+            };
+        }
+
+        const btnCloseAuth = document.getElementById('btn-close-auth');
+        if (btnCloseAuth) {
+            btnCloseAuth.onclick = () => this.closeAuthModal();
+        }
+
+        // 2. Toggle Tab Login vs Registrati
+        const tabLogin = document.getElementById('tab-auth-login');
+        const tabRegister = document.getElementById('tab-auth-register');
+        const groupName = document.getElementById('group-auth-name');
+        const groupMerge = document.getElementById('group-auth-merge');
+        const submitText = document.getElementById('auth-submit-text');
+        const authTitle = document.getElementById('auth-modal-title');
+
+        if (tabLogin && tabRegister) {
+            tabLogin.onclick = () => {
+                SoundFX.playClick();
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+                if (groupName) groupName.classList.add('hidden');
+                if (groupMerge) groupMerge.classList.add('hidden');
+                if (submitText) submitText.innerText = 'Accedi al Tuo Account';
+                if (authTitle) authTitle.innerText = 'Accedi a GDScript Hero';
+                this.clearAuthAlert();
+            };
+
+            tabRegister.onclick = () => {
+                SoundFX.playClick();
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+                if (groupName) groupName.classList.remove('hidden');
+                if (groupMerge) groupMerge.classList.remove('hidden');
+                if (submitText) submitText.innerText = 'Crea Account e Salva Progressi';
+                if (authTitle) authTitle.innerText = 'Crea il Tuo Nuovo Account';
+                this.clearAuthAlert();
+            };
+        }
+
+        // Toggle Password visibile
+        const btnTogglePwd = document.getElementById('btn-toggle-pwd');
+        const pwdInput = document.getElementById('auth-password-input');
+        if (btnTogglePwd && pwdInput) {
+            btnTogglePwd.onclick = () => {
+                if (pwdInput.type === 'password') {
+                    pwdInput.type = 'text';
+                    btnTogglePwd.innerText = '🙈';
+                } else {
+                    pwdInput.type = 'password';
+                    btnTogglePwd.innerText = '👁️';
+                }
+            };
+        }
+
+        // Continua come Ospite
+        const btnGuest = document.getElementById('btn-continue-guest');
+        if (btnGuest) {
+            btnGuest.onclick = () => {
+                SoundFX.playClick();
+                window.AuthManager.logout(); // assicura guest
+                this.closeAuthModal();
+            };
+        }
+
+        // 3. Invio Form Autenticazione (Login o Register)
+        const authForm = document.getElementById('auth-form');
+        if (authForm) {
+            authForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const isRegister = tabRegister && tabRegister.classList.contains('active');
+                const emailInput = document.getElementById('auth-email-input');
+                const nameInput = document.getElementById('auth-name-input');
+                const mergeCheckbox = document.getElementById('auth-merge-checkbox');
+
+                const email = emailInput ? emailInput.value.trim() : '';
+                const password = pwdInput ? pwdInput.value : '';
+                const name = nameInput ? nameInput.value.trim() : '';
+                const shouldMerge = mergeCheckbox ? mergeCheckbox.checked : true;
+
+                try {
+                    this.clearAuthAlert();
+                    if (isRegister) {
+                        const progressToAttach = shouldMerge ? { ...this.state } : null;
+                        const res = await window.AuthManager.registerWithEmail(name, email, password, progressToAttach);
+                        this.showAuthAlert('Account creato con successo! Benvenuto, ' + res.user.name + '!', 'success');
+                        SoundFX.playSuccess();
+                        if (progressToAttach) {
+                            this.saveStorage();
+                        }
+                    } else {
+                        const res = await window.AuthManager.loginWithEmail(email, password);
+                        this.showAuthAlert('Accesso effettuato! Bentornato, ' + res.user.name + '!', 'success');
+                        SoundFX.playSuccess();
+
+                        // Se l'account ha salvataggi cloud precedenti, caricali
+                        if (res.account && res.account.progress) {
+                            this.applyImportedState(res.account.progress, false);
+                        }
+                    }
+
+                    setTimeout(() => {
+                        this.closeAuthModal();
+                    }, 900);
+                } catch (err) {
+                    SoundFX.playError();
+                    this.showAuthAlert(err.message, 'error');
+                }
+            };
+        }
+
+        // 4. Accesso Rapido Google
+        const btnGoogle = document.getElementById('btn-google-signin');
+        const googlePickerModal = document.getElementById('google-picker-modal');
+        const btnCloseGooglePicker = document.getElementById('btn-close-google-picker');
+
+        if (btnGoogle && googlePickerModal) {
+            btnGoogle.onclick = () => {
+                SoundFX.playClick();
+                // Mostra popup di selezione account Google
+                googlePickerModal.classList.remove('hidden');
+            };
+        }
+
+        if (btnCloseGooglePicker && googlePickerModal) {
+            btnCloseGooglePicker.onclick = () => {
+                SoundFX.playClick();
+                googlePickerModal.classList.add('hidden');
+            };
+        }
+
+        const googleAccPreset = document.getElementById('google-acc-preset');
+        if (googleAccPreset) {
+            googleAccPreset.onclick = async () => {
+                SoundFX.playClick();
+                const email = googleAccPreset.getAttribute('data-email') || 'godot.dev@gmail.com';
+                const name = googleAccPreset.getAttribute('data-name') || 'Sviluppatore Godot';
+                await this.completeGoogleLogin({ email, name });
+            };
+        }
+
+        const btnConfirmCustomGoogle = document.getElementById('btn-confirm-custom-google');
+        const googleCustomEmailInput = document.getElementById('google-custom-email-input');
+        if (btnConfirmCustomGoogle && googleCustomEmailInput) {
+            btnConfirmCustomGoogle.onclick = async () => {
+                const customEmail = googleCustomEmailInput.value.trim();
+                if (!customEmail || !customEmail.includes('@')) {
+                    alert('Inserisci un indirizzo email Google valido.');
+                    return;
+                }
+                const namePart = customEmail.split('@')[0];
+                const capitalized = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+                await this.completeGoogleLogin({ email: customEmail, name: capitalized });
+            };
+        }
+
+        // 5. Apertura e Gestione Modal Backup & Ripristino Dati
+        const btnProfileBackup = document.getElementById('btn-profile-open-backup');
+        if (btnProfileBackup) {
+            btnProfileBackup.onclick = () => {
+                SoundFX.playClick();
+                this.closeProfileModal();
+                this.openBackupModal('export');
+            };
+        }
+
+        const btnSettingsExport = document.getElementById('btn-settings-export');
+        if (btnSettingsExport) {
+            btnSettingsExport.onclick = () => {
+                SoundFX.playClick();
+                document.getElementById('settings-modal').classList.add('hidden');
+                this.openBackupModal('export');
+            };
+        }
+
+        const btnSettingsImport = document.getElementById('btn-settings-import');
+        if (btnSettingsImport) {
+            btnSettingsImport.onclick = () => {
+                SoundFX.playClick();
+                document.getElementById('settings-modal').classList.add('hidden');
+                this.openBackupModal('import');
+            };
+        }
+
+        const btnCloseBackup = document.getElementById('btn-close-backup');
+        if (btnCloseBackup) {
+            btnCloseBackup.onclick = () => this.closeBackupModal();
+        }
+
+        // Schede Esporta vs Importa
+        const tabBackupExport = document.getElementById('tab-backup-export');
+        const tabBackupImport = document.getElementById('tab-backup-import');
+        const panelExport = document.getElementById('panel-backup-export');
+        const panelImport = document.getElementById('panel-backup-import');
+
+        if (tabBackupExport && tabBackupImport) {
+            tabBackupExport.onclick = () => {
+                SoundFX.playClick();
+                tabBackupExport.classList.add('active');
+                tabBackupImport.classList.remove('active');
+                panelExport.classList.remove('hidden');
+                panelImport.classList.add('hidden');
+                this.refreshBackupExportInfo();
+            };
+
+            tabBackupImport.onclick = () => {
+                SoundFX.playClick();
+                tabBackupImport.classList.add('active');
+                tabBackupExport.classList.remove('active');
+                panelImport.classList.remove('hidden');
+                panelExport.classList.add('hidden');
+            };
+        }
+
+        // Azione 1: Scarica File JSON
+        const btnDoExportFile = document.getElementById('btn-do-export-file');
+        if (btnDoExportFile) {
+            btnDoExportFile.onclick = () => {
+                SoundFX.playClick();
+                const fileName = window.AuthManager.exportToFile(this.state);
+                alert(`File di backup scaricato con successo!\nNome: ${fileName}`);
+            };
+        }
+
+        // Azione 2: Copia Codice negli Appunti
+        const btnDoCopyCode = document.getElementById('btn-do-copy-code');
+        const exportCodeTextarea = document.getElementById('export-code-textarea');
+        if (btnDoCopyCode && exportCodeTextarea) {
+            btnDoCopyCode.onclick = () => {
+                SoundFX.playClick();
+                const code = window.AuthManager.exportToCode(this.state);
+                exportCodeTextarea.value = code;
+                exportCodeTextarea.select();
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        btnDoCopyCode.innerText = '✓ Codice Copiato Negli Appunti!';
+                        setTimeout(() => {
+                            btnDoCopyCode.innerText = '📋 Copia Codice Negli Appunti';
+                        }, 2200);
+                    });
+                } else {
+                    document.execCommand('copy');
+                    btnDoCopyCode.innerText = '✓ Copiato!';
+                    setTimeout(() => {
+                        btnDoCopyCode.innerText = '📋 Copia Codice Negli Appunti';
+                    }, 2200);
+                }
+            };
+        }
+
+        // Azione 3: Importazione - Analizza File o Codice Incollato
+        const importFileInput = document.getElementById('import-file-input');
+        const importDropzone = document.getElementById('import-dropzone');
+        const importCodeInput = document.getElementById('import-code-input');
+        const btnAnalyzeImport = document.getElementById('btn-analyze-import');
+
+        if (importFileInput) {
+            importFileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const text = event.target.result;
+                    if (importCodeInput) importCodeInput.value = text;
+                    this.analyzeAndPreviewImport(text);
+                };
+                reader.readAsText(file);
+            };
+        }
+
+        if (importDropzone) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                importDropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    importDropzone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                importDropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    importDropzone.classList.remove('dragover');
+                }, false);
+            });
+
+            importDropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const text = event.target.result;
+                        if (importCodeInput) importCodeInput.value = text;
+                        this.analyzeAndPreviewImport(text);
+                    };
+                    reader.readAsText(file);
+                }
+            }, false);
+        }
+
+        if (btnAnalyzeImport) {
+            btnAnalyzeImport.onclick = () => {
+                SoundFX.playClick();
+                const rawText = importCodeInput ? importCodeInput.value.trim() : '';
+                this.analyzeAndPreviewImport(rawText);
+            };
+        }
+
+        // Toggle Opzioni Modalità Import (Merge vs Overwrite)
+        const modeOptMerge = document.getElementById('mode-opt-merge');
+        const modeOptOverwrite = document.getElementById('mode-opt-overwrite');
+        const radioMerge = document.getElementById('radio-merge');
+        const radioOverwrite = document.getElementById('radio-overwrite');
+
+        if (modeOptMerge && modeOptOverwrite && radioMerge && radioOverwrite) {
+            modeOptMerge.onclick = () => {
+                radioMerge.checked = true;
+                modeOptMerge.classList.add('selected');
+                modeOptOverwrite.classList.remove('selected');
+            };
+            modeOptOverwrite.onclick = () => {
+                radioOverwrite.checked = true;
+                modeOptOverwrite.classList.add('selected');
+                modeOptMerge.classList.remove('selected');
+            };
+        }
+
+        // Conferma Ripristino
+        const btnConfirmImport = document.getElementById('btn-confirm-import');
+        const btnCancelImport = document.getElementById('btn-cancel-import');
+        if (btnConfirmImport) {
+            btnConfirmImport.onclick = () => {
+                this.executeImport();
+            };
+        }
+        if (btnCancelImport) {
+            btnCancelImport.onclick = () => {
+                SoundFX.playClick();
+                document.getElementById('import-preview-box').classList.add('hidden');
+            };
+        }
+    },
+
+    async completeGoogleLogin(profile) {
+        try {
+            const googlePickerModal = document.getElementById('google-picker-modal');
+            if (googlePickerModal) googlePickerModal.classList.add('hidden');
+
+            const res = await window.AuthManager.loginWithGoogle(profile, { ...this.state });
+            SoundFX.playSuccess();
+
+            // Se l'account Google ha già salvataggi cloud, applicali
+            if (res.account && res.account.progress) {
+                this.applyImportedState(res.account.progress, false);
+            }
+
+            this.showAuthAlert(`Accesso con Google completato! Benvenuto, ${res.user.name}!`, 'success');
+            setTimeout(() => {
+                this.closeAuthModal();
+            }, 900);
+        } catch (e) {
+            SoundFX.playError();
+            this.showAuthAlert('Errore durante l\'accesso con Google: ' + e.message, 'error');
+        }
+    },
+
+    updateAuthUI(user) {
+        const isGuest = !user || user.isGuest === true;
+        const navAuthIcon = document.getElementById('nav-auth-icon');
+        const navAuthLabel = document.getElementById('nav-auth-label');
+        const btnNavAuth = document.getElementById('btn-open-auth-nav');
+
+        if (btnNavAuth) {
+            if (isGuest) {
+                btnNavAuth.classList.remove('logged-in');
+                btnNavAuth.title = 'Modalità Ospite • Tocca per accedere';
+            } else {
+                btnNavAuth.classList.add('logged-in');
+                btnNavAuth.title = `Connesso: ${user.email} • Tocca per gestire`;
+            }
+        }
+
+        if (navAuthIcon) {
+            if (isGuest) {
+                navAuthIcon.innerText = '👤';
+            } else if (user.provider === 'google') {
+                navAuthIcon.innerText = '🌐';
+            } else {
+                navAuthIcon.innerText = '🟢';
+            }
+        }
+
+        if (navAuthLabel) {
+            if (isGuest) {
+                navAuthLabel.innerText = 'Ospite';
+            } else {
+                const shortName = (user.name || 'Utente').split(' ')[0];
+                navAuthLabel.innerText = shortName;
+            }
+        }
+
+        // Aggiorna Sezione Profilo
+        const profileBadge = document.getElementById('profile-acc-badge');
+        const profileDesc = document.getElementById('profile-acc-desc');
+        const btnProfileAuth = document.getElementById('btn-profile-open-auth');
+
+        if (profileBadge) {
+            profileBadge.innerText = isGuest ? 'Modalità Ospite (Locale)' : `✓ Cloud Attivo (${user.provider === 'google' ? 'Google' : 'Email'})`;
+            profileBadge.style.color = isGuest ? '#38bdf8' : '#10b981';
+            profileBadge.style.borderColor = isGuest ? 'rgba(56, 189, 248, 0.4)' : 'rgba(16, 185, 129, 0.4)';
+        }
+
+        if (profileDesc) {
+            if (isGuest) {
+                profileDesc.innerHTML = 'Stai giocando come <strong>Ospite Locale</strong>. I tuoi progressi sono salvati solo in questo browser. Accedi per salvarli nel cloud!';
+            } else {
+                profileDesc.innerHTML = `Connesso come <strong>${user.email}</strong>. Sincronizzazione automatica attiva nel cloud.`;
+            }
+        }
+
+        if (btnProfileAuth) {
+            btnProfileAuth.innerText = isGuest ? '🔑 Accedi / Crea Account' : '🚪 Disconnetti (Torna Ospite)';
+        }
+
+        // Aggiorna Sezione Impostazioni
+        const settingsAccountDesc = document.getElementById('settings-account-desc');
+        const btnSettingsAuth = document.getElementById('btn-settings-auth-action');
+
+        if (settingsAccountDesc) {
+            settingsAccountDesc.innerText = isGuest ? 'Modalità Ospite (Dati salvati in locale)' : `Connesso: ${user.email}`;
+        }
+        if (btnSettingsAuth) {
+            btnSettingsAuth.innerText = isGuest ? '🔑 Accedi' : '🚪 Esci';
+        }
+    },
+
+    openAuthModal(defaultTab = 'login') {
+        const modal = document.getElementById('auth-modal');
+        if (!modal) return;
+        this.clearAuthAlert();
+
+        if (defaultTab === 'register') {
+            const tabReg = document.getElementById('tab-auth-register');
+            if (tabReg) tabReg.click();
+        } else {
+            const tabLog = document.getElementById('tab-auth-login');
+            if (tabLog) tabLog.click();
+        }
+
+        modal.classList.remove('hidden');
+    },
+
+    closeAuthModal() {
+        SoundFX.playClick();
+        const modal = document.getElementById('auth-modal');
+        if (modal) modal.classList.add('hidden');
+        this.clearAuthAlert();
+    },
+
+    showAuthAlert(message, type = 'error') {
+        const alertBox = document.getElementById('auth-alert-box');
+        if (alertBox) {
+            alertBox.className = `auth-alert ${type}`;
+            alertBox.innerText = message;
+            alertBox.classList.remove('hidden');
+        }
+    },
+
+    clearAuthAlert() {
+        const alertBox = document.getElementById('auth-alert-box');
+        if (alertBox) {
+            alertBox.classList.add('hidden');
+            alertBox.innerText = '';
+        }
+    },
+
+    openBackupModal(defaultTab = 'export') {
+        const modal = document.getElementById('backup-modal');
+        if (!modal) return;
+
+        if (defaultTab === 'import') {
+            const tabImp = document.getElementById('tab-backup-import');
+            if (tabImp) tabImp.click();
+        } else {
+            const tabExp = document.getElementById('tab-backup-export');
+            if (tabExp) tabExp.click();
+        }
+
+        this.refreshBackupExportInfo();
+        modal.classList.remove('hidden');
+    },
+
+    closeBackupModal() {
+        SoundFX.playClick();
+        const modal = document.getElementById('backup-modal');
+        if (modal) modal.classList.add('hidden');
+        const previewBox = document.getElementById('import-preview-box');
+        if (previewBox) previewBox.classList.add('hidden');
+    },
+
+    refreshBackupExportInfo() {
+        const summary = document.getElementById('export-stat-summary');
+        if (summary) {
+            summary.innerText = `Riepilogo: ${this.state.xp} XP • ${this.state.finishedLessons.length}/36 lezioni completate • Livello ${this.getCurrentLevelInfo().tier.level}`;
+        }
+        const exportCodeTextarea = document.getElementById('export-code-textarea');
+        if (exportCodeTextarea && window.AuthManager) {
+            exportCodeTextarea.value = window.AuthManager.exportToCode(this.state);
+        }
+    },
+
+    pendingImportPayload: null,
+
+    analyzeAndPreviewImport(rawText) {
+        if (!rawText) {
+            alert('Inserisci o carica un file di salvataggio prima di analizzare.');
+            return;
+        }
+
+        try {
+            const parsed = window.AuthManager.parseBackupString(rawText);
+            this.pendingImportPayload = parsed;
+
+            const previewBox = document.getElementById('import-preview-box');
+            const previewName = document.getElementById('import-preview-name');
+            const previewXp = document.getElementById('import-preview-xp');
+            const previewLessons = document.getElementById('import-preview-lessons');
+            const previewAch = document.getElementById('import-preview-ach');
+            const previewDate = document.getElementById('import-preview-date');
+
+            if (previewName) previewName.innerText = parsed.user?.name || parsed.data?.profile?.username || 'Eroe Godot';
+            if (previewXp) previewXp.innerText = `${parsed.data.xp || 0} XP`;
+            if (previewLessons) previewLessons.innerText = `${(parsed.data.finishedLessons || []).length} completate`;
+            if (previewAch) previewAch.innerText = `${(parsed.data.unlockedAchievements || []).length} sbloccati`;
+            if (previewDate) {
+                const dateStr = parsed.exportedAt ? new Date(parsed.exportedAt).toLocaleDateString() : 'Non specificata';
+                previewDate.innerText = `Data salvataggio: ${dateStr}`;
+            }
+
+            if (previewBox) {
+                previewBox.classList.remove('hidden');
+                SoundFX.playSuccess();
+            }
+        } catch (e) {
+            SoundFX.playError();
+            alert('Impossibile leggere il salvataggio: ' + e.message);
+        }
+    },
+
+    executeImport() {
+        if (!this.pendingImportPayload || !this.pendingImportPayload.data) {
+            alert('Nessun salvataggio valido pronto per il ripristino.');
+            return;
+        }
+
+        const radioOverwrite = document.getElementById('radio-overwrite');
+        const isOverwrite = radioOverwrite && radioOverwrite.checked;
+        const importedData = this.pendingImportPayload.data;
+
+        if (isOverwrite) {
+            if (!confirm('ATTENZIONE: Stai per sovrascrivere completamente tutti i tuoi progressi correnti con questo file di backup. Continuare?')) {
+                return;
+            }
+            this.applyImportedState(importedData, true);
+        } else {
+            // Modalità Unione (Merge progressivo intelligente)
+            const merged = window.AuthManager.mergeProgress(this.state, importedData);
+            this.applyImportedState(merged, true);
+        }
+
+        SoundFX.playFanfare();
+        alert('🎉 Progressi ripristinati con successo!');
+        this.closeBackupModal();
+    },
+
+    applyImportedState(data, notify = true) {
+        if (!data) return;
+
+        if (data.xp !== undefined) this.state.xp = data.xp;
+        if (data.streak !== undefined) this.state.streak = data.streak;
+        if (data.streakWeeks !== undefined) this.state.streakWeeks = data.streakWeeks;
+        if (data.streakMode) this.state.streakMode = data.streakMode;
+        if (data.activeDaysThisWeek) this.state.activeDaysThisWeek = data.activeDaysThisWeek;
+        if (data.finishedLessons) this.state.finishedLessons = data.finishedLessons;
+        if (data.completedLessons) this.state.completedLessons = data.completedLessons;
+        if (data.unlockedAchievements) this.state.unlockedAchievements = data.unlockedAchievements;
+        if (data.userCode) this.state.userCode = data.userCode;
+        if (data.profile) this.state.profile = { ...this.state.profile, ...data.profile };
+        if (data.profileCustomized !== undefined) this.state.profileCustomized = !!data.profileCustomized;
+        if (data.dailyQuests) this.state.dailyQuests = data.dailyQuests;
+        if (data.claimedQuestsCount !== undefined) this.state.claimedQuestsCount = data.claimedQuestsCount;
+        if (data.theme) {
+            this.applyTheme(data.theme);
+        }
+
+        this.saveStorage();
+        this.updateStatsUI();
+        this.applyProfileUI();
+        this.renderRoadmap();
+        this.renderSidebarDailyQuests();
+        this.checkAchievements();
+        this.updateQuestsBadge();
     }
 };
 

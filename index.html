@@ -82,6 +82,12 @@
 
             <!-- Gruppo Utente & Impostazioni -->
             <div class="nav-user-group">
+                <!-- Pillola Stato Account / Login (Ospite o Utente) -->
+                <div class="stat-pill auth-pill clickable" id="btn-open-auth-nav" title="Stato Account & Sincronizzazione">
+                    <span id="nav-auth-icon">👤</span>
+                    <span id="nav-auth-label">Ospite</span>
+                </div>
+
                 <!-- Profilo Giocatore -->
                 <div class="stat-pill profile-pill clickable" id="btn-open-profile" title="Il Tuo Profilo">
                     <div class="nav-avatar" id="nav-profile-avatar" style="border-color: #478cbf;">🤖</div>
@@ -502,6 +508,25 @@
                     <button class="btn-save-profile" id="btn-save-profile">
                         💾 Salva Modifiche Profilo
                     </button>
+
+                    <!-- Sezione Account & Backup rapido nel Profilo -->
+                    <div class="profile-account-section">
+                        <div class="profile-account-header">
+                            <span class="profile-acc-title">🔐 Account &amp; Sincronizzazione</span>
+                            <span class="profile-acc-badge" id="profile-acc-badge">Modalità Ospite</span>
+                        </div>
+                        <p class="profile-acc-desc" id="profile-acc-desc">
+                            Stai giocando come <strong>Ospite Locale</strong>. I tuoi progressi sono salvati in questo browser. Accedi per salvare su cloud o esporta un backup.
+                        </p>
+                        <div class="profile-acc-actions">
+                            <button type="button" class="btn-subtle" id="btn-profile-open-auth">
+                                🔑 Accedi / Registrati
+                            </button>
+                            <button type="button" class="btn-subtle" id="btn-profile-open-backup">
+                                💾 Backup &amp; Ripristino (.json)
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -670,7 +695,36 @@
                 </div>
             </div>
 
-            <!-- Gruppo 2: Dati e Reset (Doppia Conferma) -->
+            <!-- Gruppo 3: Account, Backup & Sincronizzazione Dati -->
+            <div class="settings-group">
+                <div class="settings-group-title">💾 Account, Backup &amp; Sincronizzazione</div>
+                
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Stato Account</span>
+                        <span class="settings-item-sub" id="settings-account-desc">Modalità Ospite (Locale)</span>
+                    </div>
+                    <button type="button" class="btn-subtle" id="btn-settings-auth-action">🔑 Accedi</button>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Esporta Dati di Gioco</span>
+                        <span class="settings-item-sub">Scarica un file .json o genera un codice backup</span>
+                    </div>
+                    <button type="button" class="btn-subtle" id="btn-settings-export">📤 Esporta</button>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Importa Dati di Gioco</span>
+                        <span class="settings-item-sub">Ripristina i tuoi progressi da un salvataggio</span>
+                    </div>
+                    <button type="button" class="btn-subtle" id="btn-settings-import">📥 Importa</button>
+                </div>
+            </div>
+
+            <!-- Gruppo 4: Dati e Reset (Doppia Conferma) -->
             <div class="settings-group danger-group">
                 <div class="settings-group-title">⚠️ Dati e Memoria di Studio</div>
                 
@@ -739,6 +793,257 @@
         </div>
     </div>
 
+    <!-- MODAL 1: AUTENTICAZIONE & ACCESSO (Ospite, Email/Password, Google) -->
+    <div class="modal-overlay hidden" id="auth-modal">
+        <div class="modal-card modal-medium auth-modal-card">
+            <div class="modal-header-row">
+                <div class="auth-header-title">
+                    <span class="auth-icon-big">🔐</span>
+                    <div>
+                        <h2 id="auth-modal-title">Accedi a GDScript Hero</h2>
+                        <span class="modal-subtitle">Salva i tuoi progressi nel Cloud e gioca ovunque</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" id="btn-close-auth">✕</button>
+            </div>
+
+            <!-- Box di feedback per errori/successo -->
+            <div class="auth-alert hidden" id="auth-alert-box"></div>
+
+            <!-- Accesso Rapido con Google -->
+            <div class="auth-social-section">
+                <button type="button" class="btn-google-signin" id="btn-google-signin" title="Accedi con il tuo account Google">
+                    <svg class="google-svg" viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.35 24 12 24z"/>
+                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.98 0 12s.45 3.84 1.25 5.42l4.03-3.15z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                    </svg>
+                    <span>Continua con Google</span>
+                </button>
+            </div>
+
+            <!-- Separatore -->
+            <div class="auth-divider">
+                <span>oppure con email</span>
+            </div>
+
+            <!-- Tabs: Accedi vs Registrati -->
+            <div class="auth-tabs-row">
+                <button type="button" class="auth-tab active" id="tab-auth-login">Accedi</button>
+                <button type="button" class="auth-tab" id="tab-auth-register">Crea Account</button>
+            </div>
+
+            <!-- Form Email & Password -->
+            <form id="auth-form" class="auth-form" onsubmit="return false;">
+                <!-- Campo Nome (solo in registrazione) -->
+                <div class="form-group hidden" id="group-auth-name">
+                    <label class="form-label" for="auth-name-input">Nome Utente o Soprannome:</label>
+                    <input type="text" id="auth-name-input" class="form-input" placeholder="es. Alex Sviluppatore" maxlength="30">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="auth-email-input">Indirizzo Email:</label>
+                    <input type="email" id="auth-email-input" class="form-input" placeholder="sviluppatore@godot.it" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label-row">
+                        <label class="form-label" for="auth-password-input">Password:</label>
+                        <button type="button" class="btn-toggle-pwd" id="btn-toggle-pwd" title="Mostra / Nascondi password">👁️</button>
+                    </div>
+                    <input type="password" id="auth-password-input" class="form-input" placeholder="Minimo 6 caratteri" required autocomplete="current-password">
+                </div>
+
+                <!-- Opzione mantieni progressi (solo registrazione) -->
+                <div class="form-check-group hidden" id="group-auth-merge">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="auth-merge-checkbox" checked>
+                        <span class="checkmark"></span>
+                        <span class="check-label">Collega i progressi attuali da Ospite (XP, serie e traguardi) al nuovo account</span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-auth-submit" id="btn-auth-submit">
+                    <span id="auth-submit-text">Accedi al Tuo Account</span>
+                </button>
+            </form>
+
+            <!-- Continua come Ospite Footer -->
+            <div class="auth-guest-footer">
+                <button type="button" class="btn-continue-guest" id="btn-continue-guest">
+                    <span>👤 Continua come Ospite (senza account)</span>
+                </button>
+                <p class="auth-guest-note">In modalità ospite puoi giocare subito: i dati saranno salvati solo nella memoria di questo browser.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: DIALOGO RAPIDO SCELTA ACCOUNT GOOGLE -->
+    <div class="modal-overlay hidden" id="google-picker-modal">
+        <div class="modal-card modal-small google-picker-card">
+            <button type="button" class="modal-close-btn top-right" id="btn-close-google-picker">✕</button>
+            <div class="google-brand-header">
+                <svg viewBox="0 0 24 24" width="30" height="30">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.35 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.98 0 12s.45 3.84 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+                <h3>Accedi con Google</h3>
+                <p>Scegli l'account con cui sincronizzare GDScript Hero</p>
+            </div>
+
+            <div class="google-accounts-list">
+                <div class="google-acc-item" id="google-acc-preset" data-email="godot.dev@gmail.com" data-name="Sviluppatore Godot">
+                    <div class="google-acc-avatar">🤖</div>
+                    <div class="google-acc-info">
+                        <span class="g-name" id="g-picker-name">Sviluppatore Godot</span>
+                        <span class="g-email">godot.dev@gmail.com</span>
+                    </div>
+                    <span class="g-check-icon">➔</span>
+                </div>
+            </div>
+
+            <!-- Oppure inserisci un'altra email Google -->
+            <div class="google-custom-box">
+                <span class="g-or-label">Oppure inserisci la tua email Google:</span>
+                <div class="g-input-row">
+                    <input type="email" id="google-custom-email-input" class="form-input" placeholder="latuaemail@gmail.com">
+                    <button type="button" class="btn-subtle" id="btn-confirm-custom-google">Conferma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: BACKUP & TRASFERIMENTO DATI (Esporta / Importa) -->
+    <div class="modal-overlay hidden" id="backup-modal">
+        <div class="modal-card modal-large backup-modal-card">
+            <div class="modal-header-row">
+                <div class="backup-header-title">
+                    <span class="auth-icon-big">💾</span>
+                    <div>
+                        <h2>Salvataggio &amp; Trasferimento Dati</h2>
+                        <span class="modal-subtitle">Esporta il tuo progresso su PC/Mobile o ripristina un backup</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" id="btn-close-backup">✕</button>
+            </div>
+
+            <!-- Tabs: Esporta vs Importa -->
+            <div class="backup-tabs-row">
+                <button type="button" class="backup-tab active" id="tab-backup-export">📤 Esporta Dati</button>
+                <button type="button" class="backup-tab" id="tab-backup-import">📥 Importa Dati</button>
+            </div>
+
+            <!-- PANNELLO 1: ESPORTA -->
+            <div class="backup-panel-content" id="panel-backup-export">
+                <div class="backup-cards-grid">
+                    <!-- Opzione 1: File JSON -->
+                    <div class="backup-action-card">
+                        <div class="b-card-icon">📁</div>
+                        <h3>Scarica File .json</h3>
+                        <p>Salva un file di backup sul tuo dispositivo contenente XP, serie, lezioni completate, profilo e codice salvato.</p>
+                        <div class="b-card-stat" id="export-stat-summary">Riepilogo: 0 XP • 0 lezioni</div>
+                        <button type="button" class="btn-export-primary" id="btn-do-export-file">
+                            <span>📥 Scarica File di Salvataggio</span>
+                        </button>
+                    </div>
+
+                    <!-- Opzione 2: Codice di Testo (per mobile o copia rapida) -->
+                    <div class="backup-action-card">
+                        <div class="b-card-icon">📋</div>
+                        <h3>Copia Codice Backup</h3>
+                        <p>Genera un codice testuale compatto (Base64) da inviarti via messaggio o incollare su un altro dispositivo.</p>
+                        <div class="backup-code-box">
+                            <textarea id="export-code-textarea" readonly rows="2" placeholder="Caricamento codice...">GDHERO-...</textarea>
+                        </div>
+                        <button type="button" class="btn-export-secondary" id="btn-do-copy-code">
+                            <span>📋 Copia Codice Negli Appunti</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANNELLO 2: IMPORTA -->
+            <div class="backup-panel-content hidden" id="panel-backup-import">
+                <div class="import-layout">
+                    <!-- Selezione File o Incolla Codice -->
+                    <div class="import-input-block">
+                        <div class="dropzone" id="import-dropzone">
+                            <input type="file" id="import-file-input" accept=".json,application/json" class="file-hidden-input">
+                            <div class="dropzone-content">
+                                <span class="dropzone-icon">📂</span>
+                                <span class="dropzone-text">Trascina qui il file <strong>.json</strong> o <label for="import-file-input" class="dropzone-browse">Sfoglia file</label></span>
+                            </div>
+                        </div>
+
+                        <div class="import-divider"><span>oppure incolla codice di backup</span></div>
+
+                        <textarea id="import-code-input" class="import-textarea" rows="3" placeholder="Incolla qui il codice backup GDHERO-... oppure il contenuto del file JSON"></textarea>
+
+                        <button type="button" class="btn-analyze-import" id="btn-analyze-import">
+                            🔍 Analizza Salvataggio
+                        </button>
+                    </div>
+
+                    <!-- Box Risultato Analisi / Anteprima Salvataggio -->
+                    <div class="import-preview-box hidden" id="import-preview-box">
+                        <div class="preview-header">
+                            <span class="preview-badge">✓ SALVATAGGIO VALIDO RICONOSCIUTO</span>
+                            <span class="preview-date" id="import-preview-date">-</span>
+                        </div>
+                        
+                        <div class="preview-info-grid">
+                            <div class="p-info-item">
+                                <span class="p-label">Giocatore:</span>
+                                <span class="p-val" id="import-preview-name">-</span>
+                            </div>
+                            <div class="p-info-item">
+                                <span class="p-label">Punti Esperienza:</span>
+                                <span class="p-val" id="import-preview-xp">-</span>
+                            </div>
+                            <div class="p-info-item">
+                                <span class="p-label">Lezioni Complete:</span>
+                                <span class="p-val" id="import-preview-lessons">-</span>
+                            </div>
+                            <div class="p-info-item">
+                                <span class="p-label">Traguardi:</span>
+                                <span class="p-val" id="import-preview-ach">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Modalità di Ripristino -->
+                        <div class="import-mode-selection">
+                            <div class="mode-option selected" id="mode-opt-merge">
+                                <input type="radio" name="import-mode" id="radio-merge" value="merge" checked>
+                                <label for="radio-merge">
+                                    <strong>✨ Unisci con i progressi correnti (Consigliato)</strong>
+                                    <span>Conserva il punteggio XP più alto, unisce le lezioni finite e non cancella nulla.</span>
+                                </label>
+                            </div>
+                            <div class="mode-option" id="mode-opt-overwrite">
+                                <input type="radio" name="import-mode" id="radio-overwrite" value="overwrite">
+                                <label for="radio-overwrite">
+                                    <strong>⚠️ Sovrascrivi completamente</strong>
+                                    <span>Sostituisce al 100% tutti i dati attuali con quelli contenuti in questo backup.</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="import-actions-row">
+                            <button type="button" class="btn-cancel" id="btn-cancel-import">Annulla</button>
+                            <button type="button" class="btn-confirm-import" id="btn-confirm-import">
+                                🚀 Conferma e Ripristina Progressi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- BARRA DI NAVIGAZIONE INFERIORE MOBILE (Attiva solo su smartphone e schermi <= 820px) -->
     <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
         <button type="button" class="mob-nav-item active" id="mob-nav-roadmap" title="Mappa dei Livelli">
@@ -769,6 +1074,7 @@
     <script src="runtime.js"></script>
     <script src="lessons.js"></script>
     <script src="viewport2d.js"></script>
+    <script src="auth.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
