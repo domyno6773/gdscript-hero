@@ -567,11 +567,7 @@ const App = {
         document.getElementById('view-projects').classList.add('hidden');
         document.getElementById('view-practice').classList.remove('hidden');
 
-        document.getElementById('nav-roadmap-btn').classList.remove('active');
-        document.getElementById('nav-editor-btn').classList.remove('active');
-        document.getElementById('nav-projects-btn').classList.remove('active');
-        document.getElementById('nav-practice-btn').classList.add('active');
-
+        this.updateNavSelection('practice');
         this.updatePracticeLineNumbers();
     },
 
@@ -661,11 +657,7 @@ const App = {
         document.getElementById('view-practice').classList.add('hidden');
         document.getElementById('view-projects').classList.remove('hidden');
 
-        document.getElementById('nav-roadmap-btn').classList.remove('active');
-        document.getElementById('nav-editor-btn').classList.remove('active');
-        document.getElementById('nav-practice-btn').classList.remove('active');
-        document.getElementById('nav-projects-btn').classList.add('active');
-
+        this.updateNavSelection('projects');
         this.renderProjectsGrid();
     },
 
@@ -1321,10 +1313,8 @@ const App = {
         document.getElementById('view-projects').classList.add('hidden');
         document.getElementById('view-exercise').classList.remove('hidden');
 
-        document.getElementById('nav-roadmap-btn').classList.remove('active');
-        document.getElementById('nav-practice-btn').classList.remove('active');
-        document.getElementById('nav-projects-btn').classList.remove('active');
-        document.getElementById('nav-editor-btn').classList.add('active');
+        this.updateNavSelection('exercise');
+        this.setMobileExerciseTab('instructions', false);
 
         document.getElementById('lesson-title').innerText = lesson.title;
         document.getElementById('lesson-theory').innerHTML = lesson.theory;
@@ -1367,12 +1357,73 @@ const App = {
         document.getElementById('view-projects').classList.add('hidden');
         document.getElementById('view-roadmap').classList.remove('hidden');
 
-        document.getElementById('nav-editor-btn').classList.remove('active');
-        document.getElementById('nav-practice-btn').classList.remove('active');
-        document.getElementById('nav-projects-btn').classList.remove('active');
-        document.getElementById('nav-roadmap-btn').classList.add('active');
-
+        this.updateNavSelection('roadmap');
         this.renderRoadmap();
+    },
+
+    updateNavSelection(viewName) {
+        // Desktop nav buttons
+        ['roadmap', 'editor', 'practice', 'projects'].forEach(key => {
+            const btn = document.getElementById(`nav-${key}-btn`);
+            if (btn) {
+                if (key === viewName || (key === 'editor' && viewName === 'exercise')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
+        });
+
+        // Mobile bottom nav buttons
+        ['roadmap', 'exercise', 'practice', 'projects'].forEach(key => {
+            const mobBtn = document.getElementById(`mob-nav-${key}`);
+            if (mobBtn) {
+                if (key === viewName) {
+                    mobBtn.classList.add('active');
+                } else {
+                    mobBtn.classList.remove('active');
+                }
+            }
+        });
+    },
+
+    setMobileExerciseTab(tab, playSound = true) {
+        if (playSound) SoundFX.playClick();
+        const workspaceGrid = document.getElementById('exercise-workspace-grid');
+        const btnTabInstructions = document.getElementById('btn-tab-instructions');
+        const btnTabCode = document.getElementById('btn-tab-code');
+        if (!workspaceGrid) return;
+
+        if (tab === 'code') {
+            workspaceGrid.classList.remove('show-instructions');
+            workspaceGrid.classList.add('show-code');
+            if (btnTabInstructions) btnTabInstructions.classList.remove('active');
+            if (btnTabCode) btnTabCode.classList.add('active');
+            this.updateLineNumbers();
+        } else {
+            workspaceGrid.classList.remove('show-code');
+            workspaceGrid.classList.add('show-instructions');
+            if (btnTabCode) btnTabCode.classList.remove('active');
+            if (btnTabInstructions) btnTabInstructions.classList.add('active');
+        }
+    },
+
+    insertTextAtEditor(targetId, textToInsert, cursorOffset = 0) {
+        const editor = document.getElementById(targetId);
+        if (!editor) return;
+        const start = editor.selectionStart !== undefined ? editor.selectionStart : editor.value.length;
+        const end = editor.selectionEnd !== undefined ? editor.selectionEnd : editor.value.length;
+        const val = editor.value;
+        editor.value = val.substring(0, start) + textToInsert + val.substring(end);
+        const newPos = start + textToInsert.length + cursorOffset;
+        editor.selectionStart = newPos;
+        editor.selectionEnd = newPos;
+        editor.focus();
+        if (targetId === 'code-editor') {
+            this.updateLineNumbers();
+        } else if (targetId === 'practice-code-editor') {
+            this.updatePracticeLineNumbers();
+        }
     },
 
     extractUserVariables(code) {
@@ -1774,6 +1825,49 @@ const App = {
         document.getElementById('nav-practice-btn').onclick = () => this.openPracticeView();
         document.getElementById('nav-projects-btn').onclick = () => this.openProjectsView();
         document.getElementById('btn-back-to-roadmap').onclick = () => this.showRoadmap();
+
+        // Navigazione Bottom Mobile (Smartphone e Tablet)
+        const mobNavRoadmap = document.getElementById('mob-nav-roadmap');
+        if (mobNavRoadmap) mobNavRoadmap.onclick = () => this.showRoadmap();
+
+        const mobNavExercise = document.getElementById('mob-nav-exercise');
+        if (mobNavExercise) {
+            mobNavExercise.onclick = () => {
+                SoundFX.playClick();
+                this.openLesson(this.state.currentLessonId);
+            };
+        }
+
+        const mobNavPractice = document.getElementById('mob-nav-practice');
+        if (mobNavPractice) mobNavPractice.onclick = () => this.openPracticeView();
+
+        const mobNavProjects = document.getElementById('mob-nav-projects');
+        if (mobNavProjects) mobNavProjects.onclick = () => this.openProjectsView();
+
+        const mobNavAchievements = document.getElementById('mob-nav-achievements');
+        if (mobNavAchievements) mobNavAchievements.onclick = () => this.openAchievementsModal();
+
+        // Switcher Schede Mobile in Esercizio (Compito vs Codice)
+        const btnTabInstructions = document.getElementById('btn-tab-instructions');
+        if (btnTabInstructions) btnTabInstructions.onclick = () => this.setMobileExerciseTab('instructions');
+
+        const btnTabCode = document.getElementById('btn-tab-code');
+        if (btnTabCode) btnTabCode.onclick = () => this.setMobileExerciseTab('code');
+
+        const btnMobileToCode = document.getElementById('btn-mobile-to-code');
+        if (btnMobileToCode) btnMobileToCode.onclick = () => this.setMobileExerciseTab('code');
+
+        // Toolbar Caratteri Rapidi Mobile (Quick Keys)
+        document.querySelectorAll('.quick-key').forEach(btn => {
+            btn.onclick = (e) => {
+                e.preventDefault();
+                SoundFX.playClick();
+                const targetId = btn.getAttribute('data-target') || 'code-editor';
+                const textToInsert = btn.getAttribute('data-insert') || '';
+                const cursorOffset = parseInt(btn.getAttribute('data-cursor') || '0', 10);
+                this.insertTextAtEditor(targetId, textToInsert, cursorOffset);
+            };
+        });
 
         // Profilo
         document.getElementById('btn-open-profile').onclick = () => this.openProfileModal();

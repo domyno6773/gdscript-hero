@@ -151,7 +151,17 @@
 
     <!-- VISTA 2: WORKSPACE ESERCIZIO (Editor + Test) -->
     <main id="view-exercise" class="view-container hidden">
-        <div class="workspace-grid">
+        <!-- Switcher Schede Mobile (visibile solo su schermi <= 820px) -->
+        <div class="exercise-mobile-tabs" id="exercise-mobile-tabs">
+            <button type="button" class="ex-mobile-tab active" id="btn-tab-instructions">
+                <span>📖 Compito</span>
+            </button>
+            <button type="button" class="ex-mobile-tab" id="btn-tab-code">
+                <span>💻 Codice</span>
+            </button>
+        </div>
+
+        <div class="workspace-grid show-instructions" id="exercise-workspace-grid">
             <!-- Colonna Sinistra: Teoria, Obiettivo, Consigli -->
             <section class="panel panel-lesson">
                 <div class="lesson-meta">
@@ -192,6 +202,11 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Pulsante Rapido Mobile per passare subito all'editor -->
+                    <button type="button" class="btn-mobile-to-code" id="btn-mobile-to-code">
+                        <span>💻 Vai all'Editor di Codice ➔</span>
+                    </button>
                 </div>
             </section>
 
@@ -214,6 +229,21 @@
                     
                     <!-- Autocomplete popup contestuale -->
                     <div id="autocomplete-popup" class="autocomplete-popup hidden"></div>
+                </div>
+
+                <!-- Barra Rapida Caratteri Speciali per Tastiera Mobile -->
+                <div class="mobile-code-toolbar" id="mobile-code-toolbar">
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert="    ">Tab</button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert=":">:</button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert="(&quot;&quot;)" data-cursor="-2">(" ")</button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert="&quot;&quot;" data-cursor="-1">""</button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert="()" data-cursor="-1">()</button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert="_">_</button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert=" = "> = </button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert="[]" data-cursor="-1">[]</button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert="print(&quot;&quot;)" data-cursor="-2">print()</button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert="var ">var</button>
+                    <button type="button" class="quick-key" data-target="code-editor" data-insert="func ">func</button>
                 </div>
 
                 <!-- Barra di Azione & Esecuzione -->
@@ -299,6 +329,20 @@
                 <div class="editor-wrapper">
                     <div class="line-numbers" id="practice-line-numbers">1</div>
                     <textarea id="practice-code-editor" spellcheck="false" placeholder="Scrivi qui il tuo codice GDScript..."></textarea>
+                </div>
+                <!-- Barra Rapida Caratteri Speciali per Tastiera Mobile (Palestra) -->
+                <div class="mobile-code-toolbar" id="practice-mobile-code-toolbar">
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="    ">Tab</button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert=":">:</button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="(&quot;&quot;)" data-cursor="-2">(" ")</button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="&quot;&quot;" data-cursor="-1">""</button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="()" data-cursor="-1">()</button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="_">_</button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert=" = "> = </button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="[]" data-cursor="-1">[]</button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="print(&quot;&quot;)" data-cursor="-2">print()</button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="var ">var</button>
+                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="func ">func</button>
                 </div>
             </div>
 
@@ -634,6 +678,30 @@
             </div>
         </div>
     </div>
+
+    <!-- BARRA DI NAVIGAZIONE INFERIORE MOBILE (Attiva solo su smartphone e schermi <= 820px) -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <button type="button" class="mob-nav-item active" id="mob-nav-roadmap" title="Mappa dei Livelli">
+            <span class="mob-nav-icon">🗺️</span>
+            <span class="mob-nav-label">Mappa</span>
+        </button>
+        <button type="button" class="mob-nav-item" id="mob-nav-exercise" title="Editor Esercizio">
+            <span class="mob-nav-icon">💻</span>
+            <span class="mob-nav-label">Codice</span>
+        </button>
+        <button type="button" class="mob-nav-item" id="mob-nav-practice" title="Palestra Libera">
+            <span class="mob-nav-icon">🏋️</span>
+            <span class="mob-nav-label">Pratica</span>
+        </button>
+        <button type="button" class="mob-nav-item" id="mob-nav-projects" title="Progetti">
+            <span class="mob-nav-icon">🛠️</span>
+            <span class="mob-nav-label">Progetti</span>
+        </button>
+        <button type="button" class="mob-nav-item" id="mob-nav-achievements" title="I Tuoi Traguardi">
+            <span class="mob-nav-icon">🏆</span>
+            <span class="mob-nav-label">Trofei</span>
+        </button>
+    </nav>
 
     <!-- Script inclusi in ordine -->
     <script src="audio.js"></script>
