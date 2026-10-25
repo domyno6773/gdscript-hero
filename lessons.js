@@ -2719,7 +2719,7 @@ const LESSONS_DATA = [
         title: "33. Vector2(x, y) e coordinate 2D",
         icon: "🧭",
         xp: 50,
-        expectedOutput: "Vector2(100, 200)",
+        expectedOutput: "(100.0, 200.0)",
         theory: `
             <p>Nello spazio 2D di Godot Engine, la posizione di qualsiasi oggetto o sprite è rappresentata da un vettore a due dimensioni: <code>Vector2(x, y)</code>:</p>
             <ul>
@@ -2735,7 +2735,7 @@ const LESSONS_DATA = [
         task: `
             <ul>
                 <li>Crea <code>posizione = Vector2(100, 200)</code>.</li>
-                <li>Stampa il vettore con <code>print(posizione)</code>.</li>
+                <li>Stampa il vettore con <code>print(posizione)</code>. Godot mostra le coordinate come <code>(100.0, 200.0)</code>, senza la parola <code>Vector2</code> nell'output.</li>
             </ul>
         `,
         initialCode: `func _ready():\n    # Crea posizione come Vector2(100, 200) e stampala\n    pass\n`,
@@ -2774,8 +2774,8 @@ const LESSONS_DATA = [
     // Se cambiamo la coordinata di partenza, un print(posizione) deve cambiare.
     const modifiedCode = (result.code || '').replace(/(var\s+posizione\s*=\s*Vector2\s*\(\s*)100(?=\s*,)/, (_m, prefix) => prefix + '101');
     const rerun = modifiedCode !== result.code ? await GDScriptRuntime.execute(modifiedCode, { lesson: LESSONS_DATA.find(l => l.id === 33) }) : null;
-    const expectedVector = (result.logs || []).some(v => String(v).trim() === 'Vector2(100, 200)');
-    const stillOriginal = rerun && (rerun.logs || []).some(v => String(v).trim() === 'Vector2(100, 200)');
+    const expectedVector = (result.logs || []).some(v => String(v).trim() === '(100.0, 200.0)');
+    const stillOriginal = rerun && (rerun.logs || []).some(v => String(v).trim() === '(100.0, 200.0)');
     const dynamicOutput = !!(rerun && rerun.success && expectedVector && !stillOriginal);
     tests.push({ desc: "Il vettore stampato dipende dalla variabile posizione", passed: dynamicOutput, diff: dynamicOutput ? null : "Stampa posizione invece di una stringa con coordinate fisse." });
     return tests;
@@ -2790,7 +2790,7 @@ const LESSONS_DATA = [
         title: "34. Calcolo nuova posizione con velocità",
         icon: "🏃",
         xp: 50,
-        expectedOutput: "Vector2(150, 200)",
+        expectedOutput: "(150.0, 200.0)",
         theory: `
             <p>Per muovere un personaggio nello spazio di gioco, aggiungiamo la velocità alla sua coordinata:</p>
             <div class="code-preview">
@@ -2798,7 +2798,7 @@ const LESSONS_DATA = [
     <span class="k">var</span> posizione = Vector2(<span class="m">100</span>, <span class="m">200</span>)
     <span class="k">var</span> velocita = <span class="m">50</span>
     posizione.x += velocita
-    <span class="nb">print</span>(posizione) <span class="c"># Stampa Vector2(150, 200)</span></pre>
+    <span class="nb">print</span>(posizione) <span class="c"># Stampa (150.0, 200.0)</span></pre>
             </div>
         `,
         task: `
@@ -2856,7 +2856,7 @@ const LESSONS_DATA = [
         title: "35. Movimento diagonale su entrambi gli assi",
         icon: "↗️",
         xp: 50,
-        expectedOutput: "Vector2(120, 180)",
+        expectedOutput: "(120.0, 180.0)",
         theory: `
             <p>Nei giochi 2D il movimento diagonale aggiorna simultaneamente sia la coordinata X (orizzontale) che la coordinata Y (verticale):</p>
             <div class="code-preview">
@@ -2930,7 +2930,7 @@ const LESSONS_DATA = [
             'Verifica se la sonda ha raggiunto la stazione: <code>var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)</code>'
         ],
         notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Posizione finale: Vector2(150, 170)\nStazione raggiunta: true",
+        expectedOutput: "Posizione finale: (150.0, 170.0)\nStazione raggiunta: true",
         initialCode: `extends Node\n\nfunc _ready():\n    # Crea posizione, aggiorna le coordinate e verifica atterrato sotto\n    \n    # Non modificare le righe sotto\n    print("Posizione finale: ", posizione)\n    print("Stazione raggiunta: ", atterrato)\n`,
         aiExplanation: "Un <code>Vector2(x, y)</code> rappresenta un punto o una velocità nello spazio bidimensionale di Godot Engine. Puoi accedere e modificare direttamente le singole componenti <code>.x</code> e <code>.y</code>. Per verificare se la sonda ha raggiunto le coordinate della stazione, puoi confrontare i valori delle coordinate per accertarti dell'allineamento perfetto.",
         hints: [
@@ -2981,7 +2981,7 @@ const LESSONS_DATA = [
     const landOk = s.atterrato === true;
     tests.push({ desc: "Posizione finale calcolata a Vector2(150, 170)", passed: posOk, diff: posOk ? null : `Ricevuto: ${pos}` });
     tests.push({ desc: "Atterraggio riuscito con successo (true)", passed: landOk, diff: landOk ? null : `Ricevuto: ${s.atterrato}` });
-    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Posizione finale: Vector2(150, 170)","Stazione raggiunta: true"][at]) at++; } return at === 2; })();
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Posizione finale: (150.0, 170.0)","Stazione raggiunta: true"][at]) at++; } return at === 2; })();
     tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
@@ -4609,7 +4609,7 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
         title: "59. Ciclo di Vita: Eliminare Nodi con queue_free()",
         icon: "🗑️",
         xp: 60,
-        expectedOutput: "Moneta presente prima: true\nMoneta eliminata con queue_free: true",
+        expectedOutput: "Moneta presente prima: true\nMoneta in attesa di eliminazione: true",
         initialNodes: [
             { type: "Node", name: "Moneta" }
         ],
@@ -4618,17 +4618,17 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
             <p>In Godot Engine il metodo ufficiale per distruggere un nodo è <strong><code>nodo.queue_free()</code></strong>:</p>
             <pre class="code-block"><span class="c"># Elimina il nodo dalla scena e dalla memoria</span>
 $Moneta.<span class="nb">queue_free</span>()</pre>
-            <p>Il metodo <code>has_node("Moneta")</code> restituirà <code>false</code> una volta rimosso!</p>
+            <p><strong>Attenzione:</strong> subito dopo <code>queue_free()</code>, il nodo è ancora presente in scena fino alla fine del frame. Verifica l'eliminazione pianificata con <code>$Moneta.is_queued_for_deletion()</code>. Soltanto dopo la fine del frame <code>has_node("Moneta")</code> diventa <code>false</code>.</p>
         `,
         task: `
             <ul>
                 <li>Nella scena è presente il nodo <code>$Moneta</code>.</li>
                 <li>Stampa: <code>print("Moneta presente prima: ", has_node("Moneta"))</code>.</li>
                 <li>Rimuovi la moneta con: <code>$Moneta.queue_free()</code>.</li>
-                <li>Stampa la conferma: <code>print("Moneta eliminata con queue_free: ", not has_node("Moneta"))</code>.</li>
+                <li>Stampa la conferma: <code>print("Moneta in attesa di eliminazione: ", $Moneta.is_queued_for_deletion())</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # Stampa has_node("Moneta"), chiama $Moneta.queue_free() e stampa conferma\n    pass\n`,
+        initialCode: `func _ready():\n    # Verifica has_node("Moneta"), accoda queue_free(), poi usa is_queued_for_deletion()\n    pass\n`,
         hints: [
             {
                         "level": 1,
@@ -4649,10 +4649,10 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Raccogli e distruggi l'oggetto moneta\n    $Moneta.queue_free()\n```\nInvocando `queue_free()`, il nodo cessa di esistere nella scena al termine del ciclo corrente."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Raccogli e distruggi l'oggetto moneta\n    $Moneta.queue_free()\n```\nSubito dopo `queue_free()` puoi controllare `is_queued_for_deletion()`; il nodo verrà liberato alla fine del frame."
             }
 ],
-        solution: `func _ready():\n    print("Moneta presente prima: ", has_node("Moneta"))\n    $Moneta.queue_free()\n    print("Moneta eliminata con queue_free: ", not has_node("Moneta"))\n`,
+        solution: `func _ready():\n    print("Moneta presente prima: ", has_node("Moneta"))\n    $Moneta.queue_free()\n    print("Moneta in attesa di eliminazione: ", $Moneta.is_queued_for_deletion())\n`,
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
@@ -4664,7 +4664,7 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     tests.push({ desc: "Nodo Moneta rimosso con successo dall'albero della scena", passed: !!notHas, diff: notHas ? null : "Il nodo Moneta risulta ancora presente." });
     const logs = result.logs || [];
     const idxBefore = logs.findIndex(l => /^Moneta presente prima\s*:\s*true$/i.test(String(l).trim()));
-    const idxAfter = logs.findIndex((l, i) => i > idxBefore && /^Moneta eliminata con queue_free\s*:\s*true$/i.test(String(l).trim()));
+    const idxAfter = logs.findIndex((l, i) => i > idxBefore && /^Moneta in attesa di eliminazione\s*:\s*true$/i.test(String(l).trim()));
     const logsOk = idxBefore !== -1 && idxAfter !== -1;
     tests.push({ desc: "Stato della moneta prima e dopo queue_free stampato a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     // Cambiare il nodo osservato deve modificare il log prima della rimozione.
@@ -4673,6 +4673,17 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     const stillTrue = replay && (replay.logs || []).some(v => /^Moneta presente prima\s*:\s*true$/i.test(String(v).trim()));
     const isDynamic = !!(replay && replay.success && !stillTrue);
     tests.push({ desc: "Stato della moneta letto dinamicamente con has_node()", passed: isDynamic, diff: isDynamic ? null : "Le stampe devono mostrare il risultato di has_node(), non valori fissi." });
+    // La seconda stampa deve leggere is_queued_for_deletion(), non un booleano scritto a mano.
+    // Se si elimina queue_free(), lo stato di eliminazione non deve più risultare true.
+    const withoutQueue = (result.code || '').replace(/\$Moneta\.queue_free\s*\(\s*\)/, 'pass');
+    const noQueueRun = withoutQueue !== result.code
+        ? await GDScriptRuntime.execute(withoutQueue, { lesson: LESSONS_DATA.find(l => l.id === 59) })
+        : null;
+    const fakeQueued = noQueueRun && (noQueueRun.logs || []).some(v =>
+        /^Moneta in attesa di eliminazione\s*:\s*true$/i.test(String(v).trim()));
+    const readQueuedState = !!(noQueueRun && noQueueRun.success && !fakeQueued);
+    tests.push({ desc: "La conferma dipende da is_queued_for_deletion()", passed: readQueuedState,
+        diff: readQueuedState ? null : "Stampa il valore di $Moneta.is_queued_for_deletion(), non true scritto direttamente." });
     return tests;
 }
     },

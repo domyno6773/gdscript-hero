@@ -36,7 +36,10 @@ class Vector2 {
     }
 
     toString() {
-        return `Vector2(${this.x}, ${this.y})`;
+        // Godot 4: print(Vector2(100, 200)) visualizza (100.0, 200.0).
+        // Mantieni i decimali significativi senza perdere lo .0 degli interi.
+        const format = v => Number.isInteger(v) ? v.toFixed(1) : String(v);
+        return `(${format(this.x)}, ${format(this.y)})`;
     }
 }
 
@@ -239,10 +242,9 @@ class GD_Node {
     }
 
     queue_free() {
+        // Godot 4 non elimina il nodo immediatamente: rimane nell'albero
+        // fino al termine del frame. is_queued_for_deletion() diventa true subito.
         this._is_queued_for_deletion = true;
-        if (this.parent) {
-            this.parent.remove_child(this);
-        }
     }
 
     is_queued_for_deletion() {
@@ -864,6 +866,16 @@ const GDScriptRuntime = {
                 currentScene,
                 currentScene
             );
+
+            // La simulazione di _ready() rappresenta un frame: accoda la rimozione
+            // durante l'esecuzione e rimuove i nodi soltanto alla sua conclusione.
+            const flushQueuedNodes = (parent) => {
+                for (const child of [...parent.children]) {
+                    if (child.is_queued_for_deletion()) parent.remove_child(child);
+                    else flushQueuedNodes(child);
+                }
+            };
+            flushQueuedNodes(currentScene);
 
             return {
                 success: true,
