@@ -46,6 +46,8 @@ async function smoke(browser,url,width){
  assert.ok(await page.evaluate(()=>App.state.xp>0),'Missing XP reward');
  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('gdscript_hero_save_v4')));
  assert.ok(saved.finishedLessons.includes(1),'Lesson missing from localStorage');
+ // Chiudi la modale di successo come farebbe lo studente prima della seconda prova.
+ await page.locator('#btn-modal-stay').click({timeout:10000});
  await page.evaluate(()=>App.openLesson(1));
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
  await page.locator('#code-editor').fill('func _ready():\n    print("<img src=x onerror=window.__auditXss=1>")');
