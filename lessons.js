@@ -1424,16 +1424,26 @@ const LESSONS_DATA = [
             }
 ],
         solution: `func _ready():\n    var livello = 10\n    if livello >= 10:\n        print("Livello raggiunto!")\n`,
-        validate: async (result) => {
+        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const hasVar = result.scope && result.scope.livello !== undefined && result.scope.livello >= 10;
     const cleanCode = stripCommentsAndStrings(result.code);
-    const hasIf = /\bif\s+livello\s*(>=|>|==)/.test(cleanCode);
+    const hasIf = /\bif[\s(]+(?:livello\s*(?:>=|==|>)|10\s*<=)/.test(cleanCode);
     tests.push({ desc: "Variabile 'livello' configurata (>= 10)", passed: hasVar, diff: hasVar ? null : `Valore livello: ${result.scope ? result.scope.livello : 'undefined'}` });
     tests.push({ desc: "Condizione 'if' sul livello applicata", passed: !!hasIf, diff: hasIf ? null : "Usa 'if livello >= 10:' per verificare la condizione." });
-    const printed = result.logs.some(l => l.includes("Livello raggiunto!"));
-    tests.push({ desc: "Messaggio 'Livello raggiunto!' stampato", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    const printed = (result.logs || []).some(l => /^Livello raggiunto!$/i.test(l.trim()));
+    tests.push({ desc: "Messaggio 'Livello raggiunto!' stampato", passed: printed, diff: printed ? null : `Ricevuto: "${(result.logs || []).join(' | ')}"` });
+
+    // Multi-scenario: con livello < 10 il messaggio NON deve essere stampato
+    if (runtime && typeof runtime.execute === 'function' && /livello\s*=/.test(result.code)) {
+        try {
+            const testLowCode = result.code.replace(/var\s+livello\s*=\s*\d+/, 'var livello = 5');
+            const rTest = await runtime.execute(testLowCode);
+            const notPrintedOnLow = !(rTest.logs || []).some(l => /^Livello raggiunto!$/i.test(l.trim()));
+            tests.push({ desc: "Condizione 'if' reattiva (non stampa con livello < 10)", passed: notPrintedOnLow, diff: notPrintedOnLow ? null : "La condizione deve impedire la stampa se il livello è inferiore a 10." });
+        } catch(e) {}
+    }
     return tests;
 }
     },
@@ -1530,11 +1540,11 @@ const LESSONS_DATA = [
             </ul>
         `,
         initialCode: `func _ready():
-    var salute = 0
-    # BUG LOGICO: Manca la gestione per quando la salute scende a zero!
-    # Aggiungi il ramo 'else:' per stampare "Game Over":
-    if salute > 0:
-        print("In vita!")
+    var punti_vita = 0
+    # BUG LOGICO: Manca il ramo 'else:' per quando il giocatore e' ancora in vita!
+    # Aggiungi il ramo 'else:' per stampare "In battaglia":
+    if punti_vita <= 0:
+        print("Game Over")
 `,
         hints: [
             {
@@ -1556,19 +1566,40 @@ const LESSONS_DATA = [
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var energia = 0\n    if energia > 0:\n        print(\"In combattimento!\")\n    else:\n        print(\"Sconfitto!\")\n```\nNota che `else:` non accetta alcuna condizione: cattura tutti i casi in cui l'if è falso."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var scudo = 0\n    if scudo <= 0:\n        print(\"Scudo distrutto!\")\n    else:\n        print(\"Scudo attivo!\")\n```\nNota che `else:` non accetta alcuna condizione: cattura tutti i casi in cui l'if è falso."
             }
 ],
         solution: `func _ready():\n    var punti_vita = 0\n    if punti_vita <= 0:\n        print("Game Over")\n    else:\n        print("In battaglia")\n`,
-        validate: async (result) => {
+        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const hasHp = result.scope && result.scope.punti_vita !== undefined;
+    const hasHp = result.scope && result.scope.punti_vita !== undefined && result.scope.punti_vita <= 0;
+    tests.push({ desc: "Variabile 'punti_vita' configurata a 0", passed: hasHp, diff: hasHp ? null : `Valore attuale: ${result.scope ? result.scope.punti_vita : 'undefined'}` });
+    
     const cleanCode = stripCommentsAndStrings(result.code);
     const hasIfElse = /\bif\b/.test(cleanCode) && /\belse\b/.test(cleanCode);
     tests.push({ desc: "Struttura di controllo 'if / else' completa presente", passed: !!hasIfElse, diff: hasIfElse ? null : "Includi sia il ramo 'if' che il ramo 'else:'." });
-    const ok = result.logs.some(l => l.includes("Game Over"));
-    tests.push({ desc: "Ramo 'Game Over' eseguito con punti_vita <= 0", passed: ok && hasHp, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    
+    const hasGameOverLog = (result.logs || []).some(l => /^Game Over$/i.test(l.trim()));
+    tests.push({ desc: "Ramo 'Game Over' eseguito con punti_vita <= 0", passed: hasGameOverLog, diff: hasGameOverLog ? null : `Ricevuto: "${(result.logs || []).join(' | ')}"` });
+
+    // Multi-scenario: test con punti_vita = 100 -> deve stampare "In battaglia" e non "Game Over"
+    if (runtime && typeof runtime.execute === 'function' && /punti_vita\s*=/.test(result.code)) {
+        try {
+            const testCodeAlive = result.code.replace(/var\s+punti_vita\s*=\s*[-]?\d+/, 'var punti_vita = 100');
+            const rAlive = await runtime.execute(testCodeAlive);
+            const printsInBattaglia = (rAlive.logs || []).some(l => /^In battaglia$/i.test(l.trim()));
+            const noGameOverWhenAlive = !(rAlive.logs || []).some(l => /^Game Over$/i.test(l.trim()));
+            const aliveOk = printsInBattaglia && noGameOverWhenAlive;
+            tests.push({
+                desc: "Ramo 'else' correttamente eseguito quando punti_vita > 0 ('In battaglia')",
+                passed: aliveOk,
+                diff: aliveOk ? null : `Con punti_vita=100 la console ha prodotto: "${(rAlive.logs || []).join(' | ')}"`
+            });
+        } catch(e) {
+            tests.push({ desc: "Esecuzione scenario punti_vita > 0", passed: false, diff: e.message });
+        }
+    }
     return tests;
 }
     },
@@ -1631,15 +1662,61 @@ const LESSONS_DATA = [
                 <li>Altrimenti: imposta <code>"Nessuna Reliquia Trovata"</code></li>
             </ul>
         `,
-        validate: async (result) => {
+        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const s = result.scope || {};
-    const stateOk = s.stato_portale === "Portale Attivato";
     const cleanCode = stripCommentsAndStrings(result.code);
-    const hasElif = /\b(elif|else)\b/.test(cleanCode);
-    tests.push({ desc: "Rami condizionali multipli con elif/else presenti", passed: !!hasElif, diff: hasElif ? null : "Usa if, elif e else per gestire i tre stati del portale." });
-    tests.push({ desc: "Stato portale calcolato a 'Portale Attivato'", passed: stateOk, diff: stateOk ? null : `Ricevuto: "${s.stato_portale}"` });
+    const hasAllBranches = /\bif\b/.test(cleanCode) && /\belif\b/.test(cleanCode) && /\belse\b/.test(cleanCode);
+    tests.push({ desc: "Rami condizionali multipli con if, elif e else presenti", passed: !!hasAllBranches, diff: hasAllBranches ? null : "Usa if, elif e else per gestire i tre stati del portale." });
+    
+    const stateOk = s.stato_portale === "Portale Attivato";
+    tests.push({ desc: "Stato portale calcolato a 'Portale Attivato' (scenario iniziale: 75, amuleto)", passed: stateOk, diff: stateOk ? null : `Ricevuto: "${s.stato_portale}"` });
+
+    const logs = result.logs || [];
+    const logOk = logs.some(l => /^Stato\s*:\s*Portale Attivato$/i.test(l.trim()));
+    tests.push({ desc: "Output corretto stampato a console ('Stato: Portale Attivato')", passed: logOk, diff: logOk ? null : `Ricevuto: "${logs.join(' | ')}"` });
+
+    // Multi-scenario validation
+    if (runtime && typeof runtime.execute === 'function') {
+        try {
+            // Scenario B: Low energy (energia = 20) -> "Energia Insufficiente"
+            const codeLowEnergy = result.code.replace(/var\s+energia\s*=\s*\d+/, 'var energia = 20');
+            const rLow = await runtime.execute(codeLowEnergy);
+            const lowOk = rLow.scope && rLow.scope.stato_portale === "Energia Insufficiente";
+            tests.push({
+                desc: "Scenario energia insufficiente (< 50) imposta 'Energia Insufficiente'",
+                passed: lowOk,
+                diff: lowOk ? null : `Con energia=20 ricevuto: "${rLow.scope ? rLow.scope.stato_portale : 'undefined'}"`
+            });
+
+            // Scenario C: No relics (ha_amuleto = false, ha_chiave = false) -> "Nessuna Reliquia Trovata"
+            const codeNoRelics = result.code
+                .replace(/var\s+ha_amuleto\s*=\s*true/, 'var ha_amuleto = false')
+                .replace(/var\s+ha_chiave\s*=\s*true/, 'var ha_chiave = false');
+            const rNoRelics = await runtime.execute(codeNoRelics);
+            const noRelicsOk = rNoRelics.scope && rNoRelics.scope.stato_portale === "Nessuna Reliquia Trovata";
+            tests.push({
+                desc: "Scenario nessuna reliquia imposta 'Nessuna Reliquia Trovata'",
+                passed: noRelicsOk,
+                diff: noRelicsOk ? null : `Senza reliquie ricevuto: "${rNoRelics.scope ? rNoRelics.scope.stato_portale : 'undefined'}"`
+            });
+
+            // Scenario D: Alternative relic (ha_amuleto = false, ha_chiave = true) -> "Portale Attivato"
+            const codeKeyRelic = result.code
+                .replace(/var\s+ha_amuleto\s*=\s*true/, 'var ha_amuleto = false')
+                .replace(/var\s+ha_chiave\s*=\s*false/, 'var ha_chiave = true');
+            const rKey = await runtime.execute(codeKeyRelic);
+            const keyOk = rKey.scope && rKey.scope.stato_portale === "Portale Attivato";
+            tests.push({
+                desc: "Scenario reliquia chiave alternativa sblocca il portale ('Portale Attivato')",
+                passed: keyOk,
+                diff: keyOk ? null : `Con sola chiave ricevuto: "${rKey.scope ? rKey.scope.stato_portale : 'undefined'}"`
+            });
+        } catch(e) {
+            tests.push({ desc: "Esecuzione scenari portale", passed: false, diff: e.message });
+        }
+    }
     return tests;
 }
     },
@@ -1697,17 +1774,44 @@ const LESSONS_DATA = [
             }
 ],
         solution: `func _ready():\n    var inventario = ["Spada", "Scudo", "Pozione"]\n    print(inventario[0])\n`,
-        validate: async (result) => {
+        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const inv = result.scope && result.scope.inventario;
-    const isArray = Array.isArray(inv) && inv.length === 3 && inv.includes("Spada") && inv.includes("Scudo");
-    tests.push({ desc: "Array 'inventario' creato con 3 elementi", passed: isArray, diff: isArray ? null : `Valore: ${JSON.stringify(inv)}` });
+    
+    // Verifica rigorosa di ordine ed elementi richiesti: ["Spada", "Scudo", "Pozione"]
+    const isExactArray = Array.isArray(inv) && inv.length === 3 &&
+        inv[0] === "Spada" && inv[1] === "Scudo" && inv[2] === "Pozione";
+    tests.push({
+        desc: "Array 'inventario' creato con gli elementi corretti e nell'ordine richiesto (['Spada', 'Scudo', 'Pozione'])",
+        passed: isExactArray,
+        diff: isExactArray ? null : `Ricevuto: ${JSON.stringify(inv)}`
+    });
+
     const cleanCode = stripCommentsAndStrings(result.code);
     const usesIndex = /inventario\s*\[\s*0\s*\]/.test(cleanCode);
-    tests.push({ desc: "Accesso con indice [0] utilizzato per la stampa", passed: !!usesIndex, diff: usesIndex ? null : "Usa 'inventario[0]' per accedere al primo elemento." });
-    const ok = result.logs.some(l => l.includes("Spada"));
-    tests.push({ desc: "Primo elemento ('Spada') stampato", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    tests.push({ desc: "Accesso con indice inventario[0] utilizzato nel codice", passed: !!usesIndex, diff: usesIndex ? null : "Usa 'inventario[0]' per accedere al primo elemento." });
+
+    const logs = result.logs || [];
+    const printsFirst = logs.length > 0 && logs[0].trim() === "Spada";
+    tests.push({ desc: "Primo elemento ('Spada') stampato come primo output di console", passed: printsFirst, diff: printsFirst ? null : `Output ricevuto: "${logs.join(' | ')}"` });
+
+    // Multi-scenario dinamico: se il primo elemento dell'array cambia, la stampa DEVE riflettere il nuovo valore
+    if (runtime && typeof runtime.execute === 'function' && isExactArray) {
+        try {
+            const testCode = result.code.replace('["Spada"', '["Arco"').replace("['Spada'", "['Arco'");
+            const rTest = await runtime.execute(testCode);
+            const dynamicOk = (rTest.logs || []).length > 0 && rTest.logs[0].trim() === "Arco";
+            tests.push({
+                desc: "Stampa dinamica dipendente da inventario[0] (non valore hardcoded)",
+                passed: dynamicOk,
+                diff: dynamicOk ? null : `Modificando il primo elemento in 'Arco', la console ha stampato: "${(rTest.logs || []).join(' | ')}"`
+            });
+        } catch(e) {
+            tests.push({ desc: "Verifica dinamica indice", passed: false, diff: e.message });
+        }
+    }
+
     return tests;
 }
     },
