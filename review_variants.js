@@ -629,72 +629,578 @@ func _ready():
             });
             return tests;
         }
+    },
+
+    // ---------------------------------------------------------
+    // 11. I SEGNALI DI GODOT (signals) - Variante 1
+    // ---------------------------------------------------------
+    {
+        id: "rev_signals_01",
+        conceptId: "signals",
+        title: "Allarme Perimetrale della Base",
+        scenario: "Attivazione del protocollo di sicurezza di un avamposto spaziale dopo il rilevamento di un'intrusione.",
+        task: "Dichiara in cima allo script il segnale personalizzato: <code>signal allarme_attivato</code>.<br><br>All'interno di <code>_ready()</code>:<br>1. Connetti il segnale alla funzione di gestione: <code>allarme_attivato.connect(on_allarme_attivato)</code><br>2. Emetti il segnale con la sintassi nativa di Godot 4: <code>allarme_attivato.emit()</code>",
+        expectedOutput: "[ALLARME] Violazione perimetro rilevata!",
+        starterCode: `extends Node
+
+# Dichiara qui il segnale allarme_attivato
+
+
+func _ready():
+    # Connetti il segnale a on_allarme_attivato ed emettilo sotto
+    pass
+
+func on_allarme_attivato():
+    print("[ALLARME] Violazione perimetro rilevata!")
+`,
+        solution: `extends Node
+
+signal allarme_attivato
+
+func _ready():
+    allarme_attivato.connect(on_allarme_attivato)
+    allarme_attivato.emit()
+
+func on_allarme_attivato():
+    print("[ALLARME] Violazione perimetro rilevata!")
+`,
+        hints: [
+            {
+                level: 1,
+                text: "Dichiara il segnale a livello radice dello script (fuori da ogni funzione) usando la parola chiave 'signal'."
+            },
+            {
+                level: 2,
+                text: "In _ready(), prima effettua la connessione con 'allarme_attivato.connect(on_allarme_attivato)', poi emetti la notifica con 'allarme_attivato.emit()'."
+            },
+            {
+                level: 3,
+                text: "Esempio:\nsignal allarme_attivato\n\nfunc _ready():\n    allarme_attivato.connect(on_allarme_attivato)\n    allarme_attivato.emit()"
+            }
+        ],
+        xpReward: 10,
+        validate: async (result) => {
+            const tests = [];
+            tests.push(formatExecutionCheck(result));
+            const cleanCode = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+            const hasSigDecl = /\bsignal\s+allarme_attivato\b/.test(cleanCode);
+            tests.push({
+                desc: "Segnale 'signal allarme_attivato' dichiarato a inizio script",
+                passed: hasSigDecl,
+                diff: hasSigDecl ? null : "Dichiara 'signal allarme_attivato' in cima allo script."
+            });
+            const hasConnect = /allarme_attivato\.connect\s*\(\s*on_allarme_attivato\s*\)/.test(cleanCode) || /connect\s*\(\s*["']allarme_attivato["']/.test(cleanCode);
+            tests.push({
+                desc: "Segnale connesso alla funzione callback 'on_allarme_attivato'",
+                passed: hasConnect,
+                diff: hasConnect ? null : "Connetti il segnale con allarme_attivato.connect(on_allarme_attivato)."
+            });
+            const hasEmit = /allarme_attivato\.emit\s*\(/.test(cleanCode) || /emit_signal\s*\(\s*["']allarme_attivato["']/.test(cleanCode);
+            tests.push({
+                desc: "Metodo .emit() invocato per emettere il segnale",
+                passed: hasEmit,
+                diff: hasEmit ? null : "Emetti il segnale con allarme_attivato.emit()."
+            });
+            const logs = result.logs || [];
+            const hasLog = logs.some(l => l.includes("[ALLARME] Violazione perimetro rilevata!"));
+            tests.push({
+                desc: "Callback eseguita con successo via segnale",
+                passed: hasLog,
+                diff: hasLog ? null : `Atteso: "[ALLARME] Violazione perimetro rilevata!", Ricevuto: "${logs.join(' | ')}"`
+            });
+            return tests;
+        }
+    },
+
+    // ---------------------------------------------------------
+    // 11. I SEGNALI DI GODOT (signals) - Variante 2 (Con Parametri)
+    // ---------------------------------------------------------
+    {
+        id: "rev_signals_02",
+        conceptId: "signals",
+        title: "Ricarica Nucleo Energetico",
+        scenario: "Notifica a evento del ripristino di energia agli scudi difensivi con passaggio di parametri.",
+        task: "Dichiara in cima allo script il segnale con parametro: <code>signal energia_ricaricata(quantita)</code>.<br><br>All'interno di <code>_ready()</code>:<br>1. Connetti il segnale alla funzione: <code>energia_ricaricata.connect(quando_ricaricato)</code><br>2. Emetti il segnale passando il valore numerico <code>50</code>: <code>energia_ricaricata.emit(50)</code>",
+        expectedOutput: "Energia ripristinata: +50 MW",
+        starterCode: `extends Node
+
+# Dichiara qui il segnale energia_ricaricata con parametro quantita
+
+
+func _ready():
+    # Connetti a quando_ricaricato ed emetti passando 50
+    pass
+
+func quando_ricaricato(quantita):
+    print("Energia ripristinata: +" + str(quantita) + " MW")
+`,
+        solution: `extends Node
+
+signal energia_ricaricata(quantita)
+
+func _ready():
+    energia_ricaricata.connect(quando_ricaricato)
+    energia_ricaricata.emit(50)
+
+func quando_ricaricato(quantita):
+    print("Energia ripristinata: +" + str(quantita) + " MW")
+`,
+        hints: [
+            {
+                level: 1,
+                text: "I segnali in Godot possono trasportare dati specificando parametri tra parentesi: signal nome_segnale(parametro)."
+            },
+            {
+                level: 2,
+                text: "Quando invochi .emit(valore), l'argomento fornito viene recapitato come parametro alla funzione connessa."
+            },
+            {
+                level: 3,
+                text: "Esempio:\nsignal energia_ricaricata(quantita)\n\nfunc _ready():\n    energia_ricaricata.connect(quando_ricaricato)\n    energia_ricaricata.emit(50)"
+            }
+        ],
+        xpReward: 10,
+        validate: async (result) => {
+            const tests = [];
+            tests.push(formatExecutionCheck(result));
+            const cleanCode = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+            const hasSigDecl = /\bsignal\s+energia_ricaricata\b/.test(cleanCode);
+            tests.push({
+                desc: "Segnale 'signal energia_ricaricata' dichiarato",
+                passed: hasSigDecl,
+                diff: hasSigDecl ? null : "Dichiara 'signal energia_ricaricata(quantita)' in cima allo script."
+            });
+            const hasEmitVal = /energia_ricaricata\.emit\s*\(\s*50\s*\)/.test(cleanCode) || /emit_signal\s*\(\s*["']energia_ricaricata["']\s*,\s*50\s*\)/.test(cleanCode);
+            tests.push({
+                desc: "Segnale emesso con argomento numerico 50",
+                passed: hasEmitVal,
+                diff: hasEmitVal ? null : "Invocare energia_ricaricata.emit(50)."
+            });
+            const logs = result.logs || [];
+            const hasLog = logs.some(l => l.includes("Energia ripristinata: +50 MW"));
+            tests.push({
+                desc: "Callback ha ricevuto il parametro stampando la riga corretta",
+                passed: hasLog,
+                diff: hasLog ? null : `Atteso: "Energia ripristinata: +50 MW", Ricevuto: "${logs.join(' | ')}"`
+            });
+            return tests;
+        }
+    },
+
+    // ---------------------------------------------------------
+    // 12. CLASSI E PROGRAMMAZIONE AD OGGETTI (oop_classes)
+    // ---------------------------------------------------------
+    {
+        id: "rev_oop_01",
+        conceptId: "oop_classes",
+        title: "Unità Robotica da Esplorazione",
+        scenario: "Creazione di una classe interna per modellare la matricola e la percentuale di batteria di droni da ricognizione.",
+        task: "Definisci la classe interna <code>class Drone:</code> con due variabili di istanza: <code>var matricola</code> e <code>var batteria</code>.<br><br>Nel costruttore <code>func _init(m, b):</code> assegna <code>self.matricola = m</code> e <code>self.batteria = b</code>.<br><br>All'interno di <code>_ready()</code>:<br>1. Crea un'istanza con <code>var d = Drone.new(\"EX-101\", 100)</code><br>2. Stampa a console la stringa formattata:<br><code>Drone EX-101 operativo (Batteria: 100%)</code>",
+        expectedOutput: "Drone EX-101 operativo (Batteria: 100%)",
+        starterCode: `extends Node
+
+# Definisci la classe interna Drone con il costruttore _init sotto
+
+
+func _ready():
+    # Istanzia il drone con Drone.new("EX-101", 100) e stampa la riga attesa
+    pass
+`,
+        solution: `extends Node
+
+class Drone:
+    var matricola
+    var batteria
+    func _init(m, b):
+        self.matricola = m
+        self.batteria = b
+
+func _ready():
+    var d = Drone.new("EX-101", 100)
+    print("Drone " + d.matricola + " operativo (Batteria: " + str(d.batteria) + "%)")
+`,
+        hints: [
+            {
+                level: 1,
+                text: "In GDScript le classi interne si dichiarano con 'class NomeClasse:'. Al loro interno definisci le proprietà e il costruttore speciale _init."
+            },
+            {
+                level: 2,
+                text: "Nel costruttore _init(m, b), memorizza gli argomenti usando self.matricola = m e self.batteria = b."
+            },
+            {
+                level: 3,
+                text: "Esempio:\nclass Drone:\n    var matricola\n    var batteria\n    func _init(m, b):\n        self.matricola = m\n        self.batteria = b\n\nfunc _ready():\n    var d = Drone.new(\"EX-101\", 100)\n    print(\"Drone \" + d.matricola + \" operativo (Batteria: \" + str(d.batteria) + \"%)\")"
+            }
+        ],
+        xpReward: 10,
+        validate: async (result) => {
+            const tests = [];
+            tests.push(formatExecutionCheck(result));
+            const cleanCode = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+            const hasClass = /\bclass\s+Drone\b/.test(cleanCode);
+            tests.push({
+                desc: "Dichiarazione 'class Drone:' presente nello script",
+                passed: hasClass,
+                diff: hasClass ? null : "Definisci la classe con la sintassi: class Drone:."
+            });
+            const hasInit = /func\s+_init\s*\(/.test(cleanCode);
+            tests.push({
+                desc: "Costruttore 'func _init' implementato nella classe",
+                passed: hasInit,
+                diff: hasInit ? null : "Aggiungi il costruttore func _init(m, b) all'interno della classe Drone."
+            });
+            const hasNew = /Drone\.new\s*\(\s*["']EX-101["']\s*,\s*100\s*\)/.test(result.code || '');
+            tests.push({
+                desc: "Istanziazione dell'oggetto con Drone.new('EX-101', 100)",
+                passed: hasNew,
+                diff: hasNew ? null : "Istanzia l'oggetto chiamando Drone.new(\"EX-101\", 100)."
+            });
+            const logs = result.logs || [];
+            const hasLog = logs.some(l => l.includes("Drone EX-101 operativo (Batteria: 100%)"));
+            tests.push({
+                desc: "Console stampa 'Drone EX-101 operativo (Batteria: 100%)'",
+                passed: hasLog,
+                diff: hasLog ? null : `Atteso: "Drone EX-101 operativo (Batteria: 100%)", Ricevuto: "${logs.join(' | ')}"`
+            });
+            return tests;
+        }
+    },
+
+    // ---------------------------------------------------------
+    // 13. ALBERO DELLA SCENA E I NODI (scene_tree_nodes)
+    // ---------------------------------------------------------
+    {
+        id: "rev_scene_tree_01",
+        conceptId: "scene_tree_nodes",
+        title: "Pannello Termico del Generatore",
+        scenario: "Ispezione e aggiornamento del monitor di temperatura del generatore tramite il nodo Label presente nella scena.",
+        task: "Nella scena è presente il nodo figlio <code>MonitorTermico</code> (tipo Label).<br><br>All'interno di <code>_ready()</code>:<br>1. Accedi al nodo con la sintassi nativa <code>$MonitorTermico</code> (oppure <code>get_node(\"MonitorTermico\")</code>) e assegna alla proprietà <code>text</code> il valore <code>\"Temperatura: 300 K\"</code>.<br>2. Stampa a console il testo aggiornato: <code>print(\"Monitor aggiornato: \", $MonitorTermico.text)</code>.",
+        expectedOutput: "Monitor aggiornato: Temperatura: 300 K",
+        initialNodes: [
+            { type: "Label", name: "MonitorTermico", text: "Temperatura: Sconosciuta" }
+        ],
+        requiresSceneTree: true,
+        requires2D: false,
+        starterCode: `extends Node
+
+func _ready():
+    # Accedi al nodo $MonitorTermico, aggiorna text e stampa a console
+    pass
+`,
+        solution: `extends Node
+
+func _ready():
+    $MonitorTermico.text = "Temperatura: 300 K"
+    print("Monitor aggiornato: ", $MonitorTermico.text)
+`,
+        hints: [
+            {
+                level: 1,
+                text: "In Godot puoi accedere a un nodo figlio diretto presente nella scena usando la sintassi rapida $NomeNodo o la funzione get_node(\"NomeNodo\")."
+            },
+            {
+                level: 2,
+                text: "I nodi di tipo Label possiedono la proprietà 'text': assegna un nuovo valore con $MonitorTermico.text = \"Temperatura: 300 K\"."
+            },
+            {
+                level: 3,
+                text: "Esempio:\nfunc _ready():\n    $MonitorTermico.text = \"Temperatura: 300 K\"\n    print(\"Monitor aggiornato: \", $MonitorTermico.text)"
+            }
+        ],
+        xpReward: 10,
+        validate: async (result) => {
+            const tests = [];
+            tests.push(formatExecutionCheck(result));
+            const scene = result.scene;
+            const nodeExists = scene && scene.has_node("MonitorTermico");
+            tests.push({
+                desc: "Nodo 'MonitorTermico' presente nell'albero della scena",
+                passed: !!nodeExists,
+                diff: nodeExists ? null : "Il nodo MonitorTermico non è stato trovato nella scena."
+            });
+            const lbl = nodeExists ? scene.get_node("MonitorTermico") : null;
+            const textUpdated = lbl && lbl.text === "Temperatura: 300 K";
+            tests.push({
+                desc: "Proprietà text di MonitorTermico impostata a 'Temperatura: 300 K'",
+                passed: !!textUpdated,
+                diff: textUpdated ? null : `Testo attuale del nodo: "${lbl ? lbl.text : 'null'}"`
+            });
+            const logs = result.logs || [];
+            const hasLog = logs.some(l => l.includes("Monitor aggiornato: Temperatura: 300 K") || l.includes("Monitor aggiornato:  Temperatura: 300 K"));
+            tests.push({
+                desc: "Console stampa 'Monitor aggiornato: Temperatura: 300 K'",
+                passed: hasLog,
+                diff: hasLog ? null : `Ricevuto: "${logs.join(' | ')}"`
+            });
+            return tests;
+        }
+    },
+
+    // ---------------------------------------------------------
+    // 14. INTERFACCIA UTENTE E PULSANTI (ui_button_interaction)
+    // ---------------------------------------------------------
+    {
+        id: "rev_ui_button_01",
+        conceptId: "ui_button_interaction",
+        title: "Pulsante di Lancio Capsula",
+        scenario: "Interazione con l'interfaccia utente: rilevare il click su un pulsante Button e avviare la sequenza di volo.",
+        task: "Nella scena è presente il nodo <code>BtnLancio</code> di tipo Button.<br><br>All'interno di <code>_ready()</code>:<br>1. Connetti il segnale nativo <code>pressed</code> del pulsante alla funzione <code>quando_premuto</code>: <code>$BtnLancio.pressed.connect(quando_premuto)</code><br>2. Simula l'interazione premendo il pulsante tramite l'emissione del segnale: <code>$BtnLancio.pressed.emit()</code>",
+        expectedOutput: "Sequenza di lancio avviata con successo!",
+        initialNodes: [
+            { type: "Button", name: "BtnLancio", text: "Inizia Sequenza" }
+        ],
+        requiresSceneTree: true,
+        requires2D: false,
+        starterCode: `extends Node
+
+func _ready():
+    # Connetti $BtnLancio.pressed a quando_premuto ed emettilo sotto
+    pass
+
+func quando_premuto():
+    print("Sequenza di lancio avviata con successo!")
+`,
+        solution: `extends Node
+
+func _ready():
+    $BtnLancio.pressed.connect(quando_premuto)
+    $BtnLancio.pressed.emit()
+
+func quando_premuto():
+    print("Sequenza di lancio avviata con successo!")
+`,
+        hints: [
+            {
+                level: 1,
+                text: "I nodi Button in Godot offrono il segnale nativo 'pressed', emesso ogni volta che l'utente clicca o preme il pulsante."
+            },
+            {
+                level: 2,
+                text: "Usa la sintassi Godot 4: $BtnLancio.pressed.connect(quando_premuto) per associare la funzione al click, e poi emettilo con $BtnLancio.pressed.emit()."
+            },
+            {
+                level: 3,
+                text: "Esempio:\nfunc _ready():\n    $BtnLancio.pressed.connect(quando_premuto)\n    $BtnLancio.pressed.emit()"
+            }
+        ],
+        xpReward: 10,
+        validate: async (result) => {
+            const tests = [];
+            tests.push(formatExecutionCheck(result));
+            const cleanCode = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+            const hasConnect = /\$BtnLancio\.pressed\.connect\s*\(\s*quando_premuto\s*\)/.test(cleanCode) || /get_node\(["']BtnLancio["']\)\.pressed\.connect/.test(cleanCode);
+            tests.push({
+                desc: "Segnale 'pressed' di $BtnLancio connesso a 'quando_premuto'",
+                passed: hasConnect,
+                diff: hasConnect ? null : "Connetti con $BtnLancio.pressed.connect(quando_premuto)."
+            });
+            const hasEmit = /\$BtnLancio\.pressed\.emit\s*\(/.test(cleanCode) || /get_node\(["']BtnLancio["']\)\.pressed\.emit/.test(cleanCode);
+            tests.push({
+                desc: "Metodo pressed.emit() invocato per simulare il click",
+                passed: hasEmit,
+                diff: hasEmit ? null : "Invocare $BtnLancio.pressed.emit() per attivare la funzione."
+            });
+            const logs = result.logs || [];
+            const hasLog = logs.some(l => l.includes("Sequenza di lancio avviata con successo!"));
+            tests.push({
+                desc: "Callback di risposta eseguita e log stampato",
+                passed: hasLog,
+                diff: hasLog ? null : `Atteso: "Sequenza di lancio avviata con successo!", Ricevuto: "${logs.join(' | ')}"`
+            });
+            return tests;
+        }
+    },
+
+    // ---------------------------------------------------------
+    // 15. TIMER E CICLO DI VITA DEI NODI (timers_lifecycle)
+    // ---------------------------------------------------------
+    {
+        id: "rev_timers_01",
+        conceptId: "timers_lifecycle",
+        title: "Timer di Detonazione e Pulizia Nodo",
+        scenario: "Gestione temporizzata del conto alla rovescia di una mina e disattivazione/rimozione grafica tramite queue_free().",
+        task: "Nella scena sono presenti un <code>TimerMina</code> (tipo Timer) e un <code>MinaGrafica</code> (tipo ColorRect).<br><br>All'interno di <code>_ready()</code>:<br>1. Connetti il segnale <code>timeout</code> del timer alla funzione <code>fai_esplodere</code>: <code>$TimerMina.timeout.connect(fai_esplodere)</code><br>2. Emetti il segnale con: <code>$TimerMina.timeout.emit()</code><br><br>All'interno della funzione <code>fai_esplodere()</code>:<br>• Stampa a console: <code>print(\"Detonazione mina energetica!\")</code><br>• Rimuovi in sicurezza il nodo grafico chiamando: <code>$MinaGrafica.queue_free()</code>",
+        expectedOutput: "Detonazione mina energetica!",
+        initialNodes: [
+            { type: "Timer", name: "TimerMina", wait_time: 1.0 },
+            { type: "ColorRect", name: "MinaGrafica" }
+        ],
+        requiresSceneTree: true,
+        requires2D: false,
+        starterCode: `extends Node
+
+func _ready():
+    # Connetti $TimerMina.timeout a fai_esplodere ed emettilo sotto
+    pass
+
+func fai_esplodere():
+    # Stampa la frase e rimuovi $MinaGrafica con queue_free()
+    pass
+`,
+        solution: `extends Node
+
+func _ready():
+    $TimerMina.timeout.connect(fai_esplodere)
+    $TimerMina.timeout.emit()
+
+func fai_esplodere():
+    print("Detonazione mina energetica!")
+    $MinaGrafica.queue_free()
+`,
+        hints: [
+            {
+                level: 1,
+                text: "I nodi Timer emettono il segnale 'timeout' quando il tempo impostato scade. Connettilo con $TimerMina.timeout.connect(fai_esplodere)."
+            },
+            {
+                level: 2,
+                text: "In Godot non si distruggono i nodi bruscamente: si invoca queue_free() sul nodo desiderato ($MinaGrafica.queue_free()) per eliminarlo in sicurezza al termine del frame."
+            },
+            {
+                level: 3,
+                text: "Esempio:\nfunc _ready():\n    $TimerMina.timeout.connect(fai_esplodere)\n    $TimerMina.timeout.emit()\n\nfunc fai_esplodere():\n    print(\"Detonazione mina energetica!\")\n    $MinaGrafica.queue_free()"
+            }
+        ],
+        xpReward: 10,
+        validate: async (result) => {
+            const tests = [];
+            tests.push(formatExecutionCheck(result));
+            const cleanCode = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+            const hasConnect = /\$TimerMina\.timeout\.connect\s*\(\s*fai_esplodere\s*\)/.test(cleanCode) || /get_node\(["']TimerMina["']\)\.timeout\.connect/.test(cleanCode);
+            tests.push({
+                desc: "Segnale 'timeout' di $TimerMina connesso a 'fai_esplodere'",
+                passed: hasConnect,
+                diff: hasConnect ? null : "Connetti con $TimerMina.timeout.connect(fai_esplodere)."
+            });
+            const hasQueueFree = /\$MinaGrafica\.queue_free\s*\(/.test(cleanCode) || /get_node\(["']MinaGrafica["']\)\.queue_free/.test(cleanCode);
+            tests.push({
+                desc: "Istruzione $MinaGrafica.queue_free() presente",
+                passed: hasQueueFree,
+                diff: hasQueueFree ? null : "Invoca $MinaGrafica.queue_free() all'interno di fai_esplodere()."
+            });
+            const scene = result.scene;
+            const isRemoved = scene ? (!scene.has_node("MinaGrafica") || (scene.get_node("MinaGrafica") && scene.get_node("MinaGrafica")._is_queued_for_deletion)) : false;
+            tests.push({
+                desc: "Nodo MinaGrafica rimosso o accodato per eliminazione (queue_free)",
+                passed: isRemoved,
+                diff: isRemoved ? null : "Il nodo MinaGrafica non è stato marcato per l'eliminazione con queue_free()."
+            });
+            const logs = result.logs || [];
+            const hasLog = logs.some(l => l.includes("Detonazione mina energetica!"));
+            tests.push({
+                desc: "Console stampa 'Detonazione mina energetica!'",
+                passed: hasLog,
+                diff: hasLog ? null : `Atteso: "Detonazione mina energetica!", Ricevuto: "${logs.join(' | ')}"`
+            });
+            return tests;
+        }
+    },
+
+    // ---------------------------------------------------------
+    // 5. CONDIZIONI E LOGICA (conditions_logic) - Variante 2
+    // ---------------------------------------------------------
+    {
+        id: "rev_conditions_02",
+        conceptId: "conditions_logic",
+        title: "Protocollo di Quarantena Bunker",
+        scenario: "Controllo di sicurezza a doppia condizione logica per l'apertura del portellone principale.",
+        task: "Dichiara all'interno di <code>_ready()</code> le due variabili:<br>• <code>livello_radiazioni = 15</code><br>• <code>tessera_valida = true</code><br><br>Utilizza un'istruzione <code>if / else</code> e l'operatore logico <code>and</code>:<br>• Se <code>tessera_valida</code> è <code>true</code> AND <code>livello_radiazioni < 25</code>, stampa:<br><code>Accesso Autorizzato: Nessuna Contaminazione</code><br>• Altrimenti stampa:<br><code>Accesso Negato: Quarantena Attiva</code>",
+        expectedOutput: "Accesso Autorizzato: Nessuna Contaminazione",
+        starterCode: `extends Node
+
+func _ready():
+    # Dichiara le variabili e verifica le condizioni con if / else
+    pass
+`,
+        solution: `extends Node
+
+func _ready():
+    var livello_radiazioni = 15
+    var tessera_valida = true
+    if tessera_valida and livello_radiazioni < 25:
+        print("Accesso Autorizzato: Nessuna Contaminazione")
+    else:
+        print("Accesso Negato: Quarantena Attiva")
+`,
+        hints: [
+            {
+                level: 1,
+                text: "Usa l'operatore logico 'and' per combinare due condizioni: 'if condizione_a and condizione_b:'."
+            },
+            {
+                level: 2,
+                text: "Poiché tessera_valida è un valore booleano, puoi scrivere direttamente 'if tessera_valida and livello_radiazioni < 25:'."
+            },
+            {
+                level: 3,
+                text: "Esempio:\nfunc _ready():\n    var livello_radiazioni = 15\n    var tessera_valida = true\n    if tessera_valida and livello_radiazioni < 25:\n        print(\"Accesso Autorizzato: Nessuna Contaminazione\")\n    else:\n        print(\"Accesso Negato: Quarantena Attiva\")"
+            }
+        ],
+        xpReward: 10,
+        validate: async (result) => {
+            const tests = [];
+            tests.push(formatExecutionCheck(result));
+            const cleanCode = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+            const hasAnd = /\band\b/.test(cleanCode) || /&&/.test(cleanCode);
+            tests.push({
+                desc: "Operatore logico 'and' impiegato nella condizione",
+                passed: hasAnd,
+                diff: hasAnd ? null : "Utilizza l'operatore logico 'and' per unire le verifiche."
+            });
+            const logs = result.logs || [];
+            const hasAuth = logs.some(l => l.includes("Accesso Autorizzato: Nessuna Contaminazione"));
+            tests.push({
+                desc: "Console stampa 'Accesso Autorizzato: Nessuna Contaminazione'",
+                passed: hasAuth,
+                diff: hasAuth ? null : `Atteso: "Accesso Autorizzato: Nessuna Contaminazione", Ricevuto: "${logs.join(' | ')}"`
+            });
+            return tests;
+        }
     }
 ];
 
 // =============================================================
 // MOTORE STRATEGICO DI RIPASSO DIDATTICO (ReviewEngine)
-// Regole trasparenti, nessuna percentuale opaca, nessuna penalizzazione
+// Regole trasparenti e verificabili a tre livelli:
+// 'da_ripassare', 'in_miglioramento', 'consolidato'
 // =============================================================
 const ReviewEngine = {
-    /**
-     * Calcola lo stato didattico trasparente di un concetto basato sulla telemetria P3.1
-     * e sullo storico dei ripassi effettuati.
-     * 
-     * Regole di transizione:
-     * - Un singolo errore isolato NON innesca raccomandazione.
-     * - 'da_ripassare': se si sono registrati >= 2 errori o >= 2 livelli di suggerimento prima del primo successo,
-     *   oppure se l'ultimo ripasso è fallito.
-     * - 'consolidato': se tutte le lezioni sono state completate senza attrito, OPPURE se lo studente ha
-     *   superato con successo una variante di ripasso per quell'argomento.
-     */
     getConceptStatus(conceptId, state) {
-        if (!state) return { status: 'non_iniziato', reason: 'Nessun dato di progresso', priority: 0 };
+        if (!state) return { status: 'non_iniziato', priority: 0 };
+        const finished = state.finishedLessons || [];
+        const telemetry = (state.learningTelemetry && state.learningTelemetry.lessons)
+            ? state.learningTelemetry.lessons
+            : (state.learningTelemetry || {});
 
-        const telemetry = state.learningTelemetry?.lessons || {};
-        const finishedLessons = state.completedLessons || [];
+        const allLessons = (typeof LESSONS_DATA !== 'undefined') ? LESSONS_DATA : [];
+        const conceptLessons = allLessons.filter(l => l.conceptId === conceptId);
+        const completedLessons = conceptLessons.filter(l => finished.includes(l.id));
+
+        const conceptVariants = REVIEW_VARIANTS.filter(v => v.conceptId === conceptId);
         const reviewProgress = state.reviewProgress || { completedVariants: [], variantHistory: {} };
+        const completedVariantsForConcept = conceptVariants.filter(v => (reviewProgress.completedVariants || []).includes(v.id));
 
-        // Recupera le lezioni del corso appartenenti a questo concetto
-        const conceptLessons = (typeof LESSONS_DATA !== 'undefined')
-            ? LESSONS_DATA.filter(l => l.conceptId === conceptId)
-            : [];
-
-        if (conceptLessons.length === 0) {
-            return {
-                status: 'disponibile',
-                reason: 'Argomento teorico disponibile per la pratica',
-                priority: 1,
-                hasActiveFriction: false,
-                metrics: { errors: 0, maxHints: 0, variantsDone: 0 }
-            };
-        }
-
-        const startedLessons = conceptLessons.filter(l => telemetry[String(l.id)] && telemetry[String(l.id)].total_runs > 0);
-        const completedLessons = conceptLessons.filter(l => finishedLessons.includes(l.id));
-
-        if (startedLessons.length === 0 && completedLessons.length === 0) {
+        // Se non ha ancora sbloccato o completato alcuna lezione del concetto
+        if (completedLessons.length === 0) {
             return {
                 status: 'non_iniziato',
-                reason: 'Lezioni di questo argomento non ancora affrontate nella mappa',
+                badgeText: 'BLOCCATO',
+                badgeClass: 'badge-locked',
+                reason: 'Argomento non ancora affrontato nel percorso principale',
                 priority: 0,
                 hasActiveFriction: false,
-                metrics: { errors: 0, maxHints: 0, variantsDone: 0, totalVariants: 0 }
+                metrics: { errors: 0, maxHints: 0, variantsDone: 0, totalVariants: conceptVariants.length }
             };
         }
 
-        // Recupera le varianti di ripasso disponibili per questo concetto
-        const conceptVariants = REVIEW_VARIANTS.filter(v => v.conceptId === conceptId);
-        const completedVariantsForConcept = conceptVariants.filter(v => reviewProgress.completedVariants?.includes(v.id));
-
-        // Raccoglie metriche di attrito didattico reale registrato dalla P3.1
+        // Valutazione dell'attrito nel corso principale
         let totalErrorsBeforeFirstSuccess = 0;
         let maxHintsBeforeFirstSuccess = 0;
         let hasActiveFriction = false;
-        let problemLessons = [];
 
         conceptLessons.forEach(l => {
-            const tel = telemetry[String(l.id)];
+            const tel = telemetry[String(l.id)] || telemetry[l.id];
             if (tel) {
                 const errs = tel.failed_before_first_success || 0;
                 const hints = tel.hints_opened_before_first_success || 0;
@@ -702,41 +1208,100 @@ const ReviewEngine = {
                 if (hints > maxHintsBeforeFirstSuccess) {
                     maxHintsBeforeFirstSuccess = hints;
                 }
-                // Criterio trasparente: almeno 2 errori o 2 livelli di suggerimento indicano attrito
                 if (errs >= 2 || hints >= 2) {
                     hasActiveFriction = true;
-                    problemLessons.push({ lessonId: l.id, errors: errs, hints: hints });
                 }
             }
         });
 
-        // 1. Se una variante di ripasso è già stata completata con successo, il concetto è CONSOLIDATO!
-        if (completedVariantsForConcept.length > 0) {
+        // Analisi dettagliata delle prestazioni durante il ripasso
+        let cleanAutonomousCompletions = 0;
+        let assistedCompletions = 0;
+        let maxVariantHintsUsed = 0;
+        let maxVariantErrors = 0;
+
+        completedVariantsForConcept.forEach(v => {
+            const vHist = reviewProgress.variantHistory ? reviewProgress.variantHistory[v.id] : null;
+            if (vHist) {
+                const hintsUsed = Math.max(vHist.hints_used || 0, vHist.hintsUsed || 0);
+                const attempts = vHist.attempts || 1;
+                const successes = vHist.successes || 1;
+                const failedAttempts = Math.max(0, attempts - successes);
+
+                if (hintsUsed > maxVariantHintsUsed) maxVariantHintsUsed = hintsUsed;
+                if (failedAttempts > maxVariantErrors) maxVariantErrors = failedAttempts;
+
+                // Definizione di superamento autonomo/pulito:
+                // al massimo 1 tentativo fallito (typo) e nessun suggerimento avanzato (hints_used <= 1)
+                if (failedAttempts <= 1 && hintsUsed <= 1) {
+                    cleanAutonomousCompletions++;
+                } else {
+                    assistedCompletions++;
+                }
+            } else {
+                cleanAutonomousCompletions++;
+            }
+        });
+
+        // LIVELLO 1: CONSOLIDATO
+        // - Se ha completato almeno una variante in piena autonomia (<= 1 errore, <= 1 hint)
+        // - OPPURE ha completato >= 2 varianti dimostrando pratica continuativa
+        if (cleanAutonomousCompletions >= 1 || completedVariantsForConcept.length >= 2) {
+            const reasonText = completedVariantsForConcept.length >= 2
+                ? `Argomento consolidato: ${completedVariantsForConcept.length} varianti di ripasso superate con successo`
+                : 'Argomento consolidato: variante superata in piena autonomia (senza errori critici né aiuti avanzati)';
             return {
                 status: 'consolidato',
                 badgeText: 'CONSOLIDATO',
                 badgeClass: 'badge-consolidated',
-                reason: `Argomento consolidato con successo: ${completedVariantsForConcept.length} variante/i di ripasso superata/e`,
+                reason: reasonText,
                 priority: 1,
                 hasActiveFriction: false,
                 metrics: {
                     errors: totalErrorsBeforeFirstSuccess,
                     maxHints: maxHintsBeforeFirstSuccess,
                     variantsDone: completedVariantsForConcept.length,
-                    totalVariants: conceptVariants.length
+                    totalVariants: conceptVariants.length,
+                    cleanVariants: cleanAutonomousCompletions,
+                    assistedVariants: assistedCompletions
                 }
             };
         }
 
-        // 2. Se ha incontrato attrito significativo (>= 2 errori o >= 2 hint), è DA RIPASSARE!
+        // LIVELLO 2: IN MIGLIORAMENTO
+        // Se ha completato una variante MA con notevole assistenza o molteplici tentativi falliti:
+        if (completedVariantsForConcept.length > 0 && assistedCompletions > 0) {
+            const detailText = maxVariantErrors >= 2
+                ? `${maxVariantErrors} errori durante il ripasso`
+                : `${maxVariantHintsUsed} livelli di suggerimento consultati`;
+            return {
+                status: 'in_miglioramento',
+                badgeText: 'IN MIGLIORAMENTO',
+                badgeClass: 'badge-improving',
+                reason: `In miglioramento: variante superata con supporto (${detailText}). Consigliata una prova autonoma per consolidare.`,
+                priority: 6,
+                hasActiveFriction: false,
+                metrics: {
+                    errors: totalErrorsBeforeFirstSuccess,
+                    maxHints: maxHintsBeforeFirstSuccess,
+                    variantsDone: completedVariantsForConcept.length,
+                    totalVariants: conceptVariants.length,
+                    cleanVariants: cleanAutonomousCompletions,
+                    assistedVariants: assistedCompletions
+                }
+            };
+        }
+
+        // LIVELLO 3: DA RIPASSARE
+        // Se ha incontrato attrito significativo nel corso (>= 2 errori o >= 2 hint) e non ha ancora completato varianti
         if (hasActiveFriction) {
             const primaryReason = totalErrorsBeforeFirstSuccess >= 2
-                ? `Consigliato: riscontrati ${totalErrorsBeforeFirstSuccess} tentativi falliti prima del successo`
+                ? `Consigliato: riscontrati ${totalErrorsBeforeFirstSuccess} tentativi falliti prima del successo nel corso`
                 : `Consigliato: utilizzati ${maxHintsBeforeFirstSuccess} livelli di suggerimento nella lezione`;
 
             return {
                 status: 'da_ripassare',
-                badgeText: 'CONSIGLIATO',
+                badgeText: 'DA RIPASSARE',
                 badgeClass: 'badge-recommended',
                 reason: primaryReason,
                 priority: 10 + totalErrorsBeforeFirstSuccess + (maxHintsBeforeFirstSuccess * 2),
@@ -745,30 +1310,34 @@ const ReviewEngine = {
                     errors: totalErrorsBeforeFirstSuccess,
                     maxHints: maxHintsBeforeFirstSuccess,
                     variantsDone: 0,
-                    totalVariants: conceptVariants.length
+                    totalVariants: conceptVariants.length,
+                    cleanVariants: 0,
+                    assistedVariants: 0
                 }
             };
         }
 
-        // 3. Se tutte le lezioni sono state completate senza intoppi (0 o 1 errore), è CONSOLIDATO!
+        // Se tutte le lezioni sono state completate nel corso senza frizione (<= 1 errore, <= 1 hint): CONSOLIDATO
         if (completedLessons.length === conceptLessons.length && conceptLessons.length > 0) {
             return {
                 status: 'consolidato',
                 badgeText: 'CONSOLIDATO',
                 badgeClass: 'badge-consolidated',
-                reason: 'Superato con facilità: nessun attrito significativo riscontrato',
+                reason: 'Superato con facilità: nessun attrito significativo riscontrato nel corso',
                 priority: 2,
                 hasActiveFriction: false,
                 metrics: {
                     errors: totalErrorsBeforeFirstSuccess,
                     maxHints: maxHintsBeforeFirstSuccess,
                     variantsDone: 0,
-                    totalVariants: conceptVariants.length
+                    totalVariants: conceptVariants.length,
+                    cleanVariants: 0,
+                    assistedVariants: 0
                 }
             };
         }
 
-        // 4. In corso / disponibile
+        // Disponibile facoltativamente
         return {
             status: 'disponibile',
             badgeText: 'DISPONIBILE',
@@ -780,14 +1349,13 @@ const ReviewEngine = {
                 errors: totalErrorsBeforeFirstSuccess,
                 maxHints: maxHintsBeforeFirstSuccess,
                 variantsDone: 0,
-                totalVariants: conceptVariants.length
+                totalVariants: conceptVariants.length,
+                cleanVariants: 0,
+                assistedVariants: 0
             }
         };
     },
 
-    /**
-     * Restituisce l'elenco dei concetti raccomandati ordinati per priorità didattica
-     */
     getRecommendedConcepts(state) {
         if (!state) return [];
         const result = [];
@@ -795,7 +1363,7 @@ const ReviewEngine = {
 
         for (const [conceptId, conceptMeta] of Object.entries(catalog)) {
             const statusInfo = this.getConceptStatus(conceptId, state);
-            if (statusInfo.status === 'da_ripassare') {
+            if (statusInfo.status === 'da_ripassare' || statusInfo.status === 'in_miglioramento') {
                 const variants = REVIEW_VARIANTS.filter(v => v.conceptId === conceptId);
                 result.push({
                     concept: conceptMeta,
@@ -809,9 +1377,6 @@ const ReviewEngine = {
         return result;
     },
 
-    /**
-     * Restituisce tutti i concetti che lo studente ha già affrontato o sbloccato
-     */
     getAllConceptsWithStatus(state) {
         if (!state) return [];
         const result = [];
@@ -830,9 +1395,6 @@ const ReviewEngine = {
         return result;
     },
 
-    /**
-     * Registra l'esito di un tentativo su una specifica variante di ripasso
-     */
     recordVariantAttempt(variantId, isSuccess, hintsRevealed, state) {
         if (!state) return;
         if (!state.reviewProgress) {
@@ -850,6 +1412,7 @@ const ReviewEngine = {
             attempts: 0,
             successes: 0,
             hints_used: 0,
+            hintsUsed: 0,
             first_attempt_at: null,
             last_attempt_at: null,
             first_success_at: null
@@ -858,7 +1421,10 @@ const ReviewEngine = {
         vHist.attempts++;
         if (!vHist.first_attempt_at) vHist.first_attempt_at = nowIso;
         vHist.last_attempt_at = nowIso;
-        vHist.hints_used = Math.max(vHist.hints_used || 0, hintsRevealed || 0);
+
+        const maxH = Math.max(vHist.hints_used || 0, vHist.hintsUsed || 0, hintsRevealed || 0);
+        vHist.hints_used = maxH;
+        vHist.hintsUsed = maxH;
 
         if (isSuccess) {
             vHist.successes++;

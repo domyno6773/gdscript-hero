@@ -10335,6 +10335,15 @@ kbd {
     color: #f59e0b;
 }
 
+.review-stat-pill.improving {
+    border-color: rgba(249, 115, 22, 0.4);
+    background: rgba(249, 115, 22, 0.08);
+}
+
+.review-stat-pill.improving .stat-num {
+    color: #fb923c;
+}
+
 .review-stat-pill .stat-num {
     font-size: 1.15rem;
     font-weight: 800;
@@ -10420,7 +10429,11 @@ kbd {
 }
 
 .review-concept-card.status-da_ripassare {
-    border-left: 4px solid #f59e0b;
+    border-left: 4px solid #ef4444;
+}
+
+.review-concept-card.status-in_miglioramento {
+    border-left: 4px solid #f97316;
 }
 
 .review-concept-card.status-consolidato {
@@ -10453,9 +10466,15 @@ kbd {
 }
 
 .badge-recommended {
-    background: rgba(245, 158, 11, 0.15);
-    border: 1px solid rgba(245, 158, 11, 0.45);
-    color: #fde68a;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #fca5a5;
+}
+
+.badge-improving {
+    background: rgba(249, 115, 22, 0.15);
+    border: 1px solid rgba(249, 115, 22, 0.45);
+    color: #fdba74;
 }
 
 .badge-consolidated {
@@ -10786,4 +10805,27 @@ kbd {
     background: #f0f9ff;
     border-color: #bae6fd;
     border-left-color: #0284c7;
+}
+
+[data-theme="light"] .review-stat-pill.alert {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+[data-theme="light"] .review-stat-pill.alert .stat-num {
+    color: #b91c1c;
+}
+[data-theme="light"] .review-stat-pill.improving {
+    background: #ffedd5;
+    border-color: #f97316;
+}
+[data-theme="light"] .review-stat-pill.improving .stat-num {
+    color: #c2410c;
+}
+[data-theme="light"] .review-concept-card.status-in_miglioramento {
+    border-left-color: #f97316;
+}
+[data-theme="light"] .badge-improving {
+    background: #ffedd5;
+    border-color: #ea580c;
+    color: #c2410c;
 }

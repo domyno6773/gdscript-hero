@@ -4300,7 +4300,13 @@ const App = {
     async runAndValidateReviewVariant(code, runBtn) {
         const variant = this.currentReviewVariant;
         try {
-            const result = await GDScriptRuntime.execute(code, { initialScene: null, lesson: null });
+            let execScene = null;
+            if (variant.initialNodes && Array.isArray(variant.initialNodes) && window.GDScriptRuntime) {
+                execScene = GDScriptRuntime.buildScene(variant);
+            } else if (this.currentScene) {
+                execScene = this.currentScene;
+            }
+            const result = await GDScriptRuntime.execute(code, { initialScene: execScene, lesson: variant });
 
             const realOutputPre = document.getElementById('real-output-pre');
             if (result.logs && result.logs.length > 0) {
@@ -4499,6 +4505,9 @@ const App = {
         const badgeAll = document.getElementById('badge-all-concepts-count');
         if (badgeAll) badgeAll.innerText = allConcepts.length;
 
+        const improvingCount = allConcepts.filter(c => c.status === 'in_miglioramento').length;
+        const toReviewCount = allConcepts.filter(c => c.status === 'da_ripassare').length;
+
         // Statistiche in testata
         const statsSummary = document.getElementById('review-stats-summary');
         if (statsSummary) {
@@ -4507,9 +4516,13 @@ const App = {
                     <span class="stat-num">${consolidatedCount} / ${allConcepts.length}</span>
                     <span class="stat-label">Argomenti Consolidati</span>
                 </div>
-                <div class="review-stat-pill ${recommended.length > 0 ? 'alert' : ''}">
-                    <span class="stat-num">${recommended.length}</span>
-                    <span class="stat-label">Consigliati da Ripassare</span>
+                <div class="review-stat-pill ${improvingCount > 0 ? 'improving' : ''}">
+                    <span class="stat-num">${improvingCount}</span>
+                    <span class="stat-label">In Miglioramento</span>
+                </div>
+                <div class="review-stat-pill ${toReviewCount > 0 ? 'alert' : ''}">
+                    <span class="stat-num">${toReviewCount}</span>
+                    <span class="stat-label">Da Ripassare</span>
                 </div>
                 <div class="review-stat-pill">
                     <span class="stat-num">${completedVariantsCount}</span>
@@ -4659,8 +4672,15 @@ const App = {
         badge.innerText = "In attesa di verifica";
         badge.style.color = '#94a3b8';
 
-        // Disattiva viewport e scena 2D per il ripasso salvo necessità
-        this.updateExerciseToolsVisibility({ id: 9999, requires2D: false, requiresSceneTree: false });
+        // Configura scena e strumenti contestuali per la variante (Scene Tree se richiesto)
+        if (variant.initialNodes && Array.isArray(variant.initialNodes) && window.GDScriptRuntime) {
+            this.currentScene = GDScriptRuntime.buildScene(variant);
+        } else if (window.GD_Node) {
+            this.currentScene = new GD_Node("Root");
+        }
+        this.renderSceneDock();
+        this.renderViewportOverlay();
+        this.updateExerciseToolsVisibility(variant);
     },
 
     exitReviewMode() {

@@ -927,14 +927,54 @@ const AuthManager = {
             merged.learningTelemetry = current.learningTelemetry;
         }
 
-        // Fusione intelligente dei progressi di Ripasso P3.3
+        // Fusione intelligente e idempotente dei progressi di Ripasso P3.3 (Nessuna duplicazione)
         const curReview = current.reviewProgress || { completedVariants: [], variantHistory: {} };
         const impReview = imported.reviewProgress || { completedVariants: [], variantHistory: {} };
         const mergedVariants = Array.from(new Set([
             ...(Array.isArray(curReview.completedVariants) ? curReview.completedVariants : []),
             ...(Array.isArray(impReview.completedVariants) ? impReview.completedVariants : [])
         ]));
-        const mergedHistory = { ...(impReview.variantHistory || {}), ...(curReview.variantHistory || {}) };
+
+        const mergedHistory = {};
+        const allVariantIds = new Set([
+            ...Object.keys(curReview.variantHistory || {}),
+            ...Object.keys(impReview.variantHistory || {})
+        ]);
+
+        const earlierReviewDate = (d1, d2) => {
+            if (!d1) return d2 || null;
+            if (!d2) return d1 || null;
+            return new Date(d1).getTime() <= new Date(d2).getTime() ? d1 : d2;
+        };
+
+        const laterReviewDate = (d1, d2) => {
+            if (!d1) return d2 || null;
+            if (!d2) return d1 || null;
+            return new Date(d1).getTime() >= new Date(d2).getTime() ? d1 : d2;
+        };
+
+        for (const vId of allVariantIds) {
+            const curH = (curReview.variantHistory || {})[vId];
+            const impH = (impReview.variantHistory || {})[vId];
+
+            if (curH && !impH) {
+                mergedHistory[vId] = { ...curH };
+            } else if (!curH && impH) {
+                mergedHistory[vId] = { ...impH };
+            } else if (curH && impH) {
+                const maxHints = Math.max(curH.hints_used || 0, curH.hintsUsed || 0, impH.hints_used || 0, impH.hintsUsed || 0);
+                mergedHistory[vId] = {
+                    attempts: Math.max(curH.attempts || 0, impH.attempts || 0),
+                    successes: Math.max(curH.successes || 0, impH.successes || 0),
+                    hints_used: maxHints,
+                    hintsUsed: maxHints,
+                    first_attempt_at: earlierReviewDate(curH.first_attempt_at, impH.first_attempt_at),
+                    last_attempt_at: laterReviewDate(curH.last_attempt_at, impH.last_attempt_at),
+                    first_success_at: earlierReviewDate(curH.first_success_at, impH.first_success_at)
+                };
+            }
+        }
+
         merged.reviewProgress = {
             completedVariants: mergedVariants,
             variantHistory: mergedHistory
