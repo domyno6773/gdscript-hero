@@ -40,7 +40,7 @@ async function smoke(browser,url,width){
  const sandboxNav=width<821?'#mob-nav-practice':'#nav-practice-btn';
  await page.locator(sandboxNav).click({timeout:15000});
  await viewIs(page,'practice');
- await page.locator('#sandbox-code-editor').fill('extends Node2D\\n\\nfunc _ready():\\n    print("BROWSER_SANDBOX_OK")');
+ await page.locator('#sandbox-code-editor').fill('extends Node2D\n\nfunc _ready():\n    print("BROWSER_SANDBOX_OK")');
  await page.locator('#btn-sandbox-run').click({timeout:10000});
  await page.waitForFunction(()=>document.getElementById('sandbox-console-output').textContent.includes('BROWSER_SANDBOX_OK'));
  // Anche nel rendering della scena, un nome nodo non deve trasformarsi in HTML attivo.
