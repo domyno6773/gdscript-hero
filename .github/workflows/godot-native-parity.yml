@@ -27,3 +27,4 @@ jobs:
           grep -F "NATIVE_IMMEDIATE_PRESENT: true" /tmp/godot_native.log
           grep -F "NATIVE_QUEUED: true" /tmp/godot_native.log
           grep -F "NATIVE_AFTER_FRAME_PRESENT: false" /tmp/godot_native.log
+          grep -F "NATIVE_VECTOR2: (100.0, 200.0)" /tmp/godot_native.log
