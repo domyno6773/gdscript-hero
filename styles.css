@@ -9876,3 +9876,199 @@ kbd {
     stroke: #059669 !important;
     filter: none !important;
 }
+
+
+/* ========================================================================== */
+/* WORKSPACE DIDATTICO CONTESTUALE: CONSOLE-ONLY & INTRODUZIONE STRUMENTI 2D */
+/* ========================================================================== */
+
+/* Modalità Console-Only (Esercizi Iniziali 1-48) */
+.validation-split-grid.console-only {
+    grid-template-columns: 1fr !important;
+}
+
+.validation-panel.console-only {
+    height: 250px !important;
+    transition: height 0.25s ease;
+}
+
+.validation-split-grid.console-only .validation-console-col {
+    width: 100% !important;
+    border-radius: 8px !important;
+}
+
+.validation-split-grid.console-only .output-comparison-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+}
+
+/* Pulsante Toggle Strumenti 2D nell'Header Editor */
+.btn-tool-toggle-tools {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-family: var(--font-display) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    color: var(--text-dim) !important;
+    border: 1px solid var(--border-dim) !important;
+    background: transparent !important;
+    border-radius: 4px !important;
+    padding: 4px 10px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-tool-toggle-tools:hover {
+    color: var(--neon-cyan) !important;
+    border-color: var(--neon-cyan) !important;
+    background: rgba(0, 229, 255, 0.08) !important;
+}
+
+.btn-tool-toggle-tools.active {
+    color: var(--neon-cyan) !important;
+    border-color: var(--neon-cyan) !important;
+    background: rgba(0, 229, 255, 0.12) !important;
+}
+
+[data-theme="light"] .btn-tool-toggle-tools {
+    color: #475569 !important;
+    border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] .btn-tool-toggle-tools:hover,
+[data-theme="light"] .btn-tool-toggle-tools.active {
+    color: #0284C7 !important;
+    border-color: #0284C7 !important;
+    background: #F0F9FF !important;
+}
+
+/* Card Onboarding Introduttiva Strumenti al Primo Incontro */
+.tool-intro-card {
+    background: linear-gradient(135deg, rgba(20, 25, 36, 0.98), rgba(14, 18, 26, 0.98));
+    border: 1px solid var(--neon-cyan);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    animation: fadeInIntro 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 25;
+}
+
+[data-theme="light"] .tool-intro-card {
+    background: #FFFFFF !important;
+    border: 1px solid #0284C7 !important;
+    box-shadow: 0 8px 24px rgba(2, 132, 199, 0.15) !important;
+}
+
+.tool-intro-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.tool-intro-badge {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--neon-cyan);
+    background: rgba(0, 229, 255, 0.12);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+[data-theme="light"] .tool-intro-badge {
+    color: #0284C7 !important;
+    background: #E0F2FE !important;
+    border-color: #BAE6FD !important;
+}
+
+.tool-intro-close {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    transition: color 0.15s;
+}
+
+.tool-intro-close:hover {
+    color: var(--text-main);
+}
+
+.tool-intro-title {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0;
+}
+
+[data-theme="light"] .tool-intro-title {
+    color: #0F172A !important;
+}
+
+.tool-intro-text {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--text-body);
+    margin: 0;
+}
+
+.tool-intro-text strong {
+    color: var(--neon-mint);
+}
+
+[data-theme="light"] .tool-intro-text strong {
+    color: #059669 !important;
+}
+
+.btn-tool-intro-dismiss {
+    align-self: flex-start;
+    margin-top: 4px;
+    background: var(--neon-mint);
+    color: #000000;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(0, 240, 170, 0.3);
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-tool-intro-dismiss:hover {
+    background: #48FFCC;
+    transform: translateY(-1px);
+}
+
+[data-theme="light"] .btn-tool-intro-dismiss {
+    background: #0284C7 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
+}
+
+[data-theme="light"] .btn-tool-intro-dismiss:hover {
+    background: #0369A1 !important;
+}
+
+@keyframes fadeInIntro {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

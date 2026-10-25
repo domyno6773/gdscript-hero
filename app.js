@@ -2528,6 +2528,140 @@ const App = {
         });
     },
 
+    
+    // ==========================================================================
+    // GESTIONE DINAMICA E CONTESTUALE DEGLI STRUMENTI DIDATTICI (2D & SCENE TREE)
+    // ==========================================================================
+
+    updateExerciseToolsVisibility(lesson) {
+        const viewportCol = document.getElementById('exercise-viewport-col');
+        const viewportCanvasWrapper = document.getElementById('exercise-viewport-wrapper');
+        const viewportHeader = document.getElementById('exercise-viewport-header');
+        const sceneDock = document.getElementById('exercise-scene-dock');
+        const validationGrid = document.getElementById('exercise-validation-grid');
+        const validationPanel = document.getElementById('exercise-validation-panel');
+        const toggleBtn = document.getElementById('btn-toggle-extra-tools');
+
+        // Se l'utente ha impostato un toggle manuale per la sessione corrente
+        const manualOverride = this.state.manualToolsOverride;
+
+        let showNodeTree = false;
+        let showViewport = false;
+
+        if (manualOverride === 'visible') {
+            showNodeTree = true;
+            showViewport = true;
+        } else if (manualOverride === 'hidden') {
+            showNodeTree = false;
+            showViewport = false;
+        } else {
+            // Logica contestuale predefinita basata sui metadati dell'esercizio
+            showNodeTree = (lesson.hasNodeTree !== undefined) ? !!lesson.hasNodeTree : (!!lesson.initialNodes && lesson.initialNodes.length > 0);
+            showViewport = (lesson.has2DViewport !== undefined) ? !!lesson.has2DViewport : (lesson.id >= 50);
+        }
+
+        const anyActive = showNodeTree || showViewport;
+
+        if (!anyActive) {
+            // Nasconde completamente la colonna degli strumenti 2D e allarga la console
+            if (viewportCol) viewportCol.classList.add('hidden');
+            if (validationGrid) validationGrid.classList.add('console-only');
+            if (validationPanel) validationPanel.classList.add('console-only');
+            if (toggleBtn) {
+                toggleBtn.classList.remove('active');
+                toggleBtn.title = "Mostra Schermo 2D e Scena Godot (Strumenti avanzati)";
+            }
+        } else {
+            // Mostra la colonna e ripartisce lo spazio
+            if (viewportCol) viewportCol.classList.remove('hidden');
+            if (validationGrid) validationGrid.classList.remove('console-only');
+            if (validationPanel) validationPanel.classList.remove('console-only');
+            if (toggleBtn) {
+                toggleBtn.classList.add('active');
+                toggleBtn.title = "Nascondi Schermo 2D e Scena Godot";
+            }
+
+            // Sotto-pannelli individuali
+            if (viewportCanvasWrapper) viewportCanvasWrapper.style.display = showViewport ? 'flex' : 'none';
+            if (viewportHeader) viewportHeader.style.display = showViewport ? 'flex' : 'none';
+            if (sceneDock) sceneDock.style.display = showNodeTree ? 'flex' : 'none';
+
+            // Resize automatico del viewport 2D se attivo
+            if (showViewport && this.viewport) {
+                setTimeout(() => this.viewport.resize(), 80);
+            }
+        }
+
+        // Verifica onboarding / introduzione contestuale la prima volta che compaiono
+        this.checkToolIntroductions(lesson, showNodeTree, showViewport);
+    },
+
+    checkToolIntroductions(lesson, showNodeTree, showViewport) {
+        // 1. Introduzione Albero della Scena
+        const cardTree = document.getElementById('intro-card-nodetree');
+        if (cardTree) {
+            const seenTree = localStorage.getItem('seen_intro_nodetree');
+            if (showNodeTree && !seenTree && lesson.id >= 49) {
+                cardTree.classList.remove('hidden');
+            } else {
+                cardTree.classList.add('hidden');
+            }
+        }
+
+        // 2. Introduzione Schermo 2D
+        const cardViewport = document.getElementById('intro-card-viewport2d');
+        if (cardViewport) {
+            const seenViewport = localStorage.getItem('seen_intro_viewport2d');
+            if (showViewport && !seenViewport && lesson.id >= 50) {
+                cardViewport.classList.remove('hidden');
+            } else {
+                cardViewport.classList.add('hidden');
+            }
+        }
+    },
+
+    dismissToolIntro(toolType) {
+        SoundFX.playClick();
+        if (toolType === 'nodetree') {
+            localStorage.setItem('seen_intro_nodetree', 'true');
+            const card = document.getElementById('intro-card-nodetree');
+            if (card) card.classList.add('hidden');
+        } else if (toolType === 'viewport2d') {
+            localStorage.setItem('seen_intro_viewport2d', 'true');
+            const card = document.getElementById('intro-card-viewport2d');
+            if (card) card.classList.add('hidden');
+        }
+    },
+
+    toggleManualExerciseTools() {
+        SoundFX.playClick();
+        const lesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId) || LESSONS_DATA[0];
+        
+        // Se attualmente visibili, nascondi; se nascosti, mostra
+        const validationGrid = document.getElementById('exercise-validation-grid');
+        const currentlyConsoleOnly = validationGrid && validationGrid.classList.contains('console-only');
+
+        if (currentlyConsoleOnly) {
+            this.state.manualToolsOverride = 'visible';
+            this.showToast({
+                icon: "🎮",
+                tag: "STRUMENTI ATTIVATI",
+                title: "Schermo 2D e Scena Godot",
+                desc: "Gli strumenti visivi sono ora visibili per questo esercizio."
+            });
+        } else {
+            this.state.manualToolsOverride = 'hidden';
+            this.showToast({
+                icon: "💻",
+                tag: "LAYOUT PULITO",
+                title: "Modalità Console Attiva",
+                desc: "Strumenti 2D nascosti per massimizzare lo spazio dell'editor."
+            });
+        }
+
+        this.updateExerciseToolsVisibility(lesson);
+    },
+
     openLesson(lessonId) {
         const lesson = LESSONS_DATA.find(l => l.id === lessonId);
         if (!lesson) return;
@@ -2552,6 +2686,7 @@ const App = {
         }
         this.renderSceneDock();
         this.renderViewportOverlay();
+        this.updateExerciseToolsVisibility(lesson);
 
         const lessonContent = document.querySelector('.lesson-content');
         if (lesson.isMastery) {
@@ -4872,6 +5007,7 @@ const App = {
         SoundFX.playClick();
         this.renderSceneDock();
         this.renderViewportOverlay();
+        this.updateExerciseToolsVisibility(lesson);
         this.showToast(`Nodo '$${name}' rimosso dall'albero della scena.`, "info");
     },
 
