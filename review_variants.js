@@ -1231,25 +1231,28 @@ const ReviewEngine = {
                 if (hintsUsed > maxVariantHintsUsed) maxVariantHintsUsed = hintsUsed;
                 if (failedAttempts > maxVariantErrors) maxVariantErrors = failedAttempts;
 
-                // Definizione di superamento autonomo/pulito:
-                // al massimo 1 tentativo fallito (typo) e nessun suggerimento avanzato (hints_used <= 1)
-                if (failedAttempts <= 1 && hintsUsed <= 1) {
+                // Definizione rigorosa di superamento autonomo (P3.3.1 / P3.4):
+                // Senza alcun suggerimento (hintsUsed === 0) e con al massimo un errore occasionale/typo (failedAttempts <= 1)
+                if (hintsUsed === 0 && failedAttempts <= 1) {
                     cleanAutonomousCompletions++;
                 } else {
                     assistedCompletions++;
                 }
             } else {
-                cleanAutonomousCompletions++;
+                // In assenza di telemetria specifica sulla variante, trattalo prudentemente come assistito
+                assistedCompletions++;
             }
         });
 
+        const remainingVariants = Math.max(0, conceptVariants.length - completedVariantsForConcept.length);
+
         // LIVELLO 1: CONSOLIDATO
-        // - Se ha completato almeno una variante in piena autonomia (<= 1 errore, <= 1 hint)
-        // - OPPURE ha completato >= 2 varianti dimostrando pratica continuativa
-        if (cleanAutonomousCompletions >= 1 || completedVariantsForConcept.length >= 2) {
-            const reasonText = completedVariantsForConcept.length >= 2
-                ? `Argomento consolidato: ${completedVariantsForConcept.length} varianti di ripasso superate con successo`
-                : 'Argomento consolidato: variante superata in piena autonomia (senza errori critici né aiuti avanzati)';
+        // Richiede ALMENO UNA dimostrazione sufficientemente autonoma (0 suggerimenti, max 1 errore occasionale).
+        // Completare 2 o più varianti con assistenza NON garantisce automaticamente lo stato Consolidato.
+        if (cleanAutonomousCompletions >= 1) {
+            const reasonText = cleanAutonomousCompletions > 1
+                ? `Argomento consolidato: ${cleanAutonomousCompletions} varianti di ripasso superate in piena autonomia (senza aiuti e al massimo 1 errore occasionale)`
+                : 'Argomento consolidato: variante superata in piena autonomia (senza suggerimenti e al massimo un errore occasionale)';
             return {
                 status: 'consolidato',
                 badgeText: 'CONSOLIDATO',
@@ -1263,22 +1266,32 @@ const ReviewEngine = {
                     variantsDone: completedVariantsForConcept.length,
                     totalVariants: conceptVariants.length,
                     cleanVariants: cleanAutonomousCompletions,
-                    assistedVariants: assistedCompletions
+                    assistedVariants: assistedCompletions,
+                    remainingVariants: remainingVariants
                 }
             };
         }
 
         // LIVELLO 2: IN MIGLIORAMENTO
-        // Se ha completato una variante MA con notevole assistenza o molteplici tentativi falliti:
-        if (completedVariantsForConcept.length > 0 && assistedCompletions > 0) {
+        // Se ha completato una o più varianti MA tutte con assistenza/errori (cleanAutonomousCompletions === 0):
+        if (completedVariantsForConcept.length > 0) {
             const detailText = maxVariantErrors >= 2
-                ? `${maxVariantErrors} errori durante il ripasso`
-                : `${maxVariantHintsUsed} livelli di suggerimento consultati`;
+                ? `${maxVariantErrors} tentativi errati prima del successo`
+                : (maxVariantHintsUsed > 0 ? `${maxVariantHintsUsed} livelli di suggerimento consultati` : 'con assistenza');
+
+            let reasonText = '';
+            if (remainingVariants === 0) {
+                // Tutte le varianti disponibili per l'argomento sono state completate con supporto
+                reasonText = `In miglioramento: hai completato con supporto tutte le ${completedVariantsForConcept.length} prove disponibili per questo argomento (${detailText}). Al momento non ci sono ulteriori varianti; puoi ripeterle in piena autonomia per consolidare.`;
+            } else {
+                reasonText = `In miglioramento: ${completedVariantsForConcept.length} prova/e superata/e con supporto (${detailText}). Restano altre prove disponibili per consolidare in piena autonomia.`;
+            }
+
             return {
                 status: 'in_miglioramento',
                 badgeText: 'IN MIGLIORAMENTO',
                 badgeClass: 'badge-improving',
-                reason: `In miglioramento: variante superata con supporto (${detailText}). Consigliata una prova autonoma per consolidare.`,
+                reason: reasonText,
                 priority: 6,
                 hasActiveFriction: false,
                 metrics: {
@@ -1287,11 +1300,11 @@ const ReviewEngine = {
                     variantsDone: completedVariantsForConcept.length,
                     totalVariants: conceptVariants.length,
                     cleanVariants: cleanAutonomousCompletions,
-                    assistedVariants: assistedCompletions
+                    assistedVariants: assistedCompletions,
+                    remainingVariants: remainingVariants
                 }
             };
         }
-
         // LIVELLO 3: DA RIPASSARE
         // Se ha incontrato attrito significativo nel corso (>= 2 errori o >= 2 hint) e non ha ancora completato varianti
         if (hasActiveFriction) {
@@ -1312,7 +1325,8 @@ const ReviewEngine = {
                     variantsDone: 0,
                     totalVariants: conceptVariants.length,
                     cleanVariants: 0,
-                    assistedVariants: 0
+                    assistedVariants: 0,
+                    remainingVariants: conceptVariants.length
                 }
             };
         }
@@ -1332,7 +1346,8 @@ const ReviewEngine = {
                     variantsDone: 0,
                     totalVariants: conceptVariants.length,
                     cleanVariants: 0,
-                    assistedVariants: 0
+                    assistedVariants: 0,
+                    remainingVariants: conceptVariants.length
                 }
             };
         }

@@ -949,7 +949,8 @@ const App = {
             'view-exercise',
             'view-practice',
             'view-projects',
-            'view-review'
+            'view-review',
+            'view-stats'
         ];
         views.forEach(id => {
             const el = document.getElementById(id);
@@ -2913,7 +2914,7 @@ const App = {
 
     updateNavSelection(viewName) {
         // Desktop nav buttons
-        ['roadmap', 'editor', 'practice', 'projects', 'review'].forEach(key => {
+        ['roadmap', 'editor', 'practice', 'projects', 'review', 'stats'].forEach(key => {
             const btn = document.getElementById(`nav-${key}-btn`);
             if (btn) {
                 if (key === viewName || (key === 'editor' && viewName === 'exercise')) {
@@ -2925,7 +2926,7 @@ const App = {
         });
 
         // Mobile bottom nav buttons
-        ['roadmap', 'exercise', 'practice', 'projects', 'review'].forEach(key => {
+        ['roadmap', 'exercise', 'practice', 'projects', 'review', 'stats'].forEach(key => {
             const mobBtn = document.getElementById(`mob-nav-${key}`);
             if (mobBtn) {
                 if (key === viewName) {
@@ -3690,6 +3691,20 @@ const App = {
         document.getElementById('nav-projects-btn').onclick = () => this.openProjectsView();
         const navReviewBtn = document.getElementById('nav-review-btn');
         if (navReviewBtn) navReviewBtn.onclick = () => this.showReviewView();
+
+        const navStatsBtn = document.getElementById('nav-stats-btn');
+        if (navStatsBtn) navStatsBtn.onclick = () => this.showStatsView();
+
+        const mobNavStats = document.getElementById('mob-nav-stats');
+        if (mobNavStats) mobNavStats.onclick = () => this.showStatsView();
+
+        const btnProfToStats = document.getElementById('btn-profile-to-stats');
+        if (btnProfToStats) {
+            btnProfToStats.onclick = () => {
+                this.closeProfileModal();
+                this.showStatsView();
+            };
+        }
         document.getElementById('btn-back-to-roadmap').onclick = () => {
             if (this.isReviewMode) {
                 this.exitReviewMode();
@@ -4690,6 +4705,372 @@ const App = {
         const revBanner = document.getElementById('review-exercise-banner');
         if (revBanner) revBanner.classList.add('hidden');
         this.showReviewView();
+    },
+
+    // =============================================================
+    // P3.4: STATISTICHE DI APPRENDIMENTO & CRUSCOTTO DIDATTICO
+    // =============================================================
+    showStatsView() {
+        SoundFX.playClick();
+        this.hideAutocomplete();
+        this.switchView('view-stats');
+        this.updateNavSelection('stats');
+        this.renderStatsView();
+    },
+
+    renderStatsView() {
+        if (typeof StatsEngine === 'undefined') return;
+
+        const report = StatsEngine.getCompleteLearningReport(this.state);
+        this.renderAutonomySection(report.courseAutonomy);
+        this.renderFrictionSection(report.errorBreakdown, report.conceptsSummary);
+        this.renderEvolutionSection(report.reviewStats, report.chronologicalProgress);
+    },
+
+    renderAutonomySection(autonomy) {
+        const container = document.getElementById('stats-autonomy-content');
+        if (!container) return;
+
+        const autonomyRateDisplay = autonomy.autonomyRate !== null
+            ? `${autonomy.autonomyRate}%`
+            : 'N/D';
+        const avgAttemptsDisplay = autonomy.avgAttemptsPerTrackedLesson !== null
+            ? `${autonomy.avgAttemptsPerTrackedLesson}`
+            : 'N/D';
+
+        let legacyNoticeHtml = '';
+        if (autonomy.hasLegacyData) {
+            legacyNoticeHtml = `
+                <div class="stats-legacy-callout">
+                    <div class="callout-icon">
+                        <svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    </div>
+                    <div class="callout-body">
+                        <strong>Nota di Trasparenza sui Dati:</strong>
+                        <p>${autonomy.legacyCount} lezioni sono state completate con una versione precedente all'introduzione della telemetria didattica dettagliata. Per queste lezioni lo storico iniziale di suggerimenti ed errori non è disponibile e <em>non viene inventato retroattivamente</em>. Le metriche di autonomia e i tentativi medi sono calcolati esclusivamente sulle <strong>${autonomy.trackedCount} lezioni tracciate</strong> con telemetria attiva.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        container.innerHTML = `
+            <div class="stats-kpi-grid">
+                <div class="stats-kpi-card">
+                    <div class="kpi-top">
+                        <span class="kpi-label">Lezioni Completate</span>
+                        <span class="kpi-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+                    </div>
+                    <div class="kpi-val">${autonomy.completedLessons} <span class="kpi-total">/ ${autonomy.totalLessons}</span></div>
+                    <div class="kpi-progress-bar">
+                        <div class="kpi-progress-fill" style="width: ${autonomy.courseProgressPercent}%;"></div>
+                    </div>
+                    <div class="kpi-subtext">${autonomy.courseProgressPercent}% del percorso completato</div>
+                </div>
+
+                <div class="stats-kpi-card highlight-autonomy">
+                    <div class="kpi-top">
+                        <span class="kpi-label">Indice di Autonomia</span>
+                        <span class="kpi-icon"><svg class="ui-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                    </div>
+                    <div class="kpi-val">${autonomyRateDisplay}</div>
+                    <div class="kpi-subtext">
+                        ${autonomy.trackedCount > 0 
+                            ? `<strong>${autonomy.autonomousCount}</strong> su ${autonomy.trackedCount} lezioni tracciate superate senza indizi`
+                            : 'Nessuna lezione tracciata con telemetria attiva'}
+                    </div>
+                </div>
+
+                <div class="stats-kpi-card">
+                    <div class="kpi-top">
+                        <span class="kpi-label">Superate al 1° Colpo</span>
+                        <span class="kpi-icon"><svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg></span>
+                    </div>
+                    <div class="kpi-val">${autonomy.cleanFirstTryCount}</div>
+                    <div class="kpi-subtext">Zero errori e zero indizi utilizzati al primo tentativo</div>
+                </div>
+
+                <div class="stats-kpi-card">
+                    <div class="kpi-top">
+                        <span class="kpi-label">Tentativi Medi / Lezione</span>
+                        <span class="kpi-icon"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
+                    </div>
+                    <div class="kpi-val">${avgAttemptsDisplay}</div>
+                    <div class="kpi-subtext">${autonomy.totalVerifications} verifiche totali registrate</div>
+                </div>
+            </div>
+            ${legacyNoticeHtml}
+        `;
+    },
+
+    renderFrictionSection(errorBreakdown, conceptsSummary) {
+        const container = document.getElementById('stats-friction-content');
+        if (!container) return;
+
+        const { counts, percentages, studentTotal, pedagogicalInsight } = errorBreakdown;
+
+        const daRip = conceptsSummary.daRipassare || [];
+        const inMiglioramento = conceptsSummary.inMiglioramento || [];
+        const consolidati = conceptsSummary.consolidati || [];
+
+        let daRipHtml = '';
+        if (daRip.length > 0) {
+            daRipHtml = `
+                <div class="stats-concept-group">
+                    <div class="stats-group-title danger">
+                        <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span>Da Ripassare (${daRip.length})</span>
+                    </div>
+                    <div class="stats-concepts-grid">
+                        ${daRip.map(item => `
+                            <div class="stats-concept-item status-da_ripassare">
+                                <div class="item-top">
+                                    <span class="item-badge badge-recommended">${this.escapeHtml(item.badgeText || 'DA RIPASSARE')}</span>
+                                    <span class="item-chapter">Capitolo ${item.concept.chapterId}</span>
+                                </div>
+                                <h4 class="item-title">${this.escapeHtml(item.concept.name)}</h4>
+                                <p class="item-reason">${this.escapeHtml(item.reason)}</p>
+                                <button type="button" class="btn-concept-action" onclick="App.showReviewView()">Ripassa Ora</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        } else {
+            daRipHtml = `
+                <div class="stats-concept-group">
+                    <div class="stats-empty-state ok">
+                        <svg class="ui-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <div>
+                            <strong>Nessun argomento urgente da ripassare!</strong>
+                            <p>Non sono stati riscontrati attriti significativi irrisolti nel percorso.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let inMigHtml = '';
+        if (inMiglioramento.length > 0) {
+            inMigHtml = `
+                <div class="stats-concept-group">
+                    <div class="stats-group-title warning">
+                        <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                        <span>In Miglioramento (${inMiglioramento.length})</span>
+                    </div>
+                    <div class="stats-concepts-grid">
+                        ${inMiglioramento.map(item => `
+                            <div class="stats-concept-item status-in_miglioramento">
+                                <div class="item-top">
+                                    <span class="item-badge badge-improving">${this.escapeHtml(item.badgeText || 'IN MIGLIORAMENTO')}</span>
+                                    <span class="item-chapter">Capitolo ${item.concept.chapterId}</span>
+                                </div>
+                                <h4 class="item-title">${this.escapeHtml(item.concept.name)}</h4>
+                                <p class="item-reason">${this.escapeHtml(item.reason)}</p>
+                                <button type="button" class="btn-concept-action secondary" onclick="App.showReviewView()">Pratica</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        let consHtml = '';
+        if (consolidati.length > 0) {
+            consHtml = `
+                <div class="stats-concept-group">
+                    <div class="stats-group-title success">
+                        <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Consolidati (${consolidati.length})</span>
+                    </div>
+                    <div class="stats-concepts-grid">
+                        ${consolidati.map(item => `
+                            <div class="stats-concept-item status-consolidato">
+                                <div class="item-top">
+                                    <span class="item-badge badge-consolidated">${this.escapeHtml(item.badgeText || 'CONSOLIDATO')}</span>
+                                    <span class="item-chapter">Capitolo ${item.concept.chapterId}</span>
+                                </div>
+                                <h4 class="item-title">${this.escapeHtml(item.concept.name)}</h4>
+                                <p class="item-reason">${this.escapeHtml(item.reason)}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        container.innerHTML = `
+            <div class="stats-friction-layout">
+                <!-- Ripartizione Categorie di Errore -->
+                <div class="stats-subpanel">
+                    <h4 class="subpanel-title">
+                        <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Distribuzione Errori di Verifica (${studentTotal} totali)
+                    </h4>
+                    
+                    <div class="stats-bars-container">
+                        <div class="stats-bar-row">
+                            <div class="bar-label-group">
+                                <span class="bar-label">Logica / Requisiti Esercizio</span>
+                                <span class="bar-value">${counts.requirement} (${percentages.requirement}%)</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill requirement" style="width: ${percentages.requirement}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-bar-row">
+                            <div class="bar-label-group">
+                                <span class="bar-label">Sintassi GDScript</span>
+                                <span class="bar-value">${counts.syntax} (${percentages.syntax}%)</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill syntax" style="width: ${percentages.syntax}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-bar-row">
+                            <div class="bar-label-group">
+                                <span class="bar-label">Eccezioni Runtime &amp; Nodi</span>
+                                <span class="bar-value">${counts.runtime} (${percentages.runtime}%)</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill runtime" style="width: ${percentages.runtime}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="stats-bar-row">
+                            <div class="bar-label-group">
+                                <span class="bar-label">Timeout &amp; Cicli Infiniti</span>
+                                <span class="bar-value">${counts.timeout} (${percentages.timeout}%)</span>
+                            </div>
+                            <div class="bar-track">
+                                <div class="bar-fill timeout" style="width: ${percentages.timeout}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-insight-card">
+                        <div class="insight-badge">INTERPRETAZIONE DIDATTICA</div>
+                        <p class="insight-text">${this.escapeHtml(pedagogicalInsight)}</p>
+                        <div class="insight-footer-note">
+                            <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            Eventuali limiti o anomalie del simulatore web sono filtrati e non gravano sullo studente.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mappa di Consolidamento Argomenti -->
+                <div class="stats-subpanel">
+                    <h4 class="subpanel-title">
+                        <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        Mappa dei 15 Concetti Didattici
+                    </h4>
+                    <div class="stats-concepts-status-container">
+                        ${daRipHtml}
+                        ${inMigHtml}
+                        ${consHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderEvolutionSection(reviewStats, chronologicalProgress) {
+        const container = document.getElementById('stats-evolution-content');
+        if (!container) return;
+
+        let trendHtml = '';
+        if (chronologicalProgress.trendAvailable) {
+            trendHtml = `
+                <div class="stats-timeline-container">
+                    <div class="timeline-header-row">
+                        <span class="timeline-status-badge">CRONOLOGIA ATTIVA</span>
+                        <span class="timeline-count-text">${this.escapeHtml(chronologicalProgress.reason)}</span>
+                    </div>
+                    <div class="stats-table-wrapper">
+                        <table class="stats-timeline-table">
+                            <thead>
+                                <tr>
+                                    <th>Data Sessione</th>
+                                    <th>Lezioni Superate</th>
+                                    <th>In Piena Autonomia</th>
+                                    <th>Verifiche Eseguite</th>
+                                    <th>Varianti di Ripasso</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${chronologicalProgress.dailySeries.map(row => `
+                                    <tr>
+                                        <td class="date-cell"><strong>${this.escapeHtml(row.date)}</strong></td>
+                                        <td>${row.lessonsCompleted}</td>
+                                        <td><span class="tag-autonomous">${row.autonomousSuccesses}</span></td>
+                                        <td>${row.verifyAttempts}</td>
+                                        <td>${row.reviewCompleted}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        } else {
+            trendHtml = `
+                <div class="stats-notice-box">
+                    <div class="notice-icon">
+                        <svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div class="notice-body">
+                        <h4>Andamento Temporale in Corso di Raccolta</h4>
+                        <p>${this.escapeHtml(chronologicalProgress.reason)}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        container.innerHTML = `
+            <div class="stats-evolution-grid">
+                <!-- Card Pratica Ripasso -->
+                <div class="stats-subpanel">
+                    <h4 class="subpanel-title">
+                        <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                        Pratica nella Palestra di Ripasso
+                    </h4>
+                    <div class="review-kpi-summary-row">
+                        <div class="review-kpi-box">
+                            <span class="rk-val">${reviewStats.completedCount} / ${reviewStats.totalVariants}</span>
+                            <span class="rk-label">Varianti Completate</span>
+                        </div>
+                        <div class="review-kpi-box highlight-green">
+                            <span class="rk-val">${reviewStats.cleanAutonomousCount}</span>
+                            <span class="rk-label">In Piena Autonomia (0 aiuti)</span>
+                        </div>
+                        <div class="review-kpi-box">
+                            <span class="rk-val">${reviewStats.assistedCount}</span>
+                            <span class="rk-label">Con Supporto / Errori</span>
+                        </div>
+                        <div class="review-kpi-box">
+                            <span class="rk-val">${reviewStats.totalReviewAttempts}</span>
+                            <span class="rk-label">Verifiche nel Ripasso</span>
+                        </div>
+                    </div>
+                    <div class="review-cta-row">
+                        <button type="button" class="btn-review-cta" onclick="App.showReviewView()">
+                            <span class="icon"><svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></span>
+                            <span>Apri Palestra di Ripasso</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Andamento Cronologico Reale -->
+                <div class="stats-subpanel">
+                    <h4 class="subpanel-title">
+                        <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                        Evoluzione Temporale delle Sessioni
+                    </h4>
+                    ${trendHtml}
+                </div>
+            </div>
+        `;
     },
 
     buildContextualFeedback(result, currentLesson, failedTest, allTests, code = '') {

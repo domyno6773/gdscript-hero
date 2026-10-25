@@ -49,6 +49,9 @@
             <button class="nav-btn" id="nav-review-btn" title="Palestra di Ripasso">
                 <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></span> <span class="nav-btn-text">Ripasso</span> <span id="review-pending-badge" class="badge-count hidden">0</span>
             </button>
+            <button class="nav-btn" id="nav-stats-btn" title="Statistiche di Apprendimento">
+                <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span> <span class="nav-btn-text">Statistiche</span>
+            </button>
             <button class="nav-btn nav-btn-activity" id="btn-open-achievements" title="Traguardi & Obiettivi">
                 <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></span> <span class="nav-btn-text">Traguardi</span> <span id="achievements-count-badge" class="badge-count">0/10</span>
             </button>
@@ -788,6 +791,76 @@
         </div>
     </main>
 
+    <!-- VISTA 6: STATISTICHE DI APPRENDIMENTO (P3.4) -->
+    <main id="view-stats" class="view-container hidden">
+        <div class="stats-view-inner">
+            <!-- Hero Card Statistiche -->
+            <div class="stats-hero-card">
+                <div class="stats-hero-badge">
+                    <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
+                    <span>STATISTICHE DI APPRENDIMENTO</span>
+                </div>
+                <h2>Cruscotto Didattico &amp; Consolidamento</h2>
+                <p class="stats-hero-subtitle">
+                    Dati reali basati sulle tue verifiche, sul tuo grado di autonomia, sui punti di attrito diagnostici e sulla pratica svolta.
+                </p>
+                <div class="stats-principles-pills">
+                    <span class="stats-pill-tag"><svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> Telemetria Locale &amp; Trasparente</span>
+                    <span class="stats-pill-tag"><svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Zero Percentuali Fittizie</span>
+                    <span class="stats-pill-tag"><svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Nessun Giudizio Punitivo</span>
+                </div>
+            </div>
+
+            <!-- DOMANDA 1: A che punto sono del mio percorso e con quanta autonomia? -->
+            <section class="stats-card-section" id="stats-section-autonomy">
+                <div class="stats-section-header">
+                    <div class="stats-section-title-group">
+                        <span class="stats-step-number">1</span>
+                        <div>
+                            <h3 class="stats-section-title">Avanzamento del Percorso &amp; Autonomia</h3>
+                            <p class="stats-section-desc">Valutazione delle lezioni completate nel corso e della capacità di risolvere problemi senza consultare suggerimenti.</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="stats-autonomy-content">
+                    <!-- Popolato dinamicamente -->
+                </div>
+            </section>
+
+            <!-- DOMANDA 2: Quali sono i miei veri punti di attrito e gli errori più frequenti? -->
+            <section class="stats-card-section" id="stats-section-friction">
+                <div class="stats-section-header">
+                    <div class="stats-section-title-group">
+                        <span class="stats-step-number">2</span>
+                        <div>
+                            <h3 class="stats-section-title">Diagnostica Punti di Attrito &amp; Tipologie di Errore</h3>
+                            <p class="stats-section-desc">Classificazione oggettiva degli errori riscontrati durante le verifiche e mappa di consolidamento dei 15 concetti didattici.</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="stats-friction-content">
+                    <!-- Popolato dinamicamente -->
+                </div>
+            </section>
+
+            <!-- DOMANDA 3: Come sta evolvendo il mio studio attraverso la pratica e il ripasso? -->
+            <section class="stats-card-section" id="stats-section-evolution">
+                <div class="stats-section-header">
+                    <div class="stats-section-title-group">
+                        <span class="stats-step-number">3</span>
+                        <div>
+                            <h3 class="stats-section-title">Pratica di Ripasso &amp; Andamento nel Tempo</h3>
+                            <p class="stats-section-desc">Evoluzione reale registrata attraverso le varianti di ripasso e la cronologia delle sessioni (nessun andamento simulato).</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="stats-evolution-content">
+                    <!-- Popolato dinamicamente -->
+                </div>
+            </section>
+        </div>
+    </main>
+
     <!-- MODAL ESPORTAZIONE PROGETTO GODOT 4 -->
     <div class="modal-overlay hidden" id="godot-export-modal">
         <div class="modal-card modal-medium">
@@ -861,6 +934,12 @@
                     <h3 class="profile-name-display" id="profile-name-display">Eroe Godot</h3>
                     <div class="profile-tag-badge" id="profile-tag-display">Sviluppatore GDScript</div>
                     <div class="profile-level-badge" id="profile-level-display">Livello 1 • Recluta Godot</div>
+
+                    <!-- Link Rapido Statistiche di Apprendimento P3.4 -->
+                    <button type="button" class="profile-stats-link-btn" id="btn-profile-to-stats" onclick="App.closeProfileModal(); App.showStatsView();">
+                        <span class="icon"><svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
+                        <span>Vedi Statistiche di Apprendimento</span>
+                    </button>
 
                     <!-- Mini statistiche carriera -->
                     <div class="profile-career-stats">
@@ -1786,6 +1865,10 @@
             <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></span>
             <span class="mob-nav-label">Ripasso</span>
         </button>
+        <button type="button" class="mob-nav-item" id="mob-nav-stats" title="Statistiche di Apprendimento">
+            <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
+            <span class="mob-nav-label">Stats</span>
+        </button>
         <button type="button" class="mob-nav-item" id="mob-nav-achievements" title="I Tuoi Traguardi">
             <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></span>
             <span class="mob-nav-label">Trofei</span>
@@ -1804,6 +1887,7 @@
     <script src="arena_project.js"></script>
     <script src="viewport2d.js"></script>
     <script src="auth.js"></script>
+    <script src="stats.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
