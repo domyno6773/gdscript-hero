@@ -1789,26 +1789,34 @@ const LESSONS_DATA = [
     });
 
     const cleanCode = stripCommentsAndStrings(result.code);
-    const usesIndex = /inventario\s*\[\s*0\s*\]/.test(cleanCode);
+    const usesIndex = /inventario\s*\[\s*0\s*\]/.test(cleanCode) || /\[\s*0\s*\]/.test(cleanCode);
     tests.push({ desc: "Accesso con indice inventario[0] utilizzato nel codice", passed: !!usesIndex, diff: usesIndex ? null : "Usa 'inventario[0]' per accedere al primo elemento." });
 
     const logs = result.logs || [];
     const printsFirst = logs.length > 0 && logs[0].trim() === "Spada";
     tests.push({ desc: "Primo elemento ('Spada') stampato come primo output di console", passed: printsFirst, diff: printsFirst ? null : `Output ricevuto: "${logs.join(' | ')}"` });
 
-    // Multi-scenario dinamico: se il primo elemento dell'array cambia, la stampa DEVE riflettere il nuovo valore
+    // Multi-scenario dinamico flessibile: supporta spazi, apici singoli/doppi e variabili ausiliarie
     if (runtime && typeof runtime.execute === 'function' && isExactArray) {
-        try {
-            const testCode = result.code.replace('["Spada"', '["Arco"').replace("['Spada'", "['Arco'");
-            const rTest = await runtime.execute(testCode);
-            const dynamicOk = (rTest.logs || []).length > 0 && rTest.logs[0].trim() === "Arco";
-            tests.push({
-                desc: "Stampa dinamica dipendente da inventario[0] (non valore hardcoded)",
-                passed: dynamicOk,
-                diff: dynamicOk ? null : `Modificando il primo elemento in 'Arco', la console ha stampato: "${(rTest.logs || []).join(' | ')}"`
-            });
-        } catch(e) {
-            tests.push({ desc: "Verifica dinamica indice", passed: false, diff: e.message });
+        let mutatedCode = null;
+        if (/(\[\s*)(["'])Spada\2/i.test(result.code)) {
+            mutatedCode = result.code.replace(/(\[\s*)(["'])Spada\2/i, '$1$2Arco$2');
+        } else if (/(["'])Spada\1/i.test(result.code)) {
+            mutatedCode = result.code.replace(/(["'])Spada\1/i, '$1Arco$1');
+        }
+
+        if (mutatedCode && mutatedCode !== result.code) {
+            try {
+                const rTest = await runtime.execute(mutatedCode);
+                const dynamicOk = (rTest.logs || []).length > 0 && rTest.logs[0].trim() === "Arco";
+                tests.push({
+                    desc: "Stampa dinamica dipendente da inventario[0] (non valore hardcoded)",
+                    passed: dynamicOk,
+                    diff: dynamicOk ? null : `Modificando il primo elemento in 'Arco', la console ha stampato: "${(rTest.logs || []).join(' | ')}"`
+                });
+            } catch(e) {
+                tests.push({ desc: "Verifica dinamica indice", passed: false, diff: e.message });
+            }
         }
     }
 
@@ -1842,11 +1850,11 @@ const LESSONS_DATA = [
             </ul>
         `,
         initialCode: `func _ready():
-    var colori = ["Rosso", "Verde", "Blu"]
-    # BUG DI INDICE: Gli array in GDScript partono da [0], non da [1]!
-    # Correggi gli indici sotto per stampare 'Verde' (2° elemento) e 'Blu' (3° elemento):
-    print(colori[0])
-    print(colori[1])
+    var oggetti = ["Spada", "Scudo", "Pozione"]
+    # BUG DI INDICE: Gli array in GDScript partono da [0]!
+    # Correggi gli indici sotto per stampare 'Scudo' (2° elemento) e 'Pozione' (3° elemento):
+    print(oggetti[0])
+    print(oggetti[1])
 `,
         hints: [
             {
@@ -1868,19 +1876,69 @@ const LESSONS_DATA = [
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var frutti = [\"Mela\", \"Banana\", \"Arancia\"]\n    print(frutti[1]) # Stampa 'Banana'\n    print(frutti[2]) # Stampa 'Arcia'\n```\nSe il codice di partenza conteneva un bug (es. indici errati), correggi i numeri tra parentesi quadre."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var frutti = [\"Mela\", \"Banana\", \"Arancia\"]\n    print(frutti[1]) # Stampa 'Banana'\n    print(frutti[2]) # Stampa 'Arancia'\n```\nSe il codice di partenza conteneva un bug (es. indici errati), correggi i numeri tra parentesi quadre."
             }
 ],
         solution: `func _ready():\n    var oggetti = ["Spada", "Scudo", "Pozione"]\n    print(oggetti[1])\n    print(oggetti[2])\n`,
-        validate: async (result) => {
+        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
+    const arr = result.scope && result.scope.oggetti;
+    
+    const isExactArray = Array.isArray(arr) && arr.length === 3 &&
+        arr[0] === "Spada" && arr[1] === "Scudo" && arr[2] === "Pozione";
+    tests.push({
+        desc: "Array 'oggetti' creato con ['Spada', 'Scudo', 'Pozione']",
+        passed: isExactArray,
+        diff: isExactArray ? null : `Ricevuto: ${JSON.stringify(arr)}`
+    });
+
     const cleanCode = stripCommentsAndStrings(result.code);
-    const usesIndices = /\[\s*1\s*\]/.test(cleanCode) && /\[\s*2\s*\]/.test(cleanCode);
-    tests.push({ desc: "Accesso tramite indici [1] e [2] utilizzato", passed: !!usesIndices, diff: usesIndices ? null : "Accedi agli elementi con oggetti[1] e oggetti[2]." });
-    const out = (result.logs || []).join('\n');
-    const ok = out.includes("Scudo") && out.includes("Pozione");
-    tests.push({ desc: "Scudo e Pozione stampati a console", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const usesIndices = (/oggetti\s*\[\s*1\s*\]/.test(cleanCode) || /\[\s*1\s*\]/.test(cleanCode)) &&
+                        (/oggetti\s*\[\s*2\s*\]/.test(cleanCode) || /\[\s*2\s*\]/.test(cleanCode));
+    tests.push({
+        desc: "Accesso tramite indici oggetti[1] e oggetti[2] utilizzato",
+        passed: !!usesIndices,
+        diff: usesIndices ? null : "Accedi agli elementi con oggetti[1] e oggetti[2]."
+    });
+
+    const logs = result.logs || [];
+    const idxScudo = logs.findIndex(l => /^Scudo$/i.test(l.trim()));
+    const idxPozione = logs.findIndex((l, i) => i > idxScudo && /^Pozione$/i.test(l.trim()));
+    const logsOk = idxScudo !== -1 && idxPozione !== -1;
+    tests.push({
+        desc: "Elementi 'Scudo' (2°) e 'Pozione' (3°) stampati a console su righe separate",
+        passed: logsOk,
+        diff: logsOk ? null : `Output ricevuto: "${logs.join(' | ')}"`
+    });
+
+    // Multi-scenario dinamico: se il secondo e terzo elemento cambiano, la stampa deve riflettere i nuovi valori
+    if (runtime && typeof runtime.execute === 'function' && isExactArray) {
+        let mutatedCode = null;
+        if (/(["'])Scudo\1/i.test(result.code) && /(["'])Pozione\1/i.test(result.code)) {
+            mutatedCode = result.code
+                .replace(/(["'])Scudo\1/i, '$1Elmo$1')
+                .replace(/(["'])Pozione\1/i, '$1Elisir$1');
+        }
+
+        if (mutatedCode && mutatedCode !== result.code) {
+            try {
+                const rTest = await runtime.execute(mutatedCode);
+                const tLogs = rTest.logs || [];
+                const tScudo = tLogs.findIndex(l => /^Elmo$/i.test(l.trim()));
+                const tPozione = tLogs.findIndex((l, i) => i > tScudo && /^Elisir$/i.test(l.trim()));
+                const dynamicOk = tScudo !== -1 && tPozione !== -1;
+                tests.push({
+                    desc: "Stampa dinamica dipendente da oggetti[1] e oggetti[2] (non valori hardcoded)",
+                    passed: dynamicOk,
+                    diff: dynamicOk ? null : `Con valori mutati ('Elmo', 'Elisir'), la console ha stampato: "${tLogs.join(' | ')}"`
+                });
+            } catch(e) {
+                tests.push({ desc: "Verifica dinamica indici", passed: false, diff: e.message });
+            }
+        }
+    }
+
     return tests;
 }
     },
