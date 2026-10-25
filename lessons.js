@@ -2243,7 +2243,7 @@ const LESSONS_DATA = [
         conceptId: "loops_iteration",
         conceptTags: ["while", "loops", "counters", "debugging"],
         isDebugging: true,
-        debugType: "Loop Infinito (Decremento mancante)",
+        debugType: "Loop Infinito (Incremento errato)",
         chapterId: 7,
         isMastery: false,
         title: "27. Ciclo while",
@@ -2268,34 +2268,35 @@ const LESSONS_DATA = [
             </ul>
         `,
         initialCode: `func _ready():
-    var tempo = 3
-    # BUG CRITICO: Senza decremento, la condizione 'tempo > 0' rimane per sempre vera!
-    # Aggiungi 'tempo -= 1' all'interno del ciclo per evitare il blocco:
-    while tempo > 0:
-        print(tempo)
+    var conto = 1
+    # BUG: il contatore diminuisce e il ciclo diventa infinito.
+    # Correggi l'aggiornamento per contare da 1 a 3.
+    while conto <= 3:
+        print("Conto: " + str(conto))
+        conto -= 1
 `,
         hints: [
-            {
-                        "level": 1,
-                        "type": "concept",
-                        "icon": "💭",
-                        "label": "Indizio Concettuale",
-                        "text": "Il ciclo 'while' continua a girare finché la condizione specificata rimane vera. È fondamentale che all'interno del ciclo qualcosa modifichi la variabile di controllo, altrimenti si crea un loop infinito che congela il gioco."
-            },
-            {
-                        "level": 2,
-                        "type": "structure",
-                        "icon": "🏗️",
-                        "label": "Guida alla Struttura",
-                        "text": "Scrivi `while tempo > 0:` e nel corpo indentato stampa il tempo, dopodiché decrementalo con `tempo -= 1`."
-            },
-            {
-                        "level": 3,
-                        "type": "example",
-                        "icon": "📝",
-                        "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var countdown = 5\n    while countdown > 0:\n        print(countdown)\n        countdown -= 1 # Cruciale: previene il blocco del programma!\n```\nSe stai correggendo un bug, assicurati che il decremento sia presente prima della fine del ciclo."
-            }
+        {
+                "level": 1,
+                "type": "concept",
+                "icon": "💭",
+                "label": "Indizio Concettuale",
+                "text": "Il while ripete un blocco finché la condizione rimane vera. Osserva come cambia la variabile conto: deve avvicinarsi al limite, non allontanarsi."
+        },
+        {
+                "level": 2,
+                "type": "structure",
+                "icon": "🏗️",
+                "label": "Guida alla Struttura",
+                "text": "La condizione while conto <= 3 è già corretta. Dopo aver stampato il valore, fai crescere conto di un'unità, invece di diminuirlo."
+        },
+        {
+                "level": 3,
+                "type": "example",
+                "icon": "📝",
+                "label": "Esempio Pratico",
+                "text": "Esempio analogo:\n```gdscript\nvar turno = 1\nwhile turno <= 4:\n    print(turno)\n    turno += 1\n```\nCon += 1 il contatore raggiunge il limite e il ciclo termina."
+        }
 ],
         solution: `func _ready():\n    var conto = 1\n    while conto <= 3:\n        print("Conto: " + str(conto))\n        conto += 1\n`,
         validate: async (result) => {
@@ -2426,27 +2427,27 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Inizializza il nodo e stampa il messaggio\n    pass\n`,
         hints: [
-            {
-                        "level": 1,
-                        "type": "concept",
-                        "icon": "💭",
-                        "label": "Indizio Concettuale",
-                        "text": "Le funzioni sono blocchi riutilizzabili di istruzioni con un nome. Invece di riscrivere lo stesso codice ovunque, scrivi la funzione una volta sola e la richiami quando serve."
-            },
-            {
-                        "level": 2,
-                        "type": "structure",
-                        "icon": "🏗️",
-                        "label": "Guida alla Struttura",
-                        "text": "In GDScript le funzioni si dichiarano con `func nome_funzione():`. Per richiamare la funzione all'interno di `_ready()`, digita il suo nome seguito dalle parentesi `nome_funzione()`."
-            },
-            {
-                        "level": 3,
-                        "type": "example",
-                        "icon": "📝",
-                        "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc avvia_motore():\n    print(\"Motore pronto\")\n\nfunc _ready():\n    avvia_motore()\n```\nDefinisci la tua funzione personalizzata all'esterno di `_ready()`, poi invocala dentro `_ready()`."
-            }
+        {
+                "level": 1,
+                "type": "concept",
+                "icon": "💭",
+                "label": "Indizio Concettuale",
+                "text": "Godot richiama automaticamente _ready() quando il nodo entra nella scena ed è pronto. Non serve invocare _ready() manualmente."
+        },
+        {
+                "level": 2,
+                "type": "structure",
+                "icon": "🏗️",
+                "label": "Guida alla Struttura",
+                "text": "Inserisci l'istruzione print() nel blocco indentato di func _ready():. La funzione esiste già nel codice iniziale."
+        },
+        {
+                "level": 3,
+                "type": "example",
+                "icon": "📝",
+                "label": "Esempio Pratico",
+                "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    print(\"Livello caricato\")\n```\nPer questo esercizio sostituisci il testo con il messaggio esatto richiesto dalla consegna."
+        }
 ],
         solution: `func _ready():\n    print("Nodo Inizializzato")\n`,
         validate: async (result) => {
@@ -2770,6 +2771,13 @@ const LESSONS_DATA = [
     tests.push({ desc: "Vector2(100, 200) creato nella variabile 'posizione'", passed: !!ok, diff: ok ? null : `Ricevuto: ${p}` });
     const printed = result.logs.some(l => l.includes("100") && l.includes("200"));
     tests.push({ desc: "Coordinate Vector2 stampate a console", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    // Se cambiamo la coordinata di partenza, un print(posizione) deve cambiare.
+    const modifiedCode = (result.code || '').replace(/(var\s+posizione\s*=\s*Vector2\s*\(\s*)100(?=\s*,)/, (_m, prefix) => prefix + '101');
+    const rerun = modifiedCode !== result.code ? await GDScriptRuntime.execute(modifiedCode, { lesson: LESSONS_DATA.find(l => l.id === 33) }) : null;
+    const expectedVector = (result.logs || []).some(v => String(v).trim() === 'Vector2(100, 200)');
+    const stillOriginal = rerun && (rerun.logs || []).some(v => String(v).trim() === 'Vector2(100, 200)');
+    const dynamicOutput = !!(rerun && rerun.success && expectedVector && !stillOriginal);
+    tests.push({ desc: "Il vettore stampato dipende dalla variabile posizione", passed: dynamicOutput, diff: dynamicOutput ? null : "Stampa posizione invece di una stringa con coordinate fisse." });
     return tests;
 }
     },
@@ -4659,6 +4667,12 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     const idxAfter = logs.findIndex((l, i) => i > idxBefore && /^Moneta eliminata con queue_free\s*:\s*true$/i.test(String(l).trim()));
     const logsOk = idxBefore !== -1 && idxAfter !== -1;
     tests.push({ desc: "Stato della moneta prima e dopo queue_free stampato a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
+    // Cambiare il nodo osservato deve modificare il log prima della rimozione.
+    const alteredSource = (result.code || '').replace(/has_node\s*\(\s*(["'])Moneta\1\s*\)/g, 'has_node("__AuditNodoAssente__")');
+    const replay = alteredSource !== result.code ? await GDScriptRuntime.execute(alteredSource, { lesson: LESSONS_DATA.find(l => l.id === 59) }) : null;
+    const stillTrue = replay && (replay.logs || []).some(v => /^Moneta presente prima\s*:\s*true$/i.test(String(v).trim()));
+    const isDynamic = !!(replay && replay.success && !stillTrue);
+    tests.push({ desc: "Stato della moneta letto dinamicamente con has_node()", passed: isDynamic, diff: isDynamic ? null : "Le stampe devono mostrare il risultato di has_node(), non valori fissi." });
     return tests;
 }
     },
