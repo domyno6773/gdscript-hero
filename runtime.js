@@ -36,7 +36,10 @@ class Vector2 {
     }
 
     toString() {
-        return `Vector2(${this.x}, ${this.y})`;
+        // Godot 4: print(Vector2(100, 200)) visualizza (100.0, 200.0).
+        // Mantieni i decimali significativi senza perdere lo .0 degli interi.
+        const format = v => Number.isInteger(v) ? v.toFixed(1) : String(v);
+        return `(${format(this.x)}, ${format(this.y)})`;
     }
 }
 
