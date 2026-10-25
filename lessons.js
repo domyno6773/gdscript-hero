@@ -89,7 +89,7 @@ const CHAPTERS_DATA = [
         id: 13,
         title: "Capitolo 13: L'Albero della Scena e i Nodi (Scene Tree)",
         badge: "CAPITOLO 13",
-        desc: "L'architettura fondamentale di Godot: cos'è un Nodo, SceneTree, istanziare nodi con add_child(), Label e l'operatore $.",
+        desc: "L'architettura fondamentale di Godot: cos'è un Nodo, la gerarchia della Scena, il nodo Label e l'accesso rapido con l'operatore $.",
         icon: "🌳"
     },
     {
@@ -2232,37 +2232,38 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         title: "49. Cos'è un Nodo e l'Albero di Godot",
         icon: "🌳",
         xp: 60,
-        expectedOutput: "Nodo aggiunto: Entita",
+        expectedOutput: "Nodo rilevato: Giocatore",
+        initialNodes: [
+            { type: "Node", name: "Giocatore" }
+        ],
         theory: `
-            <p>In Godot Engine tutto è un <strong>Nodo (Node)</strong>: il giocatore, un pulsante, la mappa o un effetto visivo sono tutti nodi organizzati a forma di albero chiamato <strong>SceneTree</strong>.</p>
-            <p>Per creare un nuovo nodo via codice usiamo <code>Node.new("Nome")</code> e per aggiungerlo alla scena usiamo <code>add_child(nodo)</code>:</p>
-            <pre class="code-block"><span class="k">var</span> mio_nodo = Node.<span class="nb">new</span>(<span class="s">"Entita"</span>)
-<span class="nb">add_child</span>(mio_nodo)
-<span class="nb">print</span>(<span class="s">"Nome nodo: "</span>, mio_nodo.name)</pre>
+            <p>In Godot Engine tutto è un <strong>Nodo (Node)</strong>: il personaggio, un'interfaccia, i nemici o un effetto visivo sono nodi organizzati a forma di albero gerarchico chiamato <strong>SceneTree</strong>.</p>
+            <p>I nodi vengono creati e posizionati visivamente nella Scena (puoi osservarli nel pannello <strong>Scena Godot</strong> in basso a destra). In GDScript, usiamo la scorciatoia nativa <strong><code>$NomeNodo</code></strong> per accedere direttamente a qualsiasi nodo figlio dell'albero:</p>
+            <pre class="code-block"><span class="c"># Accede al nodo figlio 'Giocatore' presente nella scena e ne legge il nome</span>
+<span class="nb">print</span>(<span class="s">"Nodo trovato: "</span>, $Giocatore.name)</pre>
         `,
         task: `
             <ul>
-                <li>Crea un nodo base con <code>var mio_nodo = Node.new("Entita")</code>.</li>
-                <li>Aggiungilo alla scena con <code>add_child(mio_nodo)</code>.</li>
-                <li>Stampa a console: <code>print("Nodo aggiunto: ", mio_nodo.name)</code>.</li>
+                <li>Nel pannello <strong>Scena Godot</strong> a destra puoi osservare il nodo <code>Giocatore</code> già presente nell'albero.</li>
+                <li>In <code>_ready()</code>, accedi al nodo con la sintassi nativa <code>$Giocatore</code>.</li>
+                <li>Stampa a console: <code>print("Nodo rilevato: ", $Giocatore.name)</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # Crea mio_nodo con Node.new("Entita"), aggiungilo con add_child e stampa\n    pass\n`,
+        initialCode: `func _ready():\n    # Accedi al nodo $Giocatore presente nella scena e stampa il suo nome\n    pass\n`,
         hints: [
-            'var mio_nodo = Node.new("Entita")',
-            'add_child(mio_nodo)',
-            'print("Nodo aggiunto: ", mio_nodo.name)'
+            '$Giocatore.name restituisce il nome del nodo ("Giocatore")',
+            'print("Nodo rilevato: ", $Giocatore.name)'
         ],
-        solution: `func _ready():\n    var mio_nodo = Node.new("Entita")\n    add_child(mio_nodo)\n    print("Nodo aggiunto: ", mio_nodo.name)\n`,
+        solution: `func _ready():\n    print("Nodo rilevato: ", $Giocatore.name)\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
             const sc = result.scene;
-            const nodeOk = sc && sc.has_node("Entita");
-            tests.push({ desc: "Nodo 'Entita' aggiunto correttamente alla scena con add_child()", passed: !!nodeOk, diff: nodeOk ? null : "Nodo Entita non presente nella scena" });
+            const nodeOk = sc && sc.has_node("Giocatore");
+            tests.push({ desc: "Nodo 'Giocatore' presente nell'albero della scena", passed: !!nodeOk, diff: nodeOk ? null : "Nodo Giocatore non presente nella scena" });
             const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Nodo aggiunto: Entita");
-            tests.push({ desc: "Console stampa 'Nodo aggiunto: Entita'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            const outOk = out.includes("Nodo rilevato: Giocatore");
+            tests.push({ desc: "Console stampa 'Nodo rilevato: Giocatore'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     },
@@ -2274,35 +2275,36 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         icon: "🏷️",
         xp: 60,
         expectedOutput: "Testo a schermo: Benvenuto in Godot 4!",
+        initialNodes: [
+            { type: "Label", name: "Titolo", text: "In attesa..." }
+        ],
         theory: `
             <p>Il nodo <strong>Label</strong> è il componente dedicato alla visualizzazione di testo nell'interfaccia 2D di Godot.</p>
-            <p>Possiede la proprietà <code>.text</code> che definisce la stringa visualizzata:</p>
-            <pre class="code-block"><span class="k">var</span> etichetta = Label.<span class="nb">new</span>(<span class="s">"Titolo"</span>)
-etichetta.text = <span class="s">"Benvenuto in Godot 4!"</span>
-<span class="nb">add_child</span>(etichetta)</pre>
+            <p>I nodi Label sono creati nell'albero della Scena e visualizzati a schermo. Da codice GDScript possiamo cambiarne dinamicamente il contenuto modificando la proprietà <strong><code>.text</code></strong>:</p>
+            <pre class="code-block"><span class="c"># Modifica il testo visualizzato dalla Label nella scena</span>
+$Titolo.text = <span class="s">"Benvenuto in Godot 4!"</span>
+<span class="nb">print</span>($Titolo.text)</pre>
         `,
         task: `
             <ul>
-                <li>Crea una label: <code>var etichetta = Label.new("Titolo")</code>.</li>
-                <li>Imposta il testo: <code>etichetta.text = "Benvenuto in Godot 4!"</code>.</li>
-                <li>Aggiungila alla scena con <code>add_child(etichetta)</code>.</li>
-                <li>Stampa a console: <code>print("Testo a schermo: ", etichetta.text)</code>.</li>
+                <li>Nella scena è già presente il nodo <code>$Titolo</code> (visibile anche nell'anteprima 2D).</li>
+                <li>Modifica il testo della label: <code>$Titolo.text = "Benvenuto in Godot 4!"</code>.</li>
+                <li>Stampa a console: <code>print("Testo a schermo: ", $Titolo.text)</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # Crea etichetta con Label.new("Titolo"), imposta .text, aggiungila e stampa\n    pass\n`,
+        initialCode: `func _ready():\n    # Modifica $Titolo.text e stampa a console\n    pass\n`,
         hints: [
-            'var etichetta = Label.new("Titolo")',
-            'etichetta.text = "Benvenuto in Godot 4!"',
-            'add_child(etichetta)\nprint("Testo a schermo: ", etichetta.text)'
+            '$Titolo.text = "Benvenuto in Godot 4!"',
+            'print("Testo a schermo: ", $Titolo.text)'
         ],
-        solution: `func _ready():\n    var etichetta = Label.new("Titolo")\n    etichetta.text = "Benvenuto in Godot 4!"\n    add_child(etichetta)\n    print("Testo a schermo: ", etichetta.text)\n`,
+        solution: `func _ready():\n    $Titolo.text = "Benvenuto in Godot 4!"\n    print("Testo a schermo: ", $Titolo.text)\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
             const sc = result.scene;
             const node = sc ? sc.get_node("Titolo") : null;
             const labelOk = node && node.text === "Benvenuto in Godot 4!";
-            tests.push({ desc: "Nodo Label 'Titolo' configurato con il testo corretto", passed: !!labelOk, diff: labelOk ? null : `Ricevuto: ${node ? node.text : 'Nodo non trovato'}` });
+            tests.push({ desc: "Nodo Label 'Titolo' configurato con il testo 'Benvenuto in Godot 4!'", passed: !!labelOk, diff: labelOk ? null : `Ricevuto: ${node ? node.text : 'Nodo non trovato'}` });
             const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
             const outOk = out.includes("Testo a schermo: Benvenuto in Godot 4!");
             tests.push({ desc: "Console stampa 'Testo a schermo: Benvenuto in Godot 4!'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
@@ -2364,37 +2366,37 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
         difficultyLabel: "Media",
         initialNodes: [
             { type: "Label", name: "TitoloDungeon", text: "In attesa..." },
-            { type: "Label", name: "LivelloLabel", text: "In attesa..." }
+            { type: "Label", name: "LivelloLabel", text: "In attesa..." },
+            { type: "Label", name: "MoneteLabel", text: "In attesa..." }
         ],
-        scenario: "Il custode delle rovine antiche deve allestire la schermata d'ingresso del dungeon configurando le etichette informative nella scena. Nella scena sono già presenti i nodi <code>$TitoloDungeon</code> e <code>$LivelloLabel</code>. Sotto il commento, accedi con l'operatore <code>$</code> e crea una terza etichetta:",
+        scenario: "Il custode delle rovine antiche deve allestire la schermata d'ingresso del dungeon configurando le tre etichette informative presenti nell'albero della scena: <code>$TitoloDungeon</code>, <code>$LivelloLabel</code> e <code>$MoneteLabel</code>. Sotto il commento, accedi con l'operatore <code>$</code> e configura i testi corretti:",
         requirements: [
             'Imposta <code>$TitoloDungeon.text = "Caverna dei Goblin"</code>',
             'Imposta <code>$LivelloLabel.text = "Livello: 1"</code>',
-            'Crea un terzo nodo Label: <code>var monete_lbl = Label.new("MoneteLabel")</code>',
-            'Imposta <code>monete_lbl.text = "Oro: 50"</code> e aggiungilo alla scena con <code>add_child(monete_lbl)</code>'
+            'Imposta <code>$MoneteLabel.text = "Oro: 50"</code>'
         ],
         notice: "Non modificare le righe print(). Il programma stampa:",
         expectedOutput: "Dungeon: Caverna dei Goblin\nDifficolta: Livello: 1\nBottino: Oro: 50",
-        initialCode: `extends Node\n\nfunc _ready():\n    # Configura $TitoloDungeon, $LivelloLabel e crea monete_lbl sotto\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
-        aiExplanation: `In Godot puoi accedere ai nodi già presenti nell'albero usando <code>$NomeNodo</code> per leggerne o modificarne le proprietà. Inoltre, puoi istanziare nuovi nodi via codice con <code>Label.new('Nome')</code> e innestarli nella gerarchia chiamando <code>add_child(nodo)</code>.`,
+        initialCode: `extends Node\n\nfunc _ready():\n    # Configura $TitoloDungeon, $LivelloLabel e $MoneteLabel sotto\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
+        aiExplanation: `In Godot accedere ai nodi della scena con <code>$NomeNodo</code> permette di leggere e modificare qualunque proprietà visiva (come <code>.text</code> nelle Label). Assemblando la struttura visivamente nella Scena e programmando la logica in GDScript si ottiene il flusso di sviluppo nativo e raccomandato del motore.`,
         hints: [
-            '$TitoloDungeon.text = "Caverna dei Goblin"\n$LivelloLabel.text = "Livello: 1"',
-            'var monete_lbl = Label.new("MoneteLabel")\nmonete_lbl.text = "Oro: 50"',
-            'add_child(monete_lbl)'
+            '$TitoloDungeon.text = "Caverna dei Goblin"',
+            '$LivelloLabel.text = "Livello: 1"',
+            '$MoneteLabel.text = "Oro: 50"'
         ],
-        solution: `extends Node\n\nfunc _ready():\n    $TitoloDungeon.text = "Caverna dei Goblin"\n    $LivelloLabel.text = "Livello: 1"\n    var monete_lbl = Label.new("MoneteLabel")\n    monete_lbl.text = "Oro: 50"\n    add_child(monete_lbl)\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
+        solution: `extends Node\n\nfunc _ready():\n    $TitoloDungeon.text = "Caverna dei Goblin"\n    $LivelloLabel.text = "Livello: 1"\n    $MoneteLabel.text = "Oro: 50"\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
         theory: `
             <div class="mastery-banner">
                 <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
                 <h3>La Targhetta del Dungeon</h3>
-                <p>Verifica l'accesso ai nodi della scena con l'operatore $ e la creazione di nuovi nodi Label con add_child().</p>
+                <p>Verifica l'accesso e la configurazione di molteplici nodi Label presenti nell'albero della scena tramite l'operatore nativo $.</p>
             </div>
         `,
         task: `
             <ul>
                 <li>Imposta <code>$TitoloDungeon.text = "Caverna dei Goblin"</code></li>
                 <li>Imposta <code>$LivelloLabel.text = "Livello: 1"</code></li>
-                <li>Crea <code>Label.new("MoneteLabel")</code>, imposta <code>"Oro: 50"</code> e usa <code>add_child()</code></li>
+                <li>Imposta <code>$MoneteLabel.text = "Oro: 50"</code></li>
             </ul>
         `,
         validate: async (result) => {
@@ -2404,8 +2406,8 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
             const tOk = sc && sc.get_node("TitoloDungeon") && sc.get_node("TitoloDungeon").text === "Caverna dei Goblin";
             const lOk = sc && sc.get_node("LivelloLabel") && sc.get_node("LivelloLabel").text === "Livello: 1";
             const mOk = sc && sc.get_node("MoneteLabel") && sc.get_node("MoneteLabel").text === "Oro: 50";
-            tests.push({ desc: "TitoloDungeon e LivelloLabel configurati correttamente", passed: !!(tOk && lOk), diff: (tOk && lOk) ? null : "Proprietà delle Label esistenti non corrette" });
-            tests.push({ desc: "MoneteLabel istanziata e aggiunta alla scena con Oro: 50", passed: !!mOk, diff: mOk ? null : "MoneteLabel non trovata o testo errato" });
+            tests.push({ desc: "TitoloDungeon e LivelloLabel configurati correttamente", passed: !!(tOk && lOk), diff: (tOk && lOk) ? null : "Proprietà delle Label non corrette" });
+            tests.push({ desc: "MoneteLabel configurata con 'Oro: 50'", passed: !!mOk, diff: mOk ? null : "MoneteLabel non trovata o testo errato" });
             const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
             const outOk = out.includes("Dungeon: Caverna dei Goblin") && out.includes("Difficolta: Livello: 1") && out.includes("Bottino: Oro: 50");
             tests.push({ desc: "Report del dungeon stampato correttamente a console", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
@@ -2423,39 +2425,40 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
         title: "53. Il primo Pulsante: Il nodo Button",
         icon: "🔘",
         xp: 60,
-        expectedOutput: "Pulsante creato: Sferra Attacco",
+        expectedOutput: "Pulsante configurato: Sferra Attacco",
+        initialNodes: [
+            { type: "Button", name: "AttaccaBtn", text: "In attesa..." }
+        ],
         theory: `
-            <p>Il nodo <strong>Button</strong> crea un controllo interattivo che l'utente può cliccare a schermo nella Viewport.</p>
-            <p>Possiede la proprietà <code>.text</code> per l'etichetta visualizzata e <code>.disabled</code> per disattivarlo:</p>
-            <pre class="code-block"><span class="k">var</span> btn = Button.<span class="nb">new</span>(<span class="s">"AttaccaBtn"</span>)
-btn.text = <span class="s">"Sferra Attacco"</span>
-<span class="nb">add_child</span>(btn)</pre>
+            <p>Il nodo <strong>Button</strong> crea un controllo interattivo nell'interfaccia 2D che l'utente può cliccare a schermo nella Viewport.</p>
+            <p>I nodi Button vengono creati nell'albero della Scena e mostrati a schermo. In GDScript possiamo configurarne le proprietà accedendovi con la sintassi nativa <strong><code>$</code></strong>, ad esempio modificando il testo mostrato sul pulsante tramite <strong><code>.text</code></strong>:</p>
+            <pre class="code-block"><span class="c"># Modifica la scritta visualizzata sul pulsante</span>
+$AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
+<span class="nb">print</span>($AttaccaBtn.text)</pre>
         `,
         task: `
             <ul>
-                <li>Crea un pulsante con <code>var btn = Button.new("AttaccaBtn")</code>.</li>
-                <li>Imposta il testo: <code>btn.text = "Sferra Attacco"</code>.</li>
-                <li>Aggiungilo alla scena con <code>add_child(btn)</code>.</li>
-                <li>Stampa a console: <code>print("Pulsante creato: ", btn.text)</code>.</li>
+                <li>Nella scena è già presente il nodo <code>$AttaccaBtn</code> (visibile anche nell'anteprima Viewport 2D in basso a destra).</li>
+                <li>Modifica la proprietà <code>text</code> del pulsante: <code>$AttaccaBtn.text = "Sferra Attacco"</code>.</li>
+                <li>Stampa a console il testo aggiornato: <code>print("Pulsante configurato: ", $AttaccaBtn.text)</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # Crea btn con Button.new("AttaccaBtn"), imposta .text, aggiungilo e stampa\n    pass\n`,
+        initialCode: `func _ready():\n    # Modifica il testo di $AttaccaBtn e stampa a console\n    pass\n`,
         hints: [
-            'var btn = Button.new("AttaccaBtn")',
-            'btn.text = "Sferra Attacco"',
-            'add_child(btn)\nprint("Pulsante creato: ", btn.text)'
+            '$AttaccaBtn.text = "Sferra Attacco"',
+            'print("Pulsante configurato: ", $AttaccaBtn.text)'
         ],
-        solution: `func _ready():\n    var btn = Button.new("AttaccaBtn")\n    btn.text = "Sferra Attacco"\n    add_child(btn)\n    print("Pulsante creato: ", btn.text)\n`,
+        solution: `func _ready():\n    $AttaccaBtn.text = "Sferra Attacco"\n    print("Pulsante configurato: ", $AttaccaBtn.text)\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
             const sc = result.scene;
             const btn = sc ? sc.get_node("AttaccaBtn") : null;
             const btnOk = btn && btn.type === "Button" && btn.text === "Sferra Attacco";
-            tests.push({ desc: "Nodo Button 'AttaccaBtn' creato e aggiunto con testo 'Sferra Attacco'", passed: !!btnOk, diff: btnOk ? null : `Ricevuto: ${btn ? btn.text : 'Nodo non trovato'}` });
+            tests.push({ desc: "Nodo Button 'AttaccaBtn' configurato con testo 'Sferra Attacco'", passed: !!btnOk, diff: btnOk ? null : `Ricevuto: ${btn ? btn.text : 'Nodo non trovato'}` });
             const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Pulsante creato: Sferra Attacco");
-            tests.push({ desc: "Console stampa 'Pulsante creato: Sferra Attacco'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            const outOk = out.includes("Pulsante configurato: Sferra Attacco");
+            tests.push({ desc: "Console stampa 'Pulsante configurato: Sferra Attacco'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     },
@@ -2639,33 +2642,35 @@ btn.text = <span class="s">"Sferra Attacco"</span>
         icon: "⏱️",
         xp: 60,
         expectedOutput: "Timer avviato per: 2.5s\nTempo scaduto!",
+        initialNodes: [
+            { type: "Timer", name: "Cooldown", wait_time: 1.0, one_shot: false }
+        ],
         theory: `
             <p>Il nodo <strong>Timer</strong> permette di creare conti alla rovescia o azioni periodiche (es. ricarica abilità, spawn di nemici ogni tot secondi).</p>
-            <p>Le sue proprietà e metodi principali sono:</p>
+            <p>Il nodo Timer è già presente nell'albero della Scena. In GDScript possiamo configurarne le proprietà e i metodi tramite <code>$Cooldown</code>:</p>
             <ul>
-                <li><code>wait_time = 2.5</code> (durata in secondi)</li>
-                <li><code>one_shot = true</code> (se fermarsi dopo un solo scatto)</li>
-                <li><code>timeout.connect(funzione)</code> (il segnale emesso allo scadere del tempo)</li>
-                <li><code>start()</code> (avvia il conteggio)</li>
+                <li><code>$Cooldown.wait_time = 2.5</code> (durata del conteggio in secondi)</li>
+                <li><code>$Cooldown.one_shot = true</code> (se fermarsi dopo un solo scatto)</li>
+                <li><code>$Cooldown.timeout.connect(funzione)</code> (il segnale emesso allo scadere del tempo)</li>
+                <li><code>$Cooldown.start()</code> (avvia il conteggio)</li>
             </ul>
         `,
         task: `
             <ul>
-                <li>Crea un timer: <code>var t = Timer.new("Cooldown")</code>.</li>
-                <li>Imposta <code>t.wait_time = 2.5</code> e <code>t.one_shot = true</code>.</li>
-                <li>Aggiungilo alla scena con <code>add_child(t)</code>.</li>
-                <li>Connetti <code>t.timeout.connect(quando_scaduto)</code> e avvialo con <code>t.start()</code>.</li>
-                <li>Stampa: <code>print("Timer avviato per: ", t.wait_time, "s")</code>.</li>
+                <li>Nella scena è già presente il nodo <code>$Cooldown</code> (Timer).</li>
+                <li>Imposta <code>$Cooldown.wait_time = 2.5</code> e <code>$Cooldown.one_shot = true</code>.</li>
+                <li>Connetti il segnale <code>$Cooldown.timeout.connect(quando_scaduto)</code> e avvia il timer con <code>$Cooldown.start()</code>.</li>
+                <li>Stampa: <code>print("Timer avviato per: ", $Cooldown.wait_time, "s")</code>.</li>
                 <li>Definisci <code>func quando_scaduto():</code> che stampa <code>print("Tempo scaduto!")</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # Crea timer t, imposta wait_time, one_shot, connetti timeout, avvia e stampa\n    pass\n\nfunc quando_scaduto():\n    pass\n`,
+        initialCode: `func _ready():\n    # Configura $Cooldown (wait_time, one_shot), connetti timeout, avvia e stampa\n    pass\n\nfunc quando_scaduto():\n    pass\n`,
         hints: [
-            'var t = Timer.new("Cooldown")\nt.wait_time = 2.5\nt.one_shot = true',
-            'add_child(t)\nt.timeout.connect(quando_scaduto)\nt.start()',
-            'print("Timer avviato per: ", t.wait_time, "s")'
+            '$Cooldown.wait_time = 2.5\n$Cooldown.one_shot = true',
+            '$Cooldown.timeout.connect(quando_scaduto)\n$Cooldown.start()',
+            'print("Timer avviato per: ", $Cooldown.wait_time, "s")'
         ],
-        solution: `func _ready():\n    var t = Timer.new("Cooldown")\n    t.wait_time = 2.5\n    t.one_shot = true\n    add_child(t)\n    t.timeout.connect(quando_scaduto)\n    t.start()\n    print("Timer avviato per: ", t.wait_time, "s")\n\nfunc quando_scaduto():\n    print("Tempo scaduto!")\n`,
+        solution: `func _ready():\n    $Cooldown.wait_time = 2.5\n    $Cooldown.one_shot = true\n    $Cooldown.timeout.connect(quando_scaduto)\n    $Cooldown.start()\n    print("Timer avviato per: ", $Cooldown.wait_time, "s")\n\nfunc quando_scaduto():\n    print("Tempo scaduto!")\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
@@ -2689,31 +2694,32 @@ btn.text = <span class="s">"Sferra Attacco"</span>
         title: "58. Grafica e Forme: Il nodo ColorRect",
         icon: "🟩",
         xp: 60,
-        expectedOutput: "Barra salute creata con colore: #22c55e",
+        expectedOutput: "Barra salute aggiornata con colore: #22c55e",
+        initialNodes: [
+            { type: "ColorRect", name: "BarraVita", color: "#64748b", size: { x: 50, y: 20 } }
+        ],
         theory: `
             <p>Il nodo <strong>ColorRect</strong> disegna un rettangolo colorato a tinta unita nello spazio 2D, ideale per barre della salute, riquadri HUD o sfondi di gioco.</p>
-            <p>Possiede la proprietà <code>.color</code> (stringa esadecimale o codice colore) e <code>.size</code> (Vector2):</p>
-            <pre class="code-block"><span class="k">var</span> barra = ColorRect.<span class="nb">new</span>(<span class="s">"BarraVita"</span>)
-barra.color = <span class="s">"#22c55e"</span>
-barra.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
-<span class="nb">add_child</span>(barra)</pre>
+            <p>I nodi ColorRect vengono posizionati visivamente nella Scena (puoi osservarli nella Viewport 2D a destra). In GDScript possiamo modificarne l'aspetto accedendovi con la sintassi <code>$BarraVita</code>:</p>
+            <pre class="code-block"><span class="c"># Aggiorna il colore e la dimensione del rettangolo</span>
+$BarraVita.color = <span class="s">"#22c55e"</span>
+$BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)</pre>
         `,
         task: `
             <ul>
-                <li>Crea un ColorRect: <code>var barra = ColorRect.new("BarraVita")</code>.</li>
-                <li>Imposta il colore verde: <code>barra.color = "#22c55e"</code>.</li>
-                <li>Imposta le dimensioni: <code>barra.size = Vector2(200, 20)</code>.</li>
-                <li>Aggiungilo alla scena con <code>add_child(barra)</code>.</li>
-                <li>Stampa: <code>print("Barra salute creata con colore: ", barra.color)</code>.</li>
+                <li>Nella scena è già presente il nodo <code>$BarraVita</code> (ColorRect visibile nella Viewport 2D).</li>
+                <li>Imposta il colore verde: <code>$BarraVita.color = "#22c55e"</code>.</li>
+                <li>Imposta le dimensioni a 200x20: <code>$BarraVita.size = Vector2(200, 20)</code>.</li>
+                <li>Stampa a console: <code>print("Barra salute aggiornata con colore: ", $BarraVita.color)</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # Crea ColorRect BarraVita, imposta color, size, aggiungi e stampa\n    pass\n`,
+        initialCode: `func _ready():\n    # Modifica $BarraVita (color e size) e stampa a console\n    pass\n`,
         hints: [
-            'var barra = ColorRect.new("BarraVita")',
-            'barra.color = "#22c55e"\nbarra.size = Vector2(200, 20)',
-            'add_child(barra)\nprint("Barra salute creata con colore: ", barra.color)'
+            '$BarraVita.color = "#22c55e"',
+            '$BarraVita.size = Vector2(200, 20)',
+            'print("Barra salute aggiornata con colore: ", $BarraVita.color)'
         ],
-        solution: `func _ready():\n    var barra = ColorRect.new("BarraVita")\n    barra.color = "#22c55e"\n    barra.size = Vector2(200, 20)\n    add_child(barra)\n    print("Barra salute creata con colore: ", barra.color)\n`,
+        solution: `func _ready():\n    $BarraVita.color = "#22c55e"\n    $BarraVita.size = Vector2(200, 20)\n    print("Barra salute aggiornata con colore: ", $BarraVita.color)\n`,
         validate: async (result) => {
             const tests = [];
             tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
@@ -2722,8 +2728,8 @@ barra.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
             const bOk = b && b.type === "ColorRect" && b.color === "#22c55e" && b.size.x === 200 && b.size.y === 20;
             tests.push({ desc: "ColorRect 'BarraVita' configurato con colore verde e size 200x20", passed: !!bOk, diff: bOk ? null : "Proprietà ColorRect non corrette" });
             const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Barra salute creata con colore: #22c55e");
-            tests.push({ desc: "Console stampa conferma del colore creato", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
+            const outOk = out.includes("Barra salute aggiornata con colore: #22c55e");
+            tests.push({ desc: "Console stampa conferma del colore aggiornato", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
             return tests;
         }
     },
