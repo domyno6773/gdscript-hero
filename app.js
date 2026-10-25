@@ -666,6 +666,12 @@ const App = {
             }, 800);
         });
 
+        // Scroll sync per numeri di riga
+        editor.addEventListener('scroll', () => {
+            const linesEl = document.getElementById('sandbox-line-numbers') || document.getElementById('practice-line-numbers');
+            if (linesEl) linesEl.scrollTop = editor.scrollTop;
+        });
+
         // Tab e Scorciatoie da tastiera (Ctrl+Enter per eseguire scena)
         editor.addEventListener('keydown', (e) => {
             if (e.key === 'Tab') {

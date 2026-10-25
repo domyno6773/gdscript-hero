@@ -1222,7 +1222,9 @@ body {
     white-space: pre-line;
 }
 
-#code-editor {
+#code-editor,
+#sandbox-code-editor,
+#practice-code-editor {
     flex: 1;
     background: transparent;
     border: none;
@@ -5260,7 +5262,9 @@ kbd {
     color: #94a3b8;
 }
 
-[data-theme="light"] #code-editor {
+[data-theme="light"] #code-editor,
+[data-theme="light"] #sandbox-code-editor,
+[data-theme="light"] #practice-code-editor {
     color: #0f172a;
     background: #ffffff;
 }
@@ -5625,6 +5629,7 @@ kbd {
     border-bottom-color: #e2e8f0;
 }
 
+[data-theme="light"] #sandbox-code-editor,
 [data-theme="light"] #practice-code-editor {
     background: #ffffff;
     color: #0f172a;
