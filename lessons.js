@@ -2529,6 +2529,18 @@ const LESSONS_DATA = [
     tests.push({ desc: "Funzione accetta parametri dinamici (es. saluta('Campione'))", passed: paramTestOk, diff: paramTestOk ? null : "La funzione deve stampare 'Ciao ' concatenato al parametro passato." });
     const defaultOk = result.logs.some(l => l.includes("Ciao Eroe"));
     tests.push({ desc: "Chiamata iniziale saluta('Eroe') eseguita", passed: defaultOk, diff: defaultOk ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    // Cambiare il risultato prodotto dalla funzione deve cambiare l'output iniziale.
+    const originalSource = String(result.code || '');
+    const replacementRe = /(^[ \t]*func[ \t]+saluta[ \t]*\([^\n)]*\)[ \t]*(?:->[ \t]*\w+[ \t]*)?:[ \t]*(?:#[^\n]*)?\n)(?:[ \t]+[^\n]*(?:\n|$))+/m;
+    const alteredSource = originalSource.replace(replacementRe, '$1    print("AUDIT_MUTANT_SALUTO")\n');
+    const alteredRun = alteredSource !== originalSource
+        ? await GDScriptRuntime.execute(alteredSource, { lesson: LESSONS_DATA.find(l => l.id === 30) })
+        : null;
+    const originalHasResult = (result.logs || []).some(line => String(line).trim() === "Ciao Eroe");
+    const alteredKeepsResult = alteredRun && (alteredRun.logs || []).some(line => String(line).trim() === "Ciao Eroe");
+    const functionCausesOutput = !!(alteredRun && alteredRun.success && originalHasResult && !alteredKeepsResult);
+    tests.push({ desc: "La stampa iniziale dipende dalla funzione richiesta", passed: functionCausesOutput,
+        diff: functionCausesOutput ? null : "Chiama la funzione da _ready e stampa il risultato calcolato, non una costante." });
     return tests;
 }
     },
@@ -2600,6 +2612,18 @@ const LESSONS_DATA = [
     tests.push({ desc: "Valori di ritorno calcolati correttamente su input multipli", passed: testsPass, diff: testsPass ? null : "La funzione deve restituire 'attacco - difesa'." });
     const printed = result.logs.some(l => l.trim() === "25");
     tests.push({ desc: "Risultato '25' stampato in _ready()", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    // Cambiare il risultato prodotto dalla funzione deve cambiare l'output iniziale.
+    const originalSource = String(result.code || '');
+    const replacementRe = /(^[ \t]*func[ \t]+calcola_danno[ \t]*\([^\n)]*\)[ \t]*(?:->[ \t]*\w+[ \t]*)?:[ \t]*(?:#[^\n]*)?\n)(?:[ \t]+[^\n]*(?:\n|$))+/m;
+    const alteredSource = originalSource.replace(replacementRe, '$1    return 9999\n');
+    const alteredRun = alteredSource !== originalSource
+        ? await GDScriptRuntime.execute(alteredSource, { lesson: LESSONS_DATA.find(l => l.id === 31) })
+        : null;
+    const originalHasResult = (result.logs || []).some(line => String(line).trim() === "25");
+    const alteredKeepsResult = alteredRun && (alteredRun.logs || []).some(line => String(line).trim() === "25");
+    const functionCausesOutput = !!(alteredRun && alteredRun.success && originalHasResult && !alteredKeepsResult);
+    tests.push({ desc: "La stampa iniziale dipende dalla funzione richiesta", passed: functionCausesOutput,
+        diff: functionCausesOutput ? null : "Chiama la funzione da _ready e stampa il risultato calcolato, non una costante." });
     return tests;
 }
     },
