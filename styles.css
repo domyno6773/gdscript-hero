@@ -1,3 +1,36 @@
+
+/* UI SVG Icon System */
+.ui-icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    vertical-align: -3px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+    transition: stroke 0.15s ease, fill 0.15s ease;
+}
+
+.ui-icon-sm {
+    width: 14px;
+    height: 14px;
+    vertical-align: -2px;
+}
+
+.ui-icon-lg {
+    width: 22px;
+    height: 22px;
+    vertical-align: -4px;
+}
+
+.ui-icon-fill {
+    fill: currentColor;
+    stroke: none;
+}
+
 /* GDScript Hero - Design Dark & Gamification */
 :root {
     /* Concept 1: Indie Game Academy Surface Hierarchy */
@@ -211,7 +244,7 @@ body {
 
 .logo-text .accent {
     color: var(--neon-cyan);
-    text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    
 }
 
 .nav-btn {
@@ -588,7 +621,7 @@ body {
 
 .daily-quests-sidebar-card:hover {
     border-color: var(--neon-cyan);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 229, 255, 0.15);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55); border-color: var(--neon-cyan);
 }
 
 .sidebar-card-header {
@@ -623,7 +656,7 @@ body {
 
 .sidebar-card-icon {
     font-size: 1.6rem;
-    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));
+    /* filter pruned */
 }
 
 .sidebar-card-title {
@@ -946,7 +979,7 @@ body {
     stroke: var(--neon-cyan);
     stroke-width: 4px;
     stroke-dasharray: 8 8;
-    filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.6));
+    /* filter pruned */
 }
 
 /* 3. Verde menta solido quando il percorso è COMPLETATO */
@@ -954,7 +987,7 @@ body {
     stroke: var(--neon-mint);
     stroke-width: 4px;
     stroke-dasharray: none;
-    filter: drop-shadow(0 0 8px rgba(0, 240, 170, 0.6));
+    /* filter pruned */
 }
 
 .nodes-list {
@@ -976,8 +1009,31 @@ body {
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.node-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    transform: translateX(var(--node-offset, 0px));
+    transition: filter 0.2s ease;
+}
+
 .node-item:hover {
-    transform: scale(1.12) !important;
+    /* Mantiene il nodo assolutamente fermo nella posizione x/y */
+    z-index: 10;
+}
+
+.node-item .hex-svg {
+    transform-origin: 42px 42px;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), filter 0.2s ease;
+    will-change: transform;
+}
+
+
+
+.node-item:active .hex-svg {
+    transform: scale(0.98);
 }
 
 .node-pedestal {
@@ -3083,9 +3139,7 @@ kbd {
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.node-item:hover .hex-svg {
-    transform: scale(1.1);
-}
+
 
 .node-item:active .hex-svg {
     transform: translateY(4px);
@@ -9416,4 +9470,409 @@ kbd {
         width: 100%;
         text-align: center;
     }
+}
+
+.node-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    transform: translateX(var(--node-offset, 0px));
+    transition: filter 0.2s ease;
+}
+
+.node-item:hover {
+    /* Mantiene il nodo assolutamente fermo nella posizione x/y */
+    z-index: 10;
+}
+
+.node-item .hex-svg {
+    transform-origin: 42px 42px;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), filter 0.2s ease;
+    will-change: transform;
+}
+
+.node-item:hover .hex-svg {
+    /* Solo lieve scale e contrasto senza spostamento */
+    transform: scale(1.05);
+    filter: brightness(1.15);
+}
+
+.node-item:active .hex-svg {
+    transform: scale(0.98);
+}
+
+/* ========================================================================== */
+/* COMPREHENSIVE REFINED LIGHT THEME SYSTEM (High Contrast & Crisp Surfaces)  */
+/* ========================================================================== */
+[data-theme="light"] {
+    --bg-void: #F8FAFC;
+    --bg-base: #FFFFFF;
+    --bg-surface: #FFFFFF;
+    --bg-elevated: #F1F5F9;
+    --bg-card: #FFFFFF;
+    --bg-editor: #F8FAFC;
+    --bg-surface-translucent: rgba(255, 255, 255, 0.95);
+
+    --border-dim: #E2E8F0;
+    --border-bright: #CBD5E1;
+    --border-cyan: #0284C7;
+    --border-amber: #D97706;
+    --border-subtle: #E2E8F0;
+    --border-strong: #94A3B8;
+
+    --neon-cyan: #0284C7;
+    --neon-mint: #059669;
+    --neon-amber: #D97706;
+    --neon-ruby: #DC2626;
+
+    --accent-primary: #0284C7;
+    --accent-primary-hover: #0369A1;
+    --accent-primary-bg: rgba(2, 132, 199, 0.08);
+
+    --accent-reward: #D97706;
+    --accent-reward-hover: #B45309;
+    --accent-reward-bg: rgba(217, 119, 6, 0.08);
+
+    --accent-success: #059669;
+    --accent-success-hover: #047857;
+    --accent-success-bg: rgba(5, 150, 105, 0.08);
+
+    --accent-danger: #DC2626;
+    --accent-danger-hover: #B91C1C;
+    --accent-danger-bg: rgba(220, 38, 38, 0.08);
+
+    --text-title: #0F172A;
+    --text-main: #0F172A;
+    --text-body: #334155;
+    --text-muted: #64748B;
+    --text-dim: #94A3B8;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.1);
+    --shadow-cyan: 0 0 14px rgba(2, 132, 199, 0.25);
+    --shadow-mint: 0 0 14px rgba(5, 150, 105, 0.25);
+}
+
+[data-theme="light"] body {
+    background-color: var(--bg-void) !important;
+    background-image:
+        linear-gradient(rgba(203, 213, 225, 0.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(203, 213, 225, 0.35) 1px, transparent 1px) !important;
+    background-size: 32px 32px !important;
+    color: var(--text-body) !important;
+}
+
+/* Light Theme Navbar */
+[data-theme="light"] .navbar {
+    background: #FFFFFF !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .logo-text {
+    color: #0F172A !important;
+}
+
+[data-theme="light"] .logo-tag {
+    background: #E0F2FE !important;
+    border-color: #BAE6FD !important;
+    color: #0284C7 !important;
+}
+
+[data-theme="light"] .nav-link-btn {
+    color: #475569 !important;
+}
+
+[data-theme="light"] .nav-link-btn:hover,
+[data-theme="light"] .nav-link-btn.active {
+    color: #0284C7 !important;
+    background: #F0F9FF !important;
+    border-color: #BAE6FD !important;
+}
+
+[data-theme="light"] .stat-pill {
+    background: #F8FAFC !important;
+    border: 1px solid #E2E8F0 !important;
+    color: #0F172A !important;
+}
+
+[data-theme="light"] .stat-label {
+    color: #64748B !important;
+}
+
+/* Hero Section in Light Theme */
+[data-theme="light"] .chapter-card {
+    background: #FFFFFF !important;
+    border: 2px solid #CBD5E1 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .chapter-card::before,
+[data-theme="light"] .chapter-card::after {
+    border-color: #0284C7 !important;
+}
+
+[data-theme="light"] .chapter-badge {
+    background: #ECFDF5 !important;
+    border-color: #A7F3D0 !important;
+    color: #059669 !important;
+}
+
+[data-theme="light"] .chapter-card h1 {
+    color: #0F172A !important;
+}
+
+[data-theme="light"] .chapter-card .subtitle {
+    color: #334155 !important;
+}
+
+[data-theme="light"] .overall-progress-bar {
+    background: #E2E8F0 !important;
+    border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] .progress-fill {
+    background: #0284C7 !important;
+    box-shadow: none !important;
+}
+
+[data-theme="light"] .progress-stats {
+    color: #64748B !important;
+}
+
+[data-theme="light"] .progress-stats span:first-child {
+    color: #059669 !important;
+}
+
+[data-theme="light"] .btn-hero-continue {
+    background: #0284C7 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3) !important;
+}
+
+[data-theme="light"] .btn-hero-continue:hover {
+    background: #0369A1 !important;
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4) !important;
+}
+
+/* Missioni Giornaliere in Light Theme */
+[data-theme="light"] .daily-quests-sidebar-card {
+    background: #FFFFFF !important;
+    border: 2px solid #CBD5E1 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .daily-quests-sidebar-card:hover {
+    border-color: #0284C7 !important;
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.12) !important;
+}
+
+[data-theme="light"] .sidebar-card-header {
+    border-bottom: 1px solid #E2E8F0 !important;
+}
+
+[data-theme="light"] .sidebar-card-title {
+    color: #0F172A !important;
+}
+
+[data-theme="light"] .sidebar-card-subtitle {
+    color: #64748B !important;
+}
+
+[data-theme="light"] .sidebar-card-badge {
+    background: #F0F9FF !important;
+    border: 1px solid #BAE6FD !important;
+    color: #0284C7 !important;
+}
+
+[data-theme="light"] .quest-item {
+    background: #F8FAFC !important;
+    border: 1px solid #E2E8F0 !important;
+}
+
+[data-theme="light"] .quest-item:hover {
+    background: #F1F5F9 !important;
+    border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] .quest-icon {
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    color: #0284C7 !important;
+}
+
+[data-theme="light"] .quest-title {
+    color: #0F172A !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="light"] .quest-desc {
+    color: #334155 !important;
+}
+
+[data-theme="light"] .quest-progress-track {
+    background: #E2E8F0 !important;
+}
+
+[data-theme="light"] .quest-progress-fill {
+    background: #0284C7 !important;
+}
+
+[data-theme="light"] .quest-progress-text {
+    color: #64748B !important;
+}
+
+[data-theme="light"] .quest-xp-badge {
+    background: #FEF3C7 !important;
+    border: 1px solid #FDE68A !important;
+    color: #B45309 !important;
+}
+
+/* Light Theme Hexagon Nodes */
+[data-theme="light"] .node-item.locked .hex-svg path:first-child {
+    fill: #CBD5E1 !important;
+}
+[data-theme="light"] .node-item.locked .hex-svg path:nth-child(2) {
+    fill: #F1F5F9 !important;
+    stroke: #94A3B8 !important;
+    stroke-width: 2 !important;
+}
+[data-theme="light"] .node-item.locked .hex-svg path:nth-child(3),
+[data-theme="light"] .node-item.locked .hex-svg polygon {
+    stroke: #64748B !important;
+    fill: #64748B !important;
+}
+
+[data-theme="light"] .node-item.unlocked .hex-svg path:first-child {
+    fill: #94A3B8 !important;
+}
+[data-theme="light"] .node-item.unlocked .hex-svg path:nth-child(2) {
+    fill: #FFFFFF !important;
+    stroke: #0284C7 !important;
+    stroke-width: 2.5 !important;
+}
+[data-theme="light"] .node-item.unlocked .hex-svg polygon {
+    fill: #0284C7 !important;
+}
+
+[data-theme="light"] .node-item.completed .hex-svg path:first-child {
+    fill: #047857 !important;
+}
+[data-theme="light"] .node-item.completed .hex-svg path:nth-child(2) {
+    fill: #F0FDF4 !important;
+    stroke: #059669 !important;
+    stroke-width: 2.5 !important;
+}
+[data-theme="light"] .node-item.completed .hex-svg path:nth-child(3) {
+    stroke: #059669 !important;
+}
+
+[data-theme="light"] .node-item.current .hex-svg path:first-child {
+    fill: #0369A1 !important;
+}
+[data-theme="light"] .node-item.current .hex-svg path:nth-child(2) {
+    fill: #F0F9FF !important;
+    stroke: #0284C7 !important;
+    stroke-width: 3 !important;
+}
+[data-theme="light"] .node-item.current .hex-svg polygon {
+    fill: #0284C7 !important;
+}
+
+/* Mastery Hexagon Nodes in Light Theme */
+[data-theme="light"] .node-item.mastery.completed .hex-svg path:first-child {
+    fill: #B45309 !important;
+}
+[data-theme="light"] .node-item.mastery.completed .hex-svg path:nth-child(2) {
+    fill: #FFFBEB !important;
+    stroke: #D97706 !important;
+    stroke-width: 2.5 !important;
+}
+[data-theme="light"] .node-item.mastery.completed .hex-svg polygon {
+    fill: #D97706 !important;
+}
+
+[data-theme="light"] .node-item.mastery.current .hex-svg path:first-child,
+[data-theme="light"] .node-item.mastery.unlocked .hex-svg path:first-child {
+    fill: #B45309 !important;
+}
+[data-theme="light"] .node-item.mastery.current .hex-svg path:nth-child(2),
+[data-theme="light"] .node-item.mastery.unlocked .hex-svg path:nth-child(2) {
+    fill: #FFFDF5 !important;
+    stroke: #D97706 !important;
+    stroke-width: 3 !important;
+}
+[data-theme="light"] .node-item.mastery.current .hex-svg polygon,
+[data-theme="light"] .node-item.mastery.unlocked .hex-svg polygon {
+    fill: #D97706 !important;
+}
+
+[data-theme="light"] .node-item.mastery.locked .hex-svg path:first-child {
+    fill: #CBD5E1 !important;
+}
+[data-theme="light"] .node-item.mastery.locked .hex-svg path:nth-child(2) {
+    fill: #F1F5F9 !important;
+    stroke: #94A3B8 !important;
+    stroke-width: 2 !important;
+}
+[data-theme="light"] .node-item.mastery.locked .hex-svg polygon {
+    fill: #94A3B8 !important;
+}
+
+/* Node Labels in Light Theme */
+[data-theme="light"] .node-label {
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="light"] .node-item.current .node-label {
+    border-color: #0284C7 !important;
+    color: #0284C7 !important;
+}
+
+[data-theme="light"] .node-item.completed .node-label {
+    border-color: #059669 !important;
+    color: #059669 !important;
+}
+
+/* Chapter Sector Banner in Light Theme */
+[data-theme="light"] .chapter-sector-banner {
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .sector-badge {
+    background: #E0F2FE !important;
+    border-color: #BAE6FD !important;
+    color: #0284C7 !important;
+}
+
+[data-theme="light"] .sector-title {
+    color: #0F172A !important;
+}
+
+[data-theme="light"] .sector-count {
+    color: #64748B !important;
+}
+
+/* SVG Paths in Light Theme */
+[data-theme="light"] .tree-path-bg {
+    stroke: #E2E8F0 !important;
+}
+[data-theme="light"] .tree-path.locked {
+    stroke: #CBD5E1 !important;
+}
+[data-theme="light"] .tree-path.unlocked {
+    stroke: #0284C7 !important;
+    filter: none !important;
+}
+[data-theme="light"] .tree-path.completed {
+    stroke: #059669 !important;
+    filter: none !important;
 }

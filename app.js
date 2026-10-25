@@ -473,6 +473,31 @@ const App = {
         }
     },
 
+    
+    getQuestIconSVG(questId) {
+        switch (questId) {
+            case 'daily_exercise':
+                return '<svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+            case 'no_hints':
+                return '<svg class="ui-icon" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5A7.85 7.85 0 0 1 9 14"/></svg>';
+            case 'code_runs':
+                return '<svg class="ui-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
+            default:
+                return '<svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>';
+        }
+    },
+
+    getProjectIconSVG(projectId) {
+        switch (projectId) {
+            case 'project_arena':
+                return '<svg class="ui-icon ui-icon-lg" viewBox="0 0 24 24"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/><line x1="3" y1="19" x2="5" y2="21"/></svg>';
+            case 'project_platformer':
+                return '<svg class="ui-icon ui-icon-lg" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4m-2-2v4m8-2h.01m2-2h.01"/></svg>';
+            default:
+                return '<svg class="ui-icon ui-icon-lg" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+        }
+    },
+
     renderSidebarDailyQuests() {
         this.checkDailyQuestsReset();
         const list = document.getElementById('sidebar-quests-list');
@@ -502,7 +527,7 @@ const App = {
             item.className = `sidebar-quest-item ${isCompleted && !isClaimed ? 'ready' : ''} ${isClaimed ? 'claimed' : ''}`;
             item.innerHTML = `
                 <div class="sidebar-quest-top">
-                    <span class="sidebar-quest-icon">${quest.icon}</span>
+                    <span class="sidebar-quest-icon">${this.getQuestIconSVG(quest.id)}</span>
                     <div class="sidebar-quest-title-wrap">
                         <span class="sidebar-quest-title" title="${quest.title}">${quest.title}</span>
                         <span class="sidebar-quest-reward">+${quest.xpReward} XP</span>
@@ -566,7 +591,7 @@ const App = {
             card.className = `quest-card ${isCompleted && !isClaimed ? 'ready-to-claim' : ''}`;
             card.innerHTML = `
                 <div class="quest-left">
-                    <div class="quest-icon">${quest.icon}</div>
+                    <div class="quest-icon">${this.getQuestIconSVG(quest.id)}</div>
                     <div class="quest-info">
                         <div class="quest-title-row">
                             <span class="quest-title">${quest.title}</span>
@@ -1092,15 +1117,15 @@ const App = {
 
         const getNodeIcon = (type) => {
             switch (type) {
-                case 'Button': return '🔘';
-                case 'Label': return '🏷️';
-                case 'Timer': return '⏱️';
-                case 'ColorRect': return '🟥';
-                case 'Sprite2D': return '🖼️';
-                case 'CharacterBody2D': return '🤖';
-                case 'ProgressBar': return '📊';
-                case 'Node2D': return '🌳';
-                default: return '📦';
+                case 'Button': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+                case 'Label': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="9" y1="20" x2="15" y2="20"/></svg>';
+                case 'Timer': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>';
+                case 'ColorRect': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
+                case 'Sprite2D': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+                case 'CharacterBody2D': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2"/></svg>';
+                case 'ProgressBar': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>';
+                case 'Node2D': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><circle cx="18" cy="19" r="3"/><path d="M12 8v5m-4.5 3.5L12 13m4.5 3.5L12 13"/></svg>';
+                default: return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>';
             }
         };
 
@@ -1528,7 +1553,7 @@ const App = {
             card.innerHTML = `
                 <div>
                     <div class="project-card-top">
-                        <div class="project-card-icon">${proj.icon}</div>
+                        <div class="project-card-icon">${this.getProjectIconSVG(proj.id)}</div>
                         <span class="${proj.badgeClass}">${proj.badge}</span>
                     </div>
                     <h3>${proj.title}</h3>
@@ -2314,7 +2339,10 @@ const App = {
                 };
 
                 if (!isMastery && offset !== 0) {
+                    node.style.setProperty('--node-offset', `${offset}px`);
                     node.style.transform = `translateX(${offset}px)`;
+                } else {
+                    node.style.setProperty('--node-offset', '0px');
                 }
 
                 if (isMastery) {

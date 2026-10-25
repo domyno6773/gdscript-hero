@@ -14,7 +14,7 @@
 
     <!-- Notifica Toast per Traguardi & Missioni -->
     <div id="achievement-toast" class="achievement-toast hidden">
-        <div class="toast-icon" id="toast-icon">🏆</div>
+        <div class="toast-icon" id="toast-icon"><svg class="ui-icon ui-icon-lg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></div>
         <div class="toast-body">
             <div class="toast-tag">TRAGUARDO SBLOCCATO!</div>
             <div class="toast-title" id="toast-title">Primi Passi</div>
@@ -27,7 +27,7 @@
         <!-- 1. LOGO & BRANDING (SINISTRA) -->
         <div class="nav-left">
             <div class="logo" id="btn-home" title="Torna alla Mappa" role="button" tabindex="0">
-                <span class="logo-icon">🎮</span>
+                <span class="logo-icon"><svg class="ui-icon" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4m-2-2v4m8-2h.01m2-2h.01"/></svg></span>
                 <span class="logo-text">GDScript<span class="accent">Hero</span></span>
             </div>
         </div>
@@ -35,19 +35,19 @@
         <!-- 2. NAVIGAZIONE SEZIONI PRINCIPALI (CENTRO) -->
         <nav class="nav-center" aria-label="Navigazione Principale">
             <button class="nav-btn active" id="nav-roadmap-btn" title="Mappa dei Livelli">
-                <span class="icon">🗺️</span> <span class="nav-btn-text">Mappa</span>
+                <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span> <span class="nav-btn-text">Mappa</span>
             </button>
             <button class="nav-btn" id="nav-editor-btn" title="Editor Esercizio">
-                <span class="icon">💻</span> <span class="nav-btn-text">Esercizio</span>
+                <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span> <span class="nav-btn-text">Esercizio</span>
             </button>
             <button class="nav-btn" id="nav-practice-btn" title="Sandbox &amp; Mini-IDE Godot 4">
-                <span class="icon">🎮</span> <span class="nav-btn-text">Sandbox</span>
+                <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></span> <span class="nav-btn-text">Sandbox</span>
             </button>
             <button class="nav-btn" id="nav-projects-btn" title="Progetti &amp; Arena">
-                <span class="icon">⚔️</span> <span class="nav-btn-text">Progetti</span>
+                <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span> <span class="nav-btn-text">Progetti</span>
             </button>
             <button class="nav-btn nav-btn-activity" id="btn-open-achievements" title="Traguardi & Obiettivi">
-                <span class="icon">🏆</span> <span class="nav-btn-text">Traguardi</span> <span id="achievements-count-badge" class="badge-count">0/10</span>
+                <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></span> <span class="nav-btn-text">Traguardi</span> <span id="achievements-count-badge" class="badge-count">0/10</span>
             </button>
         </nav>
 
@@ -57,21 +57,21 @@
             <div class="nav-stats-group">
                 <!-- Streak Flame -->
                 <div class="stat-pill streak-pill clickable" id="btn-streak-modal" title="Gestisci Obiettivo Serie Settimanale" role="button" tabindex="0">
-                    <span class="fire-icon" id="streak-flame">🔥</span>
+                    <span class="fire-icon" id="streak-flame"><svg class="ui-icon ui-icon-fill" viewBox="0 0 24 24"><path d="M12 2c-.5 2.5-2 4.5-4 6-2 1.6-3 3.5-3 5.5a7 7 0 1 0 14 0c0-2-1-3.9-3-5.5-2-1.5-3.5-3.5-4-6zm-1 12.5a2.5 2.5 0 0 1 2.5-2.5c0 1.38-.5 2-1 3-1.07 2.14-.22 4.05 2 6 .5-2.5 2-4.9 4-6.5 2-1.6 3-3.5 3-5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 1 2.5 2.5z"/></svg></span>
                     <span class="stat-value" id="streak-count">0 sett.</span>
                     <span class="stat-label" id="streak-sub-label">(0/2 gg)</span>
                 </div>
 
                 <!-- XP Pill -->
                 <div class="stat-pill xp-pill" title="Punti Esperienza Totali">
-                    <span class="xp-icon">⚡</span>
+                    <span class="xp-icon"><svg class="ui-icon ui-icon-fill" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
                     <span class="stat-value" id="xp-count">0</span>
                     <span class="stat-label">XP</span>
                 </div>
 
                 <!-- Level Badge con barra progresso integrata -->
                 <div class="stat-pill level-pill" id="level-pill" title="Livello Giocatore">
-                    <span class="trophy-icon">🎖️</span>
+                    <span class="trophy-icon"><svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span>
                     <div class="level-badge-group">
                         <span id="level-badge">Lv. 1 Recluta</span>
                         <div class="level-mini-bar" title="Progresso prossimo livello">
@@ -87,7 +87,7 @@
             <div class="nav-user-group">
                 <!-- Pillola Stato Account / Login (Ospite o Utente) -->
                 <div class="stat-pill auth-pill clickable" id="btn-open-auth-nav" title="Stato Account & Sincronizzazione" role="button" tabindex="0">
-                    <span id="nav-auth-icon">👤</span>
+                    <span id="nav-auth-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
                     <span id="nav-auth-label">Ospite</span>
                 </div>
 
@@ -125,7 +125,7 @@
                         <div class="hero-actions">
                             <button class="btn-hero-continue" id="btn-hero-continue" title="Continua l'apprendimento">
                                 <span>Continua ad Imparare</span>
-                                <span class="hero-btn-arrow">➔</span>
+                                <span class="hero-btn-arrow"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
                             </button>
                         </div>
                     </div>
@@ -142,7 +142,7 @@
                 <div class="daily-quests-sidebar-card collapsed-mobile" id="sidebar-quests-card">
                     <div class="sidebar-card-header" id="sidebar-quests-toggle" title="Tocca per mostrare/nascondere le missioni">
                         <div class="sidebar-card-title-group">
-                            <span class="sidebar-card-icon">🎯</span>
+                            <span class="sidebar-card-icon"><svg class="ui-icon ui-icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
                             <div>
                                 <h3 class="sidebar-card-title">Missioni Giornaliere</h3>
                                 <span class="sidebar-card-subtitle">Obiettivi del giorno</span>
@@ -174,10 +174,10 @@
         <!-- Switcher Schede Mobile (visibile solo su schermi <= 820px) -->
         <div class="exercise-mobile-tabs" id="exercise-mobile-tabs">
             <button type="button" class="ex-mobile-tab active" id="btn-tab-instructions">
-                <span>📖 Compito</span>
+                <span><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Compito</span>
             </button>
             <button type="button" class="ex-mobile-tab" id="btn-tab-code">
-                <span>💻 Codice</span>
+                <span><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> Codice</span>
             </button>
         </div>
 
@@ -197,7 +197,7 @@
 
                     <div class="task-box">
                         <div class="task-header">
-                            <span class="target-icon">🎯</span>
+                            <span class="target-icon"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
                             <h3>Il Tuo Obiettivo:</h3>
                         </div>
                         <div id="lesson-task" class="task-body">
@@ -208,7 +208,7 @@
                     <!-- Accordion dei Consigli / Hints -->
                     <div class="hints-section">
                         <div class="hints-toggle-btn" id="btn-toggle-hint">
-                            <span class="hint-icon">💡</span>
+                            <span class="hint-icon"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5A7.85 7.85 0 0 1 9 14"/></svg></span>
                             <span id="hint-toggle-text">Ti serve un consiglio? (0/2 usati)</span>
                             <span class="arrow">▼</span>
                         </div>
@@ -520,7 +520,7 @@
                         ← Elenco Progetti
                     </button>
                     <div class="arena-title-wrap">
-                        <span class="arena-title-icon">⚔️</span>
+                        <span class="arena-title-icon"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" y1="14" x2="9" y2="18"/><line x1="7" y1="17" x2="4" y2="20"/><line x1="3" y1="19" x2="5" y2="21"/></svg></span>
                         <h2 class="arena-main-title">Arena del Gladiatore</h2>
                         <span class="arena-progress-pill" id="arena-header-progress">Fase 1 di 4</span>
                     </div>
@@ -616,7 +616,7 @@
                     <div class="arena-hud-card">
                         <div class="hud-gladiator-header">
                             <div class="hud-avatar-box">
-                                <span class="hud-avatar" id="hud-gladiator-avatar">🛡️</span>
+                                <span class="hud-avatar" id="hud-gladiator-avatar"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
                             </div>
                             <div class="hud-gladiator-info">
                                 <h3 id="hud-gladiator-name">Massimo il Gladiatore</h3>
@@ -1662,23 +1662,23 @@
     <!-- BARRA DI NAVIGAZIONE INFERIORE MOBILE (Attiva solo su smartphone e schermi <= 820px) -->
     <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
         <button type="button" class="mob-nav-item active" id="mob-nav-roadmap" title="Mappa dei Livelli">
-            <span class="mob-nav-icon">🗺️</span>
+            <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
             <span class="mob-nav-label">Mappa</span>
         </button>
         <button type="button" class="mob-nav-item" id="mob-nav-exercise" title="Editor Esercizio">
-            <span class="mob-nav-icon">💻</span>
+            <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
             <span class="mob-nav-label">Codice</span>
         </button>
         <button type="button" class="mob-nav-item" id="mob-nav-practice" title="Sandbox Godot 4">
-            <span class="mob-nav-icon">🎮</span>
+            <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></span>
             <span class="mob-nav-label">Sandbox</span>
         </button>
         <button type="button" class="mob-nav-item" id="mob-nav-projects" title="Progetti">
-            <span class="mob-nav-icon">🛠️</span>
+            <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
             <span class="mob-nav-label">Progetti</span>
         </button>
         <button type="button" class="mob-nav-item" id="mob-nav-achievements" title="I Tuoi Traguardi">
-            <span class="mob-nav-icon">🏆</span>
+            <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></span>
             <span class="mob-nav-label">Trofei</span>
         </button>
     </nav>
