@@ -364,6 +364,7 @@ const GDScriptRuntime = {
         const jsLines = [];
         const sourceMap = [];
         const indentStack = [0];
+        const blockTypes = ['CLASS'];
         const declaredVars = new Set();
         let classIndent = -1;
         let currentClassName = '';
@@ -417,6 +418,7 @@ const GDScriptRuntime = {
             // Chiusura blocchi in base all'indentazione
             while (indentStack.length > 1 && currentIndent < indentStack[indentStack.length - 1]) {
                 const poppedIndent = indentStack.pop();
+                blockTypes.pop();
                 if (classIndent !== -1) {
                     // Siamo all'interno di una classe
                     if (indentStack.length === 1 || indentStack[indentStack.length - 1] <= classIndent) {
@@ -454,6 +456,17 @@ const GDScriptRuntime = {
             }
 
             const inClass = (classIndent !== -1 && currentIndent > classIndent);
+            const currentScopeType = blockTypes[blockTypes.length - 1];
+
+            // Validazione strutturale GDScript 4:
+            // Nel corpo di una classe (indent 0 o corpo di inner class) sono ammesse solo dichiarazioni
+            if (currentScopeType === 'CLASS') {
+                const isDeclaration = /^(extends\b|class_name\b|signal\b|enum\b|const\b|var\b|static\s+var\b|func\b|static\s+func\b|class\b|@)/.test(content);
+                const isInnerClassPass = (inClass || indentStack.length > 1) && content === 'pass';
+                if (!isDeclaration && !isInnerClassPass) {
+                    throw new SyntaxError(`Riga ${currentGdLine}: Errore di sintassi GDScript: Istruzione '${content.substring(0, 35)}' non consentita nel corpo dello script/classe. Le istruzioni eseguibili devono trovarsi all'interno di una funzione (es. 'func _ready():').`);
+                }
+            }
 
             // signal nome(parametri)
             if (content.startsWith('signal ')) {
@@ -619,6 +632,13 @@ const GDScriptRuntime = {
             // Costruzione riga finale
             if (isBlockStart) {
                 indentStack.push(currentIndent + 4);
+                if (content.startsWith('class ')) {
+                    blockTypes.push('CLASS');
+                } else if (content.startsWith('async function ') || content.startsWith('function ') || inClass) {
+                    blockTypes.push('FUNC');
+                } else {
+                    blockTypes.push(blockTypes[blockTypes.length - 1]);
+                }
                 pushJs(' '.repeat(currentIndent) + content + ' {');
                 if (content.startsWith('class ')) {
                     pushJs(' '.repeat(currentIndent + 4) + `static new(...args) { return new ${currentClassName}(...args); }`);
@@ -635,6 +655,7 @@ const GDScriptRuntime = {
         // Chiudi tutti i blocchi pendenti
         while (indentStack.length > 1) {
             const poppedIndent = indentStack.pop();
+            blockTypes.pop();
             if (classIndent !== -1) {
                 if (indentStack.length === 1 || indentStack[indentStack.length - 1] <= classIndent) {
                     pushJs(' '.repeat(indentStack[indentStack.length - 1]) + '}');
@@ -772,7 +793,7 @@ const GDScriptRuntime = {
 
             const finalError = identifiedLine 
                 ? `Riga ${identifiedLine}: Errore di sintassi (${specificReason || cleanMsg})`
-                : `Errore di sintassi GDScript: ${cleanMsg}`;
+                : (cleanMsg.startsWith('Riga ') ? cleanMsg : `Errore di sintassi GDScript: ${cleanMsg}`);
 
             return {
                 success: false,

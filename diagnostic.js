@@ -243,6 +243,30 @@ const GDScriptDiagnostic = {
             }
         }
 
+        // 3.6 Istruzioni eseguibili a livello radice (fuori da funzioni)
+        for (let i = 0; i < lines.length; i++) {
+            const raw = lines[i].replace(/#.*$/, '');
+            const trimmed = raw.trim();
+            if (!trimmed) continue;
+            if (!lines[i].startsWith(' ') && !lines[i].startsWith('\t')) {
+                const isDecl = /^(extends\b|class_name\b|signal\b|enum\b|const\b|var\b|static\s+var\b|func\b|static\s+func\b|class\b|@)/.test(trimmed);
+                if (!isDecl && /^(print\b|for\b|while\b|if\b|elif\b|else\b|match\b|[a-zA-Z_]\w*\s*\()/.test(trimmed)) {
+                    return {
+                        category: 'syntax',
+                        badgeText: 'SINTASSI GDSCRIPT',
+                        badgeClass: 'badge-syntax',
+                        title: "Istruzione eseguibile fuori da una funzione",
+                        line: i + 1,
+                        isHeuristic: false,
+                        isTranspilerLimitation: false,
+                        why: "In GDScript 4 le istruzioni eseguibili (come print(), cicli e condizioni) non possono essere scritte direttamente nel corpo dello script: devono trovarsi all'interno di una funzione (es. 'func _ready():').",
+                        nextStep: "Inserisci l'istruzione indentata all'interno della funzione 'func _ready():'.",
+                        techDetails: `Riga ${i + 1}: "${trimmed}"`
+                    };
+                }
+            }
+        }
+
         // 4. ERRORI DI SINTASSI EMESSI DAL TRANSPILER
         const isSyntaxError = /syntaxerror|errore di sintassi|unexpected token|invalid or unexpected token|unexpected identifier|missing \)/i.test(errStr);
         if (isSyntaxError) {
@@ -255,6 +279,9 @@ const GDScriptDiagnostic = {
             if (/missing \)/i.test(errStr) || /parentesi/i.test(errStr)) {
                 specificTitle = "Parentesi mancante o non bilanciata";
                 specificWhy = "È stata aperta una parentesi tonda '(' senza la corrispettiva parentesi di chiusura ')'.";
+            } else if (/non consentita nel corpo/i.test(errStr) || /corpo della classe/i.test(errStr)) {
+                specificTitle = "Istruzione eseguibile fuori da una funzione";
+                specificWhy = "In GDScript le istruzioni eseguibili (come print, cicli, condizioni o chiamate) non possono trovarsi direttamente nel corpo della classe o dello script. Devono trovarsi all'interno di una funzione (come 'func _ready():').";
             }
 
             return {

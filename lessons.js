@@ -319,8 +319,8 @@ const LESSONS_DATA = [
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const hasPrinted = result.logs.some(l => l.includes("Ciao Godot!"));
-    tests.push({ desc: "Console contiene 'Ciao Godot!'", passed: hasPrinted, diff: hasPrinted ? null : `Ricevuto: "${result.logs.join('\n')}"` });
+    const hasPrinted = (result.logs || []).some(l => l.trim() === "Ciao Godot!");
+    tests.push({ desc: "Console stampa esattamente 'Ciao Godot!'", passed: hasPrinted, diff: hasPrinted ? null : `Atteso: "Ciao Godot!", Ricevuto: "${(result.logs || []).join(' | ')}"` });
     return tests;
 }
     },
@@ -379,8 +379,8 @@ const LESSONS_DATA = [
     tests.push(formatExecutionCheck(result));
     const hasComment = hasRealComment(result.code);
     tests.push({ desc: "Riga di commento con '#' presente nel codice", passed: !!hasComment, diff: hasComment ? null : "Non è stato trovato alcun commento con '#'." });
-    const hasPrinted = result.logs.some(l => l.includes("Benvenuto nel gioco"));
-    tests.push({ desc: "Console contiene 'Benvenuto nel gioco'", passed: hasPrinted, diff: hasPrinted ? null : `Ricevuto: "${result.logs.join('\n')}"` });
+    const hasPrinted = (result.logs || []).some(l => l.trim() === "Benvenuto nel gioco");
+    tests.push({ desc: "Console stampa esattamente 'Benvenuto nel gioco'", passed: hasPrinted, diff: hasPrinted ? null : `Atteso: "Benvenuto nel gioco", Ricevuto: "${(result.logs || []).join(' | ')}"` });
     return tests;
 }
     },
@@ -437,10 +437,15 @@ const LESSONS_DATA = [
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const hasLivello = result.logs.some(l => l.includes("Livello"));
-    const hasNumberOne = result.logs.some(l => /^\s*1\s*$/.test(l) || (l.trim() === "1") || (l.includes("1") && !l.includes("Livello")));
-    tests.push({ desc: "Stampato il testo 'Livello'", passed: hasLivello, diff: hasLivello ? null : `Ricevuto: "${result.logs.join('\n')}"` });
-    tests.push({ desc: "Stampato il numero 1 su riga separata", passed: hasNumberOne, diff: hasNumberOne ? null : "Il numero 1 deve essere stampato su riga separata senza virgolette." });
+    const logs = result.logs || [];
+    const l1Idx = logs.findIndex(l => l.trim() === "Livello");
+    const l2Idx = logs.findIndex(l => l.trim() === "1");
+    const hasQuotedOne = /\bprint\s*\(\s*["']1["']\s*\)/.test(result.code || '');
+    const hasLivello = l1Idx !== -1;
+    const hasNumberOne = l2Idx !== -1 && !hasQuotedOne && (l1Idx === -1 || l1Idx < l2Idx);
+
+    tests.push({ desc: "Console stampa esattamente 'Livello'", passed: hasLivello, diff: hasLivello ? null : `Atteso: "Livello", Ricevuto: "${logs.join(' | ')}"` });
+    tests.push({ desc: "Console stampa il numero 1 su riga separata (senza virgolette)", passed: hasNumberOne, diff: hasQuotedOne ? 'Hai stampato la stringa "1" tra virgolette. La consegna richiede di stampare il numero 1 come valore numerico puro (senza virgolette).' : (hasNumberOne ? null : (l2Idx === -1 ? `Atteso valore numerico 1 su riga successiva, Ricevuto: "${logs.join(' | ')}"` : 'Il numero 1 deve essere stampato sulla riga successiva a "Livello".')) });
     return tests;
 }
     },
@@ -576,8 +581,9 @@ const LESSONS_DATA = [
     tests.push(formatExecutionCheck(result));
     const hasVar = result.scope && result.scope.nome === "Eroe";
     tests.push({ desc: "Variabile 'nome' creata con valore 'Eroe'", passed: hasVar, diff: hasVar ? null : `Valore attuale: ${result.scope ? result.scope.nome : 'non definita'}` });
-    const printed = result.logs.some(l => l.includes("Eroe"));
-    tests.push({ desc: "Valore della variabile 'nome' stampato a console", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    const hasLiteralPrint = /\bprint\s*\(\s*["']Eroe["']\s*\)/.test(result.code || '');
+    const printed = (result.logs || []).some(l => l.trim() === "Eroe") && !hasLiteralPrint;
+    tests.push({ desc: "Valore della variabile 'nome' stampato a console", passed: printed, diff: hasLiteralPrint ? "Hai stampato il testo letterale 'Eroe' tra virgolette. Usa 'print(nome)' per stampare il valore della variabile." : (printed ? null : `Atteso: "Eroe", Ricevuto: "${(result.logs || []).join(' | ')}"`) });
     return tests;
 }
     },
@@ -1129,9 +1135,7 @@ const LESSONS_DATA = [
     {
         id: 14,
         conceptId: "operators_math",
-        conceptTags: ["modulo", "remainder", "math", "debugging"],
-        isDebugging: true,
-        debugType: "Logica (Precedenza aritmetica)",
+        conceptTags: ["compound_assignment", "math", "health"],
         chapterId: 4,
         isMastery: false,
         title: "14. Assegnazioni rapide (+=, -=)",
@@ -1152,41 +1156,49 @@ const LESSONS_DATA = [
                 <li>Stampa il valore finale di <code>punti_vita</code> (80).</li>
             </ul>
         `,
-        initialCode: `func _ready():
-    # BUG DI PRECEDENZA: La divisione viene eseguita prima dell'addizione!
-    # Aggiungi le parentesi tonde per calcolare la media corretta (50):
-    var media_salute = 60 + 40 / 2
-    print(media_salute)
-`,
+        initialCode: `func _ready():\n    # Crea punti_vita = 100, sottrai 20 con -= e stampa\n    pass\n`,
         hints: [
             {
                         "level": 1,
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Quando vuoi che una somma venga calcolata prima di una divisione (come nel calcolo di una media tra due valori), devi forzare la precedenza racchiudendo la somma tra parentesi tonde."
+                        "text": "L'operatore di assegnazione rapida `-=` sottrae un valore direttamente da una variabile (es. `punti_vita -= 20`), senza dover riscrivere `punti_vita = punti_vita - 20`."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Racchiudi gli addendi tra parentesi tonde: `(valore1 + valore2) / 2`. In questo modo la somma viene eseguita per prima."
+                        "text": "Dichiara prima `var punti_vita = 100`, poi sulla riga successiva applica `punti_vita -= 20`, e infine stampa il valore con `print(punti_vita)`."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Senza parentesi: 10 + 20 / 2 = 10 + 10 = 20 (Sbagliato)\n    var media = (10 + 20) / 2 # (30) / 2 = 15 (Corretto)\n    print(media)\n```\nIdentifica l'espressione nel codice e avvolgila tra parentesi tonde."
+                        "text": "Esempio completo:\n```gdscript\nfunc _ready():\n    var punti_vita = 100\n    punti_vita -= 20\n    print(punti_vita)\n```"
             }
 ],
         solution: `func _ready():\n    var punti_vita = 100\n    punti_vita -= 20\n    print(punti_vita)\n`,
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const ok = result.scope && result.scope.punteggio === 20;
-    tests.push({ desc: "Espressione 'punteggio = 10 + 5 * 2' calcolata a 20", passed: ok, diff: ok ? null : `Ricevuto: ${result.scope ? result.scope.punteggio : 'null'}` });
+    const s = result.scope || {};
+    const hpOk = s.punti_vita === 80;
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasCompound = /-=\s*20\b/.test(cleanCode) || /-=/.test(cleanCode);
+    const printed80 = (result.logs || []).some(l => l.trim() === "80");
+    tests.push({
+        desc: "Variabile 'punti_vita' aggiornata a 80 con operatore '-='",
+        passed: hpOk && hasCompound,
+        diff: hpOk ? (hasCompound ? null : "Usa l'operatore '-=' per sottrarre 20 da punti_vita.") : `Ricevuto punti_vita: ${s.punti_vita}`
+    });
+    tests.push({
+        desc: "Valore finale di 'punti_vita' (80) stampato a console",
+        passed: printed80,
+        diff: printed80 ? null : `Atteso: 80, Ricevuto: "${(result.logs || []).join(' | ')}"`
+    });
     return tests;
 }
     },
@@ -1224,32 +1236,49 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Invece di riscrivere `monete = monete + 25`, puoi usare una scorciatoia sintattica che ordina a Godot di 'aggiungere 25 al valore già presente nella variabile'."
+                        "text": "Dichiara prima le due variabili 'monete_base' (50) e 'moltiplicatore' (3). Poi usa l'operatore '*' per calcolare il totale moltiplicandole."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa l'operatore di assegnazione composta `+=`. La sintassi è: `nome_variabile += incremento`."
+                        "text": "Assegna il risultato a 'var monete_totali = monete_base * moltiplicatore', e sulla riga successiva usa 'print(monete_totali)' per stamparne il valore."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var punteggio = 10\n    punteggio += 5 # Ora punteggio vale 15\n    print(punteggio)\n```\nPrima dichiara la variabile con il valore di partenza, poi applica `+=`."
+                        "text": "Esempio completo:\n```gdscript\nfunc _ready():\n    var monete_base = 50\n    var moltiplicatore = 3\n    var monete_totali = monete_base * moltiplicatore\n    print(monete_totali)\n```"
             }
 ],
         solution: `func _ready():\n    var monete_base = 50\n    var moltiplicatore = 3\n    var monete_totali = monete_base * moltiplicatore\n    print(monete_totali)\n`,
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const okVal = result.scope && result.scope.monete_totali === 150;
+    const s = result.scope || {};
+    const baseOk = s.monete_base === 50;
+    const multOk = s.moltiplicatore === 3;
+    const totalOk = s.monete_totali === 150;
     const cleanCode = stripCommentsAndStrings(result.code);
-    const hasCompound = /\+=/.test(cleanCode);
-    tests.push({ desc: "Monete totali aggiornate a 150", passed: okVal, diff: okVal ? null : `Ricevuto: ${result.scope ? result.scope.monete_totali : 'null'}` });
-    tests.push({ desc: "Operatore di assegnazione composta '+=' utilizzato", passed: !!hasCompound, diff: hasCompound ? null : "Usa 'monete_totali += 50' per incrementare il valore." });
+    const hasMult = /\*/.test(cleanCode);
+    const printed150 = (result.logs || []).some(l => l.trim() === "150");
+    tests.push({
+        desc: "Variabili 'monete_base' (50) e 'moltiplicatore' (3) definite",
+        passed: baseOk && multOk,
+        diff: (baseOk && multOk) ? null : `Ricevuto monete_base: ${s.monete_base}, moltiplicatore: ${s.moltiplicatore}`
+    });
+    tests.push({
+        desc: "Calcolo 'monete_totali = monete_base * moltiplicatore' pari a 150",
+        passed: totalOk && hasMult,
+        diff: (totalOk && hasMult) ? null : `Ricevuto monete_totali: ${s.monete_totali} (operatore '*' richiesto)`
+    });
+    tests.push({
+        desc: "Valore di 'monete_totali' (150) stampato a console",
+        passed: printed150,
+        diff: printed150 ? null : `Atteso: 150, Ricevuto: "${(result.logs || []).join(' | ')}"`
+    });
     return tests;
 }
     },
