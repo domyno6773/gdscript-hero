@@ -2640,6 +2640,8 @@ const LESSONS_DATA = [
         checks = (norm === 30) && (crit === 60) && (altNorm === 50) && (altCrit === 100);
     }
     tests.push({ desc: "Calcolo danno critico (x2 se true, x1 se false) verificato su vari input", passed: checks, diff: checks ? null : "Se critico è true ritorna attacco * 2, altrimenti attacco." });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Colpo normale: 30","Colpo critico: 60"][at]) at++; } return at === 2; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -2911,6 +2913,8 @@ const LESSONS_DATA = [
     const landOk = s.atterrato === true;
     tests.push({ desc: "Posizione finale calcolata a Vector2(150, 170)", passed: posOk, diff: posOk ? null : `Ricevuto: ${pos}` });
     tests.push({ desc: "Atterraggio riuscito con successo (true)", passed: landOk, diff: landOk ? null : `Ricevuto: ${s.atterrato}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Posizione finale: Vector2(150, 170)","Stazione raggiunta: true"][at]) at++; } return at === 2; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3190,6 +3194,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const furyOk = s.in_furia === false;
     tests.push({ desc: "Dizionario del boss aggiornato (hp: 420, attacco: 75)", passed: bossOk, diff: bossOk ? null : `Boss: ${JSON.stringify(b)}` });
     tests.push({ desc: "Controllo boss.has('furia') false", passed: furyOk, diff: furyOk ? null : `in_furia=${s.in_furia}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 4 && String(line).trim() === ["Boss: Drago Antico","HP rimanenti: 420","Attacco: 75","Furia attiva: false"][at]) at++; } return at === 4; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3257,6 +3263,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
     const ok = out.includes("Apertura in corso...") && out.includes("Porta aperta con successo!");
     tests.push({ desc: "Segnale emesso con successo e intercettato dalla callback", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const auditOk = !!(result.scope && result.scope.porta_aperta && Array.isArray(result.scope.porta_aperta.emissions) && [[]].every(args => result.scope.porta_aperta.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
+    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3322,6 +3330,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
     const ok = out.includes("+10 Monete raccolte!");
     tests.push({ desc: "Funzione aggiungi_punti invocata da emit()", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const auditOk = !!(result.scope && result.scope.moneta_raccolta && Array.isArray(result.scope.moneta_raccolta.emissions) && [[]].every(args => result.scope.moneta_raccolta.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
+    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3397,6 +3407,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         }
     }
     tests.push({ desc: "Segnale accetta e trasmette parametri numerici alla callback", passed: dynamicOk, diff: dynamicOk ? null : "La callback collegata deve ricevere il valore trasmesso dal segnale." });
+    const auditOk = !!(result.scope && result.scope.danno_inflitto && Array.isArray(result.scope.danno_inflitto.emissions) && [[35]].every(args => result.scope.danno_inflitto.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
+    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3470,6 +3482,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
     const ok = out.includes("UI: Barra salute a 75") && out.includes("UI: Barra salute a 40");
     tests.push({ desc: "Due eventi di salute emessi (75 e 40)", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const auditOk = !!(result.scope && result.scope.salute_aggiornata && Array.isArray(result.scope.salute_aggiornata.emissions) && [[75],[40]].every(args => result.scope.salute_aggiornata.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
+    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3765,6 +3779,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const totOk = Number(s.vita_totale) === 200;
     tests.push({ desc: "Membri party istanziati (Aria Maga 80 HP, Krag Guerriero 120 HP)", passed: !!(m1Ok && m2Ok), diff: (m1Ok && m2Ok) ? null : "Verifica le istanze membro1 e membro2." });
     tests.push({ desc: "Salute totale del party calcolata a 200 HP", passed: totOk, diff: totOk ? null : `vita_totale=${s.vita_totale}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 3 && String(line).trim() === ["Membro 1: Aria (Maga)","Membro 2: Krag (Guerriero)","Salute totale party: 200"][at]) at++; } return at === 3; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -4048,6 +4064,8 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
     const mOk = sc && sc.get_node("MoneteLabel") && sc.get_node("MoneteLabel").text === "Oro: 50";
     tests.push({ desc: "TitoloDungeon ('Caverna dei Goblin') e LivelloLabel ('Livello: 1') configurati", passed: !!(tOk && lOk), diff: (tOk && lOk) ? null : "Verifica le proprietà .text dei nodi." });
     tests.push({ desc: "MoneteLabel configurata con 'Oro: 50'", passed: !!mOk, diff: mOk ? null : "MoneteLabel non trovata o testo errato." });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 3 && String(line).trim() === ["Dungeon: Caverna dei Goblin","Difficolta: Livello: 1","Bottino: Oro: 50"][at]) at++; } return at === 3; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -4358,6 +4376,8 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     if (aConn) aBtn.pressed.emit();
     const almOk = sLbl && sLbl.text === "Allarme Rosso Attivo";
     tests.push({ desc: "Click su AllarmeBtn aggiorna lo stato a 'Allarme Rosso Attivo'", passed: !!almOk, diff: almOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 3 && String(line).trim() === ["Plancia Operativa","Velocita Aumentata","Scudi al 100%"][at]) at++; } return at === 3; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -4437,6 +4457,8 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
     const outOk = out.includes("Tempo scaduto!");
     tests.push({ desc: "Callback quando_scaduto eseguita allo scatto del timer", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+    const auditOk = !!(t && t.is_stopped === false);
+    tests.push({ desc: "Timer effettivamente avviato", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -4673,6 +4695,8 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     }
     const emptyOk = oLbl && oLbl.text === "Monete: 0" && mLbl && mLbl.text === "Oro Insufficiente!";
     tests.push({ desc: "Gestione limite di spesa: blocco acquisto e messaggio 'Oro Insufficiente!' quando terminano le monete", passed: !!emptyOk, diff: emptyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Bottega Aperta","Pozione Acquistata!"][at]) at++; } return at === 2; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     }
