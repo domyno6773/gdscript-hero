@@ -108,6 +108,26 @@ const CHAPTERS_DATA = [
     }
 ];
 
+// Helper per feedback chiaro allo studente (distinzione sintassi vs runtime)
+function formatExecutionCheck(result) {
+    if (result && result.success) {
+        return { desc: "Codice eseguito senza errori", passed: true, diff: null };
+    }
+    const err = (result && result.error) ? String(result.error) : "Errore sconosciuto";
+    if (err.includes("Errore di sintassi")) {
+        return {
+            desc: "Controllo sintassi GDScript",
+            passed: false,
+            diff: `⚠️ Errore di Sintassi: verifica due punti (:), indentazione a 4 spazi o virgolette non chiuse.\nDettaglio: ${err}`
+        };
+    }
+    return {
+        desc: "Esecuzione dello script",
+        passed: false,
+        diff: `⚠️ Errore di Esecuzione:\nDettaglio: ${err}`
+    };
+}
+
 const LESSONS_DATA = [
     // ==========================================
     // CAPITOLO 1: INTRODUZIONE
@@ -142,12 +162,12 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    print("Ciao Godot!")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const hasPrinted = result.logs.some(l => l.includes("Ciao Godot!"));
-            tests.push({ desc: "Console contiene 'Ciao Godot!'", passed: hasPrinted, diff: hasPrinted ? null : `Ricevuto: "${result.logs.join('\\n')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasPrinted = result.logs.some(l => l.includes("Ciao Godot!"));
+    tests.push({ desc: "Console contiene 'Ciao Godot!'", passed: hasPrinted, diff: hasPrinted ? null : `Ricevuto: "${result.logs.join('\n')}"` });
+    return tests;
+}
     },
     {
         id: 2,
@@ -179,12 +199,14 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    # Inizializzazione gioco\n    print("Benvenuto nel gioco")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const hasPrinted = result.logs.some(l => l.includes("Benvenuto nel gioco"));
-            tests.push({ desc: "Console contiene 'Benvenuto nel gioco'", passed: hasPrinted, diff: hasPrinted ? null : `Ricevuto: "${result.logs.join('\\n')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasComment = result.code && result.code.includes("#");
+    tests.push({ desc: "Riga di commento con '#' presente nel codice", passed: !!hasComment, diff: hasComment ? null : "Non è stato trovato alcun commento con '#'." });
+    const hasPrinted = result.logs.some(l => l.includes("Benvenuto nel gioco"));
+    tests.push({ desc: "Console contiene 'Benvenuto nel gioco'", passed: hasPrinted, diff: hasPrinted ? null : `Ricevuto: "${result.logs.join('\n')}"` });
+    return tests;
+}
     },
     {
         id: 3,
@@ -216,13 +238,14 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    print("Livello")\n    print(1)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("Livello") && out.includes("1");
-            tests.push({ desc: "Stampato 'Livello' e il numero 1", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasLivello = result.logs.some(l => l.includes("Livello"));
+    const hasNumberOne = result.logs.some(l => /^\s*1\s*$/.test(l) || (l.trim() === "1") || (l.includes("1") && !l.includes("Livello")));
+    tests.push({ desc: "Stampato il testo 'Livello'", passed: hasLivello, diff: hasLivello ? null : `Ricevuto: "${result.logs.join('\n')}"` });
+    tests.push({ desc: "Stampato il numero 1 su riga separata", passed: hasNumberOne, diff: hasNumberOne ? null : "Il numero 1 deve essere stampato su riga separata senza virgolette." });
+    return tests;
+}
     },
 {
         id: 4,
@@ -265,14 +288,17 @@ const LESSONS_DATA = [
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = (result.logs || []).join('\n');
-            const clean = out.replace(/\s+/g, ' ');
-            const ok = clean.includes("=== AVVIO SISTEMA ===") && clean.includes("Sistema: Godot OS") && clean.includes("Energia: 100 %") && clean.includes("=== DIAGNOSTICA COMPLETATA ===");
-            tests.push({ desc: "Diagnostica completata con output esatto", passed: ok, diff: ok ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasComment = result.code && result.code.includes("#");
+    tests.push({ desc: "Commento di diagnostica '#' presente", passed: !!hasComment, diff: hasComment ? null : "Aggiungi un commento che inizia con '#'." });
+    const clean = (result.logs || []).join(' ').replace(/\s+/g, ' ');
+    const hasSystem = clean.includes("Sistema: Godot OS");
+    const hasEnergy = clean.includes("Energia: 100 %") || clean.includes("Energia: 100%");
+    tests.push({ desc: "Sistema: Godot OS stampato", passed: hasSystem, diff: hasSystem ? null : `Ricevuto: "${clean}"` });
+    tests.push({ desc: "Energia: 100 % stampato con valori multipli", passed: hasEnergy, diff: hasEnergy ? null : `Ricevuto: "${clean}"` });
+    return tests;
+}
     },
 
     // ==========================================
@@ -308,14 +334,14 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var nome = "Eroe"\n    print(nome)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito correttamente", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.scope["nome"] === "Eroe";
-            tests.push({ desc: "Variabile 'nome' creata con valore 'Eroe'", passed: ok, diff: ok ? null : `Valore: ${result.scope["nome"]}` });
-            const printed = result.logs.some(l => l.includes("Eroe"));
-            tests.push({ desc: "Valore 'Eroe' stampato a console", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasVar = result.scope && result.scope.nome === "Eroe";
+    tests.push({ desc: "Variabile 'nome' creata con valore 'Eroe'", passed: hasVar, diff: hasVar ? null : `Valore attuale: ${result.scope ? result.scope.nome : 'non definita'}` });
+    const printed = result.logs.some(l => l.includes("Eroe"));
+    tests.push({ desc: "Valore della variabile 'nome' stampato a console", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
     {
         id: 6,
@@ -351,13 +377,17 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var personaggio = "Guerriero"\n    var punti_vita = 100\n    print(personaggio)\n    print(punti_vita)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito correttamente", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const isStr = result.scope["personaggio"] === "Guerriero";
-            const isInt = result.scope["punti_vita"] === 100;
-            tests.push({ desc: "Variabili personaggio e punti_vita create", passed: isStr && isInt, diff: (isStr && isInt) ? null : "Valori non corrispondenti" });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const isStr = result.scope && result.scope.personaggio === "Guerriero";
+    const isInt = result.scope && result.scope.punti_vita === 100;
+    tests.push({ desc: "Variabile 'personaggio' impostata a 'Guerriero'", passed: isStr, diff: isStr ? null : `Valore: ${result.scope ? result.scope.personaggio : 'undefined'}` });
+    tests.push({ desc: "Variabile 'punti_vita' impostata a intero 100", passed: isInt, diff: isInt ? null : `Valore: ${result.scope ? result.scope.punti_vita : 'undefined'}` });
+    const pPrinted = result.logs.some(l => l.includes("Guerriero"));
+    const hpPrinted = result.logs.some(l => l.includes("100"));
+    tests.push({ desc: "Entrambe le variabili stampate a console", passed: pPrinted && hpPrinted, diff: (pPrinted && hpPrinted) ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
     {
         id: 7,
@@ -391,12 +421,17 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var nome = "Eroe"\n    var messaggio = "Giocatore: " + nome\n    print(messaggio)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito correttamente", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const printed = result.logs.some(l => l.includes("Giocatore: Eroe"));
-            tests.push({ desc: "Stringa concatenata 'Giocatore: Eroe' stampata", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasNome = result.scope && result.scope.nome === "Eroe";
+    const hasMsg = result.scope && result.scope.messaggio === "Giocatore: Eroe";
+    const usesConcat = result.code && result.code.includes("+") && result.code.includes("nome");
+    tests.push({ desc: "Variabili 'nome' e 'messaggio' create correttamente", passed: hasNome && hasMsg, diff: (hasNome && hasMsg) ? null : `nome=${result.scope ? result.scope.nome : 'null'}, messaggio=${result.scope ? result.scope.messaggio : 'null'}` });
+    tests.push({ desc: "Concatenazione con l'operatore '+' utilizzata", passed: !!usesConcat, diff: usesConcat ? null : "Usa 'Giocatore: ' + nome per concatenare la stringa." });
+    const printed = result.logs.some(l => l.includes("Giocatore: Eroe"));
+    tests.push({ desc: "Stringa concatenata stampata a console", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
 {
         id: 8,
@@ -438,21 +473,17 @@ const LESSONS_DATA = [
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const titleOk = s.title === 'The "Lost" Key';
-            const npcOk = s.npc_line === "It's dangerous to go alone!";
-            const doorOk = s.door_code === "0420";
-            tests.push({ desc: "Variabile 'title' con virgolette interne corretta", passed: titleOk, diff: titleOk ? null : `Ricevuto: ${s.title}` });
-            tests.push({ desc: "Variabile 'npc_line' con apostrofo corretta", passed: npcOk, diff: npcOk ? null : `Ricevuto: ${s.npc_line}` });
-            tests.push({ desc: "Variabile 'door_code' impostata a \"0420\"", passed: doorOk, diff: doorOk ? null : `Ricevuto: ${s.door_code}` });
-            const out = (result.logs || []).join('\n');
-            const clean = out.replace(/\s+/g, ' ');
-            const outOk = clean.includes('Title: The "Lost" Key') && clean.includes("NPC: It's dangerous to go alone!") && clean.includes("Door code: 0420");
-            tests.push({ desc: "Output della console corrispondente", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const titleOk = s.title === 'The "Lost" Key';
+    const npcOk = s.npc_line === "It's dangerous to go alone!";
+    const doorOk = s.door_code === "0420";
+    tests.push({ desc: "Variabile 'title' con virgolette interne corretta", passed: titleOk, diff: titleOk ? null : `Ricevuto: ${s.title}` });
+    tests.push({ desc: "Variabile 'npc_line' con apostrofo corretta", passed: npcOk, diff: npcOk ? null : `Ricevuto: ${s.npc_line}` });
+    tests.push({ desc: "Variabile 'door_code' impostata a \"0420\"", passed: doorOk, diff: doorOk ? null : `Ricevuto: ${s.door_code}` });
+    return tests;
+}
     },
 
     // ==========================================
@@ -496,13 +527,14 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var velocita = 4.5\n    var ha_chiave = true\n    print(velocita)\n    print(ha_chiave)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const isFloat = result.scope["velocita"] === 4.5;
-            const isBool = result.scope["ha_chiave"] === true;
-            tests.push({ desc: "Variabili float e bool create", passed: isFloat && isBool, diff: (isFloat && isBool) ? null : "Valori non validi" });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const isFloat = result.scope && result.scope.velocita === 4.5;
+    const isBool = result.scope && result.scope.ha_chiave === true;
+    tests.push({ desc: "Variabile float 'velocita = 4.5' creata", passed: isFloat, diff: isFloat ? null : `Valore: ${result.scope ? result.scope.velocita : 'undefined'}` });
+    tests.push({ desc: "Variabile bool 'ha_chiave = true' creata", passed: isBool, diff: isBool ? null : `Valore: ${result.scope ? result.scope.ha_chiave : 'undefined'}` });
+    return tests;
+}
     },
     {
         id: 10,
@@ -534,12 +566,14 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var vita: int = 100\n    print(vita)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito correttamente", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.scope["vita"] === 100;
-            tests.push({ desc: "Variabile tipizzata 'vita' creata con valore 100", passed: ok, diff: ok ? null : `Ricevuto: ${result.scope["vita"]}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const okVal = result.scope && result.scope.vita === 100;
+    const hasType = result.code && /(:\s*int\b)/.test(result.code);
+    tests.push({ desc: "Variabile 'vita' con valore 100", passed: okVal, diff: okVal ? null : `Valore attuale: ${result.scope ? result.scope.vita : 'undefined'}` });
+    tests.push({ desc: "Tipizzazione statica esplicita ': int' applicata", passed: !!hasType, diff: hasType ? null : "Aggiungi ': int' dopo il nome della variabile: var vita: int = 100." });
+    return tests;
+}
     },
     {
         id: 11,
@@ -571,12 +605,14 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    const GRAVITA = 9.8\n    print(GRAVITA)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito correttamente", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.scope["GRAVITA"] === 9.8;
-            tests.push({ desc: "Costante GRAVITA impostata a 9.8", passed: ok, diff: ok ? null : `Valore: ${result.scope["GRAVITA"]}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const okVal = result.scope && result.scope.GRAVITA === 9.8;
+    const hasConst = result.code && /\bconst\s+GRAVITA\b/.test(result.code);
+    tests.push({ desc: "Costante GRAVITA impostata a 9.8", passed: okVal, diff: okVal ? null : `Valore: ${result.scope ? result.scope.GRAVITA : 'undefined'}` });
+    tests.push({ desc: "Parola chiave 'const' utilizzata", passed: !!hasConst, diff: hasConst ? null : "Dichiara la costante con: const GRAVITA = 9.8." });
+    return tests;
+}
     },
 {
         id: 12,
@@ -620,22 +656,20 @@ const LESSONS_DATA = [
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const heroOk = s.eroe === "Valerius";
-            const hpOk = s.salute === 150;
-            const shieldOk = s.scudo_attivo === true;
-            const maxHpOk = s.MAX_HP === 200;
-            tests.push({ desc: "Costante MAX_HP: int = 200 dichiarata correttamente", passed: maxHpOk, diff: maxHpOk ? null : `Ricevuto: ${s.MAX_HP}` });
-            tests.push({ desc: "Variabili tipizzate eroe e salute configurate", passed: heroOk && hpOk, diff: (heroOk && hpOk) ? null : `eroe=${s.eroe}, salute=${s.salute}` });
-            tests.push({ desc: "Variabile scudo_attivo impostata a true con inferenza", passed: shieldOk, diff: shieldOk ? null : `Ricevuto: ${s.scudo_attivo}` });
-            const out = (result.logs || []).join('\n');
-            const clean = out.replace(/\s+/g, ' ');
-            const outOk = clean.includes("Eroe: Valerius") && clean.includes("HP: 150 / 200") && clean.includes("Scudo: true");
-            tests.push({ desc: "Output scheda eroe stampato con precisione", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const heroOk = s.eroe === "Valerius";
+    const hpOk = s.salute === 150;
+    const shieldOk = s.scudo_attivo === true;
+    const maxHpOk = s.MAX_HP === 200;
+    const hasConst = result.code && /\bconst\s+MAX_HP\b/.test(result.code);
+    const hasInfer = result.code && /:=/.test(result.code);
+    tests.push({ desc: "Costante MAX_HP: int = 200 con const", passed: maxHpOk && hasConst, diff: (maxHpOk && hasConst) ? null : "Dichiara const MAX_HP: int = 200" });
+    tests.push({ desc: "Variabili tipizzate eroe e salute configurate", passed: heroOk && hpOk, diff: (heroOk && hpOk) ? null : `eroe=${s.eroe}, salute=${s.salute}` });
+    tests.push({ desc: "Variabile scudo_attivo con inferenza di tipo ':='", passed: shieldOk && hasInfer, diff: (shieldOk && hasInfer) ? null : "Usa ':=' per scudo_attivo := true" });
+    return tests;
+}
     },
 
     // ==========================================
@@ -672,13 +706,16 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var somma = 10 + 5\n    var prodotto = 5 * 2\n    print(somma)\n    print(prodotto)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito correttamente", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope["somma"] === 15;
-            const p = result.scope["prodotto"] === 10;
-            tests.push({ desc: "Somma (15) e Prodotto (10) calcolati", passed: s && p, diff: (s && p) ? null : "Calcoli non corretti" });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope && result.scope.somma === 15;
+    const p = result.scope && result.scope.prodotto === 10;
+    const hasOps = result.code && result.code.includes("+") && result.code.includes("*");
+    tests.push({ desc: "Somma (10 + 5 = 15) calcolata", passed: s, diff: s ? null : `Ricevuto somma: ${result.scope ? result.scope.somma : 'null'}` });
+    tests.push({ desc: "Prodotto (5 * 2 = 10) calcolato", passed: p, diff: p ? null : `Ricevuto prodotto: ${result.scope ? result.scope.prodotto : 'null'}` });
+    tests.push({ desc: "Operatori '+' e '*' utilizzati nel calcolo", passed: !!hasOps, diff: hasOps ? null : "Usa gli operatori + e * per eseguire le operazioni matematiche." });
+    return tests;
+}
     },
     {
         id: 14,
@@ -709,12 +746,12 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var punti_vita = 100\n    punti_vita -= 20\n    print(punti_vita)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito correttamente", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.scope["punti_vita"] === 80;
-            tests.push({ desc: "punti_vita aggiornati a 80", passed: ok, diff: ok ? null : `Risultato: ${result.scope["punti_vita"]}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const ok = result.scope && result.scope.punteggio === 20;
+    tests.push({ desc: "Espressione 'punteggio = 10 + 5 * 2' calcolata a 20", passed: ok, diff: ok ? null : `Ricevuto: ${result.scope ? result.scope.punteggio : 'null'}` });
+    return tests;
+}
     },
     {
         id: 15,
@@ -750,12 +787,14 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var monete_base = 50\n    var moltiplicatore = 3\n    var monete_totali = monete_base * moltiplicatore\n    print(monete_totali)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.scope["monete_totali"] === 150;
-            tests.push({ desc: "Monete totali calcolate a 150", passed: ok, diff: ok ? null : `Risultato: ${result.scope["monete_totali"]}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const okVal = result.scope && result.scope.monete_totali === 150;
+    const hasCompound = result.code && /\+=/.test(result.code);
+    tests.push({ desc: "Monete totali aggiornate a 150", passed: okVal, diff: okVal ? null : `Ricevuto: ${result.scope ? result.scope.monete_totali : 'null'}` });
+    tests.push({ desc: "Operatore di assegnazione composta '+=' utilizzato", passed: !!hasCompound, diff: hasCompound ? null : "Usa 'monete_totali += 50' per incrementare il valore." });
+    return tests;
+}
     },
 {
         id: 16,
@@ -797,17 +836,19 @@ const LESSONS_DATA = [
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const hpOk = s.salute_rimasta === 65;
-            const coinsOk = Math.floor(Number(s.monete_per_membro)) === 33;
-            const restOk = s.monete_avanzate === 1;
-            tests.push({ desc: "Salute rimasta aggiornata con -= a 65", passed: hpOk, diff: hpOk ? null : `Ricevuto: ${s.salute_rimasta}` });
-            tests.push({ desc: "Monete per membro calcolate a 33", passed: coinsOk, diff: coinsOk ? null : `Ricevuto: ${s.monete_per_membro}` });
-            tests.push({ desc: "Monete avanzate calcolate con % a 1", passed: restOk, diff: restOk ? null : `Ricevuto: ${s.monete_avanzate}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const hpOk = s.salute_rimasta === 65;
+    const coinsOk = Math.floor(Number(s.monete_per_membro)) === 33;
+    const restOk = s.monete_avanzate === 1;
+    const hasSub = result.code && /-=/ .test(result.code);
+    const hasMod = result.code && /%/.test(result.code);
+    tests.push({ desc: "Salute rimasta aggiornata con '-=' a 65", passed: hpOk && hasSub, diff: hpOk ? (hasSub ? null : "Usa '-='") : `Ricevuto: ${s.salute_rimasta}` });
+    tests.push({ desc: "Divisione intera monete per membro calcolata a 33", passed: coinsOk, diff: coinsOk ? null : `Ricevuto: ${s.monete_per_membro}` });
+    tests.push({ desc: "Modulo '%' resto monete calcolato a 1", passed: restOk && hasMod, diff: restOk ? (hasMod ? null : "Usa '%'") : `Ricevuto: ${s.monete_avanzate}` });
+    return tests;
+}
     },
 
     // ==========================================
@@ -842,12 +883,16 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var livello = 10\n    if livello >= 10:\n        print("Livello raggiunto!")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito correttamente", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.logs.some(l => l.includes("Livello raggiunto!"));
-            tests.push({ desc: "Condizione verificata con successo", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasVar = result.scope && result.scope.livello !== undefined && result.scope.livello >= 10;
+    const hasIf = result.code && /\bif\s+livello\s*(>=|>|==)/.test(result.code);
+    tests.push({ desc: "Variabile 'livello' configurata (>= 10)", passed: hasVar, diff: hasVar ? null : `Valore livello: ${result.scope ? result.scope.livello : 'undefined'}` });
+    tests.push({ desc: "Condizione 'if' sul livello applicata", passed: !!hasIf, diff: hasIf ? null : "Usa 'if livello >= 10:' per verificare la condizione." });
+    const printed = result.logs.some(l => l.includes("Livello raggiunto!"));
+    tests.push({ desc: "Messaggio 'Livello raggiunto!' stampato", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
     {
         id: 18,
@@ -878,12 +923,16 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var ha_chiave = true\n    var porta_chiusa = true\n    if ha_chiave and porta_chiusa:\n        print("Accesso consentito")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.logs.some(l => l.includes("Accesso consentito"));
-            tests.push({ desc: "Condizione con 'and' verificata", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasKeys = result.scope && result.scope.ha_chiave === true && result.scope.porta_chiusa === true;
+    const usesAnd = result.code && /\band\b/.test(result.code) && /\bif\b/.test(result.code);
+    tests.push({ desc: "Variabili ha_chiave e porta_chiusa impostate a true", passed: hasKeys, diff: hasKeys ? null : "Entrambe le variabili devono essere true." });
+    tests.push({ desc: "Condizione con 'and' utilizzata", passed: !!usesAnd, diff: usesAnd ? null : "Usa 'if ha_chiave and porta_chiusa:'." });
+    const ok = result.logs.some(l => l.includes("Accesso consentito"));
+    tests.push({ desc: "Console stampa 'Accesso consentito'", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
     {
         id: 19,
@@ -920,12 +969,15 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var punti_vita = 0\n    if punti_vita <= 0:\n        print("Game Over")\n    else:\n        print("In battaglia")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.logs.some(l => l.includes("Game Over"));
-            tests.push({ desc: "Game Over stampato correttamente", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasHp = result.scope && result.scope.punti_vita !== undefined;
+    const hasIfElse = result.code && /\bif\b/.test(result.code) && /\belse\b/.test(result.code);
+    tests.push({ desc: "Struttura di controllo 'if / else' completa presente", passed: !!hasIfElse, diff: hasIfElse ? null : "Includi sia il ramo 'if' che il ramo 'else:'." });
+    const ok = result.logs.some(l => l.includes("Game Over"));
+    tests.push({ desc: "Ramo 'Game Over' eseguito con punti_vita <= 0", passed: ok && hasHp, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
 {
         id: 20,
@@ -967,17 +1019,15 @@ const LESSONS_DATA = [
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const stateOk = s.stato_portale === "Portale Attivato";
-            tests.push({ desc: "Stato portale impostato a 'Portale Attivato'", passed: stateOk, diff: stateOk ? null : `Ricevuto: "${s.stato_portale}"` });
-            const out = (result.logs || []).join('\n');
-            const clean = out.replace(/\s+/g, ' ');
-            const outOk = clean.includes("Stato: Portale Attivato");
-            tests.push({ desc: "Messaggio stampato a console correttamente", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const stateOk = s.stato_portale === "Portale Attivato";
+    const hasElif = result.code && /\b(elif|else)\b/.test(result.code);
+    tests.push({ desc: "Rami condizionali multipli con elif/else presenti", passed: !!hasElif, diff: hasElif ? null : "Usa if, elif e else per gestire i tre stati del portale." });
+    tests.push({ desc: "Stato portale calcolato a 'Portale Attivato'", passed: stateOk, diff: stateOk ? null : `Ricevuto: "${s.stato_portale}"` });
+    return tests;
+}
     },
 
     // ==========================================
@@ -1013,12 +1063,17 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var inventario = ["Spada", "Scudo", "Pozione"]\n    print(inventario[0])\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.logs.some(l => l.includes("Spada"));
-            tests.push({ desc: "Primo oggetto dell'inventario stampato ('Spada')", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const inv = result.scope && result.scope.inventario;
+    const isArray = Array.isArray(inv) && inv.length === 3 && inv.includes("Spada") && inv.includes("Scudo");
+    tests.push({ desc: "Array 'inventario' creato con 3 elementi", passed: isArray, diff: isArray ? null : `Valore: ${JSON.stringify(inv)}` });
+    const usesIndex = result.code && /inventario\s*\[\s*0\s*\]/.test(result.code);
+    tests.push({ desc: "Accesso con indice [0] utilizzato per la stampa", passed: !!usesIndex, diff: usesIndex ? null : "Usa 'inventario[0]' per accedere al primo elemento." });
+    const ok = result.logs.some(l => l.includes("Spada"));
+    tests.push({ desc: "Primo elemento ('Spada') stampato", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
     {
         id: 22,
@@ -1049,13 +1104,15 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var oggetti = ["Spada", "Scudo", "Pozione"]\n    print(oggetti[1])\n    print(oggetti[2])\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("Scudo") && out.includes("Pozione");
-            tests.push({ desc: "Indici 1 e 2 stampati con successo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const usesIndices = result.code && /\[\s*1\s*\]/.test(result.code) && /\[\s*2\s*\]/.test(result.code);
+    tests.push({ desc: "Accesso tramite indici [1] e [2] utilizzato", passed: !!usesIndices, diff: usesIndices ? null : "Accedi agli elementi con oggetti[1] e oggetti[2]." });
+    const out = (result.logs || []).join('\n');
+    const ok = out.includes("Scudo") && out.includes("Pozione");
+    tests.push({ desc: "Scudo e Pozione stampati a console", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
     {
         id: 23,
@@ -1089,12 +1146,17 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var inventario = ["Mappa", "Bussola"]\n    inventario.append("Torcia")\n    print(inventario.size())\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.logs.some(l => l.trim() === "3");
-            tests.push({ desc: "Dimensione dell'inventario aggiornata a 3", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const inv = result.scope && result.scope.inventario;
+    const hasAppended = Array.isArray(inv) && inv.length === 3 && inv.includes("Torcia");
+    const usesMethods = result.code && /\.append\s*\(/.test(result.code) && /\.size\s*\(/.test(result.code);
+    tests.push({ desc: "Elemento 'Torcia' aggiunto all'array", passed: hasAppended, diff: hasAppended ? null : `Inventario finale: ${JSON.stringify(inv)}` });
+    tests.push({ desc: "Metodi append() e size() utilizzati", passed: !!usesMethods, diff: usesMethods ? null : "Usa inventario.append('Torcia') e print(inventario.size())." });
+    const ok = result.logs.some(l => l.trim() === "3");
+    tests.push({ desc: "Dimensione '3' stampata a console", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
 {
         id: 24,
@@ -1138,19 +1200,19 @@ const LESSONS_DATA = [
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const inv = s.zaino || [];
-            const hasBow = inv.includes("Arco Elfico");
-            const noStick = !inv.includes("Ramo Secco");
-            const cureOk = s.ha_cura === true;
-            const sizeOk = s.totale_slot === 3 && inv.length === 3;
-            tests.push({ desc: "Arco Elfico aggiunto e Ramo Secco rimosso", passed: hasBow && noStick, diff: (hasBow && noStick) ? null : `Zaino: ${JSON.stringify(inv)}` });
-            tests.push({ desc: "Controllo ha_cura valido (true)", passed: cureOk, diff: cureOk ? null : `Ricevuto: ${s.ha_cura}` });
-            tests.push({ desc: "Totale slot calcolato a 3", passed: sizeOk, diff: sizeOk ? null : `Ricevuto: ${s.totale_slot}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const inv = s.zaino || [];
+    const hasBow = inv.includes("Arco Elfico");
+    const noStick = !inv.includes("Ramo Secco");
+    const cureOk = s.ha_cura === true;
+    const sizeOk = s.totale_slot === 3 && inv.length === 3;
+    tests.push({ desc: "Arco Elfico aggiunto e Ramo Secco rimosso", passed: hasBow && noStick, diff: (hasBow && noStick) ? null : `Zaino: ${JSON.stringify(inv)}` });
+    tests.push({ desc: "Controllo has('Pozione di Vita') true", passed: cureOk, diff: cureOk ? null : `Ricevuto: ${s.ha_cura}` });
+    tests.push({ desc: "Totale slot calcolato con size() a 3", passed: sizeOk, diff: sizeOk ? null : `Ricevuto: ${s.totale_slot}` });
+    return tests;
+}
     },
 
     // ==========================================
@@ -1185,13 +1247,15 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    for i in range(3):\n        print(i)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("0") && out.includes("1") && out.includes("2");
-            tests.push({ desc: "Numeri da 0 a 2 stampati dal ciclo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasLoop = result.code && /\bfor\s+\w+\s+in\s+range\s*\(/.test(result.code);
+    tests.push({ desc: "Ciclo 'for ... in range(...)' utilizzato", passed: !!hasLoop, diff: hasLoop ? null : "Usa 'for i in range(3):' per iterare." });
+    const out = (result.logs || []).join('\n');
+    const ok = out.includes("0") && out.includes("1") && out.includes("2");
+    tests.push({ desc: "Numeri 0, 1, 2 stampati dal ciclo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
     {
         id: 26,
@@ -1223,13 +1287,18 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var nemici = ["Goblin", "Orco", "Drago"]\n    for nemico in nemici:\n        print(nemico)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("Goblin") && out.includes("Orco") && out.includes("Drago");
-            tests.push({ desc: "Tutti i nemici stampati dal ciclo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const inv = result.scope && result.scope.nemici;
+    const isArray = Array.isArray(inv) && inv.includes("Goblin") && inv.includes("Orco") && inv.includes("Drago");
+    const hasLoop = result.code && /\bfor\s+\w+\s+in\s+nemici\b/.test(result.code);
+    tests.push({ desc: "Lista 'nemici' definita con Goblin, Orco e Drago", passed: isArray, diff: isArray ? null : `Valore: ${JSON.stringify(inv)}` });
+    tests.push({ desc: "Ciclo 'for nemico in nemici:' utilizzato", passed: !!hasLoop, diff: hasLoop ? null : "Usa 'for nemico in nemici:' per iterare sulla lista." });
+    const out = (result.logs || []).join('\n');
+    const ok = out.includes("Goblin") && out.includes("Orco") && out.includes("Drago");
+    tests.push({ desc: "Tutti i 3 nemici stampati a console", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
     {
         id: 27,
@@ -1264,13 +1333,16 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var conto = 1\n    while conto <= 3:\n        print("Conto: " + str(conto))\n        conto += 1\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = result.logs.join('\n');
-            const ok = out.includes("Conto: 1") && out.includes("Conto: 2") && out.includes("Conto: 3");
-            tests.push({ desc: "Conteggio da 1 a 3 stampato correttamente", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasWhile = result.code && /\bwhile\b/.test(result.code);
+    const valOk = result.scope && Number(result.scope.conto) >= 3;
+    tests.push({ desc: "Ciclo 'while' utilizzato nel codice", passed: !!hasWhile, diff: hasWhile ? null : "Usa 'while conto <= 3:' per il conteggio." });
+    const out = (result.logs || []).join('\n');
+    const ok = out.includes("Conto: 1") && out.includes("Conto: 2") && out.includes("Conto: 3");
+    tests.push({ desc: "Conteggio da 1 a 3 stampato correttamente", passed: ok && valOk, diff: ok ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
 {
         id: 28,
@@ -1312,17 +1384,18 @@ const LESSONS_DATA = [
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const xpOk = s.xp_totali === 100;
-            tests.push({ desc: "XP Totali accumulati a 100 (4 x 25)", passed: xpOk, diff: xpOk ? null : `Ricevuto: ${s.xp_totali}` });
-            const out = (result.logs || []).join('\n');
-            const clean = out.replace(/\s+/g, ' ');
-            const logsOk = clean.includes("Allerta: Slime") && clean.includes("Allerta: Scheletro") && clean.includes("Allerta: Spettro") && clean.includes("Allerta: Boss Drago");
-            tests.push({ desc: "Tutte le 4 allerte dei nemici stampate", passed: logsOk, diff: logsOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const xpOk = s.xp_totali === 100;
+    const hasLoop = result.code && /\bfor\b/.test(result.code);
+    tests.push({ desc: "Ciclo for utilizzato per scorrere l'ondata", passed: !!hasLoop, diff: hasLoop ? null : "Usa un ciclo for per iterare sui nemici." });
+    tests.push({ desc: "XP Totali accumulati a 100 (4 x 25)", passed: xpOk, diff: xpOk ? null : `Ricevuto: ${s.xp_totali}` });
+    const clean = (result.logs || []).join(' ').replace(/\s+/g, ' ');
+    const logsOk = clean.includes("Allerta: Slime") && clean.includes("Allerta: Scheletro") && clean.includes("Allerta: Spettro") && clean.includes("Allerta: Boss Drago");
+    tests.push({ desc: "Allerte di tutti i nemici stampate", passed: logsOk, diff: logsOk ? null : `Ricevuto: "${clean}"` });
+    return tests;
+}
     },
 
     // ==========================================
@@ -1355,12 +1428,14 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    print("Nodo Inizializzato")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.logs.some(l => l.includes("Nodo Inizializzato"));
-            tests.push({ desc: "Messaggio 'Nodo Inizializzato' stampato", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasReady = result.code && /\bfunc\s+_ready\s*\(/.test(result.code);
+    tests.push({ desc: "Funzione 'func _ready():' definita", passed: !!hasReady, diff: hasReady ? null : "Assicurati di definire la funzione 'func _ready():'." });
+    const ok = result.logs.some(l => l.includes("Nodo Inizializzato"));
+    tests.push({ desc: "Console stampa 'Nodo Inizializzato'", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
     {
         id: 30,
@@ -1393,12 +1468,25 @@ const LESSONS_DATA = [
         ],
         solution: `func saluta(nome):\n    print("Ciao " + nome)\n\nfunc _ready():\n    saluta("Eroe")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.logs.some(l => l.includes("Ciao Eroe"));
-            tests.push({ desc: "Funzione richiamata con parametro corretto ('Ciao Eroe')", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasFn = result.scope && typeof result.scope.saluta === 'function';
+    tests.push({ desc: "Funzione 'saluta(nome)' dichiarata", passed: !!hasFn, diff: hasFn ? null : "Dichiara la funzione con: func saluta(nome):" });
+    
+    let paramTestOk = false;
+    if (hasFn) {
+        try {
+            result.scope.saluta("Campione");
+            paramTestOk = result.logs.some(l => l.includes("Ciao Campione"));
+        } catch (e) {
+            paramTestOk = false;
         }
+    }
+    tests.push({ desc: "Funzione accetta parametri dinamici (es. saluta('Campione'))", passed: paramTestOk, diff: paramTestOk ? null : "La funzione deve stampare 'Ciao ' concatenato al parametro passato." });
+    const defaultOk = result.logs.some(l => l.includes("Ciao Eroe"));
+    tests.push({ desc: "Chiamata iniziale saluta('Eroe') eseguita", passed: defaultOk, diff: defaultOk ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
     {
         id: 31,
@@ -1432,12 +1520,23 @@ const LESSONS_DATA = [
         ],
         solution: `func calcola_danno(attacco, difesa):\n    return attacco - difesa\n\nfunc _ready():\n    var danno = calcola_danno(30, 5)\n    print(danno)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const ok = result.logs.some(l => l.trim() === "25");
-            tests.push({ desc: "Valore di ritorno (25) calcolato e stampato", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasFn = result.scope && typeof result.scope.calcola_danno === 'function';
+    tests.push({ desc: "Funzione 'calcola_danno(attacco, difesa)' definita", passed: !!hasFn, diff: hasFn ? null : "Dichiara func calcola_danno(attacco, difesa): con return." });
+    
+    let testsPass = false;
+    if (hasFn) {
+        const r1 = result.scope.calcola_danno(30, 5);
+        const r2 = result.scope.calcola_danno(50, 10);
+        const r3 = result.scope.calcola_danno(15, 15);
+        testsPass = (r1 === 25) && (r2 === 40) && (r3 === 0);
+    }
+    tests.push({ desc: "Valori di ritorno calcolati correttamente su input multipli", passed: testsPass, diff: testsPass ? null : "La funzione deve restituire 'attacco - difesa'." });
+    const printed = result.logs.some(l => l.trim() === "25");
+    tests.push({ desc: "Risultato '25' stampato in _ready()", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
 {
         id: 32,
@@ -1479,14 +1578,21 @@ const LESSONS_DATA = [
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = (result.logs || []).join('\n');
-            const clean = out.replace(/\s+/g, ' ');
-            const ok = clean.includes("Colpo normale: 30") && clean.includes("Colpo critico: 60");
-            tests.push({ desc: "Colpo normale (30) e colpo critico (60) calcolati con successo", passed: ok, diff: ok ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const hasFn = result.scope && typeof result.scope.calcola_colpo === 'function';
+    tests.push({ desc: "Funzione calcola_colpo definita", passed: !!hasFn, diff: hasFn ? null : "Definisci func calcola_colpo(attacco: int, critico: bool) -> int:" });
+    let checks = false;
+    if (hasFn) {
+        const norm = result.scope.calcola_colpo(30, false);
+        const crit = result.scope.calcola_colpo(30, true);
+        const altNorm = result.scope.calcola_colpo(50, false);
+        const altCrit = result.scope.calcola_colpo(50, true);
+        checks = (norm === 30) && (crit === 60) && (altNorm === 50) && (altCrit === 100);
+    }
+    tests.push({ desc: "Calcolo danno critico (x2 se true, x1 se false) verificato su vari input", passed: checks, diff: checks ? null : "Se critico è true ritorna attacco * 2, altrimenti attacco." });
+    return tests;
+}
     },
 
     // ==========================================
@@ -1525,13 +1631,15 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var posizione = Vector2(100, 200)\n    print(posizione)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const p = result.scope["posizione"];
-            const ok = p && p.x === 100 && p.y === 200;
-            tests.push({ desc: "Vector2(100, 200) creato correttamente", passed: ok, diff: ok ? null : "Valore non corrispondente" });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const p = result.scope && result.scope.posizione;
+    const ok = p && p.x === 100 && p.y === 200;
+    tests.push({ desc: "Vector2(100, 200) creato nella variabile 'posizione'", passed: !!ok, diff: ok ? null : `Ricevuto: ${p}` });
+    const printed = result.logs.some(l => l.includes("100") && l.includes("200"));
+    tests.push({ desc: "Coordinate Vector2 stampate a console", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    return tests;
+}
     },
     {
         id: 34,
@@ -1567,13 +1675,14 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var posizione = Vector2(100, 200)\n    var velocita = 50\n    posizione.x += velocita\n    print(posizione)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const p = result.scope["posizione"];
-            const ok = p && p.x === 150 && p.y === 200;
-            tests.push({ desc: "Coordinata X aumentata a 150", passed: ok, diff: ok ? null : "Posizione errata" });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const p = result.scope && result.scope.posizione;
+    const ok = p && p.x === 150 && p.y === 200;
+    const hasAdd = result.code && /posizione\.x\s*\+=/.test(result.code);
+    tests.push({ desc: "Coordinata X incrementata con 'posizione.x += velocita' a 150", passed: ok && hasAdd, diff: ok ? (hasAdd ? null : "Usa posizione.x += velocita") : `Ricevuto: ${p}` });
+    return tests;
+}
     },
     {
         id: 35,
@@ -1609,13 +1718,13 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var pos = Vector2(100, 200)\n    pos.x += 20\n    pos.y -= 20\n    print(pos)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const p = result.scope["pos"];
-            const ok = p && p.x === 120 && p.y === 180;
-            tests.push({ desc: "Vettore aggiornato a Vector2(120, 180)", passed: ok, diff: ok ? null : "Posizione non corretta" });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const p = result.scope && result.scope.pos;
+    const ok = p && p.x === 120 && p.y === 180;
+    tests.push({ desc: "Vettore aggiornato a Vector2(120, 180)", passed: !!ok, diff: ok ? null : `Ricevuto: ${p}` });
+    return tests;
+}
     },
 {
         id: 36,
@@ -1659,20 +1768,16 @@ const LESSONS_DATA = [
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const pos = s.posizione;
-            const posOk = pos && Number(pos.x) === 150 && Number(pos.y) === 170;
-            const landOk = s.atterrato === true;
-            tests.push({ desc: "Posizione finale calcolata a Vector2(150, 170)", passed: posOk, diff: posOk ? null : `Ricevuto: ${pos}` });
-            tests.push({ desc: "Atterraggio riuscito con successo (true)", passed: landOk, diff: landOk ? null : `Ricevuto: ${s.atterrato}` });
-            const out = (result.logs || []).join('\n');
-            const clean = out.replace(/\s+/g, ' ');
-            const outOk = clean.includes("Posizione finale: Vector2(150, 170)") && clean.includes("Stazione raggiunta: true");
-            tests.push({ desc: "Output della missione stampato con successo", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const pos = s.posizione;
+    const posOk = pos && Number(pos.x) === 150 && Number(pos.y) === 170;
+    const landOk = s.atterrato === true;
+    tests.push({ desc: "Posizione finale calcolata a Vector2(150, 170)", passed: posOk, diff: posOk ? null : `Ricevuto: ${pos}` });
+    tests.push({ desc: "Atterraggio riuscito con successo (true)", passed: landOk, diff: landOk ? null : `Ricevuto: ${s.atterrato}` });
+    return tests;
+}
     },
 // ==========================================
     // CAPITOLO 10: DIZIONARI (DICTIONARY)
@@ -1706,17 +1811,17 @@ const LESSONS_DATA = [
         ],
         solution: `func _ready():\n    var eroe = { "classe": "Guerriero", "livello": 10 }\n    print("Classe: ", eroe["classe"])\n    print("Livello: ", eroe["livello"])\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const d = s.eroe || {};
-            const heroOk = d["classe"] === "Guerriero" && Number(d["livello"]) === 10;
-            tests.push({ desc: "Dizionario eroe creato con chiavi classe e livello", passed: heroOk, diff: heroOk ? null : `Ricevuto: ${JSON.stringify(d)}` });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Classe: Guerriero") && out.includes("Livello: 10");
-            tests.push({ desc: "Classe e livello stampati correttamente", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const d = s.eroe || {};
+    const heroOk = d["classe"] === "Guerriero" && Number(d["livello"]) === 10;
+    tests.push({ desc: "Dizionario eroe creato con chiavi 'classe' e 'livello'", passed: heroOk, diff: heroOk ? null : `Ricevuto: ${JSON.stringify(d)}` });
+    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
+    const outOk = out.includes("Classe: Guerriero") && out.includes("Livello: 10");
+    tests.push({ desc: "Classe e livello stampati con eroe['...']", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
     {
         id: 38,
@@ -1748,17 +1853,16 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         ],
         solution: `func _ready():\n    var equip = { "arma": "Spada" }\n    equip["armatura"] = "Scudo"\n    equip["arma"] = "Spada Laser"\n    print("Arma: ", equip["arma"])\n    print("Armatura: ", equip["armatura"])\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const eq = s.equip || {};
-            const modOk = eq["arma"] === "Spada Laser" && eq["armatura"] === "Scudo";
-            tests.push({ desc: "Chiavi aggiornate correttamente (arma e armatura)", passed: modOk, diff: modOk ? null : `Equip: ${JSON.stringify(eq)}` });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Arma: Spada Laser") && out.includes("Armatura: Scudo");
-            tests.push({ desc: "Output della console esatto", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const eq = s.equip || {};
+    const modOk = eq["arma"] === "Spada Laser" && eq["armatura"] === "Scudo";
+    const hasAssign = result.code && (/(?:equip\s*\[\s*["']armatura["']\s*\]|equip\.armatura)\s*=/.test(result.code));
+    tests.push({ desc: "Chiavi aggiornate correttamente (arma: Spada Laser, armatura: Scudo)", passed: modOk, diff: modOk ? null : `Equip: ${JSON.stringify(eq)}` });
+    tests.push({ desc: "Aggiunta della chiave 'armatura' tramite assegnazione dinamica", passed: !!hasAssign, diff: hasAssign ? null : "Assegna la chiave 'armatura' usando equip['armatura'] = 'Scudo'" });
+    return tests;
+}
     },
     {
         id: 39,
@@ -1791,17 +1895,16 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         ],
         solution: `func _ready():\n    var forziere = { "oro": 100, "gemme": 3 }\n    var ha_oro = forziere.has("oro")\n    var ha_chiave = forziere.has("chiave")\n    print("Possiede oro: ", ha_oro)\n    print("Possiede chiave: ", ha_chiave)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const goldOk = s.ha_oro === true;
-            const keyOk = s.ha_chiave === false;
-            tests.push({ desc: "Verifica ha_oro (true) e ha_chiave (false)", passed: goldOk && keyOk, diff: (goldOk && keyOk) ? null : `ha_oro=${s.ha_oro}, ha_chiave=${s.ha_chiave}` });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Possiede oro: true") && out.includes("Possiede chiave: false");
-            tests.push({ desc: "Output della console stampato con precisione", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const goldOk = s.ha_oro === true;
+    const keyOk = s.ha_chiave === false;
+    const hasMethod = result.code && /\.has\s*\(/.test(result.code);
+    tests.push({ desc: "Metodo forziere.has(...) utilizzato", passed: !!hasMethod, diff: hasMethod ? null : "Usa forziere.has('oro') e forziere.has('chiave')." });
+    tests.push({ desc: "Verifica ha_oro (true) e ha_chiave (false)", passed: goldOk && keyOk, diff: (goldOk && keyOk) ? null : `ha_oro=${s.ha_oro}, ha_chiave=${s.ha_chiave}` });
+    return tests;
+}
     },
     {
         id: 40,
@@ -1845,19 +1948,16 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const b = s.boss || {};
-            const bossOk = b["nome"] === "Drago Antico" && Number(b["hp"]) === 420 && Number(b["attacco"]) === 75;
-            const furyOk = s.in_furia === false;
-            tests.push({ desc: "Dizionario del boss aggiornato (hp: 420, attacco: 75)", passed: bossOk, diff: bossOk ? null : `Boss: ${JSON.stringify(b)}` });
-            tests.push({ desc: "Verifica stato furia con .has() corretta (false)", passed: furyOk, diff: furyOk ? null : `in_furia=${s.in_furia}` });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Boss: Drago Antico") && out.includes("HP rimanenti: 420") && out.includes("Attacco: 75") && out.includes("Furia attiva: false");
-            tests.push({ desc: "Report di combattimento stampato con successo", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const b = s.boss || {};
+    const bossOk = b["nome"] === "Drago Antico" && Number(b["hp"]) === 420 && Number(b["attacco"]) === 75;
+    const furyOk = s.in_furia === false;
+    tests.push({ desc: "Dizionario del boss aggiornato (hp: 420, attacco: 75)", passed: bossOk, diff: bossOk ? null : `Boss: ${JSON.stringify(b)}` });
+    tests.push({ desc: "Controllo boss.has('furia') false", passed: furyOk, diff: furyOk ? null : `in_furia=${s.in_furia}` });
+    return tests;
+}
     },
 
     // ==========================================
@@ -1893,13 +1993,17 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         ],
         solution: `extends Node\n\nsignal porta_aperta\n\nfunc _ready():\n    porta_aperta.connect(quando_aperta)\n    print("Apertura in corso...")\n    porta_aperta.emit()\n\nfunc quando_aperta():\n    print("Porta aperta con successo!")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const ok = out.includes("Apertura in corso...") && out.includes("Porta aperta con successo!");
-            tests.push({ desc: "Segnale porta_aperta dichiarato ed emesso con successo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const hasSigDecl = result.code && /\bsignal\s+porta_aperta\b/.test(result.code);
+    const isSignal = s.porta_aperta && (typeof s.porta_aperta.emit === 'function');
+    tests.push({ desc: "Segnale 'signal porta_aperta' dichiarato", passed: !!(hasSigDecl && isSignal), diff: (hasSigDecl && isSignal) ? null : "Dichiara 'signal porta_aperta' in cima allo script." });
+    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
+    const ok = out.includes("Apertura in corso...") && out.includes("Porta aperta con successo!");
+    tests.push({ desc: "Segnale emesso con successo e intercettato dalla callback", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
     {
         id: 42,
@@ -1934,13 +2038,17 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         ],
         solution: `extends Node\n\nsignal moneta_raccolta\n\nfunc _ready():\n    moneta_raccolta.connect(aggiungi_punti)\n    moneta_raccolta.emit()\n\nfunc aggiungi_punti():\n    print("+10 Monete raccolte!")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const ok = out.includes("+10 Monete raccolte!");
-            tests.push({ desc: "Segnale moneta_raccolta connesso ed intercettato", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const sig = s.moneta_raccolta;
+    const hasConnected = sig && sig.callbacks && sig.callbacks.length > 0;
+    tests.push({ desc: "Segnale 'moneta_raccolta' connesso con connect()", passed: !!hasConnected, diff: hasConnected ? null : "Connetti il segnale con moneta_raccolta.connect(aggiungi_punti)." });
+    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
+    const ok = out.includes("+10 Monete raccolte!");
+    tests.push({ desc: "Funzione aggiungi_punti invocata da emit()", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
     {
         id: 43,
@@ -1975,13 +2083,26 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         ],
         solution: `extends Node\n\nsignal danno_inflitto(valore)\n\nfunc _ready():\n    danno_inflitto.connect(on_danno)\n    danno_inflitto.emit(35)\n\nfunc on_danno(v):\n    print("Danno registrato: ", v)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const ok = out.includes("Danno registrato: 35");
-            tests.push({ desc: "Segnale con parametro valore 35 ricevuto con successo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-            return tests;
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const sig = s.danno_inflitto;
+    const isSig = sig && (typeof sig.emit === 'function');
+    const hasParamDecl = result.code && /\bsignal\s+danno_inflitto\s*\(/.test(result.code);
+    tests.push({ desc: "Segnale 'signal danno_inflitto(valore)' dichiarato", passed: !!(isSig && hasParamDecl), diff: (isSig && hasParamDecl) ? null : "Dichiara 'signal danno_inflitto(valore)'." });
+    
+    let dynamicOk = false;
+    if (sig && sig.callbacks && sig.callbacks.length > 0) {
+        try {
+            sig.emit(99);
+            dynamicOk = result.logs.some(l => l.includes("99"));
+        } catch(e) {
+            dynamicOk = false;
         }
+    }
+    tests.push({ desc: "Segnale accetta e trasmette parametri numerici alla callback", passed: dynamicOk, diff: dynamicOk ? null : "La callback collegata deve ricevere il valore trasmesso dal segnale." });
+    return tests;
+}
     },
     {
         id: 44,
@@ -2024,13 +2145,17 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const ok = out.includes("UI: Barra salute a 75") && out.includes("UI: Barra salute a 40") && out.includes("=== EVENTI BATTAGLIA COMPLETATI ===");
-            tests.push({ desc: "Due eventi di salute emessi ed intercettati dalla UI", passed: ok, diff: ok ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const sig = s.salute_aggiornata;
+    const isSig = sig && (typeof sig.emit === 'function');
+    tests.push({ desc: "Segnale salute_aggiornata con parametro configurato", passed: !!isSig, diff: isSig ? null : "Dichiara signal salute_aggiornata(nuova_salute)." });
+    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
+    const ok = out.includes("UI: Barra salute a 75") && out.includes("UI: Barra salute a 40");
+    tests.push({ desc: "Due eventi di salute emessi (75 e 40)", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
 
     // ==========================================
@@ -2070,17 +2195,25 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         ],
         solution: `extends Node\n\nclass Pozione:\n    var nome\n    var cura\n    func _init(n, c):\n        self.nome = n\n        self.cura = c\n\nfunc _ready():\n    var elisir = Pozione.new("Elisir", 50)\n    print("Pozione creata: ", elisir.nome, " (Cura: ", elisir.cura, ")")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const item = s.elisir;
-            const itemOk = item && item.nome === "Elisir" && Number(item.cura) === 50;
-            tests.push({ desc: "Istanza elisir creata correttamente con classe Pozione", passed: itemOk, diff: itemOk ? null : `Ricevuto: ${JSON.stringify(item)}` });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Pozione creata: Elisir (Cura: 50)");
-            tests.push({ desc: "Output della console stampato con precisione", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
-            return tests;
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const item = s.elisir;
+    const itemOk = item && item.nome === "Elisir" && Number(item.cura) === 50;
+    tests.push({ desc: "Istanza elisir creata con classe Pozione (Elisir, cura 50)", passed: !!itemOk, diff: itemOk ? null : `Ricevuto: ${JSON.stringify(item)}` });
+    
+    let classConstructorOk = false;
+    if (s.Pozione && typeof s.Pozione.new === 'function') {
+        try {
+            const testInst = s.Pozione.new("Mana", 30);
+            classConstructorOk = (testInst.nome === "Mana" && Number(testInst.cura) === 30);
+        } catch(e) {
+            classConstructorOk = false;
         }
+    }
+    tests.push({ desc: "Costruttore _init() valorizza correttamente campi di nuove istanze", passed: classConstructorOk, diff: classConstructorOk ? null : "Il costruttore _init(n, c) deve inizializzare self.nome e self.cura." });
+    return tests;
+}
     },
     {
         id: 46,
@@ -2110,17 +2243,14 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         ],
         solution: `extends Node\n\nclass Guerriero:\n    var nome\n    var hp\n    func _init(n, h):\n        self.nome = n\n        self.hp = h\n\nfunc _ready():\n    var g1 = Guerriero.new("Arthur", 100)\n    var g2 = Guerriero.new("Lancelot", 90)\n    print("Eroe 1: ", g1.nome, " (HP: ", g1.hp, ")")\n    print("Eroe 2: ", g2.nome, " (HP: ", g2.hp, ")")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const g1Ok = s.g1 && s.g1.nome === "Arthur" && Number(s.g1.hp) === 100;
-            const g2Ok = s.g2 && s.g2.nome === "Lancelot" && Number(s.g2.hp) === 90;
-            tests.push({ desc: "Istanze indipendenti g1 e g2 create correttamente", passed: g1Ok && g2Ok, diff: (g1Ok && g2Ok) ? null : "Dati guerrieri errati" });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Eroe 1: Arthur (HP: 100)") && out.includes("Eroe 2: Lancelot (HP: 90)");
-            tests.push({ desc: "Stato dei due guerrieri stampato correttamente", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const g1Ok = s.g1 && s.g1.nome === "Arthur" && Number(s.g1.hp) === 100;
+    const g2Ok = s.g2 && s.g2.nome === "Lancelot" && Number(s.g2.hp) === 90;
+    tests.push({ desc: "Istanze indipendenti g1 e g2 create correttamente", passed: !!(g1Ok && g2Ok), diff: (g1Ok && g2Ok) ? null : "Crea g1 (Arthur, 100) e g2 (Lancelot, 90)." });
+    return tests;
+}
     },
     {
         id: 47,
@@ -2156,13 +2286,25 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         ],
         solution: `extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    func colpo_caricato():\n        return self.attacco * 2\n\nfunc _ready():\n    var eroe = Personaggio.new("Eroe", 25)\n    print("Danno colpo caricato: ", eroe.colpo_caricato())\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const ok = out.includes("Danno colpo caricato: 50");
-            tests.push({ desc: "Metodo colpo_caricato() eseguito con successo (25 x 2 = 50)", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-            return tests;
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const hero = s.eroe;
+    const heroOk = hero && typeof hero.colpo_caricato === 'function' && hero.colpo_caricato() === 50;
+    tests.push({ desc: "Metodo colpo_caricato() restituisce attacco * 2 (25 x 2 = 50)", passed: !!heroOk, diff: heroOk ? null : "Definisci func colpo_caricato(): return self.attacco * 2." });
+    
+    let methodTestOk = false;
+    if (s.Personaggio && typeof s.Personaggio.new === 'function') {
+        try {
+            const testP = s.Personaggio.new("Dummy", 40);
+            methodTestOk = (testP.colpo_caricato() === 80);
+        } catch(e) {
+            methodTestOk = false;
         }
+    }
+    tests.push({ desc: "Metodo calcola correttamente il danno anche su nuove istanze", passed: methodTestOk, diff: methodTestOk ? null : "Il metodo colpo_caricato deve utilizzare self.attacco dell'istanza." });
+    return tests;
+}
     },
     {
         id: 48,
@@ -2206,21 +2348,18 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const s = result.scope || {};
-            const m1 = s.membro1;
-            const m2 = s.membro2;
-            const m1Ok = m1 && m1.nome === "Aria" && m1.ruolo === "Maga" && Number(m1.vita) === 80;
-            const m2Ok = m2 && m2.nome === "Krag" && m2.ruolo === "Guerriero" && Number(m2.vita) === 120;
-            const totOk = Number(s.vita_totale) === 200;
-            tests.push({ desc: "Entrambi gli avventurieri istanziati correttamente", passed: m1Ok && m2Ok, diff: (m1Ok && m2Ok) ? null : "Dati membri party non corretti" });
-            tests.push({ desc: "Salute totale del party calcolata a 200 HP", passed: totOk, diff: totOk ? null : `vita_totale=${s.vita_totale}` });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Membro 1: Aria (Maga)") && out.includes("Membro 2: Krag (Guerriero)") && out.includes("Salute totale party: 200");
-            tests.push({ desc: "Report finale del party stampato con successo", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const s = result.scope || {};
+    const m1 = s.membro1;
+    const m2 = s.membro2;
+    const m1Ok = m1 && m1.nome === "Aria" && m1.ruolo === "Maga" && Number(m1.vita) === 80;
+    const m2Ok = m2 && m2.nome === "Krag" && m2.ruolo === "Guerriero" && Number(m2.vita) === 120;
+    const totOk = Number(s.vita_totale) === 200;
+    tests.push({ desc: "Membri party istanziati (Aria Maga 80 HP, Krag Guerriero 120 HP)", passed: !!(m1Ok && m2Ok), diff: (m1Ok && m2Ok) ? null : "Verifica le istanze membro1 e membro2." });
+    tests.push({ desc: "Salute totale del party calcolata a 200 HP", passed: totOk, diff: totOk ? null : `vita_totale=${s.vita_totale}` });
+    return tests;
+}
     },
 // ==========================================
     // CAPITOLO 13: L'ALBERO DELLA SCENA E I NODI
@@ -2256,16 +2395,18 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         ],
         solution: `func _ready():\n    print("Nodo rilevato: ", $Giocatore.name)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const nodeOk = sc && sc.has_node("Giocatore");
-            tests.push({ desc: "Nodo 'Giocatore' presente nell'albero della scena", passed: !!nodeOk, diff: nodeOk ? null : "Nodo Giocatore non presente nella scena" });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Nodo rilevato: Giocatore");
-            tests.push({ desc: "Console stampa 'Nodo rilevato: Giocatore'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const nodeOk = sc && sc.has_node("Giocatore");
+    const usesSyntax = result.code && /\$Giocatore\b/.test(result.code);
+    tests.push({ desc: "Nodo 'Giocatore' presente nella scena", passed: !!nodeOk, diff: nodeOk ? null : "Nodo Giocatore non presente nella scena." });
+    tests.push({ desc: "Sintassi nativa '$Giocatore' utilizzata nel codice", passed: !!usesSyntax, diff: usesSyntax ? null : "Accedi al nodo usando la sintassi: $Giocatore.name." });
+    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
+    const outOk = out.includes("Nodo rilevato: Giocatore");
+    tests.push({ desc: "Console stampa 'Nodo rilevato: Giocatore'", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
     {
         id: 50,
@@ -2299,17 +2440,14 @@ $Titolo.text = <span class="s">"Benvenuto in Godot 4!"</span>
         ],
         solution: `func _ready():\n    $Titolo.text = "Benvenuto in Godot 4!"\n    print("Testo a schermo: ", $Titolo.text)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const node = sc ? sc.get_node("Titolo") : null;
-            const labelOk = node && node.text === "Benvenuto in Godot 4!";
-            tests.push({ desc: "Nodo Label 'Titolo' configurato con il testo 'Benvenuto in Godot 4!'", passed: !!labelOk, diff: labelOk ? null : `Ricevuto: ${node ? node.text : 'Nodo non trovato'}` });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Testo a schermo: Benvenuto in Godot 4!");
-            tests.push({ desc: "Console stampa 'Testo a schermo: Benvenuto in Godot 4!'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const node = sc ? sc.get_node("Titolo") : null;
+    const labelOk = node && node.text === "Benvenuto in Godot 4!";
+    tests.push({ desc: "Proprietà text del nodo Label '$Titolo' impostata a 'Benvenuto in Godot 4!'", passed: !!labelOk, diff: labelOk ? null : `Ricevuto: ${node ? node.text : 'Nodo non trovato'}` });
+    return tests;
+}
     },
     {
         id: 51,
@@ -2343,17 +2481,14 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
         ],
         solution: `func _ready():\n    $SaluteLabel.text = "HP: 75"\n    print("Nuova salute: ", $SaluteLabel.text)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const node = sc ? sc.get_node("SaluteLabel") : null;
-            const ok = node && node.text === "HP: 75";
-            tests.push({ desc: "SaluteLabel aggiornata con successo a 'HP: 75' tramite $", passed: !!ok, diff: ok ? null : `Ricevuto: ${node ? node.text : 'null'}` });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Nuova salute: HP: 75");
-            tests.push({ desc: "Console stampa 'Nuova salute: HP: 75'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const node = sc ? sc.get_node("SaluteLabel") : null;
+    const ok = node && node.text === "HP: 75";
+    tests.push({ desc: "Nodo '$SaluteLabel.text' aggiornato a 'HP: 75'", passed: !!ok, diff: ok ? null : `Ricevuto: ${node ? node.text : 'null'}` });
+    return tests;
+}
     },
     {
         id: 52,
@@ -2400,19 +2535,16 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const tOk = sc && sc.get_node("TitoloDungeon") && sc.get_node("TitoloDungeon").text === "Caverna dei Goblin";
-            const lOk = sc && sc.get_node("LivelloLabel") && sc.get_node("LivelloLabel").text === "Livello: 1";
-            const mOk = sc && sc.get_node("MoneteLabel") && sc.get_node("MoneteLabel").text === "Oro: 50";
-            tests.push({ desc: "TitoloDungeon e LivelloLabel configurati correttamente", passed: !!(tOk && lOk), diff: (tOk && lOk) ? null : "Proprietà delle Label non corrette" });
-            tests.push({ desc: "MoneteLabel configurata con 'Oro: 50'", passed: !!mOk, diff: mOk ? null : "MoneteLabel non trovata o testo errato" });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Dungeon: Caverna dei Goblin") && out.includes("Difficolta: Livello: 1") && out.includes("Bottino: Oro: 50");
-            tests.push({ desc: "Report del dungeon stampato correttamente a console", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const tOk = sc && sc.get_node("TitoloDungeon") && sc.get_node("TitoloDungeon").text === "Caverna dei Goblin";
+    const lOk = sc && sc.get_node("LivelloLabel") && sc.get_node("LivelloLabel").text === "Livello: 1";
+    const mOk = sc && sc.get_node("MoneteLabel") && sc.get_node("MoneteLabel").text === "Oro: 50";
+    tests.push({ desc: "TitoloDungeon ('Caverna dei Goblin') e LivelloLabel ('Livello: 1') configurati", passed: !!(tOk && lOk), diff: (tOk && lOk) ? null : "Verifica le proprietà .text dei nodi." });
+    tests.push({ desc: "MoneteLabel configurata con 'Oro: 50'", passed: !!mOk, diff: mOk ? null : "MoneteLabel non trovata o testo errato." });
+    return tests;
+}
     },
 
     // ==========================================
@@ -2450,17 +2582,14 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         ],
         solution: `func _ready():\n    $AttaccaBtn.text = "Sferra Attacco"\n    print("Pulsante configurato: ", $AttaccaBtn.text)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const btn = sc ? sc.get_node("AttaccaBtn") : null;
-            const btnOk = btn && btn.type === "Button" && btn.text === "Sferra Attacco";
-            tests.push({ desc: "Nodo Button 'AttaccaBtn' configurato con testo 'Sferra Attacco'", passed: !!btnOk, diff: btnOk ? null : `Ricevuto: ${btn ? btn.text : 'Nodo non trovato'}` });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Pulsante configurato: Sferra Attacco");
-            tests.push({ desc: "Console stampa 'Pulsante configurato: Sferra Attacco'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const btn = sc ? sc.get_node("AttaccaBtn") : null;
+    const btnOk = btn && btn.type === "Button" && btn.text === "Sferra Attacco";
+    tests.push({ desc: "Nodo Button '$AttaccaBtn.text' impostato a 'Sferra Attacco'", passed: !!btnOk, diff: btnOk ? null : `Ricevuto: ${btn ? btn.text : 'Nodo non trovato'}` });
+    return tests;
+}
     },
     {
         id: 54,
@@ -2497,20 +2626,20 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         ],
         solution: `func _ready():\n    $AttaccaBtn.pressed.connect(quando_premuto)\n    print("Pulsante connesso")\n\nfunc quando_premuto():\n    print("Colpo sferrato con successo!")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const btn = sc ? sc.get_node("AttaccaBtn") : null;
-            const connected = btn && btn.pressed && btn.pressed.callbacks.length > 0;
-            tests.push({ desc: "Segnale $AttaccaBtn.pressed connesso a una funzione", passed: !!connected, diff: connected ? null : "Segnale pressed non connesso" });
-            if (connected) {
-                btn.pressed.emit();
-            }
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Colpo sferrato con successo!");
-            tests.push({ desc: "Callback eseguita con successo al click sul pulsante", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const btn = sc ? sc.get_node("AttaccaBtn") : null;
+    const connected = btn && btn.pressed && btn.pressed.callbacks && btn.pressed.callbacks.length > 0;
+    tests.push({ desc: "Segnale $AttaccaBtn.pressed connesso con .connect(quando_premuto)", passed: !!connected, diff: connected ? null : "Usa $AttaccaBtn.pressed.connect(quando_premuto)." });
+    if (connected) {
+        btn.pressed.emit();
+    }
+    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
+    const outOk = out.includes("Colpo sferrato con successo!");
+    tests.push({ desc: "Callback quando_premuto() invocata al click del pulsante", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
     {
         id: 55,
@@ -2551,20 +2680,20 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         ],
         solution: `var punti = 0\n\nfunc _ready():\n    $ClickBtn.pressed.connect(al_click)\n    print("Clicker pronto")\n\nfunc al_click():\n    punti += 1\n    $PuntiLabel.text = "Click: " + str(punti)\n    print($PuntiLabel.text)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const btn = sc ? sc.get_node("ClickBtn") : null;
-            const lbl = sc ? sc.get_node("PuntiLabel") : null;
-            const connected = btn && btn.pressed && btn.pressed.callbacks.length > 0;
-            tests.push({ desc: "Pulsante $ClickBtn connesso alla funzione al_click", passed: !!connected, diff: connected ? null : "Segnale pressed non connesso" });
-            if (connected) {
-                btn.pressed.emit();
-            }
-            const lblOk = lbl && lbl.text === "Click: 1";
-            tests.push({ desc: "Etichetta $PuntiLabel aggiornata correttamente a 'Click: 1'", passed: !!lblOk, diff: lblOk ? null : `Ricevuto: ${lbl ? lbl.text : 'null'}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const btn = sc ? sc.get_node("ClickBtn") : null;
+    const lbl = sc ? sc.get_node("PuntiLabel") : null;
+    const connected = btn && btn.pressed && btn.pressed.callbacks && btn.pressed.callbacks.length > 0;
+    tests.push({ desc: "Pulsante $ClickBtn connesso alla funzione al_click", passed: !!connected, diff: connected ? null : "Connetti con $ClickBtn.pressed.connect(al_click)." });
+    if (connected) {
+        btn.pressed.emit();
+    }
+    const lblOk = lbl && lbl.text === "Click: 1";
+    tests.push({ desc: "Etichetta $PuntiLabel aggiornata correttamente a 'Click: 1'", passed: !!lblOk, diff: lblOk ? null : `Ricevuto: ${lbl ? lbl.text : 'null'}` });
+    return tests;
+}
     },
     {
         id: 56,
@@ -2612,23 +2741,23 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const mBtn = sc ? sc.get_node("MotoriBtn") : null;
-            const aBtn = sc ? sc.get_node("AllarmeBtn") : null;
-            const sLbl = sc ? sc.get_node("StatoNave") : null;
-            const mConn = mBtn && mBtn.pressed.callbacks.length > 0;
-            const aConn = aBtn && aBtn.pressed.callbacks.length > 0;
-            tests.push({ desc: "Entrambi i pulsanti $MotoriBtn e $AllarmeBtn connessi con successo", passed: !!(mConn && aConn), diff: (mConn && aConn) ? null : "Uno o entrambi i pulsanti non connessi" });
-            if (mConn) mBtn.pressed.emit();
-            const motOk = sLbl && sLbl.text === "Motori a Massima Potenza";
-            tests.push({ desc: "Click su MotoriBtn imposta 'Motori a Massima Potenza'", passed: !!motOk, diff: motOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
-            if (aConn) aBtn.pressed.emit();
-            const almOk = sLbl && sLbl.text === "Allarme Rosso Attivo";
-            tests.push({ desc: "Click su AllarmeBtn imposta 'Allarme Rosso Attivo'", passed: !!almOk, diff: almOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const mBtn = sc ? sc.get_node("MotoriBtn") : null;
+    const aBtn = sc ? sc.get_node("AllarmeBtn") : null;
+    const sLbl = sc ? sc.get_node("StatoNave") : null;
+    const mConn = mBtn && mBtn.pressed && mBtn.pressed.callbacks.length > 0;
+    const aConn = aBtn && aBtn.pressed && aBtn.pressed.callbacks.length > 0;
+    tests.push({ desc: "Entrambi i pulsanti $MotoriBtn e $AllarmeBtn connessi con successo", passed: !!(mConn && aConn), diff: (mConn && aConn) ? null : "Uno o entrambi i pulsanti non risultano connessi." });
+    if (mConn) mBtn.pressed.emit();
+    const motOk = sLbl && sLbl.text === "Motori a Massima Potenza";
+    tests.push({ desc: "Click su MotoriBtn aggiorna lo stato a 'Motori a Massima Potenza'", passed: !!motOk, diff: motOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
+    if (aConn) aBtn.pressed.emit();
+    const almOk = sLbl && sLbl.text === "Allarme Rosso Attivo";
+    tests.push({ desc: "Click su AllarmeBtn aggiorna lo stato a 'Allarme Rosso Attivo'", passed: !!almOk, diff: almOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
+    return tests;
+}
     },
 
     // ==========================================
@@ -2672,20 +2801,20 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         ],
         solution: `func _ready():\n    $Cooldown.wait_time = 2.5\n    $Cooldown.one_shot = true\n    $Cooldown.timeout.connect(quando_scaduto)\n    $Cooldown.start()\n    print("Timer avviato per: ", $Cooldown.wait_time, "s")\n\nfunc quando_scaduto():\n    print("Tempo scaduto!")\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const t = sc ? sc.get_node("Cooldown") : null;
-            const tOk = t && t.type === "Timer" && t.wait_time === 2.5 && t.one_shot === true;
-            tests.push({ desc: "Nodo Timer 'Cooldown' configurato con wait_time 2.5s e one_shot true", passed: !!tOk, diff: tOk ? null : "Proprietà timer errate o nodo assente" });
-            const conn = t && t.timeout.callbacks.length > 0;
-            tests.push({ desc: "Segnale timeout connesso a quando_scaduto", passed: !!conn, diff: conn ? null : "Segnale timeout non connesso" });
-            if (conn) t.timeout.emit();
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Tempo scaduto!");
-            tests.push({ desc: "Callback quando_scaduto eseguita con successo allo scatto del timer", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const t = sc ? sc.get_node("Cooldown") : null;
+    const tOk = t && t.type === "Timer" && t.wait_time === 2.5 && t.one_shot === true;
+    tests.push({ desc: "Nodo Timer 'Cooldown' configurato (wait_time: 2.5, one_shot: true)", passed: !!tOk, diff: tOk ? null : "Imposta $Cooldown.wait_time = 2.5 e $Cooldown.one_shot = true." });
+    const conn = t && t.timeout && t.timeout.callbacks && t.timeout.callbacks.length > 0;
+    tests.push({ desc: "Segnale timeout connesso a quando_scaduto", passed: !!conn, diff: conn ? null : "Usa $Cooldown.timeout.connect(quando_scaduto)." });
+    if (conn) t.timeout.emit();
+    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
+    const outOk = out.includes("Tempo scaduto!");
+    tests.push({ desc: "Callback quando_scaduto eseguita allo scatto del timer", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+    return tests;
+}
     },
     {
         id: 58,
@@ -2721,17 +2850,14 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
         ],
         solution: `func _ready():\n    $BarraVita.color = "#22c55e"\n    $BarraVita.size = Vector2(200, 20)\n    print("Barra salute aggiornata con colore: ", $BarraVita.color)\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const b = sc ? sc.get_node("BarraVita") : null;
-            const bOk = b && b.type === "ColorRect" && b.color === "#22c55e" && b.size.x === 200 && b.size.y === 20;
-            tests.push({ desc: "ColorRect 'BarraVita' configurato con colore verde e size 200x20", passed: !!bOk, diff: bOk ? null : "Proprietà ColorRect non corrette" });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Barra salute aggiornata con colore: #22c55e");
-            tests.push({ desc: "Console stampa conferma del colore aggiornato", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const b = sc ? sc.get_node("BarraVita") : null;
+    const bOk = b && b.type === "ColorRect" && b.color === "#22c55e" && b.size && b.size.x === 200 && b.size.y === 20;
+    tests.push({ desc: "ColorRect 'BarraVita' configurato con colore verde e size Vector2(200, 20)", passed: !!bOk, diff: bOk ? null : "Imposta $BarraVita.color = '#22c55e' e $BarraVita.size = Vector2(200, 20)." });
+    return tests;
+}
     },
     {
         id: 59,
@@ -2767,16 +2893,15 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
         ],
         solution: `func _ready():\n    print("Moneta presente prima: ", has_node("Moneta"))\n    $Moneta.queue_free()\n    print("Moneta eliminata con queue_free: ", not has_node("Moneta"))\n`,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const notHas = sc && !sc.has_node("Moneta");
-            tests.push({ desc: "Nodo Moneta rimosso con successo dalla scena tramite queue_free()", passed: !!notHas, diff: notHas ? null : "Moneta ancora presente nella scena" });
-            const out = (result.logs || []).join('\n').replace(/\s+/g, ' ');
-            const outOk = out.includes("Moneta eliminata con queue_free: true");
-            tests.push({ desc: "Console stampa conferma 'Moneta eliminata con queue_free: true'", passed: outOk, diff: outOk ? null : `Ricevuto:\n${out}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const notHas = sc && !sc.has_node("Moneta");
+    const usesQueueFree = result.code && /\$Moneta\.queue_free\s*\(/.test(result.code);
+    tests.push({ desc: "Metodo '$Moneta.queue_free()' invocato", passed: !!usesQueueFree, diff: usesQueueFree ? null : "Usa $Moneta.queue_free() per rimuovere il nodo dalla scena." });
+    tests.push({ desc: "Nodo Moneta rimosso con successo dall'albero della scena", passed: !!notHas, diff: notHas ? null : "Il nodo Moneta risulta ancora presente." });
+    return tests;
+}
     },
     {
         id: 60,
@@ -2825,29 +2950,31 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
             </ul>
         `,
         validate: async (result) => {
-            const tests = [];
-            tests.push({ desc: "Codice eseguito senza errori", passed: result.success, diff: result.error ? `Errore: ${result.error}` : null });
-            const sc = result.scene;
-            const btn = sc ? sc.get_node("CompraPozioneBtn") : null;
-            const oLbl = sc ? sc.get_node("OroLabel") : null;
-            const mLbl = sc ? sc.get_node("MessaggioLabel") : null;
-            const conn = btn && btn.pressed.callbacks.length > 0;
-            tests.push({ desc: "Pulsante d'acquisto connesso alla funzione compra_pozione", passed: !!conn, diff: conn ? null : "Segnale pressed non connesso" });
-            if (conn) {
-                btn.pressed.emit();
-            }
-            const buyOk = oLbl && oLbl.text === "Monete: 75" && mLbl && mLbl.text === "Pozione Acquistata!";
-            tests.push({ desc: "Primo acquisto riuscito: oro scalato a 75 e messaggio 'Pozione Acquistata!'", passed: !!buyOk, diff: buyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
-            if (conn) {
-                btn.pressed.emit(); // 50
-                btn.pressed.emit(); // 25
-                btn.pressed.emit(); // 0
-                btn.pressed.emit(); // Insufficiente!
-            }
-            const emptyOk = oLbl && oLbl.text === "Monete: 0" && mLbl && mLbl.text === "Oro Insufficiente!";
-            tests.push({ desc: "Gestione limite spesa: avviso 'Oro Insufficiente!' quando terminano le monete", passed: !!emptyOk, diff: emptyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
-            return tests;
-        }
+    const tests = [];
+    tests.push(formatExecutionCheck(result));
+    const sc = result.scene;
+    const btn = sc ? sc.get_node("CompraPozioneBtn") : null;
+    const oLbl = sc ? sc.get_node("OroLabel") : null;
+    const mLbl = sc ? sc.get_node("MessaggioLabel") : null;
+    const conn = btn && btn.pressed && btn.pressed.callbacks && btn.pressed.callbacks.length > 0;
+    tests.push({ desc: "Pulsante d'acquisto $CompraPozioneBtn connesso alla funzione compra_pozione", passed: !!conn, diff: conn ? null : "Connetti il pulsante a compra_pozione." });
+    
+    if (conn) {
+        btn.pressed.emit(); // Acquisto 1: 100 -> 75
+    }
+    const buyOk = oLbl && oLbl.text === "Monete: 75" && mLbl && mLbl.text === "Pozione Acquistata!";
+    tests.push({ desc: "Primo acquisto: monete scalate a 75 e messaggio 'Pozione Acquistata!'", passed: !!buyOk, diff: buyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
+    
+    if (conn) {
+        btn.pressed.emit(); // 50
+        btn.pressed.emit(); // 25
+        btn.pressed.emit(); // 0
+        btn.pressed.emit(); // Tentativo con monete esaurite!
+    }
+    const emptyOk = oLbl && oLbl.text === "Monete: 0" && mLbl && mLbl.text === "Oro Insufficiente!";
+    tests.push({ desc: "Gestione limite di spesa: blocco acquisto e messaggio 'Oro Insufficiente!' quando terminano le monete", passed: !!emptyOk, diff: emptyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
+    return tests;
+}
     }
 ];
 

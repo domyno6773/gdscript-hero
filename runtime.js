@@ -739,7 +739,9 @@ const GDScriptRuntime = {
                 logs: [],
                 error: `Errore di sintassi GDScript: ${syntaxErr.message}`,
                 scope: {},
-                scene: currentScene
+                scene: currentScene,
+                code: gdCode,
+                transpiled: ''
             };
         }
 
@@ -804,6 +806,7 @@ const GDScriptRuntime = {
                 error: null,
                 scope: scope,
                 scene: currentScene,
+                code: gdCode,
                 transpiled: transpiledCode
             };
         } catch (runtimeErr) {
@@ -813,6 +816,7 @@ const GDScriptRuntime = {
                 error: runtimeErr.message,
                 scope: scope,
                 scene: currentScene,
+                code: gdCode,
                 transpiled: transpiledCode
             };
         }
