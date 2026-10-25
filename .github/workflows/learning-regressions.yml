@@ -1,0 +1,24 @@
+name: GDScript Hero - Regression Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Learning validators and 29 negative examples
+        run: node tests/audit_validator_regression.test.cjs
+      - name: Backups and cloud sync
+        run: node tests/auth_reliability.test.cjs

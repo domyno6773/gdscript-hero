@@ -4,6 +4,16 @@
  * e varianti alternative con scenari differenti.
  */
 
+
+async function reviewAuditMutation(result, variantId, alternateCode, expectedLine) {
+ if (!alternateCode || alternateCode === result.code) return false;
+ const variant = REVIEW_VARIANTS.find(v => v.id === variantId);
+ const replay = await GDScriptRuntime.execute(alternateCode, { lesson: variant });
+ if (!replay.success) return false;
+ const target = String(expectedLine).trim();
+ return (result.logs || []).some(v => String(v).trim() === target) &&
+     !(replay.logs || []).some(v => String(v).trim() === target);
+}
 const REVIEW_VARIANTS = [
     // ---------------------------------------------------------
     // 1. SINTASSI BASE & OUTPUT (syntax_basics)
@@ -138,6 +148,8 @@ func _ready():
                 passed: hasVar,
                 diff: hasVar ? null : "Verifica di aver dichiarato entrambe le variabili con la parola chiave var."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_variables_01', (result.code || '').replace(/(var\s+nome_ranger\s*=\s*)(["'])Kael\2/, '$1"Mira"'), 'Il ranger Kael possiede 18 frecce.');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -208,6 +220,8 @@ func _ready():
                 passed: printedFloat,
                 diff: printedFloat ? null : "Assicurati di stampare la variabile altitudine."
             });
+            const auditDependency = /const\s+LIVELLO_MAX\s*:\s*int\s*=\s*50\b/.test(result.code || '') && await reviewAuditMutation(result, 'rev_types_01', (result.code || '').replace(/(var\s+altitudine\s*:\s*float\s*=\s*)120\.5\b/, '$1130.5'), '120.5');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -269,6 +283,8 @@ func _ready():
                 passed: hasFormula,
                 diff: hasFormula ? null : "Verifica che il calcolo usi le variabili fornite: resistenza_iniziale - danno_subito + bonus_riparazione."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_math_01', (result.code || '').replace(/(var\s+danno_subito\s*=\s*)25\b/, (_match, prefix) => prefix + '30'), '65');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -332,6 +348,23 @@ func _ready():
                 passed: hasAnd,
                 diff: hasAnd ? null : "Assicurati di unire le condizioni con la parola chiave 'and'."
             });
+            const causalAudit = ((() => {
+  const source = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+  return [...source.matchAll(/\bif\s+([^\n:]+)/g)].some(m => /\band\b/.test(m[1]) && /\bha_chiave\b/.test(m[1]) && /\blivello\b/.test(m[1]));
+ })() && (await (async () => {
+   const swapped = (result.code || '').replace(/(\bvar\s+ha_chiave\s*=\s*)true\b/, (_match, prefix) => prefix + 'false');
+   if (swapped === result.code) return false;
+   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_01') });
+   return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato") &&
+       !(replay.logs || []).some(v => String(v).trim() === "Accesso Concesso"));
+  })()) && (await (async () => {
+   const swapped = (result.code || '').replace(/(\bvar\s+livello\s*=\s*)12\b/, (_match, prefix) => prefix + '5');
+   if (swapped === result.code) return false;
+   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_01') });
+   return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato") &&
+       !(replay.logs || []).some(v => String(v).trim() === "Accesso Concesso"));
+  })()));
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -391,6 +424,8 @@ func _ready():
                 passed: hasAppend,
                 diff: hasAppend ? null : "Assicurati di chiamare zaino.append(\"Pozione Verde\")."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_arrays_01', (result.code || '').replace(/^(\s*)zaino\.append\s*\(\s*["']Pozione Verde["']\s*\)\s*$/m, '$1pass'), '3');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -452,6 +487,8 @@ func _ready():
                 passed: hasRange,
                 diff: hasRange ? null : "Verifica di aver utilizzato 'for i in range(1, 5):'."
             });
+            const causalAudit = await reviewAuditMutation(result, 'rev_loops_01', (result.code || '').replace(/^(\s*for\s+\w+\s+in\s+)range\s*\(\s*1\s*,\s*5\s*\)(\s*:)/m, '$1range(0)$2'), 'Generatore 1 attivo');
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -519,6 +556,8 @@ func _ready():
                 passed: hasReturn,
                 diff: hasReturn ? null : "Verifica di usare 'return (potenza + turbo) * 2'."
             });
+            const causalAudit = await reviewAuditMutation(result, 'rev_functions_01', (result.code || '').replace(/\breturn\s+[^\n]+/, 'return 9999'), '30');
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -583,6 +622,8 @@ func _ready():
                 passed: hasAxes,
                 diff: hasAxes ? null : "Verifica di aggiornare i componenti: posizione.x += 50 e posizione.y -= 30."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_vectors_01', (result.code || '').replace(/(posizione\.x\s*\+=\s*)50\b/, (_match, prefix) => prefix + '60'), 'Vector2(150, 170)');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -649,6 +690,8 @@ func _ready():
                 passed: hasMethod,
                 diff: hasMethod ? null : "Assicurati di usare if bottino.has(\"artefatti\"):."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_dictionaries_01', (result.code || '').replace(/(["']oro["']\s*:\s*)150\b/, (_match, prefix) => prefix + '200'), '150');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -730,6 +773,8 @@ func on_allarme_attivato():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "[ALLARME] Violazione perimetro rilevata!", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = !!(result.scope?.allarme_attivato?.emissions?.some(args => args.length === 0));
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -805,6 +850,8 @@ func quando_ricaricato(quantita):
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Energia ripristinata: +50 MW", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = !!(result.scope?.energia_ricaricata?.emissions?.some(args => args.length === 1 && args[0] === 50));
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -885,6 +932,8 @@ func _ready():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Drone EX-101 operativo (Batteria: 100%)", Ricevuto: "${logs.join(' | ')}"`
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_oop_01', (result.code || '').replace(/(Drone\.new\s*\(\s*["']EX-101["']\s*,\s*)100(\s*\))/, '$190$2'), 'Drone EX-101 operativo (Batteria: 100%)');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -955,6 +1004,8 @@ func _ready():
                 passed: hasLog,
                 diff: hasLog ? null : `Ricevuto: "${logs.join(' | ')}"`
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_scene_tree_01', (result.code || '').replace(/(\$MonitorTermico\.text\s*=\s*)(["'])Temperatura: 300 K\2/, '$1"Temperatura: 200 K"'), 'Monitor aggiornato: Temperatura: 300 K');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -1030,6 +1081,8 @@ func quando_premuto():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Sequenza di lancio avviata con successo!", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = !!(result.scene?.get_node('BtnLancio')?.pressed?.emissions?.length);
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -1115,6 +1168,8 @@ func fai_esplodere():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Detonazione mina energetica!", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = !!(result.scene?.get_node('TimerMina')?.timeout?.emissions?.length);
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -1177,6 +1232,23 @@ func _ready():
                 passed: hasAuth,
                 diff: hasAuth ? null : `Atteso: "Accesso Autorizzato: Nessuna Contaminazione", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = ((() => {
+  const source = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+  return [...source.matchAll(/\bif\s+([^\n:]+)/g)].some(m => /\band\b/.test(m[1]) && /\btessera_valida\b/.test(m[1]) && /\blivello_radiazioni\b/.test(m[1]));
+ })() && (await (async () => {
+   const swapped = (result.code || '').replace(/(\bvar\s+tessera_valida\s*=\s*)true\b/, (_match, prefix) => prefix + 'false');
+   if (swapped === result.code) return false;
+   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_02') });
+   return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato: Quarantena Attiva") &&
+       !(replay.logs || []).some(v => String(v).trim() === "Accesso Autorizzato: Nessuna Contaminazione"));
+  })()) && (await (async () => {
+   const swapped = (result.code || '').replace(/(\bvar\s+livello_radiazioni\s*=\s*)15\b/, (_match, prefix) => prefix + '30');
+   if (swapped === result.code) return false;
+   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_02') });
+   return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato: Quarantena Attiva") &&
+       !(replay.logs || []).some(v => String(v).trim() === "Accesso Autorizzato: Nessuna Contaminazione"));
+  })()));
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     }

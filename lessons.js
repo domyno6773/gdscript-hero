@@ -2146,6 +2146,18 @@ const LESSONS_DATA = [
     const out = (result.logs || []).join('\n');
     const ok = out.includes("0") && out.includes("1") && out.includes("2");
     tests.push({ desc: "Numeri 0, 1, 2 stampati dal ciclo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const alternateCode = result.code.replace(/^(\s*for\s+\w+\s+in\s+)range\s*\([^\n)]*\)(\s*:)/m, '$1range(0)$2');
+    const replay = alternateCode !== result.code
+        ? await GDScriptRuntime.execute(alternateCode, { lesson: LESSONS_DATA.find(l => l.id === 25) })
+        : null;
+    const requiredLogs = ["0","1","2"];
+    const baselineLogs = (result.logs || []).map(v => String(v).trim());
+    const replayLogs = replay && replay.success ? (replay.logs || []).map(v => String(v).trim()) : [];
+    const reallyFromLoop = !!(replay && replay.success &&
+        requiredLogs.every(v => baselineLogs.includes(v)) &&
+        requiredLogs.some(v => !replayLogs.includes(v)));
+    tests.push({ desc: "Il risultato è prodotto dal ciclo, non da stampe esterne", passed: reallyFromLoop,
+        diff: reallyFromLoop ? null : "Inserisci le stampe all'interno del ciclo ed esegui realmente le iterazioni." });
     return tests;
 }
     },
@@ -2211,6 +2223,18 @@ const LESSONS_DATA = [
     const out = (result.logs || []).join('\n');
     const ok = out.includes("Goblin") && out.includes("Orco") && out.includes("Drago");
     tests.push({ desc: "Tutti i 3 nemici stampati a console", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const alternateCode = result.code.replace(/^(\s*for\s+\w+\s+in\s+)nemici(\s*:)/m, '$1[]$2');
+    const replay = alternateCode !== result.code
+        ? await GDScriptRuntime.execute(alternateCode, { lesson: LESSONS_DATA.find(l => l.id === 26) })
+        : null;
+    const requiredLogs = ["Goblin","Orco","Drago"];
+    const baselineLogs = (result.logs || []).map(v => String(v).trim());
+    const replayLogs = replay && replay.success ? (replay.logs || []).map(v => String(v).trim()) : [];
+    const reallyFromLoop = !!(replay && replay.success &&
+        requiredLogs.every(v => baselineLogs.includes(v)) &&
+        requiredLogs.some(v => !replayLogs.includes(v)));
+    tests.push({ desc: "Il risultato è prodotto dal ciclo, non da stampe esterne", passed: reallyFromLoop,
+        diff: reallyFromLoop ? null : "Inserisci le stampe all'interno del ciclo ed esegui realmente le iterazioni." });
     return tests;
 }
     },
@@ -2219,7 +2243,7 @@ const LESSONS_DATA = [
         conceptId: "loops_iteration",
         conceptTags: ["while", "loops", "counters", "debugging"],
         isDebugging: true,
-        debugType: "Loop Infinito (Decremento mancante)",
+        debugType: "Loop Infinito (Incremento errato)",
         chapterId: 7,
         isMastery: false,
         title: "27. Ciclo while",
@@ -2244,34 +2268,35 @@ const LESSONS_DATA = [
             </ul>
         `,
         initialCode: `func _ready():
-    var tempo = 3
-    # BUG CRITICO: Senza decremento, la condizione 'tempo > 0' rimane per sempre vera!
-    # Aggiungi 'tempo -= 1' all'interno del ciclo per evitare il blocco:
-    while tempo > 0:
-        print(tempo)
+    var conto = 1
+    # BUG: il contatore diminuisce e il ciclo diventa infinito.
+    # Correggi l'aggiornamento per contare da 1 a 3.
+    while conto <= 3:
+        print("Conto: " + str(conto))
+        conto -= 1
 `,
         hints: [
-            {
-                        "level": 1,
-                        "type": "concept",
-                        "icon": "💭",
-                        "label": "Indizio Concettuale",
-                        "text": "Il ciclo 'while' continua a girare finché la condizione specificata rimane vera. È fondamentale che all'interno del ciclo qualcosa modifichi la variabile di controllo, altrimenti si crea un loop infinito che congela il gioco."
-            },
-            {
-                        "level": 2,
-                        "type": "structure",
-                        "icon": "🏗️",
-                        "label": "Guida alla Struttura",
-                        "text": "Scrivi `while tempo > 0:` e nel corpo indentato stampa il tempo, dopodiché decrementalo con `tempo -= 1`."
-            },
-            {
-                        "level": 3,
-                        "type": "example",
-                        "icon": "📝",
-                        "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var countdown = 5\n    while countdown > 0:\n        print(countdown)\n        countdown -= 1 # Cruciale: previene il blocco del programma!\n```\nSe stai correggendo un bug, assicurati che il decremento sia presente prima della fine del ciclo."
-            }
+        {
+                "level": 1,
+                "type": "concept",
+                "icon": "💭",
+                "label": "Indizio Concettuale",
+                "text": "Il while ripete un blocco finché la condizione rimane vera. Osserva come cambia la variabile conto: deve avvicinarsi al limite, non allontanarsi."
+        },
+        {
+                "level": 2,
+                "type": "structure",
+                "icon": "🏗️",
+                "label": "Guida alla Struttura",
+                "text": "La condizione while conto <= 3 è già corretta. Dopo aver stampato il valore, fai crescere conto di un'unità, invece di diminuirlo."
+        },
+        {
+                "level": 3,
+                "type": "example",
+                "icon": "📝",
+                "label": "Esempio Pratico",
+                "text": "Esempio analogo:\n```gdscript\nvar turno = 1\nwhile turno <= 4:\n    print(turno)\n    turno += 1\n```\nCon += 1 il contatore raggiunge il limite e il ciclo termina."
+        }
 ],
         solution: `func _ready():\n    var conto = 1\n    while conto <= 3:\n        print("Conto: " + str(conto))\n        conto += 1\n`,
         validate: async (result) => {
@@ -2284,6 +2309,18 @@ const LESSONS_DATA = [
     const out = (result.logs || []).join('\n');
     const ok = out.includes("Conto: 1") && out.includes("Conto: 2") && out.includes("Conto: 3");
     tests.push({ desc: "Conteggio da 1 a 3 stampato correttamente", passed: ok && valOk, diff: ok ? null : `Ricevuto: "${out}"` });
+    const alternateCode = result.code.replace(/^(\s*while\s+)[^\n:]+(\s*:)/m, '$1false$2');
+    const replay = alternateCode !== result.code
+        ? await GDScriptRuntime.execute(alternateCode, { lesson: LESSONS_DATA.find(l => l.id === 27) })
+        : null;
+    const requiredLogs = ["Conto: 1","Conto: 2","Conto: 3"];
+    const baselineLogs = (result.logs || []).map(v => String(v).trim());
+    const replayLogs = replay && replay.success ? (replay.logs || []).map(v => String(v).trim()) : [];
+    const reallyFromLoop = !!(replay && replay.success &&
+        requiredLogs.every(v => baselineLogs.includes(v)) &&
+        requiredLogs.some(v => !replayLogs.includes(v)));
+    tests.push({ desc: "Il risultato è prodotto dal ciclo, non da stampe esterne", passed: reallyFromLoop,
+        diff: reallyFromLoop ? null : "Inserisci le stampe all'interno del ciclo ed esegui realmente le iterazioni." });
     return tests;
 }
     },
@@ -2390,27 +2427,27 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Inizializza il nodo e stampa il messaggio\n    pass\n`,
         hints: [
-            {
-                        "level": 1,
-                        "type": "concept",
-                        "icon": "💭",
-                        "label": "Indizio Concettuale",
-                        "text": "Le funzioni sono blocchi riutilizzabili di istruzioni con un nome. Invece di riscrivere lo stesso codice ovunque, scrivi la funzione una volta sola e la richiami quando serve."
-            },
-            {
-                        "level": 2,
-                        "type": "structure",
-                        "icon": "🏗️",
-                        "label": "Guida alla Struttura",
-                        "text": "In GDScript le funzioni si dichiarano con `func nome_funzione():`. Per richiamare la funzione all'interno di `_ready()`, digita il suo nome seguito dalle parentesi `nome_funzione()`."
-            },
-            {
-                        "level": 3,
-                        "type": "example",
-                        "icon": "📝",
-                        "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc avvia_motore():\n    print(\"Motore pronto\")\n\nfunc _ready():\n    avvia_motore()\n```\nDefinisci la tua funzione personalizzata all'esterno di `_ready()`, poi invocala dentro `_ready()`."
-            }
+        {
+                "level": 1,
+                "type": "concept",
+                "icon": "💭",
+                "label": "Indizio Concettuale",
+                "text": "Godot richiama automaticamente _ready() quando il nodo entra nella scena ed è pronto. Non serve invocare _ready() manualmente."
+        },
+        {
+                "level": 2,
+                "type": "structure",
+                "icon": "🏗️",
+                "label": "Guida alla Struttura",
+                "text": "Inserisci l'istruzione print() nel blocco indentato di func _ready():. La funzione esiste già nel codice iniziale."
+        },
+        {
+                "level": 3,
+                "type": "example",
+                "icon": "📝",
+                "label": "Esempio Pratico",
+                "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    print(\"Livello caricato\")\n```\nPer questo esercizio sostituisci il testo con il messaggio esatto richiesto dalla consegna."
+        }
 ],
         solution: `func _ready():\n    print("Nodo Inizializzato")\n`,
         validate: async (result) => {
@@ -2493,6 +2530,18 @@ const LESSONS_DATA = [
     tests.push({ desc: "Funzione accetta parametri dinamici (es. saluta('Campione'))", passed: paramTestOk, diff: paramTestOk ? null : "La funzione deve stampare 'Ciao ' concatenato al parametro passato." });
     const defaultOk = result.logs.some(l => l.includes("Ciao Eroe"));
     tests.push({ desc: "Chiamata iniziale saluta('Eroe') eseguita", passed: defaultOk, diff: defaultOk ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    // Cambiare il risultato prodotto dalla funzione deve cambiare l'output iniziale.
+    const originalSource = String(result.code || '');
+    const replacementRe = /(^[ \t]*func[ \t]+saluta[ \t]*\([^\n)]*\)[ \t]*(?:->[ \t]*\w+[ \t]*)?:[ \t]*(?:#[^\n]*)?\n)(?:[ \t]+[^\n]*(?:\n|$))+/m;
+    const alteredSource = originalSource.replace(replacementRe, '$1    print("AUDIT_MUTANT_SALUTO")\n');
+    const alteredRun = alteredSource !== originalSource
+        ? await GDScriptRuntime.execute(alteredSource, { lesson: LESSONS_DATA.find(l => l.id === 30) })
+        : null;
+    const originalHasResult = (result.logs || []).some(line => String(line).trim() === "Ciao Eroe");
+    const alteredKeepsResult = alteredRun && (alteredRun.logs || []).some(line => String(line).trim() === "Ciao Eroe");
+    const functionCausesOutput = !!(alteredRun && alteredRun.success && originalHasResult && !alteredKeepsResult);
+    tests.push({ desc: "La stampa iniziale dipende dalla funzione richiesta", passed: functionCausesOutput,
+        diff: functionCausesOutput ? null : "Chiama la funzione da _ready e stampa il risultato calcolato, non una costante." });
     return tests;
 }
     },
@@ -2564,6 +2613,18 @@ const LESSONS_DATA = [
     tests.push({ desc: "Valori di ritorno calcolati correttamente su input multipli", passed: testsPass, diff: testsPass ? null : "La funzione deve restituire 'attacco - difesa'." });
     const printed = result.logs.some(l => l.trim() === "25");
     tests.push({ desc: "Risultato '25' stampato in _ready()", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    // Cambiare il risultato prodotto dalla funzione deve cambiare l'output iniziale.
+    const originalSource = String(result.code || '');
+    const replacementRe = /(^[ \t]*func[ \t]+calcola_danno[ \t]*\([^\n)]*\)[ \t]*(?:->[ \t]*\w+[ \t]*)?:[ \t]*(?:#[^\n]*)?\n)(?:[ \t]+[^\n]*(?:\n|$))+/m;
+    const alteredSource = originalSource.replace(replacementRe, '$1    return 9999\n');
+    const alteredRun = alteredSource !== originalSource
+        ? await GDScriptRuntime.execute(alteredSource, { lesson: LESSONS_DATA.find(l => l.id === 31) })
+        : null;
+    const originalHasResult = (result.logs || []).some(line => String(line).trim() === "25");
+    const alteredKeepsResult = alteredRun && (alteredRun.logs || []).some(line => String(line).trim() === "25");
+    const functionCausesOutput = !!(alteredRun && alteredRun.success && originalHasResult && !alteredKeepsResult);
+    tests.push({ desc: "La stampa iniziale dipende dalla funzione richiesta", passed: functionCausesOutput,
+        diff: functionCausesOutput ? null : "Chiama la funzione da _ready e stampa il risultato calcolato, non una costante." });
     return tests;
 }
     },
@@ -2640,6 +2701,8 @@ const LESSONS_DATA = [
         checks = (norm === 30) && (crit === 60) && (altNorm === 50) && (altCrit === 100);
     }
     tests.push({ desc: "Calcolo danno critico (x2 se true, x1 se false) verificato su vari input", passed: checks, diff: checks ? null : "Se critico è true ritorna attacco * 2, altrimenti attacco." });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Colpo normale: 30","Colpo critico: 60"][at]) at++; } return at === 2; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -2708,6 +2771,13 @@ const LESSONS_DATA = [
     tests.push({ desc: "Vector2(100, 200) creato nella variabile 'posizione'", passed: !!ok, diff: ok ? null : `Ricevuto: ${p}` });
     const printed = result.logs.some(l => l.includes("100") && l.includes("200"));
     tests.push({ desc: "Coordinate Vector2 stampate a console", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
+    // Se cambiamo la coordinata di partenza, un print(posizione) deve cambiare.
+    const modifiedCode = (result.code || '').replace(/(var\s+posizione\s*=\s*Vector2\s*\(\s*)100(?=\s*,)/, (_m, prefix) => prefix + '101');
+    const rerun = modifiedCode !== result.code ? await GDScriptRuntime.execute(modifiedCode, { lesson: LESSONS_DATA.find(l => l.id === 33) }) : null;
+    const expectedVector = (result.logs || []).some(v => String(v).trim() === 'Vector2(100, 200)');
+    const stillOriginal = rerun && (rerun.logs || []).some(v => String(v).trim() === 'Vector2(100, 200)');
+    const dynamicOutput = !!(rerun && rerun.success && expectedVector && !stillOriginal);
+    tests.push({ desc: "Il vettore stampato dipende dalla variabile posizione", passed: dynamicOutput, diff: dynamicOutput ? null : "Stampa posizione invece di una stringa con coordinate fisse." });
     return tests;
 }
     },
@@ -2911,6 +2981,8 @@ const LESSONS_DATA = [
     const landOk = s.atterrato === true;
     tests.push({ desc: "Posizione finale calcolata a Vector2(150, 170)", passed: posOk, diff: posOk ? null : `Ricevuto: ${pos}` });
     tests.push({ desc: "Atterraggio riuscito con successo (true)", passed: landOk, diff: landOk ? null : `Ricevuto: ${s.atterrato}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Posizione finale: Vector2(150, 170)","Stazione raggiunta: true"][at]) at++; } return at === 2; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3190,6 +3262,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const furyOk = s.in_furia === false;
     tests.push({ desc: "Dizionario del boss aggiornato (hp: 420, attacco: 75)", passed: bossOk, diff: bossOk ? null : `Boss: ${JSON.stringify(b)}` });
     tests.push({ desc: "Controllo boss.has('furia') false", passed: furyOk, diff: furyOk ? null : `in_furia=${s.in_furia}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 4 && String(line).trim() === ["Boss: Drago Antico","HP rimanenti: 420","Attacco: 75","Furia attiva: false"][at]) at++; } return at === 4; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3257,6 +3331,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
     const ok = out.includes("Apertura in corso...") && out.includes("Porta aperta con successo!");
     tests.push({ desc: "Segnale emesso con successo e intercettato dalla callback", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const auditOk = !!(result.scope && result.scope.porta_aperta && Array.isArray(result.scope.porta_aperta.emissions) && [[]].every(args => result.scope.porta_aperta.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
+    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3322,6 +3398,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
     const ok = out.includes("+10 Monete raccolte!");
     tests.push({ desc: "Funzione aggiungi_punti invocata da emit()", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const auditOk = !!(result.scope && result.scope.moneta_raccolta && Array.isArray(result.scope.moneta_raccolta.emissions) && [[]].every(args => result.scope.moneta_raccolta.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
+    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3397,6 +3475,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         }
     }
     tests.push({ desc: "Segnale accetta e trasmette parametri numerici alla callback", passed: dynamicOk, diff: dynamicOk ? null : "La callback collegata deve ricevere il valore trasmesso dal segnale." });
+    const auditOk = !!(result.scope && result.scope.danno_inflitto && Array.isArray(result.scope.danno_inflitto.emissions) && [[35]].every(args => result.scope.danno_inflitto.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
+    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3470,6 +3550,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
     const ok = out.includes("UI: Barra salute a 75") && out.includes("UI: Barra salute a 40");
     tests.push({ desc: "Due eventi di salute emessi (75 e 40)", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const auditOk = !!(result.scope && result.scope.salute_aggiornata && Array.isArray(result.scope.salute_aggiornata.emissions) && [[75],[40]].every(args => result.scope.salute_aggiornata.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
+    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -3765,6 +3847,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const totOk = Number(s.vita_totale) === 200;
     tests.push({ desc: "Membri party istanziati (Aria Maga 80 HP, Krag Guerriero 120 HP)", passed: !!(m1Ok && m2Ok), diff: (m1Ok && m2Ok) ? null : "Verifica le istanze membro1 e membro2." });
     tests.push({ desc: "Salute totale del party calcolata a 200 HP", passed: totOk, diff: totOk ? null : `vita_totale=${s.vita_totale}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 3 && String(line).trim() === ["Membro 1: Aria (Maga)","Membro 2: Krag (Guerriero)","Salute totale party: 200"][at]) at++; } return at === 3; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -4048,6 +4132,8 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
     const mOk = sc && sc.get_node("MoneteLabel") && sc.get_node("MoneteLabel").text === "Oro: 50";
     tests.push({ desc: "TitoloDungeon ('Caverna dei Goblin') e LivelloLabel ('Livello: 1') configurati", passed: !!(tOk && lOk), diff: (tOk && lOk) ? null : "Verifica le proprietà .text dei nodi." });
     tests.push({ desc: "MoneteLabel configurata con 'Oro: 50'", passed: !!mOk, diff: mOk ? null : "MoneteLabel non trovata o testo errato." });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 3 && String(line).trim() === ["Dungeon: Caverna dei Goblin","Difficolta: Livello: 1","Bottino: Oro: 50"][at]) at++; } return at === 3; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -4358,6 +4444,8 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     if (aConn) aBtn.pressed.emit();
     const almOk = sLbl && sLbl.text === "Allarme Rosso Attivo";
     tests.push({ desc: "Click su AllarmeBtn aggiorna lo stato a 'Allarme Rosso Attivo'", passed: !!almOk, diff: almOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 3 && String(line).trim() === ["Plancia Operativa","Velocita Aumentata","Scudi al 100%"][at]) at++; } return at === 3; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -4437,6 +4525,8 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
     const outOk = out.includes("Tempo scaduto!");
     tests.push({ desc: "Callback quando_scaduto eseguita allo scatto del timer", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
+    const auditOk = !!(t && t.is_stopped === false);
+    tests.push({ desc: "Timer effettivamente avviato", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     },
@@ -4577,6 +4667,12 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     const idxAfter = logs.findIndex((l, i) => i > idxBefore && /^Moneta eliminata con queue_free\s*:\s*true$/i.test(String(l).trim()));
     const logsOk = idxBefore !== -1 && idxAfter !== -1;
     tests.push({ desc: "Stato della moneta prima e dopo queue_free stampato a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
+    // Cambiare il nodo osservato deve modificare il log prima della rimozione.
+    const alteredSource = (result.code || '').replace(/has_node\s*\(\s*(["'])Moneta\1\s*\)/g, 'has_node("__AuditNodoAssente__")');
+    const replay = alteredSource !== result.code ? await GDScriptRuntime.execute(alteredSource, { lesson: LESSONS_DATA.find(l => l.id === 59) }) : null;
+    const stillTrue = replay && (replay.logs || []).some(v => /^Moneta presente prima\s*:\s*true$/i.test(String(v).trim()));
+    const isDynamic = !!(replay && replay.success && !stillTrue);
+    tests.push({ desc: "Stato della moneta letto dinamicamente con has_node()", passed: isDynamic, diff: isDynamic ? null : "Le stampe devono mostrare il risultato di has_node(), non valori fissi." });
     return tests;
 }
     },
@@ -4673,6 +4769,8 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     }
     const emptyOk = oLbl && oLbl.text === "Monete: 0" && mLbl && mLbl.text === "Oro Insufficiente!";
     tests.push({ desc: "Gestione limite di spesa: blocco acquisto e messaggio 'Oro Insufficiente!' quando terminano le monete", passed: !!emptyOk, diff: emptyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Bottega Aperta","Pozione Acquistata!"][at]) at++; } return at === 2; })();
+    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
     }
