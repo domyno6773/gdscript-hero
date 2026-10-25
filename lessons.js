@@ -2719,7 +2719,7 @@ const LESSONS_DATA = [
         title: "33. Vector2(x, y) e coordinate 2D",
         icon: "🧭",
         xp: 50,
-        expectedOutput: "Vector2(100, 200)",
+        expectedOutput: "(100.0, 200.0)",
         theory: `
             <p>Nello spazio 2D di Godot Engine, la posizione di qualsiasi oggetto o sprite è rappresentata da un vettore a due dimensioni: <code>Vector2(x, y)</code>:</p>
             <ul>
@@ -2735,7 +2735,7 @@ const LESSONS_DATA = [
         task: `
             <ul>
                 <li>Crea <code>posizione = Vector2(100, 200)</code>.</li>
-                <li>Stampa il vettore con <code>print(posizione)</code>.</li>
+                <li>Stampa il vettore con <code>print(posizione)</code>. Godot mostra le coordinate come <code>(100.0, 200.0)</code>, senza la parola <code>Vector2</code> nell'output.</li>
             </ul>
         `,
         initialCode: `func _ready():\n    # Crea posizione come Vector2(100, 200) e stampala\n    pass\n`,
@@ -2774,8 +2774,8 @@ const LESSONS_DATA = [
     // Se cambiamo la coordinata di partenza, un print(posizione) deve cambiare.
     const modifiedCode = (result.code || '').replace(/(var\s+posizione\s*=\s*Vector2\s*\(\s*)100(?=\s*,)/, (_m, prefix) => prefix + '101');
     const rerun = modifiedCode !== result.code ? await GDScriptRuntime.execute(modifiedCode, { lesson: LESSONS_DATA.find(l => l.id === 33) }) : null;
-    const expectedVector = (result.logs || []).some(v => String(v).trim() === 'Vector2(100, 200)');
-    const stillOriginal = rerun && (rerun.logs || []).some(v => String(v).trim() === 'Vector2(100, 200)');
+    const expectedVector = (result.logs || []).some(v => String(v).trim() === '(100.0, 200.0)');
+    const stillOriginal = rerun && (rerun.logs || []).some(v => String(v).trim() === '(100.0, 200.0)');
     const dynamicOutput = !!(rerun && rerun.success && expectedVector && !stillOriginal);
     tests.push({ desc: "Il vettore stampato dipende dalla variabile posizione", passed: dynamicOutput, diff: dynamicOutput ? null : "Stampa posizione invece di una stringa con coordinate fisse." });
     return tests;
@@ -2790,7 +2790,7 @@ const LESSONS_DATA = [
         title: "34. Calcolo nuova posizione con velocità",
         icon: "🏃",
         xp: 50,
-        expectedOutput: "Vector2(150, 200)",
+        expectedOutput: "(150.0, 200.0)",
         theory: `
             <p>Per muovere un personaggio nello spazio di gioco, aggiungiamo la velocità alla sua coordinata:</p>
             <div class="code-preview">
@@ -2798,7 +2798,7 @@ const LESSONS_DATA = [
     <span class="k">var</span> posizione = Vector2(<span class="m">100</span>, <span class="m">200</span>)
     <span class="k">var</span> velocita = <span class="m">50</span>
     posizione.x += velocita
-    <span class="nb">print</span>(posizione) <span class="c"># Stampa Vector2(150, 200)</span></pre>
+    <span class="nb">print</span>(posizione) <span class="c"># Stampa (150.0, 200.0)</span></pre>
             </div>
         `,
         task: `
@@ -2856,7 +2856,7 @@ const LESSONS_DATA = [
         title: "35. Movimento diagonale su entrambi gli assi",
         icon: "↗️",
         xp: 50,
-        expectedOutput: "Vector2(120, 180)",
+        expectedOutput: "(120.0, 180.0)",
         theory: `
             <p>Nei giochi 2D il movimento diagonale aggiorna simultaneamente sia la coordinata X (orizzontale) che la coordinata Y (verticale):</p>
             <div class="code-preview">
@@ -2930,7 +2930,7 @@ const LESSONS_DATA = [
             'Verifica se la sonda ha raggiunto la stazione: <code>var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)</code>'
         ],
         notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Posizione finale: Vector2(150, 170)\nStazione raggiunta: true",
+        expectedOutput: "Posizione finale: (150.0, 170.0)\nStazione raggiunta: true",
         initialCode: `extends Node\n\nfunc _ready():\n    # Crea posizione, aggiorna le coordinate e verifica atterrato sotto\n    \n    # Non modificare le righe sotto\n    print("Posizione finale: ", posizione)\n    print("Stazione raggiunta: ", atterrato)\n`,
         aiExplanation: "Un <code>Vector2(x, y)</code> rappresenta un punto o una velocità nello spazio bidimensionale di Godot Engine. Puoi accedere e modificare direttamente le singole componenti <code>.x</code> e <code>.y</code>. Per verificare se la sonda ha raggiunto le coordinate della stazione, puoi confrontare i valori delle coordinate per accertarti dell'allineamento perfetto.",
         hints: [
@@ -2981,7 +2981,7 @@ const LESSONS_DATA = [
     const landOk = s.atterrato === true;
     tests.push({ desc: "Posizione finale calcolata a Vector2(150, 170)", passed: posOk, diff: posOk ? null : `Ricevuto: ${pos}` });
     tests.push({ desc: "Atterraggio riuscito con successo (true)", passed: landOk, diff: landOk ? null : `Ricevuto: ${s.atterrato}` });
-    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Posizione finale: Vector2(150, 170)","Stazione raggiunta: true"][at]) at++; } return at === 2; })();
+    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Posizione finale: (150.0, 170.0)","Stazione raggiunta: true"][at]) at++; } return at === 2; })();
     tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
     return tests;
 }
