@@ -6218,10 +6218,15 @@ const App = {
         if (data.streakWeeks !== undefined) this.state.streakWeeks = data.streakWeeks;
         if (data.streakMode) this.state.streakMode = data.streakMode;
         if (data.activeDaysThisWeek) this.state.activeDaysThisWeek = data.activeDaysThisWeek;
+        if (data.currentWeekId !== undefined) this.state.currentWeekId = data.currentWeekId;
+        if (data.lastActiveDate !== undefined) this.state.lastActiveDate = data.lastActiveDate;
         if (data.finishedLessons) this.state.finishedLessons = data.finishedLessons;
         if (data.completedLessons) this.state.completedLessons = data.completedLessons;
         if (data.unlockedAchievements) this.state.unlockedAchievements = data.unlockedAchievements;
         if (data.userCode) this.state.userCode = data.userCode;
+        if (data.projectInterests) this.state.projectInterests = data.projectInterests;
+        if (data.soundEnabled !== undefined) SoundFX.enabled = !!data.soundEnabled;
+        if (data.soundVolume !== undefined) SoundFX.setVolume(data.soundVolume);
         if (data.profile) this.state.profile = { ...this.state.profile, ...data.profile };
         if (data.profileCustomized !== undefined) this.state.profileCustomized = !!data.profileCustomized;
         if (data.dailyQuests) this.state.dailyQuests = data.dailyQuests;

@@ -523,55 +523,71 @@ const AuthManager = {
      * Salva i progressi nel Database Cloud (Supabase) e nel database locale
      */
     async syncUserProgress(progressData) {
-        if (this.isGuest() || !this.currentUser || !this.currentUser.email) return;
+        if (this.isGuest() || !this.currentUser?.email || !progressData) return;
+        const email = this.currentUser.email;
+        // Una copia indipendente evita che una modifica successiva alteri il salvataggio in coda.
+        const snapshot = JSON.parse(JSON.stringify(progressData));
 
-        // 1. Sincronizzazione Cloud Supabase
-        if (this.isCloudActive()) {
-            try {
-                await this.syncToCloud(progressData);
-            } catch (err) {
-                console.warn('[AuthManager] Sync cloud non riuscito, salvataggio locale preservato:', err);
-            }
+        // Prima la copia locale: un errore di rete non deve impedire il salvataggio.
+        const db = this.getAccountsDB();
+        if (db[email]) {
+            db[email].progress = snapshot;
+            db[email].lastSync = new Date().toISOString();
+            this.saveAccountsDB(db);
         }
 
-        // 2. Sincronizzazione database locale
-        const db = this.getAccountsDB();
-        if (db[this.currentUser.email]) {
-            db[this.currentUser.email].progress = progressData;
-            db[this.currentUser.email].lastSync = new Date().toISOString();
-            this.saveAccountsDB(db);
+        if (this.isCloudActive()) {
+            try {
+                await this.syncToCloud(snapshot);
+            } catch (err) {
+                console.warn('[AuthManager] Sync cloud non riuscito; progressi locali mantenuti:', err);
+            }
         }
     },
 
     /**
-     * Salva record su tabella Supabase 'game_saves'
+     * Serializza gli upsert cloud della scheda corrente nell'ordine richiesto.
+     * La coda evita che una richiesta lenta sovrascriva quella successiva.
+     * Non sostituisce una gestione delle versioni lato server per schede/dispositivi diversi.
      */
     async syncToCloud(saveData) {
-        if (!this.isCloudActive() || this.isGuest()) return;
-        const { data: { user } } = await this.supabaseClient.auth.getUser();
-        if (!user) return;
+        if (!this.isCloudActive() || this.isGuest() || !this.currentUser?.email || !saveData) return;
+        const accountEmail = this.currentUser.email.toLowerCase();
+        const snapshot = JSON.parse(JSON.stringify(saveData));
+        const previous = this._cloudWriteQueue || Promise.resolve();
+        const operation = previous.catch(() => {}).then(async () => {
+            if (!this.isCloudActive() || this.isGuest() ||
+                this.currentUser?.email?.toLowerCase() !== accountEmail) return;
 
-        const payload = {
-            user_id: user.id,
-            email: user.email,
-            xp: saveData.xp || 0,
-            level: Math.floor((saveData.xp || 0) / 100) + 1,
-            streak: saveData.streak || 0,
-            streak_weeks: saveData.streakWeeks || 0,
-            finished_lessons_count: (saveData.finishedLessons || []).length,
-            save_data: saveData,
-            updated_at: new Date().toISOString()
-        };
+            const { data, error: authError } = await this.supabaseClient.auth.getUser();
+            if (authError) throw authError;
+            const user = data?.user;
+            if (!user || user.email?.toLowerCase() !== accountEmail) return;
+            // Controllo anche dopo l'attesa dell'autenticazione.
+            if (this.isGuest() || this.currentUser?.email?.toLowerCase() !== accountEmail) return;
 
-        const { error } = await this.supabaseClient
-            .from('game_saves')
-            .upsert(payload, { onConflict: 'user_id' });
+            const payload = {
+                user_id: user.id,
+                email: user.email,
+                xp: snapshot.xp || 0,
+                level: Math.floor((snapshot.xp || 0) / 100) + 1,
+                streak: snapshot.streak || 0,
+                streak_weeks: snapshot.streakWeeks || 0,
+                finished_lessons_count: (snapshot.finishedLessons || []).length,
+                save_data: snapshot,
+                updated_at: new Date().toISOString()
+            };
 
-        if (error) {
-            console.warn('[AuthManager] Errore upsert game_saves:', error.message);
-        }
+            const { error } = await this.supabaseClient
+                .from('game_saves')
+                .upsert(payload, { onConflict: 'user_id' });
+            if (error) throw error;
+        });
+
+        // La coda continua anche quando una singola richiesta fallisce.
+        this._cloudWriteQueue = operation.catch(() => {});
+        return operation;
     },
-
     /**
      * Recupera il salvataggio salvato nel cloud Supabase
      */
@@ -724,7 +740,7 @@ const AuthManager = {
     createBackupPayload(appState) {
         const payload = {
             app: 'GDScript Hero',
-            version: '4.0',
+            version: '4.1',
             exportedAt: new Date().toISOString(),
             user: {
                 name: appState.profile?.username || 'Eroe Godot',
@@ -751,6 +767,10 @@ const AuthManager = {
                 claimedQuestsCount: appState.claimedQuestsCount || 0,
                 projectInterests: appState.projectInterests || {},
                 userCode: appState.userCode || {},
+                // Questi dati erano già salvati localmente, ma mancavano dal backup.
+                arenaProject: appState.arenaProject ?? null,
+                sandbox: appState.sandbox ?? null,
+                reviewProgress: appState.reviewProgress ?? null,
                 learningTelemetry: appState.learningTelemetry || null,
                 soundEnabled: typeof SoundFX !== 'undefined' ? SoundFX.enabled : true,
                 soundVolume: typeof SoundFX !== 'undefined' ? SoundFX.volume : 0.8
@@ -838,6 +858,20 @@ const AuthManager = {
             throw new Error('Struttura dati non riconosciuta. Assicurati che sia un salvataggio di GDScript Hero.');
         }
 
+        // I checksum dei backup recenti rilevano modifiche e file danneggiati.
+        // Non sono firme crittografiche: non attestano chi ha creato il file.
+        if (!parsed.data || typeof parsed.data !== 'object' || Array.isArray(parsed.data) ||
+            (parsed.app && parsed.app !== 'GDScript Hero')) {
+            throw new Error('Il backup non appartiene a GDScript Hero oppure contiene dati non validi.');
+        }
+        if (parsed.checksum !== undefined) {
+            if (typeof parsed.checksum !== 'string' || parsed.checksum !== this.generateChecksum(parsed.data)) {
+                throw new Error('Il controllo di integrità del backup non corrisponde: il file potrebbe essere danneggiato o modificato.');
+            }
+        } else if (parsed.version === '4.1') {
+            throw new Error('Il backup è privo del checksum di integrità richiesto.');
+        }
+        // I backup storici e il formato legacy rimangono importabili.
         return parsed;
     },
 
@@ -867,6 +901,7 @@ const AuthManager = {
         if (imported.dailyQuests) {
             merged.dailyQuests = imported.dailyQuests;
         }
+        merged.projectInterests = { ...(current.projectInterests || {}), ...(imported.projectInterests || {}) };
         merged.claimedQuestsCount = Math.max(current.claimedQuestsCount || 0, imported.claimedQuestsCount || 0);
 
         // Fusione intelligente dei progetti Sandbox
@@ -963,7 +998,13 @@ const AuthManager = {
                 mergedHistory[vId] = { ...impH };
             } else if (curH && impH) {
                 const maxHints = Math.max(curH.hints_used || 0, curH.hintsUsed || 0, impH.hints_used || 0, impH.hintsUsed || 0);
+                const curTime = Date.parse(curH.last_attempt_at || '') || 0;
+                const impTime = Date.parse(impH.last_attempt_at || '') || 0;
+                const newest = impTime > curTime ? impH : curH;
+                const older = impTime > curTime ? curH : impH;
                 mergedHistory[vId] = {
+                    ...older,
+                    ...newest,
                     attempts: Math.max(curH.attempts || 0, impH.attempts || 0),
                     successes: Math.max(curH.successes || 0, impH.successes || 0),
                     hints_used: maxHints,
@@ -972,12 +1013,18 @@ const AuthManager = {
                     clean_autonomous_runs: Math.max(curH.clean_autonomous_runs || 0, impH.clean_autonomous_runs || 0),
                     first_attempt_at: earlierReviewDate(curH.first_attempt_at, impH.first_attempt_at),
                     last_attempt_at: laterReviewDate(curH.last_attempt_at, impH.last_attempt_at),
-                    first_success_at: earlierReviewDate(curH.first_success_at, impH.first_success_at)
+                    first_success_at: earlierReviewDate(curH.first_success_at, impH.first_success_at),
+                    // Errori nella sessione corrente e ultimo risultato appartengono
+                    // allo storico più recente, non alla somma dei due dispositivi.
+                    attempts_since_last_success: newest.attempts_since_last_success ?? older.attempts_since_last_success ?? 0,
+                    last_run: newest.last_run ?? older.last_run ?? null
                 };
             }
         }
 
         merged.reviewProgress = {
+            ...curReview,
+            ...impReview,
             completedVariants: mergedVariants,
             variantHistory: mergedHistory
         };
