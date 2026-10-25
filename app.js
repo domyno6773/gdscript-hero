@@ -1187,11 +1187,15 @@ const App = {
             item.style.paddingLeft = `${12 + depth * 16}px`;
 
             const icon = getNodeIcon(node.type);
+            // Le icone SVG sono controllate dall'app; nome e tipo provengono
+            // invece da progetti modificabili/importabili e vanno resi come testo.
             item.innerHTML = `
                 <span class="scene-node-icon">${icon}</span>
-                <span class="scene-node-name">${node.name}</span>
-                <span class="scene-node-type-badge">${node.type || 'Node'}</span>
+                <span class="scene-node-name"></span>
+                <span class="scene-node-type-badge"></span>
             `;
+            item.querySelector('.scene-node-name').textContent = String(node.name ?? '');
+            item.querySelector('.scene-node-type-badge').textContent = String(node.type || 'Node');
 
             item.onclick = (e) => {
                 e.stopPropagation();
@@ -1226,9 +1230,17 @@ const App = {
         if (detailsEl) {
             if (this.selectedSandboxNode) {
                 const s = this.selectedSandboxNode;
-                let extra = '';
-                if (s.text !== undefined) extra = ` | Testo: <strong>"${s.text}"</strong>`;
-                detailsEl.innerHTML = `<div>Nodo Selezionato: <strong>$${s.name}</strong> (${s.type || 'Node'})${extra}</div>`;
+                // Non interpretare mai come HTML nomi, tipi o testi dei nodi.
+                detailsEl.innerHTML = '<div>Nodo Selezionato: <strong class="sandbox-selected-name"></strong> <span class="sandbox-selected-type"></span></div>';
+                const detail = detailsEl.firstElementChild;
+                detail.querySelector('.sandbox-selected-name').textContent = `$${s.name}`;
+                detail.querySelector('.sandbox-selected-type').textContent = `(${s.type || 'Node'})`;
+                if (s.text !== undefined) {
+                    const textLabel = document.createTextNode(' | Testo: ');
+                    const textValue = document.createElement('strong');
+                    textValue.textContent = `"${s.text}"`;
+                    detail.append(textLabel, textValue);
+                }
             } else {
                 detailsEl.innerHTML = `<div class="sandbox-node-hint">💡 Clicca un nodo per selezionarlo o usa '➕ Nodo' per aggiungerne altri</div>`;
             }
@@ -3569,11 +3581,17 @@ const App = {
                 row.className = `test-row ${test.passed ? 'passed' : 'failed'}`;
                 row.innerHTML = `
                     <div class="test-icon">${test.passed ? '✅' : '❌'}</div>
-                    <div class="test-info">
-                        <div class="test-desc">${test.desc}</div>
-                        ${test.diff ? `<div class="test-diff">${test.diff}</div>` : ''}
-                    </div>
+                    <div class="test-info"><div class="test-desc"></div></div>
                 `;
+                // I messaggi possono includere l'output GDScript dello studente.
+                // textContent impedisce che diventino HTML eseguibile.
+                row.querySelector('.test-desc').textContent = String(test.desc ?? '');
+                if (test.diff !== undefined && test.diff !== null && test.diff !== '') {
+                    const diffEl = document.createElement('div');
+                    diffEl.className = 'test-diff';
+                    diffEl.textContent = String(test.diff);
+                    row.querySelector('.test-info').appendChild(diffEl);
+                }
                 resultsContainer.appendChild(row);
             });
 
@@ -4407,11 +4425,15 @@ const App = {
                 row.className = `test-row ${test.passed ? 'passed' : 'failed'}`;
                 row.innerHTML = `
                     <div class="test-icon">${test.passed ? '<svg class="ui-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg class="ui-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'}</div>
-                    <div class="test-info">
-                        <div class="test-desc">${test.desc}</div>
-                        ${test.diff ? `<div class="test-diff">${test.diff}</div>` : ''}
-                    </div>
+                    <div class="test-info"><div class="test-desc"></div></div>
                 `;
+                row.querySelector('.test-desc').textContent = String(test.desc ?? '');
+                if (test.diff !== undefined && test.diff !== null && test.diff !== '') {
+                    const diffEl = document.createElement('div');
+                    diffEl.className = 'test-diff';
+                    diffEl.textContent = String(test.diff);
+                    row.querySelector('.test-info').appendChild(diffEl);
+                }
                 resultsContainer.appendChild(row);
             });
 
@@ -5856,7 +5878,8 @@ const App = {
             if (isGuest) {
                 profileDesc.innerHTML = 'Stai giocando come <strong>Ospite Locale</strong>. I tuoi progressi sono salvati solo in questo browser. Accedi per salvarli nel cloud!';
             } else {
-                profileDesc.innerHTML = `Connesso come <strong>${user.email}</strong>. Sincronizzazione automatica attiva nel cloud.`;
+                profileDesc.innerHTML = 'Connesso come <strong></strong>. Sincronizzazione automatica attiva nel cloud.';
+                profileDesc.querySelector('strong').textContent = String(user.email || '');
             }
         }
 
@@ -6076,7 +6099,8 @@ const App = {
         } catch (e) {
             console.error('Errore durante il recupero delle statistiche admin:', e);
             if (tbody) {
-                tbody.innerHTML = `<tr><td colspan="5" class="table-empty-row" style="color: #ef4444;">Errore nel recupero dati: ${e.message}</td></tr>`;
+                tbody.innerHTML = '<tr><td colspan="5" class="table-empty-row" style="color: #ef4444;"></td></tr>';
+                tbody.querySelector('td').textContent = `Errore nel recupero dati: ${e.message}`;
             }
         }
     },
