@@ -863,6 +863,11 @@ const LESSONS_DATA = [
     const isBool = result.scope && result.scope.ha_chiave === true;
     tests.push({ desc: "Variabile float 'velocita = 4.5' creata", passed: isFloat, diff: isFloat ? null : `Valore: ${result.scope ? result.scope.velocita : 'undefined'}` });
     tests.push({ desc: "Variabile bool 'ha_chiave = true' creata", passed: isBool, diff: isBool ? null : `Valore: ${result.scope ? result.scope.ha_chiave : 'undefined'}` });
+    const logs = result.logs || [];
+    const idxVel = logs.findIndex(l => String(l).trim() === "4.5");
+    const idxKey = logs.findIndex((l, i) => i > idxVel && String(l).trim() === "true");
+    const logsOk = idxVel !== -1 && idxKey !== -1;
+    tests.push({ desc: "Valori '4.5' e 'true' stampati a console su righe separate", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -924,6 +929,8 @@ const LESSONS_DATA = [
     const hasType = /(:\s*int\b)/.test(cleanCode);
     tests.push({ desc: "Variabile 'vita' con valore 100", passed: okVal, diff: okVal ? null : `Valore attuale: ${result.scope ? result.scope.vita : 'undefined'}` });
     tests.push({ desc: "Tipizzazione statica esplicita ': int' applicata", passed: !!hasType, diff: hasType ? null : "Aggiungi ': int' dopo il nome della variabile: var vita: int = 100." });
+    const hasPrint100 = (result.logs || []).some(l => String(l).trim() === "100");
+    tests.push({ desc: "Valore di 'vita' (100) stampato a console", passed: hasPrint100, diff: hasPrint100 ? null : `Output ricevuto: ${(result.logs || []).join(", ") || "(nessun output)"}` });
     return tests;
 }
     },
@@ -985,6 +992,8 @@ const LESSONS_DATA = [
     const hasConst = /\bconst\s+GRAVITA\b/.test(cleanCode);
     tests.push({ desc: "Costante GRAVITA impostata a 9.8", passed: okVal, diff: okVal ? null : `Valore: ${result.scope ? result.scope.GRAVITA : 'undefined'}` });
     tests.push({ desc: "Parola chiave 'const' utilizzata", passed: !!hasConst, diff: hasConst ? null : "Dichiara la costante con: const GRAVITA = 9.8." });
+    const hasPrintGrav = (result.logs || []).some(l => String(l).trim() === "9.8");
+    tests.push({ desc: "Costante GRAVITA (9.8) stampata a console", passed: hasPrintGrav, diff: hasPrintGrav ? null : `Output ricevuto: ${(result.logs || []).join(", ") || "(nessun output)"}` });
     return tests;
 }
     },
@@ -1129,6 +1138,11 @@ const LESSONS_DATA = [
     tests.push({ desc: "Somma (10 + 5 = 15) calcolata", passed: s, diff: s ? null : `Ricevuto somma: ${result.scope ? result.scope.somma : 'null'}` });
     tests.push({ desc: "Prodotto (5 * 2 = 10) calcolato", passed: p, diff: p ? null : `Ricevuto prodotto: ${result.scope ? result.scope.prodotto : 'null'}` });
     tests.push({ desc: "Operatori '+' e '*' utilizzati nel calcolo", passed: !!hasOps, diff: hasOps ? null : "Usa gli operatori + e * per eseguire le operazioni matematiche." });
+    const logs = result.logs || [];
+    const idxSomma = logs.findIndex(l => String(l).trim() === "15");
+    const idxProdotto = logs.findIndex((l, i) => i > idxSomma && String(l).trim() === "10");
+    const logsOk = idxSomma !== -1 && idxProdotto !== -1;
+    tests.push({ desc: "Risultati '15' (somma) e '10' (prodotto) stampati a console su righe separate", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -2595,6 +2609,12 @@ const LESSONS_DATA = [
     const cleanCode = stripCommentsAndStrings(result.code);
     const hasAdd = /posizione\.x\s*\+=/.test(cleanCode);
     tests.push({ desc: "Coordinata X incrementata con 'posizione.x += velocita' a 150", passed: ok && hasAdd, diff: ok ? (hasAdd ? null : "Usa posizione.x += velocita") : `Ricevuto: ${p}` });
+    const logs = result.logs || [];
+    const printsPos = logs.some(l => {
+        const s = String(l).replace(/\s+/g, "");
+        return s.includes("(150,200)") || s.includes("Vector2(150,200)");
+    });
+    tests.push({ desc: "Vettore aggiornato (150, 200) stampato a console", passed: printsPos, diff: printsPos ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -2656,6 +2676,12 @@ const LESSONS_DATA = [
     const p = result.scope && result.scope.pos;
     const ok = p && p.x === 120 && p.y === 180;
     tests.push({ desc: "Vettore aggiornato a Vector2(120, 180)", passed: !!ok, diff: ok ? null : `Ricevuto: ${p}` });
+    const logs = result.logs || [];
+    const printsPos = logs.some(l => {
+        const s = String(l).replace(/\s+/g, "");
+        return s.includes("(120,180)") || s.includes("Vector2(120,180)");
+    });
+    tests.push({ desc: "Vettore pos (120, 180) stampato a console", passed: printsPos, diff: printsPos ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -2855,6 +2881,11 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const hasAssign = /(?:equip\s*\[\s*["']armatura["']\s*\]|equip\.armatura)\s*=/.test(codeNoComments);
     tests.push({ desc: "Chiavi aggiornate correttamente (arma: Spada Laser, armatura: Scudo)", passed: modOk, diff: modOk ? null : `Equip: ${JSON.stringify(eq)}` });
     tests.push({ desc: "Aggiunta della chiave 'armatura' tramite assegnazione dinamica", passed: !!hasAssign, diff: hasAssign ? null : "Assegna la chiave 'armatura' usando equip['armatura'] = 'Scudo'" });
+    const logs = result.logs || [];
+    const hasArmaLog = logs.some(l => /Arma\s*:\s*Spada Laser/i.test(l));
+    const hasArmaturaLog = logs.some(l => /Armatura\s*:\s*Scudo/i.test(l));
+    const logsOk = hasArmaLog && hasArmaturaLog;
+    tests.push({ desc: "Valori aggiornati di 'Arma' e 'Armatura' stampati a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -2925,6 +2956,11 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const hasMethod = /\.has\s*\(/.test(cleanCode);
     tests.push({ desc: "Metodo forziere.has(...) utilizzato", passed: !!hasMethod, diff: hasMethod ? null : "Usa forziere.has('oro') e forziere.has('chiave')." });
     tests.push({ desc: "Verifica ha_oro (true) e ha_chiave (false)", passed: goldOk && keyOk, diff: (goldOk && keyOk) ? null : `ha_oro=${s.ha_oro}, ha_chiave=${s.ha_chiave}` });
+    const logs = result.logs || [];
+    const hasGoldLog = logs.some(l => /Possiede oro\s*:\s*true/i.test(l));
+    const hasKeyLog = logs.some(l => /Possiede chiave\s*:\s*false/i.test(l));
+    const logsOk = hasGoldLog && hasKeyLog;
+    tests.push({ desc: "Esiti dei controlli 'Possiede oro' e 'Possiede chiave' stampati a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -3356,6 +3392,9 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         }
     }
     tests.push({ desc: "Costruttore _init() valorizza correttamente campi di nuove istanze", passed: classConstructorOk, diff: classConstructorOk ? null : "Il costruttore _init(n, c) deve inizializzare self.nome e self.cura." });
+    const logs = result.logs || [];
+    const logOk = logs.some(l => /Pozione creata\s*:\s*Elisir\s*\(Cura\s*:\s*50\)/i.test(l));
+    tests.push({ desc: "Dati della pozione creata stampati a console ('Pozione creata: Elisir (Cura: 50)')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -3413,6 +3452,11 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const g1Ok = s.g1 && s.g1.nome === "Arthur" && Number(s.g1.hp) === 100;
     const g2Ok = s.g2 && s.g2.nome === "Lancelot" && Number(s.g2.hp) === 90;
     tests.push({ desc: "Istanze indipendenti g1 e g2 create correttamente", passed: !!(g1Ok && g2Ok), diff: (g1Ok && g2Ok) ? null : "Crea g1 (Arthur, 100) e g2 (Lancelot, 90)." });
+    const logs = result.logs || [];
+    const g1Log = logs.some(l => /Eroe 1\s*:\s*Arthur\s*\(HP\s*:\s*100\)/i.test(l));
+    const g2Log = logs.some(l => /Eroe 2\s*:\s*Lancelot\s*\(HP\s*:\s*90\)/i.test(l));
+    const logsOk = g1Log && g2Log;
+    tests.push({ desc: "Informazioni di 'Eroe 1' e 'Eroe 2' stampate a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -3487,6 +3531,9 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         }
     }
     tests.push({ desc: "Metodo calcola correttamente il danno anche su nuove istanze", passed: methodTestOk, diff: methodTestOk ? null : "Il metodo colpo_caricato deve utilizzare self.attacco dell'istanza." });
+    const logs = result.logs || [];
+    const logOk = logs.some(l => /Danno colpo caricato\s*:\s*50/i.test(l));
+    tests.push({ desc: "Danno del colpo caricato (50) stampato a console", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -3697,6 +3744,9 @@ $Titolo.text = <span class="s">"Benvenuto in Godot 4!"</span>
     const node = sc ? sc.get_node("Titolo") : null;
     const labelOk = node && node.text === "Benvenuto in Godot 4!";
     tests.push({ desc: "Proprietà text del nodo Label '$Titolo' impostata a 'Benvenuto in Godot 4!'", passed: !!labelOk, diff: labelOk ? null : `Ricevuto: ${node ? node.text : 'Nodo non trovato'}` });
+    const logs = result.logs || [];
+    const logOk = logs.some(l => /Testo a schermo\s*:\s*Benvenuto in Godot 4!/i.test(l));
+    tests.push({ desc: "Testo della label stampato a console ('Testo a schermo: Benvenuto in Godot 4!')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -3761,6 +3811,9 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
     const node = sc ? sc.get_node("SaluteLabel") : null;
     const ok = node && node.text === "HP: 75";
     tests.push({ desc: "Nodo '$SaluteLabel.text' aggiornato a 'HP: 75'", passed: !!ok, diff: ok ? null : `Ricevuto: ${node ? node.text : 'null'}` });
+    const logs = result.logs || [];
+    const logOk = logs.some(l => /Nuova salute\s*:\s*HP:\s*75/i.test(l));
+    tests.push({ desc: "Valore aggiornato della salute stampato a console ('Nuova salute: HP: 75')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -3907,6 +3960,9 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     const btn = sc ? sc.get_node("AttaccaBtn") : null;
     const btnOk = btn && btn.type === "Button" && btn.text === "Sferra Attacco";
     tests.push({ desc: "Nodo Button '$AttaccaBtn.text' impostato a 'Sferra Attacco'", passed: !!btnOk, diff: btnOk ? null : `Ricevuto: ${btn ? btn.text : 'Nodo non trovato'}` });
+    const logs = result.logs || [];
+    const logOk = logs.some(l => /Pulsante configurato\s*:\s*Sferra Attacco/i.test(l));
+    tests.push({ desc: "Testo del pulsante configurato stampato a console ('Pulsante configurato: Sferra Attacco')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -4055,6 +4111,11 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     }
     const lblOk = lbl && lbl.text === "Click: 1";
     tests.push({ desc: "Etichetta $PuntiLabel aggiornata correttamente a 'Click: 1'", passed: !!lblOk, diff: lblOk ? null : `Ricevuto: ${lbl ? lbl.text : 'null'}` });
+    const logs = result.logs || [];
+    const hasReadyLog = logs.some(l => /Clicker pronto/i.test(l));
+    const hasClickLog = logs.some(l => /Click:\s*1/i.test(l));
+    const logsOk = hasReadyLog && hasClickLog;
+    tests.push({ desc: "Messaggi di avvio ('Clicker pronto') e di click ('Click: 1') stampati a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -4285,6 +4346,9 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
     const b = sc ? sc.get_node("BarraVita") : null;
     const bOk = b && b.type === "ColorRect" && b.color === "#22c55e" && b.size && b.size.x === 200 && b.size.y === 20;
     tests.push({ desc: "ColorRect 'BarraVita' configurato con colore verde e size Vector2(200, 20)", passed: !!bOk, diff: bOk ? null : "Imposta $BarraVita.color = '#22c55e' e $BarraVita.size = Vector2(200, 20)." });
+    const logs = result.logs || [];
+    const logOk = logs.some(l => /Barra salute aggiornata con colore:\s*#22c55e/i.test(l));
+    tests.push({ desc: "Aggiornamento colore barra stampato a console ('Barra salute aggiornata con colore: #22c55e')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
@@ -4352,6 +4416,11 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     const usesQueueFree = /\$Moneta\.queue_free\s*\(/.test(cleanCode);
     tests.push({ desc: "Metodo '$Moneta.queue_free()' invocato", passed: !!usesQueueFree, diff: usesQueueFree ? null : "Usa $Moneta.queue_free() per rimuovere il nodo dalla scena." });
     tests.push({ desc: "Nodo Moneta rimosso con successo dall'albero della scena", passed: !!notHas, diff: notHas ? null : "Il nodo Moneta risulta ancora presente." });
+    const logs = result.logs || [];
+    const hasBefore = logs.some(l => /Moneta presente prima:\s*true/i.test(l));
+    const hasAfter = logs.some(l => /Moneta eliminata con queue_free:\s*true/i.test(l));
+    const logsOk = hasBefore && hasAfter;
+    tests.push({ desc: "Stato della moneta prima e dopo queue_free stampato a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },
