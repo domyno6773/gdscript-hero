@@ -36,6 +36,21 @@ async function smoke(browser,url,width){
    await page.locator(selector).click({timeout:15000});
    await viewIs(page,section);
  }
+ // Esecuzione della Sandbox attraverso il pulsante reale, senza chiamate dirette al runtime.
+ const sandboxNav=width<821?'#mob-nav-practice':'#nav-practice-btn';
+ await page.locator(sandboxNav).click({timeout:15000});
+ await viewIs(page,'practice');
+ await page.locator('#sandbox-code-editor').fill('extends Node2D\\n\\nfunc _ready():\\n    print("BROWSER_SANDBOX_OK")');
+ await page.locator('#btn-sandbox-run').click({timeout:10000});
+ await page.waitForFunction(()=>document.getElementById('sandbox-console-output').textContent.includes('BROWSER_SANDBOX_OK'));
+ // Anche nel rendering della scena, un nome nodo non deve trasformarsi in HTML attivo.
+ await page.evaluate(()=>{
+   const current=App.getActiveSandboxProject();
+   current.nodes.push({name:'<img src=x onerror=window.__sandboxXss=1>',type:'Label',parent:current.nodes[0].name,text:'<img src=x onerror=window.__sandboxXss=1>'});
+   App.loadActiveSandboxProject();
+ });
+ assert.equal(await page.evaluate(()=>window.__sandboxXss||0),0,'XSS in Sandbox node name');
+ assert.equal(await page.locator('#sandbox-scene-tree img').count(),0,'HTML in Sandbox node tree');
  await page.evaluate(()=>App.openLesson(1));
  await viewIs(page,'exercise');
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
