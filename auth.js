@@ -968,6 +968,8 @@ const AuthManager = {
                     successes: Math.max(curH.successes || 0, impH.successes || 0),
                     hints_used: maxHints,
                     hintsUsed: maxHints,
+                    has_autonomous_success: !!(curH.has_autonomous_success || impH.has_autonomous_success),
+                    clean_autonomous_runs: Math.max(curH.clean_autonomous_runs || 0, impH.clean_autonomous_runs || 0),
                     first_attempt_at: earlierReviewDate(curH.first_attempt_at, impH.first_attempt_at),
                     last_attempt_at: laterReviewDate(curH.last_attempt_at, impH.last_attempt_at),
                     first_success_at: earlierReviewDate(curH.first_success_at, impH.first_success_at)

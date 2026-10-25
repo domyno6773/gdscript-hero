@@ -4254,7 +4254,7 @@ const App = {
             this.state.activeHintLevel = this.state.hintsRevealed;
             if (this.isReviewMode && this.currentReviewVariant) {
                 if (typeof ReviewEngine !== 'undefined') {
-                    ReviewEngine.recordVariantAttempt(this.currentReviewVariant.id, false, this.state.hintsRevealed, this.state);
+                    ReviewEngine.recordVariantHintOpened(this.currentReviewVariant.id, this.state.hintsRevealed, this.state);
                 }
             } else {
                 this.recordHintOpened(this.state.currentLessonId, this.state.hintsRevealed);
@@ -4285,7 +4285,7 @@ const App = {
                     }
                     if (this.isReviewMode && this.currentReviewVariant) {
                         if (typeof ReviewEngine !== 'undefined') {
-                            ReviewEngine.recordVariantAttempt(this.currentReviewVariant.id, false, this.state.hintsRevealed, this.state);
+                            ReviewEngine.recordVariantHintOpened(this.currentReviewVariant.id, this.state.hintsRevealed, this.state);
                         }
                     } else {
                         this.recordHintOpened(this.state.currentLessonId, this.state.hintsRevealed);
@@ -4339,7 +4339,11 @@ const App = {
                     this.state.hintsRevealed = 1;
                 }
                 this.state.activeHintLevel = 1;
-                if (!this.isReviewMode) {
+                if (this.isReviewMode && this.currentReviewVariant) {
+                    if (typeof ReviewEngine !== 'undefined') {
+                        ReviewEngine.recordVariantHintOpened(this.currentReviewVariant.id, 1, this.state);
+                    }
+                } else {
                     this.recordHintOpened(this.state.currentLessonId, 1);
                 }
                 this.renderHintBox(currentLesson);
@@ -4390,10 +4394,7 @@ const App = {
 
             const isFirstTime = !(this.state.reviewProgress && Array.isArray(this.state.reviewProgress.completedVariants) && this.state.reviewProgress.completedVariants.includes(variant.id));
 
-            // Registra tentativo nel contatore giornaliero aggregato
-            this.recordDailyActivity('verification', 1);
-
-            // Registra esito del tentativo di ripasso (isolato dalla telemetria delle lezioni)
+            // Registra esito del tentativo di ripasso (ReviewEngine gestisce in modo esclusivo daily_activity e telemetria varianti)
             if (typeof ReviewEngine !== 'undefined') {
                 ReviewEngine.recordVariantAttempt(variant.id, allPassed, this.state.hintsRevealed, this.state);
             }

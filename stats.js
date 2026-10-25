@@ -237,7 +237,8 @@ const StatsEngine = {
                 totalReviewAttempts += attempts;
                 totalReviewSuccesses += successes;
 
-                if (hints === 0 && failed <= 1) {
+                const isCleanAutonomous = (hist.has_autonomous_success === true) || (hints === 0 && failed <= 1);
+                if (isCleanAutonomous) {
                     cleanAutonomousCount++;
                 } else {
                     assistedCount++;

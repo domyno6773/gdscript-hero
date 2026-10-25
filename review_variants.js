@@ -46,17 +46,31 @@ func _ready():
             const tests = [];
             tests.push(formatExecutionCheck(result));
             const logs = result.logs || [];
-            const hasL1 = logs.some(l => l.includes("Astronave: Stella Polare"));
-            const hasL2 = logs.some(l => l.includes("Sistemi di bordo: Operativi"));
+            const code = result.code || '';
+
+            // 1. Verifica di due istruzioni print distinte nel codice sorgente
+            const printMatches = code.match(/\bprint\s*\(/g) || [];
+            const hasTwoPrints = printMatches.length >= 2;
             tests.push({
-                desc: "Console contiene 'Astronave: Stella Polare'",
-                passed: hasL1,
-                diff: hasL1 ? null : `Atteso: "Astronave: Stella Polare", Ricevuto: "${logs.join(' | ')}"`
+                desc: "Utilizzo di due istruzioni print() distinte",
+                passed: hasTwoPrints,
+                diff: hasTwoPrints ? null : `Rilevate ${printMatches.length} istruzioni print(). La consegna richiede esattamente due istruzioni print() separate.`
+            });
+
+            // 2. Verifica dei messaggi su righe separate ed ordinate
+            const l1Idx = logs.findIndex(l => l.includes("Astronave: Stella Polare") && !l.includes("Sistemi di bordo: Operativi"));
+            const l2Idx = logs.findIndex(l => l.includes("Sistemi di bordo: Operativi") && !l.includes("Astronave: Stella Polare"));
+            const distinctLinesInOrder = (l1Idx !== -1 && l2Idx !== -1 && l1Idx < l2Idx);
+
+            tests.push({
+                desc: "Console stampa 'Astronave: Stella Polare' sulla prima riga",
+                passed: l1Idx !== -1,
+                diff: l1Idx !== -1 ? null : `Atteso su riga separata: "Astronave: Stella Polare", Ricevuto: "${logs.join(' | ')}"`
             });
             tests.push({
-                desc: "Console contiene 'Sistemi di bordo: Operativi'",
-                passed: hasL2,
-                diff: hasL2 ? null : `Atteso: "Sistemi di bordo: Operativi", Ricevuto: "${logs.join(' | ')}"`
+                desc: "Console stampa 'Sistemi di bordo: Operativi' sulla riga successiva",
+                passed: l2Idx !== -1 && distinctLinesInOrder,
+                diff: (l2Idx !== -1 && distinctLinesInOrder) ? null : `Atteso su riga successiva: "Sistemi di bordo: Operativi", Ricevuto: "${logs.join(' | ')}"`
             });
             return tests;
         }
@@ -1232,8 +1246,10 @@ const ReviewEngine = {
                 if (failedAttempts > maxVariantErrors) maxVariantErrors = failedAttempts;
 
                 // Definizione rigorosa di superamento autonomo (P3.3.1 / P3.4):
-                // Senza alcun suggerimento (hintsUsed === 0) e con al massimo un errore occasionale/typo (failedAttempts <= 1)
-                if (hintsUsed === 0 && failedAttempts <= 1) {
+                // 1) Se documentata una prova autonoma pulita (vHist.has_autonomous_success === true)
+                // 2) Oppure, per retrocompatibilità storica: senza alcun suggerimento (hintsUsed === 0) e con al massimo un errore occasionale (failedAttempts <= 1)
+                const isCleanAutonomous = (vHist.has_autonomous_success === true) || (hintsUsed === 0 && failedAttempts <= 1);
+                if (isCleanAutonomous) {
                     cleanAutonomousCompletions++;
                 } else {
                     assistedCompletions++;
@@ -1410,6 +1426,32 @@ const ReviewEngine = {
         return result;
     },
 
+    recordVariantHintOpened(variantId, hintLevel, state) {
+        if (!state || !variantId) return;
+        if (!state.reviewProgress) {
+            state.reviewProgress = { completedVariants: [], variantHistory: {} };
+        }
+        if (!state.reviewProgress.variantHistory) {
+            state.reviewProgress.variantHistory = {};
+        }
+        const vHist = state.reviewProgress.variantHistory[variantId] || {
+            attempts: 0,
+            successes: 0,
+            hints_used: 0,
+            hintsUsed: 0,
+            attempts_since_last_success: 0,
+            has_autonomous_success: false,
+            clean_autonomous_runs: 0,
+            first_attempt_at: null,
+            last_attempt_at: null,
+            first_success_at: null
+        };
+        const maxH = Math.max(vHist.hints_used || 0, vHist.hintsUsed || 0, hintLevel || 0);
+        vHist.hints_used = maxH;
+        vHist.hintsUsed = maxH;
+        state.reviewProgress.variantHistory[variantId] = vHist;
+    },
+
     recordVariantAttempt(variantId, isSuccess, hintsRevealed, state) {
         if (!state) return;
         if (!state.reviewProgress) {
@@ -1429,6 +1471,9 @@ const ReviewEngine = {
             successes: 0,
             hints_used: 0,
             hintsUsed: 0,
+            attempts_since_last_success: 0,
+            has_autonomous_success: false,
+            clean_autonomous_runs: 0,
             first_attempt_at: null,
             last_attempt_at: null,
             first_success_at: null
@@ -1438,22 +1483,47 @@ const ReviewEngine = {
         if (!vHist.first_attempt_at) vHist.first_attempt_at = nowIso;
         vHist.last_attempt_at = nowIso;
 
-        const maxH = Math.max(vHist.hints_used || 0, vHist.hintsUsed || 0, hintsRevealed || 0);
+        const currentRunHints = hintsRevealed || 0;
+        const maxH = Math.max(vHist.hints_used || 0, vHist.hintsUsed || 0, currentRunHints);
         vHist.hints_used = maxH;
         vHist.hintsUsed = maxH;
 
         const isFirstSuccess = isSuccess && !vHist.first_success_at;
-        if (isSuccess) {
+
+        if (!isSuccess) {
+            // Tentativo fallito nella sessione corrente
+            vHist.attempts_since_last_success = (vHist.attempts_since_last_success || 0) + 1;
+        } else {
+            // Successo conseguito!
             vHist.successes++;
             if (!vHist.first_success_at) vHist.first_success_at = nowIso;
             if (!state.reviewProgress.completedVariants.includes(variantId)) {
                 state.reviewProgress.completedVariants.push(variantId);
             }
+
+            const sessionFailures = vHist.attempts_since_last_success || 0;
+            // Valutazione della sessione: autonoma se 0 hint aperti in questa sessione e al max 1 errore prima del successo
+            const isAutonomousRun = (currentRunHints === 0 && sessionFailures <= 1);
+            if (isAutonomousRun) {
+                vHist.has_autonomous_success = true;
+                vHist.clean_autonomous_runs = (vHist.clean_autonomous_runs || 0) + 1;
+            }
+
+            vHist.last_run = {
+                success: true,
+                hints_used: currentRunHints,
+                failed_attempts: sessionFailures,
+                is_autonomous: isAutonomousRun,
+                completed_at: nowIso
+            };
+
+            // Reset del conteggio errori per la sessione successiva
+            vHist.attempts_since_last_success = 0;
         }
 
         state.reviewProgress.variantHistory[variantId] = vHist;
 
-        // Registrazione nel contatore giornaliero aggregato (P3.4)
+        // Registrazione nel contatore giornaliero aggregato (P3.4) - PROPRIETÀ ESCLUSIVA
         if (state && state.learningTelemetry) {
             if (!state.learningTelemetry.daily_activity) state.learningTelemetry.daily_activity = {};
             const todayKey = (typeof StatsEngine !== 'undefined' && StatsEngine.formatLocalDateKey)
