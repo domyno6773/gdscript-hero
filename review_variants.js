@@ -570,8 +570,8 @@ func _ready():
         conceptId: "vectors_2d",
         title: "Spostamento Radar del Mecha",
         scenario: "Aggiornamento delle coordinate radar su griglia bidimensionale.",
-        task: "In <code>_ready()</code>:<br>1. Dichiara la variabile <code>posizione = Vector2(100, 200)</code>.<br>2. Incrementa la coordinata <code>x</code> di 50 (<code>posizione.x += 50</code>).<br>3. Decrementa la coordinata <code>y</code> di 30 (<code>posizione.y -= 30</code>).<br>4. Stampa a console <code>posizione</code> (deve stampare <code>Vector2(150, 170)</code>).",
-        expectedOutput: "Vector2(150, 170)",
+        task: "In <code>_ready()</code>:<br>1. Dichiara la variabile <code>posizione = Vector2(100, 200)</code>.<br>2. Incrementa la coordinata <code>x</code> di 50 (<code>posizione.x += 50</code>).<br>3. Decrementa la coordinata <code>y</code> di 30 (<code>posizione.y -= 30</code>).<br>4. Stampa a console <code>posizione</code> (deve stampare <code>(150.0, 170.0)</code>).",
+        expectedOutput: "(150.0, 170.0)",
         starterCode: `extends Node2D
 
 func _ready():
@@ -622,7 +622,7 @@ func _ready():
                 passed: hasAxes,
                 diff: hasAxes ? null : "Verifica di aggiornare i componenti: posizione.x += 50 e posizione.y -= 30."
             });
-            const auditDependency = await reviewAuditMutation(result, 'rev_vectors_01', (result.code || '').replace(/(posizione\.x\s*\+=\s*)50\b/, (_match, prefix) => prefix + '60'), 'Vector2(150, 170)');
+            const auditDependency = await reviewAuditMutation(result, 'rev_vectors_01', (result.code || '').replace(/(posizione\.x\s*\+=\s*)50\b/, (_match, prefix) => prefix + '60'), '(150.0, 170.0)');
             tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
