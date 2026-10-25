@@ -4,7 +4,7 @@ const App = {
         theme: "dark", // "dark" | "light"
         currentLessonId: 1,
         isValidating: false,
-        learningTelemetry: { schema_version: 1, lessons: {} },
+        learningTelemetry: { schema_version: 1, lessons: {}, daily_activity: {} },
         completedLessons: [1],
         finishedLessons: [],
         devAllUnlocked: false, // Default false: la modalità test/verifica si attiva solo in locale
@@ -270,7 +270,7 @@ const App = {
             } else {
                 this.state.currentWeekId = this.getWeekId();
                 this.state.sandbox = this.getDefaultSandboxState();
-                this.state.learningTelemetry = { schema_version: 1, lessons: {} };
+                this.state.learningTelemetry = { schema_version: 1, lessons: {}, daily_activity: {} };
                 if (this.isLocalEnvironment()) {
                     this.state.devAllUnlocked = true;
                 } else {
@@ -1757,7 +1757,7 @@ const App = {
             progress: { daily_exercise: 0, no_hints: 0, code_runs: 0 },
             claimed: { daily_exercise: false, no_hints: false, code_runs: false }
         };
-        this.state.learningTelemetry = { schema_version: 1, lessons: {} };
+        this.state.learningTelemetry = { schema_version: 1, lessons: {}, daily_activity: {} };
 
         this.saveStorage();
         this.applyProfileUI();
@@ -3242,7 +3242,8 @@ const App = {
     initLearningTelemetryFromLegacy(finishedLessons = []) {
         const telemetry = {
             schema_version: 1,
-            lessons: {}
+            lessons: {},
+            daily_activity: {}
         };
         const finishedSet = new Set(finishedLessons || []);
         finishedSet.forEach(id => {
@@ -3278,7 +3279,8 @@ const App = {
         }
         const telemetry = {
             schema_version: Math.max(parsedTelemetry.schema_version || 1, 1),
-            lessons: { ...(parsedTelemetry.lessons || {}) }
+            lessons: { ...(parsedTelemetry.lessons || {}) },
+            daily_activity: { ...(parsedTelemetry.daily_activity || {}) }
         };
 
         // Assicura che le lezioni completate prima di P3 abbiano una voce legacy corretta
@@ -3321,10 +3323,13 @@ const App = {
 
     getOrCreateLessonTelemetry(lessonId) {
         if (!this.state.learningTelemetry) {
-            this.state.learningTelemetry = { schema_version: 1, lessons: {} };
+            this.state.learningTelemetry = { schema_version: 1, lessons: {}, daily_activity: {} };
         }
         if (!this.state.learningTelemetry.lessons) {
             this.state.learningTelemetry.lessons = {};
+        }
+        if (!this.state.learningTelemetry.daily_activity) {
+            this.state.learningTelemetry.daily_activity = {};
         }
 
         const idStr = String(lessonId);
@@ -3392,6 +3397,38 @@ const App = {
         return null;
     },
 
+    recordDailyActivity(type, count = 1, options = {}) {
+        if (!this.state.learningTelemetry) {
+            this.state.learningTelemetry = { schema_version: 1, lessons: {}, daily_activity: {} };
+        }
+        if (!this.state.learningTelemetry.daily_activity) {
+            this.state.learningTelemetry.daily_activity = {};
+        }
+        const todayKey = new Date().toISOString().split('T')[0];
+        if (!this.state.learningTelemetry.daily_activity[todayKey]) {
+            this.state.learningTelemetry.daily_activity[todayKey] = {
+                verifications: 0,
+                lessons_completed: 0,
+                autonomous_completed: 0,
+                assisted_completed: 0,
+                reviews_completed: 0
+            };
+        }
+        const entry = this.state.learningTelemetry.daily_activity[todayKey];
+        if (type === 'verification') {
+            entry.verifications += count;
+        } else if (type === 'lesson_success') {
+            entry.lessons_completed += count;
+            if (options.autonomous) {
+                entry.autonomous_completed += count;
+            } else {
+                entry.assisted_completed += count;
+            }
+        } else if (type === 'review_success') {
+            entry.reviews_completed += count;
+        }
+    },
+
     recordLessonAttempt(lessonId, result, tests, criticalErr, code = '') {
         if (!lessonId) return;
         const record = this.getOrCreateLessonTelemetry(lessonId);
@@ -3404,10 +3441,14 @@ const App = {
         }
         record.last_attempt_at = nowIso;
 
+        // Registra tentativo nel contatore aggregato giornaliero (P3.4)
+        this.recordDailyActivity('verification', 1);
+
         const errType = this.classifyExecutionError(result, tests, criticalErr, code);
 
         if (errType === null) {
             // Verifica superata con successo
+            const isFirstSuccess = !record.first_success_at;
             record.success_count++;
             if (!record.first_success_at) {
                 record.first_success_at = nowIso;
@@ -3420,6 +3461,10 @@ const App = {
                 }
             }
             record.last_success_at = nowIso;
+
+            if (isFirstSuccess) {
+                this.recordDailyActivity('lesson_success', 1, { autonomous: record.first_success_without_hints === true });
+            }
         } else if (errType === 'internal') {
             // Errore infrastrutturale / interno: non attribuisce difficoltà didattica allo studente
             record.error_breakdown.internal = (record.error_breakdown.internal || 0) + 1;
@@ -4343,6 +4388,9 @@ const App = {
 
             const isFirstTime = !(this.state.reviewProgress && Array.isArray(this.state.reviewProgress.completedVariants) && this.state.reviewProgress.completedVariants.includes(variant.id));
 
+            // Registra tentativo nel contatore giornaliero aggregato
+            this.recordDailyActivity('verification', 1);
+
             // Registra esito del tentativo di ripasso (isolato dalla telemetria delle lezioni)
             if (typeof ReviewEngine !== 'undefined') {
                 ReviewEngine.recordVariantAttempt(variant.id, allPassed, this.state.hintsRevealed, this.state);
@@ -4753,6 +4801,10 @@ const App = {
             `;
         }
 
+        const autoPct = autonomy.completedLessons > 0 ? ((autonomy.autonomousCount / autonomy.completedLessons) * 100).toFixed(1) : '0';
+        const assistPct = autonomy.completedLessons > 0 ? ((autonomy.assistedCount / autonomy.completedLessons) * 100).toFixed(1) : '0';
+        const legacyPct = autonomy.completedLessons > 0 ? ((autonomy.legacyCount / autonomy.completedLessons) * 100).toFixed(1) : '0';
+
         container.innerHTML = `
             <div class="stats-kpi-grid">
                 <div class="stats-kpi-card">
@@ -4798,6 +4850,39 @@ const App = {
                     <div class="kpi-subtext">${autonomy.totalVerifications} verifiche totali registrate</div>
                 </div>
             </div>
+
+            <!-- Ripartizione Qualitativa Dettagliata -->
+            <div class="stats-autonomy-breakdown-card">
+                <div class="breakdown-header">
+                    <span class="breakdown-title">
+                        <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                        Ripartizione Qualitativa dei Completamenti
+                    </span>
+                    <span class="breakdown-subtitle">${autonomy.completedLessons} lezioni completate su ${autonomy.totalLessons} totali</span>
+                </div>
+                <div class="multi-progress-bar">
+                    <div class="multi-segment seg-autonomous" style="width: ${autoPct}%;" title="In Piena Autonomia: ${autonomy.autonomousCount} (${autoPct}%)"></div>
+                    <div class="multi-segment seg-assisted" style="width: ${assistPct}%;" title="Con Supporto / Indizi: ${autonomy.assistedCount} (${assistPct}%)"></div>
+                    ${autonomy.hasLegacyData ? `<div class="multi-segment seg-legacy" style="width: ${legacyPct}%;" title="Legacy pre-P3: ${autonomy.legacyCount} (${legacyPct}%)"></div>` : ''}
+                </div>
+                <div class="breakdown-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot seg-autonomous"></span>
+                        <span class="legend-text">In Piena Autonomia (0 indizi): <strong>${autonomy.autonomousCount}</strong> (${autonomy.trackedCount > 0 ? autonomy.autonomyRate + '%' : '0%'})</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot seg-assisted"></span>
+                        <span class="legend-text">Con Supporto Didattico (1–3 indizi): <strong>${autonomy.assistedCount}</strong> (${autonomy.trackedCount > 0 ? (autonomy.assistedRate || 0) + '%' : '0%'})</span>
+                    </div>
+                    ${autonomy.hasLegacyData ? `
+                    <div class="legend-item">
+                        <span class="legend-dot seg-legacy"></span>
+                        <span class="legend-text">Pre-P3 (Storico indizi non tracciato): <strong>${autonomy.legacyCount}</strong></span>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+
             ${legacyNoticeHtml}
         `;
     },
@@ -4992,10 +5077,11 @@ const App = {
                             <thead>
                                 <tr>
                                     <th>Data Sessione</th>
-                                    <th>Lezioni Superate</th>
-                                    <th>In Piena Autonomia</th>
-                                    <th>Verifiche Eseguite</th>
-                                    <th>Varianti di Ripasso</th>
+                                    <th>Avanzamento Corso</th>
+                                    <th>In Autonomia</th>
+                                    <th>Con Supporto</th>
+                                    <th>Varianti Ripasso</th>
+                                    <th>Verifiche Registrate</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -5004,12 +5090,17 @@ const App = {
                                         <td class="date-cell"><strong>${this.escapeHtml(row.date)}</strong></td>
                                         <td>${row.lessonsCompleted}</td>
                                         <td><span class="tag-autonomous">${row.autonomousSuccesses}</span></td>
-                                        <td>${row.verifyAttempts}</td>
+                                        <td><span class="tag-assisted">${row.assistedSuccesses}</span></td>
                                         <td>${row.reviewCompleted}</td>
+                                        <td>${row.isVerificationsTracked ? `<strong>${row.verifications}</strong>` : '<span class="tag-untracked" title="Verifiche non aggregate per questa data storica">—</span>'}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
+                    </div>
+                    <div class="stats-table-footnote">
+                        <svg class="ui-icon ui-icon-xs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><strong>Integrità Cronologica:</strong> la colonna <em>Verifiche Registrate</em> riporta i tentativi certi registrati nel contatore di sessione attivo. Per le sessioni storiche prive di contatore aggregato, i tentativi non vengono stimati a posteriori e sono contrassegnati con <em>—</em>.</span>
                     </div>
                 </div>
             `;

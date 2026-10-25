@@ -1441,6 +1441,7 @@ const ReviewEngine = {
         vHist.hints_used = maxH;
         vHist.hintsUsed = maxH;
 
+        const isFirstSuccess = isSuccess && !vHist.first_success_at;
         if (isSuccess) {
             vHist.successes++;
             if (!vHist.first_success_at) vHist.first_success_at = nowIso;
@@ -1450,6 +1451,25 @@ const ReviewEngine = {
         }
 
         state.reviewProgress.variantHistory[variantId] = vHist;
+
+        // Registrazione nel contatore giornaliero aggregato (P3.4)
+        if (state && state.learningTelemetry) {
+            if (!state.learningTelemetry.daily_activity) state.learningTelemetry.daily_activity = {};
+            const todayKey = nowIso.split('T')[0];
+            if (!state.learningTelemetry.daily_activity[todayKey]) {
+                state.learningTelemetry.daily_activity[todayKey] = {
+                    verifications: 0,
+                    lessons_completed: 0,
+                    autonomous_completed: 0,
+                    assisted_completed: 0,
+                    reviews_completed: 0
+                };
+            }
+            state.learningTelemetry.daily_activity[todayKey].verifications++;
+            if (isFirstSuccess) {
+                state.learningTelemetry.daily_activity[todayKey].reviews_completed++;
+            }
+        }
     }
 };
 

@@ -1101,6 +1101,24 @@ const AuthManager = {
             result.lessons[idStr] = mergedLesson;
         }
 
+        // Fusione idempotente e deterministica dell'attività giornaliera aggregata
+        const lDaily = local.daily_activity || {};
+        const rDaily = remote.daily_activity || {};
+        const mergedDaily = {};
+        const allDates = Array.from(new Set([...Object.keys(lDaily), ...Object.keys(rDaily)]));
+        allDates.forEach(date => {
+            const ld = lDaily[date] || {};
+            const rd = rDaily[date] || {};
+            mergedDaily[date] = {
+                verifications: Math.max(ld.verifications || 0, rd.verifications || 0),
+                lessons_completed: Math.max(ld.lessons_completed || 0, rd.lessons_completed || 0),
+                autonomous_completed: Math.max(ld.autonomous_completed || 0, rd.autonomous_completed || 0),
+                assisted_completed: Math.max(ld.assisted_completed || 0, rd.assisted_completed || 0),
+                reviews_completed: Math.max(ld.reviews_completed || 0, rd.reviews_completed || 0)
+            };
+        });
+        result.daily_activity = mergedDaily;
+
         return result;
     }
 };

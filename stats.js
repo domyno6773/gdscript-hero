@@ -72,6 +72,7 @@ const StatsEngine = {
         });
 
         const autonomyRate = trackedCount > 0 ? Math.round((autonomousCount / trackedCount) * 100) : null;
+        const assistedRate = trackedCount > 0 ? Math.round((assistedCount / trackedCount) * 100) : null;
         const avgAttemptsPerTrackedLesson = trackedCount > 0 ? (totalVerifications / trackedCount).toFixed(1) : null;
 
         return {
@@ -83,6 +84,7 @@ const StatsEngine = {
             autonomousCount,
             assistedCount,
             autonomyRate,
+            assistedRate,
             cleanFirstTryCount,
             totalVerifications,
             avgAttemptsPerTrackedLesson,
@@ -268,7 +270,7 @@ const StatsEngine = {
      * DOMANDA 3: Come sta evolvendo il mio studio nel tempo?
      * Valutazione rigorosa dei timestamp reali (nessun dato o trend inventato).
      */
-    computeChronologicalProgress(state) {
+computeChronologicalProgress(state) {
         if (!state) {
             return {
                 trendAvailable: false,
@@ -280,61 +282,68 @@ const StatsEngine = {
 
         const dateMap = {};
 
-        const registerEvent = (isoString, type) => {
-            if (!isoString || typeof isoString !== 'string') return;
-            try {
-                const datePart = isoString.split('T')[0];
-                if (!datePart || datePart.length < 10) return;
-
-                if (!dateMap[datePart]) {
-                    dateMap[datePart] = {
-                        date: datePart,
-                        lessonsCompleted: 0,
-                        verifyAttempts: 0,
-                        reviewCompleted: 0,
-                        autonomousSuccesses: 0
-                    };
-                }
-
-                if (type === 'lesson_success') dateMap[datePart].lessonsCompleted++;
-                if (type === 'verify_attempt') dateMap[datePart].verifyAttempts++;
-                if (type === 'review_success') dateMap[datePart].reviewCompleted++;
-                if (type === 'autonomous_success') dateMap[datePart].autonomousSuccesses++;
-            } catch (e) {}
+        const getOrCreateDateEntry = (datePart) => {
+            if (!dateMap[datePart]) {
+                dateMap[datePart] = {
+                    date: datePart,
+                    lessonsCompleted: 0,
+                    autonomousSuccesses: 0,
+                    assistedSuccesses: 0,
+                    legacySuccesses: 0,
+                    reviewCompleted: 0,
+                    verifications: null, // null se non tracciato attivamente in daily_activity
+                    isVerificationsTracked: false
+                };
+            }
+            return dateMap[datePart];
         };
 
-        // 1. Estrazione timestamp reali dalle lezioni
+        const dailyActivity = (state.learningTelemetry && state.learningTelemetry.daily_activity)
+            ? state.learningTelemetry.daily_activity
+            : {};
+
+        // 1. Registra le giornate tracciate attivamente in daily_activity (conteggi certi)
+        Object.entries(dailyActivity).forEach(([dateStr, act]) => {
+            if (!dateStr || typeof dateStr !== 'string') return;
+            const entry = getOrCreateDateEntry(dateStr);
+            if (act) {
+                entry.verifications = typeof act.verifications === 'number' ? act.verifications : null;
+                entry.isVerificationsTracked = (entry.verifications !== null);
+            }
+        });
+
+        // 2. Analisi rigorosa e verificabile dei completamenti certi dalle lezioni
+        // Ciascuna lezione ha un timestamp univoco di primo successo (first_success_at)
         const telemetry = (state.learningTelemetry && state.learningTelemetry.lessons)
             ? state.learningTelemetry.lessons
             : (state.learningTelemetry || {});
 
         Object.values(telemetry).forEach(tel => {
-            if (!tel || tel.legacy_completion === true || tel.history_available === false) return;
+            if (!tel || !tel.first_success_at) return;
+            const datePart = tel.first_success_at.split('T')[0];
+            if (!datePart || datePart.length < 10) return;
 
-            if (tel.first_success_at) {
-                registerEvent(tel.first_success_at, 'lesson_success');
-                if (tel.first_success_without_hints === true) {
-                    registerEvent(tel.first_success_at, 'autonomous_success');
-                }
-            }
-            if (tel.first_attempt_at) {
-                registerEvent(tel.first_attempt_at, 'verify_attempt');
-            }
-            if (tel.last_attempt_at && tel.last_attempt_at !== tel.first_attempt_at) {
-                registerEvent(tel.last_attempt_at, 'verify_attempt');
+            const entry = getOrCreateDateEntry(datePart);
+            entry.lessonsCompleted++;
+
+            if (tel.legacy_completion === true || tel.history_available === false || tel.first_success_without_hints === null) {
+                entry.legacySuccesses++;
+            } else if (tel.first_success_without_hints === true) {
+                entry.autonomousSuccesses++;
+            } else {
+                entry.assistedSuccesses++;
             }
         });
 
-        // 2. Estrazione timestamp reali dal ripasso
+        // 3. Analisi dei completamenti certi dalle varianti di ripasso
         const variantHistory = state.reviewProgress?.variantHistory || {};
         Object.values(variantHistory).forEach(hist => {
-            if (!hist) return;
-            if (hist.first_success_at) {
-                registerEvent(hist.first_success_at, 'review_success');
-            }
-            if (hist.first_attempt_at) {
-                registerEvent(hist.first_attempt_at, 'verify_attempt');
-            }
+            if (!hist || !hist.first_success_at) return;
+            const datePart = hist.first_success_at.split('T')[0];
+            if (!datePart || datePart.length < 10) return;
+
+            const entry = getOrCreateDateEntry(datePart);
+            entry.reviewCompleted++;
         });
 
         const sortedDates = Object.keys(dateMap).sort();
@@ -346,8 +355,8 @@ const StatsEngine = {
             return {
                 trendAvailable: false,
                 reason: distinctDaysCount === 1
-                    ? "Tutte le attività registrate finora appartengono alla stessa giornata di studio. Per tracciare un andamento cronologico significativo dell'apprendimento, continua a esercitarti nei prossimi giorni. La piattaforma registrerà automaticamente l'attività giorno per giorno senza generare curve o percentuali fittizie."
-                    : "Dati cronologici storici al momento assenti o appartenenti a versioni precedenti senza timestamp. Esegui verifiche ed esercizi per iniziare la rilevazione temporale.",
+                    ? "Tutte le attività registrate finora appartengono alla stessa giornata di studio (singola giornata). Per tracciare un andamento cronologico significativo dell'apprendimento, continua a esercitarti nei prossimi giorni. La piattaforma registrerà automaticamente l'attività giorno per giorno senza generare curve o percentuali fittizie."
+                    : "Dati cronologici storici al momento assenti o insufficienti (non marcati temporalmente). Esegui verifiche ed esercizi per iniziare la rilevazione temporale.",
                 dailySeries: sortedDates.map(d => dateMap[d]),
                 distinctDaysCount
             };
