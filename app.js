@@ -135,6 +135,13 @@ const App = {
                 this.state.lastActiveDate = parsed.lastActiveDate || null;
                 this.state.userCode = parsed.userCode || {};
                 
+                // Pulisce eventuale codice legacy con Node.new salvato in localStorage per le lezioni aggiornate
+                [49, 50, 52, 53, 57, 58].forEach(id => {
+                    if (this.state.userCode[id] && (this.state.userCode[id].includes('.new') || this.state.userCode[id].includes('Node.new') || this.state.userCode[id].includes('add_child'))) {
+                        delete this.state.userCode[id];
+                    }
+                });
+                
                 if (parsed.theme) {
                     this.state.theme = parsed.theme;
                 }
