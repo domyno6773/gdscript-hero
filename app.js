@@ -2139,7 +2139,7 @@ const App = {
         });
     },
 
-    // Generatore SVG 3D Hexagon fedele allo stile Coddy
+    // Generatore SVG 3D Hexagon fedele al Design System Indie Game Academy
     renderHexNodeSVG(isMastery, status) {
         if (isMastery) {
             if (status === 'completed') {
@@ -2147,13 +2147,13 @@ const App = {
                     <svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84">
                         <defs>
                             <linearGradient id="hexGoldComp" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#f59e0b"/>
-                                <stop offset="100%" stop-color="#b45309"/>
+                                <stop offset="0%" stop-color="#E8B44D"/>
+                                <stop offset="100%" stop-color="#B58117"/>
                             </linearGradient>
                         </defs>
-                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#78350f" />
-                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexGoldComp)" stroke="#fde68a" stroke-width="2.5" />
-                        <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#fffbeb" />
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#6E4904" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexGoldComp)" stroke="#FDE68A" stroke-width="2" />
+                        <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#FFFBEB" />
                     </svg>
                 `;
             } else if (status === 'current' || status === 'unlocked') {
@@ -2162,21 +2162,21 @@ const App = {
                     <svg class="hex-svg ${pulseClass}" width="84" height="84" viewBox="0 0 84 84">
                         <defs>
                             <linearGradient id="hexGoldActive" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#fbbf24"/>
-                                <stop offset="100%" stop-color="#d97706"/>
+                                <stop offset="0%" stop-color="#F59E0B"/>
+                                <stop offset="100%" stop-color="#D97706"/>
                             </linearGradient>
                         </defs>
-                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#92400e" />
-                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexGoldActive)" stroke="#fef08a" stroke-width="3" />
-                        <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#ffffff" />
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#78350F" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexGoldActive)" stroke="#FEF08A" stroke-width="2.5" />
+                        <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#FFFFFF" />
                     </svg>
                 `;
             } else {
                 return `
                     <svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84">
-                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#0f172a" />
-                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="#1e293b" stroke="#334155" stroke-width="2" />
-                        <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#475569" opacity="0.6" />
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#0C111B" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="#141C29" stroke="#243345" stroke-width="2" />
+                        <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#64748B" opacity="0.4" />
                     </svg>
                 `;
             }
@@ -2187,36 +2187,49 @@ const App = {
                     <svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84">
                         <defs>
                             <linearGradient id="hexGreen" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#34d399"/>
-                                <stop offset="100%" stop-color="#059669"/>
+                                <stop offset="0%" stop-color="#35C18D"/>
+                                <stop offset="100%" stop-color="#1E8E62"/>
                             </linearGradient>
                         </defs>
-                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#047857" />
-                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexGreen)" stroke="#6ee7b7" stroke-width="2" />
-                        <path d="M 27 39 L 37 49 L 57 29" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#164D37" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexGreen)" stroke="#6EE7B7" stroke-width="2" />
+                        <path d="M 27 39 L 37 49 L 57 29" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 `;
-            } else if (status === 'current' || status === 'unlocked') {
-                const pulseClass = (status === 'current') ? 'pulse-current' : '';
+            } else if (status === 'current') {
                 return `
-                    <svg class="hex-svg ${pulseClass}" width="84" height="84" viewBox="0 0 84 84">
+                    <svg class="hex-svg pulse-current" width="84" height="84" viewBox="0 0 84 84">
                         <defs>
-                            <linearGradient id="hexCyan" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#38bdf8"/>
-                                <stop offset="100%" stop-color="#0284c7"/>
+                            <linearGradient id="hexCyanFocus" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#48B7D9"/>
+                                <stop offset="100%" stop-color="#1D8EA8"/>
                             </linearGradient>
                         </defs>
-                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#075985" />
-                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexCyan)" stroke="#bae6fd" stroke-width="2.5" />
-                        <polygon points="36,28 36,52 54,40" fill="#ffffff" />
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#164E5E" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexCyanFocus)" stroke="#BAE6FD" stroke-width="2.5" />
+                        <polygon points="36,28 36,52 54,40" fill="#FFFFFF" />
+                    </svg>
+                `;
+            } else if (status === 'unlocked') {
+                return `
+                    <svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84">
+                        <defs>
+                            <linearGradient id="hexCyanUnlocked" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#2D7D9A"/>
+                                <stop offset="100%" stop-color="#1A5A70"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#103B49" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="url(#hexCyanUnlocked)" stroke="#7CD2EC" stroke-width="2" />
+                        <polygon points="36,28 36,52 54,40" fill="#E0F2FE" />
                     </svg>
                 `;
             } else {
                 return `
                     <svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84">
-                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#0f172a" />
-                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="#1e293b" stroke="#334155" stroke-width="2" />
-                        <path d="M 36 34 L 36 30 C 36 26.7 38.7 24 42 24 C 45.3 24 48 26.7 48 30 L 48 34 M 32 34 L 52 34 C 53.1 34 54 34.9 54 36 L 54 50 C 54 51.1 53.1 52 52 52 L 32 52 C 30.9 52 30 51.1 30 50 L 30 36 C 30 34.9 30.9 34 32 34 Z" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" />
+                        <path d="M 2 40 L 2 48 L 22 82 L 62 82 L 82 48 L 82 40 L 62 74 L 22 74 Z" fill="#0C111B" />
+                        <path d="M 22 6 L 62 6 L 82 40 L 62 74 L 22 74 L 2 40 Z" fill="#141C29" stroke="#243345" stroke-width="2" />
+                        <path d="M 36 34 L 36 30 C 36 26.7 38.7 24 42 24 C 45.3 24 48 26.7 48 30 L 48 34 M 32 34 L 52 34 C 53.1 34 54 34.9 54 36 L 54 50 C 54 51.1 53.1 52 52 52 L 32 52 C 30.9 52 30 51.1 30 50 L 30 36 C 30 34.9 30.9 34 32 34 Z" fill="none" stroke="#64748B" stroke-width="2.5" stroke-linecap="round" />
                     </svg>
                 `;
             }
@@ -2318,6 +2331,17 @@ const App = {
                 const node = document.createElement('div');
                 node.className = `node-item ${statusClass} ${isMastery ? 'mastery' : ''}`;
                 node.id = `node-lesson-${lesson.id}`;
+                node.setAttribute('role', 'button');
+                node.setAttribute('tabindex', isUnlocked ? '0' : '-1');
+                node.setAttribute('aria-label', `${lesson.title} - ${statusClass === 'completed' ? 'Completato' : (statusClass === 'current' ? 'In corso' : (statusClass === 'unlocked' ? 'Disponibile' : 'Bloccato'))}`);
+                node.title = lesson.title;
+
+                node.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        node.click();
+                    }
+                };
 
                 if (!isMastery && offset !== 0) {
                     node.style.transform = `translateX(${offset}px)`;
@@ -3222,6 +3246,19 @@ const App = {
         });
         document.getElementById('btn-home').onclick = () => this.showRoadmap();
         document.getElementById('nav-roadmap-btn').onclick = () => this.showRoadmap();
+
+        const btnHeroContinue = document.getElementById('btn-hero-continue');
+        if (btnHeroContinue) {
+            btnHeroContinue.onclick = () => {
+                SoundFX.playClick();
+                let focusId = this.state.currentLessonId;
+                if (!focusId || this.state.finishedLessons.includes(focusId)) {
+                    const firstUnfinished = LESSONS_DATA.find(l => !l.isMastery && !this.state.finishedLessons.includes(l.id));
+                    focusId = firstUnfinished ? firstUnfinished.id : 1;
+                }
+                this.openLesson(focusId);
+            };
+        }
         document.getElementById('nav-editor-btn').onclick = () => {
             SoundFX.playClick();
             this.openLesson(this.state.currentLessonId);

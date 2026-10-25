@@ -24,13 +24,16 @@
 
     <!-- Top Navigation Bar con divisione Sezioni del Sito | Obiettivi | Statistiche Personali -->
     <header class="navbar">
-        <!-- 1. SEZIONI PRINCIPALI DEL SITO & ATTIVITÀ -->
+        <!-- 1. LOGO & BRANDING (SINISTRA) -->
         <div class="nav-left">
-            <div class="logo" id="btn-home" title="Torna alla Mappa">
+            <div class="logo" id="btn-home" title="Torna alla Mappa" role="button" tabindex="0">
                 <span class="logo-icon">🎮</span>
                 <span class="logo-text">GDScript<span class="accent">Hero</span></span>
             </div>
-            <div class="nav-separator"></div>
+        </div>
+
+        <!-- 2. NAVIGAZIONE SEZIONI PRINCIPALI (CENTRO) -->
+        <nav class="nav-center" aria-label="Navigazione Principale">
             <button class="nav-btn active" id="nav-roadmap-btn" title="Mappa dei Livelli">
                 <span class="icon">🗺️</span> <span class="nav-btn-text">Mappa</span>
             </button>
@@ -40,20 +43,20 @@
             <button class="nav-btn" id="nav-practice-btn" title="Sandbox &amp; Mini-IDE Godot 4">
                 <span class="icon">🎮</span> <span class="nav-btn-text">Sandbox</span>
             </button>
-            <button class="nav-btn" id="nav-projects-btn" title="Progetti (In Sviluppo)">
-                <span class="icon">🛠️</span> <span class="nav-btn-text">Progetti</span> <span class="nav-wip-pill">WIP</span>
+            <button class="nav-btn" id="nav-projects-btn" title="Progetti &amp; Arena">
+                <span class="icon">⚔️</span> <span class="nav-btn-text">Progetti</span>
             </button>
             <button class="nav-btn nav-btn-activity" id="btn-open-achievements" title="Traguardi & Obiettivi">
                 <span class="icon">🏆</span> <span class="nav-btn-text">Traguardi</span> <span id="achievements-count-badge" class="badge-count">0/10</span>
             </button>
-        </div>
+        </nav>
 
-        <!-- 2. STATISTICHE PERSONALI & PROFILO (DESTRA) -->
+        <!-- 3. STATISTICHE PERSONALI & PROFILO (DESTRA) -->
         <div class="nav-right">
             <!-- Gruppo Statistiche Personali -->
             <div class="nav-stats-group">
                 <!-- Streak Flame -->
-                <div class="stat-pill streak-pill clickable" id="btn-streak-modal" title="Gestisci Obiettivo Serie Settimanale">
+                <div class="stat-pill streak-pill clickable" id="btn-streak-modal" title="Gestisci Obiettivo Serie Settimanale" role="button" tabindex="0">
                     <span class="fire-icon" id="streak-flame">🔥</span>
                     <span class="stat-value" id="streak-count">0 sett.</span>
                     <span class="stat-label" id="streak-sub-label">(0/2 gg)</span>
@@ -83,19 +86,19 @@
             <!-- Gruppo Utente & Impostazioni -->
             <div class="nav-user-group">
                 <!-- Pillola Stato Account / Login (Ospite o Utente) -->
-                <div class="stat-pill auth-pill clickable" id="btn-open-auth-nav" title="Stato Account & Sincronizzazione">
+                <div class="stat-pill auth-pill clickable" id="btn-open-auth-nav" title="Stato Account & Sincronizzazione" role="button" tabindex="0">
                     <span id="nav-auth-icon">👤</span>
                     <span id="nav-auth-label">Ospite</span>
                 </div>
 
                 <!-- Profilo Giocatore -->
-                <div class="stat-pill profile-pill clickable" id="btn-open-profile" title="Il Tuo Profilo">
+                <div class="stat-pill profile-pill clickable" id="btn-open-profile" title="Il Tuo Profilo" role="button" tabindex="0">
                     <div class="nav-avatar" id="nav-profile-avatar" style="border-color: #478cbf;">🤖</div>
                     <span class="nav-profile-name" id="nav-profile-name">Eroe Godot</span>
                 </div>
 
                 <!-- Settings Button -->
-                <button class="icon-btn" id="btn-open-settings" title="Impostazioni & Audio">
+                <button class="icon-btn" id="btn-open-settings" title="Impostazioni & Audio" aria-label="Impostazioni">
                     ⚙️
                 </button>
             </div>
@@ -109,15 +112,21 @@
             <div class="roadmap-main-col">
                 <div class="roadmap-header">
                     <div class="chapter-card overall-course-card">
-                        <div class="chapter-badge">CORSO COMPLETO • GDSCRIPT 4</div>
+                        <div class="chapter-badge">ACCADEMIA INDIE • GDSCRIPT 4</div>
                         <h1>Accademia di Sviluppo Godot</h1>
-                        <p class="subtitle">9 Capitoli completi: Introduzione, Variabili (Parte 1 e 2), Operazioni, Condizioni, Array, Cicli, Funzioni e Vettori 2D con relative Sfide di Padronanza!</p>
+                        <p class="subtitle">Percorso completo in 15 Capitoli e 60 Lezioni: dai fondamenti di programmazione ai nodi 2D, segnali, animazioni e architettura ad albero per Godot 4.</p>
                         <div class="overall-progress-bar">
                             <div class="progress-fill" id="overall-progress-fill" style="width: 0%;"></div>
                         </div>
                         <div class="progress-stats">
-                            <span id="completed-count-text">0 di 36 completati</span>
+                            <span id="completed-count-text">0 di 60 completati (0%)</span>
                             <span class="demo-tag" id="xp-to-next-level-tag">50 XP al prossimo livello</span>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="btn-hero-continue" id="btn-hero-continue" title="Continua l'apprendimento">
+                                <span>Continua ad Imparare</span>
+                                <span class="hero-btn-arrow">➔</span>
+                            </button>
                         </div>
                     </div>
                 </div>
