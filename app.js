@@ -5,7 +5,7 @@ const App = {
         currentLessonId: 1,
         completedLessons: [1],
         finishedLessons: [],
-        devAllUnlocked: true, // Sblocca tutti i 60 livelli localmente per la verifica immediata
+        devAllUnlocked: false, // Default false: la modalità test/verifica si attiva solo in locale
         unlockedAchievements: [],
         xp: 0,
         streak: 1,
@@ -81,6 +81,16 @@ const App = {
         { name: "pass", type: "keyword", badge: "ignora" }
     ],
 
+    isLocalEnvironment() {
+        try {
+            const h = window.location.hostname;
+            const p = window.location.protocol;
+            return p === 'file:' || h === 'localhost' || h === '127.0.0.1' || h === '::1';
+        } catch (e) {
+            return false;
+        }
+    },
+
     init() {
         this.loadStorage();
         this.ensureUnlockedConsistency();
@@ -95,6 +105,12 @@ const App = {
         this.setupPracticeEditor();
         this.checkAchievements();
         this.updateQuestsBadge();
+
+        // Mostra i controlli sviluppatore nelle impostazioni ESCLUSIVAMENTE in ambiente locale
+        if (this.isLocalEnvironment()) {
+            const devGroup = document.getElementById('dev-settings-group');
+            if (devGroup) devGroup.classList.remove('hidden');
+        }
 
         // Inizializzazione Viewport 2D Godot Engine
         if (window.GodotViewport) {
@@ -126,7 +142,12 @@ const App = {
                 this.state.streak = parsed.streak || 1;
                 this.state.finishedLessons = parsed.finishedLessons || [];
                 this.state.completedLessons = parsed.completedLessons || [1];
-                this.state.devAllUnlocked = (parsed.devAllUnlocked !== undefined) ? parsed.devAllUnlocked : true;
+                // In ambiente locale permette la modalità sblocco rapido, online forza false
+                if (this.isLocalEnvironment()) {
+                    this.state.devAllUnlocked = (parsed.devAllUnlocked !== undefined) ? parsed.devAllUnlocked : true;
+                } else {
+                    this.state.devAllUnlocked = false;
+                }
                 this.state.unlockedAchievements = parsed.unlockedAchievements || [];
                 this.state.streakMode = parsed.streakMode || "rilassato";
                 this.state.streakWeeks = parsed.streakWeeks || 0;
@@ -169,6 +190,11 @@ const App = {
                 }
             } else {
                 this.state.currentWeekId = this.getWeekId();
+                if (this.isLocalEnvironment()) {
+                    this.state.devAllUnlocked = true;
+                } else {
+                    this.state.devAllUnlocked = false;
+                }
             }
         } catch (e) {
             console.warn("Storage non disponibile.");
@@ -1219,8 +1245,13 @@ const App = {
             this.state.completedLessons.unshift(1);
         }
 
-        // Se la modalità sblocco totale è attiva (default: true per permettere la verifica immediata di tutti i livelli)
-        if (this.state.devAllUnlocked !== false) {
+        // Se siamo sul sito online pubblico, la modalità devAllUnlocked è disattivata categoricamente
+        if (!this.isLocalEnvironment()) {
+            this.state.devAllUnlocked = false;
+        }
+
+        // Se la modalità sblocco totale è attiva (SOLO ed esclusivamente in locale)
+        if (this.state.devAllUnlocked) {
             LESSONS_DATA.forEach(lesson => {
                 if (!this.state.completedLessons.includes(lesson.id)) {
                     this.state.completedLessons.push(lesson.id);
@@ -1230,6 +1261,9 @@ const App = {
             return;
         }
 
+        // Progressione normale per il sito pubblico online:
+        // Ricalcola lo sblocco effettivo basandosi SOLO sui finishedLessons reali dell'utente
+        const normalUnlocked = [1];
         CHAPTERS_DATA.forEach(chapter => {
             const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id);
             const coreLessons = chapterLessons.filter(l => !l.isMastery);
@@ -1239,30 +1273,40 @@ const App = {
                 if (this.state.finishedLessons.includes(core.id)) {
                     if (idx < coreLessons.length - 1) {
                         const nextCore = coreLessons[idx + 1];
-                        if (!this.state.completedLessons.includes(nextCore.id)) {
-                            this.state.completedLessons.push(nextCore.id);
+                        if (!normalUnlocked.includes(nextCore.id)) {
+                            normalUnlocked.push(nextCore.id);
                         }
                     } else {
                         // Ultimo core del capitolo: sblocca la sfida bonus di apprendimento!
-                        if (masteryLesson && !this.state.completedLessons.includes(masteryLesson.id)) {
-                            this.state.completedLessons.push(masteryLesson.id);
+                        if (masteryLesson && !normalUnlocked.includes(masteryLesson.id)) {
+                            normalUnlocked.push(masteryLesson.id);
                         }
                         // E sblocca il primo livello core del capitolo successivo!
                         const nextChapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id + 1 && !l.isMastery);
                         if (nextChapterLessons.length > 0) {
                             const nextCore = nextChapterLessons[0];
-                            if (!this.state.completedLessons.includes(nextCore.id)) {
-                                this.state.completedLessons.push(nextCore.id);
+                            if (!normalUnlocked.includes(nextCore.id)) {
+                                normalUnlocked.push(nextCore.id);
                             }
                         }
                     }
                 }
             });
         });
+        this.state.completedLessons = normalUnlocked;
         this.saveStorage();
     },
 
     unlockAllLessons(notify = false) {
+        if (!this.isLocalEnvironment()) {
+            this.showToast({
+                icon: '🔒',
+                tag: 'PRODUZIONE',
+                title: 'Comando non disponibile',
+                desc: 'Lo sblocco totale è consentito solo in locale per i test dello sviluppatore.'
+            });
+            return;
+        }
         this.state.devAllUnlocked = true;
         this.state.completedLessons = LESSONS_DATA.map(l => l.id);
         this.saveStorage();
@@ -1270,9 +1314,9 @@ const App = {
         if (notify) {
             this.showToast({
                 icon: '🔓',
-                tag: 'MODALITÀ VERIFICA',
+                tag: 'MODALITÀ VERIFICA (LOCALE)',
                 title: 'Tutti i 60 Livelli Sbloccati',
-                desc: 'Ora puoi selezionare e testare qualsiasi esercizio o sfida di apprendimento!'
+                desc: 'Ora puoi selezionare e testare qualsiasi esercizio o sfida in locale!'
             });
         }
     },
@@ -1800,7 +1844,7 @@ const App = {
         if (headerNextBtn) {
             const hasNext = lessonId < LESSONS_DATA.length;
             const isNextUnlocked = hasNext && this.state.completedLessons.includes(lessonId + 1);
-            if (hasNext && (this.state.finishedLessons.includes(lessonId) || isNextUnlocked)) {
+            if (hasNext && (this.state.finishedLessons.includes(lessonId) || (this.isLocalEnvironment() && isNextUnlocked))) {
                 headerNextBtn.classList.remove('hidden');
             } else {
                 headerNextBtn.classList.add('hidden');
