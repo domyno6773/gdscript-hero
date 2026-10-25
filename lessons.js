@@ -4391,6 +4391,18 @@ const DAILY_QUESTS_CONFIG = [
 
 const PROJECTS_DATA = [
     {
+        id: "project_arena",
+        title: "Arena del Gladiatore",
+        icon: "⚔️",
+        badge: "DISPONIBILE • GIOCABILE",
+        badgeClass: "badge-playable",
+        isPlayable: true,
+        desc: "Programma un sistema completo di combattimento: gestione salute con take_damage() e heal(), limiti biologici, HUD reattivo ed esportazione per Godot 4.",
+        levelReq: "Capitolo 4 completato",
+        estimatedTime: "30 min",
+        topics: ["Variabili", "Funzioni", "Condizioni if/else", "HUD Grafico", "Godot 4 Export"]
+    },
+    {
         id: "project_platformer",
         title: "Controller 2D: Movimento & Salto",
         icon: "🎮",

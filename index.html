@@ -484,21 +484,239 @@
         </div>
     </main>
 
-    <!-- VISTA 4: PROGETTI PRATICI DI GIOCO (W.I.P.) -->
+    <!-- VISTA 4: PROGETTI PRATICI DI GIOCO -->
     <main id="view-projects" class="view-container hidden">
-        <div class="projects-hero-card">
-            <div class="wip-banner-badge">🚧 WORK IN PROGRESS - IN ARRIVO</div>
-            <h2>🛠️ Progetti Pratici per Godot Engine</h2>
-            <p class="projects-subtitle">
-                Metti alla prova tutte le tue conoscenze costruendo veri mini-giochi completi con GDScript 4.<br>
-                Questi progetti guidati sono attualmente in sviluppo e saranno sbloccati nei prossimi aggiornamenti dell'applicazione!
-            </p>
+        <!-- SEZIONE 1: CATALOGO PROGETTI -->
+        <div id="projects-catalog-section">
+            <div class="projects-hero-card">
+                <div class="wip-banner-badge ready-badge">✨ PROGETTI PRATICI DISPONIBILI</div>
+                <h2>🛠️ Progetti Pratici per Godot Engine 4</h2>
+                <p class="projects-subtitle">
+                    Metti alla prova le tue competenze programmando mini-giochi e sistemi reali in GDScript 4.<br>
+                    Sviluppa passo dopo passo, testa in tempo reale e scarica il progetto esportato direttamente per Godot Engine!
+                </p>
+            </div>
+
+            <div class="projects-grid" id="projects-grid-container">
+                <!-- Popolato dinamicamente da app.js -->
+            </div>
         </div>
 
-        <div class="projects-grid" id="projects-grid-container">
-            <!-- Popolato dinamicamente da app.js -->
+        <!-- SEZIONE 2: WORKSPACE INTERATTIVO MINI-PROGETTO ARENA -->
+        <div id="project-arena-workspace" class="hidden">
+            <!-- Barra superiore progetto: Back, Stepper Fasi, Esporta -->
+            <div class="arena-top-bar">
+                <div class="arena-nav-left">
+                    <button type="button" class="btn-back-projects" onclick="App.closeArenaWorkspace()">
+                        ← Elenco Progetti
+                    </button>
+                    <div class="arena-title-wrap">
+                        <span class="arena-title-icon">⚔️</span>
+                        <h2 class="arena-main-title">Arena del Gladiatore</h2>
+                        <span class="arena-progress-pill" id="arena-header-progress">Fase 1 di 4</span>
+                    </div>
+                </div>
+                <div class="arena-nav-actions">
+                    <button type="button" class="btn-godot-export" id="btn-export-godot" onclick="App.openGodotExportModal()">
+                        <span>💾</span>
+                        <span>Esporta per Godot 4</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stepper Fasi Interattivo -->
+            <div class="arena-stepper-row" id="arena-stepper-row">
+                <!-- Generato dinamicamente: Fasi 1, 2, 3, 4 -->
+            </div>
+
+            <!-- Grid a 3 colonne del Workspace Progetto -->
+            <div class="arena-workspace-grid">
+                <!-- Colonna Sinistra: Istruzioni, Compito didattico, Suggerimenti -->
+                <section class="arena-panel arena-instructions-panel">
+                    <div class="arena-phase-header">
+                        <span class="phase-number-badge" id="arena-phase-badge">FASE 1</span>
+                        <h3 id="arena-phase-title">Inizializzazione e Variabili</h3>
+                        <p class="arena-phase-subtitle" id="arena-phase-subtitle">Dichiara lo stato vitale del tuo gladiatore</p>
+                    </div>
+
+                    <div class="arena-narrative-box" id="arena-narrative-box">
+                        <!-- Narrazione -->
+                    </div>
+
+                    <div class="arena-task-card">
+                        <div class="task-card-header">
+                            <span class="task-header-icon">🎯</span>
+                            <h4>Compito Didattico:</h4>
+                        </div>
+                        <div class="task-card-body" id="arena-task-body">
+                            <!-- Task html -->
+                        </div>
+                    </div>
+
+                    <!-- Box Suggerimenti della Fase -->
+                    <div class="arena-hints-box" id="arena-hints-box">
+                        <div class="arena-hints-header" onclick="App.toggleArenaHints()">
+                            <span class="hint-header-icon">💡</span>
+                            <span id="arena-hints-toggle-text">Ti serve un consiglio? (0/3 sbloccati)</span>
+                            <span class="arrow" id="arena-hints-arrow">▼</span>
+                        </div>
+                        <div class="arena-hints-content hidden" id="arena-hints-content">
+                            <div class="hint-stepper-nav" id="arena-hint-stepper-nav"></div>
+                            <div class="hint-content" id="arena-hint-body"></div>
+                            <div class="hint-actions">
+                                <button type="button" class="btn-subtle" id="btn-arena-next-hint" onclick="App.unlockNextArenaHint()">Sblocca Prossimo Livello ➔</button>
+                                <button type="button" class="btn-danger-subtle" onclick="App.revealArenaPhaseSolution()">Mostra Soluzione Fase</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Colonna Centrale: Editor di Codice -->
+                <section class="arena-panel arena-editor-panel">
+                    <div class="arena-editor-header">
+                        <div class="editor-file-tab">
+                            <span class="file-icon">📜</span>
+                            <span>gladiator.gd</span>
+                            <span class="file-tag">GDScript 4</span>
+                        </div>
+                        <div class="editor-actions-bar">
+                            <button type="button" class="btn-secondary-sm" onclick="App.resetArenaCode()" title="Ripristina codice iniziale della fase">
+                                ↺ Ripristina
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="arena-code-wrap">
+                        <textarea id="arena-code-editor" spellcheck="false" placeholder="# Scrivi qui il codice del gladiatore..."></textarea>
+                    </div>
+
+                    <div class="arena-action-bar">
+                        <div class="action-info">
+                            <span class="info-tip">💡 Modifica lo script e clicca su Verifica per testare la fase.</span>
+                        </div>
+                        <button type="button" class="btn-primary-run" id="btn-run-arena-phase" onclick="App.verifyArenaPhase()">
+                            <span class="run-icon">▶</span>
+                            <span class="run-text">Verifica Fase Corrente</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Colonna Destra: HUD Live, Simulatore Combattimento & Risultati Test -->
+                <section class="arena-panel arena-interactive-panel">
+                    <!-- HUD Grafico del Gladiatore -->
+                    <div class="arena-hud-card">
+                        <div class="hud-gladiator-header">
+                            <div class="hud-avatar-box">
+                                <span class="hud-avatar" id="hud-gladiator-avatar">🛡️</span>
+                            </div>
+                            <div class="hud-gladiator-info">
+                                <h3 id="hud-gladiator-name">Massimo il Gladiatore</h3>
+                                <div class="hud-status-badge status-healthy" id="hud-status-badge">🟢 In Forma</div>
+                            </div>
+                        </div>
+
+                        <!-- Barra Vita Dinamica -->
+                        <div class="hud-health-section">
+                            <div class="health-meta-row">
+                                <span class="health-label">PUNTI VITA (HP)</span>
+                                <span class="health-values" id="hud-health-text">100 / 100</span>
+                            </div>
+                            <div class="health-bar-track">
+                                <div class="health-bar-fill bar-healthy" id="hud-health-fill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Simulatore di Battaglia Interattivo (Pulsanti Live) -->
+                        <div class="hud-sim-section">
+                            <span class="sim-section-label">🎮 Simulatore Combattimento (Live Test)</span>
+                            <div class="sim-buttons-grid">
+                                <button type="button" class="btn-sim btn-sim-damage" onclick="App.simulateArenaCombat('damage', 25)">
+                                    ⚔️ Danno (-25)
+                                </button>
+                                <button type="button" class="btn-sim btn-sim-crit" onclick="App.simulateArenaCombat('damage', 50)">
+                                    💥 Critico (-50)
+                                </button>
+                                <button type="button" class="btn-sim btn-sim-heal" onclick="App.simulateArenaCombat('heal', 20)">
+                                    🧪 Cura (+20)
+                                </button>
+                                <button type="button" class="btn-sim btn-sim-reset" onclick="App.simulateArenaCombat('reset')">
+                                    🔄 Reset HP
+                                </button>
+                            </div>
+                            <div class="sim-feedback-msg" id="hud-combat-log">Pronto per il combattimento nell'Arena.</div>
+                        </div>
+                    </div>
+
+                    <!-- Drawer Risultati Test della Fase -->
+                    <div class="arena-results-card">
+                        <div class="results-header-row">
+                            <h4>📋 Verifiche della Fase</h4>
+                            <span class="phase-status-badge" id="arena-phase-status">• In attesa</span>
+                        </div>
+                        <div class="arena-test-list" id="arena-test-list">
+                            <div class="arena-empty-tests">Modifica il codice e premi 'Verifica Fase' per eseguire i test automatici.</div>
+                        </div>
+                        <div class="arena-phase-success-box hidden" id="arena-phase-success-box">
+                            <div class="success-banner">
+                                <span class="trophy-icon">🏆</span>
+                                <div>
+                                    <strong id="arena-success-msg">FASE SUPERATA!</strong>
+                                    <p id="arena-success-sub">Tutti i controlli hanno avuto esito positivo.</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-next-phase" id="btn-arena-next-phase" onclick="App.nextArenaPhase()">
+                                Procedi alla Prossima Fase ➔
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
     </main>
+
+    <!-- MODAL ESPORTAZIONE PROGETTO GODOT 4 -->
+    <div class="modal-overlay hidden" id="godot-export-modal">
+        <div class="modal-card modal-medium">
+            <div class="modal-header-row">
+                <h2>💾 Esporta per Godot Engine 4</h2>
+                <button class="modal-close-btn" onclick="App.closeGodotExportModal()">✕</button>
+            </div>
+            <p class="modal-subtitle">Scarica lo script GDScript 4 e la scena 2D per aprirli ed eseguirli direttamente sul tuo computer con Godot Engine!</p>
+
+            <div class="export-options-list">
+                <div class="export-option-card">
+                    <div class="option-icon">📜</div>
+                    <div class="option-info">
+                        <h4>Script GDScript 4 (.gd)</h4>
+                        <p>Il codice completo del tuo gladiatore con gestione salute, condizioni ed esportazione variabili.</p>
+                    </div>
+                    <button type="button" class="btn-download-export" onclick="App.downloadGodotScript()">
+                        Scarica .gd
+                    </button>
+                </div>
+
+                <div class="export-option-card">
+                    <div class="option-icon">🎬</div>
+                    <div class="option-info">
+                        <h4>Scena Godot 4 (.tscn)</h4>
+                        <p>La scena testuale completa con interfaccia CanvasLayer, ProgressBar e Label collegata allo script.</p>
+                    </div>
+                    <button type="button" class="btn-download-export" onclick="App.downloadGodotScene()">
+                        Scarica .tscn
+                    </button>
+                </div>
+            </div>
+
+            <div class="export-guide-box">
+                <strong>Come usarlo in Godot Engine:</strong>
+                <ol>
+                    <li>Copia i file scaricati nella cartella del tuo progetto Godot 4.</li>
+                    <li>Apri il progetto in Godot Engine: troverai la scena <code>gladiator_arena.tscn</code>.</li>
+                    <li>Premi <kbd>F6</kbd> o clicca su "Esegui Scena Corrente" per ammirare il tuo gladiatore in azione!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL PROFILO GIOCATORE (Nome, Tag, Colore, Avatar & Carriera) -->
     <div class="modal-overlay hidden" id="profile-modal">
@@ -1452,6 +1670,7 @@
     <script src="confetti.js"></script>
     <script src="runtime.js"></script>
     <script src="lessons.js"></script>
+    <script src="arena_project.js"></script>
     <script src="viewport2d.js"></script>
     <script src="auth.js"></script>
     <script src="app.js"></script>

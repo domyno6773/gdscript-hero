@@ -19,6 +19,18 @@ const App = {
         hintsRevealed: 0,
         activeHintLevel: 1,
         autocompleteList: [],
+
+        // Progetto Pratico P2: Arena del Gladiatore
+        arenaProject: {
+            currentPhase: 1,
+            completedPhases: [],
+            userCode: {},
+            hintsRevealed: 0,
+            activeHintLevel: 1,
+            liveSalute: 100,
+            liveMaxSalute: 100,
+            liveIsVivo: true
+        },
         selectedAutocompleteIndex: 0,
 
         // Profilo Giocatore
@@ -197,7 +209,20 @@ const App = {
                 }
                 this.state.claimedQuestsCount = parsed.claimedQuestsCount || 0;
 
-                if (parsed.projectInterests) {
+                if (parsed.arenaProject) {
+            this.state.arenaProject = {
+                currentPhase: parsed.arenaProject.currentPhase || 1,
+                completedPhases: Array.isArray(parsed.arenaProject.completedPhases) ? parsed.arenaProject.completedPhases : [],
+                userCode: parsed.arenaProject.userCode || {},
+                hintsRevealed: parsed.arenaProject.hintsRevealed || 0,
+                activeHintLevel: parsed.arenaProject.activeHintLevel || 1,
+                liveSalute: 100,
+                liveMaxSalute: 100,
+                liveIsVivo: true
+            };
+        }
+
+        if (parsed.projectInterests) {
                     this.state.projectInterests = { ...this.state.projectInterests, ...parsed.projectInterests };
                 }
 
@@ -251,6 +276,7 @@ const App = {
             dailyQuests: this.state.dailyQuests,
             claimedQuestsCount: this.state.claimedQuestsCount,
             projectInterests: this.state.projectInterests,
+            arenaProject: this.state.arenaProject,
             sandbox: this.state.sandbox
         };
 
@@ -1464,6 +1490,11 @@ const App = {
         document.getElementById('view-practice').classList.add('hidden');
         document.getElementById('view-projects').classList.remove('hidden');
 
+        const cat = document.getElementById('projects-catalog-section');
+        const ws = document.getElementById('project-arena-workspace');
+        if (cat) cat.classList.remove('hidden');
+        if (ws) ws.classList.add('hidden');
+
         this.updateNavSelection('projects');
         this.renderProjectsGrid();
     },
@@ -1480,6 +1511,20 @@ const App = {
 
             const pills = proj.topics.map(t => `<span class="topic-pill">${t}</span>`).join('');
 
+            const isArena = proj.id === "project_arena";
+            const completedPhasesCount = (this.state.arenaProject && this.state.arenaProject.completedPhases) ? this.state.arenaProject.completedPhases.length : 0;
+            const progressLabel = isArena ? (completedPhasesCount >= 4 ? "✓ Completato (4/4)" : `Avanzamento: ${completedPhasesCount}/4 Fasi`) : `🔒 ${proj.levelReq}`;
+            const btnText = isArena ? (completedPhasesCount > 0 ? (completedPhasesCount >= 4 ? "Rivedi Arena ➔" : "Continua Arena ➔") : "Inizia Progetto ➔") : "Anteprima ➔";
+            const btnClass = isArena ? "btn-preview-project btn-playable-start" : "btn-preview-project";
+
+            card.onclick = () => {
+                if (isArena) {
+                    this.openArenaWorkspace();
+                } else {
+                    this.openProjectPreview(proj.id);
+                }
+            };
+
             card.innerHTML = `
                 <div>
                     <div class="project-card-top">
@@ -1491,8 +1536,8 @@ const App = {
                     <div class="project-topics-pills">${pills}</div>
                 </div>
                 <div class="project-card-footer">
-                    <span class="project-req-text">🔒 ${proj.levelReq}</span>
-                    <button class="btn-preview-project">Anteprima ➔</button>
+                    <span class="project-req-text ${isArena ? 'req-completed' : ''}">${progressLabel}</span>
+                    <button type="button" class="${btnClass}">${btnText}</button>
                 </div>
             `;
             grid.appendChild(card);
@@ -1834,7 +1879,8 @@ const App = {
 
     updateStatsUI() {
         this.checkWeekReset();
-        document.getElementById('xp-count').innerText = this.state.xp;
+        const xpEl = document.getElementById('xp-count');
+        if (xpEl) xpEl.innerText = this.state.xp;
 
         // Gestione Fiamma e Serie Settimanale
         const currentTier = STREAK_TIERS[this.state.streakMode] || STREAK_TIERS.rilassato;
@@ -1850,8 +1896,10 @@ const App = {
             }
         }
 
-        document.getElementById('streak-count').innerText = `${this.state.streakWeeks}`;
-        document.getElementById('streak-sub-label').innerText = `(${this.state.activeDaysThisWeek.length}/${currentTier.target}d)`;
+        const scEl = document.getElementById('streak-count');
+        if (scEl) scEl.innerText = `${this.state.streakWeeks}`;
+        const sslEl = document.getElementById('streak-sub-label');
+        if (sslEl) sslEl.innerText = `(${this.state.activeDaysThisWeek.length}/${currentTier.target}d)`;
 
         const streakPill = document.getElementById('btn-streak-modal');
         if (streakPill) {
@@ -1863,7 +1911,7 @@ const App = {
         this.state.level = info.tier.level;
 
         // Aggiorna badge e barra mini del livello
-        document.getElementById('level-badge').innerText = `Lv. ${info.tier.level}`;
+        const lvlBadge = document.getElementById('level-badge'); if (lvlBadge) { lvlBadge.innerText = `Lv. ${info.tier.level}`; }
         const levelPill = document.getElementById('level-pill');
         if (levelPill) {
             levelPill.title = `Livello ${info.tier.level}: ${info.tier.title} (${info.percent}%)`;
@@ -3807,9 +3855,15 @@ const App = {
                 ${debugHtml}
                 <p class="didactic-card-explanation">${explanation}</p>
                 ${technicalDetail}
-                <div class="didactic-card-reflection">
-                    <span class="reflection-label">💭 Spunto Didattico di Ragionamento:</span>
-                    <div class="reflection-text">${this.formatHintContent(lvl1HintText)}</div>
+                <div class="didactic-card-reflection-prompt">
+                    <div class="reflection-prompt-header">
+                        <span class="prompt-icon">💡</span>
+                        <span class="prompt-text">Ti serve un consiglio logico per comprendere l'argomento?</span>
+                    </div>
+                    <button type="button" class="btn-reveal-reflection" onclick="App.openHintFromFeedback()">
+                        <span>💭</span>
+                        <span>Richiedi Indizio Concettuale (Livello 1)</span>
+                    </button>
                 </div>
             </div>
             <div class="didactic-card-footer">
@@ -5032,6 +5086,496 @@ const App = {
             this.showToast(`Nodo '$${name}' (${type}) aggiunto alla scena!`, 'success');
         }
     },
+
+
+    // ==========================================================================
+    // MINI-PROGETTO ARENA DEL GLADIATORE (P2)
+    // ==========================================================================
+
+    openArenaWorkspace(targetPhase = null) {
+        SoundFX.playClick();
+        const cat = document.getElementById('projects-catalog-section');
+        const ws = document.getElementById('project-arena-workspace');
+        if (cat) cat.classList.add('hidden');
+        if (ws) ws.classList.remove('hidden');
+
+        let phase = targetPhase;
+        if (!phase) {
+            phase = (this.state.arenaProject && this.state.arenaProject.currentPhase) ? this.state.arenaProject.currentPhase : 1;
+        }
+        this.loadArenaPhase(phase);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    closeArenaWorkspace() {
+        SoundFX.playClick();
+        const cat = document.getElementById('projects-catalog-section');
+        const ws = document.getElementById('project-arena-workspace');
+        if (cat) cat.classList.remove('hidden');
+        if (ws) ws.classList.add('hidden');
+        this.renderProjectsGrid();
+    },
+
+    loadArenaPhase(phaseNum) {
+        if (typeof ARENA_PROJECT_DATA === 'undefined') return;
+        const phaseData = ARENA_PROJECT_DATA.phases.find(p => p.phase === phaseNum) || ARENA_PROJECT_DATA.phases[0];
+        if (!phaseData) return;
+
+        this.state.arenaProject.currentPhase = phaseNum;
+        this.state.arenaProject.hintsRevealed = 0;
+        this.state.arenaProject.activeHintLevel = 1;
+
+        // Aggiorna progress pill e badge fase
+        const headerProg = document.getElementById('arena-header-progress');
+        if (headerProg) headerProg.innerText = `Fase ${phaseNum} di 4`;
+
+        const badge = document.getElementById('arena-phase-badge');
+        if (badge) badge.innerText = `FASE ${phaseNum}`;
+
+        const title = document.getElementById('arena-phase-title');
+        if (title) title.innerText = phaseData.title;
+
+        const subtitle = document.getElementById('arena-phase-subtitle');
+        if (subtitle) subtitle.innerText = phaseData.subtitle;
+
+        const narrative = document.getElementById('arena-narrative-box');
+        if (narrative) narrative.innerHTML = `<p>${phaseData.narrative}</p>`;
+
+        const taskBody = document.getElementById('arena-task-body');
+        if (taskBody) taskBody.innerHTML = phaseData.task;
+
+        // Render Stepper Fasi
+        const stepperRow = document.getElementById('arena-stepper-row');
+        if (stepperRow) {
+            stepperRow.innerHTML = ARENA_PROJECT_DATA.phases.map(p => {
+                const isCurrent = p.phase === phaseNum;
+                const isDone = (this.state.arenaProject.completedPhases || []).includes(p.phase);
+                return `
+                    <div class="arena-step-item ${isCurrent ? 'active' : ''} ${isDone ? 'completed' : ''}" onclick="App.loadArenaPhase(${p.phase})">
+                        <span class="step-num">${isDone ? '✓' : p.phase}</span>
+                        <span class="step-title">${p.title.split(':')[0]}</span>
+                    </div>
+                `;
+            }).join('<div class="arena-step-divider"></div>');
+        }
+
+        // Carica codice nell'editor
+        const editor = document.getElementById('arena-code-editor');
+        if (editor) {
+            let codeToLoad = this.state.arenaProject.userCode[phaseNum];
+            if (!codeToLoad && phaseNum > 1 && this.state.arenaProject.userCode[phaseNum - 1]) {
+                // Pre-popola con il codice funzionante della fase precedente
+                codeToLoad = this.state.arenaProject.userCode[phaseNum - 1];
+            }
+            if (!codeToLoad) {
+                codeToLoad = phaseData.initialCode;
+            }
+            editor.value = codeToLoad;
+        }
+
+        // Reset verifiche e box successo
+        const testList = document.getElementById('arena-test-list');
+        if (testList) {
+            testList.innerHTML = `<div class="arena-empty-tests">Modifica il codice e clicca su "Verifica Fase Corrente" per avviare i test automatici.</div>`;
+        }
+        const statusBadge = document.getElementById('arena-phase-status');
+        if (statusBadge) {
+            const isDone = (this.state.arenaProject.completedPhases || []).includes(phaseNum);
+            statusBadge.innerText = isDone ? '✓ Già Superata' : '• In attesa';
+            statusBadge.style.color = isDone ? '#10b981' : '#94a3b8';
+        }
+        const successBox = document.getElementById('arena-phase-success-box');
+        if (successBox) successBox.classList.add('hidden');
+
+        // Render suggerimenti fase
+        this.renderArenaHints(phaseData);
+
+        // Reset live HUD
+        this.updateLiveHud(100, 100, true, "In Forma");
+        const logEl = document.getElementById('hud-combat-log');
+        if (logEl) logEl.innerText = "Gladiatore pronto per la Fase " + phaseNum + ".";
+    },
+
+    async verifyArenaPhase() {
+        SoundFX.playClick();
+        if (typeof ARENA_PROJECT_DATA === 'undefined') return;
+        const curPhase = this.state.arenaProject.currentPhase || 1;
+        const phaseData = ARENA_PROJECT_DATA.phases.find(p => p.phase === curPhase);
+        if (!phaseData) return;
+
+        const editor = document.getElementById('arena-code-editor');
+        const code = editor ? editor.value : "";
+        this.state.arenaProject.userCode[curPhase] = code;
+        this.saveStorage();
+
+        const runBtn = document.getElementById('btn-run-arena-phase');
+        if (runBtn) {
+            runBtn.style.opacity = '0.7';
+            runBtn.querySelector('.run-text').innerText = "Verifica in corso...";
+        }
+
+        try {
+            const result = await GDScriptRuntime.execute(code);
+            const checks = await phaseData.validate(result, GDScriptRuntime);
+            const allPassed = checks.every(c => c.passed);
+
+            const testList = document.getElementById('arena-test-list');
+            if (testList) {
+                testList.innerHTML = checks.map(c => `
+                    <div class="test-row ${c.passed ? 'passed' : 'failed'}">
+                        <div class="test-icon">${c.passed ? '✅' : '❌'}</div>
+                        <div class="test-info">
+                            <div class="test-desc">${c.desc}</div>
+                            ${c.diff ? `<div class="test-diff">${this.escapeHtml(c.diff)}</div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const statusBadge = document.getElementById('arena-phase-status');
+            const successBox = document.getElementById('arena-phase-success-box');
+
+            if (allPassed) {
+                if (statusBadge) {
+                    statusBadge.innerText = `✓ Superato (${checks.length}/${checks.length})`;
+                    statusBadge.style.color = '#10b981';
+                }
+                SoundFX.playSuccess();
+                ConfettiFX.burst();
+
+                // Registra fase completata
+                if (!this.state.arenaProject.completedPhases.includes(curPhase)) {
+                    this.state.arenaProject.completedPhases.push(curPhase);
+                    this.state.xp += 75; // Ricompensa XP per ogni fase
+                    this.saveStorage();
+                    this.updateStatsUI();
+                }
+
+                if (successBox) {
+                    successBox.classList.remove('hidden');
+                    const msgEl = document.getElementById('arena-success-msg');
+                    const subEl = document.getElementById('arena-success-sub');
+                    const nextBtn = document.getElementById('btn-arena-next-phase');
+
+                    if (curPhase >= 4) {
+                        if (msgEl) msgEl.innerText = "🏆 PROGETTO ARENA COMPLETATO!";
+                        if (subEl) subEl.innerText = "Incredibile! Hai programmato un sistema di combattimento e salute completo in GDScript 4. Puoi esportarlo subito per Godot Engine!";
+                        if (nextBtn) nextBtn.innerText = "💾 Esporta per Godot 4 ➔";
+                    } else {
+                        if (msgEl) msgEl.innerText = `FASE ${curPhase} COMPLETATA!`;
+                        if (subEl) subEl.innerText = "Tutti i requisiti logici e didattici sono stati superati con successo.";
+                        if (nextBtn) nextBtn.innerText = `Procedi alla Fase ${curPhase + 1} ➔`;
+                    }
+                }
+
+                // Aggiorna HUD live
+                const scope = result.scope || {};
+                const sal = typeof scope.salute === 'number' ? scope.salute : 100;
+                const salMax = typeof scope.salute_max === 'number' ? scope.salute_max : 100;
+                const isV = scope.is_vivo !== false;
+                const st = (typeof scope.get_status === 'function') ? await scope.get_status() : (isV ? "In Forma" : "Sconfitto");
+                this.updateLiveHud(sal, salMax, isV, st);
+
+            } else {
+                if (statusBadge) {
+                    const passCount = checks.filter(c => c.passed).length;
+                    statusBadge.innerText = `✗ Non superato (${passCount}/${checks.length})`;
+                    statusBadge.style.color = '#ef4444';
+                }
+                if (successBox) successBox.classList.add('hidden');
+                SoundFX.playError();
+            }
+
+        } catch (e) {
+            console.error("Errore verifica arena:", e);
+        } finally {
+            if (runBtn) {
+                runBtn.style.opacity = '1';
+                runBtn.querySelector('.run-text').innerText = "Verifica Fase Corrente";
+            }
+        }
+    },
+
+    nextArenaPhase() {
+        const curPhase = this.state.arenaProject.currentPhase || 1;
+        if (curPhase < 4) {
+            this.loadArenaPhase(curPhase + 1);
+        } else {
+            this.openGodotExportModal();
+        }
+    },
+
+    resetArenaCode() {
+        if (!confirm("Vuoi ripristinare il codice iniziale per questa fase? Tutte le modifiche non salvate andranno perse.")) return;
+        SoundFX.playClick();
+        const curPhase = this.state.arenaProject.currentPhase || 1;
+        const phaseData = ARENA_PROJECT_DATA.phases.find(p => p.phase === curPhase);
+        if (!phaseData) return;
+        const editor = document.getElementById('arena-code-editor');
+        if (editor) {
+            editor.value = phaseData.initialCode;
+            this.state.arenaProject.userCode[curPhase] = phaseData.initialCode;
+            this.saveStorage();
+        }
+    },
+
+    async simulateArenaCombat(action, val = 0) {
+        SoundFX.playClick();
+        const editor = document.getElementById('arena-code-editor');
+        const code = editor ? editor.value : "";
+        const logEl = document.getElementById('hud-combat-log');
+
+        if (action === 'reset') {
+            this.arenaGladiatorScope = null;
+            this.state.arenaProject.liveSalute = 100;
+            this.state.arenaProject.liveIsVivo = true;
+            this.updateLiveHud(100, 100, true, "In Forma");
+            if (logEl) logEl.innerText = "Salute ripristinata al massimo (100 HP).";
+            return;
+        }
+
+        try {
+            if (!this.arenaGladiatorScope || this.arenaGladiatorCode !== code) {
+                const res = await GDScriptRuntime.execute(code);
+                this.arenaGladiatorScope = res.scope || {};
+                this.arenaGladiatorCode = code;
+            }
+            const scope = this.arenaGladiatorScope;
+
+            if (action === 'damage') {
+                if (typeof scope.take_damage !== 'function') {
+                    if (logEl) logEl.innerText = "⚠️ La funzione take_damage() non è ancora definita nel tuo codice!";
+                    SoundFX.playError();
+                    return;
+                }
+
+                await scope.take_damage(val);
+
+                const newSalute = typeof scope.salute === 'number' ? scope.salute : 0;
+                const newVivo = scope.is_vivo !== false && newSalute > 0;
+                this.state.arenaProject.liveSalute = newSalute;
+                this.state.arenaProject.liveIsVivo = newVivo;
+
+                let st = "";
+                if (typeof scope.get_status === 'function') {
+                    try { st = await scope.get_status(); } catch (e) {}
+                }
+                if (!st) {
+                    st = newVivo ? (newSalute < 35 ? "Critico" : newSalute < 70 ? "Ferito" : "In Forma") : "Sconfitto";
+                }
+                this.updateLiveHud(newSalute, 100, newVivo, st);
+                if (logEl) {
+                    logEl.innerText = newVivo 
+                        ? `Colpo subito! -${val} HP. Salute residua: ${newSalute} HP.` 
+                        : `Colpo letale (-${val} HP)! Il Gladiatore è K.O.`;
+                }
+                if (newVivo) SoundFX.playClick(); else SoundFX.playError();
+
+            } else if (action === 'heal') {
+                if (typeof scope.heal !== 'function') {
+                    if (logEl) logEl.innerText = "⚠️ La funzione heal() non è ancora definita nel tuo codice!";
+                    SoundFX.playError();
+                    return;
+                }
+
+                await scope.heal(val);
+
+                const newSalute = typeof scope.salute === 'number' ? scope.salute : 0;
+                const newVivo = scope.is_vivo !== false && newSalute > 0;
+                this.state.arenaProject.liveSalute = newSalute;
+                this.state.arenaProject.liveIsVivo = newVivo;
+
+                let st = "";
+                if (typeof scope.get_status === 'function') {
+                    try { st = await scope.get_status(); } catch (e) {}
+                }
+                if (!st) {
+                    st = newVivo ? (newSalute < 35 ? "Critico" : newSalute < 70 ? "Ferito" : "In Forma") : "Sconfitto";
+                }
+                this.updateLiveHud(newSalute, 100, newVivo, st);
+                if (logEl) {
+                    logEl.innerText = newVivo 
+                        ? `Pozione usata! +${val} HP. Salute attuale: ${newSalute} HP.` 
+                        : `Impossibile curare: il gladiatore è già sconfitto!`;
+                }
+                if (newVivo) SoundFX.playSuccess(); else SoundFX.playError();
+            }
+
+        } catch (e) {
+            if (logEl) logEl.innerText = `Errore di simulazione: ${e.message}`;
+        }
+    },
+
+    updateLiveHud(salute, maxSalute = 100, isVivo = true, statusText = "In Forma") {
+        const fillEl = document.getElementById('hud-health-fill');
+        const textEl = document.getElementById('hud-health-text');
+        const badgeEl = document.getElementById('hud-status-badge');
+
+        const pct = Math.max(0, Math.min(100, Math.round((salute / maxSalute) * 100)));
+
+        if (fillEl) {
+            fillEl.style.width = `${pct}%`;
+            fillEl.className = 'health-bar-fill ' + (pct >= 70 ? 'bar-healthy' : pct >= 30 ? 'bar-wounded' : 'bar-critical');
+        }
+
+        if (textEl) {
+            textEl.innerText = `${salute} / ${maxSalute} HP`;
+        }
+
+        if (badgeEl) {
+            if (!isVivo || salute <= 0) {
+                badgeEl.innerText = "🔴 Sconfitto";
+                badgeEl.className = "hud-status-badge status-dead";
+            } else if (salute < 35) {
+                badgeEl.innerText = "🟠 Critico";
+                badgeEl.className = "hud-status-badge status-critical";
+            } else if (salute < 70) {
+                badgeEl.innerText = "🟡 Ferito";
+                badgeEl.className = "hud-status-badge status-wounded";
+            } else {
+                badgeEl.innerText = "🟢 In Forma";
+                badgeEl.className = "hud-status-badge status-healthy";
+            }
+        }
+    },
+
+    toggleArenaHints() {
+        const content = document.getElementById('arena-hints-content');
+        const arrow = document.getElementById('arena-hints-arrow');
+        if (!content) return;
+        const isHidden = content.classList.contains('hidden');
+        if (isHidden) {
+            SoundFX.playHint();
+            content.classList.remove('hidden');
+            if (arrow) arrow.innerText = '▲';
+            if (this.state.arenaProject.hintsRevealed === 0) {
+                this.state.arenaProject.hintsRevealed = 1;
+                this.state.arenaProject.activeHintLevel = 1;
+            }
+            const phase = ARENA_PROJECT_DATA.phases.find(p => p.phase === this.state.arenaProject.currentPhase);
+            if (phase) this.renderArenaHints(phase);
+        } else {
+            content.classList.add('hidden');
+            if (arrow) arrow.innerText = '▼';
+        }
+    },
+
+    unlockNextArenaHint() {
+        const phase = ARENA_PROJECT_DATA.phases.find(p => p.phase === this.state.arenaProject.currentPhase);
+        if (!phase || !phase.hints) return;
+        if (this.state.arenaProject.hintsRevealed < phase.hints.length) {
+            SoundFX.playHint();
+            this.state.arenaProject.hintsRevealed++;
+            this.state.arenaProject.activeHintLevel = this.state.arenaProject.hintsRevealed;
+            this.renderArenaHints(phase);
+        }
+    },
+
+    selectArenaHintLevel(lvl) {
+        if (lvl <= this.state.arenaProject.hintsRevealed) {
+            SoundFX.playClick();
+            this.state.arenaProject.activeHintLevel = lvl;
+            const phase = ARENA_PROJECT_DATA.phases.find(p => p.phase === this.state.arenaProject.currentPhase);
+            if (phase) this.renderArenaHints(phase);
+        }
+    },
+
+    renderArenaHints(phase) {
+        if (!phase || !phase.hints) return;
+        const total = phase.hints.length;
+        if (this.state.arenaProject.hintsRevealed === 0) this.state.arenaProject.hintsRevealed = 1;
+
+        const toggleText = document.getElementById('arena-hints-toggle-text');
+        if (toggleText) toggleText.innerText = `Consiglio (${this.state.arenaProject.hintsRevealed}/${total} sbloccati)`;
+
+        const nav = document.getElementById('arena-hint-stepper-nav');
+        if (nav) {
+            nav.innerHTML = phase.hints.map((h, i) => {
+                const lvl = h.level || (i + 1);
+                const isUnlocked = this.state.arenaProject.hintsRevealed >= lvl;
+                const isActive = this.state.arenaProject.activeHintLevel === lvl;
+                if (isUnlocked) {
+                    return `<button type="button" class="hint-tab-btn ${isActive ? 'active' : ''}" onclick="App.selectArenaHintLevel(${lvl})"><span class="tab-icon">${h.icon}</span> Liv. ${lvl}</button>`;
+                } else {
+                    return `<button type="button" class="hint-tab-btn locked" onclick="App.unlockNextArenaHint()"><span class="tab-icon">🔒</span> Liv. ${lvl}</button>`;
+                }
+            }).join('');
+        }
+
+        const body = document.getElementById('arena-hint-body');
+        if (body) {
+            const activeIdx = Math.max(0, Math.min(this.state.arenaProject.activeHintLevel - 1, total - 1));
+            const h = phase.hints[activeIdx];
+            body.innerHTML = `
+                <div class="hint-level-badge level-${h.level}">
+                    <span class="badge-icon">${h.icon}</span>
+                    <span class="badge-title">Livello ${h.level} — ${this.escapeHtml(h.label)}</span>
+                </div>
+                <div class="hint-body-formatted">${this.formatHintContent(h.text)}</div>
+            `;
+        }
+
+        const nextBtn = document.getElementById('btn-arena-next-hint');
+        if (nextBtn) {
+            nextBtn.style.display = this.state.arenaProject.hintsRevealed >= total ? 'none' : 'inline-block';
+        }
+    },
+
+    revealArenaPhaseSolution() {
+        if (!confirm("Vuoi visualizzare la soluzione completa per questa fase?")) return;
+        SoundFX.playHint();
+        const phase = ARENA_PROJECT_DATA.phases.find(p => p.phase === this.state.arenaProject.currentPhase);
+        if (!phase) return;
+        const editor = document.getElementById('arena-code-editor');
+        if (editor) {
+            editor.value = phase.solution;
+        }
+    },
+
+    // Esportazione Godot 4
+    openGodotExportModal() {
+        SoundFX.playClick();
+        const modal = document.getElementById('godot-export-modal');
+        if (modal) modal.classList.remove('hidden');
+    },
+
+    closeGodotExportModal() {
+        const modal = document.getElementById('godot-export-modal');
+        if (modal) modal.classList.add('hidden');
+    },
+
+    getArenaCurrentCode() {
+        const editor = document.getElementById('arena-code-editor');
+        if (editor && editor.value.trim().length > 0) return editor.value;
+        const curPhase = this.state.arenaProject.currentPhase || 4;
+        return this.state.arenaProject.userCode[curPhase] || (ARENA_PROJECT_DATA.phases[3].solution);
+    },
+
+    downloadGodotScript() {
+        SoundFX.playSuccess();
+        const code = this.getArenaCurrentCode();
+        const gdContent = ARENA_PROJECT_DATA.exportGdScript(code);
+        this.downloadFile("gladiator.gd", gdContent, "text/plain");
+    },
+
+    downloadGodotScene() {
+        SoundFX.playSuccess();
+        const tscnContent = ARENA_PROJECT_DATA.exportGodotScene("gladiator.gd");
+        this.downloadFile("gladiator_arena.tscn", tscnContent, "text/plain");
+    },
+
+    downloadFile(filename, content, mimeType = "text/plain") {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+
 };
 
 window.App = App;

@@ -362,12 +362,20 @@ const GDScriptRuntime = {
     transpile(gdCode) {
         const lines = gdCode.split(/\r?\n/);
         const jsLines = [];
+        const sourceMap = [];
         const indentStack = [0];
         const declaredVars = new Set();
         let classIndent = -1;
         let currentClassName = '';
+        let currentGdLine = 1;
+
+        const pushJs = (code, gdLine = null) => {
+            jsLines.push(code);
+            sourceMap.push(gdLine !== null ? gdLine : currentGdLine);
+        };
 
         for (let idx = 0; idx < lines.length; idx++) {
+            currentGdLine = idx + 1;
             let line = lines[idx];
 
             // Rimuovi commenti inline se non tra virgolette
@@ -413,24 +421,24 @@ const GDScriptRuntime = {
                     // Siamo all'interno di una classe
                     if (indentStack.length === 1 || indentStack[indentStack.length - 1] <= classIndent) {
                         // Stiamo chiudendo il corpo della classe
-                        jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                        pushJs(' '.repeat(indentStack[indentStack.length - 1]) + '}');
                         if (currentClassName) {
-                            jsLines.push(`try { __scope["${currentClassName}"] = ${currentClassName}; } catch(e) {}`);
+                            pushJs(`try { __scope["${currentClassName}"] = ${currentClassName}; } catch(e) {}`);
                         }
                         classIndent = -1;
                         currentClassName = '';
                     } else {
                         // Stiamo chiudendo un metodo dentro la classe
-                        jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                        pushJs(' '.repeat(indentStack[indentStack.length - 1]) + '}');
                     }
                 } else {
                     // Chiusura di un normale blocco/funzione
                     if (indentStack.length === 1) {
                         declaredVars.forEach(v => {
-                            jsLines.push(' '.repeat(poppedIndent) + `try { __scope["${v}"] = ${v}; } catch(e) {}`);
+                            pushJs(' '.repeat(poppedIndent) + `try { __scope["${v}"] = ${v}; } catch(e) {}`);
                         });
                     }
-                    jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                    pushJs(' '.repeat(indentStack[indentStack.length - 1]) + '}');
                 }
             }
 
@@ -611,16 +619,16 @@ const GDScriptRuntime = {
             // Costruzione riga finale
             if (isBlockStart) {
                 indentStack.push(currentIndent + 4);
-                jsLines.push(' '.repeat(currentIndent) + content + ' {');
+                pushJs(' '.repeat(currentIndent) + content + ' {');
                 if (content.startsWith('class ')) {
-                    jsLines.push(' '.repeat(currentIndent + 4) + `static new(...args) { return new ${currentClassName}(...args); }`);
+                    pushJs(' '.repeat(currentIndent + 4) + `static new(...args) { return new ${currentClassName}(...args); }`);
                 }
                 // Guardia anti-ciclo infinito per while/for
                 if (content.startsWith('while') || content.startsWith('for')) {
-                    jsLines.push(' '.repeat(currentIndent + 4) + '__checkLoopTimeout();');
+                    pushJs(' '.repeat(currentIndent + 4) + '__checkLoopTimeout();');
                 }
             } else {
-                jsLines.push(' '.repeat(currentIndent) + content + (content.endsWith(';') ? '' : ';'));
+                pushJs(' '.repeat(currentIndent) + content + (content.endsWith(';') ? '' : ';'));
             }
         }
 
@@ -629,30 +637,32 @@ const GDScriptRuntime = {
             const poppedIndent = indentStack.pop();
             if (classIndent !== -1) {
                 if (indentStack.length === 1 || indentStack[indentStack.length - 1] <= classIndent) {
-                    jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                    pushJs(' '.repeat(indentStack[indentStack.length - 1]) + '}');
                     if (currentClassName) {
-                        jsLines.push(`try { __scope["${currentClassName}"] = ${currentClassName}; } catch(e) {}`);
+                        pushJs(`try { __scope["${currentClassName}"] = ${currentClassName}; } catch(e) {}`);
                     }
                     classIndent = -1;
                     currentClassName = '';
                 } else {
-                    jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                    pushJs(' '.repeat(indentStack[indentStack.length - 1]) + '}');
                 }
             } else {
                 if (indentStack.length === 1) {
                     declaredVars.forEach(v => {
-                        jsLines.push(' '.repeat(poppedIndent) + `try { __scope["${v}"] = ${v}; } catch(e) {}`);
+                        pushJs(' '.repeat(poppedIndent) + `try { __scope["${v}"] = ${v}; } catch(e) {}`);
                     });
                 }
-                jsLines.push(' '.repeat(indentStack[indentStack.length - 1]) + '}');
+                pushJs(' '.repeat(indentStack[indentStack.length - 1]) + '}');
             }
         }
 
         // Variabili a livello globale / script
         declaredVars.forEach(v => {
-            jsLines.push(`try { __scope["${v}"] = ${v}; } catch(e) {}`);
+            pushJs(`try { __scope["${v}"] = ${v}; } catch(e) {}`);
         });
 
+        this.lastSourceMap = sourceMap;
+        this.lastInputLines = lines;
         return jsLines.join('\n');
     },
 
@@ -698,7 +708,7 @@ const GDScriptRuntime = {
         const get_node = (p) => currentScene.get_node(p);
         const has_node = (p) => currentScene.has_node(p);
         const logs = [];
-        const scope = {};
+        const scope = (options && options.initialScope) ? Object.assign({}, options.initialScope) : {};
         let loopCounter = 0;
         const maxIterations = 50000;
         const startTime = Date.now();
@@ -734,10 +744,40 @@ const GDScriptRuntime = {
         try {
             transpiledCode = this.transpile(gdCode);
         } catch (syntaxErr) {
+            const rawMsg = syntaxErr.message || String(syntaxErr);
+            const lines = gdCode.split(/\r?\n/);
+            let identifiedLine = null;
+            let specificReason = "";
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                let singleQ = 0, doubleQ = 0;
+                for (let c = 0; c < line.length; c++) {
+                    if (line[c] === '"' && (c === 0 || line[c-1] !== '\\')) doubleQ++;
+                    if (line[c] === "'" && (c === 0 || line[c-1] !== '\\')) singleQ++;
+                }
+                if (doubleQ % 2 !== 0 || singleQ % 2 !== 0) {
+                    identifiedLine = i + 1;
+                    specificReason = "Delimitazione stringa non chiusa (virgolette mancanti)";
+                    break;
+                }
+            }
+
+            const cleanMsg = rawMsg
+                .replace(/<anonymous>:\d+(:\d+)?/g, '')
+                .replace(/eval at execute\s*/g, '')
+                .replace(/\s+at\s+Function\..*/g, '')
+                .replace(/\(line \d+\)/gi, '')
+                .trim();
+
+            const finalError = identifiedLine 
+                ? `Riga ${identifiedLine}: Errore di sintassi (${specificReason || cleanMsg})`
+                : `Errore di sintassi GDScript: ${cleanMsg}`;
+
             return {
                 success: false,
                 logs: [],
-                error: `Errore di sintassi GDScript: ${syntaxErr.message}`,
+                error: finalError,
                 scope: {},
                 scene: currentScene,
                 code: gdCode,
@@ -810,10 +850,56 @@ const GDScriptRuntime = {
                 transpiled: transpiledCode
             };
         } catch (runtimeErr) {
+            const rawMsg = runtimeErr.message || String(runtimeErr);
+            const lines = gdCode.split(/\r?\n/);
+            let identifiedLine = null;
+            let specificReason = "";
+
+            if (runtimeErr instanceof SyntaxError || runtimeErr.name === 'SyntaxError') {
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    let singleQ = 0, doubleQ = 0;
+                    for (let c = 0; c < line.length; c++) {
+                        if (line[c] === '"' && (c === 0 || line[c - 1] !== '\\')) doubleQ++;
+                        if (line[c] === "'" && (c === 0 || line[c - 1] !== '\\')) singleQ++;
+                    }
+                    if (doubleQ % 2 !== 0 || singleQ % 2 !== 0) {
+                        identifiedLine = i + 1;
+                        specificReason = "Delimitazione stringa non chiusa (virgolette mancanti)";
+                        break;
+                    }
+                }
+            } else if (runtimeErr.stack) {
+                const stackMatch = runtimeErr.stack.match(/<anonymous>:(\d+):(\d+)/) ||
+                                   runtimeErr.stack.match(/eval:(\d+):(\d+)/) ||
+                                   runtimeErr.stack.match(/Function:(\d+):(\d+)/);
+                if (stackMatch) {
+                    const funcLine = parseInt(stackMatch[1], 10);
+                    const jsLineIdx = funcLine - 4;
+                    if (this.lastSourceMap && jsLineIdx >= 0 && jsLineIdx < this.lastSourceMap.length) {
+                        const candidate = this.lastSourceMap[jsLineIdx];
+                        if (candidate && candidate > 0 && candidate <= lines.length) {
+                            identifiedLine = candidate;
+                        }
+                    }
+                }
+            }
+
+            const cleanMsg = rawMsg
+                .replace(/<anonymous>:\d+(:\d+)?/g, '')
+                .replace(/eval at execute\s*/g, '')
+                .replace(/\s+at\s+Function\..*/g, '')
+                .replace(/line \d+ of \S+/gi, '')
+                .trim();
+
+            const finalError = identifiedLine 
+                ? `Riga ${identifiedLine}: ${specificReason ? `Errore di sintassi (${specificReason})` : cleanMsg}`
+                : cleanMsg;
+
             return {
                 success: false,
                 logs: logs,
-                error: runtimeErr.message,
+                error: finalError,
                 scope: scope,
                 scene: currentScene,
                 code: gdCode,
