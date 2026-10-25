@@ -5121,6 +5121,16 @@ const App = {
         const phaseData = ARENA_PROJECT_DATA.phases.find(p => p.phase === phaseNum) || ARENA_PROJECT_DATA.phases[0];
         if (!phaseData) return;
 
+        // Salva preventivamente il codice della fase precedente prima del cambio
+        const prevPhaseNum = this.state.arenaProject.currentPhase;
+        if (prevPhaseNum && prevPhaseNum !== phaseNum) {
+            const editorEl = document.getElementById('arena-code-editor');
+            if (editorEl) {
+                this.state.arenaProject.userCode[prevPhaseNum] = editorEl.value;
+                this.saveStorage();
+            }
+        }
+
         this.state.arenaProject.currentPhase = phaseNum;
         this.state.arenaProject.hintsRevealed = 0;
         this.state.arenaProject.activeHintLevel = 1;
@@ -5159,18 +5169,40 @@ const App = {
             }).join('<div class="arena-step-divider"></div>');
         }
 
-        // Carica codice nell'editor
+        // Carica codice nell'editor con continuita tra fasi
         const editor = document.getElementById('arena-code-editor');
         if (editor) {
             let codeToLoad = this.state.arenaProject.userCode[phaseNum];
             if (!codeToLoad && phaseNum > 1 && this.state.arenaProject.userCode[phaseNum - 1]) {
-                // Pre-popola con il codice funzionante della fase precedente
-                codeToLoad = this.state.arenaProject.userCode[phaseNum - 1];
+                const prevCode = this.state.arenaProject.userCode[phaseNum - 1];
+                if (phaseNum === 2 && !prevCode.includes('take_damage')) {
+                    codeToLoad = prevCode.trim() + "\n\n# FASE 2: Implementa qui sotto func take_damage(quantita: int):\n";
+                } else if (phaseNum === 3 && !prevCode.includes('heal')) {
+                    codeToLoad = prevCode.trim() + "\n\n# FASE 3: Implementa qui sotto func heal(quantita: int):\n";
+                } else if (phaseNum === 4 && !prevCode.includes('get_status')) {
+                    codeToLoad = prevCode.trim() + "\n\n# FASE 4: Implementa qui sotto func get_status() -> String:\n";
+                } else {
+                    codeToLoad = prevCode;
+                }
             }
             if (!codeToLoad) {
                 codeToLoad = phaseData.initialCode;
             }
             editor.value = codeToLoad;
+
+            // Auto-salvataggio persistente in tempo reale su ogni digitazione
+            if (!editor.dataset.arenaBound) {
+                editor.dataset.arenaBound = "true";
+                let saveTimeout = null;
+                editor.addEventListener('input', () => {
+                    clearTimeout(saveTimeout);
+                    saveTimeout = setTimeout(() => {
+                        const cur = App.state.arenaProject.currentPhase || 1;
+                        App.state.arenaProject.userCode[cur] = editor.value;
+                        App.saveStorage();
+                    }, 300);
+                });
+            }
         }
 
         // Reset verifiche e box successo
@@ -5336,7 +5368,15 @@ const App = {
 
         try {
             if (!this.arenaGladiatorScope || this.arenaGladiatorCode !== code) {
-                const res = await GDScriptRuntime.execute(code);
+                // Per la simulazione manuale interattiva con i bottoni, disattiviamo l'auto-esecuzione di _ready()
+                // in modo da partire sempre a salute massima (100 HP) e permettere all'utente di provare manualmente ogni pulsante
+                const simCode = code.replace(/func\s+_ready\s*\(\s*\)\s*:/g, 'func __arena_manual_ready():');
+                const res = await GDScriptRuntime.execute(simCode);
+                if (res.error) {
+                    if (logEl) logEl.innerText = `⚠️ Errore nel codice: ${res.error}`;
+                    SoundFX.playError();
+                    return;
+                }
                 this.arenaGladiatorScope = res.scope || {};
                 this.arenaGladiatorCode = code;
             }
@@ -5546,9 +5586,24 @@ const App = {
 
     getArenaCurrentCode() {
         const editor = document.getElementById('arena-code-editor');
+        const curPhase = (this.state.arenaProject && this.state.arenaProject.currentPhase) || 1;
+
+        if (this.state.arenaProject && this.state.arenaProject.userCode && this.state.arenaProject.userCode[4]) {
+            if (curPhase === 4 && editor && editor.value.trim().length > 0) {
+                return editor.value;
+            }
+            return this.state.arenaProject.userCode[4];
+        }
+
         if (editor && editor.value.trim().length > 0) return editor.value;
-        const curPhase = this.state.arenaProject.currentPhase || 4;
-        return this.state.arenaProject.userCode[curPhase] || (ARENA_PROJECT_DATA.phases[3].solution);
+        return (this.state.arenaProject && this.state.arenaProject.userCode && this.state.arenaProject.userCode[curPhase]) 
+            || ARENA_PROJECT_DATA.phases[3].solution;
+    },
+
+    downloadGodotProject() {
+        SoundFX.playSuccess();
+        const projectContent = ARENA_PROJECT_DATA.exportGodotProject("Arena del Gladiatore");
+        this.downloadFile("project.godot", projectContent, "text/plain");
     },
 
     downloadGodotScript() {

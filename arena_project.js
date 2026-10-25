@@ -594,6 +594,11 @@ func __test_status_thresholds():
 
     // Generatore di file GDScript 4 pronto per il download
     exportGdScript: (userCode, gladiatorName = "Massimo") => {
+        let cleanCode = (userCode || "").trim();
+        // Rimuove eventuali 'class_name' o 'extends' ridondanti scritti dall'utente
+        cleanCode = cleanCode.replace(/^class_name\s+[A-Za-z0-9_]+\s*\r?\n/m, '');
+        cleanCode = cleanCode.replace(/^extends\s+[A-Za-z0-9_]+\s*\r?\n/m, '');
+
         return `# ==============================================================================
 # PROGETTO GDScript 4: Arena del Gladiatore
 # Generato da GDScript Hero
@@ -602,19 +607,47 @@ func __test_status_thresholds():
 class_name Gladiator
 extends Node2D
 
-# --- PROPRIETÀ DEL GLADIATORE ---
-${userCode.trim()}
+# --- PROPRIETA E LOGICA DEL GLADIATORE (Scritto dallo Studente) ---
+${cleanCode}
 
-# --- METODO DI AGGIORNAMENTO HUD GODOT 4 ---
-func update_hud(progress_bar: ProgressBar = null, status_label: Label = null) -> void:
+# --- INTEGRAZIONE AUTOMATICA HUD GODOT 4 ---
+func _notification(what: int) -> void:
+    if what == NOTIFICATION_READY:
+        update_hud()
+
+func update_hud(progress_bar: ProgressBar = null, status_label: Label = null, name_label: Label = null) -> void:
+    if progress_bar == null and has_node("CanvasLayer/HUD/Panel/HealthBar"):
+        progress_bar = get_node("CanvasLayer/HUD/Panel/HealthBar") as ProgressBar
+    if status_label == null and has_node("CanvasLayer/HUD/Panel/StatusLabel"):
+        status_label = get_node("CanvasLayer/HUD/Panel/StatusLabel") as Label
+    if name_label == null and has_node("CanvasLayer/HUD/Panel/GladiatorName"):
+        name_label = get_node("CanvasLayer/HUD/Panel/GladiatorName") as Label
+
+    if name_label != null and "nome" in self:
+        name_label.text = "⚔️ " + str(nome) + " il Gladiatore"
     if progress_bar != null:
         progress_bar.max_value = salute_max
         progress_bar.value = salute
     if status_label != null:
         if has_method("get_status"):
-            status_label.text = "Stato: " + get_status() + " (" + str(salute) + "/" + str(salute_max) + " HP)"
+            status_label.text = "Stato: " + str(get_status()) + " (" + str(salute) + "/" + str(salute_max) + " HP)"
         else:
             status_label.text = "Salute: " + str(salute) + "/" + str(salute_max)
+`;
+    },
+
+    // Generatore di file di configurazione progetto Godot 4 (project.godot)
+    exportGodotProject: (projectName = "Arena del Gladiatore") => {
+        return `config_version=5
+
+[application]
+config/name="${projectName}"
+run/main_scene="res://gladiator_arena.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+
+[display]
+window/size/viewport_width=1152
+window/size/viewport_height=648
 `;
     },
 
