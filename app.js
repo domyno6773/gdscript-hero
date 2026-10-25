@@ -616,12 +616,9 @@ const App = {
                 {
                     id: 'proj_default',
                     name: 'Il Mio Gioco Godot',
-                    code: `extends Node2D\n\nvar clicks: int = 0\n\nfunc _ready():\n    print("🎮 Benvenuto nella Sandbox di Godot 4!")\n    $Label.text = "Clicca il pulsante sotto per iniziare."\n\nfunc _on_button_pressed():\n    clicks += 1\n    print("Pulsante cliccato! Punteggio:", clicks)\n    $Label.text = "Bravo! Hai cliccato " + str(clicks) + " volte!"\n    if clicks >= 5:\n        $Label.text = "🏆 Ottimo lavoro! Hai sbloccato il bonus!"\n`,
+                    code: `extends Node2D\n\nfunc _ready():\n    print("🎮 Sandbox avviata! Scrivi il tuo codice qui.")\n`,
                     nodes: [
-                        { name: 'Main', type: 'Node2D', parent: null },
-                        { name: 'Label', type: 'Label', text: 'Clicca il pulsante sotto per iniziare.', parent: 'Main' },
-                        { name: 'Button', type: 'Button', text: 'Cliccami!', parent: 'Main' },
-                        { name: 'Sprite2D', type: 'Sprite2D', parent: 'Main' }
+                        { name: 'Main', type: 'Node2D', parent: null }
                     ],
                     updatedAt: new Date().toISOString()
                 }
@@ -719,11 +716,36 @@ const App = {
         if (btnConfirmNew) {
             btnConfirmNew.onclick = () => {
                 const nameInput = document.getElementById('sandbox-new-name-input');
-                const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Nuovo Gioco';
-                const checkedTpl = document.querySelector('input[name="sandbox-new-tpl"]:checked');
-                const tpl = checkedTpl ? checkedTpl.value : 'button';
-                this.createSandboxProject(name, tpl);
+                const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Nuovo Progetto';
+                this.createSandboxProject(name);
                 if (modalNew) modalNew.classList.add('hidden');
+            };
+        }
+
+        // Modale Benvenuto / Guida Sandbox
+        const btnHelp = document.getElementById('btn-sandbox-help');
+        const modalWelcome = document.getElementById('modal-sandbox-welcome');
+        const btnCloseWelcome = document.getElementById('btn-close-sandbox-welcome');
+        const btnStartWelcome = document.getElementById('btn-start-sandbox-welcome');
+
+        if (btnHelp && modalWelcome) {
+            btnHelp.onclick = () => {
+                SoundFX.playClick();
+                modalWelcome.classList.remove('hidden');
+            };
+        }
+        if (btnCloseWelcome && modalWelcome) {
+            btnCloseWelcome.onclick = () => {
+                SoundFX.playClick();
+                modalWelcome.classList.add('hidden');
+                localStorage.setItem('sandbox_welcome_seen', 'true');
+            };
+        }
+        if (btnStartWelcome && modalWelcome) {
+            btnStartWelcome.onclick = () => {
+                SoundFX.playSuccess();
+                modalWelcome.classList.add('hidden');
+                localStorage.setItem('sandbox_welcome_seen', 'true');
             };
         }
 
@@ -764,17 +786,6 @@ const App = {
             btnDelete.onclick = () => this.deleteSandboxProject();
         }
 
-        // Template Selector rapido
-        const tplSelect = document.getElementById('sandbox-template-select');
-        if (tplSelect) {
-            tplSelect.addEventListener('change', (e) => {
-                if (e.target.value) {
-                    this.loadSandboxTemplate(e.target.value);
-                    e.target.value = '';
-                }
-            });
-        }
-
         // Esporta per Godot 4
         const btnExport = document.getElementById('btn-sandbox-export-godot');
         if (btnExport) {
@@ -811,15 +822,6 @@ const App = {
         if (btnClearConsole) {
             btnClearConsole.onclick = () => this.clearSandboxConsole();
         }
-
-        // Setup Template Selector radio cards nel modal nuovo progetto
-        const tplCards = document.querySelectorAll('.sandbox-tpl-card');
-        tplCards.forEach(card => {
-            card.addEventListener('click', () => {
-                tplCards.forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-            });
-        });
     },
 
     updateSandboxLineNumbers() {
@@ -871,6 +873,14 @@ const App = {
         this.updateNavSelection('practice');
         this.loadActiveSandboxProject();
         setTimeout(() => this.practiceViewport && this.practiceViewport.resize(), 80);
+
+        // Mostra modale benvenuto se prima visita
+        if (!localStorage.getItem('sandbox_welcome_seen')) {
+            const modalWelcome = document.getElementById('modal-sandbox-welcome');
+            if (modalWelcome) {
+                modalWelcome.classList.remove('hidden');
+            }
+        }
     },
 
     loadActiveSandboxProject() {
@@ -919,20 +929,17 @@ const App = {
         SoundFX.playSuccess();
     },
 
-    createSandboxProject(name, templateKey = 'button') {
+    createSandboxProject(name = 'Nuovo Progetto') {
         const id = 'proj_' + Date.now();
         const newProj = {
             id: id,
             name: name,
-            code: '',
-            nodes: [],
+            code: `extends Node2D\n\nfunc _ready():\n    print("🎮 Progetto ${name} avviato!")\n`,
+            nodes: [
+                { name: 'Main', type: 'Node2D', parent: null }
+            ],
             updatedAt: new Date().toISOString()
         };
-
-        // Applica template scelto
-        const tpl = this.getSandboxTemplateData(templateKey);
-        newProj.code = tpl.code;
-        newProj.nodes = tpl.nodes;
 
         if (!this.state.sandbox.projects) this.state.sandbox.projects = [];
         this.state.sandbox.projects.push(newProj);
@@ -990,72 +997,6 @@ const App = {
             tag: 'SANDBOX',
             title: 'Progetto Rimosso',
             desc: 'La lista progetti è stata aggiornata.'
-        });
-    },
-
-    getSandboxTemplateData(key) {
-        const templates = {
-            button: {
-                nodes: [
-                    { name: 'Main', type: 'Node2D', parent: null },
-                    { name: 'Label', type: 'Label', text: 'Premi il pulsante sotto!', parent: 'Main' },
-                    { name: 'Button', type: 'Button', text: 'Cliccami!', parent: 'Main' },
-                    { name: 'Sprite2D', type: 'Sprite2D', parent: 'Main' }
-                ],
-                code: `extends Node2D\n\nvar clicks: int = 0\n\nfunc _ready():\n    print("🎮 Gioco avviato nella Sandbox!")\n    $Label.text = "Clicca il pulsante sotto per iniziare."\n\nfunc _on_button_pressed():\n    clicks += 1\n    print("Pulsante cliccato! Volte:", clicks)\n    $Label.text = "Bravo! Hai cliccato " + str(clicks) + " volte!"\n    if clicks >= 5:\n        $Label.text = "🏆 Ottimo lavoro! Hai sbloccato il bonus!"\n`
-            },
-            movement: {
-                nodes: [
-                    { name: 'Main', type: 'Node2D', parent: null },
-                    { name: 'Sprite2D', type: 'Sprite2D', parent: 'Main' },
-                    { name: 'Label', type: 'Label', text: 'Robottino Godot Pronto', parent: 'Main' }
-                ],
-                code: `extends Node2D\n\nvar velocita = 120\nvar coordinate = Vector2(120, 100)\n\nfunc _ready():\n    print("🤖 Robottino pronto al movimento!")\n    $Label.text = "Posizione iniziale: " + str(coordinate)\n    coordinate.x += 60\n    coordinate.y += 20\n    print("Nuova posizione calcolata: ", coordinate)\n`
-            },
-            timer: {
-                nodes: [
-                    { name: 'Main', type: 'Node2D', parent: null },
-                    { name: 'Timer', type: 'Timer', parent: 'Main' },
-                    { name: 'Label', type: 'Label', text: 'Tempo: 5', parent: 'Main' },
-                    { name: 'Button', type: 'Button', text: 'Riavvia Timer', parent: 'Main' }
-                ],
-                code: `extends Node2D\n\nvar countdown: int = 5\n\nfunc _ready():\n    print("⏱️ Timer impostato su 5 secondi!")\n    $Label.text = "Secondi rimasti: " + str(countdown)\n\nfunc _on_timer_timeout():\n    if countdown > 0:\n        countdown -= 1\n        $Label.text = "Secondi rimasti: " + str(countdown)\n        print("Tick timer: ", countdown)\n    else:\n        $Label.text = "🎉 TEMPO SCADUTO!"\n`
-            },
-            logic: {
-                nodes: [
-                    { name: 'Main', type: 'Node2D', parent: null }
-                ],
-                code: `extends Node2D\n\nfunc _ready():\n    print("--- Logica & Calcoli GDScript 4 ---")\n    var equipaggiamento = ["Spada Antica", "Pozione Cura", "Scudo d'Oro"]\n    for oggetto in equipaggiamento:\n        print("Trovato oggetto: ", oggetto)\n    \n    var danno_base: int = 40\n    var moltiplicatore: float = 1.75\n    var danno_totale: float = danno_base * moltiplicatore\n    print("Danno inflitto:", danno_totale)\n`
-            },
-            empty: {
-                nodes: [
-                    { name: 'Main', type: 'Node2D', parent: null }
-                ],
-                code: `extends Node2D\n\nfunc _ready():\n    print("Scena Godot 4 avviata!")\n`
-            }
-        };
-
-        return templates[key] || templates.button;
-    },
-
-    loadSandboxTemplate(templateKey) {
-        if (!confirm('Vuoi caricare questo template nel progetto corrente? Il codice e i nodi attuali verranno sostituiti.')) return;
-        const cur = this.getActiveSandboxProject();
-        if (!cur) return;
-
-        const tpl = this.getSandboxTemplateData(templateKey);
-        cur.code = tpl.code;
-        cur.nodes = tpl.nodes;
-        cur.updatedAt = new Date().toISOString();
-
-        this.saveStorage();
-        this.loadActiveSandboxProject();
-        SoundFX.playSuccess();
-        this.showToast({
-            icon: '⚡',
-            tag: 'TEMPLATE CARICATO',
-            title: 'Scena Aggiornata',
-            desc: 'Il template è pronto per essere modificato ed eseguito!'
         });
     },
 
@@ -1233,11 +1174,36 @@ const App = {
                 btn.textContent = node.text || node.name;
                 btn.disabled = !!node.disabled;
                 btn.title = `Clicca nodo Button: $${node.name}`;
-                btn.addEventListener('click', () => {
+                btn.addEventListener('click', async () => {
                     SoundFX.playClick();
                     if (node.pressed) {
                         node.pressed.emit();
                     }
+
+                    // Se c'è una funzione associata nello script (es. _on_button_pressed o _on_NomeNodo_pressed)
+                    if (this.sandboxScope) {
+                        const candidates = [
+                            `_on_${node.name.toLowerCase()}_pressed`,
+                            `_on_${node.name}_pressed`,
+                            `_on_button_pressed`,
+                            `on_button_pressed`
+                        ];
+                        for (const fn of candidates) {
+                            if (typeof this.sandboxScope[fn] === 'function') {
+                                try {
+                                    await this.sandboxScope[fn]();
+                                } catch (err) {
+                                    const outputPre = document.getElementById('sandbox-console-output') || document.getElementById('practice-console-output');
+                                    if (outputPre) {
+                                        outputPre.innerText += `\n// Errore in ${fn}: ${err.message}`;
+                                        outputPre.scrollTop = outputPre.scrollHeight;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
                     this.renderSandboxSceneDock();
                     this.renderSandboxViewportOverlay();
                 });
@@ -1286,7 +1252,18 @@ const App = {
         this.recordDailyQuestProgress('code_runs', 1);
 
         try {
-            const res = await GDScriptRuntime.execute(code, { initialScene: this.sandboxScene });
+            const res = await GDScriptRuntime.execute(code, {
+                initialScene: this.sandboxScene,
+                onLog: (line) => {
+                    if (outputPre.innerText === "// Console ripulita" || outputPre.innerText.startsWith("// Esecuzione completata")) {
+                        outputPre.innerText = line;
+                    } else {
+                        outputPre.innerText += '\n' + line;
+                    }
+                    outputPre.scrollTop = outputPre.scrollHeight;
+                }
+            });
+            this.sandboxScope = res.scope;
             const elapsed = Math.round(performance.now() - startT);
 
             if (res.logs && res.logs.length > 0) {
@@ -3291,14 +3268,6 @@ const App = {
             };
         }
 
-        const templateSelect = document.getElementById('practice-template-select');
-        if (templateSelect) {
-            templateSelect.onchange = (e) => {
-                if (e.target.value) {
-                    this.loadSandboxTemplate(e.target.value);
-                }
-            };
-        }
 
         // Traguardi
         document.getElementById('btn-open-achievements').onclick = () => this.openAchievementsModal();

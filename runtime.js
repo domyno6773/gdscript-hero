@@ -528,8 +528,10 @@ const GDScriptRuntime = {
                     } else if (inClass) {
                         content = `${funcName}(${cleanParams})`;
                     } else if (funcName === '_ready' || funcName === '_process') {
+                        declaredVars.add(funcName);
                         content = `async function ${funcName}(${cleanParams})`;
                     } else {
+                        declaredVars.add(funcName);
                         content = `function ${funcName}(${cleanParams})`;
                     }
                 }
@@ -716,11 +718,14 @@ const GDScriptRuntime = {
                 }
             }
             logs.push(res);
+            if (options && typeof options.onLog === 'function') {
+                options.onLog(res);
+            }
         };
 
         const checkLoop = () => {
             loopCounter++;
-            if (loopCounter > maxIterations || (Date.now() - startTime > 1500)) {
+            if (loopCounter > maxIterations) {
                 throw new Error("Timeout: Possibile ciclo infinito rilevato nel tuo codice!");
             }
         };

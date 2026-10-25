@@ -383,15 +383,10 @@
                     <span id="sandbox-sync-text">Sincronizzato</span>
                 </div>
 
-                <!-- Template Rapidi -->
-                <select id="sandbox-template-select" class="sandbox-select" title="Carica un template nel progetto attuale">
-                    <option value="">⚡ Template Rapido...</option>
-                    <option value="button">🔘 UI &amp; Pulsanti Interattivi</option>
-                    <option value="movement">🤖 Robottino &amp; Movimento 2D</option>
-                    <option value="timer">⏱️ Timer &amp; Cicli a Tempo</option>
-                    <option value="logic">💻 Logica Pura &amp; Console</option>
-                    <option value="empty">📄 Scena Vuota</option>
-                </select>
+                <!-- Tasto Guida Rapida Sandbox -->
+                <button type="button" class="btn-tool" id="btn-sandbox-help" title="Mostra la guida della Sandbox">
+                    <span>❓</span> <span class="btn-text-resp">Guida</span>
+                </button>
 
                 <!-- Esportazione verso Godot Engine 4 -->
                 <button type="button" class="btn-tool btn-export" id="btn-sandbox-export-godot" title="Scarica main.tscn e main.gd per il vero Godot Engine 4">
@@ -475,7 +470,7 @@
                     <!-- Schermo 2D Viewport Canvas con Overlay Interattivo UI -->
                     <div class="viewport-canvas-wrapper sandbox-viewport-wrapper">
                         <canvas id="sandbox-viewport-canvas"></canvas>
-                        <div class="exercise-ui-overlay" id="sandbox-ui-overlay"></div>
+                        <div class="viewport-ui-overlay" id="sandbox-ui-overlay"></div>
                     </div>
                     <!-- Console dei Log Output -->
                     <div class="sandbox-console-container">
@@ -982,6 +977,62 @@
         </div>
     </div>
 
+    <!-- MODAL: BENVENUTO / GUIDA SANDBOX -->
+    <div class="modal-overlay hidden" id="modal-sandbox-welcome">
+        <div class="modal-card modal-medium">
+            <div class="modal-header-row">
+                <div class="auth-header-title">
+                    <span class="auth-icon-big">🎮</span>
+                    <div>
+                        <h2>Benvenuto nella Sandbox Godot 4!</h2>
+                        <span class="modal-subtitle" style="display:block; margin-top:2px;">Il tuo spazio libero per sperimentare con nodi, scene e codice</span>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" id="btn-close-sandbox-welcome">✕</button>
+            </div>
+            
+            <div class="sandbox-welcome-features">
+                <div class="sandbox-welcome-item">
+                    <span class="welcome-item-icon">🌳</span>
+                    <div>
+                        <strong>1. Albero dei Nodi (A sinistra)</strong>
+                        <p>Costruisci la tua scena libera: premi <strong>➕ Nodo</strong> per aggiungere pulsanti (<code>Button</code>), scritte (<code>Label</code>), timer (<code>Timer</code>), sprite o rettangoli. Clicca sui nodi per selezionarli o rimuoverli con il cestino.</p>
+                    </div>
+                </div>
+
+                <div class="sandbox-welcome-item">
+                    <span class="welcome-item-icon">📜</span>
+                    <div>
+                        <strong>2. Editor GDScript (Al centro)</strong>
+                        <p>Scrivi il tuo codice liberamente. Puoi accedere ai nodi della scena con <code>$NomeNodo</code> (es. <code>$Label.text = "Ciao!"</code>). Tutto quello che scrivi si salva in tempo reale sul tuo account!</p>
+                    </div>
+                </div>
+
+                <div class="sandbox-welcome-item">
+                    <span class="welcome-item-icon">🎮</span>
+                    <div>
+                        <strong>3. Schermo 2D &amp; Console (A destra)</strong>
+                        <p>Premi <strong>▶ Esegui Scena</strong> (o <kbd>Ctrl+Invio</kbd>): i nodi UI creati appariranno direttamente sul canvas e i pulsanti saranno interattivi e cliccabili!</p>
+                    </div>
+                </div>
+
+                <div class="sandbox-welcome-item">
+                    <span class="welcome-item-icon">📦</span>
+                    <div>
+                        <strong>4. Esporta su Godot Reale</strong>
+                        <p>Quando il tuo esperimento è pronto, premi <strong>Esporta Godot 4</strong> per scaricare <code>main.gd</code> e <code>main.tscn</code> pronti per l'engine ufficiale sul PC.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions-row" style="margin-top: 18px;">
+                <button type="button" class="btn-primary" id="btn-start-sandbox-welcome" style="width:100%; justify-content:center; padding:12px; font-size:15px; background:#0284c7; border:none; border-radius:8px; color:#fff; font-weight:700; cursor:pointer;">
+                    <span>🚀 Inizia a Sperimentare</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: NUOVO PROGETTO SANDBOX -->
     <div class="modal-overlay hidden" id="modal-sandbox-new-project">
         <div class="modal-card modal-medium">
@@ -989,52 +1040,15 @@
                 <h2>➕ Nuovo Progetto Sandbox</h2>
                 <button type="button" class="modal-close-btn" id="btn-close-sandbox-new">✕</button>
             </div>
-            <p class="modal-subtitle">Crea un nuovo ambiente di sviluppo per testare le tue idee su Godot 4:</p>
-            <div class="profile-input-group" style="margin-bottom: 14px;">
+            <p class="modal-subtitle">Crea un nuovo ambiente pulito per sviluppare liberamente la tua idea:</p>
+            <div class="profile-input-group" style="margin: 18px 0 24px 0;">
                 <label for="sandbox-new-name-input" style="display:block; font-size:12px; margin-bottom:6px; font-weight:600; color:var(--text-muted);">Nome del Progetto:</label>
-                <input type="text" id="sandbox-new-name-input" class="modal-input" placeholder="es. Il Mio Gioco, Test Movimento..." value="Nuovo Gioco" style="width:100%;">
-            </div>
-            <div class="profile-input-group" style="margin-bottom: 20px;">
-                <label style="display:block; font-size:12px; margin-bottom:6px; font-weight:600; color:var(--text-muted);">Template di Partenza:</label>
-                <div class="sandbox-template-picker-grid">
-                    <label class="sandbox-tpl-card selected">
-                        <input type="radio" name="sandbox-new-tpl" value="button" checked>
-                        <div class="tpl-card-content">
-                            <span class="tpl-icon">🔘</span>
-                            <strong>UI &amp; Pulsanti</strong>
-                            <small>Button + Label interattivi</small>
-                        </div>
-                    </label>
-                    <label class="sandbox-tpl-card">
-                        <input type="radio" name="sandbox-new-tpl" value="movement">
-                        <div class="tpl-card-content">
-                            <span class="tpl-icon">🤖</span>
-                            <strong>Movimento 2D</strong>
-                            <small>Robot Godot su canvas</small>
-                        </div>
-                    </label>
-                    <label class="sandbox-tpl-card">
-                        <input type="radio" name="sandbox-new-tpl" value="timer">
-                        <div class="tpl-card-content">
-                            <span class="tpl-icon">⏱️</span>
-                            <strong>Timer</strong>
-                            <small>Conto alla rovescia</small>
-                        </div>
-                    </label>
-                    <label class="sandbox-tpl-card">
-                        <input type="radio" name="sandbox-new-tpl" value="empty">
-                        <div class="tpl-card-content">
-                            <span class="tpl-icon">📄</span>
-                            <strong>Scena Vuota</strong>
-                            <small>Pagina bianca</small>
-                        </div>
-                    </label>
-                </div>
+                <input type="text" id="sandbox-new-name-input" class="modal-input" placeholder="es. Il Mio Gioco, Test Movimento..." value="Nuovo Progetto" style="width:100%;">
             </div>
             <div class="modal-actions-row">
                 <button type="button" class="btn-subtle" id="btn-cancel-sandbox-new">Annulla</button>
-                <button type="button" class="btn-primary" id="btn-confirm-sandbox-new" style="background:#0284c7; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600; cursor:pointer;">
-                    <span>🚀 Crea Progetto</span>
+                <button type="button" class="btn-primary" id="btn-confirm-sandbox-new" style="background:#0284c7; color:#fff; border:none; padding:8px 20px; border-radius:6px; font-weight:600; cursor:pointer;">
+                    <span>🚀 Crea Progetto Vuoto</span>
                 </button>
             </div>
         </div>
