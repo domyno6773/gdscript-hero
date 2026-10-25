@@ -24,7 +24,7 @@ const lessonMutations = [
     [30, s => s.replace('saluta("Eroe")', 'print("Ciao Eroe")')],
     [31, s => s.replace('var danno = calcola_danno(30, 5)\n    print(danno)', 'print(25)')],
     [32, s => s.replace('print("Colpo normale: ", normale)', 'print("RISULTATO FALSO")').replace('print("Colpo critico: ", critico)', 'print("RISULTATO FALSO")')],
-    [33, s => s.replace('print(posizione)', 'print("Vector2(100, 200)")')],
+    [33, s => s.replace('print(posizione)', 'print("(100.0, 200.0)")')],
     [41, s => s.replace('porta_aperta.emit()', 'print("Porta aperta con successo!")')],
     [42, s => s.replace('moneta_raccolta.emit()', 'print("+10 Monete raccolte!")')],
     [43, s => s.replace('danno_inflitto.emit(35)', 'print("Danno registrato: 35")')],
@@ -40,7 +40,7 @@ const reviewMutations = [
     ['rev_arrays_01', s => s.replace('print(zaino.size())', 'print(3)')],
     ['rev_loops_01', s => s.replace('print("Generatore " + str(i) + " attivo")', 'pass') + '\n    print("Generatore 1 attivo")\n    print("Generatore 2 attivo")\n    print("Generatore 3 attivo")\n    print("Generatore 4 attivo")'],
     ['rev_functions_01', s => s.replace('var spinta = calcola_spinta(10, 5)\n    print(spinta)', 'print(30)')],
-    ['rev_vectors_01', s => s.replace('print(posizione)', 'print(Vector2(150, 170))')],
+    ['rev_vectors_01', s => s.replace('print(posizione)', 'print("(150.0, 170.0)")')],
     ['rev_dictionaries_01', s => s.replace('print(bottino["oro"])', 'print(150)')],
     ['rev_signals_01', s => s.replace('allarme_attivato.emit()', 'print("[ALLARME] Violazione perimetro rilevata!")')],
     ['rev_signals_02', s => s.replace('energia_ricaricata.emit(50)', 'print("Energia ripristinata: +50 MW")')],
@@ -84,6 +84,8 @@ async function run() {
         await check(review, transform(review.solution), true, 'Alternativa corretta ' + id);
     }
 
-    console.log('OK: 60 lezioni ufficiali, 17 ripassi ufficiali, 29 bypass respinti, 2 alternative accolte.');
+    const vectorRun = await runtime.execute('func _ready():\n    print(Vector2(100, 200))');
+    assert.equal(vectorRun.logs[0], '(100.0, 200.0)', 'Formato Vector2 come Godot 4 nativo');
+    console.log('OK: 60 lezioni ufficiali, 17 ripassi ufficiali, 29 bypass respinti, 2 alternative accolte, Vector2 Godot 4.');
 }
 run().catch(err => { console.error(err); process.exitCode = 1; });
