@@ -114,7 +114,13 @@ function formatExecutionCheck(result) {
         return { desc: "Codice eseguito senza errori", passed: true, diff: null };
     }
     const err = (result && result.error) ? String(result.error) : "Errore sconosciuto";
-    if (err.includes("Errore di sintassi")) {
+    const isSyntax = err.includes("Errore di sintassi") ||
+                     err.includes("SyntaxError") ||
+                     err.includes("Unexpected token") ||
+                     err.includes("Invalid or unexpected token") ||
+                     err.includes("Unexpected identifier") ||
+                     err.includes("missing ) after argument list");
+    if (isSyntax) {
         return {
             desc: "Controllo sintassi GDScript",
             passed: false,
@@ -127,6 +133,27 @@ function formatExecutionCheck(result) {
         diff: `⚠️ Errore di Esecuzione:\nDettaglio: ${err}`
     };
 }
+
+// Rimuove stringhe e commenti dal codice per impedire bypass tramite testo nei commenti o letterali
+function stripCommentsAndStrings(code) {
+    if (!code) return "";
+    return code
+        .replace(/"""[\s\S]*?"""|'''[\s\S]*?'''/g, '""')
+        .replace(/"(?:\\.|[^"\\])*"/g, '""')
+        .replace(/'(?:\\.|[^'\\])*'/g, "''")
+        .replace(/#.*$/gm, '');
+}
+
+// Verifica la presenza di commenti autentici (non contenuti all'interno di stringhe)
+function hasRealComment(code) {
+    if (!code) return false;
+    const noStrings = code
+        .replace(/"""[\s\S]*?"""|'''[\s\S]*?'''/g, '""')
+        .replace(/"(?:\\.|[^"\\])*"/g, '""')
+        .replace(/'(?:\\.|[^'\\])*'/g, "''");
+    return /#\s*\S+/.test(noStrings);
+}
+
 
 const LESSONS_DATA = [
     // ==========================================
@@ -201,7 +228,7 @@ const LESSONS_DATA = [
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const hasComment = result.code && result.code.includes("#");
+    const hasComment = hasRealComment(result.code);
     tests.push({ desc: "Riga di commento con '#' presente nel codice", passed: !!hasComment, diff: hasComment ? null : "Non è stato trovato alcun commento con '#'." });
     const hasPrinted = result.logs.some(l => l.includes("Benvenuto nel gioco"));
     tests.push({ desc: "Console contiene 'Benvenuto nel gioco'", passed: hasPrinted, diff: hasPrinted ? null : `Ricevuto: "${result.logs.join('\n')}"` });
@@ -290,7 +317,7 @@ const LESSONS_DATA = [
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const hasComment = result.code && result.code.includes("#");
+    const hasComment = hasRealComment(result.code);
     tests.push({ desc: "Commento di diagnostica '#' presente", passed: !!hasComment, diff: hasComment ? null : "Aggiungi un commento che inizia con '#'." });
     const clean = (result.logs || []).join(' ').replace(/\s+/g, ' ');
     const hasSystem = clean.includes("Sistema: Godot OS");
@@ -425,7 +452,8 @@ const LESSONS_DATA = [
     tests.push(formatExecutionCheck(result));
     const hasNome = result.scope && result.scope.nome === "Eroe";
     const hasMsg = result.scope && result.scope.messaggio === "Giocatore: Eroe";
-    const usesConcat = result.code && result.code.includes("+") && result.code.includes("nome");
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const usesConcat = cleanCode.includes("+") && cleanCode.includes("nome");
     tests.push({ desc: "Variabili 'nome' e 'messaggio' create correttamente", passed: hasNome && hasMsg, diff: (hasNome && hasMsg) ? null : `nome=${result.scope ? result.scope.nome : 'null'}, messaggio=${result.scope ? result.scope.messaggio : 'null'}` });
     tests.push({ desc: "Concatenazione con l'operatore '+' utilizzata", passed: !!usesConcat, diff: usesConcat ? null : "Usa 'Giocatore: ' + nome per concatenare la stringa." });
     const printed = result.logs.some(l => l.includes("Giocatore: Eroe"));
@@ -569,7 +597,8 @@ const LESSONS_DATA = [
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const okVal = result.scope && result.scope.vita === 100;
-    const hasType = result.code && /(:\s*int\b)/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasType = /(:\s*int\b)/.test(cleanCode);
     tests.push({ desc: "Variabile 'vita' con valore 100", passed: okVal, diff: okVal ? null : `Valore attuale: ${result.scope ? result.scope.vita : 'undefined'}` });
     tests.push({ desc: "Tipizzazione statica esplicita ': int' applicata", passed: !!hasType, diff: hasType ? null : "Aggiungi ': int' dopo il nome della variabile: var vita: int = 100." });
     return tests;
@@ -608,7 +637,8 @@ const LESSONS_DATA = [
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const okVal = result.scope && result.scope.GRAVITA === 9.8;
-    const hasConst = result.code && /\bconst\s+GRAVITA\b/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasConst = /\bconst\s+GRAVITA\b/.test(cleanCode);
     tests.push({ desc: "Costante GRAVITA impostata a 9.8", passed: okVal, diff: okVal ? null : `Valore: ${result.scope ? result.scope.GRAVITA : 'undefined'}` });
     tests.push({ desc: "Parola chiave 'const' utilizzata", passed: !!hasConst, diff: hasConst ? null : "Dichiara la costante con: const GRAVITA = 9.8." });
     return tests;
@@ -663,8 +693,9 @@ const LESSONS_DATA = [
     const hpOk = s.salute === 150;
     const shieldOk = s.scudo_attivo === true;
     const maxHpOk = s.MAX_HP === 200;
-    const hasConst = result.code && /\bconst\s+MAX_HP\b/.test(result.code);
-    const hasInfer = result.code && /:=/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasConst = /\bconst\s+MAX_HP\b/.test(cleanCode);
+    const hasInfer = /:=/.test(cleanCode);
     tests.push({ desc: "Costante MAX_HP: int = 200 con const", passed: maxHpOk && hasConst, diff: (maxHpOk && hasConst) ? null : "Dichiara const MAX_HP: int = 200" });
     tests.push({ desc: "Variabili tipizzate eroe e salute configurate", passed: heroOk && hpOk, diff: (heroOk && hpOk) ? null : `eroe=${s.eroe}, salute=${s.salute}` });
     tests.push({ desc: "Variabile scudo_attivo con inferenza di tipo ':='", passed: shieldOk && hasInfer, diff: (shieldOk && hasInfer) ? null : "Usa ':=' per scudo_attivo := true" });
@@ -710,7 +741,8 @@ const LESSONS_DATA = [
     tests.push(formatExecutionCheck(result));
     const s = result.scope && result.scope.somma === 15;
     const p = result.scope && result.scope.prodotto === 10;
-    const hasOps = result.code && result.code.includes("+") && result.code.includes("*");
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasOps = cleanCode.includes("+") && cleanCode.includes("*");
     tests.push({ desc: "Somma (10 + 5 = 15) calcolata", passed: s, diff: s ? null : `Ricevuto somma: ${result.scope ? result.scope.somma : 'null'}` });
     tests.push({ desc: "Prodotto (5 * 2 = 10) calcolato", passed: p, diff: p ? null : `Ricevuto prodotto: ${result.scope ? result.scope.prodotto : 'null'}` });
     tests.push({ desc: "Operatori '+' e '*' utilizzati nel calcolo", passed: !!hasOps, diff: hasOps ? null : "Usa gli operatori + e * per eseguire le operazioni matematiche." });
@@ -790,7 +822,8 @@ const LESSONS_DATA = [
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const okVal = result.scope && result.scope.monete_totali === 150;
-    const hasCompound = result.code && /\+=/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasCompound = /\+=/.test(cleanCode);
     tests.push({ desc: "Monete totali aggiornate a 150", passed: okVal, diff: okVal ? null : `Ricevuto: ${result.scope ? result.scope.monete_totali : 'null'}` });
     tests.push({ desc: "Operatore di assegnazione composta '+=' utilizzato", passed: !!hasCompound, diff: hasCompound ? null : "Usa 'monete_totali += 50' per incrementare il valore." });
     return tests;
@@ -842,8 +875,9 @@ const LESSONS_DATA = [
     const hpOk = s.salute_rimasta === 65;
     const coinsOk = Math.floor(Number(s.monete_per_membro)) === 33;
     const restOk = s.monete_avanzate === 1;
-    const hasSub = result.code && /-=/ .test(result.code);
-    const hasMod = result.code && /%/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasSub = /-=/ .test(cleanCode);
+    const hasMod = /%/.test(cleanCode);
     tests.push({ desc: "Salute rimasta aggiornata con '-=' a 65", passed: hpOk && hasSub, diff: hpOk ? (hasSub ? null : "Usa '-='") : `Ricevuto: ${s.salute_rimasta}` });
     tests.push({ desc: "Divisione intera monete per membro calcolata a 33", passed: coinsOk, diff: coinsOk ? null : `Ricevuto: ${s.monete_per_membro}` });
     tests.push({ desc: "Modulo '%' resto monete calcolato a 1", passed: restOk && hasMod, diff: restOk ? (hasMod ? null : "Usa '%'") : `Ricevuto: ${s.monete_avanzate}` });
@@ -886,7 +920,8 @@ const LESSONS_DATA = [
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const hasVar = result.scope && result.scope.livello !== undefined && result.scope.livello >= 10;
-    const hasIf = result.code && /\bif\s+livello\s*(>=|>|==)/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasIf = /\bif\s+livello\s*(>=|>|==)/.test(cleanCode);
     tests.push({ desc: "Variabile 'livello' configurata (>= 10)", passed: hasVar, diff: hasVar ? null : `Valore livello: ${result.scope ? result.scope.livello : 'undefined'}` });
     tests.push({ desc: "Condizione 'if' sul livello applicata", passed: !!hasIf, diff: hasIf ? null : "Usa 'if livello >= 10:' per verificare la condizione." });
     const printed = result.logs.some(l => l.includes("Livello raggiunto!"));
@@ -926,7 +961,8 @@ const LESSONS_DATA = [
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const hasKeys = result.scope && result.scope.ha_chiave === true && result.scope.porta_chiusa === true;
-    const usesAnd = result.code && /\band\b/.test(result.code) && /\bif\b/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const usesAnd = /\band\b/.test(cleanCode) && /\bif\b/.test(cleanCode);
     tests.push({ desc: "Variabili ha_chiave e porta_chiusa impostate a true", passed: hasKeys, diff: hasKeys ? null : "Entrambe le variabili devono essere true." });
     tests.push({ desc: "Condizione con 'and' utilizzata", passed: !!usesAnd, diff: usesAnd ? null : "Usa 'if ha_chiave and porta_chiusa:'." });
     const ok = result.logs.some(l => l.includes("Accesso consentito"));
@@ -972,7 +1008,8 @@ const LESSONS_DATA = [
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const hasHp = result.scope && result.scope.punti_vita !== undefined;
-    const hasIfElse = result.code && /\bif\b/.test(result.code) && /\belse\b/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasIfElse = /\bif\b/.test(cleanCode) && /\belse\b/.test(cleanCode);
     tests.push({ desc: "Struttura di controllo 'if / else' completa presente", passed: !!hasIfElse, diff: hasIfElse ? null : "Includi sia il ramo 'if' che il ramo 'else:'." });
     const ok = result.logs.some(l => l.includes("Game Over"));
     tests.push({ desc: "Ramo 'Game Over' eseguito con punti_vita <= 0", passed: ok && hasHp, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
@@ -1023,7 +1060,8 @@ const LESSONS_DATA = [
     tests.push(formatExecutionCheck(result));
     const s = result.scope || {};
     const stateOk = s.stato_portale === "Portale Attivato";
-    const hasElif = result.code && /\b(elif|else)\b/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasElif = /\b(elif|else)\b/.test(cleanCode);
     tests.push({ desc: "Rami condizionali multipli con elif/else presenti", passed: !!hasElif, diff: hasElif ? null : "Usa if, elif e else per gestire i tre stati del portale." });
     tests.push({ desc: "Stato portale calcolato a 'Portale Attivato'", passed: stateOk, diff: stateOk ? null : `Ricevuto: "${s.stato_portale}"` });
     return tests;
@@ -1068,7 +1106,8 @@ const LESSONS_DATA = [
     const inv = result.scope && result.scope.inventario;
     const isArray = Array.isArray(inv) && inv.length === 3 && inv.includes("Spada") && inv.includes("Scudo");
     tests.push({ desc: "Array 'inventario' creato con 3 elementi", passed: isArray, diff: isArray ? null : `Valore: ${JSON.stringify(inv)}` });
-    const usesIndex = result.code && /inventario\s*\[\s*0\s*\]/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const usesIndex = /inventario\s*\[\s*0\s*\]/.test(cleanCode);
     tests.push({ desc: "Accesso con indice [0] utilizzato per la stampa", passed: !!usesIndex, diff: usesIndex ? null : "Usa 'inventario[0]' per accedere al primo elemento." });
     const ok = result.logs.some(l => l.includes("Spada"));
     tests.push({ desc: "Primo elemento ('Spada') stampato", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
@@ -1106,7 +1145,8 @@ const LESSONS_DATA = [
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const usesIndices = result.code && /\[\s*1\s*\]/.test(result.code) && /\[\s*2\s*\]/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const usesIndices = /\[\s*1\s*\]/.test(cleanCode) && /\[\s*2\s*\]/.test(cleanCode);
     tests.push({ desc: "Accesso tramite indici [1] e [2] utilizzato", passed: !!usesIndices, diff: usesIndices ? null : "Accedi agli elementi con oggetti[1] e oggetti[2]." });
     const out = (result.logs || []).join('\n');
     const ok = out.includes("Scudo") && out.includes("Pozione");
@@ -1150,7 +1190,8 @@ const LESSONS_DATA = [
     tests.push(formatExecutionCheck(result));
     const inv = result.scope && result.scope.inventario;
     const hasAppended = Array.isArray(inv) && inv.length === 3 && inv.includes("Torcia");
-    const usesMethods = result.code && /\.append\s*\(/.test(result.code) && /\.size\s*\(/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const usesMethods = /\.append\s*\(/.test(cleanCode) && /\.size\s*\(/.test(cleanCode);
     tests.push({ desc: "Elemento 'Torcia' aggiunto all'array", passed: hasAppended, diff: hasAppended ? null : `Inventario finale: ${JSON.stringify(inv)}` });
     tests.push({ desc: "Metodi append() e size() utilizzati", passed: !!usesMethods, diff: usesMethods ? null : "Usa inventario.append('Torcia') e print(inventario.size())." });
     const ok = result.logs.some(l => l.trim() === "3");
@@ -1249,7 +1290,8 @@ const LESSONS_DATA = [
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const hasLoop = result.code && /\bfor\s+\w+\s+in\s+range\s*\(/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasLoop = /\bfor\s+\w+\s+in\s+range\s*\(/.test(cleanCode);
     tests.push({ desc: "Ciclo 'for ... in range(...)' utilizzato", passed: !!hasLoop, diff: hasLoop ? null : "Usa 'for i in range(3):' per iterare." });
     const out = (result.logs || []).join('\n');
     const ok = out.includes("0") && out.includes("1") && out.includes("2");
@@ -1291,7 +1333,8 @@ const LESSONS_DATA = [
     tests.push(formatExecutionCheck(result));
     const inv = result.scope && result.scope.nemici;
     const isArray = Array.isArray(inv) && inv.includes("Goblin") && inv.includes("Orco") && inv.includes("Drago");
-    const hasLoop = result.code && /\bfor\s+\w+\s+in\s+nemici\b/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasLoop = /\bfor\s+\w+\s+in\s+nemici\b/.test(cleanCode);
     tests.push({ desc: "Lista 'nemici' definita con Goblin, Orco e Drago", passed: isArray, diff: isArray ? null : `Valore: ${JSON.stringify(inv)}` });
     tests.push({ desc: "Ciclo 'for nemico in nemici:' utilizzato", passed: !!hasLoop, diff: hasLoop ? null : "Usa 'for nemico in nemici:' per iterare sulla lista." });
     const out = (result.logs || []).join('\n');
@@ -1335,7 +1378,8 @@ const LESSONS_DATA = [
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const hasWhile = result.code && /\bwhile\b/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasWhile = /\bwhile\b/.test(cleanCode);
     const valOk = result.scope && Number(result.scope.conto) >= 3;
     tests.push({ desc: "Ciclo 'while' utilizzato nel codice", passed: !!hasWhile, diff: hasWhile ? null : "Usa 'while conto <= 3:' per il conteggio." });
     const out = (result.logs || []).join('\n');
@@ -1388,7 +1432,8 @@ const LESSONS_DATA = [
     tests.push(formatExecutionCheck(result));
     const s = result.scope || {};
     const xpOk = s.xp_totali === 100;
-    const hasLoop = result.code && /\bfor\b/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasLoop = /\bfor\b/.test(cleanCode);
     tests.push({ desc: "Ciclo for utilizzato per scorrere l'ondata", passed: !!hasLoop, diff: hasLoop ? null : "Usa un ciclo for per iterare sui nemici." });
     tests.push({ desc: "XP Totali accumulati a 100 (4 x 25)", passed: xpOk, diff: xpOk ? null : `Ricevuto: ${s.xp_totali}` });
     const clean = (result.logs || []).join(' ').replace(/\s+/g, ' ');
@@ -1430,7 +1475,8 @@ const LESSONS_DATA = [
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const hasReady = result.code && /\bfunc\s+_ready\s*\(/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasReady = /\bfunc\s+_ready\s*\(/.test(cleanCode);
     tests.push({ desc: "Funzione 'func _ready():' definita", passed: !!hasReady, diff: hasReady ? null : "Assicurati di definire la funzione 'func _ready():'." });
     const ok = result.logs.some(l => l.includes("Nodo Inizializzato"));
     tests.push({ desc: "Console stampa 'Nodo Inizializzato'", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
@@ -1679,7 +1725,8 @@ const LESSONS_DATA = [
     tests.push(formatExecutionCheck(result));
     const p = result.scope && result.scope.posizione;
     const ok = p && p.x === 150 && p.y === 200;
-    const hasAdd = result.code && /posizione\.x\s*\+=/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasAdd = /posizione\.x\s*\+=/.test(cleanCode);
     tests.push({ desc: "Coordinata X incrementata con 'posizione.x += velocita' a 150", passed: ok && hasAdd, diff: ok ? (hasAdd ? null : "Usa posizione.x += velocita") : `Ricevuto: ${p}` });
     return tests;
 }
@@ -1858,7 +1905,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const s = result.scope || {};
     const eq = s.equip || {};
     const modOk = eq["arma"] === "Spada Laser" && eq["armatura"] === "Scudo";
-    const hasAssign = result.code && (/(?:equip\s*\[\s*["']armatura["']\s*\]|equip\.armatura)\s*=/.test(result.code));
+    const codeNoComments = (result.code || "").replace(/#.*$/gm, "");
+    const hasAssign = /(?:equip\s*\[\s*["']armatura["']\s*\]|equip\.armatura)\s*=/.test(codeNoComments);
     tests.push({ desc: "Chiavi aggiornate correttamente (arma: Spada Laser, armatura: Scudo)", passed: modOk, diff: modOk ? null : `Equip: ${JSON.stringify(eq)}` });
     tests.push({ desc: "Aggiunta della chiave 'armatura' tramite assegnazione dinamica", passed: !!hasAssign, diff: hasAssign ? null : "Assegna la chiave 'armatura' usando equip['armatura'] = 'Scudo'" });
     return tests;
@@ -1900,7 +1948,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const s = result.scope || {};
     const goldOk = s.ha_oro === true;
     const keyOk = s.ha_chiave === false;
-    const hasMethod = result.code && /\.has\s*\(/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasMethod = /\.has\s*\(/.test(cleanCode);
     tests.push({ desc: "Metodo forziere.has(...) utilizzato", passed: !!hasMethod, diff: hasMethod ? null : "Usa forziere.has('oro') e forziere.has('chiave')." });
     tests.push({ desc: "Verifica ha_oro (true) e ha_chiave (false)", passed: goldOk && keyOk, diff: (goldOk && keyOk) ? null : `ha_oro=${s.ha_oro}, ha_chiave=${s.ha_chiave}` });
     return tests;
@@ -1996,7 +2045,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const tests = [];
     tests.push(formatExecutionCheck(result));
     const s = result.scope || {};
-    const hasSigDecl = result.code && /\bsignal\s+porta_aperta\b/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasSigDecl = /\bsignal\s+porta_aperta\b/.test(cleanCode);
     const isSignal = s.porta_aperta && (typeof s.porta_aperta.emit === 'function');
     tests.push({ desc: "Segnale 'signal porta_aperta' dichiarato", passed: !!(hasSigDecl && isSignal), diff: (hasSigDecl && isSignal) ? null : "Dichiara 'signal porta_aperta' in cima allo script." });
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
@@ -2088,7 +2138,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     const s = result.scope || {};
     const sig = s.danno_inflitto;
     const isSig = sig && (typeof sig.emit === 'function');
-    const hasParamDecl = result.code && /\bsignal\s+danno_inflitto\s*\(/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const hasParamDecl = /\bsignal\s+danno_inflitto\s*\(/.test(cleanCode);
     tests.push({ desc: "Segnale 'signal danno_inflitto(valore)' dichiarato", passed: !!(isSig && hasParamDecl), diff: (isSig && hasParamDecl) ? null : "Dichiara 'signal danno_inflitto(valore)'." });
     
     let dynamicOk = false;
@@ -2399,7 +2450,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     tests.push(formatExecutionCheck(result));
     const sc = result.scene;
     const nodeOk = sc && sc.has_node("Giocatore");
-    const usesSyntax = result.code && /\$Giocatore\b/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const usesSyntax = /\$Giocatore\b/.test(cleanCode);
     tests.push({ desc: "Nodo 'Giocatore' presente nella scena", passed: !!nodeOk, diff: nodeOk ? null : "Nodo Giocatore non presente nella scena." });
     tests.push({ desc: "Sintassi nativa '$Giocatore' utilizzata nel codice", passed: !!usesSyntax, diff: usesSyntax ? null : "Accedi al nodo usando la sintassi: $Giocatore.name." });
     const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
@@ -2897,7 +2949,8 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     tests.push(formatExecutionCheck(result));
     const sc = result.scene;
     const notHas = sc && !sc.has_node("Moneta");
-    const usesQueueFree = result.code && /\$Moneta\.queue_free\s*\(/.test(result.code);
+    const cleanCode = stripCommentsAndStrings(result.code);
+    const usesQueueFree = /\$Moneta\.queue_free\s*\(/.test(cleanCode);
     tests.push({ desc: "Metodo '$Moneta.queue_free()' invocato", passed: !!usesQueueFree, diff: usesQueueFree ? null : "Usa $Moneta.queue_free() per rimuovere il nodo dalla scena." });
     tests.push({ desc: "Nodo Moneta rimosso con successo dall'albero della scena", passed: !!notHas, diff: notHas ? null : "Il nodo Moneta risulta ancora presente." });
     return tests;
