@@ -108,6 +108,113 @@ const CHAPTERS_DATA = [
     }
 ];
 
+// ==========================================
+// P3.1: CATALOGO DEI CONCETTI DIDATTICI STABILI
+// ==========================================
+const CONCEPTS_CATALOG = {
+    syntax_basics: {
+        id: "syntax_basics",
+        name: "Sintassi Base e Output",
+        chapterId: 1,
+        desc: "Istruzioni print(), funzione _ready(), commenti e output testuale."
+    },
+    variables_basics: {
+        id: "variables_basics",
+        name: "Variabili e Testo",
+        chapterId: 2,
+        desc: "Dichiarazione var, tipi String e int, concatenazione di stringhe."
+    },
+    type_system: {
+        id: "type_system",
+        name: "Tipi e Costanti",
+        chapterId: 3,
+        desc: "Numeri float, booleani bool, tipizzazione esplicita Godot 4 e costanti const."
+    },
+    operators_math: {
+        id: "operators_math",
+        name: "Operatori e Matematica",
+        chapterId: 4,
+        desc: "Aritmetica (+, -, *, /, %), calcolo danni e formule matematiche."
+    },
+    conditions_logic: {
+        id: "conditions_logic",
+        name: "Condizioni e Logica",
+        chapterId: 5,
+        desc: "Confronti (==, !=, >, <), operatori logici (and, or, not) e if/elif/else."
+    },
+    arrays_collections: {
+        id: "arrays_collections",
+        name: "Array e Liste",
+        chapterId: 6,
+        desc: "Liste ordinate, indici, metodi append() e size()."
+    },
+    loops_iteration: {
+        id: "loops_iteration",
+        name: "Cicli e Iterazione",
+        chapterId: 7,
+        desc: "Cicli for con range(), iterazione su array e cicli while."
+    },
+    functions_scope: {
+        id: "functions_scope",
+        name: "Funzioni e Parametri",
+        chapterId: 8,
+        desc: "Funzioni personalizzate func, parametri, valori di ritorno return e scope."
+    },
+    vectors_2d: {
+        id: "vectors_2d",
+        name: "Vettori e Movimento 2D",
+        chapterId: 9,
+        desc: "Vector2(x, y), coordinate spaziali e calcolo vettoriale di movimento."
+    },
+    dictionaries: {
+        id: "dictionaries",
+        name: "Dizionari Chiave-Valore",
+        chapterId: 10,
+        desc: "Coppie chiave-valore {}, accesso, aggiunta elementi e metodi has()."
+    },
+    signals: {
+        id: "signals",
+        name: "I Segnali di Godot",
+        chapterId: 11,
+        desc: "Dichiarazione signal, emissione emit() e connessione connect()."
+    },
+    oop_classes: {
+        id: "oop_classes",
+        name: "Classi e Programmazione ad Oggetti",
+        chapterId: 12,
+        desc: "Classi class, costruttore _init(), istanziazione con .new() e metodi."
+    },
+    scene_tree_nodes: {
+        id: "scene_tree_nodes",
+        name: "Albero della Scena e Nodi",
+        chapterId: 13,
+        desc: "Gerarchia ad albero, nodo Label, visualizzazione testo e operatore $."
+    },
+    ui_button_interaction: {
+        id: "ui_button_interaction",
+        name: "Interfaccia Utente e Pulsanti",
+        chapterId: 14,
+        desc: "Nodo Button, interattività, segnale pressed e feedback UI."
+    },
+    timers_lifecycle: {
+        id: "timers_lifecycle",
+        name: "Timer e Ciclo di Vita dei Nodi",
+        chapterId: 15,
+        desc: "Nodo Timer, segnale timeout, ColorRect e rimozione dinamica queue_free()."
+    }
+};
+
+function getLessonConcept(lessonId) {
+    const lesson = (typeof LESSONS_DATA !== 'undefined') ? LESSONS_DATA.find(l => l.id === lessonId) : null;
+    if (lesson && lesson.conceptId && CONCEPTS_CATALOG[lesson.conceptId]) {
+        return CONCEPTS_CATALOG[lesson.conceptId];
+    }
+    const chapterId = lesson ? lesson.chapterId : Math.ceil(lessonId / 4);
+    const found = Object.values(CONCEPTS_CATALOG).find(c => c.chapterId === chapterId);
+    return found || { id: "general", name: "Generale", chapterId: chapterId || 1, desc: "Concetti generali GDScript" };
+}
+
+
 // Helper per feedback chiaro allo studente (distinzione sintassi vs runtime)
 function formatExecutionCheck(result) {
     if (result && result.success) {
@@ -161,6 +268,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 1,
+        conceptId: "syntax_basics",
+        conceptTags: ["print", "ready", "syntax"],
         chapterId: 1,
         isMastery: false,
         title: "1. Benvenuto in GDScript 4 (print)",
@@ -217,6 +326,8 @@ const LESSONS_DATA = [
     },
     {
         id: 2,
+        conceptId: "syntax_basics",
+        conceptTags: ["comments", "syntax"],
         chapterId: 1,
         isMastery: false,
         title: "2. Come funzionano i commenti (#)",
@@ -275,6 +386,8 @@ const LESSONS_DATA = [
     },
     {
         id: 3,
+        conceptId: "syntax_basics",
+        conceptTags: ["print", "multiple_values", "numbers"],
         chapterId: 1,
         isMastery: false,
         title: "3. Stampare valori multipli e numeri",
@@ -333,6 +446,8 @@ const LESSONS_DATA = [
     },
 {
         id: 4,
+        conceptId: "syntax_basics",
+        conceptTags: ["mastery", "print", "comments"],
         chapterId: 1,
         isMastery: true,
         title: "4. ⭐ Sfida di Apprendimento: Terminale di Avvio della Nave",
@@ -408,6 +523,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 5,
+        conceptId: "variables_basics",
+        conceptTags: ["var", "variables", "assignment"],
         chapterId: 2,
         isMastery: false,
         title: "5. Creazione di variabili con var",
@@ -466,6 +583,8 @@ const LESSONS_DATA = [
     },
     {
         id: 6,
+        conceptId: "variables_basics",
+        conceptTags: ["strings", "integers", "types", "debugging"],
         isDebugging: true,
         debugType: "Sintassi (Virgolette mancanti)",
         chapterId: 2,
@@ -536,6 +655,8 @@ const LESSONS_DATA = [
     },
     {
         id: 7,
+        conceptId: "variables_basics",
+        conceptTags: ["concatenation", "str", "strings"],
         chapterId: 2,
         isMastery: false,
         title: "7. Concatenazione di stringhe",
@@ -599,6 +720,8 @@ const LESSONS_DATA = [
     },
 {
         id: 8,
+        conceptId: "variables_basics",
+        conceptTags: ["mastery", "variables", "strings"],
         chapterId: 2,
         isMastery: true,
         title: "8. ⭐ Sfida di Apprendimento: Dialoghi e Codice Segreto",
@@ -673,6 +796,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 9,
+        conceptId: "type_system",
+        conceptTags: ["float", "bool", "primitives"],
         chapterId: 3,
         isMastery: false,
         title: "9. Numeri decimali (float) e Booleani (bool)",
@@ -737,6 +862,8 @@ const LESSONS_DATA = [
     },
     {
         id: 10,
+        conceptId: "type_system",
+        conceptTags: ["static_typing", "explicit_types", "type_hints"],
         chapterId: 3,
         isMastery: false,
         title: "10. Tipizzazione statica esplicita",
@@ -796,6 +923,8 @@ const LESSONS_DATA = [
     },
     {
         id: 11,
+        conceptId: "type_system",
+        conceptTags: ["const", "constants", "immutability"],
         chapterId: 3,
         isMastery: false,
         title: "11. Costanti con const",
@@ -855,6 +984,8 @@ const LESSONS_DATA = [
     },
 {
         id: 12,
+        conceptId: "type_system",
+        conceptTags: ["mastery", "static_typing", "const", "rpg"],
         chapterId: 3,
         isMastery: true,
         title: "12. ⭐ Sfida di Apprendimento: Scheda Eroe RPG Tipizzata",
@@ -935,6 +1066,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 13,
+        conceptId: "operators_math",
+        conceptTags: ["arithmetic", "math", "operators"],
         chapterId: 4,
         isMastery: false,
         title: "13. Operazioni aritmetiche (+, -, *, /, %)",
@@ -995,6 +1128,8 @@ const LESSONS_DATA = [
     },
     {
         id: 14,
+        conceptId: "operators_math",
+        conceptTags: ["modulo", "remainder", "math", "debugging"],
         isDebugging: true,
         debugType: "Logica (Precedenza aritmetica)",
         chapterId: 4,
@@ -1057,6 +1192,8 @@ const LESSONS_DATA = [
     },
     {
         id: 15,
+        conceptId: "operators_math",
+        conceptTags: ["game_math", "damage", "coins"],
         chapterId: 4,
         isMastery: false,
         title: "15. Calcolo del danno, punteggi e monete",
@@ -1118,6 +1255,8 @@ const LESSONS_DATA = [
     },
 {
         id: 16,
+        conceptId: "operators_math",
+        conceptTags: ["mastery", "math", "damage", "dungeon"],
         chapterId: 4,
         isMastery: true,
         title: "16. ⭐ Sfida di Apprendimento: Bottino del Dungeon e Danno Subito",
@@ -1195,6 +1334,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 17,
+        conceptId: "conditions_logic",
+        conceptTags: ["comparison", "equality", "if"],
         chapterId: 5,
         isMastery: false,
         title: "17. Operatori di confronto (==, !=, >, <)",
@@ -1255,6 +1396,8 @@ const LESSONS_DATA = [
     },
     {
         id: 18,
+        conceptId: "conditions_logic",
+        conceptTags: ["logical_operators", "and", "or", "not"],
         chapterId: 5,
         isMastery: false,
         title: "18. Operatori logici (and, or, not)",
@@ -1315,6 +1458,8 @@ const LESSONS_DATA = [
     },
     {
         id: 19,
+        conceptId: "conditions_logic",
+        conceptTags: ["elif", "else", "branching", "debugging"],
         isDebugging: true,
         debugType: "Logica (Ramo else mancante)",
         chapterId: 5,
@@ -1386,6 +1531,8 @@ const LESSONS_DATA = [
     },
 {
         id: 20,
+        conceptId: "conditions_logic",
+        conceptTags: ["mastery", "branching", "logic", "temple"],
         chapterId: 5,
         isMastery: true,
         title: "20. ⭐ Sfida di Apprendimento: Il Portale Antico del Tempio",
@@ -1459,6 +1606,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 21,
+        conceptId: "arrays_collections",
+        conceptTags: ["arrays", "indexing", "lists"],
         chapterId: 6,
         isMastery: false,
         title: "21. Creare un inventario con gli Array",
@@ -1521,6 +1670,8 @@ const LESSONS_DATA = [
     },
     {
         id: 22,
+        conceptId: "arrays_collections",
+        conceptTags: ["array_mutation", "indexes", "inventory", "debugging"],
         isDebugging: true,
         debugType: "Off-by-One (Indici Array)",
         chapterId: 6,
@@ -1588,6 +1739,8 @@ const LESSONS_DATA = [
     },
     {
         id: 23,
+        conceptId: "arrays_collections",
+        conceptTags: ["append", "size", "array_methods"],
         chapterId: 6,
         isMastery: false,
         title: "23. Metodi append() e size()",
@@ -1652,6 +1805,8 @@ const LESSONS_DATA = [
     },
 {
         id: 24,
+        conceptId: "arrays_collections",
+        conceptTags: ["mastery", "arrays", "inventory", "backpack"],
         chapterId: 6,
         isMastery: true,
         title: "24. ⭐ Sfida di Apprendimento: Gestione dello Zaino d'Avventura",
@@ -1730,6 +1885,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 25,
+        conceptId: "loops_iteration",
+        conceptTags: ["for", "range", "loops"],
         chapterId: 7,
         isMastery: false,
         title: "25. Ciclo for con range()",
@@ -1789,6 +1946,8 @@ const LESSONS_DATA = [
     },
     {
         id: 26,
+        conceptId: "loops_iteration",
+        conceptTags: ["for_in", "array_iteration", "enemies"],
         chapterId: 7,
         isMastery: false,
         title: "26. Iterazione su liste di nemici",
@@ -1852,6 +2011,8 @@ const LESSONS_DATA = [
     },
     {
         id: 27,
+        conceptId: "loops_iteration",
+        conceptTags: ["while", "loops", "counters", "debugging"],
         isDebugging: true,
         debugType: "Loop Infinito (Decremento mancante)",
         chapterId: 7,
@@ -1923,6 +2084,8 @@ const LESSONS_DATA = [
     },
 {
         id: 28,
+        conceptId: "loops_iteration",
+        conceptTags: ["mastery", "loops", "waves", "xp_calc"],
         chapterId: 7,
         isMastery: true,
         title: "28. ⭐ Sfida di Apprendimento: Annuncio Ondate e Calcolo XP",
@@ -1999,6 +2162,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 29,
+        conceptId: "functions_scope",
+        conceptTags: ["ready", "lifecycle", "functions"],
         chapterId: 8,
         isMastery: false,
         title: "29. Il ciclo di vita func _ready()",
@@ -2056,6 +2221,8 @@ const LESSONS_DATA = [
     },
     {
         id: 30,
+        conceptId: "functions_scope",
+        conceptTags: ["func", "parameters", "arguments"],
         chapterId: 8,
         isMastery: false,
         title: "30. Funzioni con parametri",
@@ -2126,6 +2293,8 @@ const LESSONS_DATA = [
     },
     {
         id: 31,
+        conceptId: "functions_scope",
+        conceptTags: ["return", "functions", "return_values"],
         chapterId: 8,
         isMastery: false,
         title: "31. Valori di ritorno con return",
@@ -2195,6 +2364,8 @@ const LESSONS_DATA = [
     },
 {
         id: 32,
+        conceptId: "functions_scope",
+        conceptTags: ["mastery", "functions", "critical_damage"],
         chapterId: 8,
         isMastery: true,
         title: "32. ⭐ Sfida di Apprendimento: Motore di Calcolo Danno Critico",
@@ -2273,6 +2444,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 33,
+        conceptId: "vectors_2d",
+        conceptTags: ["vector2", "coordinates", "2d"],
         chapterId: 9,
         isMastery: false,
         title: "33. Vector2(x, y) e coordinate 2D",
@@ -2335,6 +2508,8 @@ const LESSONS_DATA = [
     },
     {
         id: 34,
+        conceptId: "vectors_2d",
+        conceptTags: ["position", "velocity", "movement"],
         chapterId: 9,
         isMastery: false,
         title: "34. Calcolo nuova posizione con velocità",
@@ -2396,6 +2571,8 @@ const LESSONS_DATA = [
     },
     {
         id: 35,
+        conceptId: "vectors_2d",
+        conceptTags: ["diagonal_movement", "axes", "vector2"],
         chapterId: 9,
         isMastery: false,
         title: "35. Movimento diagonale su entrambi gli assi",
@@ -2455,6 +2632,8 @@ const LESSONS_DATA = [
     },
 {
         id: 36,
+        conceptId: "vectors_2d",
+        conceptTags: ["mastery", "vectors", "radar", "landing"],
         chapterId: 9,
         isMastery: true,
         title: "36. ⭐ Sfida di Apprendimento: Navigazione Radar e Atterraggio 2D",
@@ -2529,6 +2708,8 @@ const LESSONS_DATA = [
     // ==========================================
     {
         id: 37,
+        conceptId: "dictionaries",
+        conceptTags: ["dictionaries", "key_value", "dict_access"],
         chapterId: 10,
         isMastery: false,
         title: "37. Creare e accedere ai Dizionari",
@@ -2588,6 +2769,8 @@ const LESSONS_DATA = [
     },
     {
         id: 38,
+        conceptId: "dictionaries",
+        conceptTags: ["dict_mutation", "adding_keys", "dictionaries"],
         chapterId: 10,
         isMastery: false,
         title: "38. Modificare e aggiungere chiavi al Dizionario",
@@ -2648,6 +2831,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 39,
+        conceptId: "dictionaries",
+        conceptTags: ["has", "keys", "values", "dict_methods", "debugging"],
         isDebugging: true,
         debugType: "Controllo Sicurezza Chiave (.has)",
         chapterId: 10,
@@ -2716,6 +2901,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 40,
+        conceptId: "dictionaries",
+        conceptTags: ["mastery", "dictionaries", "boss_stats"],
         chapterId: 10,
         isMastery: true,
         title: "40. ⭐ Sfida di Apprendimento: Statistiche del Boss Finale",
@@ -2791,6 +2978,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     // ==========================================
     {
         id: 41,
+        conceptId: "signals",
+        conceptTags: ["signal", "emit", "events"],
         chapterId: 11,
         isMastery: false,
         title: "41. Dichiarare ed emettere un Segnale",
@@ -2852,6 +3041,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 42,
+        conceptId: "signals",
+        conceptTags: ["connect", "callable", "callbacks"],
         chapterId: 11,
         isMastery: false,
         title: "42. Connettere un Segnale a una Funzione (connect)",
@@ -2915,6 +3106,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 43,
+        conceptId: "signals",
+        conceptTags: ["signal_parameters", "event_payload", "signals"],
         chapterId: 11,
         isMastery: false,
         title: "43. Segnali con Parametri",
@@ -2988,6 +3181,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 44,
+        conceptId: "signals",
+        conceptTags: ["mastery", "signals", "battle_events"],
         chapterId: 11,
         isMastery: true,
         title: "44. ⭐ Sfida di Apprendimento: Sistema di Eventi Battaglia",
@@ -3063,6 +3258,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     // ==========================================
     {
         id: 45,
+        conceptId: "oop_classes",
+        conceptTags: ["class", "init", "constructors"],
         chapterId: 12,
         isMastery: false,
         title: "45. Definire una Classe e il Costruttore _init()",
@@ -3135,6 +3332,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 46,
+        conceptId: "oop_classes",
+        conceptTags: ["new", "instances", "oop"],
         chapterId: 12,
         isMastery: false,
         title: "46. Creare Istanze Multiple con .new()",
@@ -3190,6 +3389,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 47,
+        conceptId: "oop_classes",
+        conceptTags: ["methods", "class_methods", "behavior"],
         chapterId: 12,
         isMastery: false,
         title: "47. Metodi di Classe (Comportamento)",
@@ -3262,6 +3463,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 48,
+        conceptId: "oop_classes",
+        conceptTags: ["mastery", "oop", "party_rpg", "classes"],
         chapterId: 12,
         isMastery: true,
         title: "48. ⭐ Sfida di Apprendimento Finale: Creazione Party RPG ad Oggetti",
@@ -3338,6 +3541,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     // ==========================================
     {
         id: 49,
+        conceptId: "scene_tree_nodes",
+        conceptTags: ["nodes", "scene_tree", "hierarchy"],
         chapterId: 13,
         isMastery: false,
         hasNodeTree: true,
@@ -3404,6 +3609,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 50,
+        conceptId: "scene_tree_nodes",
+        conceptTags: ["label", "text_display", "canvas"],
         chapterId: 13,
         isMastery: false,
         hasNodeTree: true,
@@ -3466,6 +3673,8 @@ $Titolo.text = <span class="s">"Benvenuto in Godot 4!"</span>
     },
     {
         id: 51,
+        conceptId: "scene_tree_nodes",
+        conceptTags: ["dollar_operator", "get_node", "child_nodes"],
         chapterId: 13,
         isMastery: false,
         hasNodeTree: true,
@@ -3528,6 +3737,8 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
     },
     {
         id: 52,
+        conceptId: "scene_tree_nodes",
+        conceptTags: ["mastery", "scene_tree", "label", "dungeon_sign"],
         chapterId: 13,
         isMastery: true,
         hasNodeTree: true,
@@ -3608,6 +3819,8 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
     // ==========================================
     {
         id: 53,
+        conceptId: "ui_button_interaction",
+        conceptTags: ["button", "ui_controls", "nodes"],
         chapterId: 14,
         isMastery: false,
         hasNodeTree: true,
@@ -3670,6 +3883,8 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     },
     {
         id: 54,
+        conceptId: "ui_button_interaction",
+        conceptTags: ["pressed", "button_events", "signals"],
         chapterId: 14,
         isMastery: false,
         hasNodeTree: true,
@@ -3740,6 +3955,8 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     },
     {
         id: 55,
+        conceptId: "ui_button_interaction",
+        conceptTags: ["clicker_game", "ui_state", "buttons"],
         chapterId: 14,
         isMastery: false,
         hasNodeTree: true,
@@ -3814,6 +4031,8 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     },
     {
         id: 56,
+        conceptId: "ui_button_interaction",
+        conceptTags: ["mastery", "control_panel", "spaceship_ui"],
         chapterId: 14,
         isMastery: true,
         hasNodeTree: true,
@@ -3902,6 +4121,8 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     // ==========================================
     {
         id: 57,
+        conceptId: "timers_lifecycle",
+        conceptTags: ["timer", "wait_time", "timeout"],
         chapterId: 15,
         isMastery: false,
         hasNodeTree: true,
@@ -3975,6 +4196,8 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
     },
     {
         id: 58,
+        conceptId: "timers_lifecycle",
+        conceptTags: ["color_rect", "geometry", "shapes"],
         chapterId: 15,
         isMastery: false,
         hasNodeTree: true,
@@ -4038,6 +4261,8 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
     },
     {
         id: 59,
+        conceptId: "timers_lifecycle",
+        conceptTags: ["queue_free", "node_lifecycle", "memory"],
         chapterId: 15,
         isMastery: false,
         hasNodeTree: true,
@@ -4103,6 +4328,8 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     },
     {
         id: 60,
+        conceptId: "timers_lifecycle",
+        conceptTags: ["final_mastery", "shop_system", "hud", "lifecycle"],
         chapterId: 15,
         isMastery: true,
         hasNodeTree: true,
@@ -4469,3 +4696,6 @@ window.LEVELS_CONFIG = LEVELS_CONFIG;
 window.STREAK_TIERS = STREAK_TIERS;
 window.DAILY_QUESTS_CONFIG = DAILY_QUESTS_CONFIG;
 window.PROJECTS_DATA = PROJECTS_DATA;
+
+window.CONCEPTS_CATALOG = CONCEPTS_CATALOG;
+window.getLessonConcept = getLessonConcept;

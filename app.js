@@ -3,6 +3,8 @@ const App = {
     state: {
         theme: "dark", // "dark" | "light"
         currentLessonId: 1,
+        isValidating: false,
+        learningTelemetry: { schema_version: 1, lessons: {} },
         completedLessons: [1],
         finishedLessons: [],
         devAllUnlocked: false, // Default false: la modalità test/verifica si attiva solo in locale
@@ -240,9 +242,17 @@ const App = {
                 if (parsed.soundVolume !== undefined) {
                     SoundFX.setVolume(parsed.soundVolume);
                 }
+
+                // P3.1: Telemetria didattica per apprendimento adattivo
+                if (parsed.learningTelemetry && parsed.learningTelemetry.schema_version) {
+                    this.state.learningTelemetry = this.migrateLearningTelemetry(parsed.learningTelemetry, this.state.finishedLessons);
+                } else {
+                    this.state.learningTelemetry = this.initLearningTelemetryFromLegacy(this.state.finishedLessons);
+                }
             } else {
                 this.state.currentWeekId = this.getWeekId();
                 this.state.sandbox = this.getDefaultSandboxState();
+                this.state.learningTelemetry = { schema_version: 1, lessons: {} };
                 if (this.isLocalEnvironment()) {
                     this.state.devAllUnlocked = true;
                 } else {
@@ -277,7 +287,8 @@ const App = {
             claimedQuestsCount: this.state.claimedQuestsCount,
             projectInterests: this.state.projectInterests,
             arenaProject: this.state.arenaProject,
-            sandbox: this.state.sandbox
+            sandbox: this.state.sandbox,
+            learningTelemetry: this.state.learningTelemetry
         };
 
         try {
@@ -1708,6 +1719,7 @@ const App = {
             progress: { daily_exercise: 0, no_hints: 0, code_runs: 0 },
             claimed: { daily_exercise: false, no_hints: false, code_runs: false }
         };
+        this.state.learningTelemetry = { schema_version: 1, lessons: {} };
 
         this.saveStorage();
         this.applyProfileUI();
@@ -3180,12 +3192,221 @@ const App = {
     // ==========================================
     // VERIFICA DEL CODICE
     // ==========================================
+    // ==========================================
+    // P3.1: TELEMETRIA DIDATTICA LOCALE & APPRENDIMENTO ADATTIVO
+    // ==========================================
+    initLearningTelemetryFromLegacy(finishedLessons = []) {
+        const telemetry = {
+            schema_version: 1,
+            lessons: {}
+        };
+        const finishedSet = new Set(finishedLessons || []);
+        finishedSet.forEach(id => {
+            const lesson = (typeof LESSONS_DATA !== 'undefined') ? LESSONS_DATA.find(l => l.id === id) : null;
+            const concept = (typeof getLessonConcept === 'function') ? getLessonConcept(id) : { id: "general" };
+            telemetry.lessons[id] = {
+                lesson_id: id,
+                concept_id: lesson?.conceptId || concept.id,
+                concept_tags: lesson?.conceptTags || [],
+                total_runs: 0,
+                verify_attempts: 0,
+                failed_verifications: 0,
+                failed_before_first_success: null, // Dati storici pre-P3 non disponibili
+                success_count: 1,
+                first_attempt_at: null,
+                last_attempt_at: null,
+                first_success_at: null,
+                last_success_at: null,
+                max_hint_level_opened: 0,
+                hints_opened_before_first_success: null, // Dati storici pre-P3 non disponibili
+                first_success_without_hints: null, // Non presumere soluzione senza aiuti per salvataggi legacy
+                error_breakdown: { syntax: 0, runtime: 0, requirement: 0, timeout: 0, internal: 0 },
+                legacy_completion: true,
+                history_available: false
+            };
+        });
+        return telemetry;
+    },
+
+    migrateLearningTelemetry(parsedTelemetry, finishedLessons = []) {
+        if (!parsedTelemetry || typeof parsedTelemetry !== 'object') {
+            return this.initLearningTelemetryFromLegacy(finishedLessons);
+        }
+        const telemetry = {
+            schema_version: Math.max(parsedTelemetry.schema_version || 1, 1),
+            lessons: { ...(parsedTelemetry.lessons || {}) }
+        };
+
+        // Assicura che le lezioni completate prima di P3 abbiano una voce legacy corretta
+        const finishedSet = new Set(finishedLessons || []);
+        finishedSet.forEach(id => {
+            if (!telemetry.lessons[id]) {
+                const lesson = (typeof LESSONS_DATA !== 'undefined') ? LESSONS_DATA.find(l => l.id === id) : null;
+                const concept = (typeof getLessonConcept === 'function') ? getLessonConcept(id) : { id: "general" };
+                telemetry.lessons[id] = {
+                    lesson_id: id,
+                    concept_id: lesson?.conceptId || concept.id,
+                    concept_tags: lesson?.conceptTags || [],
+                    total_runs: 0,
+                    verify_attempts: 0,
+                    failed_verifications: 0,
+                    failed_before_first_success: null,
+                    success_count: 1,
+                    first_attempt_at: null,
+                    last_attempt_at: null,
+                    first_success_at: null,
+                    last_success_at: null,
+                    max_hint_level_opened: 0,
+                    hints_opened_before_first_success: null,
+                    first_success_without_hints: null,
+                    error_breakdown: { syntax: 0, runtime: 0, requirement: 0, timeout: 0, internal: 0 },
+                    legacy_completion: true,
+                    history_available: false
+                };
+            } else {
+                const l = telemetry.lessons[id];
+                if (!l.error_breakdown) {
+                    l.error_breakdown = { syntax: 0, runtime: 0, requirement: 0, timeout: 0, internal: 0 };
+                }
+                if (l.total_runs === undefined) l.total_runs = l.verify_attempts || 0;
+            }
+        });
+
+        return telemetry;
+    },
+
+    getOrCreateLessonTelemetry(lessonId) {
+        if (!this.state.learningTelemetry) {
+            this.state.learningTelemetry = { schema_version: 1, lessons: {} };
+        }
+        if (!this.state.learningTelemetry.lessons) {
+            this.state.learningTelemetry.lessons = {};
+        }
+
+        const idStr = String(lessonId);
+        if (!this.state.learningTelemetry.lessons[idStr]) {
+            const lesson = (typeof LESSONS_DATA !== 'undefined') ? LESSONS_DATA.find(l => l.id === lessonId) : null;
+            const concept = (typeof getLessonConcept === 'function') ? getLessonConcept(lessonId) : { id: "general" };
+            this.state.learningTelemetry.lessons[idStr] = {
+                lesson_id: lessonId,
+                concept_id: lesson?.conceptId || concept.id,
+                concept_tags: lesson?.conceptTags || [],
+                total_runs: 0,
+                verify_attempts: 0,
+                failed_verifications: 0,
+                failed_before_first_success: 0,
+                success_count: 0,
+                first_attempt_at: null,
+                last_attempt_at: null,
+                first_success_at: null,
+                last_success_at: null,
+                max_hint_level_opened: 0,
+                hints_opened_before_first_success: 0,
+                first_success_without_hints: null,
+                error_breakdown: { syntax: 0, runtime: 0, requirement: 0, timeout: 0, internal: 0 },
+                legacy_completion: false,
+                history_available: true
+            };
+        }
+        return this.state.learningTelemetry.lessons[idStr];
+    },
+
+    classifyExecutionError(result, tests, criticalErr) {
+        if (criticalErr) {
+            return 'internal';
+        }
+        if (result && !result.success && result.error) {
+            const err = String(result.error);
+            if (/timeout|ciclo infinito/i.test(err)) {
+                return 'timeout';
+            }
+            if (/syntaxerror|errore di sintassi|delimitazione stringa|unexpected token|invalid or unexpected token|unexpected identifier|missing \)/i.test(err)) {
+                return 'syntax';
+            }
+            if (/internal|transpiler bug|non supportato/i.test(err)) {
+                return 'internal';
+            }
+            return 'runtime';
+        }
+        if (tests && Array.isArray(tests)) {
+            const allPassed = tests.length > 0 && tests.every(t => t.passed);
+            if (!allPassed) {
+                return 'requirement';
+            }
+        }
+        return null;
+    },
+
+    recordLessonAttempt(lessonId, result, tests, criticalErr) {
+        if (!lessonId) return;
+        const record = this.getOrCreateLessonTelemetry(lessonId);
+        const nowIso = new Date().toISOString();
+
+        record.total_runs++;
+        record.verify_attempts++;
+        if (!record.first_attempt_at) {
+            record.first_attempt_at = nowIso;
+        }
+        record.last_attempt_at = nowIso;
+
+        const errType = this.classifyExecutionError(result, tests, criticalErr);
+
+        if (errType === null) {
+            // Verifica superata con successo
+            record.success_count++;
+            if (!record.first_success_at) {
+                record.first_success_at = nowIso;
+                if (record.hints_opened_before_first_success === null || record.hints_opened_before_first_success === undefined) {
+                    record.hints_opened_before_first_success = record.max_hint_level_opened || 0;
+                }
+                record.first_success_without_hints = (record.hints_opened_before_first_success === 0);
+                if (record.failed_before_first_success === null || record.failed_before_first_success === undefined) {
+                    record.failed_before_first_success = 0;
+                }
+            }
+            record.last_success_at = nowIso;
+        } else if (errType === 'internal') {
+            // Errore infrastrutturale / interno: non attribuisce difficoltà didattica allo studente
+            record.error_breakdown.internal = (record.error_breakdown.internal || 0) + 1;
+        } else {
+            // Errore didattico (sintassi, runtime, requisito o timeout)
+            // Più asserzioni fallite nella stessa verifica valgono comunque come 1 solo tentativo fallito
+            record.failed_verifications++;
+            if (!record.first_success_at) {
+                record.failed_before_first_success = (record.failed_before_first_success || 0) + 1;
+            }
+            record.error_breakdown[errType] = (record.error_breakdown[errType] || 0) + 1;
+        }
+
+        this.saveStorage();
+    },
+
+    recordHintOpened(lessonId, level) {
+        if (!lessonId || level <= 0) return;
+        const record = this.getOrCreateLessonTelemetry(lessonId);
+        if (level > (record.max_hint_level_opened || 0)) {
+            record.max_hint_level_opened = level;
+        }
+        if (!record.first_success_at) {
+            if (record.hints_opened_before_first_success === null || record.hints_opened_before_first_success === undefined || level > record.hints_opened_before_first_success) {
+                record.hints_opened_before_first_success = level;
+            }
+        }
+        this.saveStorage();
+    },
+
     async runAndValidate() {
+        if (this.isValidating) return;
+        this.isValidating = true;
+
         SoundFX.playClick();
         const editor = document.getElementById('code-editor');
         const code = editor.value;
         const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
-        if (!currentLesson) return;
+        if (!currentLesson) {
+            this.isValidating = false;
+            return;
+        }
 
         const runBtn = document.getElementById('btn-run-code');
         runBtn.style.opacity = '0.7';
@@ -3219,6 +3440,9 @@ const App = {
 
             const tests = await currentLesson.validate(result, GDScriptRuntime);
             const allPassed = tests.every(t => t.passed);
+
+            // Registra telemetria P3.1 del tentativo di verifica
+            this.recordLessonAttempt(currentLesson.id, result, tests, null);
 
             // Aggiorna Schermo Viewport 2D Godot
             if (this.viewport) {
@@ -3361,6 +3585,7 @@ const App = {
 
         } catch (criticalErr) {
             console.error("Errore durante la verifica:", criticalErr);
+            this.recordLessonAttempt(currentLesson.id, null, null, criticalErr);
             const realOutputPre = document.getElementById('real-output-pre');
             realOutputPre.innerText = `// Errore inaspettato: ${criticalErr.message}`;
             realOutputPre.style.color = '#f87171';
@@ -3368,6 +3593,7 @@ const App = {
         } finally {
             runBtn.style.opacity = '1';
             runBtn.querySelector('.run-text').innerText = "Verifica Codice";
+            this.isValidating = false;
         }
     },
 
@@ -3889,6 +4115,7 @@ const App = {
             SoundFX.playHint();
             this.state.hintsRevealed++;
             this.state.activeHintLevel = this.state.hintsRevealed;
+            this.recordHintOpened(this.state.currentLessonId, this.state.hintsRevealed);
             this.renderHintBox(currentLesson);
             this.checkAchievements();
         }
@@ -3913,6 +4140,7 @@ const App = {
                         this.state.hintsRevealed = 1;
                         this.state.activeHintLevel = 1;
                     }
+                    this.recordHintOpened(this.state.currentLessonId, this.state.hintsRevealed);
                     this.renderHintBox(currentLesson);
                     this.checkAchievements();
                 } else if (hintBox) {
@@ -3935,6 +4163,7 @@ const App = {
                 if (!currentLesson) return;
                 if (confirm("Vuoi visualizzare la soluzione completa?")) {
                     SoundFX.playHint();
+                    this.recordHintOpened(this.state.currentLessonId, 3);
                     document.getElementById('code-editor').value = currentLesson.solution;
                     this.updateLineNumbers();
                 }
@@ -3961,6 +4190,7 @@ const App = {
                     this.state.hintsRevealed = 1;
                 }
                 this.state.activeHintLevel = 1;
+                this.recordHintOpened(this.state.currentLessonId, 1);
                 this.renderHintBox(currentLesson);
                 this.checkAchievements();
                 hintBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -4072,6 +4302,7 @@ const App = {
             if (item) item.classList.add('open');
             if (arrow) arrow.innerText = '▼';
             this.state.hintsRevealed = Math.max(this.state.hintsRevealed, idx + 1);
+            this.recordHintOpened(this.state.currentLessonId, this.state.hintsRevealed);
             this.checkAchievements();
         } else {
             text.classList.add('hidden');
@@ -4085,6 +4316,7 @@ const App = {
         if (!currentLesson) return;
         if (confirm("Vuoi visualizzare la soluzione completa per questa sfida?")) {
             SoundFX.playHint();
+            this.recordHintOpened(this.state.currentLessonId, 3);
             document.getElementById('code-editor').value = currentLesson.solution;
             this.updateLineNumbers();
         }

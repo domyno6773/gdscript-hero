@@ -747,6 +747,7 @@ const AuthManager = {
                 claimedQuestsCount: appState.claimedQuestsCount || 0,
                 projectInterests: appState.projectInterests || {},
                 userCode: appState.userCode || {},
+                learningTelemetry: appState.learningTelemetry || null,
                 soundEnabled: typeof SoundFX !== 'undefined' ? SoundFX.enabled : true,
                 soundVolume: typeof SoundFX !== 'undefined' ? SoundFX.volume : 0.8
             }
@@ -890,7 +891,139 @@ const AuthManager = {
             }
         }
 
+        // Fusione deterministica della telemetria didattica P3.1
+        if (imported.learningTelemetry && imported.learningTelemetry.lessons) {
+            if (!current.learningTelemetry || !current.learningTelemetry.lessons) {
+                merged.learningTelemetry = imported.learningTelemetry;
+            } else {
+                merged.learningTelemetry = this.mergeLearningTelemetry(current.learningTelemetry, imported.learningTelemetry);
+            }
+        } else if (current.learningTelemetry) {
+            merged.learningTelemetry = current.learningTelemetry;
+        }
+
         return merged;
+    },
+
+    /**
+     * Merge deterministico e idempotente della telemetria didattica locale e remota
+     */
+    mergeLearningTelemetry(local, remote) {
+        if (!local && !remote) return { schema_version: 1, lessons: {} };
+        if (!local) return remote;
+        if (!remote) return local;
+
+        const result = {
+            schema_version: Math.max(local.schema_version || 1, remote.schema_version || 1),
+            lessons: { ...(local.lessons || {}) }
+        };
+        const remoteLessons = remote.lessons || {};
+
+        const earlierDate = (d1, d2) => {
+            if (!d1) return d2 || null;
+            if (!d2) return d1 || null;
+            return new Date(d1).getTime() <= new Date(d2).getTime() ? d1 : d2;
+        };
+
+        const laterDate = (d1, d2) => {
+            if (!d1) return d2 || null;
+            if (!d2) return d1 || null;
+            return new Date(d1).getTime() >= new Date(d2).getTime() ? d1 : d2;
+        };
+
+        for (const [idStr, rData] of Object.entries(remoteLessons)) {
+            const lData = result.lessons[idStr];
+            if (!lData) {
+                result.lessons[idStr] = { ...rData };
+                continue;
+            }
+
+            const hasLocalHistory = lData.history_available && !lData.legacy_completion;
+            const hasRemoteHistory = rData.history_available && !rData.legacy_completion;
+
+            let mergedLesson;
+            if (!hasLocalHistory && hasRemoteHistory) {
+                mergedLesson = { ...rData };
+            } else if (hasLocalHistory && !hasRemoteHistory) {
+                mergedLesson = { ...lData };
+            } else {
+                const firstSuccessAt = earlierDate(lData.first_success_at, rData.first_success_at);
+                const lastSuccessAt = laterDate(lData.last_success_at, rData.last_success_at);
+                const firstAttemptAt = earlierDate(lData.first_attempt_at, rData.first_attempt_at);
+                const lastAttemptAt = laterDate(lData.last_attempt_at, rData.last_attempt_at);
+
+                let failedBeforeFirst = null;
+                if (lData.failed_before_first_success !== null && lData.failed_before_first_success !== undefined &&
+                    rData.failed_before_first_success !== null && rData.failed_before_first_success !== undefined) {
+                    if (firstSuccessAt && lData.first_success_at === firstSuccessAt && lData.first_success_at !== rData.first_success_at) {
+                        failedBeforeFirst = lData.failed_before_first_success;
+                    } else if (firstSuccessAt && rData.first_success_at === firstSuccessAt && lData.first_success_at !== rData.first_success_at) {
+                        failedBeforeFirst = rData.failed_before_first_success;
+                    } else {
+                        failedBeforeFirst = Math.max(lData.failed_before_first_success, rData.failed_before_first_success);
+                    }
+                } else {
+                    failedBeforeFirst = (lData.failed_before_first_success !== null && lData.failed_before_first_success !== undefined)
+                        ? lData.failed_before_first_success
+                        : rData.failed_before_first_success ?? null;
+                }
+
+                let hintsBeforeFirst = null;
+                if (lData.hints_opened_before_first_success !== null && lData.hints_opened_before_first_success !== undefined &&
+                    rData.hints_opened_before_first_success !== null && rData.hints_opened_before_first_success !== undefined) {
+                    hintsBeforeFirst = Math.max(lData.hints_opened_before_first_success, rData.hints_opened_before_first_success);
+                } else {
+                    hintsBeforeFirst = (lData.hints_opened_before_first_success !== null && lData.hints_opened_before_first_success !== undefined)
+                        ? lData.hints_opened_before_first_success
+                        : rData.hints_opened_before_first_success ?? null;
+                }
+
+                let firstSuccessWithoutHints = null;
+                if (lData.first_success_without_hints !== null && lData.first_success_without_hints !== undefined &&
+                    rData.first_success_without_hints !== null && rData.first_success_without_hints !== undefined) {
+                    firstSuccessWithoutHints = lData.first_success_without_hints && rData.first_success_without_hints;
+                } else {
+                    firstSuccessWithoutHints = (lData.first_success_without_hints !== null && lData.first_success_without_hints !== undefined)
+                        ? lData.first_success_without_hints
+                        : rData.first_success_without_hints ?? null;
+                }
+
+                const lErr = lData.error_breakdown || {};
+                const rErr = rData.error_breakdown || {};
+                const errorBreakdown = {
+                    syntax: Math.max(lErr.syntax || 0, rErr.syntax || 0),
+                    runtime: Math.max(lErr.runtime || 0, rErr.runtime || 0),
+                    requirement: Math.max(lErr.requirement || 0, rErr.requirement || 0),
+                    timeout: Math.max(lErr.timeout || 0, rErr.timeout || 0),
+                    internal: Math.max(lErr.internal || 0, rErr.internal || 0)
+                };
+
+                mergedLesson = {
+                    lesson_id: lData.lesson_id,
+                    concept_id: lData.concept_id || rData.concept_id,
+                    concept_tags: lData.concept_tags || rData.concept_tags || [],
+                    total_runs: Math.max(lData.total_runs || 0, rData.total_runs || 0),
+                    verify_attempts: Math.max(lData.verify_attempts || 0, rData.verify_attempts || 0),
+                    failed_verifications: Math.max(lData.failed_verifications || 0, rData.failed_verifications || 0),
+                    failed_before_first_success: failedBeforeFirst,
+                    success_count: Math.max(lData.success_count || 0, rData.success_count || 0),
+                    first_attempt_at: firstAttemptAt,
+                    last_attempt_at: lastAttemptAt,
+                    first_success_at: firstSuccessAt,
+                    last_success_at: lastSuccessAt,
+                    max_hint_level_opened: Math.max(lData.max_hint_level_opened || 0, rData.max_hint_level_opened || 0),
+                    hints_opened_before_first_success: hintsBeforeFirst,
+                    first_success_without_hints: firstSuccessWithoutHints,
+                    error_breakdown: errorBreakdown,
+                    legacy_completion: !!(lData.legacy_completion && rData.legacy_completion),
+                    history_available: !!(lData.history_available || rData.history_available)
+                };
+            }
+
+            result.lessons[idStr] = mergedLesson;
+        }
+
+        return result;
     }
 };
 
