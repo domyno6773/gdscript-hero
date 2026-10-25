@@ -146,6 +146,8 @@ class GD_Signal {
     constructor(name = "signal") {
         this.name = name;
         this.callbacks = [];
+        this.emitCount = 0;
+        this.emissions = [];
     }
     connect(cb) {
         if (typeof cb === 'function') {
@@ -153,6 +155,8 @@ class GD_Signal {
         }
     }
     emit(...args) {
+        this.emitCount += 1;
+        if (this.emissions.length < 100) this.emissions.push([...args]);
         for (const cb of this.callbacks) {
             cb(...args);
         }
