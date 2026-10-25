@@ -148,6 +148,8 @@ func _ready():
                 passed: hasVar,
                 diff: hasVar ? null : "Verifica di aver dichiarato entrambe le variabili con la parola chiave var."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_variables_01', (result.code || '').replace(/(var\s+nome_ranger\s*=\s*)(["'])Kael\2/, '$1"Mira"'), 'Il ranger Kael possiede 18 frecce.');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -218,6 +220,8 @@ func _ready():
                 passed: printedFloat,
                 diff: printedFloat ? null : "Assicurati di stampare la variabile altitudine."
             });
+            const auditDependency = /const\s+LIVELLO_MAX\s*:\s*int\s*=\s*50\b/.test(result.code || '') && await reviewAuditMutation(result, 'rev_types_01', (result.code || '').replace(/(var\s+altitudine\s*:\s*float\s*=\s*)120\.5\b/, '$1130.5'), '120.5');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -279,6 +283,8 @@ func _ready():
                 passed: hasFormula,
                 diff: hasFormula ? null : "Verifica che il calcolo usi le variabili fornite: resistenza_iniziale - danno_subito + bonus_riparazione."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_math_01', (result.code || '').replace(/(var\s+danno_subito\s*=\s*)25\b/, (_match, prefix) => prefix + '30'), '65');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -403,6 +409,8 @@ func _ready():
                 passed: hasAppend,
                 diff: hasAppend ? null : "Assicurati di chiamare zaino.append(\"Pozione Verde\")."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_arrays_01', (result.code || '').replace(/^(\s*)zaino\.append\s*\(\s*["']Pozione Verde["']\s*\)\s*$/m, '$1pass'), '3');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -599,6 +607,8 @@ func _ready():
                 passed: hasAxes,
                 diff: hasAxes ? null : "Verifica di aggiornare i componenti: posizione.x += 50 e posizione.y -= 30."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_vectors_01', (result.code || '').replace(/(posizione\.x\s*\+=\s*)50\b/, (_match, prefix) => prefix + '60'), 'Vector2(150, 170)');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -665,6 +675,8 @@ func _ready():
                 passed: hasMethod,
                 diff: hasMethod ? null : "Assicurati di usare if bottino.has(\"artefatti\"):."
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_dictionaries_01', (result.code || '').replace(/(["']oro["']\s*:\s*)150\b/, (_match, prefix) => prefix + '200'), '150');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -905,6 +917,8 @@ func _ready():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Drone EX-101 operativo (Batteria: 100%)", Ricevuto: "${logs.join(' | ')}"`
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_oop_01', (result.code || '').replace(/(Drone\.new\s*\(\s*["']EX-101["']\s*,\s*)100(\s*\))/, '$190$2'), 'Drone EX-101 operativo (Batteria: 100%)');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
@@ -975,6 +989,8 @@ func _ready():
                 passed: hasLog,
                 diff: hasLog ? null : `Ricevuto: "${logs.join(' | ')}"`
             });
+            const auditDependency = await reviewAuditMutation(result, 'rev_scene_tree_01', (result.code || '').replace(/(\$MonitorTermico\.text\s*=\s*)(["'])Temperatura: 300 K\2/, '$1"Temperatura: 200 K"'), 'Monitor aggiornato: Temperatura: 300 K');
+            tests.push({ desc: "Il valore stampato dipende dal dato realmente calcolato", passed: !!auditDependency, diff: auditDependency ? null : "Stampa il valore ottenuto dall'operazione richiesta, non un valore fisso." });
             return tests;
         }
     },
