@@ -316,6 +316,47 @@ class GD_Node2D extends GD_Node {
     }
 }
 
+class GD_Sprite2D extends GD_Node2D {
+    constructor(name = "Sprite2D") {
+        super(name);
+        this.texture = "godot_icon";
+        this.modulate = "#ffffff";
+    }
+}
+
+class GD_CharacterBody2D extends GD_Node2D {
+    constructor(name = "CharacterBody2D") {
+        super(name);
+        this.velocity = new Vector2(0, 0);
+    }
+    move_and_slide() {
+        this.position.x += (this.velocity.x || 0) * 0.016;
+        this.position.y += (this.velocity.y || 0) * 0.016;
+    }
+}
+
+class GD_ProgressBar extends GD_Node {
+    constructor(name = "ProgressBar") {
+        super(name);
+        this.value = 50;
+        this.max_value = 100;
+        this.min_value = 0;
+    }
+}
+
+class GD_AudioStreamPlayer2D extends GD_Node {
+    constructor(name = "AudioStreamPlayer2D") {
+        super(name);
+        this.playing = false;
+    }
+    play() {
+        this.playing = true;
+    }
+    stop() {
+        this.playing = false;
+    }
+}
+
 // Transpiler da GDScript a JavaScript moderno
 const GDScriptRuntime = {
     transpile(gdCode) {
@@ -782,4 +823,8 @@ if (typeof window !== 'undefined') {
     window.GD_Timer = GD_Timer;
     window.GD_ColorRect = GD_ColorRect;
     window.GD_Node2D = GD_Node2D;
+    window.GD_Sprite2D = GD_Sprite2D;
+    window.GD_CharacterBody2D = GD_CharacterBody2D;
+    window.GD_ProgressBar = GD_ProgressBar;
+    window.GD_AudioStreamPlayer2D = GD_AudioStreamPlayer2D;
 }

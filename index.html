@@ -37,8 +37,8 @@
             <button class="nav-btn" id="nav-editor-btn" title="Editor Esercizio">
                 <span class="icon">💻</span> <span class="nav-btn-text">Esercizio</span>
             </button>
-            <button class="nav-btn" id="nav-practice-btn" title="Palestra Libera">
-                <span class="icon">🏋️</span> <span class="nav-btn-text">Pratica</span>
+            <button class="nav-btn" id="nav-practice-btn" title="Sandbox &amp; Mini-IDE Godot 4">
+                <span class="icon">🎮</span> <span class="nav-btn-text">Sandbox</span>
             </button>
             <button class="nav-btn" id="nav-projects-btn" title="Progetti (In Sviluppo)">
                 <span class="icon">🛠️</span> <span class="nav-btn-text">Progetti</span> <span class="nav-wip-pill">WIP</span>
@@ -349,78 +349,140 @@
         </div>
     </main>
 
-    <!-- VISTA 3: PALESTRA DI CODICE / PRATICA (Sandbox Libera) -->
+    <!-- VISTA 3: SANDBOX & MINI-IDE GODOT 4 (Libera Sperimentazione con Sincronizzazione Account) -->
     <main id="view-practice" class="view-container hidden">
-        <div class="practice-header-card">
-            <div class="practice-header-info">
-                <div class="practice-badge">AMBITO DI SPERIMENTAZIONE LIBERA</div>
-                <h2>🏋️ Palestra di Codice GDScript 4</h2>
-                <p>Scrivi qualsiasi script Godot, prova algoritmi e visualizza istantaneamente i log della console senza restrizioni o test vincolanti!</p>
+        <div class="sandbox-header-card">
+            <div class="sandbox-header-left">
+                <div class="sandbox-title-wrap">
+                    <span class="sandbox-badge">MINI-IDE &amp; PLAYGROUND</span>
+                    <h2>🎮 Sandbox Godot 4</h2>
+                </div>
+
+                <!-- Gestore Progetti Multipli -->
+                <div class="sandbox-project-manager">
+                    <div class="sandbox-project-selector-wrap">
+                        <span class="sandbox-icon-label">📁</span>
+                        <select id="sandbox-project-select" class="sandbox-select" title="Seleziona Progetto Sandbox"></select>
+                    </div>
+                    <button type="button" class="btn-tool-accent" id="btn-sandbox-new-project" title="Crea un nuovo progetto Sandbox">
+                        <span>➕</span> <span class="btn-text-resp">Nuovo</span>
+                    </button>
+                    <button type="button" class="btn-tool" id="btn-sandbox-rename-project" title="Rinomina progetto corrente">
+                        <span>✏️</span>
+                    </button>
+                    <button type="button" class="btn-tool btn-tool-danger" id="btn-sandbox-delete-project" title="Elimina progetto corrente">
+                        <span>🗑️</span>
+                    </button>
+                </div>
             </div>
-            <div class="practice-controls">
-                <select id="practice-template-select" class="practice-select">
-                    <option value="">📋 Carica un Template di Esempio...</option>
-                    <option value="hello">👋 Saluto e Stampa Multipla</option>
-                    <option value="rpg">❤️ Scheda Statistiche RPG</option>
-                    <option value="math">⚔️ Calcolo Danno e Bottino</option>
-                    <option value="logic">🔮 Condizioni If / Elif / Else</option>
-                    <option value="vector">🚀 Movimento e Vettori 2D</option>
+
+            <div class="sandbox-header-right">
+                <!-- Badge di Salvataggio in Tempo Reale (Locale / Cloud) -->
+                <div class="sandbox-sync-badge" id="sandbox-sync-badge" title="Stato sincronizzazione">
+                    <span class="sync-dot cloud" id="sandbox-sync-dot"></span>
+                    <span id="sandbox-sync-text">Sincronizzato</span>
+                </div>
+
+                <!-- Template Rapidi -->
+                <select id="sandbox-template-select" class="sandbox-select" title="Carica un template nel progetto attuale">
+                    <option value="">⚡ Template Rapido...</option>
+                    <option value="button">🔘 UI &amp; Pulsanti Interattivi</option>
+                    <option value="movement">🤖 Robottino &amp; Movimento 2D</option>
+                    <option value="timer">⏱️ Timer &amp; Cicli a Tempo</option>
+                    <option value="logic">💻 Logica Pura &amp; Console</option>
+                    <option value="empty">📄 Scena Vuota</option>
                 </select>
-                <button class="btn-subtle" id="btn-practice-reset">↺ Svuota</button>
-                <button class="btn-run" id="btn-practice-run">
+
+                <!-- Esportazione verso Godot Engine 4 -->
+                <button type="button" class="btn-tool btn-export" id="btn-sandbox-export-godot" title="Scarica main.tscn e main.gd per il vero Godot Engine 4">
+                    <span>📦</span> <span class="btn-text-resp">Esporta Godot 4</span>
+                </button>
+
+                <!-- Esegui Scena -->
+                <button type="button" class="btn-run sandbox-run-btn" id="btn-sandbox-run" title="Esegui script e scena (Ctrl+Invio)">
                     <span class="run-icon">▶</span>
-                    <span>Esegui Script</span>
+                    <span>Esegui Scena</span>
                 </button>
             </div>
         </div>
 
-        <div class="practice-workspace-grid">
-            <div class="practice-editor-col">
-                <div class="practice-col-header">
-                    <span class="tab">💻 sandbox.gd</span>
-                    <span class="practice-tip">Supporta Vector2, tipi statici, print, if/else</span>
+        <div class="sandbox-workspace-grid">
+            <!-- COLONNA 1: SCENE TREE DOCK -->
+            <div class="sandbox-scene-col">
+                <div class="sandbox-col-header">
+                    <div class="sandbox-col-title">
+                        <span class="tab">🌳 Scena Godot</span>
+                        <span class="scene-node-count" id="sandbox-scene-node-count">1 nodo</span>
+                    </div>
+                    <div class="scene-dock-actions">
+                        <button type="button" class="btn-scene-add-node" id="btn-sandbox-add-node" title="Aggiungi un nodo alla scena">
+                            <span>➕</span> Nodo
+                        </button>
+                        <button type="button" class="btn-scene-remove-node hidden" id="btn-sandbox-remove-node" title="Rimuovi nodo selezionato">
+                            <span>🗑️</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="editor-wrapper">
-                    <div class="line-numbers" id="practice-line-numbers">1</div>
-                    <textarea id="practice-code-editor" spellcheck="false" placeholder="Scrivi qui il tuo codice GDScript..."></textarea>
-                </div>
-                <!-- Barra Rapida Caratteri Speciali per Tastiera Mobile (Palestra) -->
-                <div class="mobile-code-toolbar" id="practice-mobile-code-toolbar">
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="    ">Tab</button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert=":">:</button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="(&quot;&quot;)" data-cursor="-2">(" ")</button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="&quot;&quot;" data-cursor="-1">""</button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="()" data-cursor="-1">()</button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="_">_</button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert=" = "> = </button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="[]" data-cursor="-1">[]</button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="print(&quot;&quot;)" data-cursor="-2">print()</button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="var ">var</button>
-                    <button type="button" class="quick-key" data-target="practice-code-editor" data-insert="func ">func</button>
+                <div class="sandbox-scene-body">
+                    <div class="scene-dock-tree sandbox-tree-container" id="sandbox-scene-tree">
+                        <!-- Albero gerarchico generato dinamicamente -->
+                    </div>
+                    <div class="sandbox-node-details" id="sandbox-node-details">
+                        <div class="sandbox-node-hint">💡 Clicca un nodo per selezionarlo o usa '➕ Nodo' per aggiungerne altri</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="practice-console-col">
-                <div class="practice-col-header">
-                    <div class="practice-header-left">
-                        <span class="tab">💻 Console & 🎮 Schermo 2D</span>
+            <!-- COLONNA 2: GDScript EDITOR -->
+            <div class="sandbox-editor-col">
+                <div class="sandbox-col-header">
+                    <span class="tab">📜 main.gd</span>
+                    <span class="practice-tip">Auto-salvataggio in tempo reale</span>
+                </div>
+                <div class="editor-wrapper">
+                    <div class="line-numbers" id="sandbox-line-numbers">1</div>
+                    <textarea id="sandbox-code-editor" spellcheck="false" placeholder="Scrivi qui il tuo script GDScript..."></textarea>
+                </div>
+                <!-- Barra Rapida Caratteri Speciali per Mobile -->
+                <div class="mobile-code-toolbar" id="sandbox-mobile-code-toolbar">
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="    ">Tab</button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert=":">:</button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="(&quot;&quot;)" data-cursor="-2">(" ")</button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="&quot;&quot;" data-cursor="-1">""</button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="()" data-cursor="-1">()</button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="_">_</button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert=" = "> = </button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="[]" data-cursor="-1">[]</button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="print(&quot;&quot;)" data-cursor="-2">print()</button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="var ">var</button>
+                    <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="func ">func</button>
+                </div>
+            </div>
+
+            <!-- COLONNA 3: VIEWPORT 2D & CONSOLE -->
+            <div class="sandbox-output-col">
+                <div class="sandbox-col-header">
+                    <div class="sandbox-col-title">
+                        <span class="tab">🎮 Schermo 2D</span>
                     </div>
                     <div class="practice-console-tools">
-                        <span id="practice-status-tag" class="practice-status-tag">Pronto</span>
-                        <button type="button" class="btn-tool" id="btn-practice-restart" title="Riavvia simulazione 2D">↺ Riavvia</button>
-                        <button type="button" class="btn-tool" id="btn-practice-clear">🗑️ Pulisci</button>
+                        <span id="sandbox-status-tag" class="practice-status-tag">Pronto</span>
+                        <button type="button" class="btn-tool" id="btn-sandbox-restart" title="Riavvia simulazione 2D">↺ Riavvia</button>
+                        <button type="button" class="btn-tool" id="btn-sandbox-clear-console" title="Pulisci console">🗑️ Pulisci</button>
                     </div>
                 </div>
-                <div class="practice-body-wrapper">
-                    <div class="practice-split-grid">
-                        <div class="practice-console-half">
-                            <pre class="practice-console-pre" id="practice-console-output">// Premi 'Esegui Script' per avviare il codice nella sandbox</pre>
+                <div class="sandbox-output-body">
+                    <!-- Schermo 2D Viewport Canvas con Overlay Interattivo UI -->
+                    <div class="viewport-canvas-wrapper sandbox-viewport-wrapper">
+                        <canvas id="sandbox-viewport-canvas"></canvas>
+                        <div class="exercise-ui-overlay" id="sandbox-ui-overlay"></div>
+                    </div>
+                    <!-- Console dei Log Output -->
+                    <div class="sandbox-console-container">
+                        <div class="sandbox-console-subhead">
+                            <span>📟 Console GDScript</span>
                         </div>
-                        <div class="practice-viewport-half">
-                            <div class="viewport-canvas-wrapper">
-                                <canvas id="practice-viewport-canvas"></canvas>
-                            </div>
-                        </div>
+                        <pre class="practice-console-pre" id="sandbox-console-output">// Premi 'Esegui Scena' per avviare il codice nella Sandbox</pre>
                     </div>
                 </div>
             </div>
@@ -920,6 +982,84 @@
         </div>
     </div>
 
+    <!-- MODAL: NUOVO PROGETTO SANDBOX -->
+    <div class="modal-overlay hidden" id="modal-sandbox-new-project">
+        <div class="modal-card modal-medium">
+            <div class="modal-header-row">
+                <h2>➕ Nuovo Progetto Sandbox</h2>
+                <button type="button" class="modal-close-btn" id="btn-close-sandbox-new">✕</button>
+            </div>
+            <p class="modal-subtitle">Crea un nuovo ambiente di sviluppo per testare le tue idee su Godot 4:</p>
+            <div class="profile-input-group" style="margin-bottom: 14px;">
+                <label for="sandbox-new-name-input" style="display:block; font-size:12px; margin-bottom:6px; font-weight:600; color:var(--text-muted);">Nome del Progetto:</label>
+                <input type="text" id="sandbox-new-name-input" class="modal-input" placeholder="es. Il Mio Gioco, Test Movimento..." value="Nuovo Gioco" style="width:100%;">
+            </div>
+            <div class="profile-input-group" style="margin-bottom: 20px;">
+                <label style="display:block; font-size:12px; margin-bottom:6px; font-weight:600; color:var(--text-muted);">Template di Partenza:</label>
+                <div class="sandbox-template-picker-grid">
+                    <label class="sandbox-tpl-card selected">
+                        <input type="radio" name="sandbox-new-tpl" value="button" checked>
+                        <div class="tpl-card-content">
+                            <span class="tpl-icon">🔘</span>
+                            <strong>UI &amp; Pulsanti</strong>
+                            <small>Button + Label interattivi</small>
+                        </div>
+                    </label>
+                    <label class="sandbox-tpl-card">
+                        <input type="radio" name="sandbox-new-tpl" value="movement">
+                        <div class="tpl-card-content">
+                            <span class="tpl-icon">🤖</span>
+                            <strong>Movimento 2D</strong>
+                            <small>Robot Godot su canvas</small>
+                        </div>
+                    </label>
+                    <label class="sandbox-tpl-card">
+                        <input type="radio" name="sandbox-new-tpl" value="timer">
+                        <div class="tpl-card-content">
+                            <span class="tpl-icon">⏱️</span>
+                            <strong>Timer</strong>
+                            <small>Conto alla rovescia</small>
+                        </div>
+                    </label>
+                    <label class="sandbox-tpl-card">
+                        <input type="radio" name="sandbox-new-tpl" value="empty">
+                        <div class="tpl-card-content">
+                            <span class="tpl-icon">📄</span>
+                            <strong>Scena Vuota</strong>
+                            <small>Pagina bianca</small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-actions-row">
+                <button type="button" class="btn-subtle" id="btn-cancel-sandbox-new">Annulla</button>
+                <button type="button" class="btn-primary" id="btn-confirm-sandbox-new" style="background:#0284c7; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600; cursor:pointer;">
+                    <span>🚀 Crea Progetto</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: RINOMINA PROGETTO SANDBOX -->
+    <div class="modal-overlay hidden" id="modal-sandbox-rename-project">
+        <div class="modal-card modal-medium">
+            <div class="modal-header-row">
+                <h2>✏️ Rinomina Progetto Sandbox</h2>
+                <button type="button" class="modal-close-btn" id="btn-close-sandbox-rename">✕</button>
+            </div>
+            <div class="profile-input-group" style="margin: 16px 0;">
+                <label for="sandbox-rename-input" style="display:block; font-size:12px; margin-bottom:6px; font-weight:600; color:var(--text-muted);">Nuovo Nome Progetto:</label>
+                <input type="text" id="sandbox-rename-input" class="modal-input" style="width:100%;">
+            </div>
+            <div class="modal-actions-row">
+                <button type="button" class="btn-subtle" id="btn-cancel-sandbox-rename">Annulla</button>
+                <button type="button" class="btn-primary" id="btn-confirm-sandbox-rename" style="background:#0284c7; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600; cursor:pointer;">
+                    <span>Salva Nome</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay hidden" id="auth-modal">
         <div class="modal-card modal-medium auth-modal-card">
             <div class="modal-header-row">
@@ -1277,9 +1417,9 @@
             <span class="mob-nav-icon">💻</span>
             <span class="mob-nav-label">Codice</span>
         </button>
-        <button type="button" class="mob-nav-item" id="mob-nav-practice" title="Palestra Libera">
-            <span class="mob-nav-icon">🏋️</span>
-            <span class="mob-nav-label">Pratica</span>
+        <button type="button" class="mob-nav-item" id="mob-nav-practice" title="Sandbox Godot 4">
+            <span class="mob-nav-icon">🎮</span>
+            <span class="mob-nav-label">Sandbox</span>
         </button>
         <button type="button" class="mob-nav-item" id="mob-nav-projects" title="Progetti">
             <span class="mob-nav-icon">🛠️</span>

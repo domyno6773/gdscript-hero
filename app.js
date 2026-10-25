@@ -50,6 +50,25 @@ const App = {
             project_platformer: 24,
             project_inventory: 19,
             project_turn_combat: 31
+        },
+
+        // Progetti Sandbox & Mini-IDE (Sincronizzati Cloud in tempo reale)
+        sandbox: {
+            activeProjectId: 'proj_default',
+            projects: [
+                {
+                    id: 'proj_default',
+                    name: 'Il Mio Gioco Godot',
+                    code: `extends Node2D\n\nvar clicks = 0\n\nfunc _ready():\n    print("🎮 Benvenuto nella Sandbox di Godot 4!")\n    $Label.text = "Clicca il pulsante sotto per iniziare."\n\nfunc _on_button_pressed():\n    clicks += 1\n    print("Pulsante cliccato! Volte:", clicks)\n    $Label.text = "Bravo! Hai cliccato " + str(clicks) + " volte!"\n`,
+                    nodes: [
+                        { name: 'Main', type: 'Node2D', parent: null },
+                        { name: 'Label', type: 'Label', text: 'Clicca il pulsante sotto per iniziare.', parent: 'Main' },
+                        { name: 'Button', type: 'Button', text: 'Cliccami!', parent: 'Main' },
+                        { name: 'Sprite2D', type: 'Sprite2D', parent: 'Main' }
+                    ],
+                    updatedAt: new Date().toISOString()
+                }
+            ]
         }
     },
 
@@ -115,7 +134,7 @@ const App = {
         // Inizializzazione Viewport 2D Godot Engine
         if (window.GodotViewport) {
             this.viewport = new GodotViewport('exercise-viewport-canvas');
-            this.practiceViewport = new GodotViewport('practice-viewport-canvas');
+            this.practiceViewport = new GodotViewport('sandbox-viewport-canvas');
             if (this.state.theme) {
                 this.viewport.setTheme(this.state.theme);
                 this.practiceViewport.setTheme(this.state.theme);
@@ -181,6 +200,13 @@ const App = {
                     this.state.projectInterests = { ...this.state.projectInterests, ...parsed.projectInterests };
                 }
 
+                // Progetti Sandbox & Mini-IDE
+                if (parsed.sandbox && Array.isArray(parsed.sandbox.projects) && parsed.sandbox.projects.length > 0) {
+                    this.state.sandbox = parsed.sandbox;
+                } else {
+                    this.state.sandbox = this.getDefaultSandboxState();
+                }
+
                 // Impostazioni Audio
                 if (parsed.soundEnabled !== undefined) {
                     SoundFX.enabled = parsed.soundEnabled;
@@ -190,6 +216,7 @@ const App = {
                 }
             } else {
                 this.state.currentWeekId = this.getWeekId();
+                this.state.sandbox = this.getDefaultSandboxState();
                 if (this.isLocalEnvironment()) {
                     this.state.devAllUnlocked = true;
                 } else {
@@ -222,7 +249,8 @@ const App = {
             profileCustomized: this.state.profileCustomized,
             dailyQuests: this.state.dailyQuests,
             claimedQuestsCount: this.state.claimedQuestsCount,
-            projectInterests: this.state.projectInterests
+            projectInterests: this.state.projectInterests,
+            sandbox: this.state.sandbox
         };
 
         try {
@@ -578,40 +606,219 @@ const App = {
         }
     },
 
-    // ==========================================
-    // VISTA PRATICA / PALESTRA (SANDBOX LIBERA)
-    // ==========================================
-    setupPracticeEditor() {
-        const practiceEditor = document.getElementById('practice-code-editor');
-        if (!practiceEditor) return;
+    // =========================================================
+    // VISTA SANDBOX & MINI-IDE GODOT 4 (Libera Sperimentazione)
+    // =========================================================
+    getDefaultSandboxState() {
+        return {
+            activeProjectId: 'proj_default',
+            projects: [
+                {
+                    id: 'proj_default',
+                    name: 'Il Mio Gioco Godot',
+                    code: `extends Node2D\n\nvar clicks: int = 0\n\nfunc _ready():\n    print("🎮 Benvenuto nella Sandbox di Godot 4!")\n    $Label.text = "Clicca il pulsante sotto per iniziare."\n\nfunc _on_button_pressed():\n    clicks += 1\n    print("Pulsante cliccato! Punteggio:", clicks)\n    $Label.text = "Bravo! Hai cliccato " + str(clicks) + " volte!"\n    if clicks >= 5:\n        $Label.text = "🏆 Ottimo lavoro! Hai sbloccato il bonus!"\n`,
+                    nodes: [
+                        { name: 'Main', type: 'Node2D', parent: null },
+                        { name: 'Label', type: 'Label', text: 'Clicca il pulsante sotto per iniziare.', parent: 'Main' },
+                        { name: 'Button', type: 'Button', text: 'Cliccami!', parent: 'Main' },
+                        { name: 'Sprite2D', type: 'Sprite2D', parent: 'Main' }
+                    ],
+                    updatedAt: new Date().toISOString()
+                }
+            ]
+        };
+    },
 
-        if (!practiceEditor.value) {
-            practiceEditor.value = `func _ready():\n    # Benvenuto nella Palestra di GDScript 4!\n    # Scrivi qui qualsiasi codice e premi "Esegui Script"\n    var saluto = "Pronto a sviluppare su Godot!"\n    print(saluto)\n`;
+    getActiveSandboxProject() {
+        if (!this.state.sandbox || !Array.isArray(this.state.sandbox.projects) || this.state.sandbox.projects.length === 0) {
+            this.state.sandbox = this.getDefaultSandboxState();
         }
-        this.updatePracticeLineNumbers();
+        let proj = this.state.sandbox.projects.find(p => p.id === this.state.sandbox.activeProjectId);
+        if (!proj) {
+            proj = this.state.sandbox.projects[0];
+            this.state.sandbox.activeProjectId = proj.id;
+        }
+        return proj;
+    },
 
-        practiceEditor.addEventListener('input', () => {
-            this.updatePracticeLineNumbers();
+    setupPracticeEditor() {
+        this.setupSandbox();
+    },
+
+    setupSandbox() {
+        const editor = document.getElementById('sandbox-code-editor') || document.getElementById('practice-code-editor');
+        if (!editor) return;
+
+        // Auto-save debounced a 800ms
+        let autoSaveDebounce = null;
+        editor.addEventListener('input', () => {
+            this.updateSandboxLineNumbers();
+            this.updateSandboxSyncStatus('saving');
+            clearTimeout(autoSaveDebounce);
+            autoSaveDebounce = setTimeout(() => {
+                const curProj = this.getActiveSandboxProject();
+                if (curProj) {
+                    curProj.code = editor.value;
+                    curProj.updatedAt = new Date().toISOString();
+                    this.saveStorage();
+                    this.updateSandboxSyncStatus('saved');
+                }
+            }, 800);
         });
 
-        practiceEditor.addEventListener('keydown', (e) => {
+        // Tab e Scorciatoie da tastiera (Ctrl+Enter per eseguire scena)
+        editor.addEventListener('keydown', (e) => {
             if (e.key === 'Tab') {
                 e.preventDefault();
-                const start = practiceEditor.selectionStart;
-                const end = practiceEditor.selectionEnd;
-                practiceEditor.value = practiceEditor.value.substring(0, start) + "    " + practiceEditor.value.substring(end);
-                practiceEditor.selectionStart = practiceEditor.selectionEnd = start + 4;
-                this.updatePracticeLineNumbers();
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                editor.value = editor.value.substring(0, start) + "    " + editor.value.substring(end);
+                editor.selectionStart = editor.selectionEnd = start + 4;
+                this.updateSandboxLineNumbers();
             } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
-                this.runPracticeCode();
+                this.runSandboxCode();
             }
+        });
+
+        // Dropdown selezione progetto
+        const projSelect = document.getElementById('sandbox-project-select');
+        if (projSelect) {
+            projSelect.addEventListener('change', (e) => {
+                SoundFX.playClick();
+                this.switchSandboxProject(e.target.value);
+            });
+        }
+
+        // Modale Nuovo Progetto
+        const btnNew = document.getElementById('btn-sandbox-new-project');
+        const modalNew = document.getElementById('modal-sandbox-new-project');
+        const btnCloseNew = document.getElementById('btn-close-sandbox-new');
+        const btnCancelNew = document.getElementById('btn-cancel-sandbox-new');
+        const btnConfirmNew = document.getElementById('btn-confirm-sandbox-new');
+
+        if (btnNew && modalNew) {
+            btnNew.onclick = () => {
+                SoundFX.playClick();
+                modalNew.classList.remove('hidden');
+                const nameInput = document.getElementById('sandbox-new-name-input');
+                if (nameInput) {
+                    nameInput.value = `Progetto ${(this.state.sandbox.projects || []).length + 1}`;
+                    nameInput.focus();
+                }
+            };
+        }
+        if (btnCloseNew && modalNew) btnCloseNew.onclick = () => modalNew.classList.add('hidden');
+        if (btnCancelNew && modalNew) btnCancelNew.onclick = () => modalNew.classList.add('hidden');
+        if (btnConfirmNew) {
+            btnConfirmNew.onclick = () => {
+                const nameInput = document.getElementById('sandbox-new-name-input');
+                const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Nuovo Gioco';
+                const checkedTpl = document.querySelector('input[name="sandbox-new-tpl"]:checked');
+                const tpl = checkedTpl ? checkedTpl.value : 'button';
+                this.createSandboxProject(name, tpl);
+                if (modalNew) modalNew.classList.add('hidden');
+            };
+        }
+
+        // Modale Rinomina Progetto
+        const btnRename = document.getElementById('btn-sandbox-rename-project');
+        const modalRename = document.getElementById('modal-sandbox-rename-project');
+        const btnCloseRename = document.getElementById('btn-close-sandbox-rename');
+        const btnCancelRename = document.getElementById('btn-cancel-sandbox-rename');
+        const btnConfirmRename = document.getElementById('btn-confirm-sandbox-rename');
+
+        if (btnRename && modalRename) {
+            btnRename.onclick = () => {
+                SoundFX.playClick();
+                modalRename.classList.remove('hidden');
+                const cur = this.getActiveSandboxProject();
+                const renInput = document.getElementById('sandbox-rename-input');
+                if (renInput && cur) {
+                    renInput.value = cur.name;
+                    renInput.focus();
+                }
+            };
+        }
+        if (btnCloseRename && modalRename) btnCloseRename.onclick = () => modalRename.classList.add('hidden');
+        if (btnCancelRename && modalRename) btnCancelRename.onclick = () => modalRename.classList.add('hidden');
+        if (btnConfirmRename) {
+            btnConfirmRename.onclick = () => {
+                const renInput = document.getElementById('sandbox-rename-input');
+                if (renInput && renInput.value.trim()) {
+                    this.renameSandboxProject(renInput.value.trim());
+                }
+                if (modalRename) modalRename.classList.add('hidden');
+            };
+        }
+
+        // Elimina Progetto Corrente
+        const btnDelete = document.getElementById('btn-sandbox-delete-project');
+        if (btnDelete) {
+            btnDelete.onclick = () => this.deleteSandboxProject();
+        }
+
+        // Template Selector rapido
+        const tplSelect = document.getElementById('sandbox-template-select');
+        if (tplSelect) {
+            tplSelect.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    this.loadSandboxTemplate(e.target.value);
+                    e.target.value = '';
+                }
+            });
+        }
+
+        // Esporta per Godot 4
+        const btnExport = document.getElementById('btn-sandbox-export-godot');
+        if (btnExport) {
+            btnExport.onclick = () => this.exportSandboxToGodot4();
+        }
+
+        // Esegui Scena
+        const btnRun = document.getElementById('btn-sandbox-run') || document.getElementById('btn-practice-run');
+        if (btnRun) {
+            btnRun.onclick = () => this.runSandboxCode();
+        }
+
+        // Scene Tree Aggiungi & Rimuovi Nodo
+        const btnAddNode = document.getElementById('btn-sandbox-add-node');
+        if (btnAddNode) {
+            btnAddNode.onclick = () => this.openAddNodeModal('sandbox');
+        }
+
+        const btnRemoveNode = document.getElementById('btn-sandbox-remove-node');
+        if (btnRemoveNode) {
+            btnRemoveNode.onclick = () => this.removeSandboxNode(this.selectedSandboxNode);
+        }
+
+        // Viewport Riavvia & Pulisci Console
+        const btnRestart = document.getElementById('btn-sandbox-restart') || document.getElementById('btn-practice-restart');
+        if (btnRestart) {
+            btnRestart.onclick = () => {
+                SoundFX.playClick();
+                if (this.practiceViewport) this.practiceViewport.replay();
+            };
+        }
+
+        const btnClearConsole = document.getElementById('btn-sandbox-clear-console') || document.getElementById('btn-practice-clear');
+        if (btnClearConsole) {
+            btnClearConsole.onclick = () => this.clearSandboxConsole();
+        }
+
+        // Setup Template Selector radio cards nel modal nuovo progetto
+        const tplCards = document.querySelectorAll('.sandbox-tpl-card');
+        tplCards.forEach(card => {
+            card.addEventListener('click', () => {
+                tplCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            });
         });
     },
 
-    updatePracticeLineNumbers() {
-        const editor = document.getElementById('practice-code-editor');
-        const linesEl = document.getElementById('practice-line-numbers');
+    updateSandboxLineNumbers() {
+        const editor = document.getElementById('sandbox-code-editor') || document.getElementById('practice-code-editor');
+        const linesEl = document.getElementById('sandbox-line-numbers') || document.getElementById('practice-line-numbers');
         if (!editor || !linesEl) return;
 
         const count = editor.value.split('\n').length;
@@ -620,6 +827,30 @@ const App = {
             nums += i + '\n';
         }
         linesEl.innerText = nums;
+    },
+
+    updateSandboxSyncStatus(status = 'saved') {
+        const badge = document.getElementById('sandbox-sync-badge');
+        const dot = document.getElementById('sandbox-sync-dot');
+        const text = document.getElementById('sandbox-sync-text');
+        if (!badge || !dot || !text) return;
+
+        if (status === 'saving') {
+            dot.className = 'sync-dot saving';
+            text.innerText = 'Salvataggio in corso...';
+        } else {
+            const isCloud = window.AuthManager && !window.AuthManager.isGuest();
+            if (isCloud) {
+                dot.className = 'sync-dot cloud';
+                const email = (window.AuthManager.currentUser && window.AuthManager.currentUser.email) ? window.AuthManager.currentUser.email : 'Cloud';
+                text.innerText = `Sincronizzato (${email})`;
+                badge.title = `I tuoi progetti sono salvati nel database cloud per ${email}`;
+            } else {
+                dot.className = 'sync-dot local';
+                text.innerText = 'Salvato nel Browser (Accedi per Cloud)';
+                badge.title = 'Salvataggio locale nel browser. Effettua l\'accesso per sincronizzare su altri PC o telefono.';
+            }
+        }
     },
 
     openPracticeView() {
@@ -632,86 +863,609 @@ const App = {
         document.getElementById('view-practice').classList.remove('hidden');
 
         this.updateNavSelection('practice');
-        this.updatePracticeLineNumbers();
-        setTimeout(() => this.practiceViewport && this.practiceViewport.resize(), 60);
+        this.loadActiveSandboxProject();
+        setTimeout(() => this.practiceViewport && this.practiceViewport.resize(), 80);
     },
 
-    async runPracticeCode() {
+    loadActiveSandboxProject() {
+        const cur = this.getActiveSandboxProject();
+        if (!cur) return;
+
+        // Popola dropdown progetti
+        const projSelect = document.getElementById('sandbox-project-select');
+        if (projSelect) {
+            projSelect.innerHTML = '';
+            (this.state.sandbox.projects || []).forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                if (p.id === cur.id) opt.selected = true;
+                projSelect.appendChild(opt);
+            });
+        }
+
+        // Imposta codice nell'editor
+        const editor = document.getElementById('sandbox-code-editor') || document.getElementById('practice-code-editor');
+        if (editor) {
+            editor.value = cur.code || '';
+            this.updateSandboxLineNumbers();
+        }
+
+        // Costruisci e renderizza Scena Godot
+        this.sandboxScene = this.buildSceneFromNodes(cur.nodes || []);
+        this.renderSandboxSceneDock();
+        this.renderSandboxViewportOverlay();
+        this.updateSandboxSyncStatus('saved');
+    },
+
+    switchSandboxProject(projectId) {
+        // Salva prima il codice del progetto uscente
+        const cur = this.getActiveSandboxProject();
+        const editor = document.getElementById('sandbox-code-editor') || document.getElementById('practice-code-editor');
+        if (cur && editor) {
+            cur.code = editor.value;
+            cur.updatedAt = new Date().toISOString();
+        }
+
+        this.state.sandbox.activeProjectId = projectId;
+        this.saveStorage();
+        this.loadActiveSandboxProject();
+        SoundFX.playSuccess();
+    },
+
+    createSandboxProject(name, templateKey = 'button') {
+        const id = 'proj_' + Date.now();
+        const newProj = {
+            id: id,
+            name: name,
+            code: '',
+            nodes: [],
+            updatedAt: new Date().toISOString()
+        };
+
+        // Applica template scelto
+        const tpl = this.getSandboxTemplateData(templateKey);
+        newProj.code = tpl.code;
+        newProj.nodes = tpl.nodes;
+
+        if (!this.state.sandbox.projects) this.state.sandbox.projects = [];
+        this.state.sandbox.projects.push(newProj);
+        this.state.sandbox.activeProjectId = id;
+        this.saveStorage();
+        this.loadActiveSandboxProject();
+
+        SoundFX.playFanfare();
+        this.showToast({
+            icon: '🚀',
+            tag: 'SANDBOX',
+            title: 'Nuovo Progetto Creato',
+            desc: `"${name}" è ora attivo e sincronizzato!`
+        });
+    },
+
+    renameSandboxProject(newName) {
+        const cur = this.getActiveSandboxProject();
+        if (!cur) return;
+        cur.name = newName;
+        cur.updatedAt = new Date().toISOString();
+        this.saveStorage();
+        this.loadActiveSandboxProject();
+        SoundFX.playSuccess();
+        this.showToast({
+            icon: '✏️',
+            tag: 'SANDBOX',
+            title: 'Progetto Rinominato',
+            desc: `Nome aggiornato in "${newName}"`
+        });
+    },
+
+    deleteSandboxProject() {
+        const cur = this.getActiveSandboxProject();
+        if (!cur) return;
+
+        if (this.state.sandbox.projects.length <= 1) {
+            if (!confirm(`Vuoi azzerare il progetto "${cur.name}" alle impostazioni di default?`)) return;
+            const def = this.getDefaultSandboxState().projects[0];
+            cur.name = def.name;
+            cur.code = def.code;
+            cur.nodes = def.nodes;
+            cur.updatedAt = new Date().toISOString();
+        } else {
+            if (!confirm(`Sei sicuro di voler eliminare definitivamente il progetto "${cur.name}"?`)) return;
+            this.state.sandbox.projects = this.state.sandbox.projects.filter(p => p.id !== cur.id);
+            this.state.sandbox.activeProjectId = this.state.sandbox.projects[0].id;
+        }
+
+        this.saveStorage();
+        this.loadActiveSandboxProject();
         SoundFX.playClick();
-        const editor = document.getElementById('practice-code-editor');
-        const outputPre = document.getElementById('practice-console-output');
-        const statusTag = document.getElementById('practice-status-tag');
+        this.showToast({
+            icon: '🗑️',
+            tag: 'SANDBOX',
+            title: 'Progetto Rimosso',
+            desc: 'La lista progetti è stata aggiornata.'
+        });
+    },
+
+    getSandboxTemplateData(key) {
+        const templates = {
+            button: {
+                nodes: [
+                    { name: 'Main', type: 'Node2D', parent: null },
+                    { name: 'Label', type: 'Label', text: 'Premi il pulsante sotto!', parent: 'Main' },
+                    { name: 'Button', type: 'Button', text: 'Cliccami!', parent: 'Main' },
+                    { name: 'Sprite2D', type: 'Sprite2D', parent: 'Main' }
+                ],
+                code: `extends Node2D\n\nvar clicks: int = 0\n\nfunc _ready():\n    print("🎮 Gioco avviato nella Sandbox!")\n    $Label.text = "Clicca il pulsante sotto per iniziare."\n\nfunc _on_button_pressed():\n    clicks += 1\n    print("Pulsante cliccato! Volte:", clicks)\n    $Label.text = "Bravo! Hai cliccato " + str(clicks) + " volte!"\n    if clicks >= 5:\n        $Label.text = "🏆 Ottimo lavoro! Hai sbloccato il bonus!"\n`
+            },
+            movement: {
+                nodes: [
+                    { name: 'Main', type: 'Node2D', parent: null },
+                    { name: 'Sprite2D', type: 'Sprite2D', parent: 'Main' },
+                    { name: 'Label', type: 'Label', text: 'Robottino Godot Pronto', parent: 'Main' }
+                ],
+                code: `extends Node2D\n\nvar velocita = 120\nvar coordinate = Vector2(120, 100)\n\nfunc _ready():\n    print("🤖 Robottino pronto al movimento!")\n    $Label.text = "Posizione iniziale: " + str(coordinate)\n    coordinate.x += 60\n    coordinate.y += 20\n    print("Nuova posizione calcolata: ", coordinate)\n`
+            },
+            timer: {
+                nodes: [
+                    { name: 'Main', type: 'Node2D', parent: null },
+                    { name: 'Timer', type: 'Timer', parent: 'Main' },
+                    { name: 'Label', type: 'Label', text: 'Tempo: 5', parent: 'Main' },
+                    { name: 'Button', type: 'Button', text: 'Riavvia Timer', parent: 'Main' }
+                ],
+                code: `extends Node2D\n\nvar countdown: int = 5\n\nfunc _ready():\n    print("⏱️ Timer impostato su 5 secondi!")\n    $Label.text = "Secondi rimasti: " + str(countdown)\n\nfunc _on_timer_timeout():\n    if countdown > 0:\n        countdown -= 1\n        $Label.text = "Secondi rimasti: " + str(countdown)\n        print("Tick timer: ", countdown)\n    else:\n        $Label.text = "🎉 TEMPO SCADUTO!"\n`
+            },
+            logic: {
+                nodes: [
+                    { name: 'Main', type: 'Node2D', parent: null }
+                ],
+                code: `extends Node2D\n\nfunc _ready():\n    print("--- Logica & Calcoli GDScript 4 ---")\n    var equipaggiamento = ["Spada Antica", "Pozione Cura", "Scudo d'Oro"]\n    for oggetto in equipaggiamento:\n        print("Trovato oggetto: ", oggetto)\n    \n    var danno_base: int = 40\n    var moltiplicatore: float = 1.75\n    var danno_totale: float = danno_base * moltiplicatore\n    print("Danno inflitto:", danno_totale)\n`
+            },
+            empty: {
+                nodes: [
+                    { name: 'Main', type: 'Node2D', parent: null }
+                ],
+                code: `extends Node2D\n\nfunc _ready():\n    print("Scena Godot 4 avviata!")\n`
+            }
+        };
+
+        return templates[key] || templates.button;
+    },
+
+    loadSandboxTemplate(templateKey) {
+        if (!confirm('Vuoi caricare questo template nel progetto corrente? Il codice e i nodi attuali verranno sostituiti.')) return;
+        const cur = this.getActiveSandboxProject();
+        if (!cur) return;
+
+        const tpl = this.getSandboxTemplateData(templateKey);
+        cur.code = tpl.code;
+        cur.nodes = tpl.nodes;
+        cur.updatedAt = new Date().toISOString();
+
+        this.saveStorage();
+        this.loadActiveSandboxProject();
+        SoundFX.playSuccess();
+        this.showToast({
+            icon: '⚡',
+            tag: 'TEMPLATE CARICATO',
+            title: 'Scena Aggiornata',
+            desc: 'Il template è pronto per essere modificato ed eseguito!'
+        });
+    },
+
+    buildSceneFromNodes(nodesList) {
+        if (!nodesList || nodesList.length === 0) {
+            return new GD_Node("Main");
+        }
+        const nodeMap = new Map();
+        let root = null;
+
+        nodesList.forEach(item => {
+            let n;
+            const type = item.type || 'Node2D';
+            if (type === 'Button' && window.GD_Button) {
+                n = new GD_Button(item.name);
+                if (item.text !== undefined) n.text = item.text;
+            } else if (type === 'Label' && window.GD_Label) {
+                n = new GD_Label(item.name);
+                if (item.text !== undefined) n.text = item.text;
+            } else if (type === 'Timer' && window.GD_Timer) {
+                n = new GD_Timer(item.name);
+            } else if (type === 'ColorRect' && window.GD_ColorRect) {
+                n = new GD_ColorRect(item.name);
+            } else if (type === 'Sprite2D' && window.GD_Sprite2D) {
+                n = new GD_Sprite2D(item.name);
+            } else if (type === 'CharacterBody2D' && window.GD_CharacterBody2D) {
+                n = new GD_CharacterBody2D(item.name);
+            } else if (type === 'ProgressBar' && window.GD_ProgressBar) {
+                n = new GD_ProgressBar(item.name);
+            } else if (type === 'Node2D' && window.GD_Node2D) {
+                n = new GD_Node2D(item.name);
+            } else if (window.GD_Node) {
+                n = new GD_Node(item.name);
+            }
+            if (n) {
+                n.type = type;
+                nodeMap.set(item.name, n);
+                if (!item.parent && !root) {
+                    root = n;
+                }
+            }
+        });
+
+        nodesList.forEach(item => {
+            if (item.parent && nodeMap.has(item.parent) && nodeMap.has(item.name)) {
+                nodeMap.get(item.parent).add_child(nodeMap.get(item.name));
+            }
+        });
+
+        return root || new GD_Node("Main");
+    },
+
+    renderSandboxSceneDock() {
+        const treeContainer = document.getElementById('sandbox-scene-tree');
+        if (!treeContainer) return;
+        treeContainer.innerHTML = '';
+
+        const cur = this.getActiveSandboxProject();
+        const nodesList = cur ? (cur.nodes || []) : [];
+
+        // Aggiorna contatore nodi
+        const countEl = document.getElementById('sandbox-scene-node-count');
+        if (countEl) {
+            countEl.innerText = `${nodesList.length} ${nodesList.length === 1 ? 'nodo' : 'nodi'}`;
+        }
+
+        const getNodeIcon = (type) => {
+            switch (type) {
+                case 'Button': return '🔘';
+                case 'Label': return '🏷️';
+                case 'Timer': return '⏱️';
+                case 'ColorRect': return '🟥';
+                case 'Sprite2D': return '🖼️';
+                case 'CharacterBody2D': return '🤖';
+                case 'ProgressBar': return '📊';
+                case 'Node2D': return '🌳';
+                default: return '📦';
+            }
+        };
+
+        const buildTreeDom = (node, depth = 0) => {
+            if (!node) return;
+            const item = document.createElement('div');
+            item.className = 'scene-tree-item';
+            if (this.selectedSandboxNode && this.selectedSandboxNode.name === node.name) {
+                item.classList.add('selected');
+            }
+            item.style.paddingLeft = `${12 + depth * 16}px`;
+
+            const icon = getNodeIcon(node.type);
+            item.innerHTML = `
+                <span class="scene-node-icon">${icon}</span>
+                <span class="scene-node-name">${node.name}</span>
+                <span class="scene-node-type-badge">${node.type || 'Node'}</span>
+            `;
+
+            item.onclick = (e) => {
+                e.stopPropagation();
+                SoundFX.playClick();
+                this.selectSandboxSceneNode(node);
+            };
+
+            treeContainer.appendChild(item);
+
+            for (const child of node.children) {
+                buildTreeDom(child, depth + 1);
+            }
+        };
+
+        if (this.sandboxScene) {
+            buildTreeDom(this.sandboxScene);
+        }
+
+        // Aggiorna visibilità tasto Rimuovi
+        const removeBtn = document.getElementById('btn-sandbox-remove-node');
+        if (removeBtn) {
+            if (this.selectedSandboxNode && this.selectedSandboxNode !== this.sandboxScene && this.selectedSandboxNode.parent) {
+                removeBtn.classList.remove('hidden');
+                removeBtn.title = `Rimuovi il nodo '${this.selectedSandboxNode.name}'`;
+            } else {
+                removeBtn.classList.add('hidden');
+            }
+        }
+
+        // Dettagli nodo selezionato
+        const detailsEl = document.getElementById('sandbox-node-details');
+        if (detailsEl) {
+            if (this.selectedSandboxNode) {
+                const s = this.selectedSandboxNode;
+                let extra = '';
+                if (s.text !== undefined) extra = ` | Testo: <strong>"${s.text}"</strong>`;
+                detailsEl.innerHTML = `<div>Nodo Selezionato: <strong>$${s.name}</strong> (${s.type || 'Node'})${extra}</div>`;
+            } else {
+                detailsEl.innerHTML = `<div class="sandbox-node-hint">💡 Clicca un nodo per selezionarlo o usa '➕ Nodo' per aggiungerne altri</div>`;
+            }
+        }
+    },
+
+    selectSandboxSceneNode(node) {
+        this.selectedSandboxNode = node;
+        this.renderSandboxSceneDock();
+    },
+
+    renderSandboxViewportOverlay() {
+        const overlay = document.getElementById('sandbox-ui-overlay');
+        if (!overlay) return;
+        overlay.innerHTML = '';
+        if (!this.sandboxScene) return;
+
+        const collectUiNodes = (node, list = []) => {
+            if (node !== this.sandboxScene) {
+                if (['Button', 'Label', 'ColorRect'].includes(node.type)) {
+                    list.push(node);
+                }
+            }
+            for (const child of node.children) {
+                collectUiNodes(child, list);
+            }
+            return list;
+        };
+
+        const uiNodes = collectUiNodes(this.sandboxScene);
+        if (uiNodes.length === 0) {
+            overlay.style.display = 'none';
+            return;
+        }
+
+        overlay.style.display = 'flex';
+
+        for (const node of uiNodes) {
+            if (node.type === 'Button') {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'godot-ui-btn';
+                btn.textContent = node.text || node.name;
+                btn.disabled = !!node.disabled;
+                btn.title = `Clicca nodo Button: $${node.name}`;
+                btn.addEventListener('click', () => {
+                    SoundFX.playClick();
+                    if (node.pressed) {
+                        node.pressed.emit();
+                    }
+                    this.renderSandboxSceneDock();
+                    this.renderSandboxViewportOverlay();
+                });
+                overlay.appendChild(btn);
+            } else if (node.type === 'Label') {
+                const lbl = document.createElement('div');
+                lbl.className = 'godot-ui-label';
+                lbl.textContent = node.text !== undefined ? node.text : '';
+                overlay.appendChild(lbl);
+            } else if (node.type === 'ColorRect') {
+                const rect = document.createElement('div');
+                rect.className = 'godot-ui-colorrect';
+                rect.style.backgroundColor = node.color || '#438eff';
+                overlay.appendChild(rect);
+            }
+        }
+    },
+
+    async runSandboxCode() {
+        SoundFX.playClick();
+        const editor = document.getElementById('sandbox-code-editor') || document.getElementById('practice-code-editor');
+        const outputPre = document.getElementById('sandbox-console-output') || document.getElementById('practice-console-output');
+        const statusTag = document.getElementById('sandbox-status-tag') || document.getElementById('practice-status-tag');
         if (!editor || !outputPre) return;
 
-        statusTag.innerText = "In esecuzione...";
-        statusTag.style.color = "#f59e0b";
+        if (statusTag) {
+            statusTag.innerText = "In esecuzione...";
+            statusTag.style.color = "#f59e0b";
+        }
 
         const startT = performance.now();
         const code = editor.value;
 
-        // Registra progresso missione quotidiana (esecuzioni codice)
+        // Salva codice nel progetto attivo
+        const cur = this.getActiveSandboxProject();
+        if (cur) {
+            cur.code = code;
+            cur.updatedAt = new Date().toISOString();
+            this.saveStorage();
+        }
+
+        // Ricostruisci scena da nodi
+        this.sandboxScene = this.buildSceneFromNodes(cur ? cur.nodes : []);
+
+        // Registra progresso missione code_runs
         this.recordDailyQuestProgress('code_runs', 1);
 
         try {
-            const res = await GDScriptRuntime.execute(code);
+            const res = await GDScriptRuntime.execute(code, { initialScene: this.sandboxScene });
             const elapsed = Math.round(performance.now() - startT);
 
             if (res.logs && res.logs.length > 0) {
                 outputPre.innerText = res.logs.join('\n');
                 outputPre.style.color = '#38bdf8';
-                statusTag.innerText = `OK (${elapsed} ms)`;
-                statusTag.style.color = '#10b981';
+                if (statusTag) {
+                    statusTag.innerText = `OK (${elapsed} ms)`;
+                    statusTag.style.color = '#10b981';
+                }
                 SoundFX.playSuccess();
             } else if (res.error) {
                 outputPre.innerText = `// Errore: ${res.error}`;
                 outputPre.style.color = '#f87171';
-                statusTag.innerText = "Errore Script";
-                statusTag.style.color = '#ef4444';
+                if (statusTag) {
+                    statusTag.innerText = "Errore Script";
+                    statusTag.style.color = '#ef4444';
+                }
                 SoundFX.playError();
             } else {
                 outputPre.innerText = "// Esecuzione completata (nessun output print a console)";
                 outputPre.style.color = '#94a3b8';
-                statusTag.innerText = `OK (${elapsed} ms)`;
-                statusTag.style.color = '#10b981';
+                if (statusTag) {
+                    statusTag.innerText = `OK (${elapsed} ms)`;
+                    statusTag.style.color = '#10b981';
+                }
             }
 
             if (this.practiceViewport) {
                 this.practiceViewport.updateFromExecution(res, null, !res.error);
             }
+
+            this.renderSandboxSceneDock();
+            this.renderSandboxViewportOverlay();
+            this.updateSandboxSyncStatus('saved');
         } catch (e) {
             outputPre.innerText = `// Errore inaspettato: ${e.message}`;
             outputPre.style.color = '#f87171';
-            statusTag.innerText = "Errore Critico";
-            statusTag.style.color = '#ef4444';
+            if (statusTag) {
+                statusTag.innerText = "Errore";
+                statusTag.style.color = '#ef4444';
+            }
             SoundFX.playError();
         }
     },
 
-    clearPracticeConsole() {
+    clearSandboxConsole() {
         SoundFX.playClick();
-        const outputPre = document.getElementById('practice-console-output');
-        const statusTag = document.getElementById('practice-status-tag');
+        const outputPre = document.getElementById('sandbox-console-output') || document.getElementById('practice-console-output');
+        const statusTag = document.getElementById('sandbox-status-tag') || document.getElementById('practice-status-tag');
         if (outputPre) outputPre.innerText = "// Console ripulita";
         if (statusTag) statusTag.innerText = "Pronto";
     },
 
-    loadPracticeTemplate(type) {
-        const editor = document.getElementById('practice-code-editor');
-        if (!editor) return;
+    exportSandboxToGodot4() {
+        SoundFX.playClick();
+        const cur = this.getActiveSandboxProject();
+        if (!cur) return;
 
-        const templates = {
-            hello: `func _ready():\n    # Stampa multipla e commenti\n    print("=== AVVIO MOTORE GODOT 4 ===")\n    print("Benvenuto sviluppatore!")\n`,
-            rpg: `func _ready():\n    # Scheda del personaggio\n    var nome: String = "Cavaliere"\n    var salute: int = 100\n    var difesa: float = 12.5\n    var scudo: bool = true\n    print("Eroe: ", nome, " | HP: ", salute)\n`,
-            math: `func _ready():\n    # Calcolo danno e bottino\n    var monete: int = 250\n    var membri: int = 3\n    var a_testa: int = monete / membri\n    var resto: int = monete % membri\n    print("Monete per ciascuno: ", a_testa)\n    print("Resto allo scrigno: ", resto)\n`,
-            logic: `func _ready():\n    # Condizioni con if, elif ed else\n    var punti_vita: int = 35\n    if punti_vita > 70:\n        print("Stato Ottimo")\n    elif punti_vita > 20:\n        print("Personaggio Ferito!")\n    else:\n        print("Attenzione: Stato Critico!")\n`,
-            vector: `func _ready():\n    # Movimento 2D con Vector2\n    var posizione = Vector2(100, 200)\n    var velocita = Vector2(15, -20)\n    posizione.x += velocita.x\n    posizione.y += velocita.y\n    print("Nuova posizione 2D: ", posizione)\n`
+        const projectName = cur.name || "MioProgettoGodot";
+
+        // 1. Script main.gd
+        const scriptHeader = `# ==========================================\n# Creato con GDScript Hero Sandbox\n# Progetto: ${projectName}\n# Data: ${new Date().toLocaleDateString()}\n# ==========================================\n\n`;
+        const scriptContent = scriptHeader + (cur.code || 'extends Node2D\n\nfunc _ready():\n    pass\n');
+
+        // 2. Scena main.tscn per Godot 4
+        let tscnContent = `[gd_scene load_steps=2 format=3]\n\n`;
+        tscnContent += `[ext_resource type="Script" path="res://main.gd" id="1_main"]\n\n`;
+        tscnContent += `[node name="Main" type="Node2D"]\n`;
+        tscnContent += `script = ExtResource("1_main")\n\n`;
+
+        let uiOffsetTop = 40;
+        (cur.nodes || []).forEach(n => {
+            if (!n.parent) return; // Salta radice già definita come Main
+            const type = n.type || 'Node2D';
+            tscnContent += `[node name="${n.name}" type="${type}" parent="."]\n`;
+            if (type === 'Label') {
+                tscnContent += `offset_left = 40.0\n`;
+                tscnContent += `offset_top = ${uiOffsetTop}.0\n`;
+                tscnContent += `text = "${(n.text || '').replace(/"/g, '\\"')}"\n\n`;
+                uiOffsetTop += 40;
+            } else if (type === 'Button') {
+                tscnContent += `offset_left = 40.0\n`;
+                tscnContent += `offset_top = ${uiOffsetTop}.0\n`;
+                tscnContent += `text = "${(n.text || 'Button').replace(/"/g, '\\"')}"\n\n`;
+                uiOffsetTop += 50;
+            } else if (type === 'Sprite2D') {
+                tscnContent += `position = Vector2(240, 160)\n\n`;
+            } else if (type === 'Timer') {
+                tscnContent += `wait_time = 1.0\nautostart = true\n\n`;
+            } else if (type === 'ColorRect') {
+                tscnContent += `color = Color(0.26, 0.55, 1, 1)\n`;
+                tscnContent += `offset_right = 100.0\noffset_bottom = 30.0\n\n`;
+            } else {
+                tscnContent += `\n`;
+            }
+        });
+
+        // Funzione helper download file
+        const downloadBlob = (filename, text) => {
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(link.href), 1000);
         };
 
-        if (templates[type]) {
-            SoundFX.playClick();
-            editor.value = templates[type];
-            this.updatePracticeLineNumbers();
+        downloadBlob('main.gd', scriptContent);
+        setTimeout(() => downloadBlob('main.tscn', tscnContent), 300);
+
+        SoundFX.playFanfare();
+        this.showToast({
+            icon: '📦',
+            tag: 'ESPORTAZIONE GODOT 4',
+            title: 'File main.gd e main.tscn Scaricati!',
+            desc: 'Trascina i file nella cartella di un progetto Godot Engine 4 per eseguirli!'
+        });
+    },
+
+    addSandboxNode(name, type, text) {
+        const cur = this.getActiveSandboxProject();
+        if (!cur) return;
+        if (!cur.nodes) cur.nodes = [{ name: 'Main', type: 'Node2D', parent: null }];
+
+        // Assicurati che non ci siano duplicati di nome
+        let finalName = name;
+        let counter = 1;
+        while (cur.nodes.some(n => n.name === finalName)) {
+            finalName = `${name}_${counter++}`;
         }
+
+        const newNode = {
+            name: finalName,
+            type: type,
+            text: text || '',
+            parent: 'Main'
+        };
+
+        cur.nodes.push(newNode);
+        cur.updatedAt = new Date().toISOString();
+
+        this.saveStorage();
+        this.sandboxScene = this.buildSceneFromNodes(cur.nodes);
+        this.renderSandboxSceneDock();
+        this.renderSandboxViewportOverlay();
+
+        SoundFX.playSuccess();
+        this.showToast({
+            icon: '➕',
+            tag: 'SCENA GODOT',
+            title: 'Nodo Aggiunto!',
+            desc: `Nodo '$${finalName}' (${type}) aggiunto alla scena Sandbox.`
+        });
+    },
+
+    removeSandboxNode(targetNode) {
+        if (!targetNode) return;
+        const cur = this.getActiveSandboxProject();
+        if (!cur || !cur.nodes) return;
+
+        if (targetNode.name === 'Main' || !targetNode.parent) {
+            alert('Il nodo radice (Main) non può essere rimosso!');
+            return;
+        }
+
+        if (!confirm(`Rimuovere il nodo '$${targetNode.name}' dalla scena?`)) return;
+
+        cur.nodes = cur.nodes.filter(n => n.name !== targetNode.name && n.parent !== targetNode.name);
+        cur.updatedAt = new Date().toISOString();
+
+        this.selectedSandboxNode = null;
+        this.saveStorage();
+        this.sandboxScene = this.buildSceneFromNodes(cur.nodes);
+        this.renderSandboxSceneDock();
+        this.renderSandboxViewportOverlay();
+
+        SoundFX.playClick();
+        this.showToast({
+            icon: '🗑️',
+            tag: 'SCENA GODOT',
+            title: 'Nodo Rimosso',
+            desc: `Il nodo '$${targetNode.name}' è stato rimosso dalla scena.`
+        });
     },
 
     // ==========================================
@@ -2514,23 +3268,28 @@ const App = {
         const btnCloseProj = document.getElementById('btn-close-project-preview');
         if (btnCloseProj) btnCloseProj.onclick = () => this.closeProjectPreview();
 
-        // Palestra di Codice
-        document.getElementById('btn-practice-run').onclick = () => this.runPracticeCode();
-        document.getElementById('btn-practice-clear').onclick = () => this.clearPracticeConsole();
-        document.getElementById('btn-practice-reset').onclick = () => {
-            SoundFX.playClick();
-            const ed = document.getElementById('practice-code-editor');
-            if (ed) {
-                ed.value = `func _ready():\n    # Scrivi qui il tuo codice GDScript...\n    pass\n`;
-                this.updatePracticeLineNumbers();
-            }
-        };
+        // Palestra / Sandbox di Codice (Compatibilità controlli legacy)
+        const btnLegacyRun = document.getElementById('btn-practice-run');
+        if (btnLegacyRun) btnLegacyRun.onclick = () => this.runSandboxCode();
+        const btnLegacyClear = document.getElementById('btn-practice-clear');
+        if (btnLegacyClear) btnLegacyClear.onclick = () => this.clearSandboxConsole();
+        const btnLegacyReset = document.getElementById('btn-practice-reset');
+        if (btnLegacyReset) {
+            btnLegacyReset.onclick = () => {
+                SoundFX.playClick();
+                const ed = document.getElementById('sandbox-code-editor') || document.getElementById('practice-code-editor');
+                if (ed) {
+                    ed.value = `extends Node2D\n\nfunc _ready():\n    pass\n`;
+                    this.updateSandboxLineNumbers();
+                }
+            };
+        }
 
         const templateSelect = document.getElementById('practice-template-select');
         if (templateSelect) {
             templateSelect.onchange = (e) => {
                 if (e.target.value) {
-                    this.loadPracticeTemplate(e.target.value);
+                    this.loadSandboxTemplate(e.target.value);
                 }
             };
         }
@@ -3746,6 +4505,13 @@ const App = {
         if (data.profileCustomized !== undefined) this.state.profileCustomized = !!data.profileCustomized;
         if (data.dailyQuests) this.state.dailyQuests = data.dailyQuests;
         if (data.claimedQuestsCount !== undefined) this.state.claimedQuestsCount = data.claimedQuestsCount;
+        if (data.sandbox) {
+            this.state.sandbox = data.sandbox;
+            const practiceView = document.getElementById('view-practice');
+            if (practiceView && !practiceView.classList.contains('hidden')) {
+                this.loadActiveSandboxProject();
+            }
+        }
         if (data.theme) {
             this.applyTheme(data.theme);
         }
@@ -3986,7 +4752,8 @@ const App = {
         }
     },
 
-    openAddNodeModal() {
+    openAddNodeModal(context = 'exercise') {
+        this.addNodeContext = context;
         const modal = document.getElementById('add-node-modal');
         if (modal) {
             modal.classList.remove('hidden');
@@ -4010,6 +4777,13 @@ const App = {
         const textInput = document.getElementById('node-text-input');
         const name = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : ('Nodo_' + type);
         const text = textInput ? textInput.value.trim() : '';
+
+        // Se siamo nella Sandbox, aggiungi al progetto sandbox corrente
+        if (this.addNodeContext === 'sandbox') {
+            this.addSandboxNode(name, type, text);
+            this.closeAddNodeModal();
+            return;
+        }
 
         if (!this.currentScene && window.GD_Node) {
             this.currentScene = new GD_Node("Root");

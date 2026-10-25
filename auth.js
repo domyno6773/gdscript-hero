@@ -864,6 +864,32 @@ const AuthManager = {
         }
         merged.claimedQuestsCount = Math.max(current.claimedQuestsCount || 0, imported.claimedQuestsCount || 0);
 
+        // Fusione intelligente dei progetti Sandbox
+        if (imported.sandbox) {
+            if (!current.sandbox || !current.sandbox.projects || current.sandbox.projects.length === 0) {
+                merged.sandbox = imported.sandbox;
+            } else {
+                const projectMap = new Map();
+                (current.sandbox.projects || []).forEach(p => projectMap.set(p.id, p));
+                (imported.sandbox.projects || []).forEach(p => {
+                    if (!projectMap.has(p.id)) {
+                        projectMap.set(p.id, p);
+                    } else {
+                        const existing = projectMap.get(p.id);
+                        const existingTime = new Date(existing.updatedAt || 0).getTime();
+                        const importedTime = new Date(p.updatedAt || 0).getTime();
+                        if (importedTime >= existingTime) {
+                            projectMap.set(p.id, p);
+                        }
+                    }
+                });
+                merged.sandbox = {
+                    activeProjectId: imported.sandbox.activeProjectId || current.sandbox.activeProjectId || 'proj_default',
+                    projects: Array.from(projectMap.values())
+                };
+            }
+        }
+
         return merged;
     }
 };
