@@ -348,7 +348,22 @@ func _ready():
                 passed: hasAnd,
                 diff: hasAnd ? null : "Assicurati di unire le condizioni con la parola chiave 'and'."
             });
-            const causalAudit = /\bif[^\n:]*\bha_chiave\b[^\n:]*\band\b[^\n:]*\blivello\b/.test(result.code || '');
+            const causalAudit = ((() => {
+  const source = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+  return [...source.matchAll(/\bif\s+([^\n:]+)/g)].some(m => /\band\b/.test(m[1]) && /\bha_chiave\b/.test(m[1]) && /\blivello\b/.test(m[1]));
+ })() && (await (async () => {
+   const swapped = (result.code || '').replace(/(\bvar\s+ha_chiave\s*=\s*)true\b/, (_match, prefix) => prefix + 'false');
+   if (swapped === result.code) return false;
+   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_01') });
+   return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato") &&
+       !(replay.logs || []).some(v => String(v).trim() === "Accesso Concesso"));
+  })()) && (await (async () => {
+   const swapped = (result.code || '').replace(/(\bvar\s+livello\s*=\s*)12\b/, (_match, prefix) => prefix + '5');
+   if (swapped === result.code) return false;
+   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_01') });
+   return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato") &&
+       !(replay.logs || []).some(v => String(v).trim() === "Accesso Concesso"));
+  })()));
             tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
@@ -1217,7 +1232,22 @@ func _ready():
                 passed: hasAuth,
                 diff: hasAuth ? null : `Atteso: "Accesso Autorizzato: Nessuna Contaminazione", Ricevuto: "${logs.join(' | ')}"`
             });
-            const causalAudit = /\bif[^\n:]*\btessera_valida\b[^\n:]*\band\b[^\n:]*\blivello_radiazioni\b/.test(result.code || '');
+            const causalAudit = ((() => {
+  const source = (typeof stripCommentsAndStrings === 'function') ? stripCommentsAndStrings(result.code || '') : (result.code || '');
+  return [...source.matchAll(/\bif\s+([^\n:]+)/g)].some(m => /\band\b/.test(m[1]) && /\btessera_valida\b/.test(m[1]) && /\blivello_radiazioni\b/.test(m[1]));
+ })() && (await (async () => {
+   const swapped = (result.code || '').replace(/(\bvar\s+tessera_valida\s*=\s*)true\b/, (_match, prefix) => prefix + 'false');
+   if (swapped === result.code) return false;
+   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_02') });
+   return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato: Quarantena Attiva") &&
+       !(replay.logs || []).some(v => String(v).trim() === "Accesso Autorizzato: Nessuna Contaminazione"));
+  })()) && (await (async () => {
+   const swapped = (result.code || '').replace(/(\bvar\s+livello_radiazioni\s*=\s*)15\b/, (_match, prefix) => prefix + '30');
+   if (swapped === result.code) return false;
+   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_02') });
+   return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato: Quarantena Attiva") &&
+       !(replay.logs || []).some(v => String(v).trim() === "Accesso Autorizzato: Nessuna Contaminazione"));
+  })()));
             tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
