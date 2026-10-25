@@ -2146,6 +2146,18 @@ const LESSONS_DATA = [
     const out = (result.logs || []).join('\n');
     const ok = out.includes("0") && out.includes("1") && out.includes("2");
     tests.push({ desc: "Numeri 0, 1, 2 stampati dal ciclo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const alternateCode = result.code.replace(/^(\s*for\s+\w+\s+in\s+)range\s*\([^\n)]*\)(\s*:)/m, '$1range(0)$2');
+    const replay = alternateCode !== result.code
+        ? await GDScriptRuntime.execute(alternateCode, { lesson: LESSONS_DATA.find(l => l.id === 25) })
+        : null;
+    const requiredLogs = ["0","1","2"];
+    const baselineLogs = (result.logs || []).map(v => String(v).trim());
+    const replayLogs = replay && replay.success ? (replay.logs || []).map(v => String(v).trim()) : [];
+    const reallyFromLoop = !!(replay && replay.success &&
+        requiredLogs.every(v => baselineLogs.includes(v)) &&
+        requiredLogs.some(v => !replayLogs.includes(v)));
+    tests.push({ desc: "Il risultato è prodotto dal ciclo, non da stampe esterne", passed: reallyFromLoop,
+        diff: reallyFromLoop ? null : "Inserisci le stampe all'interno del ciclo ed esegui realmente le iterazioni." });
     return tests;
 }
     },
@@ -2211,6 +2223,18 @@ const LESSONS_DATA = [
     const out = (result.logs || []).join('\n');
     const ok = out.includes("Goblin") && out.includes("Orco") && out.includes("Drago");
     tests.push({ desc: "Tutti i 3 nemici stampati a console", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
+    const alternateCode = result.code.replace(/^(\s*for\s+\w+\s+in\s+)nemici(\s*:)/m, '$1[]$2');
+    const replay = alternateCode !== result.code
+        ? await GDScriptRuntime.execute(alternateCode, { lesson: LESSONS_DATA.find(l => l.id === 26) })
+        : null;
+    const requiredLogs = ["Goblin","Orco","Drago"];
+    const baselineLogs = (result.logs || []).map(v => String(v).trim());
+    const replayLogs = replay && replay.success ? (replay.logs || []).map(v => String(v).trim()) : [];
+    const reallyFromLoop = !!(replay && replay.success &&
+        requiredLogs.every(v => baselineLogs.includes(v)) &&
+        requiredLogs.some(v => !replayLogs.includes(v)));
+    tests.push({ desc: "Il risultato è prodotto dal ciclo, non da stampe esterne", passed: reallyFromLoop,
+        diff: reallyFromLoop ? null : "Inserisci le stampe all'interno del ciclo ed esegui realmente le iterazioni." });
     return tests;
 }
     },
@@ -2284,6 +2308,18 @@ const LESSONS_DATA = [
     const out = (result.logs || []).join('\n');
     const ok = out.includes("Conto: 1") && out.includes("Conto: 2") && out.includes("Conto: 3");
     tests.push({ desc: "Conteggio da 1 a 3 stampato correttamente", passed: ok && valOk, diff: ok ? null : `Ricevuto: "${out}"` });
+    const alternateCode = result.code.replace(/^(\s*while\s+)[^\n:]+(\s*:)/m, '$1false$2');
+    const replay = alternateCode !== result.code
+        ? await GDScriptRuntime.execute(alternateCode, { lesson: LESSONS_DATA.find(l => l.id === 27) })
+        : null;
+    const requiredLogs = ["Conto: 1","Conto: 2","Conto: 3"];
+    const baselineLogs = (result.logs || []).map(v => String(v).trim());
+    const replayLogs = replay && replay.success ? (replay.logs || []).map(v => String(v).trim()) : [];
+    const reallyFromLoop = !!(replay && replay.success &&
+        requiredLogs.every(v => baselineLogs.includes(v)) &&
+        requiredLogs.some(v => !replayLogs.includes(v)));
+    tests.push({ desc: "Il risultato è prodotto dal ciclo, non da stampe esterne", passed: reallyFromLoop,
+        diff: reallyFromLoop ? null : "Inserisci le stampe all'interno del ciclo ed esegui realmente le iterazioni." });
     return tests;
 }
     },
