@@ -48,13 +48,21 @@ func _ready():
             const logs = result.logs || [];
             const code = result.code || '';
 
-            // 1. Verifica di due istruzioni print distinte nel codice sorgente
-            const printMatches = code.match(/\bprint\s*\(/g) || [];
+            // 1. Verifica di due istruzioni print distinte nel codice sorgente eseguibile
+            // (escludendo print all'interno di commenti # o stringhe letterali)
+            const cleanCode = (typeof stripCommentsAndStrings === 'function')
+                ? stripCommentsAndStrings(code)
+                : (code || '')
+                    .replace(/"""[\s\S]*?"""|'''[\s\S]*?'''/g, '""')
+                    .replace(/"(?:\\.|[^"\\])*"/g, '""')
+                    .replace(/'(?:\\.|[^'\\])*'/g, "''")
+                    .replace(/#.*$/gm, '');
+            const printMatches = cleanCode.match(/\bprint\s*\(/g) || [];
             const hasTwoPrints = printMatches.length >= 2;
             tests.push({
                 desc: "Utilizzo di due istruzioni print() distinte",
                 passed: hasTwoPrints,
-                diff: hasTwoPrints ? null : `Rilevate ${printMatches.length} istruzioni print(). La consegna richiede esattamente due istruzioni print() separate.`
+                diff: hasTwoPrints ? null : `Rilevate ${printMatches.length} istruzioni print() eseguibili (commenti e stringhe esclusi). La consegna richiede due istruzioni print() separate.`
             });
 
             // 2. Verifica dei messaggi su righe separate ed ordinate
