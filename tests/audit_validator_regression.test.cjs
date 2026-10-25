@@ -30,7 +30,7 @@ const lessonMutations = [
     [43, s => s.replace('danno_inflitto.emit(35)', 'print("Danno registrato: 35")')],
     [44, s => s.replace('salute_aggiornata.emit(75)', 'print("UI: Barra salute a 75")').replace('salute_aggiornata.emit(40)', 'print("UI: Barra salute a 40")')],
     [57, s => s.replace('$Cooldown.start()', 'pass')],
-    [59, s => s.replace('print("Moneta presente prima: ", has_node("Moneta"))', 'print("Moneta presente prima: true")').replace('print("Moneta eliminata con queue_free: ", not has_node("Moneta"))', 'print("Moneta eliminata con queue_free: true")')]
+    [59, s => s.replace('print("Moneta presente prima: ", has_node("Moneta"))', 'print("Moneta presente prima: true")').replace('print("Moneta in attesa di eliminazione: ", $Moneta.is_queued_for_deletion())', 'print("Moneta in attesa di eliminazione: true")')]
 ];
 const reviewMutations = [
     ['rev_variables_01', s => s.replace('print("Il ranger " + nome_ranger + " possiede " + str(frecce) + " frecce.")', 'print("Il ranger Kael possiede 18 frecce.")')],
