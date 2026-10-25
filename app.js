@@ -3311,9 +3311,20 @@ const App = {
         return this.state.learningTelemetry.lessons[idStr];
     },
 
-    classifyExecutionError(result, tests, criticalErr) {
+    classifyExecutionError(result, tests, criticalErr, code = '') {
         if (criticalErr) {
             return 'internal';
+        }
+        if (!code && typeof document !== 'undefined') {
+            const ed = document.getElementById('code-editor');
+            if (ed) code = ed.value || '';
+        }
+        // Verifica limitazioni del transpiler web: non etichettare lo studente come in errore
+        if (typeof GDScriptDiagnostic !== 'undefined' && code) {
+            const diag = GDScriptDiagnostic.analyze(code, result, null, null);
+            if (diag && diag.isTranspilerLimitation) {
+                return 'internal';
+            }
         }
         if (result && !result.success && result.error) {
             const err = String(result.error);
@@ -3337,7 +3348,7 @@ const App = {
         return null;
     },
 
-    recordLessonAttempt(lessonId, result, tests, criticalErr) {
+    recordLessonAttempt(lessonId, result, tests, criticalErr, code = '') {
         if (!lessonId) return;
         const record = this.getOrCreateLessonTelemetry(lessonId);
         const nowIso = new Date().toISOString();
@@ -3349,7 +3360,7 @@ const App = {
         }
         record.last_attempt_at = nowIso;
 
-        const errType = this.classifyExecutionError(result, tests, criticalErr);
+        const errType = this.classifyExecutionError(result, tests, criticalErr, code);
 
         if (errType === null) {
             // Verifica superata con successo
@@ -3442,7 +3453,7 @@ const App = {
             const allPassed = tests.every(t => t.passed);
 
             // Registra telemetria P3.1 del tentativo di verifica
-            this.recordLessonAttempt(currentLesson.id, result, tests, null);
+            this.recordLessonAttempt(currentLesson.id, result, tests, null, code);
 
             // Aggiorna Schermo Viewport 2D Godot
             if (this.viewport) {
@@ -3575,9 +3586,9 @@ const App = {
                 badge.style.color = '#ef4444';
                 SoundFX.playError();
 
-                // Costruzione Feedback Didattico Contestuale (P1)
+                // Costruzione Feedback Didattico Contestuale Avanzato (P3.2)
                 const firstFailedTest = tests.find(t => !t.passed);
-                const feedbackCard = this.buildContextualFeedback(result, currentLesson, firstFailedTest, tests);
+                const feedbackCard = this.buildContextualFeedback(result, currentLesson, firstFailedTest, tests, code);
                 if (feedbackCard) {
                     resultsContainer.appendChild(feedbackCard);
                 }
@@ -3585,7 +3596,7 @@ const App = {
 
         } catch (criticalErr) {
             console.error("Errore durante la verifica:", criticalErr);
-            this.recordLessonAttempt(currentLesson.id, null, null, criticalErr);
+            this.recordLessonAttempt(currentLesson.id, null, null, criticalErr, code);
             const realOutputPre = document.getElementById('real-output-pre');
             realOutputPre.innerText = `// Errore inaspettato: ${criticalErr.message}`;
             realOutputPre.style.color = '#f87171';
@@ -4198,77 +4209,116 @@ const App = {
         }
     },
 
-    buildContextualFeedback(result, currentLesson, failedTest, allTests) {
+    buildContextualFeedback(result, currentLesson, failedTest, allTests, code = '') {
         const card = document.createElement('div');
         card.className = 'didactic-feedback-card';
 
-        let title = "🎯 Verifica Didattica: Requisito Non Soddisfatto";
-        let icon = "💡";
-        let explanation = "Il codice è stato eseguito, ma il risultato o lo stato generato non corrisponde a quanto richiesto dalla traccia.";
-        let technicalDetail = "";
+        if (!code && typeof document !== 'undefined') {
+            const ed = document.getElementById('code-editor');
+            if (ed) code = ed.value || '';
+        }
 
-        if (result && result.error) {
-            const errStr = String(result.error);
-            const isSyntax = /syntaxerror|invalid or unexpected token|unexpected token|indentation|unexpected identifier/i.test(errStr);
-            const isUndefined = /is not defined|referenceerror/i.test(errStr);
-            if (isSyntax) {
-                title = "🔍 Errore di Sintassi GDScript";
-                icon = "🛠️";
-                explanation = "Il compilatore GDScript non è riuscito a comprendere la struttura del codice. Controlla di aver racchiuso correttamente i testi tra virgolette doppie o singole, chiuso tutte le parentesi e aggiunto i due punti (:) al termine delle definizioni.";
-            } else if (isUndefined) {
-                title = "🔍 Errore di Sintassi o Nome Non Definito";
-                icon = "🛠️";
-                explanation = "GDScript non riconosce questo nome. Se intendevi assegnare una parola o un testo, racchiudilo tra virgolette (es. \"Eroe\"); altrimenti verifica di aver dichiarato la variabile con 'var' prima di usarla.";
-            } else {
-                title = "⚡ Errore durante l'Esecuzione (Runtime)";
-                icon = "🛑";
-                explanation = "Il codice si è interrotto durante l'esecuzione prima di raggiungere il risultato. Verifica il nome delle variabili dichiarate, gli indici degli array o le chiamate di metodi.";
+        // Diagnostica avanzata P3.2
+        let diag = null;
+        if (typeof GDScriptDiagnostic !== 'undefined') {
+            diag = GDScriptDiagnostic.analyze(code, result, failedTest, currentLesson);
+        }
+
+        let badgeText = "LOGICA / REQUISITO";
+        let badgeClass = "badge-requirement";
+        let title = "Verifica Didattica: Requisito Non Soddisfatto";
+        let lineInfoHtml = "";
+        let whyHtml = "Il codice è stato eseguito, ma il risultato o lo stato generato non corrisponde a quanto richiesto dalla traccia.";
+        let nextStepHtml = "Rileggi l'obiettivo dell'esercizio per assicurarti di aver rispettato tutti i punti richiesti.";
+        let techHtml = "";
+        let headerIconSvg = '<svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+
+        if (diag) {
+            badgeText = diag.badgeText || badgeText;
+            badgeClass = diag.badgeClass || badgeClass;
+            title = diag.title || title;
+            whyHtml = diag.why || whyHtml;
+            nextStepHtml = diag.nextStep || nextStepHtml;
+
+            if (diag.line) {
+                if (diag.isHeuristic) {
+                    lineInfoHtml = `<span class="diag-pos heuristic">Posizione approssimativa: Riga ${diag.line} (stima euristica)</span>`;
+                } else {
+                    lineInfoHtml = `<span class="diag-pos exact">Riga ${diag.line}</span>`;
+                }
             }
-            technicalDetail = `<div class="didactic-tech-err"><code>${this.escapeHtml(errStr)}</code></div>`;
-        } else if (failedTest && failedTest.desc) {
-            explanation = `Il requisito non ancora soddisfatto è: <strong>${this.escapeHtml(failedTest.desc)}</strong>.`;
-            if (failedTest.diff) {
-                technicalDetail = `<div class="didactic-tech-err"><code>${this.escapeHtml(failedTest.diff)}</code></div>`;
+
+            if (diag.techDetails) {
+                techHtml = `<div class="didactic-tech-err"><code>${this.escapeHtml(diag.techDetails)}</code></div>`;
+            }
+
+            if (diag.category === 'transpiler_limitation') {
+                headerIconSvg = '<svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+            } else if (diag.category === 'syntax') {
+                headerIconSvg = '<svg class="ui-icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+            } else if (diag.category === 'runtime' || diag.category === 'timeout') {
+                headerIconSvg = '<svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+            }
+        } else {
+            // Fallback legacy se GDScriptDiagnostic non è presente
+            if (result && result.error) {
+                const errStr = String(result.error);
+                badgeText = "ERRORE SINTASSI / RUNTIME";
+                badgeClass = "badge-runtime";
+                title = "Errore durante l'esecuzione";
+                whyHtml = "Lo script si è interrotto in modo anomalo durante la transpilazione o l'esecuzione.";
+                nextStepHtml = "Esamina il messaggio tecnico e verifica le istruzioni digitate.";
+                techHtml = `<div class="didactic-tech-err"><code>${this.escapeHtml(errStr)}</code></div>`;
+            } else if (failedTest && failedTest.desc) {
+                whyHtml = `Il requisito non ancora soddisfatto è: <strong>${this.escapeHtml(failedTest.desc)}</strong>.`;
+                if (failedTest.diff) {
+                    techHtml = `<div class="didactic-tech-err"><code>${this.escapeHtml(failedTest.diff)}</code></div>`;
+                }
             }
         }
 
-        // Recupera l'indizio concettuale di Livello 1 per la riflessione
-        let lvl1HintText = "Rileggi l'obiettivo dell'esercizio e verifica con attenzione ogni passaggio logico.";
-        if (currentLesson.hints && currentLesson.hints.length > 0) {
-            const h1 = currentLesson.hints[0];
-            lvl1HintText = (typeof h1 === 'object' && h1.text) ? h1.text : String(h1);
-        }
-
-        const debugHtml = currentLesson.isDebugging ? `
+        const debugHtml = (currentLesson && currentLesson.isDebugging) ? `
             <div class="didactic-debug-badge">
-                <span class="debug-badge-icon">🐛</span>
-                <span><strong>Focus Debugging:</strong> ${this.escapeHtml(currentLesson.debugType || 'Correzione bug')} — In questo esercizio c'è un bug inserito appositamente nel codice iniziale. Esaminalo riga per riga per individuare la causa del malfunzionamento.</span>
+                <span class="debug-badge-icon"><svg class="ui-icon" viewBox="0 0 24 24"><rect width="8" height="14" x="8" y="5" rx="4"/><path d="m19 7-3 2"/><path d="m5 7 3 2"/><path d="m19 19-3-2"/><path d="m5 19 3-2"/><path d="M20 13h-4"/><path d="M4 13h4"/><path d="m10 4 1 1"/><path d="m14 4-1 1"/></svg></span>
+                <span><strong>Focus Debugging:</strong> ${this.escapeHtml(currentLesson.debugType || 'Correzione bug')} — In questo esercizio c'è un bug inserito intenzionalmente nel codice di partenza. Esaminalo riga per riga per identificare e risolvere la causa.</span>
             </div>
         ` : '';
 
         card.innerHTML = `
             <div class="didactic-card-header">
-                <span class="didactic-card-icon">${icon}</span>
-                <h4 class="didactic-card-title">${title}</h4>
+                <div class="didactic-header-left">
+                    <span class="didactic-card-icon">${headerIconSvg}</span>
+                    <span class="diag-badge ${badgeClass}">${this.escapeHtml(badgeText)}</span>
+                    ${lineInfoHtml}
+                </div>
+            </div>
+            <div class="didactic-card-title-row">
+                <h4 class="didactic-card-title">${this.escapeHtml(title)}</h4>
             </div>
             <div class="didactic-card-body">
                 ${debugHtml}
-                <p class="didactic-card-explanation">${explanation}</p>
-                ${technicalDetail}
+                <div class="diag-section diag-why">
+                    <div class="diag-section-label">Perché si verifica:</div>
+                    <div class="diag-section-text">${whyHtml}</div>
+                </div>
+                <div class="diag-section diag-next-step">
+                    <div class="diag-section-label">Passo successivo consigliato:</div>
+                    <div class="diag-section-text">${nextStepHtml}</div>
+                </div>
+                ${techHtml}
                 <div class="didactic-card-reflection-prompt">
                     <div class="reflection-prompt-header">
-                        <span class="prompt-icon">💡</span>
+                        <span class="prompt-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><line x1="9" y1="21" x2="15" y2="21"/></svg></span>
                         <span class="prompt-text">Ti serve un consiglio logico per comprendere l'argomento?</span>
                     </div>
                     <button type="button" class="btn-reveal-reflection" onclick="App.openHintFromFeedback()">
-                        <span>💭</span>
                         <span>Richiedi Indizio Concettuale (Livello 1)</span>
                     </button>
                 </div>
             </div>
             <div class="didactic-card-footer">
                 <button type="button" class="btn-open-hint-step" onclick="App.openHintFromFeedback()">
-                    <span>💡</span>
+                    <span class="btn-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><line x1="9" y1="21" x2="15" y2="21"/></svg></span>
                     <span>Apri Suggerimento Completo (Livello 1)</span>
                 </button>
             </div>
@@ -4487,10 +4537,8 @@ const App = {
                         this.showAuthAlert('Accesso effettuato! Bentornato, ' + res.user.name + '!', 'success');
                         SoundFX.playSuccess();
 
-                        // Se l'account ha salvataggi cloud precedenti, caricali
-                        if (res.account && res.account.progress) {
-                            this.applyImportedState(res.account.progress, false);
-                        }
+                        // Integra i progressi dell'Ospite con i salvataggi dell'account
+                        await this.integrateCloudSave(res.account ? res.account.progress : null);
                     }
 
                     setTimeout(() => {
@@ -4787,10 +4835,8 @@ const App = {
             const res = await window.AuthManager.loginWithGoogle(profile, { ...this.state });
             SoundFX.playSuccess();
 
-            // Se l'account Google ha già salvataggi cloud, applicali
-            if (res.account && res.account.progress) {
-                this.applyImportedState(res.account.progress, false);
-            }
+            // Integra i progressi dell'Ospite con i salvataggi dell'account Google
+            await this.integrateCloudSave(res.account ? res.account.progress : null);
 
             this.showAuthAlert(`Accesso con Google completato! Benvenuto, ${res.user.name}!`, 'success');
             setTimeout(() => {
@@ -5162,6 +5208,26 @@ const App = {
         this.closeBackupModal();
     },
 
+    /**
+     * Integra i progressi locali dell'Ospite con il salvataggio salvato nel Cloud Supabase
+     */
+    async integrateCloudSave(cloudSave) {
+        if (cloudSave) {
+            // Unione intelligente e deterministica tra lo stato locale dell'Ospite e il Cloud
+            const merged = (window.AuthManager && typeof window.AuthManager.mergeProgress === 'function')
+                ? window.AuthManager.mergeProgress(this.state, cloudSave)
+                : { ...this.state, ...cloudSave };
+            this.applyImportedState(merged, false);
+            // Sincronizza lo stato unito risultante immediatamente nel Cloud
+            if (window.AuthManager && typeof window.AuthManager.syncUserProgress === 'function') {
+                await window.AuthManager.syncUserProgress(this.state);
+            }
+        } else {
+            // Primo accesso al Cloud: trasferisce integralmente i progressi dell'Ospite nel Cloud
+            this.saveStorage();
+        }
+    },
+
     applyImportedState(data, notify = true) {
         if (!data) return;
 
@@ -5184,6 +5250,12 @@ const App = {
             if (practiceView && !practiceView.classList.contains('hidden')) {
                 this.loadActiveSandboxProject();
             }
+        }
+        if (data.arenaProject) {
+            this.state.arenaProject = data.arenaProject;
+        }
+        if (data.learningTelemetry) {
+            this.state.learningTelemetry = data.learningTelemetry;
         }
         if (data.theme) {
             this.applyTheme(data.theme);

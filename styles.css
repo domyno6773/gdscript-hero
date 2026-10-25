@@ -8209,10 +8209,10 @@ kbd {
     line-height: 1.5;
 }
 
-/* Didactic Contextual Feedback Card */
+/* Didactic Contextual Feedback Card - P3.2 Enhanced Diagnostics */
 .didactic-feedback-card {
     margin-top: 14px;
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.98));
     border: 1px solid rgba(245, 158, 11, 0.35);
     border-left: 4px solid #f59e0b;
     border-radius: 10px;
@@ -8220,24 +8220,148 @@ kbd {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
 .didactic-card-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.didactic-header-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
 }
 
 .didactic-card-icon {
-    font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #f59e0b;
+}
+
+.didactic-card-icon .ui-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.didactic-card-title-row {
+    margin-top: -2px;
 }
 
 .didactic-card-title {
-    font-size: 0.88rem;
+    font-size: 0.92rem;
     font-weight: 700;
     color: #fde68a;
     margin: 0;
+    line-height: 1.4;
+}
+
+/* Category Badges */
+.diag-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.badge-limitation {
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.5);
+    color: #d8b4fe;
+}
+
+.badge-syntax {
+    background: rgba(249, 115, 22, 0.15);
+    border: 1px solid rgba(249, 115, 22, 0.5);
+    color: #fdba74;
+}
+
+.badge-runtime {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+}
+
+.badge-timeout {
+    background: rgba(234, 179, 8, 0.15);
+    border: 1px solid rgba(234, 179, 8, 0.5);
+    color: #fde047;
+}
+
+.badge-requirement {
+    background: rgba(14, 165, 233, 0.15);
+    border: 1px solid rgba(14, 165, 233, 0.5);
+    color: #7dd3fc;
+}
+
+/* Line / Position Indicators */
+.diag-pos {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.diag-pos.exact {
+    background: rgba(148, 163, 184, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    color: #cbd5e1;
+}
+
+.diag-pos.heuristic {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px dashed rgba(245, 158, 11, 0.45);
+    color: #fcd34d;
+}
+
+/* Sections: Why & Next Step */
+.diag-section {
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.diag-section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.diag-section-text {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--text-main);
+}
+
+.diag-section.diag-why {
+    background: rgba(15, 23, 42, 0.6);
+    border-left: 3px solid #64748b;
+}
+
+.diag-section.diag-why .diag-section-label {
+    color: #94a3b8;
+}
+
+.diag-section.diag-next-step {
+    background: rgba(16, 185, 129, 0.08);
+    border-left: 3px solid #10b981;
+}
+
+.diag-section.diag-next-step .diag-section-label {
+    color: #34d399;
 }
 
 .didactic-card-body {
@@ -8360,7 +8484,67 @@ kbd {
 }
 
 [data-theme="light"] .didactic-card-title {
+    color: #92400e;
+}
+
+[data-theme="light"] .badge-limitation {
+    background: #f3e8ff;
+    border-color: #d8b4fe;
+    color: #7e22ce;
+}
+
+[data-theme="light"] .badge-syntax {
+    background: #ffedd5;
+    border-color: #fdba74;
+    color: #c2410c;
+}
+
+[data-theme="light"] .badge-runtime {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+}
+
+[data-theme="light"] .badge-timeout {
+    background: #fef9c3;
+    border-color: #fde047;
+    color: #a16207;
+}
+
+[data-theme="light"] .badge-requirement {
+    background: #e0f2fe;
+    border-color: #7dd3fc;
+    color: #0369a1;
+}
+
+[data-theme="light"] .diag-pos.exact {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+[data-theme="light"] .diag-pos.heuristic {
+    background: #fffbeb;
+    border-color: #fcd34d;
     color: #b45309;
+}
+
+[data-theme="light"] .diag-section.diag-why {
+    background: #f8fafc;
+    border-left-color: #94a3b8;
+}
+
+[data-theme="light"] .diag-section.diag-why .diag-section-label {
+    color: #64748b;
+}
+
+[data-theme="light"] .diag-section.diag-next-step {
+    background: #f0fdf4;
+    border-left-color: #059669;
+}
+
+[data-theme="light"] .diag-section.diag-next-step .diag-section-label {
+    color: #047857;
 }
 
 [data-theme="light"] .didactic-tech-err {

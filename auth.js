@@ -119,7 +119,9 @@ const AuthManager = {
 
                     // Carica i salvataggi cloud
                     const cloudSave = await this.fetchFromCloud();
-                    if (cloudSave && window.App && typeof window.App.applyImportedState === 'function') {
+                    if (window.App && typeof window.App.integrateCloudSave === 'function') {
+                        await window.App.integrateCloudSave(cloudSave);
+                    } else if (cloudSave && window.App && typeof window.App.applyImportedState === 'function') {
                         window.App.applyImportedState(cloudSave, false);
                     }
                 }
@@ -145,9 +147,11 @@ const AuthManager = {
                             window.history.replaceState({}, document.title, window.location.pathname);
                         }
 
-                        // Carica i progressi cloud salvati per questo utente
+                        // Integra i progressi dell'Ospite con i salvataggi cloud
                         const cloudSave = await this.fetchFromCloud();
-                        if (cloudSave && window.App && typeof window.App.applyImportedState === 'function') {
+                        if (window.App && typeof window.App.integrateCloudSave === 'function') {
+                            await window.App.integrateCloudSave(cloudSave);
+                        } else if (cloudSave && window.App && typeof window.App.applyImportedState === 'function') {
                             window.App.applyImportedState(cloudSave, false);
                         }
                     } else if (event === 'SIGNED_OUT') {
@@ -887,6 +891,27 @@ const AuthManager = {
                 merged.sandbox = {
                     activeProjectId: imported.sandbox.activeProjectId || current.sandbox.activeProjectId || 'proj_default',
                     projects: Array.from(projectMap.values())
+                };
+            }
+        }
+
+        // Fusione intelligente del mini-progetto Arena del Gladiatore (P2)
+        if (imported.arenaProject) {
+            if (!current.arenaProject) {
+                merged.arenaProject = imported.arenaProject;
+            } else {
+                const curPhases = Array.isArray(current.arenaProject.completedPhases) ? current.arenaProject.completedPhases : [];
+                const impPhases = Array.isArray(imported.arenaProject.completedPhases) ? imported.arenaProject.completedPhases : [];
+                const mergedPhases = Array.from(new Set([...curPhases, ...impPhases])).sort((a, b) => a - b);
+                merged.arenaProject = {
+                    currentPhase: Math.max(current.arenaProject.currentPhase || 1, imported.arenaProject.currentPhase || 1),
+                    completedPhases: mergedPhases,
+                    userCode: { ...(current.arenaProject.userCode || {}), ...(imported.arenaProject.userCode || {}) },
+                    hintsRevealed: Math.max(current.arenaProject.hintsRevealed || 0, imported.arenaProject.hintsRevealed || 0),
+                    activeHintLevel: 1,
+                    liveSalute: 100,
+                    liveMaxSalute: 100,
+                    liveIsVivo: true
                 };
             }
         }
