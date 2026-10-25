@@ -3404,7 +3404,9 @@ const App = {
         if (!this.state.learningTelemetry.daily_activity) {
             this.state.learningTelemetry.daily_activity = {};
         }
-        const todayKey = new Date().toISOString().split('T')[0];
+        const todayKey = (typeof StatsEngine !== 'undefined' && StatsEngine.formatLocalDateKey)
+            ? StatsEngine.formatLocalDateKey(new Date())
+            : this.getTodayISO();
         if (!this.state.learningTelemetry.daily_activity[todayKey]) {
             this.state.learningTelemetry.daily_activity[todayKey] = {
                 verifications: 0,

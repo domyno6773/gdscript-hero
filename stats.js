@@ -270,7 +270,38 @@ const StatsEngine = {
      * DOMANDA 3: Come sta evolvendo il mio studio nel tempo?
      * Valutazione rigorosa dei timestamp reali (nessun dato o trend inventato).
      */
-computeChronologicalProgress(state) {
+    /**
+     * Converte un Date o timestamp ISO nella chiave YYYY-MM-DD basata sul fuso orario locale dello studente.
+     * Preserva stringhe già nel formato YYYY-MM-DD per evitare riassegnazioni o slittamenti di dati storici.
+     */
+    formatLocalDateKey(dateInput, timeZone = null) {
+        if (!dateInput) return null;
+        if (typeof dateInput === 'string') {
+            const trimmed = dateInput.trim();
+            // Preserva date già pure 'YYYY-MM-DD' per non alterare chiavi storiche
+            if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+                return trimmed;
+            }
+        }
+        const d = (dateInput instanceof Date) ? dateInput : new Date(dateInput);
+        if (isNaN(d.getTime())) return null;
+
+        try {
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+            if (timeZone) {
+                options.timeZone = timeZone;
+            }
+            return new Intl.DateTimeFormat('en-CA', options).format(d);
+        } catch (e) {
+            // Fallback deterministico sul fuso orario locale del sistema
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+    },
+
+    computeChronologicalProgress(state) {
         if (!state) {
             return {
                 trendAvailable: false,
@@ -320,7 +351,7 @@ computeChronologicalProgress(state) {
 
         Object.values(telemetry).forEach(tel => {
             if (!tel || !tel.first_success_at) return;
-            const datePart = tel.first_success_at.split('T')[0];
+            const datePart = this.formatLocalDateKey(tel.first_success_at);
             if (!datePart || datePart.length < 10) return;
 
             const entry = getOrCreateDateEntry(datePart);
@@ -339,7 +370,7 @@ computeChronologicalProgress(state) {
         const variantHistory = state.reviewProgress?.variantHistory || {};
         Object.values(variantHistory).forEach(hist => {
             if (!hist || !hist.first_success_at) return;
-            const datePart = hist.first_success_at.split('T')[0];
+            const datePart = this.formatLocalDateKey(hist.first_success_at);
             if (!datePart || datePart.length < 10) return;
 
             const entry = getOrCreateDateEntry(datePart);

@@ -1422,7 +1422,8 @@ const ReviewEngine = {
             state.reviewProgress.variantHistory = {};
         }
 
-        const nowIso = new Date().toISOString();
+        const now = new Date();
+        const nowIso = now.toISOString();
         const vHist = state.reviewProgress.variantHistory[variantId] || {
             attempts: 0,
             successes: 0,
@@ -1455,7 +1456,9 @@ const ReviewEngine = {
         // Registrazione nel contatore giornaliero aggregato (P3.4)
         if (state && state.learningTelemetry) {
             if (!state.learningTelemetry.daily_activity) state.learningTelemetry.daily_activity = {};
-            const todayKey = nowIso.split('T')[0];
+            const todayKey = (typeof StatsEngine !== 'undefined' && StatsEngine.formatLocalDateKey)
+                ? StatsEngine.formatLocalDateKey(now)
+                : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             if (!state.learningTelemetry.daily_activity[todayKey]) {
                 state.learningTelemetry.daily_activity[todayKey] = {
                     verifications: 0,
