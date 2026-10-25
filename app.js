@@ -943,14 +943,31 @@ const App = {
         }
     },
 
+    switchView(activeViewId) {
+        const views = [
+            'view-roadmap',
+            'view-exercise',
+            'view-practice',
+            'view-projects',
+            'view-review'
+        ];
+        views.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (id === activeViewId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            }
+        });
+    },
+
     openPracticeView() {
         SoundFX.playClick();
         this.hideAutocomplete();
 
-        document.getElementById('view-roadmap').classList.add('hidden');
-        document.getElementById('view-exercise').classList.add('hidden');
-        document.getElementById('view-projects').classList.add('hidden');
-        document.getElementById('view-practice').classList.remove('hidden');
+        this.switchView('view-practice');
 
         this.updateNavSelection('practice');
         this.loadActiveSandboxProject();
@@ -1536,14 +1553,15 @@ const App = {
     // ==========================================
     // VISTA PROGETTI PRATICI (W.I.P.)
     // ==========================================
+    showProjectsView() {
+        this.openProjectsView();
+    },
+
     openProjectsView() {
         SoundFX.playClick();
         this.hideAutocomplete();
 
-        document.getElementById('view-roadmap').classList.add('hidden');
-        document.getElementById('view-exercise').classList.add('hidden');
-        document.getElementById('view-practice').classList.add('hidden');
-        document.getElementById('view-projects').classList.remove('hidden');
+        this.switchView('view-projects');
 
         const cat = document.getElementById('projects-catalog-section');
         const ws = document.getElementById('project-arena-workspace');
@@ -2700,15 +2718,17 @@ const App = {
         const lesson = LESSONS_DATA.find(l => l.id === lessonId);
         if (!lesson) return;
 
+        this.isReviewMode = false;
+        this.currentReviewVariant = null;
+        const revBanner = document.getElementById('review-exercise-banner');
+        if (revBanner) revBanner.classList.add('hidden');
+
         this.state.currentLessonId = lessonId;
         this.state.hintsRevealed = 0;
         this.state.activeHintLevel = 1;
         this.hideAutocomplete();
 
-        document.getElementById('view-roadmap').classList.add('hidden');
-        document.getElementById('view-practice').classList.add('hidden');
-        document.getElementById('view-projects').classList.add('hidden');
-        document.getElementById('view-exercise').classList.remove('hidden');
+        this.switchView('view-exercise');
 
         this.updateNavSelection('exercise');
         this.setMobileExerciseTab('instructions', false);
@@ -2878,13 +2898,14 @@ const App = {
         }
     },
 
+    showRoadmapView() {
+        this.showRoadmap();
+    },
+
     showRoadmap() {
         SoundFX.playClick();
         this.hideAutocomplete();
-        document.getElementById('view-exercise').classList.add('hidden');
-        document.getElementById('view-practice').classList.add('hidden');
-        document.getElementById('view-projects').classList.add('hidden');
-        document.getElementById('view-roadmap').classList.remove('hidden');
+        this.switchView('view-roadmap');
 
         this.updateNavSelection('roadmap');
         this.renderRoadmap();
@@ -4432,11 +4453,7 @@ const App = {
         this.isReviewMode = false;
         this.currentReviewVariant = null;
 
-        document.getElementById('view-exercise').classList.add('hidden');
-        document.getElementById('view-practice').classList.add('hidden');
-        document.getElementById('view-projects').classList.add('hidden');
-        document.getElementById('view-roadmap').classList.add('hidden');
-        document.getElementById('view-review').classList.remove('hidden');
+        this.switchView('view-review');
 
         this.updateNavSelection('review');
         this.renderReviewView();
@@ -4589,11 +4606,7 @@ const App = {
         this.currentReviewVariant = variant;
 
         // Switch al view exercise
-        document.getElementById('view-roadmap').classList.add('hidden');
-        document.getElementById('view-practice').classList.add('hidden');
-        document.getElementById('view-projects').classList.add('hidden');
-        document.getElementById('view-review').classList.add('hidden');
-        document.getElementById('view-exercise').classList.remove('hidden');
+        this.switchView('view-exercise');
 
         this.updateNavSelection('review');
 
