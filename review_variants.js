@@ -4,6 +4,16 @@
  * e varianti alternative con scenari differenti.
  */
 
+
+async function reviewAuditMutation(result, variantId, alternateCode, expectedLine) {
+ if (!alternateCode || alternateCode === result.code) return false;
+ const variant = REVIEW_VARIANTS.find(v => v.id === variantId);
+ const replay = await GDScriptRuntime.execute(alternateCode, { lesson: variant });
+ if (!replay.success) return false;
+ const target = String(expectedLine).trim();
+ return (result.logs || []).some(v => String(v).trim() === target) &&
+     !(replay.logs || []).some(v => String(v).trim() === target);
+}
 const REVIEW_VARIANTS = [
     // ---------------------------------------------------------
     // 1. SINTASSI BASE & OUTPUT (syntax_basics)
@@ -332,6 +342,8 @@ func _ready():
                 passed: hasAnd,
                 diff: hasAnd ? null : "Assicurati di unire le condizioni con la parola chiave 'and'."
             });
+            const causalAudit = /\bif[^\n:]*\bha_chiave\b[^\n:]*\band\b[^\n:]*\blivello\b/.test(result.code || '');
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -452,6 +464,8 @@ func _ready():
                 passed: hasRange,
                 diff: hasRange ? null : "Verifica di aver utilizzato 'for i in range(1, 5):'."
             });
+            const causalAudit = await reviewAuditMutation(result, 'rev_loops_01', (result.code || '').replace(/^(\s*for\s+\w+\s+in\s+)range\s*\(\s*1\s*,\s*5\s*\)(\s*:)/m, '$1range(0)$2'), 'Generatore 1 attivo');
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -519,6 +533,8 @@ func _ready():
                 passed: hasReturn,
                 diff: hasReturn ? null : "Verifica di usare 'return (potenza + turbo) * 2'."
             });
+            const causalAudit = await reviewAuditMutation(result, 'rev_functions_01', (result.code || '').replace(/\breturn\s+[^\n]+/, 'return 9999'), '30');
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -730,6 +746,8 @@ func on_allarme_attivato():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "[ALLARME] Violazione perimetro rilevata!", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = !!(result.scope?.allarme_attivato?.emissions?.some(args => args.length === 0));
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -805,6 +823,8 @@ func quando_ricaricato(quantita):
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Energia ripristinata: +50 MW", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = !!(result.scope?.energia_ricaricata?.emissions?.some(args => args.length === 1 && args[0] === 50));
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -1030,6 +1050,8 @@ func quando_premuto():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Sequenza di lancio avviata con successo!", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = !!(result.scene?.get_node('BtnLancio')?.pressed?.emissions?.length);
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -1115,6 +1137,8 @@ func fai_esplodere():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Detonazione mina energetica!", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = !!(result.scene?.get_node('TimerMina')?.timeout?.emissions?.length);
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     },
@@ -1177,6 +1201,8 @@ func _ready():
                 passed: hasAuth,
                 diff: hasAuth ? null : `Atteso: "Accesso Autorizzato: Nessuna Contaminazione", Ricevuto: "${logs.join(' | ')}"`
             });
+            const causalAudit = /\bif[^\n:]*\btessera_valida\b[^\n:]*\band\b[^\n:]*\blivello_radiazioni\b/.test(result.code || '');
+            tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
     }
