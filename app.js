@@ -2506,10 +2506,18 @@ const App = {
         document.getElementById('btn-reset-code').onclick = () => {
             SoundFX.playClick();
             const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
-            if (currentLesson && confirm("Vuoi ripristinare il codice iniziale di questo livello?")) {
+            if (currentLesson && confirm("Vuoi ripristinare il codice iniziale e la scena di questo livello?")) {
                 document.getElementById('code-editor').value = currentLesson.initialCode;
                 this.updateLineNumbers();
                 delete this.state.userCode[this.state.currentLessonId];
+                if (currentLesson.initialNodes && Array.isArray(currentLesson.initialNodes) && window.GDScriptRuntime) {
+                    this.currentScene = GDScriptRuntime.buildScene(currentLesson);
+                } else if (window.GD_Node) {
+                    this.currentScene = new GD_Node("Root");
+                }
+                this.selectedSceneNode = null;
+                this.renderSceneDock();
+                this.renderViewportOverlay();
                 this.saveStorage();
             }
         };
@@ -2535,6 +2543,26 @@ const App = {
 
         const btnConfirmAddNode = document.getElementById('btn-confirm-add-node');
         if (btnConfirmAddNode) btnConfirmAddNode.onclick = () => this.confirmAddNode();
+
+        const btnRemoveSelectedNode = document.getElementById('btn-remove-selected-node');
+        if (btnRemoveSelectedNode) {
+            btnRemoveSelectedNode.onclick = () => {
+                this.removeSceneNode(this.selectedSceneNode);
+            };
+        }
+
+        // Tasto Canc o Backspace per rimuovere il nodo selezionato nella Scena
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+                if (activeTag !== 'input' && activeTag !== 'textarea') {
+                    if (this.selectedSceneNode && this.selectedSceneNode !== this.currentScene) {
+                        e.preventDefault();
+                        this.removeSceneNode(this.selectedSceneNode);
+                    }
+                }
+            }
+        });
 
         const nodeTypeOpts = document.querySelectorAll('.node-type-option');
         nodeTypeOpts.forEach(opt => {
@@ -3680,6 +3708,50 @@ const App = {
         this.updateQuestsBadge();
     },
 
+    selectSceneNode(node) {
+        this.selectedSceneNode = node;
+        const removeBtn = document.getElementById('btn-remove-selected-node');
+        if (removeBtn) {
+            if (node && node !== this.currentScene && node.parent) {
+                removeBtn.classList.remove('hidden');
+                removeBtn.title = `Rimuovi il nodo '${node.name}' (Canc)`;
+            } else {
+                removeBtn.classList.add('hidden');
+            }
+        }
+        const items = document.querySelectorAll('.scene-tree-item');
+        items.forEach(el => {
+            if (el.getAttribute('data-node-name') === (node ? node.name : '')) {
+                el.classList.add('selected');
+            } else {
+                el.classList.remove('selected');
+            }
+        });
+    },
+
+    removeSceneNode(targetNode) {
+        const node = targetNode || this.selectedSceneNode;
+        if (!node) {
+            this.showToast("Seleziona prima un nodo da rimuovere!", "info");
+            return;
+        }
+        if (node === this.currentScene || !node.parent) {
+            this.showToast("Non puoi rimuovere il nodo radice (Root) della scena!", "warning");
+            return;
+        }
+
+        const name = node.name;
+        node.parent.remove_child(node);
+        if (this.selectedSceneNode === node) {
+            this.selectedSceneNode = null;
+        }
+
+        SoundFX.playClick();
+        this.renderSceneDock();
+        this.renderViewportOverlay();
+        this.showToast(`Nodo '$${name}' rimosso dall'albero della scena.`, "info");
+    },
+
     renderSceneDock() {
         const treeContainer = document.getElementById('exercise-scene-tree');
         const countBadge = document.getElementById('scene-node-count');
@@ -3714,34 +3786,89 @@ const App = {
             }
         };
 
-        const buildTreeHtml = (node, depth = 0) => {
+        treeContainer.innerHTML = '';
+
+        const buildTreeDom = (node, depth = 0) => {
             const icon = getNodeIcon(node.type);
             const indentPx = depth * 16;
-            let propSnippet = '';
+
+            const item = document.createElement('div');
+            item.className = 'scene-tree-item' + (this.selectedSceneNode === node ? ' selected' : '');
+            item.style.paddingLeft = `${indentPx}px`;
+            item.setAttribute('data-node-name', node.name);
+
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'tree-node-icon';
+            iconSpan.textContent = icon;
+            item.appendChild(iconSpan);
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'tree-node-name';
+            nameSpan.textContent = node.name;
+            item.appendChild(nameSpan);
+
+            const typeSpan = document.createElement('span');
+            typeSpan.className = 'tree-node-type';
+            typeSpan.textContent = `(${node.type})`;
+            item.appendChild(typeSpan);
+
             if (node.text !== undefined && node.text !== null && node.text !== '') {
-                propSnippet = `<span class="tree-node-prop">"${node.text}"</span>`;
+                const propSpan = document.createElement('span');
+                propSpan.className = 'tree-node-prop';
+                propSpan.textContent = `"${node.text}"`;
+                item.appendChild(propSpan);
             } else if (node.type === 'Timer') {
-                propSnippet = `<span class="tree-node-prop">${node.wait_time}s</span>`;
+                const propSpan = document.createElement('span');
+                propSpan.className = 'tree-node-prop';
+                propSpan.textContent = `${node.wait_time}s`;
+                item.appendChild(propSpan);
             } else if (node.type === 'ColorRect') {
-                propSnippet = `<span class="tree-node-prop" style="color:${node.color}">${node.color}</span>`;
+                const propSpan = document.createElement('span');
+                propSpan.className = 'tree-node-prop';
+                propSpan.style.color = node.color;
+                propSpan.textContent = node.color;
+                item.appendChild(propSpan);
             }
 
-            let html = `
-                <div class="scene-tree-item" style="padding-left: ${indentPx}px;">
-                    <span class="tree-node-icon">${icon}</span>
-                    <span class="tree-node-name">${node.name}</span>
-                    <span class="tree-node-type">(${node.type})</span>
-                    ${propSnippet}
-                </div>
-            `;
+            // Pulsante elimina rapido (✕) solo per i nodi figli (non per la radice)
+            if (depth > 0) {
+                const delBtn = document.createElement('button');
+                delBtn.type = 'button';
+                delBtn.className = 'tree-node-delete-btn';
+                delBtn.title = `Rimuovi nodo '${node.name}'`;
+                delBtn.textContent = '✕';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.removeSceneNode(node);
+                };
+                item.appendChild(delBtn);
+            }
+
+            item.onclick = (e) => {
+                e.stopPropagation();
+                SoundFX.playClick();
+                this.selectSceneNode(node);
+            };
+
+            treeContainer.appendChild(item);
 
             for (const child of node.children) {
-                html += buildTreeHtml(child, depth + 1);
+                buildTreeDom(child, depth + 1);
             }
-            return html;
         };
 
-        treeContainer.innerHTML = buildTreeHtml(this.currentScene);
+        buildTreeDom(this.currentScene);
+
+        // Aggiorna stato del pulsante Rimuovi nell'header della dock
+        const removeBtn = document.getElementById('btn-remove-selected-node');
+        if (removeBtn) {
+            if (this.selectedSceneNode && this.selectedSceneNode !== this.currentScene && this.selectedSceneNode.parent) {
+                removeBtn.classList.remove('hidden');
+                removeBtn.title = `Rimuovi il nodo '${this.selectedSceneNode.name}' (Canc)`;
+            } else {
+                removeBtn.classList.add('hidden');
+            }
+        }
     },
 
     renderViewportOverlay() {

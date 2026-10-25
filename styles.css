@@ -7006,6 +7006,12 @@ kbd {
     font-weight: 500;
 }
 
+.scene-dock-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .btn-scene-add-node {
     background: #0284c7;
     color: #ffffff;
@@ -7025,6 +7031,27 @@ kbd {
     background: #0369a1;
 }
 
+.btn-scene-remove-node {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+}
+
+.btn-scene-remove-node:hover {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+}
+
 .scene-dock-tree {
     padding: 8px;
     max-height: 150px;
@@ -7034,20 +7061,29 @@ kbd {
     gap: 3px;
     font-family: var(--font-mono, monospace);
     font-size: 12px;
+    outline: none;
 }
 
 .scene-tree-item {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 3px 6px;
+    padding: 4px 6px;
     border-radius: 4px;
     color: var(--text-main, #f8fafc);
-    transition: background 0.15s ease;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .scene-tree-item:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.scene-tree-item.selected {
+    background: rgba(2, 132, 199, 0.25);
+    border-color: rgba(56, 189, 248, 0.5);
 }
 
 .tree-node-icon {
@@ -7068,6 +7104,40 @@ kbd {
 .tree-node-prop {
     margin-left: auto;
     font-size: 11px;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.12);
+    padding: 1px 6px;
+    border-radius: 3px;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tree-node-delete-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    opacity: 0;
+    margin-left: 6px;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.scene-tree-item:hover .tree-node-delete-btn,
+.scene-tree-item.selected .tree-node-delete-btn {
+    opacity: 1;
+}
+
+.tree-node-delete-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
     color: #fbbf24;
     background: rgba(251, 191, 36, 0.12);
     padding: 1px 6px;
@@ -7140,6 +7210,20 @@ kbd {
 
 [data-theme="light"] .scene-tree-item:hover {
     background: #f1f5f9;
+}
+
+[data-theme="light"] .scene-tree-item.selected {
+    background: #e0f2fe;
+    border-color: #0284c7;
+}
+
+[data-theme="light"] .tree-node-delete-btn {
+    color: #64748b;
+}
+
+[data-theme="light"] .tree-node-delete-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
 }
 
 [data-theme="light"] .node-type-option {

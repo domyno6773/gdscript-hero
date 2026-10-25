@@ -328,9 +328,14 @@
                                             <span>Scena Godot</span>
                                             <span class="scene-node-count" id="scene-node-count">1 nodo</span>
                                         </div>
-                                        <button type="button" class="btn-scene-add-node" id="btn-open-add-node-modal" title="Aggiungi un nuovo nodo alla scena">
-                                            <span>➕</span> Aggiungi Nodo
-                                        </button>
+                                        <div class="scene-dock-actions">
+                                            <button type="button" class="btn-scene-add-node" id="btn-open-add-node-modal" title="Aggiungi un nuovo nodo alla scena">
+                                                <span>➕</span> Aggiungi Nodo
+                                            </button>
+                                            <button type="button" class="btn-scene-remove-node hidden" id="btn-remove-selected-node" title="Rimuovi il nodo selezionato">
+                                                <span>🗑️</span> Rimuovi
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="scene-dock-tree" id="exercise-scene-tree">
                                         <!-- Albero nodi gerarchico generato dinamicamente -->
