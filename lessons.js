@@ -4609,7 +4609,7 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
         title: "59. Ciclo di Vita: Eliminare Nodi con queue_free()",
         icon: "🗑️",
         xp: 60,
-        expectedOutput: "Moneta presente prima: true\nMoneta eliminata con queue_free: true",
+        expectedOutput: "Moneta presente prima: true\nMoneta in attesa di eliminazione: true",
         initialNodes: [
             { type: "Node", name: "Moneta" }
         ],
@@ -4618,17 +4618,17 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
             <p>In Godot Engine il metodo ufficiale per distruggere un nodo è <strong><code>nodo.queue_free()</code></strong>:</p>
             <pre class="code-block"><span class="c"># Elimina il nodo dalla scena e dalla memoria</span>
 $Moneta.<span class="nb">queue_free</span>()</pre>
-            <p>Il metodo <code>has_node("Moneta")</code> restituirà <code>false</code> una volta rimosso!</p>
+            <p><strong>Attenzione:</strong> subito dopo <code>queue_free()</code>, il nodo è ancora presente in scena fino alla fine del frame. Verifica l'eliminazione pianificata con <code>$Moneta.is_queued_for_deletion()</code>. Soltanto dopo la fine del frame <code>has_node("Moneta")</code> diventa <code>false</code>.</p>
         `,
         task: `
             <ul>
                 <li>Nella scena è presente il nodo <code>$Moneta</code>.</li>
                 <li>Stampa: <code>print("Moneta presente prima: ", has_node("Moneta"))</code>.</li>
                 <li>Rimuovi la moneta con: <code>$Moneta.queue_free()</code>.</li>
-                <li>Stampa la conferma: <code>print("Moneta eliminata con queue_free: ", not has_node("Moneta"))</code>.</li>
+                <li>Stampa la conferma: <code>print("Moneta in attesa di eliminazione: ", $Moneta.is_queued_for_deletion())</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # Stampa has_node("Moneta"), chiama $Moneta.queue_free() e stampa conferma\n    pass\n`,
+        initialCode: `func _ready():\n    # Verifica has_node("Moneta"), accoda queue_free(), poi usa is_queued_for_deletion()\n    pass\n`,
         hints: [
             {
                         "level": 1,
@@ -4649,10 +4649,10 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Raccogli e distruggi l'oggetto moneta\n    $Moneta.queue_free()\n```\nInvocando `queue_free()`, il nodo cessa di esistere nella scena al termine del ciclo corrente."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Raccogli e distruggi l'oggetto moneta\n    $Moneta.queue_free()\n```\nSubito dopo `queue_free()` puoi controllare `is_queued_for_deletion()`; il nodo verrà liberato alla fine del frame."
             }
 ],
-        solution: `func _ready():\n    print("Moneta presente prima: ", has_node("Moneta"))\n    $Moneta.queue_free()\n    print("Moneta eliminata con queue_free: ", not has_node("Moneta"))\n`,
+        solution: `func _ready():\n    print("Moneta presente prima: ", has_node("Moneta"))\n    $Moneta.queue_free()\n    print("Moneta in attesa di eliminazione: ", $Moneta.is_queued_for_deletion())\n`,
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
@@ -4664,7 +4664,7 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     tests.push({ desc: "Nodo Moneta rimosso con successo dall'albero della scena", passed: !!notHas, diff: notHas ? null : "Il nodo Moneta risulta ancora presente." });
     const logs = result.logs || [];
     const idxBefore = logs.findIndex(l => /^Moneta presente prima\s*:\s*true$/i.test(String(l).trim()));
-    const idxAfter = logs.findIndex((l, i) => i > idxBefore && /^Moneta eliminata con queue_free\s*:\s*true$/i.test(String(l).trim()));
+    const idxAfter = logs.findIndex((l, i) => i > idxBefore && /^Moneta in attesa di eliminazione\s*:\s*true$/i.test(String(l).trim()));
     const logsOk = idxBefore !== -1 && idxAfter !== -1;
     tests.push({ desc: "Stato della moneta prima e dopo queue_free stampato a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     // Cambiare il nodo osservato deve modificare il log prima della rimozione.
@@ -4673,6 +4673,17 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
     const stillTrue = replay && (replay.logs || []).some(v => /^Moneta presente prima\s*:\s*true$/i.test(String(v).trim()));
     const isDynamic = !!(replay && replay.success && !stillTrue);
     tests.push({ desc: "Stato della moneta letto dinamicamente con has_node()", passed: isDynamic, diff: isDynamic ? null : "Le stampe devono mostrare il risultato di has_node(), non valori fissi." });
+    // La seconda stampa deve leggere is_queued_for_deletion(), non un booleano scritto a mano.
+    // Se si elimina queue_free(), lo stato di eliminazione non deve più risultare true.
+    const withoutQueue = (result.code || '').replace(/\$Moneta\.queue_free\s*\(\s*\)/, 'pass');
+    const noQueueRun = withoutQueue !== result.code
+        ? await GDScriptRuntime.execute(withoutQueue, { lesson: LESSONS_DATA.find(l => l.id === 59) })
+        : null;
+    const fakeQueued = noQueueRun && (noQueueRun.logs || []).some(v =>
+        /^Moneta in attesa di eliminazione\s*:\s*true$/i.test(String(v).trim()));
+    const readQueuedState = !!(noQueueRun && noQueueRun.success && !fakeQueued);
+    tests.push({ desc: "La conferma dipende da is_queued_for_deletion()", passed: readQueuedState,
+        diff: readQueuedState ? null : "Stampa il valore di $Moneta.is_queued_for_deletion(), non true scritto direttamente." });
     return tests;
 }
     },
