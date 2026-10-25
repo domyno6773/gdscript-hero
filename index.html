@@ -46,6 +46,9 @@
             <button class="nav-btn" id="nav-projects-btn" title="Progetti &amp; Arena">
                 <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span> <span class="nav-btn-text">Progetti</span>
             </button>
+            <button class="nav-btn" id="nav-review-btn" title="Palestra di Ripasso">
+                <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></span> <span class="nav-btn-text">Ripasso</span> <span id="review-pending-badge" class="badge-count hidden">0</span>
+            </button>
             <button class="nav-btn nav-btn-activity" id="btn-open-achievements" title="Traguardi & Obiettivi">
                 <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></span> <span class="nav-btn-text">Traguardi</span> <span id="achievements-count-badge" class="badge-count">0/10</span>
             </button>
@@ -110,6 +113,19 @@
         <div class="roadmap-layout-container">
             <!-- Colonna Principale: Intestazione Corso + Flusso Capitoli a Nodi -->
             <div class="roadmap-main-col">
+                <!-- Discrete Callout Ripasso Consigliato (P3.3) -->
+                <div id="roadmap-review-callout" class="roadmap-review-callout hidden">
+                    <div class="callout-left">
+                        <span class="callout-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></span>
+                        <div class="callout-text">
+                            <strong>Palestra di Ripasso:</strong> <span id="roadmap-review-text">Hai argomenti consigliati per consolidare le tue competenze.</span>
+                        </div>
+                    </div>
+                    <div class="callout-actions">
+                        <button type="button" class="btn-subtle btn-xs" onclick="App.dismissRoadmapReviewCallout()">Non adesso</button>
+                        <button type="button" class="btn-primary btn-xs" onclick="App.showReviewView()">Apri Ripasso</button>
+                    </div>
+                </div>
                 <div class="roadmap-header">
                     <div class="chapter-card overall-course-card">
                         <div class="chapter-badge">ACCADEMIA INDIE • GDSCRIPT 4</div>
@@ -171,6 +187,14 @@
 
     <!-- VISTA 2: WORKSPACE ESERCIZIO (Editor + Test) -->
     <main id="view-exercise" class="view-container hidden">
+        <!-- Banner Modalità Ripasso Didattico (P3.3) -->
+        <div id="review-exercise-banner" class="review-exercise-banner hidden">
+            <div class="review-banner-left">
+                <span class="review-banner-badge">MODALITÀ RIPASSO</span>
+                <span id="review-banner-concept-name" class="review-banner-concept">Argomento</span>
+            </div>
+            <button type="button" class="btn-subtle btn-xs" onclick="App.exitReviewMode()">Torna alla Palestra</button>
+        </div>
         <!-- Switcher Schede Mobile (visibile solo su schermi <= 820px) -->
         <div class="exercise-mobile-tabs" id="exercise-mobile-tabs">
             <button type="button" class="ex-mobile-tab active" id="btn-tab-instructions">
@@ -711,6 +735,55 @@
                         </div>
                     </div>
                 </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- VISTA 5: PALESTRA DI RIPASSO INTELLIGENTE (P3.3) -->
+    <main id="view-review" class="view-container hidden">
+        <div class="review-view-inner">
+            <!-- Hero Card della Palestra di Ripasso -->
+            <div class="review-hero-card">
+                <div class="review-hero-badge">
+                    <span class="icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></span>
+                    <span>PALESTRA DI RIPASSO</span>
+                </div>
+                <h2>Consolida le tue competenze GDScript 4</h2>
+                <p class="review-subtitle">
+                    Esercizi e varianti alternative per rafforzare i concetti chiave incontrati nel corso.<br>
+                    Le varianti propongono scenari di gioco e dati differenti senza riutilizzare il codice originale.
+                </p>
+                <div class="review-stats-summary" id="review-stats-summary">
+                    <!-- Popolato dinamicamente da app.js -->
+                </div>
+            </div>
+
+            <!-- Tab Switcher: Consigliati per te vs Tutti gli argomenti -->
+            <div class="review-tabs-bar">
+                <button type="button" class="review-tab-btn active" id="tab-review-recommended" onclick="App.setReviewTab('recommended')">
+                    <span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                    <span>Consigliati per te</span>
+                    <span id="badge-recommended-count" class="badge-tab-count">0</span>
+                </button>
+                <button type="button" class="review-tab-btn" id="tab-review-all" onclick="App.setReviewTab('all')">
+                    <span class="tab-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+                    <span>Tutti gli argomenti</span>
+                    <span id="badge-all-concepts-count" class="badge-tab-count">15</span>
+                </button>
+            </div>
+
+            <!-- Contenuto Scheda: Consigliati per te -->
+            <div id="review-content-recommended" class="review-tab-pane">
+                <div id="review-recommended-list" class="review-grid">
+                    <!-- Popolato dinamicamente da app.js -->
+                </div>
+            </div>
+
+            <!-- Contenuto Scheda: Tutti gli Argomenti -->
+            <div id="review-content-all" class="review-tab-pane hidden">
+                <div id="review-all-list" class="review-grid">
+                    <!-- Popolato dinamicamente da app.js -->
+                </div>
             </div>
         </div>
     </main>
@@ -1709,6 +1782,10 @@
             <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
             <span class="mob-nav-label">Progetti</span>
         </button>
+        <button type="button" class="mob-nav-item" id="mob-nav-review" title="Palestra di Ripasso">
+            <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg></span>
+            <span class="mob-nav-label">Ripasso</span>
+        </button>
         <button type="button" class="mob-nav-item" id="mob-nav-achievements" title="I Tuoi Traguardi">
             <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></span>
             <span class="mob-nav-label">Trofei</span>
@@ -1723,6 +1800,7 @@
     <script src="runtime.js"></script>
     <script src="diagnostic.js"></script>
     <script src="lessons.js"></script>
+    <script src="review_variants.js"></script>
     <script src="arena_project.js"></script>
     <script src="viewport2d.js"></script>
     <script src="auth.js"></script>

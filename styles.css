@@ -10256,3 +10256,534 @@ kbd {
         transform: translateY(0);
     }
 }
+
+
+/* ===================================================================
+   P3.3: STILI PALESTRA DI RIPASSO INTELLIGENTE & VARIANTI
+   =================================================================== */
+
+.review-view-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.review-hero-card {
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 24px 28px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.review-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+}
+
+.review-hero-card h2 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 6px 0;
+}
+
+.review-subtitle {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.review-stats-summary {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.review-stat-pill {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.review-stat-pill.alert {
+    border-color: rgba(245, 158, 11, 0.4);
+    background: rgba(245, 158, 11, 0.08);
+}
+
+.review-stat-pill.alert .stat-num {
+    color: #f59e0b;
+}
+
+.review-stat-pill .stat-num {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.review-stat-pill .stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Tabs switcher */
+.review-tabs-bar {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.review-tab-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.review-tab-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.review-tab-btn.active {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+.badge-tab-count {
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1px 6px;
+    border-radius: 10px;
+}
+
+.review-tab-btn.active .badge-tab-count {
+    background: rgba(56, 189, 248, 0.25);
+    color: #e0f2fe;
+}
+
+/* Grid & Cards */
+.review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.review-concept-card {
+    background: var(--bg-panel, #1e293b);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.review-concept-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.review-concept-card.status-da_ripassare {
+    border-left: 4px solid #f59e0b;
+}
+
+.review-concept-card.status-consolidato {
+    border-left: 4px solid #10b981;
+}
+
+.review-concept-card.status-disponibile {
+    border-left: 4px solid #38bdf8;
+}
+
+.review-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.review-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.review-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.badge-recommended {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    color: #fde68a;
+}
+
+.badge-consolidated {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    color: #6ee7b7;
+}
+
+.badge-available {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    color: #7dd3fc;
+}
+
+.review-chapter-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-dim);
+}
+
+.review-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+.review-card-desc {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.review-card-reason {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #cbd5e1;
+}
+
+.review-card-reason .reason-icon {
+    color: #f59e0b;
+    display: inline-flex;
+}
+
+.review-variants-container {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.variants-heading {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+}
+
+.variant-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+.variant-item.done {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.variant-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.variant-icon {
+    margin-top: 2px;
+    color: #94a3b8;
+    display: inline-flex;
+}
+
+.variant-item.done .variant-icon {
+    color: #10b981;
+}
+
+.variant-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.variant-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.variant-scenario {
+    font-size: 0.74rem;
+    color: var(--text-dim);
+}
+
+.btn-start-variant {
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 5px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.review-empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 48px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+}
+
+.review-empty-state .empty-icon {
+    color: #10b981;
+}
+
+.review-empty-state h3 {
+    font-size: 1.15rem;
+    color: #fff;
+    margin: 0;
+}
+
+.review-empty-state p {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    max-width: 480px;
+    margin: 0;
+}
+
+/* Callout sulla Roadmap */
+.roadmap-review-callout {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(15, 23, 42, 0.9));
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.roadmap-review-callout .callout-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.roadmap-review-callout .callout-icon {
+    color: #f59e0b;
+    display: inline-flex;
+}
+
+.roadmap-review-callout .callout-text {
+    font-size: 0.86rem;
+    color: #e2e8f0;
+}
+
+.roadmap-review-callout .callout-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Banner Ripasso nell'Editor Esercizio */
+.review-exercise-banner {
+    background: rgba(56, 189, 248, 0.12);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.review-exercise-banner .review-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.review-banner-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: #0284c7;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.review-banner-concept {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #e0f2fe;
+}
+
+.review-scenario-box {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-left: 3px solid #38bdf8;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+}
+
+.review-scenario-box .scenario-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #38bdf8;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.review-scenario-box p {
+    font-size: 0.84rem;
+    color: var(--text-main);
+    line-height: 1.45;
+    margin: 0;
+}
+
+/* ===================================================================
+   LIGHT THEME OVERRIDES PER IL RIPASSO
+   =================================================================== */
+
+[data-theme="light"] .review-hero-card {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .review-hero-card h2 {
+    color: #0f172a;
+}
+
+[data-theme="light"] .review-stat-pill {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .review-stat-pill .stat-num {
+    color: #0f172a;
+}
+
+[data-theme="light"] .review-tab-btn.active {
+    background: #e0f2fe;
+    color: #0284c7;
+    border-color: #7dd3fc;
+}
+
+[data-theme="light"] .review-concept-card {
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+
+[data-theme="light"] .review-card-title {
+    color: #0f172a;
+}
+
+[data-theme="light"] .review-card-reason {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+[data-theme="light"] .variant-item {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .variant-item.done {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+[data-theme="light"] .variant-title {
+    color: #0f172a;
+}
+
+[data-theme="light"] .roadmap-review-callout {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    border-left-color: #d97706;
+}
+
+[data-theme="light"] .roadmap-review-callout .callout-text {
+    color: #92400e;
+}
+
+[data-theme="light"] .review-exercise-banner {
+    background: #e0f2fe;
+    border-color: #bae6fd;
+}
+
+[data-theme="light"] .review-banner-concept {
+    color: #0369a1;
+}
+
+[data-theme="light"] .review-scenario-box {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+    border-left-color: #0284c7;
+}

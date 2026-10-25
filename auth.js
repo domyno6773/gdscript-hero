@@ -927,6 +927,19 @@ const AuthManager = {
             merged.learningTelemetry = current.learningTelemetry;
         }
 
+        // Fusione intelligente dei progressi di Ripasso P3.3
+        const curReview = current.reviewProgress || { completedVariants: [], variantHistory: {} };
+        const impReview = imported.reviewProgress || { completedVariants: [], variantHistory: {} };
+        const mergedVariants = Array.from(new Set([
+            ...(Array.isArray(curReview.completedVariants) ? curReview.completedVariants : []),
+            ...(Array.isArray(impReview.completedVariants) ? impReview.completedVariants : [])
+        ]));
+        const mergedHistory = { ...(impReview.variantHistory || {}), ...(curReview.variantHistory || {}) };
+        merged.reviewProgress = {
+            completedVariants: mergedVariants,
+            variantHistory: mergedHistory
+        };
+
         return merged;
     },
 

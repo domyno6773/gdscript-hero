@@ -33,6 +33,14 @@ const App = {
             liveMaxSalute: 100,
             liveIsVivo: true
         },
+
+        // P3.3: Progresso Ripasso Intelligente
+        reviewProgress: {
+            completedVariants: [],
+            variantHistory: {}
+        },
+        currentReviewTab: "recommended",
+        sessionDismissedReviewCallout: false,
         selectedAutocompleteIndex: 0,
 
         // Profilo Giocatore
@@ -249,6 +257,16 @@ const App = {
                 } else {
                     this.state.learningTelemetry = this.initLearningTelemetryFromLegacy(this.state.finishedLessons);
                 }
+
+                // P3.3: Progresso Ripasso Intelligente
+                if (parsed.reviewProgress) {
+                    this.state.reviewProgress = {
+                        completedVariants: Array.isArray(parsed.reviewProgress.completedVariants) ? parsed.reviewProgress.completedVariants : [],
+                        variantHistory: (typeof parsed.reviewProgress.variantHistory === 'object' && parsed.reviewProgress.variantHistory !== null) ? parsed.reviewProgress.variantHistory : {}
+                    };
+                } else {
+                    this.state.reviewProgress = { completedVariants: [], variantHistory: {} };
+                }
             } else {
                 this.state.currentWeekId = this.getWeekId();
                 this.state.sandbox = this.getDefaultSandboxState();
@@ -288,7 +306,8 @@ const App = {
             projectInterests: this.state.projectInterests,
             arenaProject: this.state.arenaProject,
             sandbox: this.state.sandbox,
-            learningTelemetry: this.state.learningTelemetry
+            learningTelemetry: this.state.learningTelemetry,
+            reviewProgress: this.state.reviewProgress
         };
 
         try {
@@ -2250,6 +2269,9 @@ const App = {
 
         this.ensureUnlockedConsistency();
 
+        // P3.3: Aggiorna indicatori, badge e callout della Palestra di Ripasso
+        this.updateReviewIndicators();
+
         const finishedCount = this.state.finishedLessons.length;
         const total = LESSONS_DATA.length;
         const percent = Math.min(100, Math.round((finishedCount / total) * 100));
@@ -2870,7 +2892,7 @@ const App = {
 
     updateNavSelection(viewName) {
         // Desktop nav buttons
-        ['roadmap', 'editor', 'practice', 'projects'].forEach(key => {
+        ['roadmap', 'editor', 'practice', 'projects', 'review'].forEach(key => {
             const btn = document.getElementById(`nav-${key}-btn`);
             if (btn) {
                 if (key === viewName || (key === 'editor' && viewName === 'exercise')) {
@@ -2882,7 +2904,7 @@ const App = {
         });
 
         // Mobile bottom nav buttons
-        ['roadmap', 'exercise', 'practice', 'projects'].forEach(key => {
+        ['roadmap', 'exercise', 'practice', 'projects', 'review'].forEach(key => {
             const mobBtn = document.getElementById(`mob-nav-${key}`);
             if (mobBtn) {
                 if (key === viewName) {
@@ -3413,6 +3435,16 @@ const App = {
         SoundFX.playClick();
         const editor = document.getElementById('code-editor');
         const code = editor.value;
+
+        // P3.3: Gestione Esecuzione e Verifica in Modalità Ripasso
+        if (this.isReviewMode && this.currentReviewVariant) {
+            const runBtn = document.getElementById('btn-run-code');
+            runBtn.style.opacity = '0.7';
+            runBtn.querySelector('.run-text').innerText = "Verifica in corso...";
+            this.recordDailyQuestProgress('code_runs', 1);
+            await this.runAndValidateReviewVariant(code, runBtn);
+            return;
+        }
         const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
         if (!currentLesson) {
             this.isValidating = false;
@@ -3635,7 +3667,15 @@ const App = {
         };
         document.getElementById('nav-practice-btn').onclick = () => this.openPracticeView();
         document.getElementById('nav-projects-btn').onclick = () => this.openProjectsView();
-        document.getElementById('btn-back-to-roadmap').onclick = () => this.showRoadmap();
+        const navReviewBtn = document.getElementById('nav-review-btn');
+        if (navReviewBtn) navReviewBtn.onclick = () => this.showReviewView();
+        document.getElementById('btn-back-to-roadmap').onclick = () => {
+            if (this.isReviewMode) {
+                this.exitReviewMode();
+            } else {
+                this.showRoadmap();
+            }
+        };
 
         // Navigazione Bottom Mobile (Smartphone e Tablet)
         const mobNavRoadmap = document.getElementById('mob-nav-roadmap');
@@ -3654,6 +3694,9 @@ const App = {
 
         const mobNavProjects = document.getElementById('mob-nav-projects');
         if (mobNavProjects) mobNavProjects.onclick = () => this.openProjectsView();
+
+        const mobNavReview = document.getElementById('mob-nav-review');
+        if (mobNavReview) mobNavReview.onclick = () => this.showReviewView();
 
         const mobNavAchievements = document.getElementById('mob-nav-achievements');
         if (mobNavAchievements) mobNavAchievements.onclick = () => this.openAchievementsModal();
@@ -4114,19 +4157,25 @@ const App = {
         if (level <= this.state.hintsRevealed) {
             SoundFX.playClick();
             this.state.activeHintLevel = level;
-            const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+            const currentLesson = this.getCurrentActiveLessonOrVariant();
             if (currentLesson) this.renderHintBox(currentLesson);
         }
     },
 
     unlockNextHintLevel() {
-        const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
-        if (!currentLesson) return;
+        const currentLesson = this.getCurrentActiveLessonOrVariant();
+        if (!currentLesson || !currentLesson.hints) return;
         if (this.state.hintsRevealed < currentLesson.hints.length) {
             SoundFX.playHint();
             this.state.hintsRevealed++;
             this.state.activeHintLevel = this.state.hintsRevealed;
-            this.recordHintOpened(this.state.currentLessonId, this.state.hintsRevealed);
+            if (this.isReviewMode && this.currentReviewVariant) {
+                if (typeof ReviewEngine !== 'undefined') {
+                    ReviewEngine.recordVariantAttempt(this.currentReviewVariant.id, false, this.state.hintsRevealed, this.state);
+                }
+            } else {
+                this.recordHintOpened(this.state.currentLessonId, this.state.hintsRevealed);
+            }
             this.renderHintBox(currentLesson);
             this.checkAchievements();
         }
@@ -4140,7 +4189,7 @@ const App = {
         const btnToggleHint = document.getElementById('btn-toggle-hint');
         if (btnToggleHint) {
             btnToggleHint.onclick = () => {
-                const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+                const currentLesson = this.getCurrentActiveLessonOrVariant();
                 if (!currentLesson) return;
 
                 const hintBox = document.getElementById('hint-box');
@@ -4151,7 +4200,13 @@ const App = {
                         this.state.hintsRevealed = 1;
                         this.state.activeHintLevel = 1;
                     }
-                    this.recordHintOpened(this.state.currentLessonId, this.state.hintsRevealed);
+                    if (this.isReviewMode && this.currentReviewVariant) {
+                        if (typeof ReviewEngine !== 'undefined') {
+                            ReviewEngine.recordVariantAttempt(this.currentReviewVariant.id, false, this.state.hintsRevealed, this.state);
+                        }
+                    } else {
+                        this.recordHintOpened(this.state.currentLessonId, this.state.hintsRevealed);
+                    }
                     this.renderHintBox(currentLesson);
                     this.checkAchievements();
                 } else if (hintBox) {
@@ -4183,7 +4238,7 @@ const App = {
     },
 
     openHintFromFeedback() {
-        const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+        const currentLesson = this.getCurrentActiveLessonOrVariant();
         if (!currentLesson) return;
 
         if (currentLesson.isMastery) {
@@ -4201,12 +4256,407 @@ const App = {
                     this.state.hintsRevealed = 1;
                 }
                 this.state.activeHintLevel = 1;
-                this.recordHintOpened(this.state.currentLessonId, 1);
+                if (!this.isReviewMode) {
+                    this.recordHintOpened(this.state.currentLessonId, 1);
+                }
                 this.renderHintBox(currentLesson);
                 this.checkAchievements();
                 hintBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         }
+    },
+
+    // ===================================================================
+    // P3.3: MODALITÀ RIPASSO DIDATTICO INTELLIGENTE & VARIANTI
+    // ===================================================================
+    getCurrentActiveLessonOrVariant() {
+        if (this.isReviewMode && this.currentReviewVariant) {
+            return this.currentReviewVariant;
+        }
+        return (typeof LESSONS_DATA !== 'undefined') ? LESSONS_DATA.find(l => l.id === this.state.currentLessonId) : null;
+    },
+
+    async runAndValidateReviewVariant(code, runBtn) {
+        const variant = this.currentReviewVariant;
+        try {
+            const result = await GDScriptRuntime.execute(code, { initialScene: null, lesson: null });
+
+            const realOutputPre = document.getElementById('real-output-pre');
+            if (result.logs && result.logs.length > 0) {
+                realOutputPre.innerText = result.logs.join('\n');
+                realOutputPre.style.color = '#38bdf8';
+            } else if (result.error) {
+                realOutputPre.innerText = `// Errore: ${result.error}`;
+                realOutputPre.style.color = '#f87171';
+            } else {
+                realOutputPre.innerText = "// Nessun output stampato a console";
+                realOutputPre.style.color = '#94a3b8';
+            }
+
+            const expectedOutputPre = document.getElementById('expected-output-pre');
+            expectedOutputPre.innerText = variant.expectedOutput || "// Nessun output richiesto";
+
+            const tests = await variant.validate(result, GDScriptRuntime);
+            const allPassed = tests.every(t => t.passed);
+
+            const isFirstTime = !(this.state.reviewProgress && Array.isArray(this.state.reviewProgress.completedVariants) && this.state.reviewProgress.completedVariants.includes(variant.id));
+
+            // Registra esito del tentativo di ripasso (isolato dalla telemetria delle lezioni)
+            if (typeof ReviewEngine !== 'undefined') {
+                ReviewEngine.recordVariantAttempt(variant.id, allPassed, this.state.hintsRevealed, this.state);
+            }
+
+            const resultsContainer = document.getElementById('test-results-view');
+            resultsContainer.innerHTML = '';
+
+            tests.forEach(test => {
+                const row = document.createElement('div');
+                row.className = `test-row ${test.passed ? 'passed' : 'failed'}`;
+                row.innerHTML = `
+                    <div class="test-icon">${test.passed ? '<svg class="ui-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg class="ui-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'}</div>
+                    <div class="test-info">
+                        <div class="test-desc">${test.desc}</div>
+                        ${test.diff ? `<div class="test-diff">${test.diff}</div>` : ''}
+                    </div>
+                `;
+                resultsContainer.appendChild(row);
+            });
+
+            const badge = document.getElementById('test-status-badge');
+            if (allPassed) {
+                badge.innerText = `✓ Superato (${tests.length}/${tests.length})`;
+                badge.style.color = '#10b981';
+
+                let gainXp = 0;
+                if (isFirstTime) {
+                    if (!this.state.reviewProgress.completedVariants.includes(variant.id)) {
+                        this.state.reviewProgress.completedVariants.push(variant.id);
+                    }
+                    gainXp = variant.xpReward || 10;
+                    this.state.xp += gainXp;
+                }
+
+                this.saveStorage();
+                this.updateStatsUI();
+                this.checkAchievements();
+                SoundFX.playSuccess();
+                ConfettiFX.burst();
+
+                // Modale di vittoria per ripasso
+                const modalTitle = document.getElementById('modal-success-title');
+                const modalSubtitle = document.getElementById('modal-success-subtitle');
+                const modalGain = document.getElementById('modal-xp-gain');
+
+                if (modalTitle) modalTitle.innerText = "⭐ VARIANTE DI RIPASSO SUPERATA!";
+                if (modalSubtitle) {
+                    modalSubtitle.innerText = isFirstTime
+                        ? "Ottimo lavoro! Hai rafforzato questo concetto con successo e ottenuto +10 XP bonus di ripasso!"
+                        : "Ottimo lavoro! La variante di ripasso è stata nuovamente verificata con successo.";
+                }
+                if (modalGain) modalGain.innerText = isFirstTime ? `+${gainXp}` : "+0";
+
+                setTimeout(() => {
+                    document.getElementById('success-modal').classList.remove('hidden');
+                }, 300);
+            } else {
+                badge.innerText = `✗ Fallito (${tests.filter(t => t.passed).length}/${tests.length})`;
+                badge.style.color = '#ef4444';
+                SoundFX.playError();
+
+                const firstFailedTest = tests.find(t => !t.passed);
+                const mockReviewLesson = {
+                    id: 9999,
+                    title: variant.title,
+                    conceptId: variant.conceptId,
+                    hints: variant.hints
+                };
+                const feedbackCard = this.buildContextualFeedback(result, mockReviewLesson, firstFailedTest, tests, code);
+                if (feedbackCard) {
+                    resultsContainer.appendChild(feedbackCard);
+                }
+            }
+
+        } catch (err) {
+            console.error("Errore verifica variante ripasso:", err);
+            SoundFX.playError();
+        } finally {
+            runBtn.style.opacity = '1';
+            runBtn.querySelector('.run-text').innerText = "Verifica Codice";
+            this.isValidating = false;
+        }
+    },
+
+    updateReviewIndicators() {
+        if (typeof ReviewEngine === 'undefined') return;
+        const recommended = ReviewEngine.getRecommendedConcepts(this.state);
+        const count = recommended.length;
+
+        // Badge pulsante nav
+        const badge = document.getElementById('review-pending-badge');
+        if (badge) {
+            badge.innerText = count;
+            if (count > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // Callout su Roadmap
+        const callout = document.getElementById('roadmap-review-callout');
+        if (callout) {
+            if (count > 0 && !this.state.sessionDismissedReviewCallout) {
+                callout.classList.remove('hidden');
+                const textEl = document.getElementById('roadmap-review-text');
+                if (textEl) {
+                    textEl.innerText = count === 1
+                        ? `Hai 1 argomento consigliato (${recommended[0].concept.name}) per consolidare le tue competenze.`
+                        : `Hai ${count} argomenti consigliati per consolidare le tue competenze.`;
+                }
+            } else {
+                callout.classList.add('hidden');
+            }
+        }
+    },
+
+    dismissRoadmapReviewCallout() {
+        SoundFX.playClick();
+        this.state.sessionDismissedReviewCallout = true;
+        const callout = document.getElementById('roadmap-review-callout');
+        if (callout) callout.classList.add('hidden');
+    },
+
+    showReviewView() {
+        SoundFX.playClick();
+        this.hideAutocomplete();
+        this.isReviewMode = false;
+        this.currentReviewVariant = null;
+
+        document.getElementById('view-exercise').classList.add('hidden');
+        document.getElementById('view-practice').classList.add('hidden');
+        document.getElementById('view-projects').classList.add('hidden');
+        document.getElementById('view-roadmap').classList.add('hidden');
+        document.getElementById('view-review').classList.remove('hidden');
+
+        this.updateNavSelection('review');
+        this.renderReviewView();
+    },
+
+    openReviewView() {
+        this.showReviewView();
+    },
+
+    setReviewTab(tab) {
+        SoundFX.playClick();
+        this.state.currentReviewTab = tab;
+        const btnRec = document.getElementById('tab-review-recommended');
+        const btnAll = document.getElementById('tab-review-all');
+        const paneRec = document.getElementById('review-content-recommended');
+        const paneAll = document.getElementById('review-content-all');
+
+        if (tab === 'recommended') {
+            if (btnRec) btnRec.classList.add('active');
+            if (btnAll) btnAll.classList.remove('active');
+            if (paneRec) paneRec.classList.remove('hidden');
+            if (paneAll) paneAll.classList.add('hidden');
+        } else {
+            if (btnRec) btnRec.classList.remove('active');
+            if (btnAll) btnAll.classList.add('active');
+            if (paneRec) paneRec.classList.add('hidden');
+            if (paneAll) paneAll.classList.remove('hidden');
+        }
+    },
+
+    renderReviewView() {
+        if (typeof ReviewEngine === 'undefined') return;
+        this.updateReviewIndicators();
+
+        const recommended = ReviewEngine.getRecommendedConcepts(this.state);
+        const allConcepts = ReviewEngine.getAllConceptsWithStatus(this.state);
+        const completedVariantsCount = (this.state.reviewProgress?.completedVariants || []).length;
+        const consolidatedCount = allConcepts.filter(c => c.status === 'consolidato').length;
+
+        // Badge schede
+        const badgeRec = document.getElementById('badge-recommended-count');
+        if (badgeRec) badgeRec.innerText = recommended.length;
+        const badgeAll = document.getElementById('badge-all-concepts-count');
+        if (badgeAll) badgeAll.innerText = allConcepts.length;
+
+        // Statistiche in testata
+        const statsSummary = document.getElementById('review-stats-summary');
+        if (statsSummary) {
+            statsSummary.innerHTML = `
+                <div class="review-stat-pill">
+                    <span class="stat-num">${consolidatedCount} / ${allConcepts.length}</span>
+                    <span class="stat-label">Argomenti Consolidati</span>
+                </div>
+                <div class="review-stat-pill ${recommended.length > 0 ? 'alert' : ''}">
+                    <span class="stat-num">${recommended.length}</span>
+                    <span class="stat-label">Consigliati da Ripassare</span>
+                </div>
+                <div class="review-stat-pill">
+                    <span class="stat-num">${completedVariantsCount}</span>
+                    <span class="stat-label">Varianti Completate</span>
+                </div>
+            `;
+        }
+
+        // Renderizza Lista Consigliati
+        const recList = document.getElementById('review-recommended-list');
+        if (recList) {
+            recList.innerHTML = '';
+            if (recommended.length === 0) {
+                recList.innerHTML = `
+                    <div class="review-empty-state">
+                        <div class="empty-icon"><svg class="ui-icon ui-icon-lg" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                        <h3>Ottimo lavoro! Nessun argomento urgente da ripassare.</h3>
+                        <p>Tutti gli argomenti affrontati sono stati completati senza attrito significativo o sono già stati consolidati.</p>
+                        <button type="button" class="btn-primary btn-sm" onclick="App.setReviewTab('all')">Esplora Tutti gli Argomenti</button>
+                    </div>
+                `;
+            } else {
+                recommended.forEach(item => {
+                    recList.appendChild(this.buildConceptReviewCard(item));
+                });
+            }
+        }
+
+        // Renderizza Lista Tutti gli Argomenti
+        const allList = document.getElementById('review-all-list');
+        if (allList) {
+            allList.innerHTML = '';
+            allConcepts.forEach(item => {
+                allList.appendChild(this.buildConceptReviewCard(item));
+            });
+        }
+    },
+
+    buildConceptReviewCard(item) {
+        const card = document.createElement('div');
+        card.className = `review-concept-card status-${item.status}`;
+
+        const concept = item.concept;
+        const variants = item.variants || [];
+        const completedVariants = (this.state.reviewProgress?.completedVariants || []);
+
+        const variantsHtml = variants.length > 0 ? variants.map(v => {
+            const isDone = completedVariants.includes(v.id);
+            return `
+                <div class="variant-item ${isDone ? 'done' : ''}">
+                    <div class="variant-left">
+                        <span class="variant-icon">${isDone ? '<svg class="ui-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>'}</span>
+                        <div class="variant-info">
+                            <span class="variant-title">${this.escapeHtml(v.title)}</span>
+                            <span class="variant-scenario">${this.escapeHtml(v.scenario)}</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-start-variant ${isDone ? 'btn-subtle' : 'btn-primary'}" onclick="App.openReviewVariant('${v.id}')">
+                        ${isDone ? 'Ripeti (+0 XP)' : 'Inizia (+10 XP)'}
+                    </button>
+                </div>
+            `;
+        }).join('') : `<p class="no-variants-text">Nuove varianti in arrivo per questo argomento.</p>`;
+
+        card.innerHTML = `
+            <div class="review-card-header">
+                <div class="review-header-left">
+                    <span class="review-badge ${item.badgeClass}">${this.escapeHtml(item.badgeText || item.status.toUpperCase())}</span>
+                    <span class="review-chapter-tag">Capitolo ${concept.chapterId}</span>
+                </div>
+            </div>
+            <h3 class="review-card-title">${this.escapeHtml(concept.name)}</h3>
+            <p class="review-card-desc">${this.escapeHtml(concept.desc)}</p>
+            <div class="review-card-reason">
+                <span class="reason-icon"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+                <span class="reason-text">${this.escapeHtml(item.reason)}</span>
+            </div>
+            <div class="review-variants-container">
+                <div class="variants-heading">Varianti di Pratica (${variants.filter(v => completedVariants.includes(v.id)).length}/${variants.length} completate):</div>
+                ${variantsHtml}
+            </div>
+        `;
+
+        return card;
+    },
+
+    openReviewVariant(variantId) {
+        if (typeof REVIEW_VARIANTS === 'undefined') return;
+        const variant = REVIEW_VARIANTS.find(v => v.id === variantId);
+        if (!variant) return;
+
+        SoundFX.playClick();
+        this.isReviewMode = true;
+        this.currentReviewVariant = variant;
+
+        // Switch al view exercise
+        document.getElementById('view-roadmap').classList.add('hidden');
+        document.getElementById('view-practice').classList.add('hidden');
+        document.getElementById('view-projects').classList.add('hidden');
+        document.getElementById('view-review').classList.add('hidden');
+        document.getElementById('view-exercise').classList.remove('hidden');
+
+        this.updateNavSelection('review');
+
+        // Mostra il banner della modalità ripasso
+        const revBanner = document.getElementById('review-exercise-banner');
+        if (revBanner) {
+            revBanner.classList.remove('hidden');
+            const conceptMeta = (typeof CONCEPTS_CATALOG !== 'undefined') ? CONCEPTS_CATALOG[variant.conceptId] : null;
+            const conceptEl = document.getElementById('review-banner-concept-name');
+            if (conceptEl) conceptEl.innerText = conceptMeta ? `${conceptMeta.name} — ${variant.title}` : variant.title;
+        }
+
+        // Configura contenuti didattici della variante
+        document.getElementById('lesson-title').innerText = variant.title;
+        document.getElementById('lesson-theory').innerHTML = `
+            <div class="review-scenario-box">
+                <span class="scenario-badge">SCENARIO ALTERNATIVO</span>
+                <p>${this.escapeHtml(variant.scenario)}</p>
+            </div>
+        `;
+        document.getElementById('lesson-task').innerHTML = variant.task;
+
+        const xpBadge = document.getElementById('lesson-xp-badge');
+        const isDone = this.state.reviewProgress?.completedVariants?.includes(variant.id);
+        if (xpBadge) {
+            xpBadge.innerText = isDone ? "Già Completato (+0 XP)" : `+${variant.xpReward} XP Ripasso`;
+            xpBadge.style.background = isDone ? 'rgba(148, 163, 184, 0.2)' : 'rgba(16, 185, 129, 0.2)';
+            xpBadge.style.color = isDone ? '#94a3b8' : '#34d399';
+        }
+
+        // Reimposta i suggerimenti per la variante
+        this.state.hintsRevealed = 0;
+        this.state.activeHintLevel = 1;
+        const hintBox = document.getElementById('hint-box');
+        if (hintBox) hintBox.classList.add('hidden');
+        const hintToggleText = document.getElementById('hint-toggle-text');
+        if (hintToggleText) hintToggleText.innerText = `Ti serve un consiglio? (0/${variant.hints.length} sbloccati)`;
+
+        // Inizializza l'editor con il codice iniziale della variante (MAI il codice precedente dello studente!)
+        const editor = document.getElementById('code-editor');
+        editor.value = variant.starterCode;
+        this.updateLineNumbers();
+
+        // Resetta console e test results
+        document.getElementById('real-output-pre').innerText = "// Clicca su 'Verifica Codice' per eseguire lo script della variante";
+        document.getElementById('real-output-pre').style.color = '#94a3b8';
+        document.getElementById('expected-output-pre').innerText = variant.expectedOutput || "// Nessun output richiesto";
+        document.getElementById('test-results-view').innerHTML = '';
+        const badge = document.getElementById('test-status-badge');
+        badge.innerText = "In attesa di verifica";
+        badge.style.color = '#94a3b8';
+
+        // Disattiva viewport e scena 2D per il ripasso salvo necessità
+        this.updateExerciseToolsVisibility({ id: 9999, requires2D: false, requiresSceneTree: false });
+    },
+
+    exitReviewMode() {
+        SoundFX.playClick();
+        this.isReviewMode = false;
+        this.currentReviewVariant = null;
+        const revBanner = document.getElementById('review-exercise-banner');
+        if (revBanner) revBanner.classList.add('hidden');
+        this.showReviewView();
     },
 
     buildContextualFeedback(result, currentLesson, failedTest, allTests, code = '') {
@@ -5256,6 +5706,9 @@ const App = {
         }
         if (data.learningTelemetry) {
             this.state.learningTelemetry = data.learningTelemetry;
+        }
+        if (data.reviewProgress) {
+            this.state.reviewProgress = data.reviewProgress;
         }
         if (data.theme) {
             this.applyTheme(data.theme);
