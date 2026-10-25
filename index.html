@@ -230,6 +230,7 @@
                     </div>
                     <div class="editor-tools">
                         <button class="btn-tool" id="btn-reset-code" title="Ripristina codice iniziale">Ripristina</button>
+                        <button class="btn-tool btn-tool-prev hidden" id="btn-header-prev" title="Vai al livello precedente">◀ Prec</button>
                         <button class="btn-tool btn-tool-next hidden" id="btn-header-next" title="Vai al livello successivo">Prossimo ➔</button>
                     </div>
                 </div>
@@ -750,7 +751,28 @@
                 </div>
             </div>
 
-            <!-- Gruppo 4: Dati e Reset (Doppia Conferma) -->
+            <!-- Gruppo 4: Modalità Test & Verifica Esercizi (Sviluppatore) -->
+            <div class="settings-group">
+                <div class="settings-group-title">🛠️ Modalità Test &amp; Verifica Livelli</div>
+                
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Sblocca Tutti i Livelli</span>
+                        <span class="settings-item-sub">Accesso diretto a tutti i 60 esercizi e sfide di apprendimento</span>
+                    </div>
+                    <button type="button" class="btn-subtle" id="btn-settings-unlock-all">🔓 Sblocca Tutti</button>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Progressione Sequenziale Standard</span>
+                        <span class="settings-item-sub">Ripristina i vincoli sequenziali dal livello 1 in poi</span>
+                    </div>
+                    <button type="button" class="btn-subtle" id="btn-settings-lock-progression">🔒 Ripristina Blocco</button>
+                </div>
+            </div>
+
+            <!-- Gruppo 5: Dati e Reset (Doppia Conferma) -->
             <div class="settings-group danger-group">
                 <div class="settings-group-title">⚠️ Dati e Memoria di Studio</div>
                 

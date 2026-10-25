@@ -5,6 +5,7 @@ const App = {
         currentLessonId: 1,
         completedLessons: [1],
         finishedLessons: [],
+        devAllUnlocked: true, // Sblocca tutti i 60 livelli localmente per la verifica immediata
         unlockedAchievements: [],
         xp: 0,
         streak: 1,
@@ -125,6 +126,7 @@ const App = {
                 this.state.streak = parsed.streak || 1;
                 this.state.finishedLessons = parsed.finishedLessons || [];
                 this.state.completedLessons = parsed.completedLessons || [1];
+                this.state.devAllUnlocked = (parsed.devAllUnlocked !== undefined) ? parsed.devAllUnlocked : true;
                 this.state.unlockedAchievements = parsed.unlockedAchievements || [];
                 this.state.streakMode = parsed.streakMode || "rilassato";
                 this.state.streakWeeks = parsed.streakWeeks || 0;
@@ -173,6 +175,7 @@ const App = {
             streak: this.state.streak,
             finishedLessons: this.state.finishedLessons,
             completedLessons: this.state.completedLessons,
+            devAllUnlocked: this.state.devAllUnlocked,
             unlockedAchievements: this.state.unlockedAchievements,
             streakMode: this.state.streakMode,
             streakWeeks: this.state.streakWeeks,
@@ -1209,6 +1212,17 @@ const App = {
             this.state.completedLessons.unshift(1);
         }
 
+        // Se la modalità sblocco totale è attiva (default: true per permettere la verifica immediata di tutti i livelli)
+        if (this.state.devAllUnlocked !== false) {
+            LESSONS_DATA.forEach(lesson => {
+                if (!this.state.completedLessons.includes(lesson.id)) {
+                    this.state.completedLessons.push(lesson.id);
+                }
+            });
+            this.saveStorage();
+            return;
+        }
+
         CHAPTERS_DATA.forEach(chapter => {
             const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id);
             const coreLessons = chapterLessons.filter(l => !l.isMastery);
@@ -1222,7 +1236,7 @@ const App = {
                             this.state.completedLessons.push(nextCore.id);
                         }
                     } else {
-                        // Ultimo core del capitolo: sblocca la sfida bonus di padronanza!
+                        // Ultimo core del capitolo: sblocca la sfida bonus di apprendimento!
                         if (masteryLesson && !this.state.completedLessons.includes(masteryLesson.id)) {
                             this.state.completedLessons.push(masteryLesson.id);
                         }
@@ -1238,6 +1252,38 @@ const App = {
                 }
             });
         });
+        this.saveStorage();
+    },
+
+    unlockAllLessons(notify = false) {
+        this.state.devAllUnlocked = true;
+        this.state.completedLessons = LESSONS_DATA.map(l => l.id);
+        this.saveStorage();
+        this.renderRoadmap();
+        if (notify) {
+            this.showToast({
+                icon: '🔓',
+                tag: 'MODALITÀ VERIFICA',
+                title: 'Tutti i 60 Livelli Sbloccati',
+                desc: 'Ora puoi selezionare e testare qualsiasi esercizio o sfida di apprendimento!'
+            });
+        }
+    },
+
+    lockToStandardProgression(notify = false) {
+        this.state.devAllUnlocked = false;
+        this.state.completedLessons = [1];
+        this.ensureUnlockedConsistency();
+        this.saveStorage();
+        this.renderRoadmap();
+        if (notify) {
+            this.showToast({
+                icon: '🔒',
+                tag: 'PROGRESSIONE NORMALE',
+                title: 'Blocco Sequenziale Ripristinato',
+                desc: 'I livelli sono ora vincolati al completamento in ordine degli esercizi precedenti.'
+            });
+        }
     },
 
     toggleMasteryPopover(lessonId) {
@@ -1273,9 +1319,10 @@ const App = {
                         <polygon points="42,21 46.5,31.5 57.5,33 49.5,41 52,52 42,46 32,52 34.5,41 26.5,33 37.5,31.5" fill="#fffbeb" />
                     </svg>
                 `;
-            } else if (status === 'current') {
+            } else if (status === 'current' || status === 'unlocked') {
+                const pulseClass = (status === 'current') ? 'pulse-mastery' : '';
                 return `
-                    <svg class="hex-svg pulse-mastery" width="84" height="84" viewBox="0 0 84 84">
+                    <svg class="hex-svg ${pulseClass}" width="84" height="84" viewBox="0 0 84 84">
                         <defs>
                             <linearGradient id="hexGoldActive" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stop-color="#fbbf24"/>
@@ -1312,9 +1359,10 @@ const App = {
                         <path d="M 27 39 L 37 49 L 57 29" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 `;
-            } else if (status === 'current') {
+            } else if (status === 'current' || status === 'unlocked') {
+                const pulseClass = (status === 'current') ? 'pulse-current' : '';
                 return `
-                    <svg class="hex-svg pulse-current" width="84" height="84" viewBox="0 0 84 84">
+                    <svg class="hex-svg ${pulseClass}" width="84" height="84" viewBox="0 0 84 84">
                         <defs>
                             <linearGradient id="hexCyan" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stop-color="#38bdf8"/>
@@ -1365,9 +1413,9 @@ const App = {
             const chapterFinished = chapterLessons.filter(l => this.state.finishedLessons.includes(l.id)).length;
             const chapterTotal = chapterLessons.length;
 
-            // Il capitolo è sbloccato se è il capitolo 1, oppure se tutti i livelli core del capitolo precedente sono completati
-            let isChapterUnlocked = chapter.id === 1;
-            if (chapter.id > 1) {
+            // Il capitolo è sbloccato se è il capitolo 1, oppure se contiene livelli già sbloccati, oppure se il capitolo precedente è stato completato
+            let isChapterUnlocked = chapter.id === 1 || chapterLessons.some(l => this.state.completedLessons.includes(l.id));
+            if (!isChapterUnlocked && chapter.id > 1) {
                 const prevCoreLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id - 1 && !l.isMastery);
                 const lastPrevCore = prevCoreLessons[prevCoreLessons.length - 1];
                 if (lastPrevCore && this.state.finishedLessons.includes(lastPrevCore.id)) {
@@ -1412,9 +1460,23 @@ const App = {
             const buildNode = (lesson, isMastery, offset = 0) => {
                 const isFinished = this.state.finishedLessons.includes(lesson.id);
                 const isUnlocked = this.state.completedLessons.includes(lesson.id);
-                const isCurrent = isUnlocked && !isFinished;
 
-                let statusClass = isFinished ? 'completed' : (isCurrent ? 'current' : 'locked');
+                // Determina quale singolo nodo deve avere il tag "CONTINUA" e la pulsazione d'azione
+                let focusId = this.state.currentLessonId;
+                if (!focusId || this.state.finishedLessons.includes(focusId)) {
+                    const firstUnfinishedCore = LESSONS_DATA.find(l => !l.isMastery && this.state.completedLessons.includes(l.id) && !this.state.finishedLessons.includes(l.id));
+                    if (firstUnfinishedCore) focusId = firstUnfinishedCore.id;
+                }
+                const isCurrentFocus = isUnlocked && !isFinished && (lesson.id === focusId);
+
+                let statusClass = 'locked';
+                if (isFinished) {
+                    statusClass = 'completed';
+                } else if (isCurrentFocus) {
+                    statusClass = 'current';
+                } else if (isUnlocked) {
+                    statusClass = 'unlocked';
+                }
 
                 const node = document.createElement('div');
                 node.className = `node-item ${statusClass} ${isMastery ? 'mastery' : ''}`;
@@ -1455,7 +1517,7 @@ const App = {
                 let innerHtml = `
                     <div class="node-button hex-node">
                         ${this.renderHexNodeSVG(isMastery, statusClass)}
-                        ${(!isMastery && isCurrent) ? '<div class="tag-continua">CONTINUA</div>' : ''}
+                        ${(!isMastery && isCurrentFocus) ? '<div class="tag-continua">CONTINUA</div>' : ''}
                     </div>
                     <div class="node-label">${isMastery ? '⭐ Sfida di apprendimento' : lesson.title.replace(/^\d+\.\s*/, '')}</div>
                 `;
@@ -1729,10 +1791,21 @@ const App = {
 
         const headerNextBtn = document.getElementById('btn-header-next');
         if (headerNextBtn) {
-            if (this.state.finishedLessons.includes(lessonId)) {
+            const hasNext = lessonId < LESSONS_DATA.length;
+            const isNextUnlocked = hasNext && this.state.completedLessons.includes(lessonId + 1);
+            if (hasNext && (this.state.finishedLessons.includes(lessonId) || isNextUnlocked)) {
                 headerNextBtn.classList.remove('hidden');
             } else {
                 headerNextBtn.classList.add('hidden');
+            }
+        }
+
+        const headerPrevBtn = document.getElementById('btn-header-prev');
+        if (headerPrevBtn) {
+            if (lessonId > 1) {
+                headerPrevBtn.classList.remove('hidden');
+            } else {
+                headerPrevBtn.classList.add('hidden');
             }
         }
 
@@ -2240,7 +2313,7 @@ const App = {
                 const modalGain = document.getElementById('modal-xp-gain');
 
                 if (currentLesson.isMastery) {
-                    if (modalTitle) modalTitle.innerText = "⭐ SFIDA DI PADRONANZA SUPERATA!";
+                    if (modalTitle) modalTitle.innerText = "⭐ SFIDA DI APPRENDIMENTO SUPERATA!";
                     if (modalSubtitle) modalSubtitle.innerText = "Incredibile! Hai completato la sfida bonus e dimostrato la tua padronanza!";
                     if (modalGain) modalGain.innerText = `+${currentLesson.xp}`;
                 } else {
@@ -2251,7 +2324,7 @@ const App = {
                     if (modalTitle) modalTitle.innerText = isLastCore ? "CAPITOLO COMPLETATO!" : "MISSIONE COMPIUTA!";
                     if (modalSubtitle) {
                         modalSubtitle.innerText = isLastCore 
-                            ? "Ottimo lavoro! Hai sbloccato il capitolo successivo e la ⭐ Sfida di Padronanza Bonus!"
+                            ? "Ottimo lavoro! Hai sbloccato il capitolo successivo e la ⭐ Sfida di Apprendimento Bonus!"
                             : "Ottimo lavoro! Il tuo script GDScript funziona alla perfezione.";
                     }
                     if (modalGain) modalGain.innerText = `+${currentLesson.xp}`;
@@ -2594,6 +2667,37 @@ const App = {
                     SoundFX.playFanfare();
                     this.showRoadmap();
                 }
+            };
+        }
+
+        const btnHeaderPrev = document.getElementById('btn-header-prev');
+        if (btnHeaderPrev) {
+            btnHeaderPrev.onclick = () => {
+                SoundFX.playClick();
+                const prevId = this.state.currentLessonId - 1;
+                const prevLesson = LESSONS_DATA.find(l => l.id === prevId);
+                if (prevLesson) {
+                    this.openLesson(prevId);
+                } else {
+                    this.showRoadmap();
+                }
+            };
+        }
+
+        // Pulsanti Modal Impostazioni Sviluppatore / Modalità Verifica
+        const btnUnlockAll = document.getElementById('btn-settings-unlock-all');
+        if (btnUnlockAll) {
+            btnUnlockAll.onclick = () => {
+                SoundFX.playClick();
+                this.unlockAllLessons(true);
+            };
+        }
+
+        const btnLockProgression = document.getElementById('btn-settings-lock-progression');
+        if (btnLockProgression) {
+            btnLockProgression.onclick = () => {
+                SoundFX.playClick();
+                this.lockToStandardProgression(true);
             };
         }
     },
@@ -3762,6 +3866,8 @@ const App = {
 };
 
 window.App = App;
+window.unlockAll = (notify = true) => App.unlockAllLessons(notify);
+window.lockAll = (notify = true) => App.lockToStandardProgression(notify);
 
 window.addEventListener('DOMContentLoaded', () => {
     App.init();

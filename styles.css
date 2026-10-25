@@ -811,6 +811,14 @@ body {
     animation: rippleGlow 2s infinite;
 }
 
+/* NODO SBLOCCATO / DISPONIBILE: Ciano vivido pronto al click */
+.node-item.unlocked .node-button {
+    background: linear-gradient(145deg, #38bdf8, #0284c7 40%, #075985 100%);
+    border: 4px solid #bae6fd;
+    box-shadow: 0 10px 0 #0369a1;
+    cursor: pointer;
+}
+
 @keyframes rippleGlow {
     0%, 100% {
         box-shadow: 0 10px 0 #075985, 0 0 20px rgba(6, 182, 212, 0.6);
@@ -4551,6 +4559,13 @@ kbd {
 [data-theme="light"] .tree-path.completed {
     stroke: #10b981;
     filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.5));
+}
+
+[data-theme="light"] .node-item.unlocked .node-button {
+    background: linear-gradient(145deg, #38bdf8, #0284c7 100%);
+    border-color: #bae6fd;
+    box-shadow: 0 8px 0 #0369a1;
+    color: #ffffff;
 }
 
 [data-theme="light"] .node-item.locked .node-button {
