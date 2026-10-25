@@ -7702,3 +7702,335 @@ kbd {
     border-color: rgba(0, 0, 0, 0.1);
     text-shadow: none;
 }
+
+/* ==========================================================================
+   P1: PROGRESSIVE HINTS, DIDACTIC FEEDBACK & DEBUGGING EXERCISES
+   ========================================================================== */
+
+/* Header row for lessons with badge */
+.lesson-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.lesson-header-row h2 {
+    margin: 0;
+}
+
+/* Debugging Badge */
+.badge-debugging {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(185, 28, 28, 0.28));
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.4px;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+    animation: debugPulse 2s infinite ease-in-out;
+}
+
+@keyframes debugPulse {
+    0%, 100% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 8px rgba(239, 68, 68, 0.2); }
+    50% { border-color: rgba(239, 68, 68, 0.85); box-shadow: 0 0 16px rgba(239, 68, 68, 0.45); }
+}
+
+.task-box.debugging-task-box {
+    border-left: 4px solid #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+/* 3-Level Progressive Hints Stepper */
+.hint-stepper-nav {
+    display: flex;
+    gap: 6px;
+    padding: 10px 14px;
+    background: rgba(15, 23, 42, 0.5);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.hint-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.hint-tab-btn:hover:not(:disabled) {
+    border-color: var(--accent-cyan);
+    color: var(--text-main);
+    transform: translateY(-1px);
+}
+
+.hint-tab-btn.active {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent-cyan);
+    color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.hint-tab-btn.locked {
+    opacity: 0.65;
+    cursor: pointer;
+    border-style: dashed;
+}
+
+.hint-tab-btn.locked:hover {
+    opacity: 0.95;
+    border-color: #f59e0b;
+    color: #fde68a;
+}
+
+.hint-level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.hint-level-badge.level-1 {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.hint-level-badge.level-2 {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+.hint-level-badge.level-3 {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.hint-body-formatted {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--text-main);
+}
+
+.hint-spacer {
+    height: 10px;
+}
+
+.hint-inline-code {
+    font-family: var(--font-code);
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: #38bdf8;
+}
+
+.hint-code-block {
+    background: #0b1120;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-family: var(--font-code);
+    font-size: 0.82rem;
+    overflow-x: auto;
+    color: #e2e8f0;
+    line-height: 1.5;
+}
+
+/* Didactic Contextual Feedback Card */
+.didactic-feedback-card {
+    margin-top: 14px;
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-left: 4px solid #f59e0b;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.didactic-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.didactic-card-icon {
+    font-size: 1.15rem;
+}
+
+.didactic-card-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #fde68a;
+    margin: 0;
+}
+
+.didactic-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.didactic-card-explanation {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.didactic-tech-err {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: var(--font-code);
+    font-size: 0.78rem;
+    color: #fca5a5;
+    overflow-x: auto;
+}
+
+.didactic-debug-badge {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    color: #fca5a5;
+    line-height: 1.4;
+}
+
+.didactic-card-reflection {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.reflection-label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.reflection-text {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: #e2e8f0;
+    margin: 0;
+}
+
+.didactic-card-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-open-hint-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fde68a;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-open-hint-step:hover {
+    background: rgba(245, 158, 11, 0.3);
+    border-color: #f59e0b;
+    transform: translateY(-1px);
+}
+
+/* Light Theme Overrides */
+[data-theme="light"] .badge-debugging {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: #ef4444;
+    color: #dc2626;
+}
+
+[data-theme="light"] .hint-stepper-nav {
+    background: #f1f5f9;
+}
+
+[data-theme="light"] .hint-tab-btn {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+[data-theme="light"] .hint-tab-btn.active {
+    background: #e0f2fe;
+    border-color: #0284c7;
+    color: #0369a1;
+}
+
+[data-theme="light"] .hint-code-block {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+[data-theme="light"] .didactic-feedback-card {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    border-left-color: #d97706;
+}
+
+[data-theme="light"] .didactic-card-title {
+    color: #b45309;
+}
+
+[data-theme="light"] .didactic-tech-err {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+}
+
+[data-theme="light"] .didactic-card-reflection {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+}
+
+[data-theme="light"] .reflection-text {
+    color: #1e293b;
+}
+
+[data-theme="light"] .btn-open-hint-step {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}

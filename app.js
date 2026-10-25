@@ -17,6 +17,7 @@ const App = {
         lastActiveDate: null,
         userCode: {},
         hintsRevealed: 0,
+        activeHintLevel: 1,
         autocompleteList: [],
         selectedAutocompleteIndex: 0,
 
@@ -2463,6 +2464,7 @@ const App = {
 
         this.state.currentLessonId = lessonId;
         this.state.hintsRevealed = 0;
+        this.state.activeHintLevel = 1;
         this.hideAutocomplete();
 
         document.getElementById('view-roadmap').classList.add('hidden');
@@ -2491,6 +2493,7 @@ const App = {
                             <span class="coddy-bulb-icon">💡</span>
                             <h2 class="coddy-challenge-title">Sfida di apprendimento</h2>
                             <span class="coddy-diff-badge ${lesson.difficulty || 'facile'}">${lesson.difficultyLabel || 'Facile'}</span>
+                            ${lesson.isDebugging ? `<span class="badge-debugging">🐛 Debugging: ${App.escapeHtml(lesson.debugType || 'Bug Fix')}</span>` : ''}
                         </div>
                     </div>
 
@@ -2520,17 +2523,29 @@ const App = {
                             <span>Suggerimenti</span>
                         </div>
                         <div class="coddy-hints-list">
-                            ${(lesson.hints || []).map((hint, idx) => `
-                                <div class="coddy-hint-item" id="coddy-hint-item-${idx}">
-                                    <div class="coddy-hint-trigger" onclick="App.toggleCoddyHint(${idx})">
-                                        <span>Suggerimento ${idx + 1}</span>
-                                        <span class="coddy-hint-arrow" id="coddy-hint-arrow-${idx}">›</span>
+                            ${(lesson.hints || []).map((hint, idx) => {
+                                const hObj = (typeof hint === 'object' && hint !== null) ? hint : {
+                                    level: idx + 1,
+                                    icon: '💡',
+                                    label: `Suggerimento ${idx + 1}`,
+                                    text: String(hint)
+                                };
+                                return `
+                                    <div class="coddy-hint-item" id="coddy-hint-item-${idx}">
+                                        <div class="coddy-hint-trigger" onclick="App.toggleCoddyHint(${idx})">
+                                            <span class="coddy-hint-title-text"><span class="hint-item-icon">${hObj.icon || '💡'}</span> Livello ${hObj.level}: ${App.escapeHtml(hObj.label)}</span>
+                                            <span class="coddy-hint-arrow" id="coddy-hint-arrow-${idx}">›</span>
+                                        </div>
+                                        <div class="coddy-hint-text hidden" id="coddy-hint-text-${idx}">
+                                            <div class="hint-level-badge level-${hObj.level}">
+                                                <span class="badge-icon">${hObj.icon || '💡'}</span>
+                                                <span class="badge-title">Livello ${hObj.level} — ${App.escapeHtml(hObj.label)}</span>
+                                            </div>
+                                            <div class="hint-body-formatted">${App.formatHintContent(hObj.text)}</div>
+                                        </div>
                                     </div>
-                                    <div class="coddy-hint-text hidden" id="coddy-hint-text-${idx}">
-                                        ${hint}
-                                    </div>
-                                </div>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </div>
                         <div class="coddy-solution-row">
                             <button type="button" class="btn-coddy-sol-toggle" onclick="App.revealChallengeSolution()">Mostra Soluzione</button>
@@ -2541,28 +2556,32 @@ const App = {
         } else {
             // Ripristina layout standard lezione con teoria e obiettivo
             lessonContent.innerHTML = `
-                <h2 id="lesson-title">${lesson.title}</h2>
+                <div class="lesson-header-row">
+                    <h2 id="lesson-title">${lesson.title}</h2>
+                    ${lesson.isDebugging ? `<span class="badge-debugging">🐛 Debugging: ${App.escapeHtml(lesson.debugType || 'Bug Fix')}</span>` : ''}
+                </div>
                 <div id="lesson-theory" class="theory-body">${lesson.theory}</div>
-                <div class="task-box">
+                <div class="task-box ${lesson.isDebugging ? 'debugging-task-box' : ''}">
                     <div class="task-header">
-                        <span class="target-icon">🎯</span>
-                        <h3>Il Tuo Obiettivo:</h3>
+                        <span class="target-icon">${lesson.isDebugging ? '🐛' : '🎯'}</span>
+                        <h3>${lesson.isDebugging ? 'Compito di Debugging:' : 'Il Tuo Obiettivo:'}</h3>
                     </div>
                     <div id="lesson-task" class="task-body">${lesson.task}</div>
                 </div>
                 <div class="hints-section">
                     <div class="hints-toggle-btn" id="btn-toggle-hint">
                         <span class="hint-icon">💡</span>
-                        <span id="hint-toggle-text">Ti serve un consiglio? (0/${lesson.hints.length} usati)</span>
+                        <span id="hint-toggle-text">Ti serve un consiglio? (0/${lesson.hints.length} sbloccati)</span>
                         <span class="arrow">▼</span>
                     </div>
                     <div class="hint-box hidden" id="hint-box">
+                        <div class="hint-stepper-nav" id="hint-stepper-nav"></div>
                         <div class="hint-content" id="hint-text">
                             Leggi attentamente il compito e usa la funzione corretta.
                         </div>
                         <div class="hint-actions">
-                            <button class="btn-subtle" id="btn-next-hint">Altro Consiglio ➔</button>
-                            <button class="btn-danger-subtle" id="btn-reveal-solution">Mostra Soluzione</button>
+                            <button type="button" class="btn-subtle" id="btn-next-hint">Altro Consiglio ➔</button>
+                            <button type="button" class="btn-danger-subtle" id="btn-reveal-solution">Mostra Soluzione Completa</button>
                         </div>
                     </div>
                 </div>
@@ -2610,7 +2629,7 @@ const App = {
         const hintBox = document.getElementById('hint-box');
         if (hintBox) hintBox.classList.add('hidden');
         const hintToggleText = document.getElementById('hint-toggle-text');
-        if (hintToggleText) hintToggleText.innerText = `Ti serve un consiglio? (0/${lesson.hints.length} usati)`;
+        if (hintToggleText) hintToggleText.innerText = `Ti serve un consiglio? (0/${lesson.hints.length} sbloccati)`;
 
         // Reset e posizionamento Viewport 2D per il livello corrente
         if (this.viewport) {
@@ -3126,6 +3145,13 @@ const App = {
                 badge.innerText = `✗ Fallito (${tests.filter(t => t.passed).length}/${tests.length})`;
                 badge.style.color = '#ef4444';
                 SoundFX.playError();
+
+                // Costruzione Feedback Didattico Contestuale (P1)
+                const firstFailedTest = tests.find(t => !t.passed);
+                const feedbackCard = this.buildContextualFeedback(result, currentLesson, firstFailedTest, tests);
+                if (feedbackCard) {
+                    resultsContainer.appendChild(feedbackCard);
+                }
             }
 
         } catch (criticalErr) {
@@ -3515,21 +3541,143 @@ const App = {
         }
     },
 
-    displayHint(lesson) {
-        const hintIdx = Math.min(this.state.hintsRevealed - 1, lesson.hints.length - 1);
-        const hintText = document.getElementById('hint-text');
-        if (hintText) hintText.innerText = lesson.hints[hintIdx];
+    escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    },
+
+    formatHintContent(text) {
+        if (!text) return '';
+        let escaped = String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        // ```gdscript ... ``` or ``` ... ```
+        escaped = escaped.replace(/```(?:gdscript)?\s*([\s\S]*?)```/g, (match, code) => {
+            return `<pre class="hint-code-block"><code>${code.trim()}</code></pre>`;
+        });
+
+        // `inline code`
+        escaped = escaped.replace(/`([^`\n]+)`/g, '<code class="hint-inline-code">$1</code>');
+
+        // **bold**
+        escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+        // Newlines: split around pre blocks so we don't insert <br> inside <pre>
+        const parts = escaped.split(/(<pre[\s\S]*?<\/pre>)/g);
+        for (let i = 0; i < parts.length; i += 2) {
+            parts[i] = parts[i].replace(/\n\n/g, '<div class="hint-spacer"></div>').replace(/\n/g, '<br>');
+        }
+        return parts.join('');
+    },
+
+    renderHintBox(lesson) {
+        if (!lesson || !lesson.hints) return;
+        const totalHints = lesson.hints.length;
+        if (this.state.hintsRevealed === 0) {
+            this.state.hintsRevealed = 1;
+        }
+        if (!this.state.activeHintLevel || this.state.activeHintLevel > this.state.hintsRevealed) {
+            this.state.activeHintLevel = this.state.hintsRevealed;
+        }
+
         const hintToggleText = document.getElementById('hint-toggle-text');
-        if (hintToggleText) hintToggleText.innerText = `Consiglio (${this.state.hintsRevealed}/${lesson.hints.length})`;
+        if (hintToggleText) {
+            hintToggleText.innerText = `Consiglio (${this.state.hintsRevealed}/${totalHints} sbloccati)`;
+        }
+
+        const navContainer = document.getElementById('hint-stepper-nav');
+        if (navContainer) {
+            navContainer.innerHTML = lesson.hints.map((h, idx) => {
+                const lvl = (typeof h === 'object' && h.level) ? h.level : (idx + 1);
+                const isUnlocked = this.state.hintsRevealed >= lvl;
+                const isActive = this.state.activeHintLevel === lvl;
+                const label = (typeof h === 'object' && h.label) ? h.label : (lvl === 1 ? 'Indizio' : lvl === 2 ? 'Struttura' : 'Esempio');
+                const icon = (typeof h === 'object' && h.icon) ? h.icon : (lvl === 1 ? '💭' : lvl === 2 ? '🏗️' : '📝');
+
+                if (isUnlocked) {
+                    return `
+                        <button type="button" class="hint-tab-btn ${isActive ? 'active' : ''}" onclick="App.selectHintLevel(${lvl})">
+                            <span class="tab-icon">${icon}</span>
+                            <span class="tab-label">Liv. ${lvl}: ${this.escapeHtml(label)}</span>
+                        </button>
+                    `;
+                } else {
+                    return `
+                        <button type="button" class="hint-tab-btn locked" onclick="App.unlockNextHintLevel()" title="Clicca per sbloccare il livello ${lvl}">
+                            <span class="tab-icon">🔒</span>
+                            <span class="tab-label">Liv. ${lvl}: ${this.escapeHtml(label)}</span>
+                        </button>
+                    `;
+                }
+            }).join('');
+        }
+
+        const hintContent = document.getElementById('hint-text');
+        if (hintContent) {
+            const activeIdx = Math.max(0, Math.min(this.state.activeHintLevel - 1, totalHints - 1));
+            const activeHint = lesson.hints[activeIdx];
+            const hObj = (typeof activeHint === 'object' && activeHint !== null) ? activeHint : {
+                level: activeIdx + 1,
+                icon: '💡',
+                label: `Livello ${activeIdx + 1}`,
+                text: String(activeHint)
+            };
+
+            hintContent.innerHTML = `
+                <div class="hint-level-badge level-${hObj.level}">
+                    <span class="badge-icon">${hObj.icon || '💡'}</span>
+                    <span class="badge-title">Livello ${hObj.level} — ${this.escapeHtml(hObj.label)}</span>
+                </div>
+                <div class="hint-body-formatted">
+                    ${this.formatHintContent(hObj.text)}
+                </div>
+            `;
+        }
 
         const nextBtn = document.getElementById('btn-next-hint');
         if (nextBtn) {
-            if (this.state.hintsRevealed >= lesson.hints.length) {
+            if (this.state.hintsRevealed >= totalHints) {
                 nextBtn.style.display = 'none';
             } else {
                 nextBtn.style.display = 'inline-block';
+                const nextLvl = this.state.hintsRevealed + 1;
+                const nextHint = lesson.hints[nextLvl - 1];
+                const nextLabel = (nextHint && nextHint.label) ? nextHint.label : `Livello ${nextLvl}`;
+                nextBtn.innerText = `Sblocca Liv. ${nextLvl}: ${nextLabel} ➔`;
             }
         }
+    },
+
+    selectHintLevel(level) {
+        if (level <= this.state.hintsRevealed) {
+            SoundFX.playClick();
+            this.state.activeHintLevel = level;
+            const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+            if (currentLesson) this.renderHintBox(currentLesson);
+        }
+    },
+
+    unlockNextHintLevel() {
+        const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+        if (!currentLesson) return;
+        if (this.state.hintsRevealed < currentLesson.hints.length) {
+            SoundFX.playHint();
+            this.state.hintsRevealed++;
+            this.state.activeHintLevel = this.state.hintsRevealed;
+            this.renderHintBox(currentLesson);
+            this.checkAchievements();
+        }
+    },
+
+    displayHint(lesson) {
+        this.renderHintBox(lesson);
     },
 
     bindStandardHintEvents() {
@@ -3545,8 +3693,9 @@ const App = {
                     hintBox.classList.remove('hidden');
                     if (this.state.hintsRevealed === 0) {
                         this.state.hintsRevealed = 1;
+                        this.state.activeHintLevel = 1;
                     }
-                    this.displayHint(currentLesson);
+                    this.renderHintBox(currentLesson);
                     this.checkAchievements();
                 } else if (hintBox) {
                     hintBox.classList.add('hidden');
@@ -3557,13 +3706,7 @@ const App = {
         const btnNextHint = document.getElementById('btn-next-hint');
         if (btnNextHint) {
             btnNextHint.onclick = () => {
-                const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
-                if (!currentLesson) return;
-                if (this.state.hintsRevealed < currentLesson.hints.length) {
-                    SoundFX.playHint();
-                    this.state.hintsRevealed++;
-                    this.displayHint(currentLesson);
-                }
+                this.unlockNextHintLevel();
             };
         }
 
@@ -3579,6 +3722,105 @@ const App = {
                 }
             };
         }
+    },
+
+    openHintFromFeedback() {
+        const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+        if (!currentLesson) return;
+
+        if (currentLesson.isMastery) {
+            const item = document.getElementById('coddy-hint-item-0');
+            const text = document.getElementById('coddy-hint-text-0');
+            if (text && text.classList.contains('hidden')) {
+                this.toggleCoddyHint(0);
+            }
+            if (item) item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            const hintBox = document.getElementById('hint-box');
+            if (hintBox) {
+                hintBox.classList.remove('hidden');
+                if (this.state.hintsRevealed === 0) {
+                    this.state.hintsRevealed = 1;
+                }
+                this.state.activeHintLevel = 1;
+                this.renderHintBox(currentLesson);
+                this.checkAchievements();
+                hintBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+    },
+
+    buildContextualFeedback(result, currentLesson, failedTest, allTests) {
+        const card = document.createElement('div');
+        card.className = 'didactic-feedback-card';
+
+        let title = "🎯 Verifica Didattica: Requisito Non Soddisfatto";
+        let icon = "💡";
+        let explanation = "Il codice è stato eseguito, ma il risultato o lo stato generato non corrisponde a quanto richiesto dalla traccia.";
+        let technicalDetail = "";
+
+        if (result && result.error) {
+            const errStr = String(result.error);
+            const isSyntax = /syntaxerror|invalid or unexpected token|unexpected token|indentation|unexpected identifier/i.test(errStr);
+            const isUndefined = /is not defined|referenceerror/i.test(errStr);
+            if (isSyntax) {
+                title = "🔍 Errore di Sintassi GDScript";
+                icon = "🛠️";
+                explanation = "Il compilatore GDScript non è riuscito a comprendere la struttura del codice. Controlla di aver racchiuso correttamente i testi tra virgolette doppie o singole, chiuso tutte le parentesi e aggiunto i due punti (:) al termine delle definizioni.";
+            } else if (isUndefined) {
+                title = "🔍 Errore di Sintassi o Nome Non Definito";
+                icon = "🛠️";
+                explanation = "GDScript non riconosce questo nome. Se intendevi assegnare una parola o un testo, racchiudilo tra virgolette (es. \"Eroe\"); altrimenti verifica di aver dichiarato la variabile con 'var' prima di usarla.";
+            } else {
+                title = "⚡ Errore durante l'Esecuzione (Runtime)";
+                icon = "🛑";
+                explanation = "Il codice si è interrotto durante l'esecuzione prima di raggiungere il risultato. Verifica il nome delle variabili dichiarate, gli indici degli array o le chiamate di metodi.";
+            }
+            technicalDetail = `<div class="didactic-tech-err"><code>${this.escapeHtml(errStr)}</code></div>`;
+        } else if (failedTest && failedTest.desc) {
+            explanation = `Il requisito non ancora soddisfatto è: <strong>${this.escapeHtml(failedTest.desc)}</strong>.`;
+            if (failedTest.diff) {
+                technicalDetail = `<div class="didactic-tech-err"><code>${this.escapeHtml(failedTest.diff)}</code></div>`;
+            }
+        }
+
+        // Recupera l'indizio concettuale di Livello 1 per la riflessione
+        let lvl1HintText = "Rileggi l'obiettivo dell'esercizio e verifica con attenzione ogni passaggio logico.";
+        if (currentLesson.hints && currentLesson.hints.length > 0) {
+            const h1 = currentLesson.hints[0];
+            lvl1HintText = (typeof h1 === 'object' && h1.text) ? h1.text : String(h1);
+        }
+
+        const debugHtml = currentLesson.isDebugging ? `
+            <div class="didactic-debug-badge">
+                <span class="debug-badge-icon">🐛</span>
+                <span><strong>Focus Debugging:</strong> ${this.escapeHtml(currentLesson.debugType || 'Correzione bug')} — In questo esercizio c'è un bug inserito appositamente nel codice iniziale. Esaminalo riga per riga per individuare la causa del malfunzionamento.</span>
+            </div>
+        ` : '';
+
+        card.innerHTML = `
+            <div class="didactic-card-header">
+                <span class="didactic-card-icon">${icon}</span>
+                <h4 class="didactic-card-title">${title}</h4>
+            </div>
+            <div class="didactic-card-body">
+                ${debugHtml}
+                <p class="didactic-card-explanation">${explanation}</p>
+                ${technicalDetail}
+                <div class="didactic-card-reflection">
+                    <span class="reflection-label">💭 Spunto Didattico di Ragionamento:</span>
+                    <div class="reflection-text">${this.formatHintContent(lvl1HintText)}</div>
+                </div>
+            </div>
+            <div class="didactic-card-footer">
+                <button type="button" class="btn-open-hint-step" onclick="App.openHintFromFeedback()">
+                    <span>💡</span>
+                    <span>Apri Suggerimento Completo (Livello 1)</span>
+                </button>
+            </div>
+        `;
+
+        return card;
     },
 
     toggleCoddyExplanation() {

@@ -184,9 +184,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Stampa esattamente: "Ciao Godot!"\n    pass\n`,
         hints: [
-            "Sostituisci 'pass' con: print(\"Ciao Godot!\")",
-            "Assicurati che la riga sia indentata con 4 spazi (oppure 1 tasto Tab)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "In Godot, quando un nodo viene inserito nella scena, il motore esegue automaticamente la funzione `_ready()`. Pensa a questa funzione come al punto di partenza del tuo script."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa la funzione nativa `print(...)`. Il testo da stampare deve essere racchiuso tra virgolette doppie o singole e inserito indentato sotto `func _ready():`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    print(\"Saluti da Godot!\")\n```\nSostituisci il messaggio di esempio con la stringa esatta richiesta nel testo dell'esercizio."
+            }
+],
         solution: `func _ready():\n    print("Ciao Godot!")\n`,
         validate: async (result) => {
     const tests = [];
@@ -221,9 +240,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Inserisci il tuo commento e stampa la frase richiesta\n    pass\n`,
         hints: [
-            "Scrivi: # Inizializzazione gioco",
-            "Poi stampa: print(\"Benvenuto nel gioco\")"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I commenti sono note per gli umani che il computer ignora completamente durante l'esecuzione del gioco. Servono a spiegare l'intenzione del codice."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "In GDScript, qualsiasi testo che segue il simbolo cancelletto `#` sulla stessa riga diventa un commento. Puoi posizionarlo su una riga dedicata prima del `print()`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Inizializzazione parametri\n    print(\"Test\")\n```\nInserisci un commento descrittivo seguito dal `print()` con la frase richiesta."
+            }
+],
         solution: `func _ready():\n    # Inizializzazione gioco\n    print("Benvenuto nel gioco")\n`,
         validate: async (result) => {
     const tests = [];
@@ -260,9 +298,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Stampa "Livello" e poi il numero 1\n    pass\n`,
         hints: [
-            "print(\"Livello\")",
-            "print(1)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Il testo (stringa) richiede le virgolette per essere interpretato, mentre i numeri interi sono valori numerici puri e vanno inseriti direttamente."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa due chiamate distinte a `print(...)` in sequenza: la prima con la parola tra virgolette, la seconda con il numero senza virgolette."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    print(\"Capitolo\")\n    print(42)\n```\nOgni chiamata a `print()` produce una riga separata nella console di Godot."
+            }
+],
         solution: `func _ready():\n    print("Livello")\n    print(1)\n`,
         validate: async (result) => {
     const tests = [];
@@ -294,10 +351,28 @@ const LESSONS_DATA = [
         initialCode: `extends Node\n\nfunc _ready():\n    print("=== AVVIO SISTEMA ===")\n    # Aggiungi il commento e le due istruzioni print() sotto\n    \n    # Non modificare la riga sotto\n    print("=== DIAGNOSTICA COMPLETATA ===")\n`,
         aiExplanation: "In questo esercizio applichi i fondamenti del Capitolo 1: i commenti con <code>#</code> vengono ignorati dal motore ma servono a documentare il codice. La funzione <code>print()</code> accetta sia singoli testi tra virgolette, sia argomenti multipli separati da virgola come <code>print(\"Energia: \", 100, \"%\")</code>, che Godot formatta automaticamente con gli spazi corretti.",
         hints: [
-            "Inizia inserendo il cancelletto # seguito dal testo: # Diagnostica reattori",
-            "Per la prima stampa scrivi: print(\"Sistema: Godot OS\")",
-            "Per stampare più valori separati da virgola scrivi: print(\"Energia: \", 100, \"%\")"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Questa sfida richiede di combinare documentazione (commento con cancelletto) e output di diagnostica nella console."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Scrivi una riga che inizia con `#` per documentare il sistema, poi due istruzioni `print(...)` separate per i due parametri di diagnostica."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Diagnostica motore\n    print(\"Modulo: Audio\")\n    print(\"Volume:\", 80, \"%\")\n```\nAdatta i nomi delle etichette e le percentuali ai requisiti della missione."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    print("=== AVVIO SISTEMA ===")\n    # Diagnostica reattori\n    print("Sistema: Godot OS")\n    print("Energia: ", 100, "%")\n    print("=== DIAGNOSTICA COMPLETATA ===")
 `,
         theory: `
@@ -356,9 +431,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Dichiara la variabile nome e stampala\n    pass\n`,
         hints: [
-            "var nome = \"Eroe\"",
-            "print(nome)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Una variabile è come una scatola etichettata nella memoria del computer in cui conservare un dato che potrai riutilizzare più volte nel gioco."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "In GDScript si crea una variabile con la parola chiave `var`, seguita dal nome della variabile, dall'operatore `=` e dal valore numerico iniziale."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var monete = 25\n    print(monete)\n```\nNota che quando stampi la variabile non devi usare le virgolette, altrimenti stamperesti il testo del nome e non il suo contenuto numerico."
+            }
+],
         solution: `func _ready():\n    var nome = "Eroe"\n    print(nome)\n`,
         validate: async (result) => {
     const tests = [];
@@ -372,6 +466,8 @@ const LESSONS_DATA = [
     },
     {
         id: 6,
+        isDebugging: true,
+        debugType: "Sintassi (Virgolette mancanti)",
         chapterId: 2,
         isMastery: false,
         title: "6. Tipi di testo (String) e interi (int)",
@@ -395,13 +491,35 @@ const LESSONS_DATA = [
                 <li>Stampa entrambe le variabili su righe separate.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    # Dichiara personaggio e punti_vita, poi stampale\n    pass\n`,
+        initialCode: `func _ready():
+    # BUG DI SINTASSI: Manca la delimitazione della stringa!
+    # Correggi la riga sotto affinché 'Eroe' sia una stringa racchiusa tra virgolette:
+    var nome_giocatore = Eroe
+    print(nome_giocatore)
+`,
         hints: [
-            "var personaggio = \"Guerriero\"",
-            "var punti_vita = 100",
-            "print(personaggio)",
-            "print(punti_vita)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Le stringhe rappresentano testi o sequenze di caratteri (nomi di personaggi, messaggi di dialogo). Senza virgolette, il compilatore le confonderebbe con variabili non definite."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Dichiara la variabile con `var` e assegna la stringa racchiusa tra doppi apici `\"...\"` o singoli apici `'...'`. Poi passa la variabile a `print()`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var titolo = \"Cavaliere\"\n    print(titolo)\n```\nSe il codice di partenza conteneva un errore (virgolette mancanti), racchiudi la parola nelle virgolette."
+            }
+],
         solution: `func _ready():\n    var personaggio = "Guerriero"\n    var punti_vita = 100\n    print(personaggio)\n    print(punti_vita)\n`,
         validate: async (result) => {
     const tests = [];
@@ -442,10 +560,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Concatena "Giocatore: " con la variabile nome e stampa\n    pass\n`,
         hints: [
-            "var nome = \"Eroe\"",
-            "var messaggio = \"Giocatore: \" + nome",
-            "print(messaggio)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Concatenare significa 'incollare' due stringhe insieme per formare una frase completa (es. unire un'etichetta fissa con il nome dinamico del personaggio)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "In GDScript puoi unire due stringhe usando l'operatore di addizione `+`. Assegna il risultato dell'unione a una seconda variabile `messaggio`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var utente = \"Mario\"\n    var benvenuto = \"Ciao: \" + utente\n    print(benvenuto)\n```\nFai attenzione a includere lo spazio dopo i due punti all'interno delle virgolette."
+            }
+],
         solution: `func _ready():\n    var nome = "Eroe"\n    var messaggio = "Giocatore: " + nome\n    print(messaggio)\n`,
         validate: async (result) => {
     const tests = [];
@@ -481,10 +617,28 @@ const LESSONS_DATA = [
         initialCode: `extends Node\n\nfunc _ready():\n    # Crea title, npc_line e door_code sotto\n    \n    # Non modificare le righe sotto\n    print("Title: ", title)\n    print("NPC: ", npc_line)\n    print("Door code: ", door_code)\n`,
         aiExplanation: "In GDScript puoi creare stringhe sia con virgolette doppie <code>\"...\"</code> sia con apici singoli <code>'...'</code>. Se il testo contiene virgolette doppie interne (come <code>\"Lost\"</code>), racchiudi la stringa tra apici singoli come <code>'The \"Lost\" Key'</code> oppure usa il carattere di escape <code>\\\"</code>. Per includere un apostrofo, racchiudi la stringa tra virgolette doppie. Per codici con zero iniziale come <code>\"0420\"</code>, usa sempre una stringa di caratteri altrimenti verrebbe troncato a numero.",
         hints: [
-            "Dichiara ogni variabile usando la parola chiave var: var nome_variabile = ...",
-            "Per racchiudere virgolette doppie all'interno puoi usare apici singoli: var title = 'The \"Lost\" Key'",
-            "Il codice della porta deve essere racchiuso tra virgolette: var door_code = \"0420\""
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I giochi di ruolo memorizzano attributi differenti per ciascun personaggio: testo per l'identità, numeri interi per le statistiche come punti salute e forza."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Dichiara le variabili richieste (`nome_personaggio`, `classe_ruolo`, `salute_iniziale`, `livello`) una sotto l'altra, quindi stampale ciascuna con la propria etichetta."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var eroe = \"Geralt\"\n    var hp = 100\n    print(\"Eroe:\", eroe)\n    print(\"HP:\", hp)\n```\nIn `print()`, passare argomenti separati da virgola inserisce automaticamente uno spazio."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    var title = 'The "Lost" Key'\n    var npc_line = "It's dangerous to go alone!"\n    var door_code = "0420"\n    \n    # Non modificare le righe sotto\n    print("Title: ", title)\n    print("NPC: ", npc_line)\n    print("Door code: ", door_code)\n`,
         theory: `
             <div class="mastery-banner">
@@ -548,11 +702,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Dichiara velocita (float) e ha_chiave (bool)\n    pass\n`,
         hints: [
-            "var velocita = 4.5",
-            "var ha_chiave = true",
-            "print(velocita)",
-            "print(ha_chiave)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I numeri con la virgola (chiamati `float` per virgola mobile) servono per grandezze fisiche continue come velocità, tempo in secondi, o moltiplicatori di danno."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "In programmazione si usa il punto `.` come separatore decimale anziché la virgola. Crea la variabile assegnando il numero decimale con il punto."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var fattore_scala = 1.75\n    print(fattore_scala)\n```\nNon usare `1,75` poiché la virgola separa gli argomenti."
+            }
+],
         solution: `func _ready():\n    var velocita = 4.5\n    var ha_chiave = true\n    print(velocita)\n    print(ha_chiave)\n`,
         validate: async (result) => {
     const tests = [];
@@ -589,9 +760,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Dichiara con tipizzazione statica: var vita: int = 100\n    pass\n`,
         hints: [
-            "var vita: int = 100",
-            "print(vita)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "La tipizzazione statica esplicita informa Godot sul tipo di dato che la variabile conterrà per sempre. Questo previene bug ed ottimizza le prestazioni dello script."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Aggiungi `:` seguito dal tipo (`int`, `float`, `String`, `bool`) subito dopo il nome della variabile e prima del segno `=`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var energia: int = 50\n    print(energia)\n```\nLa struttura è sempre: `var nome: Tipo = valore`."
+            }
+],
         solution: `func _ready():\n    var vita: int = 100\n    print(vita)\n`,
         validate: async (result) => {
     const tests = [];
@@ -629,9 +819,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Dichiara la costante GRAVITA e stampala\n    pass\n`,
         hints: [
-            "const GRAVITA = 9.8",
-            "print(GRAVITA)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Se un parametro di gioco non deve MAI cambiare durante l'esecuzione (come le leggi fisiche o la risoluzione base), usare `const` impedisce modifiche accidentali."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Sostituisci la parola chiave `var` con `const`. Per convenzione in Godot, i nomi delle costanti si scrivono interamente in MAIUSCOLO."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nconst ATTRITO = 0.85\n\nfunc _ready():\n    print(ATTRITO)\n```\nLe costanti possono essere definite sia a livello di classe (in cima al file) che all'interno di funzioni."
+            }
+],
         solution: `func _ready():\n    const GRAVITA = 9.8\n    print(GRAVITA)\n`,
         validate: async (result) => {
     const tests = [];
@@ -665,10 +874,28 @@ const LESSONS_DATA = [
         initialCode: `extends Node\n\n# Dichiara la costante MAX_HP sotto\n\nfunc _ready():\n    # Crea eroe, salute e scudo_attivo sotto\n    \n    # Non modificare le righe sotto\n    print("Eroe: ", eroe)\n    print("HP: ", salute, " / ", MAX_HP)\n    print("Scudo: ", scudo_attivo)\n`,
         aiExplanation: "In GDScript 4, le costanti si dichiarano con <code>const NOME: Tipo = Valore</code> e non possono essere modificate durante il gioco. La tipizzazione statica usa la sintassi <code>var nome: Tipo = valore</code>, consentendo all'autocompletamento di suggerire i metodi corretti. L'operatore speciale di inferenza <code>:=</code> assegna il tipo automaticamente in base al valore iniziale.",
         hints: [
-            "Dichiara la costante in cima allo script: const MAX_HP: int = 200",
-            "Dichiara le variabili specificando il tipo con i due punti: var eroe: String = \"Valerius\" e var salute: int = 150",
-            "Per l'inferenza di tipo usa := senza scrivere il tipo a mano: var scudo_attivo := true"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "In Godot 4, l'operatore walrus `:=` permette di combinare la sicurezza del tipo statico con la brevità, lasciando che Godot indovini il tipo dal valore assegnato."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa `const NOME := valore` per una costante con tipo inferito, oppure `var nome := valore` per una variabile con tipo inferito."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nconst LIMITE_LIVELLO := 99\n\nfunc _ready():\n    var attivo := true\n    print(LIMITE_LIVELLO)\n```\n`LIMITE_LIVELLO` riceve automaticamente il tipo `: int` senza doverlo digitare manualmente."
+            }
+],
         solution: `extends Node\n\nconst MAX_HP: int = 200\n\nfunc _ready():\n    var eroe: String = "Valerius"\n    var salute: int = 150\n    var scudo_attivo := true\n    \n    # Non modificare le righe sotto\n    print("Eroe: ", eroe)\n    print("HP: ", salute, " / ", MAX_HP)\n    print("Scudo: ", scudo_attivo)\n`,
         theory: `
             <div class="mastery-banner">
@@ -730,11 +957,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Calcola somma (10 + 5) e prodotto (5 * 2), poi stampali\n    pass\n`,
         hints: [
-            "var somma = 10 + 5",
-            "var prodotto = 5 * 2",
-            "print(somma)",
-            "print(prodotto)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Il computer valuta prima le moltiplicazioni e divisioni, e solo successivamente addizioni e sottrazioni, esattamente come nelle regole matematiche standard."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Combina l'addizione `+` e la moltiplicazione `*` in un'unica espressione assegnata alla variabile `xp_totali`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var monete_totali = 100 + 4 * 10\n    print(monete_totali)\n```\n`4 * 10` viene calcolato per primo (40), poi sommato a 100 per un totale di 140."
+            }
+],
         solution: `func _ready():\n    var somma = 10 + 5\n    var prodotto = 5 * 2\n    print(somma)\n    print(prodotto)\n`,
         validate: async (result) => {
     const tests = [];
@@ -751,6 +995,8 @@ const LESSONS_DATA = [
     },
     {
         id: 14,
+        isDebugging: true,
+        debugType: "Logica (Precedenza aritmetica)",
         chapterId: 4,
         isMastery: false,
         title: "14. Assegnazioni rapide (+=, -=)",
@@ -771,11 +1017,35 @@ const LESSONS_DATA = [
                 <li>Stampa il valore finale di <code>punti_vita</code> (80).</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    var punti_vita = 100\n    # Sottrai 20 con -= e stampa\n    pass\n`,
+        initialCode: `func _ready():
+    # BUG DI PRECEDENZA: La divisione viene eseguita prima dell'addizione!
+    # Aggiungi le parentesi tonde per calcolare la media corretta (50):
+    var media_salute = 60 + 40 / 2
+    print(media_salute)
+`,
         hints: [
-            "punti_vita -= 20",
-            "print(punti_vita)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Quando vuoi che una somma venga calcolata prima di una divisione (come nel calcolo di una media tra due valori), devi forzare la precedenza racchiudendo la somma tra parentesi tonde."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Racchiudi gli addendi tra parentesi tonde: `(valore1 + valore2) / 2`. In questo modo la somma viene eseguita per prima."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Senza parentesi: 10 + 20 / 2 = 10 + 10 = 20 (Sbagliato)\n    var media = (10 + 20) / 2 # (30) / 2 = 15 (Corretto)\n    print(media)\n```\nIdentifica l'espressione nel codice e avvolgila tra parentesi tonde."
+            }
+],
         solution: `func _ready():\n    var punti_vita = 100\n    punti_vita -= 20\n    print(punti_vita)\n`,
         validate: async (result) => {
     const tests = [];
@@ -812,11 +1082,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Calcola monete_totali e stampala\n    pass\n`,
         hints: [
-            "var monete_base = 50",
-            "var moltiplicatore = 3",
-            "var monete_totali = monete_base * moltiplicatore",
-            "print(monete_totali)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Invece di riscrivere `monete = monete + 25`, puoi usare una scorciatoia sintattica che ordina a Godot di 'aggiungere 25 al valore già presente nella variabile'."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa l'operatore di assegnazione composta `+=`. La sintassi è: `nome_variabile += incremento`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var punteggio = 10\n    punteggio += 5 # Ora punteggio vale 15\n    print(punteggio)\n```\nPrima dichiara la variabile con il valore di partenza, poi applica `+=`."
+            }
+],
         solution: `func _ready():\n    var monete_base = 50\n    var moltiplicatore = 3\n    var monete_totali = monete_base * moltiplicatore\n    print(monete_totali)\n`,
         validate: async (result) => {
     const tests = [];
@@ -849,10 +1136,28 @@ const LESSONS_DATA = [
         initialCode: `extends Node\n\nfunc _ready():\n    var salute_rimasta = 100\n    # Aggiorna salute_rimasta e calcola monete_per_membro e monete_avanzate sotto\n    \n    # Non modificare le righe sotto\n    print("Salute Guerriero: ", salute_rimasta)\n    print("Monete per membro: ", monete_per_membro)\n    print("Monete avanzate: ", monete_avanzate)\n`,
         aiExplanation: "In GDScript l'operatore <code>-=</code> sottrae un valore direttamente da una variabile esistente (es. <code>salute_rimasta -= 35</code>). La divisione intera tra due numeri interi <code>100 / 3</code> calcola la parte intera (33), mentre l'operatore resto <code>%</code> (modulo) calcola quante unità avanzano dalla divisione (1).",
         hints: [
-            "Per sottrarre il danno scrivi: salute_rimasta -= 35",
-            "Per la divisione usa lo slash: var monete_per_membro = 100 / 3",
-            "Per il resto della divisione usa il modulo %: var monete_avanzate = 100 % 3"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Quando distribuisci risorse tra membri di una squadra, la divisione intera ti dice quante monete spettano a ciascuno, mentre l'operatore modulo `%` restituisce il resto che non può essere diviso equamente."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa `-=` per sottrarre danno dalla salute, `/` per la divisione in parti uguali e `%` (modulo) per calcolare le monete avanzate."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var mele = 10\n    var mele_per_persona = 10 / 3 # Divisione intera = 3\n    var resto = 10 % 3           # Resto della divisione = 1\n```\nIn GDScript, dividere due numeri interi restituisce un quoziente intero."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    var salute_rimasta = 100\n    salute_rimasta -= 35\n    var monete_per_membro = 100 / 3\n    var monete_avanzate = 100 % 3\n    \n    # Non modificare le righe sotto\n    print("Salute Guerriero: ", salute_rimasta)\n    print("Monete per membro: ", monete_per_membro)\n    print("Monete avanzate: ", monete_avanzate)\n`,
         theory: `
             <div class="mastery-banner">
@@ -912,9 +1217,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    var livello = 10\n    # Confronta con >= e stampa\n    pass\n`,
         hints: [
-            "if livello >= 10:",
-            "    print(\"Livello raggiunto!\")"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Le istruzioni condizionali permettono al gioco di prendere decisioni: eseguire un blocco di codice solo se una determinata condizione è vera (ad esempio se il giocatore ha raggiunto il livello richiesto)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa `if` seguito dalla condizione e dai due punti `:`. Le istruzioni da eseguire devono essere indentate di 4 spazi."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var punteggio = 15\n    if punteggio >= 10:\n        print(\"Traguardo superato!\")\n```\nNon dimenticare i due punti `:` alla fine della riga dell'if."
+            }
+],
         solution: `func _ready():\n    var livello = 10\n    if livello >= 10:\n        print("Livello raggiunto!")\n`,
         validate: async (result) => {
     const tests = [];
@@ -953,9 +1277,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    var ha_chiave = true\n    var porta_chiusa = true\n    # Combina con and e stampa\n    pass\n`,
         hints: [
-            "if ha_chiave and porta_chiusa:",
-            "    print(\"Accesso consentito\")"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Spesso un'azione richiede che PIÙ condizioni siano soddisfatte contemporaneamente (ad esempio possedere sia la chiave che il livello sufficiente per aprire una porta)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Unisci le due condizioni all'interno dell'`if` usando l'operatore logico `and`. Entrambe le espressioni devono risultare `true` affinché il blocco venga eseguito."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var ha_pass = true\n    var eta = 18\n    if ha_pass and eta >= 18:\n        print(\"Ingresso VIP consentito\")\n```\nSe una sola delle due condizioni fosse falsa, il print verrebbe saltato."
+            }
+],
         solution: `func _ready():\n    var ha_chiave = true\n    var porta_chiusa = true\n    if ha_chiave and porta_chiusa:\n        print("Accesso consentito")\n`,
         validate: async (result) => {
     const tests = [];
@@ -972,6 +1315,8 @@ const LESSONS_DATA = [
     },
     {
         id: 19,
+        isDebugging: true,
+        debugType: "Logica (Ramo else mancante)",
         chapterId: 5,
         isMastery: false,
         title: "19. Logica gameplay (Game Over con if / else)",
@@ -996,13 +1341,36 @@ const LESSONS_DATA = [
                 <li>Altrimenti (<code>else:</code>) stampa <code>"In battaglia"</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    var punti_vita = 0\n    # Scrivi il controllo Game Over\n    pass\n`,
+        initialCode: `func _ready():
+    var salute = 0
+    # BUG LOGICO: Manca la gestione per quando la salute scende a zero!
+    # Aggiungi il ramo 'else:' per stampare "Game Over":
+    if salute > 0:
+        print("In vita!")
+`,
         hints: [
-            "if punti_vita <= 0:",
-            "    print(\"Game Over\")",
-            "else:",
-            "    print(\"In battaglia\")"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "La clausola `else` definisce cosa deve accadere quando la condizione dell'`if` NON è verificata (il piano B del tuo programma, ad esempio quando i punti vita arrivano a zero)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Dopo il blocco indentato dell'`if`, scrivi `else:` allo stesso livello di indentazione dell'`if`, seguito dal blocco di istruzioni alternativo indentato."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var energia = 0\n    if energia > 0:\n        print(\"In combattimento!\")\n    else:\n        print(\"Sconfitto!\")\n```\nNota che `else:` non accetta alcuna condizione: cattura tutti i casi in cui l'if è falso."
+            }
+],
         solution: `func _ready():\n    var punti_vita = 0\n    if punti_vita <= 0:\n        print("Game Over")\n    else:\n        print("In battaglia")\n`,
         validate: async (result) => {
     const tests = [];
@@ -1036,10 +1404,28 @@ const LESSONS_DATA = [
         initialCode: `extends Node\n\nfunc _ready():\n    var energia = 75\n    var ha_amuleto = true\n    var ha_chiave = false\n    var stato_portale = ""\n    \n    # Scrivi la catena if / elif / else sotto\n    \n    # Non modificare la riga sotto\n    print("Stato: ", stato_portale)\n`,
         aiExplanation: "In GDScript si combinano le condizioni booleane usando <code>and</code> e <code>or</code>. Racchiudere tra parentesi <code>(ha_amuleto or ha_chiave)</code> assicura che basti una qualsiasi delle due reliquie purché l'energia sia maggiore o uguale a 50. Ogni blocco condizionale deve terminare con <code>:</code> e il corpo deve essere indentato di 4 spazi.",
         hints: [
-            "Inizia con: if energia >= 50 and (ha_amuleto or ha_chiave):",
-            "Nel ramo elif controlla l'energia: elif energia < 50: stato_portale = \"Energia Insufficiente\"",
-            "Chiudi con else: stato_portale = \"Nessuna Reliquia Trovata\""
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Quando ci sono più di due possibili esiti (es. medaglia d'Oro, Argento o Bronzo in base al punteggio), `elif` permette di verificare condizioni a cascata una dopo l'altra."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Inizia con `if`, prosegui con uno o più rami `elif condizione:`, e termina facoltativamente con `else:` per tutti gli altri casi inferiori."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var exp_val = 75\n    if exp_val >= 90:\n        print(\"Rango S\")\n    elif exp_val >= 70:\n        print(\"Rango A\")\n    else:\n        print(\"Rango B\")\n```\nGodot valuta le condizioni dall'alto verso il basso e si ferma alla prima vera."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    var energia = 75\n    var ha_amuleto = true\n    var ha_chiave = false\n    var stato_portale = ""\n    \n    if energia >= 50 and (ha_amuleto or ha_chiave):\n        stato_portale = "Portale Attivato"\n    elif energia < 50:\n        stato_portale = "Energia Insufficiente"\n    else:\n        stato_portale = "Nessuna Reliquia Trovata"\n        \n    # Non modificare la riga sotto\n    print("Stato: ", stato_portale)\n`,
         theory: `
             <div class="mastery-banner">
@@ -1096,9 +1482,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Crea l'inventario e stampa il primo elemento\n    pass\n`,
         hints: [
-            "var inventario = [\"Spada\", \"Scudo\", \"Pozione\"]",
-            "print(inventario[0])"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Un Array è una sequenza ordinata di elementi. In quasi tutti i linguaggi di programmazione moderni, compreso GDScript, il conteggio degli elementi inizia sempre da ZERO."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Dichiara l'array racchiudendo gli elementi tra parentesi quadre `[...]` separati da virgole. Per accedere al primo elemento usa `nome_array[0]`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var armi = [\"Arco\", \"Pugnale\"]\n    print(armi[0]) # Stampa 'Arco'\n```\n`armi[0]` punta al primo elemento, mentre `armi[1]` punterebbe al secondo."
+            }
+],
         solution: `func _ready():\n    var inventario = ["Spada", "Scudo", "Pozione"]\n    print(inventario[0])\n`,
         validate: async (result) => {
     const tests = [];
@@ -1116,6 +1521,8 @@ const LESSONS_DATA = [
     },
     {
         id: 22,
+        isDebugging: true,
+        debugType: "Off-by-One (Indici Array)",
         chapterId: 6,
         isMastery: false,
         title: "22. Accesso per indice",
@@ -1136,11 +1543,36 @@ const LESSONS_DATA = [
                 <li>Stampa il secondo elemento (<code>oggetti[1]</code>) e poi il terzo (<code>oggetti[2]</code>).</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    var oggetti = ["Spada", "Scudo", "Pozione"]\n    # Stampa il secondo e il terzo elemento\n    pass\n`,
+        initialCode: `func _ready():
+    var colori = ["Rosso", "Verde", "Blu"]
+    # BUG DI INDICE: Gli array in GDScript partono da [0], non da [1]!
+    # Correggi gli indici sotto per stampare 'Verde' (2° elemento) e 'Blu' (3° elemento):
+    print(colori[0])
+    print(colori[1])
+`,
         hints: [
-            "print(oggetti[1])",
-            "print(oggetti[2])"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Gli array sono 'mutabili': puoi cambiare il valore memorizzato in una specifica posizione assegnando un nuovo valore tramite il suo indice tra parentesi quadre."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Per visualizzare il secondo e terzo elemento, usa rispettivamente gli indici `[1]` e `[2]`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var frutti = [\"Mela\", \"Banana\", \"Arancia\"]\n    print(frutti[1]) # Stampa 'Banana'\n    print(frutti[2]) # Stampa 'Arcia'\n```\nSe il codice di partenza conteneva un bug (es. indici errati), correggi i numeri tra parentesi quadre."
+            }
+],
         solution: `func _ready():\n    var oggetti = ["Spada", "Scudo", "Pozione"]\n    print(oggetti[1])\n    print(oggetti[2])\n`,
         validate: async (result) => {
     const tests = [];
@@ -1181,9 +1613,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    var inventario = ["Mappa", "Bussola"]\n    # Aggiungi "Torcia" e stampa la dimensione\n    pass\n`,
         hints: [
-            "inventario.append(\"Torcia\")",
-            "print(inventario.size())"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Durante una partita, il giocatore raccoglie nuovi oggetti. Gli array di Godot offrono metodi dedicati per aggiungere elementi alla fine e per verificare la dimensione totale."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa `.append(nuovo_elemento)` per aggiungere un oggetto in coda all'array, e `.size()` per ottenere il numero totale di elementi attualmente presenti."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var squadra = [\"Cavaliere\", \"Mago\"]\n    squadra.append(\"Ladro\")\n    print(\"Membri:\", squadra.size())\n```\nDopo `append`, la chiamata a `.size()` restituirà 3."
+            }
+],
         solution: `func _ready():\n    var inventario = ["Mappa", "Bussola"]\n    inventario.append("Torcia")\n    print(inventario.size())\n`,
         validate: async (result) => {
     const tests = [];
@@ -1220,10 +1671,28 @@ const LESSONS_DATA = [
         initialCode: `extends Node\n\nfunc _ready():\n    var zaino = ["Spada", "Ramo Secco", "Pozione di Vita"]\n    \n    # Modifica lo zaino e crea ha_cura e totale_slot sotto\n    \n    # Non modificare le righe sotto\n    print("Zaino: ", zaino)\n    print("Ha pozione: ", ha_cura)\n    print("Totale slot: ", totale_slot)\n`,
         aiExplanation: "Gli array in GDScript offrono potenti metodi nativi: <code>.append(elemento)</code> inserisce in ultima posizione, <code>.erase(elemento)</code> cerca ed elimina la prima occorrenza specificata, <code>.has(elemento)</code> restituisce <code>true</code> se l'elemento è presente e <code>.size()</code> restituisce la dimensione totale della lista.",
         hints: [
-            "Usa zaino.append(\"Arco Elfico\") per inserire il nuovo arco",
-            "Usa zaino.erase(\"Ramo Secco\") per togliere l'oggetto inutile",
-            "Crea le due variabili: var ha_cura = zaino.has(\"Pozione di Vita\") e var totale_slot = zaino.size()"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Questa sfida di padronanza richiede di combinare creazione dell'inventario, aggiunta di nuovi oggetti trovati e verifica della capacità dello zaino."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Inizializza l'array con gli oggetti di partenza, usa `.append()` per inserire il nuovo manufatto e infine stampa la dimensione totale con `.size()`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var zaino = [\"Mappa\", \"Torcia\"]\n    zaino.append(\"Bussola\")\n    var capienza = zaino.size()\n    print(\"Capienza:\", capienza)\n```\nVerifica attentamente i nomi esatti degli oggetti richiesti dal testo della sfida."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    var zaino = ["Spada", "Ramo Secco", "Pozione di Vita"]\n    \n    zaino.append("Arco Elfico")\n    zaino.erase("Ramo Secco")\n    var ha_cura = zaino.has("Pozione di Vita")\n    var totale_slot = zaino.size()\n    \n    # Non modificare le righe sotto\n    print("Zaino: ", zaino)\n    print("Ha pozione: ", ha_cura)\n    print("Totale slot: ", totale_slot)\n`,
         theory: `
             <div class="mastery-banner">
@@ -1283,9 +1752,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Scrivi il ciclo for con range(3)\n    pass\n`,
         hints: [
-            "for i in range(3):",
-            "    print(i)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Un ciclo 'for' con 'range' permette di ripetere un blocco di istruzioni per un numero prefissato di volte, ad esempio per contare i turni di gioco."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa `for i in range(N):`. La funzione `range(5)` genera numeri partendo da 0 fino a 4 (l'estremo superiore non è mai incluso)."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    for n in range(3):\n        print(n) # Stampa 0, poi 1, poi 2\n```\nAll'interno del ciclo, stampa la variabile iteratore (es. `i`)."
+            }
+],
         solution: `func _ready():\n    for i in range(3):\n        print(i)\n`,
         validate: async (result) => {
     const tests = [];
@@ -1324,9 +1812,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    var nemici = ["Goblin", "Orco", "Drago"]\n    # Itera sui nemici con il ciclo for\n    pass\n`,
         hints: [
-            "for nemico in nemici:",
-            "    print(nemico)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Invece di usare indici numerici, in GDScript puoi scorrere direttamente ogni singolo elemento contenuto in un array, uno per ciascuna iterazione del ciclo."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "La sintassi è: `for elemento in nome_array:`. A ogni giro del ciclo, `elemento` assumerà automaticamente il valore del prossimo elemento dell'array."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var pozioni = [\"Cura\", \"Mana\", \"Velocita\"]\n    for p in pozioni:\n        print(p)\n```\nNon occorre specificare indici tra parentesi quadre: l'iterazione è automatica."
+            }
+],
         solution: `func _ready():\n    var nemici = ["Goblin", "Orco", "Drago"]\n    for nemico in nemici:\n        print(nemico)\n`,
         validate: async (result) => {
     const tests = [];
@@ -1345,6 +1852,8 @@ const LESSONS_DATA = [
     },
     {
         id: 27,
+        isDebugging: true,
+        debugType: "Loop Infinito (Decremento mancante)",
         chapterId: 7,
         isMastery: false,
         title: "27. Ciclo while",
@@ -1368,12 +1877,36 @@ const LESSONS_DATA = [
                 <li>Stampa <code>"Conto: " + str(conto)</code> e incrementa <code>conto += 1</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    var conto = 1\n    # Scrivi il ciclo while\n    pass\n`,
+        initialCode: `func _ready():
+    var tempo = 3
+    # BUG CRITICO: Senza decremento, la condizione 'tempo > 0' rimane per sempre vera!
+    # Aggiungi 'tempo -= 1' all'interno del ciclo per evitare il blocco:
+    while tempo > 0:
+        print(tempo)
+`,
         hints: [
-            "while conto <= 3:",
-            "    print(\"Conto: \" + str(conto))",
-            "    conto += 1"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Il ciclo 'while' continua a girare finché la condizione specificata rimane vera. È fondamentale che all'interno del ciclo qualcosa modifichi la variabile di controllo, altrimenti si crea un loop infinito che congela il gioco."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Scrivi `while tempo > 0:` e nel corpo indentato stampa il tempo, dopodiché decrementalo con `tempo -= 1`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var countdown = 5\n    while countdown > 0:\n        print(countdown)\n        countdown -= 1 # Cruciale: previene il blocco del programma!\n```\nSe stai correggendo un bug, assicurati che il decremento sia presente prima della fine del ciclo."
+            }
+],
         solution: `func _ready():\n    var conto = 1\n    while conto <= 3:\n        print("Conto: " + str(conto))\n        conto += 1\n`,
         validate: async (result) => {
     const tests = [];
@@ -1408,10 +1941,28 @@ const LESSONS_DATA = [
         initialCode: `extends Node\n\nfunc _ready():\n    var nemici = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali = 0\n    \n    # Scrivi il ciclo for sotto\n    \n    # Non modificare la riga sotto\n    print("XP Totali: ", xp_totali)\n`,
         aiExplanation: "Il ciclo <code>for elemento in collezione:</code> scorre in sequenza tutti gli elementi di un array o di una sequenza. Ad ogni passaggio la variabile temporanea (in questo caso <code>nemico</code>) assume il valore dell'elemento corrente, consentendo di eseguire operazioni ripetute come stampare messaggi e sommare punti in un accumulatore.",
         hints: [
-            "Inizia con la dichiarazione del ciclo: for nemico in nemici:",
-            "Indenta di 4 spazi le due righe all'interno del blocco for",
-            "Dentro il ciclo scrivi: print(\"Allerta: \" + nemico) e xp_totali += 25"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Il pattern dell'accumulatore consiste nel partire da un totale iniziale (pari a zero) e aggiungere progressivamente ogni valore della lista durante il passaggio del ciclo."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Inizializza `var somma = 0` prima del ciclo. All'interno del `for n in numeri:`, esegui `somma += n`. Infine, stampa la somma all'esterno del ciclo."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var monete_casse = [10, 20, 30]\n    var totale = 0\n    for m in monete_casse:\n        totale += m\n    print(\"Totale:\", totale) # Stampa 60\n```\nFai attenzione a posizionare il `print` finale NON indentato dentro il ciclo."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    var nemici = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali = 0\n    \n    for nemico in nemici:\n        print("Allerta: " + nemico)\n        xp_totali += 25\n        \n    # Non modificare la riga sotto\n    print("XP Totali: ", xp_totali)\n`,
         theory: `
             <div class="mastery-banner">
@@ -1469,8 +2020,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Inizializza il nodo e stampa il messaggio\n    pass\n`,
         hints: [
-            "print(\"Nodo Inizializzato\")"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Le funzioni sono blocchi riutilizzabili di istruzioni con un nome. Invece di riscrivere lo stesso codice ovunque, scrivi la funzione una volta sola e la richiami quando serve."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "In GDScript le funzioni si dichiarano con `func nome_funzione():`. Per richiamare la funzione all'interno di `_ready()`, digita il suo nome seguito dalle parentesi `nome_funzione()`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc avvia_motore():\n    print(\"Motore pronto\")\n\nfunc _ready():\n    avvia_motore()\n```\nDefinisci la tua funzione personalizzata all'esterno di `_ready()`, poi invocala dentro `_ready()`."
+            }
+],
         solution: `func _ready():\n    print("Nodo Inizializzato")\n`,
         validate: async (result) => {
     const tests = [];
@@ -1509,9 +2080,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func saluta(nome):\n    # Stampa il saluto con il parametro nome\n    pass\n\nfunc _ready():\n    # Chiama saluta("Eroe")\n    pass\n`,
         hints: [
-            "Dentro func saluta(nome): print(\"Ciao \" + nome)",
-            "Dentro func _ready(): saluta(\"Eroe\")"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I parametri sono variabili speciali racchiuse tra le parentesi tonde della funzione, che ricevono i valori forniti al momento della chiamata (argomenti)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Dichiara la funzione inserendo il nome del parametro tra le parentesi: `func saluta(nome):`. Nel corpo della funzione, usa il parametro come una normale variabile."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc benvenuto(giocatore):\n    print(\"Benvenuto, \" + giocatore)\n\nfunc _ready():\n    benvenuto(\"Eroe\")\n```\nLa funzione saluta deve stampare la stringa 'Ciao ' concatenata con il parametro."
+            }
+],
         solution: `func saluta(nome):\n    print("Ciao " + nome)\n\nfunc _ready():\n    saluta("Eroe")\n`,
         validate: async (result) => {
     const tests = [];
@@ -1561,9 +2151,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func calcola_danno(attacco, difesa):\n    # Restituisci attacco - difesa con return\n    pass\n\nfunc _ready():\n    # Chiama calcola_danno(30, 5) e stampa il risultato\n    pass\n`,
         hints: [
-            "func calcola_danno(attacco, difesa): return attacco - difesa",
-            "In _ready(): var danno = calcola_danno(30, 5); print(danno)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Spesso una funzione non deve limitarsi a stampare, ma deve 'restituire' un risultato calcolato al codice che l'ha chiamata. La parola chiave `return` restituisce il valore e interrompe la funzione."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Scrivi `return risultato` all'interno della funzione. Chi invoca la funzione può memorizzare il valore restituito in una variabile: `var danno = calcola_danno(30, 5)`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc somma(a, b):\n    return a + b\n\nfunc _ready():\n    var risultato = somma(10, 5)\n    print(risultato) # Stampa 15\n```\nSostituisci l'addizione con la formula del danno `attacco - difesa`."
+            }
+],
         solution: `func calcola_danno(attacco, difesa):\n    return attacco - difesa\n\nfunc _ready():\n    var danno = calcola_danno(30, 5)\n    print(danno)\n`,
         validate: async (result) => {
     const tests = [];
@@ -1604,10 +2213,28 @@ const LESSONS_DATA = [
         initialCode: `extends Node\n\n# Definisci la funzione calcola_colpo sotto\n\n\nfunc _ready():\n    # Non modificare le righe sotto\n    var normale = calcola_colpo(30, false)\n    var critico = calcola_colpo(30, true)\n    print("Colpo normale: ", normale)\n    print("Colpo critico: ", critico)\n`,
         aiExplanation: "Le funzioni personalizzate si dichiarano con <code>func nome_funzione(argomenti):</code>. La parola chiave <code>return</code> interrompe l'esecuzione della funzione e restituisce il valore al chiamante. Specificare il tipo con <code>-> int</code> rende la funzione auto-documentante ed efficiente.",
         hints: [
-            "Inizia la funzione con: func calcola_colpo(attacco: int, critico: bool) -> int:",
-            "Verifica la condizione booleana: if critico: return attacco * 2",
-            "Nel ramo else scrivi: else: return attacco"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Questa sfida richiede di costruire una funzione pura di combattimento che decide il valore del danno in base a un flag booleano (colpo critico)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Definisci `func calcola_colpo(attacco: int, critico: bool) -> int:`. All'interno, usa `if critico: return attacco * 2` e `else: return attacco` (oppure return immediato)."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc calcola_bonus(valore: int, potenziato: bool) -> int:\n    if potenziato:\n        return valore * 2\n    return valore\n```\nNon modificare le istruzioni preesistenti in `_ready()`."
+            }
+],
         solution: `extends Node\n\nfunc calcola_colpo(attacco: int, critico: bool) -> int:\n    if critico:\n        return attacco * 2\n    else:\n        return attacco\n\nfunc _ready():\n    var normale = calcola_colpo(30, false)\n    var critico = calcola_colpo(30, true)\n    print("Colpo normale: ", normale)\n    print("Colpo critico: ", critico)\n`,
         theory: `
             <div class="mastery-banner">
@@ -1672,9 +2299,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Crea posizione come Vector2(100, 200) e stampala\n    pass\n`,
         hints: [
-            "var posizione = Vector2(100, 200)",
-            "print(posizione)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "In uno spazio 2D, ogni punto o movimento ha due componenti: orizzontale (X, verso destra) e verticale (Y, verso il basso nello standard degli schermi 2D)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Crea una variabile assegnando il costruttore nativo `Vector2(coordinata_x, coordinata_y)`. Poi passa la variabile a `print()`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var punto_spawn = Vector2(50, 75)\n    print(punto_spawn)\n```\nGodot stamperà automaticamente il formato `(50, 75)`."
+            }
+],
         solution: `func _ready():\n    var posizione = Vector2(100, 200)\n    print(posizione)\n`,
         validate: async (result) => {
     const tests = [];
@@ -1714,11 +2360,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Aggiorna posizione.x con velocita e stampa\n    pass\n`,
         hints: [
-            "var posizione = Vector2(100, 200)",
-            "var velocita = 50",
-            "posizione.x += velocita",
-            "print(posizione)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Puoi accedere e modificare singolarmente le due componenti di un vettore tramite la notazione puntata (`.x` e `.y`), ad esempio per spostare un personaggio solo a destra."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa l'operatore composto sulla proprietà: `posizione.x += velocita` per incrementare la sola coordinata orizzontale."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var pos = Vector2(100, 200)\n    pos.x += 50 # Ora la posizione è (150, 200)\n    print(pos)\n```\nLa coordinata `y` rimane invariata se modifichi solo `.x`."
+            }
+],
         solution: `func _ready():\n    var posizione = Vector2(100, 200)\n    var velocita = 50\n    posizione.x += velocita\n    print(posizione)\n`,
         validate: async (result) => {
     const tests = [];
@@ -1758,11 +2421,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Aggiorna pos.x e pos.y e stampa il vettore\n    pass\n`,
         hints: [
-            "var pos = Vector2(100, 200)",
-            "pos.x += 20",
-            "pos.y -= 20",
-            "print(pos)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I vettori supportano l'aritmetica diretta: sommare due vettori somma le rispettive componenti X e Y contemporaneamente."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Calcola la nuova posizione sommando la posizione iniziale e il vettore velocità: `var nuova_posizione = posizione + velocita`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var pos = Vector2(10, 20)\n    var vel = Vector2(5, 5)\n    var arrivo = pos + vel # (15, 25)\n    print(arrivo)\n```\nQuesta operazione simula lo spostamento fisico in un frame di gioco."
+            }
+],
         solution: `func _ready():\n    var pos = Vector2(100, 200)\n    pos.x += 20\n    pos.y -= 20\n    print(pos)\n`,
         validate: async (result) => {
     const tests = [];
@@ -1794,10 +2474,28 @@ const LESSONS_DATA = [
         initialCode: `extends Node\n\nfunc _ready():\n    # Crea posizione, aggiorna le coordinate e verifica atterrato sotto\n    \n    # Non modificare le righe sotto\n    print("Posizione finale: ", posizione)\n    print("Stazione raggiunta: ", atterrato)\n`,
         aiExplanation: "Un <code>Vector2(x, y)</code> rappresenta un punto o una velocità nello spazio bidimensionale di Godot Engine. Puoi accedere e modificare direttamente le singole componenti <code>.x</code> e <code>.y</code>. Per verificare se la sonda ha raggiunto le coordinate della stazione, puoi confrontare i valori delle coordinate per accertarti dell'allineamento perfetto.",
         hints: [
-            "Inizializza il vettore: var posizione = Vector2(100, 200)",
-            "Aggiorna i due assi: posizione.x += 50 e posizione.y -= 30",
-            "Crea la stazione e confronta: var stazione = Vector2(150, 170) e var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Per sapere quanto è lungo un vettore (ad esempio la distanza coperta o la velocità complessiva di un proiettile), Godot offre il metodo matematico nativo `.length()`."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Chiama `.length()` sul vettore: `var distanza = vettore.length()`. Restituirà un numero float calcolato con il teorema di Pitagora."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var spostamento = Vector2(3, 4)\n    var lunghezza = spostamento.length() # sqrt(3^2 + 4^2) = 5.0\n    print(lunghezza)\n```\nSe il vettore è `Vector2(300, 400)`, `.length()` restituirà esattamente `500.0`."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    var posizione = Vector2(100, 200)\n    posizione.x += 50\n    posizione.y -= 30\n    var stazione = Vector2(150, 170)\n    var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)\n    \n    # Non modificare le righe sotto\n    print("Posizione finale: ", posizione)\n    print("Stazione raggiunta: ", atterrato)\n`,
         theory: `
             <div class="mastery-banner">
@@ -1852,10 +2550,28 @@ const LESSONS_DATA = [
         `,
         initialCode: `func _ready():\n    # Crea il dizionario eroe e stampa classe e livello sotto\n    pass\n`,
         hints: [
-            'var eroe = { "classe": "Guerriero", "livello": 10 }',
-            'print("Classe: ", eroe["classe"])',
-            'print("Livello: ", eroe["livello"])'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Un Dizionario memorizza dati in coppie 'chiave: valore', permettendoti di cercare un dato tramite un nome descrittivo (come 'vita' o 'nome') anziché tramite un indice numerico."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa le parentesi graffe `{}` con la sintassi `\"chiave\": valore`, separando le coppie con virgole. Per accedere a un valore, usa `dizionario[\"chiave\"]`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var nemico = { \"nome\": \"Goblin\", \"salute\": 30 }\n    print(nemico[\"nome\"]) # Stampa 'Goblin'\n```\nAssicurati di racchiudere le chiavi tra virgolette."
+            }
+],
         solution: `func _ready():\n    var eroe = { "classe": "Guerriero", "livello": 10 }\n    print("Classe: ", eroe["classe"])\n    print("Livello: ", eroe["livello"])\n`,
         validate: async (result) => {
     const tests = [];
@@ -1894,10 +2610,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         `,
         initialCode: `func _ready():\n    var equip = { "arma": "Spada" }\n    # Aggiungi armatura, aggiorna arma e stampa sotto\n    pass\n`,
         hints: [
-            'equip["armatura"] = "Scudo"',
-            'equip["arma"] = "Spada Laser"',
-            'print("Arma: ", equip["arma"]) e print("Armatura: ", equip["armatura"])'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I dizionari sono dinamici: puoi aggiungere nuovi attributi in qualsiasi momento durante la partita o aggiornare valori esistenti riassegnando la chiave."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Per aggiungere o sovrascrivere una chiave, usa l'assegnazione con parentesi quadre: `dizionario[\"nuova_chiave\"] = nuovo_valore`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var profilo = { \"ruolo\": \"Guerriero\" }\n    profilo[\"livello\"] = 10 # Aggiunge la chiave 'livello'\n    profilo[\"ruolo\"] = \"Paladino\" # Sovrascrive 'ruolo'\n```\nNon ridefinire l'intero dizionario da capo: modifica l'oggetto esistente tramite le sue chiavi."
+            }
+],
         solution: `func _ready():\n    var equip = { "arma": "Spada" }\n    equip["armatura"] = "Scudo"\n    equip["arma"] = "Spada Laser"\n    print("Arma: ", equip["arma"])\n    print("Armatura: ", equip["armatura"])\n`,
         validate: async (result) => {
     const tests = [];
@@ -1914,6 +2648,8 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
     },
     {
         id: 39,
+        isDebugging: true,
+        debugType: "Controllo Sicurezza Chiave (.has)",
         chapterId: 10,
         isMastery: false,
         title: "39. Metodi dei Dizionari (has, keys)",
@@ -1935,12 +2671,35 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
                 <li>Stampa: <code>print("Possiede oro: ", ha_oro)</code> e <code>print("Possiede chiave: ", ha_chiave)</code>.</li>
             </ul>
         `,
-        initialCode: `func _ready():\n    var forziere = { "oro": 100, "gemme": 3 }\n    # Verifica la presenza con .has() e stampa sotto\n    pass\n`,
+        initialCode: `func _ready():
+    var forziere = { "oro": 100 }
+    # BUG DI SICUREZZA: Verificare l'esistenza della chiave 'chiave' prima dell'accesso!
+    # Usa 'if forziere.has("oro"):' per stampare "Ha oro: true":
+    print("Ha oro: ", forziere["oro"])
+`,
         hints: [
-            'var ha_oro = forziere.has("oro")',
-            'var ha_chiave = forziere.has("chiave")',
-            'print("Possiede oro: ", ha_oro) e print("Possiede chiave: ", ha_chiave)'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Tentare di leggere una chiave che non esiste in un dizionario può causare errori a runtime. Il metodo `.has()` permette di verificare in anticipo l'esistenza della chiave."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa `if dizionario.has(\"nome_chiave\"):` per eseguire il blocco di codice solo se la chiave è effettivamente presente."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var inventario = { \"spada\": 1 }\n    if inventario.has(\"pozione\"):\n        print(\"Pozione presente!\")\n    else:\n        print(\"Pozione mancante!\")\n```\n`.has()` restituisce un booleano (`true` o `false`)."
+            }
+],
         solution: `func _ready():\n    var forziere = { "oro": 100, "gemme": 3 }\n    var ha_oro = forziere.has("oro")\n    var ha_chiave = forziere.has("chiave")\n    print("Possiede oro: ", ha_oro)\n    print("Possiede chiave: ", ha_chiave)\n`,
         validate: async (result) => {
     const tests = [];
@@ -1976,10 +2735,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         initialCode: `extends Node\n\nfunc _ready():\n    # Crea e aggiorna boss e crea in_furia sotto\n    \n    # Non modificare le righe sotto\n    print("Boss: ", boss["nome"])\n    print("HP rimanenti: ", boss["hp"])\n    print("Attacco: ", boss["attacco"])\n    print("Furia attiva: ", in_furia)\n`,
         aiExplanation: "In GDScript i dizionari sono la struttura dati prediletta per memorizzare entità complesse con proprietà eterogenee (testi, numeri, booleani). Puoi accedere e modificare chiavi con le parentesi quadre <code>diz[\"chiave\"] = valore</code> e testare l'esistenza di parametri opzionali usando <code>diz.has(\"chiave\")</code>.",
         hints: [
-            'Inizializza: var boss = { "nome": "Drago Antico", "hp": 500 }',
-            'Aggiungi e modifica con le quadre: boss["attacco"] = 75 e boss["hp"] = 420',
-            'Usa il metodo has per la furia: var in_furia = boss.has("furia")'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Questa sfida richiede di strutturare un sistema di equipaggiamento flessibile per slot (testa, corpo, arma) con verifica e aggiornamento dei pezzi."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Inizializza il dizionario, aggiungi o modifica gli slot richiesti e stampa i valori finali verificando che ogni slot abbia l'oggetto corretto."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var armatura = { \"testa\": \"Elmo\" }\n    armatura[\"torace\"] = \"Corazza\"\n    if armatura.has(\"torace\"):\n        print(\"Protezione:\", armatura[\"torace\"])\n```\nControlla le maiuscole nei nomi degli equipaggiamenti richiesti dal testo."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    var boss = { "nome": "Drago Antico", "hp": 500 }\n    boss["attacco"] = 75\n    boss["hp"] = 420\n    var in_furia = boss.has("furia")\n    \n    # Non modificare le righe sotto\n    print("Boss: ", boss["nome"])\n    print("HP rimanenti: ", boss["hp"])\n    print("Attacco: ", boss["attacco"])\n    print("Furia attiva: ", in_furia)\n`,
         theory: `
             <div class="mastery-banner">
@@ -2036,10 +2813,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         `,
         initialCode: `extends Node\n\n# Dichiara il segnale porta_aperta sotto\n\n\nfunc _ready():\n    porta_aperta.connect(quando_aperta)\n    print("Apertura in corso...")\n    # Emetti il segnale sotto\n\n\nfunc quando_aperta():\n    print("Porta aperta con successo!")\n`,
         hints: [
-            "Dichiara: signal porta_aperta",
-            "In _ready() scrivi: porta_aperta.emit()",
-            "Il metodo .emit() avviserà automaticamente la funzione connessa"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I segnali sono il meccanismo di Godot per realizzare l'architettura a eventi: un nodo annuncia che qualcosa è accaduto ('Porta aperta!') senza doversi preoccupare di chi ascolterà."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Dichiara il segnale in cima allo script con la parola chiave `signal nome_segnale`. Per inviare la notifica usa `nome_segnale.emit()` (o `emit_signal(\"nome_segnale\")`)."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nsignal salto_eseguito\n\nfunc _ready():\n    salto_eseguito.emit()\n```\nIn Godot 4 la sintassi raccomandata è `segnale.emit()`."
+            }
+],
         solution: `extends Node\n\nsignal porta_aperta\n\nfunc _ready():\n    porta_aperta.connect(quando_aperta)\n    print("Apertura in corso...")\n    porta_aperta.emit()\n\nfunc quando_aperta():\n    print("Porta aperta con successo!")\n`,
         validate: async (result) => {
     const tests = [];
@@ -2082,10 +2877,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         `,
         initialCode: `extends Node\n\nsignal moneta_raccolta\n\nfunc _ready():\n    # Connetti moneta_raccolta ad aggiungi_punti ed emettila sotto\n    pass\n\nfunc aggiungi_punti():\n    print("+10 Monete raccolte!")\n`,
         hints: [
-            "Usa moneta_raccolta.connect(aggiungi_punti)",
-            "Poi chiama moneta_raccolta.emit()",
-            "Non mettere le parentesi tonde dentro connect()"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Per reagire a un segnale, dobbiamo 'collegare' l'evento a una funzione di risposta (chiamata callback)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Collega il segnale in `_ready()` con la sintassi `nome_segnale.connect(nome_funzione_callback)`. Definisci la funzione di risposta con `func _on_...():`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nsignal luce_accesa\n\nfunc _ready():\n    luce_accesa.connect(_on_luce_accesa)\n    luce_accesa.emit()\n\nfunc _on_luce_accesa():\n    print(\"Luce attiva!\")\n```\nNota che passi il nome della funzione senza parentesi tonde a `.connect()`."
+            }
+],
         solution: `extends Node\n\nsignal moneta_raccolta\n\nfunc _ready():\n    moneta_raccolta.connect(aggiungi_punti)\n    moneta_raccolta.emit()\n\nfunc aggiungi_punti():\n    print("+10 Monete raccolte!")\n`,
         validate: async (result) => {
     const tests = [];
@@ -2127,10 +2940,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         `,
         initialCode: `extends Node\n\n# Dichiara signal danno_inflitto(valore) sotto\n\n\nfunc _ready():\n    danno_inflitto.connect(on_danno)\n    # Emetti danno_inflitto con 35 sotto\n\n\nfunc on_danno(v):\n    print("Danno registrato: ", v)\n`,
         hints: [
-            "signal danno_inflitto(valore)",
-            "danno_inflitto.emit(35)",
-            "Il valore 35 viene ricevuto dal parametro v di on_danno"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I segnali possono trasportare informazioni con sé, come la quantità di punti danno inflitti o il punteggio guadagnato durante l'evento."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Dichiara il segnale con i parametri tra parentesi: `signal danno_inflitto(quantita)`. Quando emetti il segnale passa il valore: `danno_inflitto.emit(35)`. Il callback riceverà questo valore come argomento."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nsignal monete_raccolte(valore)\n\nfunc _ready():\n    monete_raccolte.connect(_on_monete_raccolte)\n    monete_raccolte.emit(50)\n\nfunc _on_monete_raccolte(valore):\n    print(\"Monete +\", valore)\n```\nIl nome del parametro nel callback può essere a tua scelta."
+            }
+],
         solution: `extends Node\n\nsignal danno_inflitto(valore)\n\nfunc _ready():\n    danno_inflitto.connect(on_danno)\n    danno_inflitto.emit(35)\n\nfunc on_danno(v):\n    print("Danno registrato: ", v)\n`,
         validate: async (result) => {
     const tests = [];
@@ -2176,10 +3007,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         initialCode: `extends Node\n\n# Dichiara il segnale salute_aggiornata sotto\n\n\n# Crea la funzione quando_salute_cambia(hp) sotto\n\n\nfunc _ready():\n    # Connetti il segnale ed emetti due volte (75 e 40) sotto\n    \n    # Non modificare la riga sotto\n    print("=== EVENTI BATTAGLIA COMPLETATI ===")\n`,
         aiExplanation: "In Godot 4 l'architettura a segnali garantisce che nodi diversi (come il Player e la barra HP della UI) non abbiano bisogno di riferimenti diretti l'uno verso l'altro. Il Player lancia <code>salute_aggiornata.emit(nuova_salute)</code> e qualunque elemento collegato aggiorna autonomamente la propria grafica.",
         hints: [
-            "In cima dichiara: signal salute_aggiornata(nuova_salute)",
-            "Definisci la funzione: func quando_salute_cambia(hp): print(\"UI: Barra salute a \", hp)",
-            "In _ready() connetti ed emetti: salute_aggiornata.connect(quando_salute_cambia) poi salute_aggiornata.emit(75) e salute_aggiornata.emit(40)"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Questa sfida richiede di costruire un sistema di trasmissione eventi completo per un gioco di ruolo: dichiarare il segnale, connetterlo al ricevitore ed emetterlo con dati dinamici."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Combina la dichiarazione `signal`, la connessione con `.connect()` dentro `_ready()`, e la funzione callback che gestisce il messaggio stampato."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nsignal livello_superato(num_livello)\n\nfunc _ready():\n    livello_superato.connect(_on_livello_superato)\n    livello_superato.emit(1)\n\nfunc _on_livello_superato(num):\n    print(\"Livello completato:\", num)\n```\nVerifica che il messaggio emesso corrisponda esattamente all'output atteso."
+            }
+],
         solution: `extends Node\n\nsignal salute_aggiornata(nuova_salute)\n\nfunc quando_salute_cambia(hp):\n    print("UI: Barra salute a ", hp)\n\nfunc _ready():\n    salute_aggiornata.connect(quando_salute_cambia)\n    salute_aggiornata.emit(75)\n    salute_aggiornata.emit(40)\n    \n    # Non modificare la riga sotto\n    print("=== EVENTI BATTAGLIA COMPLETATI ===")\n`,
         theory: `
             <div class="mastery-banner">
@@ -2240,10 +3089,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         `,
         initialCode: `extends Node\n\n# Definisci la classe Pozione sotto\n\n\nfunc _ready():\n    # Crea elisir con Pozione.new e stampa sotto\n    pass\n`,
         hints: [
-            "class Pozione:\n    var nome\n    var cura\n    func _init(n, c):\n        self.nome = n\n        self.cura = c",
-            "var elisir = Pozione.new(\"Elisir\", 50)",
-            "print(\"Pozione creata: \", elisir.nome, \" (Cura: \", elisir.cura, \")\")"
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "La programmazione a oggetti (OOP) ti permette di creare i tuoi 'tipi' personalizzati (come una classe Nemico o Personaggio) definendo lo stampo con cui generare tanti oggetti simili."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "In GDScript dichiari una classe personalizzata con la parola chiave `class NomeClasse:`. All'interno della classe dichiari le sue variabili di stato."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nclass Veicolo:\n    var marca = \"GodotMobile\"\n    var velocita = 100\n\nfunc _ready():\n    var auto = Veicolo.new()\n    print(auto.marca)\n```\nPer creare un'istanza della classe usa `NomeClasse.new()`."
+            }
+],
         solution: `extends Node\n\nclass Pozione:\n    var nome\n    var cura\n    func _init(n, c):\n        self.nome = n\n        self.cura = c\n\nfunc _ready():\n    var elisir = Pozione.new("Elisir", 50)\n    print("Pozione creata: ", elisir.nome, " (Cura: ", elisir.cura, ")")\n`,
         validate: async (result) => {
     const tests = [];
@@ -2288,10 +3155,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         `,
         initialCode: `extends Node\n\nclass Guerriero:\n    var nome\n    var hp\n    func _init(n, h):\n        self.nome = n\n        self.hp = h\n\nfunc _ready():\n    # Crea g1 e g2 con .new() e stampa i loro stati sotto\n    pass\n`,
         hints: [
-            'var g1 = Guerriero.new("Arthur", 100)',
-            'var g2 = Guerriero.new("Lancelot", 90)',
-            'print("Eroe 1: ", g1.nome, " (HP: ", g1.hp, ")") e print("Eroe 2: ", g2.nome, " (HP: ", g2.hp, ")")'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Il costruttore è la funzione speciale che viene eseguita automaticamente ogni volta che crei un nuovo oggetto con `.new()`, per impostare le sue proprietà di partenza."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "In GDScript il costruttore si chiama sempre `func _init(parametri):`. Al suo interno assegni i parametri alle variabili dell'istanza (`self.nome = nome`)."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nclass Mostro:\n    var nome: String\n    func _init(n):\n        nome = n\n\nfunc _ready():\n    var m = Mostro.new(\"Slime\")\n    print(m.nome) # Stampa 'Slime'\n```\nI valori passati a `.new(...)` vengono inoltrati a `_init`."
+            }
+],
         solution: `extends Node\n\nclass Guerriero:\n    var nome\n    var hp\n    func _init(n, h):\n        self.nome = n\n        self.hp = h\n\nfunc _ready():\n    var g1 = Guerriero.new("Arthur", 100)\n    var g2 = Guerriero.new("Lancelot", 90)\n    print("Eroe 1: ", g1.nome, " (HP: ", g1.hp, ")")\n    print("Eroe 2: ", g2.nome, " (HP: ", g2.hp, ")")\n`,
         validate: async (result) => {
     const tests = [];
@@ -2331,10 +3216,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         `,
         initialCode: `extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    # Aggiungi func colpo_caricato() sotto\n\n\nfunc _ready():\n    # Istanzia eroe con attacco 25 e stampa il colpo caricato sotto\n    pass\n`,
         hints: [
-            "func colpo_caricato():\n    return self.attacco * 2",
-            'var eroe = Personaggio.new("Eroe", 25)',
-            'print("Danno colpo caricato: ", eroe.colpo_caricato())'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I metodi sono funzioni definite all'interno di una classe che rappresentano le azioni che quell'oggetto può compiere o subire (es. subire danno, attaccare, curarsi)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Definisci la funzione indentata all'interno della classe: `func subisci_danno(quantita):`. All'interno, modifica le proprietà dell'oggetto: `salute -= quantita`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nclass Giocatore:\n    var hp = 100\n    func ferisci(danno):\n        hp -= danno\n\nfunc _ready():\n    var p = Giocatore.new()\n    p.ferisci(20)\n    print(p.hp) # Stampa 80\n```\nInvocare `p.ferisci(20)` modifica direttamente l'istanza `p`."
+            }
+],
         solution: `extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    func colpo_caricato():\n        return self.attacco * 2\n\nfunc _ready():\n    var eroe = Personaggio.new("Eroe", 25)\n    print("Danno colpo caricato: ", eroe.colpo_caricato())\n`,
         validate: async (result) => {
     const tests = [];
@@ -2379,10 +3282,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         initialCode: `extends Node\n\n# Definisci la classe Avventuriero con _init sotto\n\n\nfunc _ready():\n    # Crea membro1, membro2 e calcola vita_totale sotto\n    \n    # Non modificare le righe sotto\n    print("Membro 1: ", membro1.nome, " (", membro1.ruolo, ")")\n    print("Membro 2: ", membro2.nome, " (", membro2.ruolo, ")")\n    print("Salute totale party: ", vita_totale)\n`,
         aiExplanation: "Congratulazioni per essere arrivato alla Sfida Finale del Corso! In Godot Engine l'incapsulamento dei dati in classi personalizzate è la base per creare entità complesse, gestire party di gioco, inventari ed elementi della scena in modo pulito ed espandibile.",
         hints: [
-            'class Avventuriero:\n    var nome\n    var ruolo\n    var vita\n    func _init(n, r, v):\n        self.nome = n\n        self.ruolo = r\n        self.vita = v',
-            'var membro1 = Avventuriero.new("Aria", "Maga", 80)\nvar membro2 = Avventuriero.new("Krag", "Guerriero", 120)',
-            'var vita_totale = membro1.vita + membro2.vita'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Questa sfida culminante dell'OOP richiede di assemblare un'intera entità RPG con attributi, costruttore parametrico e metodi di interazione."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Crea la classe `Personaggio`, implementa `_init(nome_init, hp_init)` e i metodi richiesti (`subisci_danno` e `guarisci`). Poi istanziala in `_ready()`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nclass Eroe:\n    var nome = \"\"\n    var hp = 0\n    func _init(n, h):\n        nome = n\n        hp = h\n    func cura(val):\n        hp += val\n\nfunc _ready():\n    var e = Eroe.new(\"Artù\", 100)\n    e.cura(25)\n    print(e.nome, e.hp)\n```\nSegui scrupolosamente i nomi delle variabili e dei metodi specificati nella sfida."
+            }
+],
         solution: `extends Node\n\nclass Avventuriero:\n    var nome\n    var ruolo\n    var vita\n    func _init(n, r, v):\n        self.nome = n\n        self.ruolo = r\n        self.vita = v\n\nfunc _ready():\n    var membro1 = Avventuriero.new("Aria", "Maga", 80)\n    var membro2 = Avventuriero.new("Krag", "Guerriero", 120)\n    var vita_totale = membro1.vita + membro2.vita\n    \n    # Non modificare le righe sotto\n    print("Membro 1: ", membro1.nome, " (", membro1.ruolo, ")")\n    print("Membro 2: ", membro2.nome, " (", membro2.ruolo, ")")\n    print("Salute totale party: ", vita_totale)\n`,
         theory: `
             <div class="mastery-banner">
@@ -2441,9 +3362,28 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         `,
         initialCode: `func _ready():\n    # Accedi al nodo $Giocatore presente nella scena e stampa il suo nome\n    pass\n`,
         hints: [
-            '$Giocatore.name restituisce il nome del nodo ("Giocatore")',
-            'print("Nodo rilevato: ", $Giocatore.name)'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "In Godot ogni gioco è un albero gerarchico di nodi (Scene Tree). Per controllare un elemento del gioco dallo script del genitore, dobbiamo ottenere un riferimento al nodo figlio desiderato."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa la sintassi rapida `$NomeNodo`. È una scorciatoia nativa di GDScript che equivale a chiamare `get_node(\"NomeNodo\")`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var nemico = $Nemico\n    print(nemico.name)\n```\nAssegna `$Giocatore` a una variabile `giocatore`."
+            }
+],
         solution: `func _ready():\n    print("Nodo rilevato: ", $Giocatore.name)\n`,
         validate: async (result) => {
     const tests = [];
@@ -2487,9 +3427,28 @@ $Titolo.text = <span class="s">"Benvenuto in Godot 4!"</span>
         `,
         initialCode: `func _ready():\n    # Modifica $Titolo.text e stampa a console\n    pass\n`,
         hints: [
-            '$Titolo.text = "Benvenuto in Godot 4!"',
-            'print("Testo a schermo: ", $Titolo.text)'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Ogni nodo possiede proprietà specifiche in base al suo tipo. Un nodo di tipo Label (testo) possiede la proprietà `.text` che controlla la stringa mostrata a video."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Accedi al nodo tramite il dollaro e modifica la proprietà direttamente con l'assegnazione: `$NomeLabel.text = \"Nuovo testo\"`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Messaggio.text = \"Game Started!\"\n```\nSostituisci il nome del nodo con `$Titolo` e imposta il testo richiesto."
+            }
+],
         solution: `func _ready():\n    $Titolo.text = "Benvenuto in Godot 4!"\n    print("Testo a schermo: ", $Titolo.text)\n`,
         validate: async (result) => {
     const tests = [];
@@ -2528,9 +3487,28 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
         `,
         initialCode: `func _ready():\n    # Accedi a $SaluteLabel con l'operatore $, aggiorna il testo a "HP: 75" e stampa\n    pass\n`,
         hints: [
-            '$SaluteLabel.text = "HP: 75"',
-            'print("Nuova salute: ", $SaluteLabel.text)'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Quando i nodi hanno nomi con spazi o caratteri speciali, o quando il percorso viene composto dinamicamente, si usa il metodo formale `get_node(...)`."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Chiama `get_node(\"Percorso/Nome\")` passando il nome esatto tra virgolette, rispettando maiuscole e minuscole."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var moneta = get_node(\"Moneta Speciale\")\n    print(moneta.name)\n```\nIn Godot, i percorsi dei nodi sono sempre case-sensitive (sensibili a maiuscole e minuscole)."
+            }
+],
         solution: `func _ready():\n    $SaluteLabel.text = "HP: 75"\n    print("Nuova salute: ", $SaluteLabel.text)\n`,
         validate: async (result) => {
     const tests = [];
@@ -2567,10 +3545,28 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
         initialCode: `extends Node\n\nfunc _ready():\n    # Configura $TitoloDungeon, $LivelloLabel e $MoneteLabel sotto\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
         aiExplanation: `In Godot accedere ai nodi della scena con <code>$NomeNodo</code> permette di leggere e modificare qualunque proprietà visiva (come <code>.text</code> nelle Label). Assemblando la struttura visivamente nella Scena e programmando la logica in GDScript si ottiene il flusso di sviluppo nativo e raccomandato del motore.`,
         hints: [
-            '$TitoloDungeon.text = "Caverna dei Goblin"',
-            '$LivelloLabel.text = "Livello: 1"',
-            '$MoneteLabel.text = "Oro: 50"'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Questa sfida richiede di manipolare l'interfaccia grafica aggiornando più etichette contemporaneamente (es. titolo del livello e punteggio attuale) interagendo con i nodi della scena."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Accedi a ciascuna Label con la notazione `$` o con `get_node` e modifica la rispettiva proprietà `.text` con i valori richiesti."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Titolo.text = \"Capitolo 1\"\n    $Punti.text = \"Punti: 0\"\n```\nAssicurati che entrambi i nodi ricevano il testo esatto indicato nelle istruzioni."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    $TitoloDungeon.text = "Caverna dei Goblin"\n    $LivelloLabel.text = "Livello: 1"\n    $MoneteLabel.text = "Oro: 50"\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
         theory: `
             <div class="mastery-banner">
@@ -2629,9 +3625,28 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         `,
         initialCode: `func _ready():\n    # Modifica il testo di $AttaccaBtn e stampa a console\n    pass\n`,
         hints: [
-            '$AttaccaBtn.text = "Sferra Attacco"',
-            'print("Pulsante configurato: ", $AttaccaBtn.text)'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I nodi `Button` sono i controlli interattivi fondamentali dell'interfaccia di Godot, capaci di ricevere click o tap dall'utente e mostrare etichette testuali."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Puoi modificare il testo visibile di un pulsante assegnando la sua proprietà `.text`: `$PulsanteAvvia.text = \"Gioca\"`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var btn = $MioPulsante\n    btn.text = \"Inizia Battaglia\"\n    print(btn.text)\n```\nModifica la proprietà `.text` del nodo pulsante specificato nell'esercizio."
+            }
+],
         solution: `func _ready():\n    $AttaccaBtn.text = "Sferra Attacco"\n    print("Pulsante configurato: ", $AttaccaBtn.text)\n`,
         validate: async (result) => {
     const tests = [];
@@ -2672,10 +3687,28 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         `,
         initialCode: `func _ready():\n    # Connetti $AttaccaBtn.pressed e stampa "Pulsante connesso"\n    pass\n\n# Definisci func quando_premuto() sotto\n`,
         hints: [
-            '$AttaccaBtn.pressed.connect(quando_premuto)',
-            'print("Pulsante connesso")',
-            'func quando_premuto():\n    print("Colpo sferrato con successo!")'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I pulsanti in Godot emettono automaticamente il segnale `pressed` ogni volta che vengono cliccati. Collegando questo segnale a una funzione, esegui il codice di risposta al click."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Usa `$Pulsante.pressed.connect(nome_funzione)` dentro `_ready()`, e definisci la funzione callback che esegue l'azione."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nfunc _ready():\n    $Pulsante.pressed.connect(_on_pulsante_pressed)\n\nfunc _on_pulsante_pressed():\n    print(\"Click registrato!\")\n```\nNon dimenticare di connettere il segnale all'interno di `_ready()`."
+            }
+],
         solution: `func _ready():\n    $AttaccaBtn.pressed.connect(quando_premuto)\n    print("Pulsante connesso")\n\nfunc quando_premuto():\n    print("Colpo sferrato con successo!")\n`,
         validate: async (result) => {
     const tests = [];
@@ -2726,10 +3759,28 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         `,
         initialCode: `var punti = 0\n\nfunc _ready():\n    # Connetti $ClickBtn.pressed ad al_click e stampa "Clicker pronto"\n    pass\n\nfunc al_click():\n    # Incrementa punti, aggiorna $PuntiLabel.text e stampa\n    pass\n`,
         hints: [
-            '$ClickBtn.pressed.connect(al_click)',
-            'punti += 1\n$PuntiLabel.text = "Click: " + str(punti)',
-            'print($PuntiLabel.text)'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "In Godot puoi alterare l'aspetto visivo e il colore di qualsiasi nodo 2D o UI modificando la sua proprietà `.modulate` (tinta di colore)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Assegna una stringa di colore esadecimale o un Color a `.modulate`: `$Riquadro.modulate = \"#10b981\"` (verde smeraldo)."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Pannello.modulate = \"#ef4444\" # Rosso acceso\n```\nUsa il codice esadecimale specificato nella consegna della lezione."
+            }
+],
         solution: `var punti = 0\n\nfunc _ready():\n    $ClickBtn.pressed.connect(al_click)\n    print("Clicker pronto")\n\nfunc al_click():\n    punti += 1\n    $PuntiLabel.text = "Click: " + str(punti)\n    print($PuntiLabel.text)\n`,
         validate: async (result) => {
     const tests = [];
@@ -2773,10 +3824,28 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         initialCode: `extends Node\n\nfunc _ready():\n    # Connetti $MotoriBtn e $AllarmeBtn sotto\n    \n    # Non modificare la riga sotto\n    print("Plancia Operativa")\n\n# Definisci le funzioni attiva_motori e attiva_allarme sotto\n`,
         aiExplanation: "In Godot puoi collegare più nodi Button a funzioni diverse per creare pannelli di controllo e interfacce utente complesse. Ogni pulsante ha la propria istanza del segnale <code>pressed</code>, che quando viene emesso esegue il blocco associato modificando le Label e lo stato della scena.",
         hints: [
-            '$MotoriBtn.pressed.connect(attiva_motori)\n$AllarmeBtn.pressed.connect(attiva_allarme)',
-            'func attiva_motori():\n    $StatoNave.text = "Motori a Massima Potenza"\n    print("Velocita Aumentata")',
-            'func attiva_allarme():\n    $StatoNave.text = "Allarme Rosso Attivo"\n    print("Scudi al 100%")'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Questa sfida richiede di collegare interazione e feedback visivo: quando l'utente clicca il pulsante, l'etichetta cambia testo e il pannello cambia colore."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Connetti il segnale `.pressed` del pulsante a una funzione callback, e al suo interno aggiorna la proprietà `.text` della Label e il colore di sfondo."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Bottone.pressed.connect(_on_click)\n\nfunc _on_click():\n    $Stato.text = \"Attivato\"\n    $Sfondo.modulate = \"#10b981\"\n```\nVerifica che tutti i nodi referenziati corrispondano ai nomi nell'albero della scena."
+            }
+],
         solution: `extends Node\n\nfunc _ready():\n    $MotoriBtn.pressed.connect(attiva_motori)\n    $AllarmeBtn.pressed.connect(attiva_allarme)\n    \n    # Non modificare la riga sotto\n    print("Plancia Operativa")\n\nfunc attiva_motori():\n    $StatoNave.text = "Motori a Massima Potenza"\n    print("Velocita Aumentata")\n\nfunc attiva_allarme():\n    $StatoNave.text = "Allarme Rosso Attivo"\n    print("Scudi al 100%")\n`,
         theory: `
             <div class="mastery-banner">
@@ -2847,10 +3916,28 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         `,
         initialCode: `func _ready():\n    # Configura $Cooldown (wait_time, one_shot), connetti timeout, avvia e stampa\n    pass\n\nfunc quando_scaduto():\n    pass\n`,
         hints: [
-            '$Cooldown.wait_time = 2.5\n$Cooldown.one_shot = true',
-            '$Cooldown.timeout.connect(quando_scaduto)\n$Cooldown.start()',
-            'print("Timer avviato per: ", $Cooldown.wait_time, "s")'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "I nodi `Timer` gestiscono il tempo nei giochi: conto alla rovescia, intervalli di spawn dei nemici o delay prima di un'azione."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Imposta la durata con la proprietà `.wait_time = secondi` e avvia il conteggio con il metodo `.start()`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var t = $Timer\n    t.wait_time = 2.5\n    t.start()\n```\nSenza chiamare `.start()`, il timer non comincerà a scorrere."
+            }
+],
         solution: `func _ready():\n    $Cooldown.wait_time = 2.5\n    $Cooldown.one_shot = true\n    $Cooldown.timeout.connect(quando_scaduto)\n    $Cooldown.start()\n    print("Timer avviato per: ", $Cooldown.wait_time, "s")\n\nfunc quando_scaduto():\n    print("Tempo scaduto!")\n`,
         validate: async (result) => {
     const tests = [];
@@ -2896,10 +3983,28 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
         `,
         initialCode: `func _ready():\n    # Modifica $BarraVita (color e size) e stampa a console\n    pass\n`,
         hints: [
-            '$BarraVita.color = "#22c55e"',
-            '$BarraVita.size = Vector2(200, 20)',
-            'print("Barra salute aggiornata con colore: ", $BarraVita.color)'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Quando un Timer conclude la sua durata, emette automaticamente il segnale `timeout`. Collegandoti a questo evento puoi far scattare qualsiasi logica temporizzata."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Connetti `$Timer.timeout.connect(_on_timer_timeout)` e fai partire il timer con `.start()`."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nfunc _ready():\n    $Timer.timeout.connect(_on_timeout)\n    $Timer.start()\n\nfunc _on_timeout():\n    print(\"Tempo scaduto!\")\n```\nIl callback viene eseguito non appena il countdown arriva a zero."
+            }
+],
         solution: `func _ready():\n    $BarraVita.color = "#22c55e"\n    $BarraVita.size = Vector2(200, 20)\n    print("Barra salute aggiornata con colore: ", $BarraVita.color)\n`,
         validate: async (result) => {
     const tests = [];
@@ -2939,10 +4044,28 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
         `,
         initialCode: `func _ready():\n    # Stampa has_node("Moneta"), chiama $Moneta.queue_free() e stampa conferma\n    pass\n`,
         hints: [
-            'print("Moneta presente prima: ", has_node("Moneta"))',
-            '$Moneta.queue_free()',
-            'print("Moneta eliminata con queue_free: ", not has_node("Moneta"))'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "In Godot non si eliminano i nodi all'istante durante l'elaborazione di un frame, perché altri nodi potrebbero ancora star leggendo i loro dati. Si usa `queue_free()`, che pianifica la distruzione sicura del nodo a fine frame."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Chiama `$NomeNodo.queue_free()`. Il nodo verrà rimosso dall'albero della scena e la memoria liberata pulitamente."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Raccogli e distruggi l'oggetto moneta\n    $Moneta.queue_free()\n```\nInvocando `queue_free()`, il nodo cessa di esistere nella scena al termine del ciclo corrente."
+            }
+],
         solution: `func _ready():\n    print("Moneta presente prima: ", has_node("Moneta"))\n    $Moneta.queue_free()\n    print("Moneta eliminata con queue_free: ", not has_node("Moneta"))\n`,
         validate: async (result) => {
     const tests = [];
@@ -2984,9 +4107,28 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
         initialCode: `extends Node\n\nvar monete = 100\n\nfunc _ready():\n    # Connetti $CompraPozioneBtn sotto\n    \n    # Non modificare la riga sotto\n    print("Bottega Aperta")\n\n# Definisci func compra_pozione() sotto\n`,
         aiExplanation: "Congratulazioni per essere giunto al completamento del corso! Questo esercizio finale unisce tutti i pilastri di Godot Engine: nodi di controllo (Button, Label), segnali di interazione utente in tempo reale, variabili di stato e logica condizionale.",
         hints: [
-            '$CompraPozioneBtn.pressed.connect(compra_pozione)',
-            'func compra_pozione():\n    if monete >= 25:\n        monete -= 25\n        $OroLabel.text = "Monete: " + str(monete)\n        $MessaggioLabel.text = "Pozione Acquistata!"\n    else:\n        $MessaggioLabel.text = "Oro Insufficiente!"\n    print($MessaggioLabel.text)'
-        ],
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💭",
+                        "label": "Indizio Concettuale",
+                        "text": "Congratulazioni per essere arrivato alla Sfida Finale! Questa missione integra tutti i concetti appresi nel corso: albero dei nodi, segnali, temporizzazione, modifica delle proprietà e ciclo di vita."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "Connetti il timer, aggiorna lo stato dei nodi UI all'avvio, gestisci il timeout rimuovendo l'ostacolo con `queue_free()` e colorando l'interfaccia di vittoria."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "📝",
+                        "label": "Esempio Pratico",
+                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nfunc _ready():\n    $TimerPartita.timeout.connect(_on_fine_gioco)\n    $TimerPartita.start()\n    $Messaggio.text = \"Partita in corso...\"\n\nfunc _on_fine_gioco():\n    $Ostacolo.queue_free()\n    $Messaggio.text = \"Vittoria!\"\n```\nVerifica tutti i requisiti elencati nella scheda della sfida finale."
+            }
+],
         solution: `extends Node\n\nvar monete = 100\n\nfunc _ready():\n    $CompraPozioneBtn.pressed.connect(compra_pozione)\n    \n    # Non modificare la riga sotto\n    print("Bottega Aperta")\n\nfunc compra_pozione():\n    if monete >= 25:\n        monete -= 25\n        $OroLabel.text = "Monete: " + str(monete)\n        $MessaggioLabel.text = "Pozione Acquistata!"\n    else:\n        $MessaggioLabel.text = "Oro Insufficiente!"\n    print($MessaggioLabel.text)\n`,
         theory: `
             <div class="mastery-banner">
