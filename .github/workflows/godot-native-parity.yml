@@ -1,0 +1,29 @@
+name: GDScript Hero - Godot Native Parity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  godot-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Godot 4.4.1 Linux
+        run: |
+          curl --fail --location --retry 3 --silent --show-error https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip -o /tmp/godot4.zip
+          mkdir /tmp/godot4
+          unzip -q /tmp/godot4.zip -d /tmp/godot4
+          chmod +x /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64
+      - name: Test queue_free and Vector2 in native Godot
+        run: |
+          /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64 --headless --path tests/native_godot --script smoke.gd 2>&1 | tee /tmp/godot_native.log
+          grep -F "NATIVE_INITIAL: true" /tmp/godot_native.log
+          grep -F "NATIVE_IMMEDIATE_PRESENT: true" /tmp/godot_native.log
+          grep -F "NATIVE_QUEUED: true" /tmp/godot_native.log
+          grep -F "NATIVE_AFTER_FRAME_PRESENT: false" /tmp/godot_native.log
