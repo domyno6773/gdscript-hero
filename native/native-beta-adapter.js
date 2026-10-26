@@ -329,7 +329,9 @@
     if(previewMode)tools.append(button);
     const nativeFlag=document.createElement('label');
     nativeFlag.id='gdh-native-verify-mode';
-    nativeFlag.style.cssText='display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;white-space:nowrap';
+    nativeFlag.style.cssText='display:flex;align-items:center;gap:6px;padding:8px 12px;'+
+      'font-size:12px;line-height:1.3;cursor:pointer;white-space:normal;'+
+      'flex-wrap:wrap;width:100%;box-sizing:border-box';
     const nativeToggle=document.createElement('input');
     nativeToggle.type='checkbox';
     nativeToggle.id='gdh-native-verify-toggle';
@@ -338,7 +340,8 @@
     nativeToggleText.textContent=
       ' Godot reale (Beta — senza XP)';
     nativeFlag.append(nativeToggle,nativeToggleText);
-    if(verifyMode)tools.append(nativeFlag);
+    const panelCode=document.querySelector('#view-exercise .panel-code');
+    if(verifyMode)panelCode.insertBefore(nativeFlag,panelCode.firstChild);
     panel.style.display='none';
     nativeToggle.addEventListener('change',()=>{
       if(running){nativeToggle.checked=!nativeToggle.checked;return;}
