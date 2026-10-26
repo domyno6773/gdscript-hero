@@ -62,7 +62,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Cache-Control", "no-store" if name.endswith((".html",".js")) else "public, max-age=3600")
-        self.send_header("X-Frame-Options", "DENY" if ROLE == "host" else "SAMEORIGIN")
+        if ROLE == "host":
+            self.send_header("X-Frame-Options", "DENY")
         if ROLE == "host":
             self.send_header("Content-Security-Policy",
                 "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
@@ -72,8 +73,10 @@ class Handler(BaseHTTPRequestHandler):
         else:
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Cross-Origin-Resource-Policy", "cross-origin")
-            self.send_header("Content-Security-Policy",
-                             "default-src 'self' data: blob: 'wasm-unsafe-eval' 'unsafe-eval'; frame-ancestors " + HOST_ORIGIN)
+            # The document receives an opaque origin through iframe sandbox=allow-scripts;
+            # restricting script fetches to 'self' here would break Godot export assets.
+            # Its embedding parent is nonetheless pinned to this temporary host URL.
+            self.send_header("Content-Security-Policy", "frame-ancestors " + HOST_ORIGIN)
         self.end_headers()
         try:
             self.wfile.write(data)
