@@ -49,7 +49,7 @@ func _with_local_capture(source: String, names: Array) -> String:
             break
     if header_index == -1:
         return ""
-    var pairs: Array[String] = []
+    var pairs := PackedStringArray()
     for name_value in names:
         var name := str(name_value)
         if identifier.search(name) == null:
@@ -66,7 +66,7 @@ func _with_local_capture(source: String, names: Array) -> String:
         if leading <= header_indent.length():
             insertion = i
             break
-    lines.insert(insertion, indentation + "get_parent().__gdh_record({" + ", ".join(pairs) + "})")
+    lines.insert(insertion, indentation + "get_parent().call(\"__gdh_record\", {" + ", ".join(pairs) + "})")
     return "\n".join(lines)
 
 func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = []) -> Dictionary:
