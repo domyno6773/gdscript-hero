@@ -203,7 +203,7 @@ func _build_sandbox_scene(instance: Node, specs: Array) -> void:
             continue
         var name := str(entry.get("name", ""))
         var type_name := str(entry.get("type", "Node"))
-        var parent := str(entry.get("parent", ""))
+        var parent := "" if entry.get("parent", null) == null else str(entry.get("parent"))
         if valid.search(name) == null or not allowed.has(type_name) or created.has(name):
             continue
         if parent.is_empty():
@@ -229,7 +229,7 @@ func _build_sandbox_scene(instance: Node, specs: Array) -> void:
             if not (entry is Dictionary):
                 continue
             var name := str(entry.get("name", ""))
-            var parent_name := str(entry.get("parent", ""))
+            var parent_name := "" if entry.get("parent", null) == null else str(entry.get("parent"))
             if parent_name.is_empty() or name == parent_name:
                 continue
             var node: Node = created.get(name, null)
@@ -265,7 +265,7 @@ func _sandbox_snapshot() -> Dictionary:
         if not (entry is Dictionary):
             continue
         var name := str(entry.get("name", ""))
-        var parent_name := str(entry.get("parent", ""))
+        var parent_name := "" if entry.get("parent", null) == null else str(entry.get("parent"))
         var node: Node
         if parent_name.is_empty():
             node = _sandbox_instance
