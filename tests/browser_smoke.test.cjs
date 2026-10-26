@@ -223,7 +223,17 @@ async function smoke(browser,url,width){
  const official=await page.evaluate(()=>LESSONS_DATA.find(l=>l.id===1).solution);
  await page.locator('#code-editor').fill(official);
  await page.locator('#btn-run-code').click({timeout:10000});
- await page.waitForFunction(()=>App.state.finishedLessons.includes(1));
+ try {
+   await page.waitForFunction(()=>App.state.finishedLessons.includes(1),null,{timeout:15000});
+ } catch(error){
+   throw new Error('Lesson after Sandbox diagnostic: '+JSON.stringify(await page.evaluate(()=>({
+     output:document.getElementById('real-output-pre')?.textContent,
+     status:document.getElementById('test-status-badge')?.textContent,
+     feedback:document.getElementById('exercise-feedback-description')?.textContent,
+     stage:window.GDHGodot?.lastStage,validating:App.isValidating,
+     script:document.getElementById('code-editor')?.value
+   }))));
+ }
  assert.ok(await page.evaluate(()=>App.state.xp>0),'Missing XP reward');
  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('gdscript_hero_save_v4')));
  assert.ok(saved.finishedLessons.includes(1),'Lesson missing from localStorage');
