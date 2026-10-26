@@ -35,6 +35,32 @@
     setStatus(reason + ' · caricamento Godot…');
   };
 
+  // Each scenario runs as a separate native Godot request, without altering the editor text.
+  // This is local instructional feedback, NOT an anti-tamper grading boundary.
+  const startStep = () => {
+    if (!active || !frame) return;
+    const step = active.steps[active.phase];
+    const id = ++nextId;
+    active.id = id;
+    frame.contentWindow.postMessage({
+      v: VERSION, type: 'run', session, id, code: step.code,
+      inspect: active.lesson ? active.lesson.properties : ['answer'],
+      locals: active.lesson ? active.lesson.locals : []
+    }, '*');
+    if (timer !== null) clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (active && active.id === id) {
+        byId('result').textContent = JSON.stringify({id, status:'timeout', reset:true},null,2);
+        if (document.getElementById('grade')) {
+          document.getElementById('grade').textContent = JSON.stringify({
+            passed:false,reason:'Timeout in '+step.key+', nessuna validazione'
+          });
+        }
+        reset('Timeout, contesto precedente eliminato');
+      }
+    }, TIMEOUT_MS);
+  };
+
   window.addEventListener('message', event => {
     if (event.origin !== 'null' || !frame || event.source !== frame.contentWindow) {
       rejected++; return;
@@ -65,15 +91,25 @@
     }
     if (timer !== null) clearTimeout(timer);
     timer = null;
-    const id = active.id;
+    const step = active.steps[active.phase];
+    active.outputs[step.key] = {reply:m.reply, stdout:m.stdout, stderr:m.stderr};
+    if (active.phase + 1 < active.steps.length) {
+      active.phase++;
+      setStatus('Prova di comportamento '+active.phase+'/'+(active.steps.length-1)+'…');
+      startStep();
+      return;
+    }
     const completed = active;
     active = null;
-    byId('stdout').textContent = m.stdout;
-    byId('stderr').textContent = m.stderr;
-    byId('result').textContent = JSON.stringify({id, ...m.reply}, null, 2).slice(0, 34000);
+    const base = completed.outputs.base;
+    byId('stdout').textContent = base.stdout;
+    byId('stderr').textContent = base.stderr;
+    byId('result').textContent = JSON.stringify(base.reply, null, 2).slice(0, 34000);
     byId('run').disabled = false;
     if (completed.lesson && window.GDHLessonLab && document.getElementById('grade')) {
-      const feedback = window.GDHLessonLab.grade(completed.lesson.id, completed.code, m.reply, m.stdout, m.stderr);
+      const feedback = window.GDHLessonLab.grade(
+        completed.lesson.id, completed.code, base.reply, base.stdout, base.stderr, completed.outputs
+      );
       document.getElementById('grade').textContent = JSON.stringify(feedback, null, 2);
     }
     setStatus('Esecuzione conclusa · valutazione locale sperimentale e non attendibile');
@@ -85,23 +121,17 @@
     if (code.length > LIMIT_CODE) {
       setStatus('Massimo 10000 caratteri'); return;
     }
-    const id = ++nextId;
     const lesson = window.GDHLessonLab && document.getElementById('lesson') ? window.GDHLessonLab.get(Number(document.getElementById('lesson').value)) : null;
-    active = {id, code, lesson};
+    const extra = lesson && window.GDHLessonLab ? window.GDHLessonLab.scenarios(lesson.id, code) : [];
+    active = {id:null, code, lesson, phase:0, outputs:{},
+      steps:[{key:'base',code}, ...extra]};
     byId('run').disabled = true;
     byId('stdout').textContent = '';
     byId('stderr').textContent = '';
     byId('result').textContent = '';
     if (document.getElementById('grade')) document.getElementById('grade').textContent = '';
     setStatus('Esecuzione in corso…');
-    // Opaque-origin iframe: targetOrigin must be '*'; the frame reference and session are validated on reply.
-    frame.contentWindow.postMessage({v: VERSION, type:'run', session, id, code, inspect:active.lesson ? active.lesson.properties : ['answer'], locals:active.lesson ? active.lesson.locals : []}, '*');
-    timer = setTimeout(() => {
-      if (active && active.id === id) {
-        byId('result').textContent = JSON.stringify({id, status:'timeout', reset:true},null,2);
-        reset('Timeout, contesto precedente eliminato');
-      }
-    }, TIMEOUT_MS);
+    startStep();
   });
   byId('restart').addEventListener('click', () => reset('Riavvio manuale'));
   byId('invalid').addEventListener('click', () => {
