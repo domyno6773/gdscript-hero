@@ -181,7 +181,7 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
     var err := candidate.reload()
     if err != OK:
         return {"status": "compile_error", "code": int(err)}
-    if not candidate.can_instantiate() or candidate.get_instance_base_type() != "Node":
+    if not candidate.can_instantiate() or not (candidate.get_instance_base_type() == "Node" or ClassDB.is_parent_class(candidate.get_instance_base_type(), "Node")):
         return {"status": "unsupported", "message": "Solo script Node in questo spike"}
     var local_state := "not_requested"
     var local_reason := ""
@@ -194,7 +194,7 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
                 __gdh_phase("instrumentation")
                 var instrumented_script := GDScript.new()
                 instrumented_script.source_code = instrumented_source
-                if instrumented_script.reload() == OK and instrumented_script.can_instantiate() and instrumented_script.get_instance_base_type() == "Node":
+                if instrumented_script.reload() == OK and instrumented_script.can_instantiate() and (instrumented_script.get_instance_base_type() == "Node" or ClassDB.is_parent_class(instrumented_script.get_instance_base_type(), "Node")):
                     candidate = instrumented_script
                     local_state = "instrumented"
                 else:
@@ -210,8 +210,9 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
     # Only diagnostics emitted during ORIGINAL compilation or execution belong to
     # the student's error stream. Diagnostics from instrumentation stay separate.
     __gdh_phase("execution")
-    var instance := Node.new()
-    instance.set_script(candidate)
+    var instance := candidate.new() as Node
+    if instance == null:
+        return {"status": "unsupported", "message": "Impossibile creare il nodo Godot"}
     var active_scene := 0
     if scene_lesson is int or scene_lesson is float:
         active_scene = int(scene_lesson)
