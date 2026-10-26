@@ -1,0 +1,13 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Godot Web spike - GDScript Hero</title><link rel="stylesheet" href="style.css"></head><body>
+<main><h1>Godot Web — GDScript Hero</h1><p><strong>Demo non isolata. Non inserire codice non fidato, accessi o dati personali.</strong></p>
+<div id="status">Caricamento Godot…</div>
+<label for="source">GDScript</label><textarea id="source" spellcheck="false">extends Node
+var answer: int = 0
+func _ready():
+    answer = 100 / 3
+    print("A", "B")
+    print("Risultato: ", answer)</textarea>
+<button id="run" disabled>Esegui in Godot</button><button id="invalid">Prova errore di sintassi</button>
+<label>Output</label><pre id="stdout"></pre><label>Errori</label><pre id="stderr"></pre><label>Risultato strutturato</label><pre id="result"></pre>
+<canvas id="canvas" aria-label="Godot canvas"></canvas></main>
+<script src="godot.js"></script><script src="app.js"></script></body></html>
