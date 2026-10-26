@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   demo:
@@ -88,6 +88,26 @@ jobs:
           grep -q 'Laboratorio sperimentale' /tmp/godot-demo-public.html
           curl -fL --retry 5 --retry-delay 5 --connect-timeout 15 -sS -o /dev/null "$URL/godot.js"
           echo "TEMP_GODOT_DEMO_PUBLIC_VERIFIED=$URL/lesson-lab.html"
+      - name: Publish direct demo link on experimental branch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          URL="${{ steps.tunnel.outputs.url }}"
+          CONTENT="$(printf '# Godot native — anteprima temporanea\n\n[Apri il laboratorio Godot (60 lezioni)](%s/lesson-lab.html)\n\nQuesta demo senza account, XP o progressi è temporanea; rimane attiva solo finché GitHub Actions esegue il relativo job (massimo circa 3 ore). Il link può scadere.\n\nWorkflow: https://github.com/%s/actions/runs/%s\n' "$URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" | base64 -w0)"
+          PATH_IN_REPO="docs/godot-temporary-demo-link.md"
+          EXISTING="$(gh api "repos/$GITHUB_REPOSITORY/contents/$PATH_IN_REPO?ref=$GITHUB_REF_NAME" --jq .sha 2>/dev/null || true)"
+          if [[ -n "$EXISTING" ]]; then
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$PATH_IN_REPO" \
+              -f message="docs(spike): refresh temporary Godot demo URL" \
+              -f branch="$GITHUB_REF_NAME" -f sha="$EXISTING" -f content="$CONTENT"
+          else
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$PATH_IN_REPO" \
+              -f message="docs(spike): link to temporary Godot demo" \
+              -f branch="$GITHUB_REF_NAME" -f content="$CONTENT"
+          fi
+          echo "DEMO_LINK_PUBLISHED=https://github.com/$GITHUB_REPOSITORY/blob/$GITHUB_REF_NAME/$PATH_IN_REPO"
       - name: Keep demo accessible for three hours
         run: |
           echo "Temporary Godot preview is now accessible from the HTTPS link above."
