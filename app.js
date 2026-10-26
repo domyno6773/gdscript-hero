@@ -3603,12 +3603,11 @@ const App = {
         this.recordDailyQuestProgress('code_runs', 1);
 
         try {
-            const result = await GDScriptRuntime.execute(code, { initialScene: this.currentScene, lesson: currentLesson });
-            if (result.scene) {
-                this.currentScene = result.scene;
-                this.renderSceneDock();
-                this.renderViewportOverlay();
-            }
+            if (!window.GDHGodot) throw new Error('Motore Godot non disponibile');
+            const native = await window.GDHGodot.verifyLesson(currentLesson.id, code);
+            // Non attribuire a una lezione l'esito di un codice cambiato durante la verifica.
+            if (this.state.currentLessonId !== currentLesson.id || editor.value !== code || this.isReviewMode) return;
+            const result = native.execution;
 
             const realOutputPre = document.getElementById('real-output-pre');
             if (result.logs && result.logs.length > 0) {
@@ -3625,12 +3624,23 @@ const App = {
             const expectedOutputPre = document.getElementById('expected-output-pre');
             expectedOutputPre.innerText = currentLesson.expectedOutput || "// Nessun output richiesto";
 
-            const tests = await currentLesson.validate(result, GDScriptRuntime);
-            const allPassed = tests.every(t => t.passed);
+            // Solo il verdetto completo di Godot può attivare gli XP e gli sblocchi.
+            const tests = [...(native.feedback.checks || [])];
+            const allPassed = native.accepted && tests.length > 0 && tests.every(t => t.passed);
+            if (!allPassed && tests.every(t => t.passed)) {
+                tests.push({desc:'Verifica Godot non conclusiva',passed:false,
+                    diff:native.feedback.reason || 'Impossibile confermare la soluzione. Riprova.'});
+            }
+            if (!allPassed && native.feedback.reason && native.feedback.verdict === 'inconclusive') {
+                const failure = tests.find(t => !t.passed);
+                if (failure) failure.diff = native.feedback.reason;
+            }
             this.showExerciseFeedback(result, tests);
 
             // Registra telemetria P3.1 del tentativo di verifica
-            this.recordLessonAttempt(currentLesson.id, result, tests, null, code);
+            this.recordLessonAttempt(currentLesson.id, result, tests,
+                ['inconclusive','timeout'].includes(native.feedback.verdict)
+                    ? new Error(native.feedback.reason || 'Verifica nativa incompleta') : null, code);
 
             // Aggiorna Schermo Viewport 2D Godot
             if (this.viewport) {
