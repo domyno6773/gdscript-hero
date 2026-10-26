@@ -2,22 +2,32 @@
 /*
  * EXPERIMENTAL ADAPTER for the real GDScript Hero code editor.
  *
- * Only activates at http://127.0.0.1:18767/?nativeGodotPreview=1 on the spike branch.
- * Separate button; NEVER calls App.runAndValidate, saveStorage, AuthManager or Supabase.
+ * Only activates on the local spike harness at 127.0.0.1:18767 with
+ * ?nativeGodotPreview=1 (diagnostic button) or ?nativeGodotVerify=1
+ * (reversible native interception of the real Verify button).
+ * Native path NEVER calls the original App.runAndValidate, saveStorage,
+ * lesson.validate, recordLessonAttempt, AuthManager or Supabase.
  * The runner origin is opaque and its returned data is UNTRUSTED.
  */
 (() => {
-  const enabled = location.protocol === 'http:' && location.hostname === '127.0.0.1' &&
-    location.port === '18767' && new URL(location.href).searchParams.get('nativeGodotPreview') === '1';
-  if (!enabled) return;
+  const flags = new URL(location.href).searchParams;
+  const localOnly = location.protocol === 'http:' && location.hostname === '127.0.0.1' &&
+    location.port === '18767';
+  const verifyMode = localOnly && flags.get('nativeGodotVerify') === '1';
+  const previewMode = localOnly && flags.get('nativeGodotPreview') === '1' && !verifyMode;
+  if (!previewMode && !verifyMode) return;
   const RUNNER_ORIGIN='http://localhost:18768';
   const VERSION=1, STARTUP_TIMEOUT=30000, EXECUTION_TIMEOUT=4500, MAX_CODE=10000;
   const element=id=>document.getElementById(id);
   const limit=x=>String(x||'').slice(0,32000);
   const asText=(node,text)=>{node.textContent=limit(text);};
   let frame=null,session=null,generation=0,ready=false,startup=null,startupTimer=null,pending=null,id=0;
-  let disposed=false,running=false,fixturePromise=null;
+  let disposed=false,running=false,fixturePromise=null,validatorPromise=null;
+  let previousVerification=null;
   const ui={};
+  const stillCurrent=(lessonId,source)=>
+    window.App?.state?.currentLessonId===lessonId&&
+    element('code-editor')?.value===source;
   const setStatus=text=>{if(ui.status)asText(ui.status,text);};
   const cancelTimer=t=>{if(t!==null)clearTimeout(t);};
   const rejectPending=(reason)=>{
@@ -68,6 +78,25 @@
     }).catch(error=>{fixturePromise=null;throw error;});
     return fixturePromise;
   };
+  const loadValidators=()=>{
+    if(window.GDHLessonLab?.grade&&window.GDHLessonLab?.scenarios)
+      return Promise.resolve(window.GDHLessonLab);
+    if(validatorPromise)return validatorPromise;
+    const filenames=['lesson-validation.js','lesson-validation-native-scenes.js'];
+    const loadScript=filename=>new Promise((resolve,reject)=>{
+      const script=document.createElement('script');
+      script.src='/spikes/godot-web/host/'+filename;
+      script.onload=resolve;
+      script.onerror=()=>reject(new Error('Validatore non disponibile: '+filename));
+      document.head.append(script);
+    });
+    validatorPromise=loadFixtures().then(async()=>{
+      for(const filename of filenames)await loadScript(filename);
+      if(!window.GDHLessonLab?.grade)throw new Error('Validatore nativo non inizializzato');
+      return window.GDHLessonLab;
+    }).catch(error=>{validatorPromise=null;throw error;});
+    return validatorPromise;
+  };
   const ensureReady=()=>{
     if(disposed)return Promise.reject(new Error('Adattatore disattivato'));
     if(ready)return Promise.resolve();
@@ -88,16 +117,21 @@
     ui.mount.append(iframe);
     return promise;
   };
-  const execute=(code,lesson)=>{
+  const execute=(code,lesson,step={key:'base',code})=>{
     if(!ready||!frame||pending)return Promise.reject(new Error('Motore non pronto'));
     if(typeof code!=='string'||code.length>MAX_CODE)return Promise.reject(new Error('Codice troppo lungo'));
     const request=++id;
     const args={
       v:VERSION,type:'run',session,id:request,code,
-      inspect:lesson.properties||[],locals:lesson.locals||[],
-      calls:lesson.calls||[],emissions:lesson.emissions||[],
-      objectCalls:lesson.objectCalls||[],scene:lesson.scene||0,
-      actions:lesson.actions||[]
+      inspect:lesson.properties||[],
+      locals:step.key==='base'
+        ? (window.GDHLessonLab?.captureNames?.(lesson.id,code)||lesson.locals||[])
+        : [],
+      calls:step.key==='base'?(lesson.calls||[]):[],
+      emissions:step.key==='base'?(lesson.emissions||[]):[],
+      objectCalls:step.key==='base'?(lesson.objectCalls||[]):[],
+      scene:lesson.scene||0,
+      actions:step.actions||(lesson.actions||[])
     };
     const outcome=new Promise((resolve,reject)=>{
       pending={id:request,resolve,reject,timer:setTimeout(()=>reset('Timeout Godot; runner distrutto'),EXECUTION_TIMEOUT)};
@@ -148,6 +182,129 @@
       running=false;ui.button.disabled=false;
     }
   };
+
+  const showMainFeedback=(report,lesson,original)=>{
+    const output=element('real-output-pre');
+    const expected=element('expected-output-pre');
+    const badge=element('test-status-badge');
+    const results=element('test-results-view');
+    const checks=Array.isArray(report.feedback?.checks)?report.feedback.checks:[];
+    if(output){
+      output.textContent=(original?.stdout||'').trim() ||
+        (original?.stderr?('// Errore Godot: '+original.stderr.trim()):
+          '// Nessun output stampato a console');
+      output.style.color=original?.stderr?'#f87171':'#38bdf8';
+    }
+    if(expected)expected.textContent=lesson.expectedOutput||'// Nessun output richiesto';
+    if(badge){
+      badge.textContent='Godot (PROVA): '+report.feedback.verdict+
+        ' — nessun XP o progresso';
+      badge.style.color=report.feedback.verdict==='accepted'?'#10b981':'#f59e0b';
+    }
+    if(results){
+      results.replaceChildren();
+      for(const check of checks){
+        const row=document.createElement('div');
+        row.className='test-row '+(check.passed?'passed':'failed');
+        const symbol=document.createElement('span');
+        symbol.className='test-icon';symbol.textContent=check.passed?'✓':'✗';
+        const label=document.createElement('span');
+        label.className='test-desc';
+        label.textContent=String(check.desc||'').slice(0,300);
+        row.append(symbol,label);results.append(row);
+      }
+      const notice=document.createElement('p');
+      notice.className='test-diff';
+      notice.textContent='ANTEPRIMA NATIVA NON CERTIFICATA: nessun XP, sblocco, salvataggio, cloud o diritto Premium.';
+      results.prepend(notice);
+    }
+    const mainArea=element('exercise-primary-feedback');
+    if(mainArea)mainArea.dataset.state=
+      report.feedback.verdict==='accepted'?'success':'error';
+    const title=element('exercise-feedback-title');
+    if(title)title.textContent=report.feedback.verdict==='accepted'?
+      'Godot: verifiche superate (solo prova)': 'Godot: '+report.feedback.verdict;
+    const description=element('exercise-feedback-description');
+    if(description)description.textContent=report.feedback.reason ||
+      (report.feedback.verdict==='accepted'
+        ? 'Codice accettato dal laboratorio nativo. Non vengono assegnati progressi.'
+        : checks.find(c=>!c.passed)?.desc || 'Esecuzione non completata.');
+    const testCount=element('exercise-test-count');
+    if(testCount)testCount.textContent=checks.filter(c=>c.passed).length+
+      ' di '+checks.length+' verifiche native — senza XP';
+    asText(ui.stdout,original?.stdout||'(nessuna stampa)');
+    asText(ui.stderr,original?.stderr||'(nessun errore)');
+    asText(ui.details,JSON.stringify({
+      lesson:lesson.id,feedback:report.feedback,
+      nativeStatus:original?.reply?.status,scene:original?.reply?.scene||{},
+      notice:'Risultati locali non attendibili per progressi.'
+    },null,2));
+    setStatus('Godot: '+report.feedback.verdict+
+      ' — prova nel pulsante Verifica, nessun progresso salvato');
+  };
+  const verifyFromMain=async app=>{
+    if(running||disposed||app.isValidating)return;
+    if(app.isReviewMode)return; // review variants use legacy JS, unchanged
+    const lessonId=Number(app.state?.currentLessonId);
+    const source=element('code-editor')?.value;
+    const currentLesson=typeof LESSONS_DATA!=='undefined'?
+      LESSONS_DATA.find(x=>x.id===lessonId):null;
+    if(!currentLesson||typeof source!=='string')return;
+    const button=element('btn-run-code');
+    running=true;
+    app.isValidating=true; // transient UI guard only; no persistent state writes
+    if(button)button.disabled=true;
+    if(ui.button)ui.button.disabled=true;
+    const runLabel=button?.querySelector('.run-text');
+    if(runLabel)runLabel.textContent='Godot: verifica in prova…';
+    asText(ui.stdout,'');asText(ui.stderr,'');asText(ui.details,'');
+    setStatus('Preparazione della verifica nativa senza progressi…');
+    let lesson=null;
+    try{
+      if(source.length>MAX_CODE)throw new Error('Limite di 10000 caratteri');
+      const [fixtures,validator]=await Promise.all([loadFixtures(),loadValidators()]);
+      lesson=fixtures.find(x=>x.id===lessonId);
+      if(!lesson)throw new Error('Metadati nativi mancanti per la lezione');
+      const scenarios=validator.scenarios(lessonId,source);
+      const steps=[{key:'base',code:source},...scenarios];
+      await ensureReady();
+      const outputs={};
+      for(const step of steps){
+        if(!stillCurrent(lessonId,source))
+          throw new Error('Il codice o la lezione sono cambiati: risultati ignorati');
+        setStatus('Godot: prova '+(Object.keys(outputs).length+1)+'/'+steps.length+'…');
+        const r=await execute(step.code,lesson,step);
+        outputs[step.key]={reply:r.reply,stdout:r.stdout,stderr:r.stderr};
+        if(step.key==='base'&&r.status!=='executed')break;
+      }
+      if(!stillCurrent(lessonId,source))
+        throw new Error('Il codice o la lezione sono cambiati: risultati ignorati');
+      const base=outputs.base;
+      if(!base)throw new Error('Nessun risultato Godot ricevuto');
+      const feedback=validator.grade(lessonId,source,
+        base.reply,base.stdout,base.stderr,outputs);
+      // The UI never consumes feedback as authorization.
+      showMainFeedback({feedback},currentLesson,base);
+      return feedback;
+    }catch(error){
+      if(!stillCurrent(lessonId,source)){
+        setStatus('Risultato Godot ignorato: codice o lezione cambiati');
+        return {id:lessonId,passed:false,verdict:'inconclusive',demoOnly:true};
+      }
+      const timeout=/timeout|scadut/i.test(String(error?.message||error));
+      const feedback={id:lessonId,passed:false,demoOnly:true,
+        verdict:timeout?'timeout':'inconclusive',checks:[],
+        reason:String(error?.message||error).slice(0,250)};
+      showMainFeedback({feedback},currentLesson,null);
+      return feedback;
+    }finally{
+      running=false;
+      app.isValidating=false;
+      if(button)button.disabled=false;
+      if(ui.button)ui.button.disabled=false;
+      if(runLabel)runLabel.textContent='Verifica Codice';
+    }
+  };
   const mount=()=>{
     const tools=document.querySelector('#view-exercise .editor-header .editor-tools');
     const editor=element('code-editor');
@@ -173,20 +330,45 @@
       'white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto;font-size:12px';
     const l1=document.createElement('p');l1.textContent='Console nativa';const l2=document.createElement('p');l2.textContent='Errori';const l3=document.createElement('p');l3.textContent='Dati nativi (non attendibili)';
     panel.append(head,status,l1,stdout,l2,stderr,l3,details,mountPoint);
-    tools.append(button);
+    if(previewMode)tools.append(button);
+    const nativeFlag=document.createElement('label');
+    nativeFlag.id='gdh-native-verify-mode';
+    nativeFlag.style.cssText='display:block;margin-bottom:8px;font-size:13px';
+    const nativeToggle=document.createElement('input');
+    nativeToggle.type='checkbox';
+    nativeToggle.id='gdh-native-verify-toggle';
+    nativeToggle.checked=verifyMode;
+    const nativeToggleText=document.createElement('span');
+    nativeToggleText.textContent=
+      ' Godot nativo nel pulsante Verifica (SOLO PROVA, senza XP). Disattiva per tornare al runtime JavaScript normale.';
+    nativeFlag.append(nativeToggle,nativeToggleText);
+    if(verifyMode)panel.prepend(nativeFlag);
     document.querySelector('#view-exercise .panel-code').append(panel);
-    Object.assign(ui,{button,status,stdout,stderr,details,mount:mountPoint});
-    button.addEventListener('click',run);
-    setStatus('Motore non caricato. Premi il pulsante per avviare solo la diagnostica.');
+    Object.assign(ui,{button,status,stdout,stderr,details,mount:mountPoint,nativeToggle});
+    if(previewMode)button.addEventListener('click',run);
+    if(verifyMode){
+      previousVerification=window.App.runAndValidate;
+      window.App.runAndValidate=function(...args){
+        if(!disposed&&ui.nativeToggle.checked&&!this.isReviewMode)
+          return verifyFromMain(this);
+        return previousVerification.apply(this,args);
+      };
+      setStatus('Modalità Godot attiva nel pulsante Verifica. Nessun XP, account o progresso viene modificato.');
+    }else{
+      setStatus('Motore non caricato. Premi il pulsante per avviare solo la diagnostica.');
+    }
   };
   window.__GDHNativePreview=Object.freeze({
     get enabled(){return true;},
     get ready(){return ready;},
     get running(){return running;},
     get generation(){return generation;},
+    get verificationEnabled(){return verifyMode&&!disposed&&Boolean(ui.nativeToggle?.checked);},
+    get mode(){return verifyMode?'verify':'preview';},
     dispose(){
       if(disposed)return;disposed=true;reset('Anteprima disattivata');
       window.removeEventListener('message',onMessage);
+      if(previousVerification&&window.App)window.App.runAndValidate=previousVerification;
       ui.button?.remove();element('gdh-native-preview-panel')?.remove();
     }
   });
