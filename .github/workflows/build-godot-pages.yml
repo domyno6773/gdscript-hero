@@ -43,13 +43,14 @@ jobs:
           /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path . --editor --quit
           /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path . --export-release Web ../godot.html
           test -s ../godot.wasm && test -s ../godot.pck && test -s ../godot.js
+          test -s ../godot.audio.worklet.js && test -s ../godot.audio.position.worklet.js
           du -h ../godot.wasm ../godot.pck ../godot.js
       - name: Commit compiled static assets to the same GitHub Pages branch
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f native/godot.js native/godot.wasm native/godot.pck
+          git add -f native/godot.js native/godot.wasm native/godot.pck native/godot.audio.worklet.js native/godot.audio.position.worklet.js
           if git diff --cached --quiet; then
             echo "No binary changes"
           else
