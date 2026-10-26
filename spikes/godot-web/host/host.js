@@ -66,12 +66,17 @@
     if (timer !== null) clearTimeout(timer);
     timer = null;
     const id = active.id;
+    const completed = active;
     active = null;
     byId('stdout').textContent = m.stdout;
     byId('stderr').textContent = m.stderr;
     byId('result').textContent = JSON.stringify({id, ...m.reply}, null, 2).slice(0, 34000);
     byId('run').disabled = false;
-    setStatus('Esecuzione conclusa · risultati non affidabili per il grading');
+    if (completed.lesson && window.GDHLessonLab && document.getElementById('grade')) {
+      const feedback = window.GDHLessonLab.grade(completed.lesson.id, completed.code, m.reply, m.stdout, m.stderr);
+      document.getElementById('grade').textContent = JSON.stringify(feedback, null, 2);
+    }
+    setStatus('Esecuzione conclusa · valutazione locale sperimentale e non attendibile');
   });
 
   byId('run').addEventListener('click', () => {
@@ -81,14 +86,16 @@
       setStatus('Massimo 10000 caratteri'); return;
     }
     const id = ++nextId;
-    active = {id};
+    const lesson = window.GDHLessonLab && document.getElementById('lesson') ? window.GDHLessonLab.get(Number(document.getElementById('lesson').value)) : null;
+    active = {id, code, lesson};
     byId('run').disabled = true;
     byId('stdout').textContent = '';
     byId('stderr').textContent = '';
     byId('result').textContent = '';
+    if (document.getElementById('grade')) document.getElementById('grade').textContent = '';
     setStatus('Esecuzione in corso…');
     // Opaque-origin iframe: targetOrigin must be '*'; the frame reference and session are validated on reply.
-    frame.contentWindow.postMessage({v: VERSION, type:'run', session, id, code, inspect:['answer']}, '*');
+    frame.contentWindow.postMessage({v: VERSION, type:'run', session, id, code, inspect:active.lesson ? active.lesson.properties : ['answer'], locals:active.lesson ? active.lesson.locals : []}, '*');
     timer = setTimeout(() => {
       if (active && active.id === id) {
         byId('result').textContent = JSON.stringify({id, status:'timeout', reset:true},null,2);
