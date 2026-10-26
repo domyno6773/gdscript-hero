@@ -23,12 +23,12 @@
  // Native repeatability scenarios. We rewrite ONLY the numeric/boolean seed declared in _ready.
  // A missing declaration yields no variant and therefore FAILS the corresponding behavior check.
  const overwriteSeed=(code,name,value)=>{
-   const re=new RegExp('(^[ \\t]*var\\s+'+escape(name)+'\\s*(?::\\s*\\w+\\s*)?=\\s*)[^\\r\\n#]*','m');
+   const re=new RegExp('(^[ \\t]*var\\s+'+escape(name)+'\\s*(?::\\s*[A-Za-z_]\\w*(?:\\s*\\[\\s*[A-Za-z_]\\w*\\s*\\])?\\s*)?(?:=|:=)\\s*)[^\\r\\n#]*','m');
    return re.test(code) ? code.replace(re,(_m,prefix)=>prefix+value) : null;
  };
  function scenarios(id,src){
    const specs={
-     25:[['range4',{__replace:['range(3)','range(4)']}]],
+     25:[['range4',{__range4:true}]],
      26:[['other_enemies',{nemici:'["Ciclope", "Mago"]'}]],
      27:[['start2',{conto:'2'}]],
      28:[['two_enemies',{nemici:'["Mago", "Lupo"]'}]],
@@ -46,6 +46,11 @@
        if(name==='__replace'){
          if(!result.includes(value[0]))return [];
          result=result.replace(value[0],value[1]);
+       }else if(name==='__range4'){
+         // Match the actual for-loop header, never a quoted string/comment.
+         const header=/^([ \t]*for\s+i\s+in\s+)range\s*\(\s*3\s*\)(\s*:)/m;
+         if(!header.test(result))return [];
+         result=result.replace(header,'$1range(4)$2');
        }else {
          result=overwriteSeed(result,name,value);
          if(result===null)return [];
@@ -150,8 +155,8 @@
        check(list,'scudo_attivo :=',loc('scudo_attivo')===true&&decl(m,'var','scudo_attivo','\\s*:=')); 
        check(list,'Output scheda',eq(lines,['Eroe: Valerius','HP: 150 / 200','Scudo: true']));break;
      case 13:
-       check(list,'somma = 15, calcolata con +',loc('somma')===15&&/\bvar\s+somma\s*=\s*(?:10\s*\+\s*5|5\s*\+\s*10)\b/.test(m));
-       check(list,'prodotto = 10, calcolato con *',loc('prodotto')===10&&/\bvar\s+prodotto\s*=\s*(?:5\s*\*\s*2|2\s*\*\s*5)\b/.test(m));
+       check(list,'somma = 15, calcolata con +',loc('somma')===15&&/\bvar\s+somma(?:\s*:\s*int)?\s*=\s*(?:10\s*\+\s*5|5\s*\+\s*10)\b/.test(m));
+       check(list,'prodotto = 10, calcolato con *',loc('prodotto')===10&&/\bvar\s+prodotto(?:\s*:\s*int)?\s*=\s*(?:5\s*\*\s*2|2\s*\*\s*5)\b/.test(m));
        check(list,'print(somma), print(prodotto) e output separati',pr(m,'somma')&&pr(m,'prodotto')&&eq(lines,['15','10']));
        break;
      case 14:
@@ -176,7 +181,7 @@
        break;
      case 17:
        check(list,'livello iniziale 10',loc('livello')===10);
-       check(list,'Confronto if livello >= 10',/\bif\s+livello\s*>=\s*10\s*:/.test(m));
+       check(list,'Confronto if livello >= 10',/\bif\s+\(?\s*livello\s*>=\s*10\s*\)?\s*:/.test(m));
        check(list,'Con livello 10 stampa messaggio',eq(lines,['Livello raggiunto!']));
        check(list,'Con livello 9 NON stampa messaggio',scenarioOk(scenarioResults,'below',[]));
        break;
@@ -251,7 +256,7 @@
        check(list,'Funziona con Ciclope e Mago',scenarioOk(scenarioResults,'other_enemies',['Ciclope','Mago']));break;
      case 27:
        check(list,'while conto <= 3 e aggiornamento conto += 1',
-         /\bwhile\s+conto\s*<=\s*3\s*:/.test(m)&&/\bconto\s*\+=\s*1\b/.test(m));
+         /\bwhile\s+conto\s*(?:<=\s*3|<\s*4)\s*:/.test(m)&&/\bconto\s*\+=\s*1\b/.test(m));
        check(list,'Valore finale conto = 4',loc('conto')===4);
        check(list,'Sequenza Conto: 1, 2, 3',eq(lines,['Conto: 1','Conto: 2','Conto: 3']));
        check(list,'Con conto iniziale 2 stampa 2 e 3',scenarioOk(scenarioResults,'start2',['Conto: 2','Conto: 3']));break;
