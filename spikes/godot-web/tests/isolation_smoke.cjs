@@ -76,7 +76,7 @@ async function run(page,code,expected){
       const recovered=await run(page,'func _ready():\n    print("AFTER_RESTART")\n','executed');
       assert.match(recovered.stdout,/AFTER_RESTART/);
       // Navigazione deliberata verso l'origin del parent: l'iframe resta di origine opaca.
-      await frame.evaluate(() => { window.location.href = 'http://127.0.0.1:18767/probe.html'; });
+      await frame.evaluate(() => { setTimeout(() => { window.location.href = 'http://127.0.0.1:18767/probe.html'; }, 120); });
       await frame.waitForURL('http://127.0.0.1:18767/probe.html',{timeout:12000});
       const afterNavigation=await frame.evaluate(()=>{
         try { return window.parent.document.title; }
