@@ -118,6 +118,52 @@
    if(id===13)return /\bvar\s+somma(?:\s*:\s*int)?\s*=\s*(?:10\s*\+\s*5|5\s*\+\s*10)\b/.test(m)&&
       /\bvar\s+prodotto(?:\s*:\s*int)?\s*=\s*(?:5\s*\*\s*2|2\s*\*\s*5)\b/.test(m)&&
       pr(m,'somma')&&pr(m,'prodotto');
+
+   // The seven cases below already have independently executed native behavior
+   // scenarios (different inputs). For their short, literal seed declarations,
+   // we can avoid injecting a tail into _ready() altogether.
+   // Not a general-purpose GDScript parser: anything outside this narrow form
+   // falls back to optional local observation and can remain inconclusive.
+   const body=fn(src,'_ready');
+   const seed=(name,pattern)=>{
+     const typed='(?:\\s*:\\s*(?:[A-Za-z_]\\w*|Array\\s*\\[\\s*String\\s*\\]))?';
+     const re=new RegExp('(?:^|\\n)[ \\t]+var\\s+'+escape(name)+typed+
+       '\\s*(?:=|:=)\\s*'+pattern+'[ \\t]*(?=\\n|$|#)','m');
+     return re.test(body);
+   };
+   const quoted=value=>'(?:"'+escape(value)+'"|\\x27'+escape(value)+'\\x27)';
+   const array=items=>'\\[\\s*'+items.map(quoted).join('\\s*,\\s*')+'\\s*\\]';
+   switch(id){
+     case 17:
+       return seed('livello','10')&&
+         /\bif\s+\(?\s*livello\s*(?:>=\s*10|>\s*9)\s*\)?\s*:/.test(m);
+     case 18:
+       return seed('ha_chiave','true')&&seed('porta_chiusa','true')&&
+         /\bif\b[^\n:]*\band\b[^\n:]*:/.test(m);
+     case 19:
+       return seed('punti_vita','0')&&
+         /\bif\b[^\n]*\bpunti_vita\b[^\n]*:/.test(m)&&/\belse\s*:/.test(m);
+     case 20:
+       return seed('energia','75')&&seed('ha_amuleto','true')&&
+         seed('ha_chiave','false')&&seed('stato_portale',quoted(''))&&
+         /\bif\b/.test(m)&&/\belif\b/.test(m)&&/\belse\b/.test(m)&&
+         /\bprint\s*\([^)]*\bstato_portale\s*\)/.test(m);
+     case 26:
+       return seed('nemici',array(['Goblin','Orco','Drago']))&&
+         /\bfor\s+nemico\s+in\s+nemici\s*:/.test(m)&&pr(m,'nemico');
+     case 27:
+       return seed('conto','1')&&
+         /\bwhile\s+conto\s*(?:<=\s*3|<\s*4)\s*:/.test(m)&&
+         /\bconto\s*\+=\s*1\b/.test(m)&&
+         /\bprint\s*\([^)]*\bstr\s*\(\s*conto\s*\)/.test(m);
+     case 28:
+       return seed('nemici',array(['Slime','Scheletro','Spettro','Boss Drago']))&&
+         seed('xp_totali','0')&&
+         /\bfor\s+nemico\s+in\s+nemici\s*:/.test(m)&&
+         /\bxp_totali\s*\+=\s*25\b/.test(m)&&
+         /\bprint\s*\([^)]*\bnemico\s*\)/.test(m)&&
+         /\bprint\s*\([^)]*\bxp_totali\s*\)/.test(m);
+   }
    return false;
  };
  const captureNames=(id,source)=>{
@@ -230,30 +276,30 @@
          eq(lines,['Salute Guerriero: 65','Monete per membro: 33','Monete avanzate: 1']));
        break;
      case 17:
-       check(list,'livello iniziale 10',loc('livello')===10);
-       check(list,'Confronto if livello >= 10',/\bif\s+\(?\s*livello\s*>=\s*10\s*\)?\s*:/.test(m));
+       check(list,'livello iniziale 10',(directSourceProof(id,src)||loc('livello')===10));
+       check(list,'Confronto if livello >= 10',/\bif\s+\(?\s*livello\s*(?:>=\s*10|>\s*9)\s*\)?\s*:/.test(m));
        check(list,'Con livello 10 stampa messaggio',eq(lines,['Livello raggiunto!']));
        check(list,'Con livello 9 NON stampa messaggio',scenarioOk(scenarioResults,'below',[]));
        break;
      case 18:
-       check(list,'Due variabili booleane vere',loc('ha_chiave')===true&&loc('porta_chiusa')===true);
+       check(list,'Due variabili booleane vere',(directSourceProof(id,src)||(loc('ha_chiave')===true&&loc('porta_chiusa')===true)));
        check(list,'Condizione usa if e and',/\bif\b[^\n:]*\band\b[^\n:]*:/.test(m));
        check(list,'Caso iniziale stampa Accesso consentito',eq(lines,['Accesso consentito']));
        check(list,'Nessun accesso senza chiave',scenarioOk(scenarioResults,'no_key',[]));
        check(list,'Nessun accesso con porta non chiusa',scenarioOk(scenarioResults,'open_door',[]));
        break;
      case 19:
-       check(list,'punti_vita iniziale 0',loc('punti_vita')===0);
+       check(list,'punti_vita iniziale 0',(directSourceProof(id,src)||loc('punti_vita')===0));
        check(list,'if su punti_vita e ramo else',/\bif\b[^\n]*punti_vita[^\n]*:/.test(m)&&/\belse\s*:/.test(m));
        check(list,'Game Over quando salute è zero',eq(lines,['Game Over']));
        check(list,'In battaglia quando salute è 100',scenarioOk(scenarioResults,'alive',['In battaglia']));
        break;
      case 20:
        check(list,'Configurazione iniziale del portale',
-         loc('energia')===75&&loc('ha_amuleto')===true&&loc('ha_chiave')===false);
+         (directSourceProof(id,src)||(loc('energia')===75&&loc('ha_amuleto')===true&&loc('ha_chiave')===false)));
        check(list,'if / elif / else presenti',/\bif\b/.test(m)&&/\belif\b/.test(m)&&/\belse\b/.test(m));
        check(list,'Portale attivo nello scenario iniziale',
-         loc('stato_portale')==='Portale Attivato'&&eq(lines,['Stato: Portale Attivato']));
+         (directSourceProof(id,src)||loc('stato_portale')==='Portale Attivato')&&eq(lines,['Stato: Portale Attivato']));
        check(list,'Energia insufficiente con energia 20',
          scenarioOk(scenarioResults,'low_energy',['Stato: Energia Insufficiente']));
        check(list,'Nessuna reliquia se non ha chiave né amuleto',
@@ -299,7 +345,7 @@
        check(list,'Output 0, 1, 2',eq(lines,['0','1','2']));
        check(list,'range(4) genera anche il numero 3',scenarioOk(scenarioResults,'range4',['0','1','2','3']));break;
      case 26:
-       check(list,'Array nemici iniziale',localsArray(s,'nemici',['Goblin','Orco','Drago']));
+       check(list,'Array nemici iniziale',(directSourceProof(id,src)||localsArray(s,'nemici',['Goblin','Orco','Drago'])));
        check(list,'Iterazione sui nemici e stampa dinamica',
          /\bfor\s+nemico\s+in\s+nemici\s*:\s*\n[ \t]+print\s*\(\s*nemico\s*\)/.test(m));
        check(list,'Stampa di Goblin, Orco e Drago',eq(lines,['Goblin','Orco','Drago']));
@@ -307,14 +353,14 @@
      case 27:
        check(list,'while conto <= 3 e aggiornamento conto += 1',
          /\bwhile\s+conto\s*(?:<=\s*3|<\s*4)\s*:/.test(m)&&/\bconto\s*\+=\s*1\b/.test(m));
-       check(list,'Valore finale conto = 4',loc('conto')===4);
+       check(list,'Valore finale conto = 4',(directSourceProof(id,src)||loc('conto')===4));
        check(list,'Sequenza Conto: 1, 2, 3',eq(lines,['Conto: 1','Conto: 2','Conto: 3']));
        check(list,'Con conto iniziale 2 stampa 2 e 3',scenarioOk(scenarioResults,'start2',['Conto: 2','Conto: 3']));break;
      case 28:
        check(list,'Array iniziale di quattro nemici',
-         localsArray(s,'nemici',['Slime','Scheletro','Spettro','Boss Drago']));
+         (directSourceProof(id,src)||localsArray(s,'nemici',['Slime','Scheletro','Spettro','Boss Drago'])));
        check(list,'XP aggiornati con += 25',
-         loc('xp_totali')===100&&/\bfor\s+nemico\s+in\s+nemici\s*:/.test(m)&&/\bxp_totali\s*\+=\s*25\b/.test(m));
+         (directSourceProof(id,src)||loc('xp_totali')===100)&&/\bfor\s+nemico\s+in\s+nemici\s*:/.test(m)&&/\bxp_totali\s*\+=\s*25\b/.test(m));
        check(list,'Quattro allerte e XP 100',eq(lines,['Allerta: Slime','Allerta: Scheletro','Allerta: Spettro','Allerta: Boss Drago','XP Totali: 100']));
        check(list,'Solo due nemici generano XP 50',scenarioOk(scenarioResults,'two_enemies',['Allerta: Mago','Allerta: Lupo','XP Totali: 50']));break;
      case 29:
