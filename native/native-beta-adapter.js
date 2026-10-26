@@ -73,7 +73,9 @@
         inspect:options.inspect||[],locals:options.locals||[],
         calls:options.calls||[],emissions:options.emissions||[],
         objectCalls:options.objectCalls||[],
-        scene:options.scene||0,actions:options.actions||[]
+        scene:options.scene||0,actions:options.actions||[],
+        mode:options.mode||'',nodes:options.nodes||[],
+        node:options.node||'',signal:options.signal||''
       },'*'); // sandboxed iframe has an opaque origin
       return result;
     };
@@ -182,7 +184,14 @@
     const locals=[...new Set([...String(source).matchAll(/^\s+var\s+([A-Za-z_]\w*)/gm)].map(m=>m[1]))].slice(0,20);
     const reviewId=options.lesson?.id;
     const sceneId=reviewSceneIds[reviewId]||0;
-    const probeOptions={inspect:names,locals,scene:sceneId,calls:probes.map(method=>({method,args:[]}))};
+    const sandboxNodes=Array.isArray(options.sandboxNodes)?options.sandboxNodes:null;
+    const nativeNodes=sandboxNodes?sandboxNodes.map(n=>({
+      name:String(n.name||''),type:String(n.type||'Node'),
+      parent:n.parent==null?null:String(n.parent),
+      text:String(n.text||'').slice(0,200)
+    })):[];
+    const probeOptions={inspect:names,locals,scene:sceneId,calls:probes.map(method=>({method,args:[]})),
+      mode:sandboxNodes?'sandbox_start':'',nodes:nativeNodes};
     const r=await raw(source,probeOptions);
     const success=r.status==='executed'&&!String(r.stderr||'').trim();
     const state={...(r.reply?.properties||{}),...(r.reply?.locals||{})};
@@ -210,7 +219,15 @@
     if(typeof options.onLog==='function')result.logs.forEach(options.onLog);
     return result;
   };
-  const adapter=Object.freeze({verifyLesson,execute:executeCompat,runNative:raw,get engine(){return 'Godot 4.4.1 WebAssembly';}});
+  const sandboxAction=async(name,signal='pressed')=>{
+    const run=await raw('',{mode:'sandbox_action',node:name,signal});
+    const success=run.status==='executed'&&!String(run.stderr||'').trim();
+    return {success,logs:lines(run.stdout),error:success?null:
+      (run.stderr.trim()||String(run.reply?.message||'Azione Godot non riuscita')),
+      native:run.reply};
+  };
+  const adapter=Object.freeze({verifyLesson,execute:executeCompat,sandboxAction,
+    runNative:raw,get engine(){return 'Godot 4.4.1 WebAssembly';}});
   window.GDHGodot=adapter;
   if(window.GDScriptRuntime)window.GDScriptRuntime.execute=(...args)=>executeCompat(...args);
 })();
