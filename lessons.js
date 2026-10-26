@@ -467,9 +467,9 @@ const LESSONS_DATA = [
             'Stampa l\'energia passando i tre valori separati da virgola: <code>"Energia: ", 100, "%"</code>'
         ],
         notice: "Non modificare le righe print() esistenti. Il programma stampa:",
-        expectedOutput: "=== AVVIO SISTEMA ===\nSistema: Godot OS\nEnergia: 100 %\n=== DIAGNOSTICA COMPLETATA ===",
+        expectedOutput: "=== AVVIO SISTEMA ===\nSistema: Godot OS\nEnergia: 100%\n=== DIAGNOSTICA COMPLETATA ===",
         initialCode: `extends Node\n\nfunc _ready():\n    print("=== AVVIO SISTEMA ===")\n    # Aggiungi il commento e le due istruzioni print() sotto\n    \n    # Non modificare la riga sotto\n    print("=== DIAGNOSTICA COMPLETATA ===")\n`,
-        aiExplanation: "In questo esercizio applichi i fondamenti del Capitolo 1: i commenti con <code>#</code> vengono ignorati dal motore ma servono a documentare il codice. La funzione <code>print()</code> accetta sia singoli testi tra virgolette, sia argomenti multipli separati da virgola come <code>print(\"Energia: \", 100, \"%\")</code>, che Godot formatta automaticamente con gli spazi corretti.",
+        aiExplanation: "In questo esercizio applichi i fondamenti del Capitolo 1: i commenti con <code>#</code> vengono ignorati dal motore ma servono a documentare il codice. La funzione <code>print()</code> accetta sia singoli testi tra virgolette, sia argomenti multipli separati da virgola come <code>print(\"Energia: \", 100, \"%\")</code>, che Godot concatena senza inserire spazi aggiuntivi (inseriscili nelle stringhe quando servono).",
         hints: [
             {
                         "level": 1,
@@ -490,7 +490,7 @@ const LESSONS_DATA = [
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Diagnostica motore\n    print(\"Modulo: Audio\")\n    print(\"Volume:\", 80, \"%\")\n```\nAdatta i nomi delle etichette e le percentuali ai requisiti della missione."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Diagnostica motore\n    print(\"Modulo: Audio\")\n    print(\"Volume: \", 80, \"%\")\n```\nAdatta i nomi delle etichette e le percentuali ai requisiti della missione."
             }
 ],
         solution: `extends Node\n\nfunc _ready():\n    print("=== AVVIO SISTEMA ===")\n    # Diagnostica reattori\n    print("Sistema: Godot OS")\n    print("Energia: ", 100, "%")\n    print("=== DIAGNOSTICA COMPLETATA ===")
@@ -617,10 +617,12 @@ const LESSONS_DATA = [
             </ul>
         `,
         initialCode: `func _ready():
-    # BUG DI SINTASSI: Manca la delimitazione della stringa!
-    # Correggi la riga sotto affinché 'Eroe' sia una stringa racchiusa tra virgolette:
-    var nome_giocatore = Eroe
-    print(nome_giocatore)
+    # BUG DI SINTASSI: mancano le virgolette attorno al nome del personaggio!
+    # Correggi "Guerriero", poi verifica la variabile intera punti_vita.
+    var personaggio = Guerriero
+    var punti_vita = 100
+    print(personaggio)
+    print(punti_vita)
 `,
         hints: [
             {
@@ -642,7 +644,7 @@ const LESSONS_DATA = [
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var titolo = \"Cavaliere\"\n    print(titolo)\n```\nSe il codice di partenza conteneva un errore (virgolette mancanti), racchiudi la parola nelle virgolette."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var titolo = \"Cavaliere\"\n    print(titolo)\n```\nNel codice di partenza correggi Guerriero aggiungendo le virgolette; stampa anche la variabile intera punti_vita."
             }
 ],
         solution: `func _ready():\n    var personaggio = "Guerriero"\n    var punti_vita = 100\n    print(personaggio)\n    print(punti_vita)\n`,
@@ -3145,10 +3147,12 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
             </ul>
         `,
         initialCode: `func _ready():
-    var forziere = { "oro": 100 }
-    # BUG DI SICUREZZA: Verificare l'esistenza della chiave 'chiave' prima dell'accesso!
-    # Usa 'if forziere.has("oro"):' per stampare "Ha oro: true":
-    print("Ha oro: ", forziere["oro"])
+    var forziere = { "oro": 100, "gemme": 3 }
+    # Correggi i due accessi: devono verificare se le chiavi esistono.
+    var ha_oro = forziere["oro"]
+    var ha_chiave = forziere["chiave"]
+    print("Possiede oro: ", ha_oro)
+    print("Possiede chiave: ", ha_chiave)
 `,
         hints: [
             {
@@ -3163,14 +3167,14 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa `if dizionario.has(\"nome_chiave\"):` per eseguire il blocco di codice solo se la chiave è effettivamente presente."
+                        "text": "Assegna il risultato booleano di `forziere.has(\"oro\")` e `forziere.has(\"chiave\")` a due variabili, senza leggere direttamente chiavi mancanti."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var inventario = { \"spada\": 1 }\n    if inventario.has(\"pozione\"):\n        print(\"Pozione presente!\")\n    else:\n        print(\"Pozione mancante!\")\n```\n`.has()` restituisce un booleano (`true` o `false`)."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var inventario = { \"spada\": 1 }\n    var ha_pozione = inventario.has(\"pozione\")\n    print(\"Pozione trovata: \", ha_pozione)\n```\n`.has()` restituisce un booleano (`true` o `false`)."
             }
 ],
         solution: `func _ready():\n    var forziere = { "oro": 100, "gemme": 3 }\n    var ha_oro = forziere.has("oro")\n    var ha_chiave = forziere.has("chiave")\n    print("Possiede oro: ", ha_oro)\n    print("Possiede chiave: ", ha_chiave)\n`,
@@ -4541,7 +4545,7 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
         title: "58. Grafica e Forme: Il nodo ColorRect",
         icon: "🟩",
         xp: 60,
-        expectedOutput: "Barra salute aggiornata con colore: #22c55e",
+        expectedOutput: "Barra salute aggiornata con colore: (0.1333, 0.7725, 0.3686, 1.0)",
         initialNodes: [
             { type: "ColorRect", name: "BarraVita", color: "#64748b", size: { x: 50, y: 20 } }
         ],
@@ -4567,21 +4571,21 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Quando un Timer conclude la sua durata, emette automaticamente il segnale `timeout`. Collegandoti a questo evento puoi far scattare qualsiasi logica temporizzata."
+                        "text": "Un ColorRect è un nodo 2D che mostra un rettangolo colorato. La proprietà `color` è un valore Godot di tipo `Color`, mentre `size` è un `Vector2`."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Connetti `$Timer.timeout.connect(_on_timer_timeout)` e fai partire il timer con `.start()`."
+                        "text": "Assegna `$BarraVita.color = \"#22c55e\"`, poi `$BarraVita.size = Vector2(200, 20)` e stampa la proprietà `$BarraVita.color`."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nfunc _ready():\n    $Timer.timeout.connect(_on_timeout)\n    $Timer.start()\n\nfunc _on_timeout():\n    print(\"Tempo scaduto!\")\n```\nIl callback viene eseguito non appena il countdown arriva a zero."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Pannello.color = \"#ff9900\"\n    $Pannello.size = Vector2(160, 32)\n    print($Pannello.color)\n```\nGodot stampa un Color con i componenti RGBA, non necessariamente come stringa esadecimale."
             }
 ],
         solution: `func _ready():\n    $BarraVita.color = "#22c55e"\n    $BarraVita.size = Vector2(200, 20)\n    print("Barra salute aggiornata con colore: ", $BarraVita.color)\n`,
@@ -4593,8 +4597,8 @@ $BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)
     const bOk = b && b.type === "ColorRect" && b.color === "#22c55e" && b.size && b.size.x === 200 && b.size.y === 20;
     tests.push({ desc: "ColorRect 'BarraVita' configurato con colore verde e size Vector2(200, 20)", passed: !!bOk, diff: bOk ? null : "Imposta $BarraVita.color = '#22c55e' e $BarraVita.size = Vector2(200, 20)." });
     const logs = result.logs || [];
-    const logOk = logs.some(l => /^Barra salute aggiornata con colore\s*:\s*#22c55e$/i.test(String(l).trim()));
-    tests.push({ desc: "Aggiornamento colore barra stampato a console ('Barra salute aggiornata con colore: #22c55e')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
+    const logOk = logs.some(l => /^Barra salute aggiornata con colore\s*:\s*(?:#22c55e|\(0\.1333,\s*0\.7725,\s*0\.3686,\s*1\.0\))$/i.test(String(l).trim()));
+    tests.push({ desc: "Aggiornamento colore barra stampato a console (Color nativo o formato esadecimale legacy)", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
     return tests;
 }
     },

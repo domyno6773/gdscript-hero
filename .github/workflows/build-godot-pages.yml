@@ -1,0 +1,58 @@
+name: Build and publish Godot WebAssembly for GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'native/project/**'
+      - 'native/isolated.html'
+      - 'native/isolated-runner.js'
+      - '.github/workflows/build-godot-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: godot-web-pages-export
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - name: Download official Godot 4.4.1 and Web export template
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 5 -o /tmp/godot-linux.zip https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
+          unzip -q /tmp/godot-linux.zip -d /tmp
+          chmod +x /tmp/Godot_v4.4.1-stable_linux.x86_64
+          curl -fL -C - --retry 5 --retry-all-errors --retry-delay 8 -o /tmp/godot-templates.tpz https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz
+          unzip -p /tmp/godot-templates.tpz templates/web_nothreads_release.zip > /tmp/web_nothreads_release.zip
+          test -s /tmp/web_nothreads_release.zip
+      - name: Export Godot Web files into main/native
+        run: |
+          set -euo pipefail
+          cd native/project
+          sed -i 's|custom_template/release=""|custom_template/release="/tmp/web_nothreads_release.zip"|' export_presets.cfg
+          /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path . --editor --quit
+          /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path . --export-release Web ../godot.html
+          test -s ../godot.wasm && test -s ../godot.pck && test -s ../godot.js
+          du -h ../godot.wasm ../godot.pck ../godot.js
+      - name: Commit compiled static assets to the same GitHub Pages branch
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f native/godot.js native/godot.wasm native/godot.pck
+          if git diff --cached --quiet; then
+            echo "No binary changes"
+          else
+            git commit -m "build(native): publish Godot 4.4.1 WebAssembly for GitHub Pages"
+            git push origin HEAD:main
+          fi
