@@ -10,10 +10,21 @@
   let ready = false;
   let pending = null;
   let stdout = '', stderr = '';
+  let phase = 'original_compile';
+  let diagnostics = {original_compile:'', instrumentation:'', execution:''};
   const notify = m => window.parent.postMessage({v:VERSION,session,...m},PARENT_ORIGIN);
+  // These diagnostic labels are *advisory*, not a security proof. Student GDScript
+  // can call JavaScriptBridge from the sandboxed runner origin.
+  window.gdhPhase = next => {
+    if(pending !== null && Object.hasOwn(diagnostics,next))phase=next;
+  };
   const append = (name,text) => {
-    if(name === 'stderr') stderr=(stderr+text+'\n').slice(0,MAX_OUT);
-    else stdout=(stdout+text+'\n').slice(0,MAX_OUT);
+    if(name === 'stderr'){
+      diagnostics[phase]=(diagnostics[phase]+text+'\n').slice(0,MAX_OUT);
+      if(phase !== 'instrumentation')stderr=(stderr+text+'\n').slice(0,MAX_OUT);
+    }else if(phase !== 'instrumentation'){
+      stdout=(stdout+text+'\n').slice(0,MAX_OUT);
+    }
   };
   window.gdhReady = () => { ready = true; notify({type:'ready'}); };
   window.gdhResult = raw => {
@@ -22,6 +33,12 @@
     pending=null;
     try {
       const reply=JSON.parse(raw);
+      if(!reply || typeof reply!=='object')throw new Error('Invalid native reply');
+      reply.diagnostics={
+        originalCompile:diagnostics.original_compile,
+        instrumentation:diagnostics.instrumentation,
+        execution:diagnostics.execution
+      };
       notify({type:'result',id,stdout,stderr,reply});
     } catch(e) {
       notify({type:'error',message:'Native result parsing failed'});
@@ -54,6 +71,8 @@
        m.inspect.some(x=>typeof x!=='string'|| x.length>60))return;
     pending=m.id;
     stdout=''; stderr='';
+    phase='original_compile';
+    diagnostics={original_compile:'', instrumentation:'', execution:''};
     try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[],emissions:m.emissions||[],objectCalls:m.objectCalls||[],scene:m.scene||0,actions:m.actions||[]})); }
     catch(e) { append('stderr',String(e));window.gdhResult(JSON.stringify({status:'bridge_error'})); }
   });
