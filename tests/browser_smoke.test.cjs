@@ -59,7 +59,18 @@ async function smoke(browser,url,width){
  await viewIs(page,'practice');
  await page.locator('#sandbox-code-editor').fill('extends Node2D\n\nfunc _ready():\n    print("BROWSER_SANDBOX_OK")');
  await page.locator('#btn-sandbox-run').click({timeout:10000});
- await page.waitForFunction(()=>document.getElementById('sandbox-console-output').textContent.includes('BROWSER_SANDBOX_OK'));
+ try {
+   await page.waitForFunction(()=>document.getElementById('sandbox-console-output').textContent.includes('BROWSER_SANDBOX_OK'),null,{timeout:12000});
+ } catch(error) {
+   const diagnostics=await page.evaluate(()=>({
+     sandbox:document.getElementById('sandbox-console-output')?.textContent,
+     status:document.getElementById('sandbox-status-tag')?.textContent,
+     engine:window.GDHGodot?.engine,
+     frame:document.getElementById('gdh-native-runner')?.src,
+     scripts:[...document.querySelectorAll('script[src]')].slice(-4).map(x=>x.src)
+   }));
+   throw new Error('Godot Sandbox smoke diagnostic: '+JSON.stringify({diagnostics,pageErrors:errors}));
+ }
  // Anche nel rendering della scena, un nome nodo non deve trasformarsi in HTML attivo.
  await page.evaluate(()=>{
    const current=App.getActiveSandboxProject();
