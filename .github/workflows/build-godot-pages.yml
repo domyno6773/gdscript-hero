@@ -55,5 +55,16 @@ jobs:
             echo "No binary changes"
           else
             git commit -m "build(native): publish Godot 4.4.1 WebAssembly for GitHub Pages"
-            git push origin HEAD:main
+            # During export other commits can land on main. Preserve both sets
+            # of changes instead of failing with a non-fast-forward push.
+            for attempt in 1 2 3; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then
+                exit 0
+              fi
+              sleep 2
+            done
+            echo "Could not publish native assets after three attempts" >&2
+            exit 1
           fi
