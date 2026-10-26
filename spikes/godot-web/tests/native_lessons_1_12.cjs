@@ -86,6 +86,17 @@ async function run(page,id,code){
     console.log('NATIVE_ALTERNATIVE_ACCEPTED '+id);
   }
 
+  // The initial stdout can look correct, but a real engine error must prevent credit.
+  const runtimeErrorSource='func _ready():\n    print("Ciao Godot!")\n    push_error("GDH_EXPECTED_RUNTIME_ERROR")';
+  const runtimeError=await run(page,1,runtimeErrorSource);
+  const errorStream=await page.locator('#stderr').textContent();
+  assert.match(errorStream,/GDH_EXPECTED_RUNTIME_ERROR/,'Godot error diagnostic should reach the browser');
+  assert.equal(runtimeError.feedback.passed,false,
+    'The correct stdout followed by a Godot error must NOT pass: '+JSON.stringify(runtimeError.feedback));
+  assert.equal(runtimeError.feedback.checks.some(c=>c.desc.includes('Nessun errore')&&!c.passed),true,
+    'Engine error must be explicitly identified in lesson feedback');
+  console.log('NATIVE_ERROR_AFTER_CORRECT_OUTPUT_REJECTED');
+
   await page.screenshot({path:path.join(output,'native-12-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-12-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){
