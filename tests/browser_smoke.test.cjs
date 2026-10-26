@@ -93,6 +93,28 @@ async function smoke(browser,url,width){
    fs.mkdirSync(dir,{recursive:true});
    await page.screenshot({path:path.join(dir,'exercise-'+width+'-initial.png'),fullPage:false});
  }
+ // Design acceptance: real colored GDScript tokens, no old neon theme.
+ const design=await page.evaluate(()=>{
+   const e=document.getElementById('code-editor');
+   const layer=document.getElementById('gdscript-syntax-layer');
+   const shell=document.querySelector('#view-exercise .panel-code');
+   const header=document.querySelector('body:has(#view-exercise:not(.hidden)) .navbar');
+   const tokens=layer?[...layer.querySelectorAll('[class^="gd-token-"]')]:[];
+   const getRGB=element=>getComputedStyle(element).backgroundColor;
+   return {
+      tokens:tokens.length,
+      comments:tokens.filter(x=>x.classList.contains('gd-token-comment')).length,
+      keywords:tokens.filter(x=>x.classList.contains('gd-token-keyword')).length,
+      editorColor:getRGB(shell),
+      navbarColor:header?getRGB(header):null,
+      syntaxLayerHeight:layer?layer.getBoundingClientRect().height:0,
+      inputTransparent:getComputedStyle(e).color
+   };
+ });
+ console.log('DESIGN '+width+'px '+JSON.stringify(design));
+ assert.ok(design.tokens>0 && design.keywords>0,'GDScript syntax must be highlighted');
+ assert.ok(design.syntaxLayerHeight>0,'Syntax layer must be rendered');
+ assert.ok(!design.navbarColor?.includes('0, 229, 255'),'Old neon header must not remain');
  const official=await page.evaluate(()=>LESSONS_DATA.find(l=>l.id===1).solution);
  await page.locator('#code-editor').fill(official);
  await page.locator('#btn-run-code').click({timeout:10000});
