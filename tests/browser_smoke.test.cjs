@@ -74,6 +74,7 @@ async function smoke(browser,url,width){
      sandbox:document.getElementById('sandbox-console-output')?.textContent,
      status:document.getElementById('sandbox-status-tag')?.textContent,
      engine:window.GDHGodot?.engine,
+     lastStage:window.GDHGodot?.lastStage,
      frame:document.getElementById('gdh-native-runner')?.src,
      scripts:[...document.querySelectorAll('script[src]')].slice(-4).map(x=>x.src)
    }));
