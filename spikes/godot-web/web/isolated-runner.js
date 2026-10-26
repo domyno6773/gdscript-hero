@@ -47,10 +47,14 @@
             !/^[A-Za-z_]\w{0,59}$/.test(x.variable) || typeof x.method!=='string' ||
             !/^[A-Za-z_]\w{0,59}$/.test(x.method) || !Array.isArray(x.args) || x.args.length>5 ||
             !x.set || typeof x.set!=='object' || Array.isArray(x.set)))) ||
+       (m.scene !== undefined && (!Number.isSafeInteger(m.scene) || m.scene<0 || m.scene>60)) ||
+       (m.actions !== undefined && (!Array.isArray(m.actions) || m.actions.length>7 ||
+          m.actions.some(x=>!x||typeof x.node!=='string'|| x.node.length>40 ||
+            (x.signal!=='pressed'&&x.signal!=='timeout')))) ||
        m.inspect.some(x=>typeof x!=='string'|| x.length>60))return;
     pending=m.id;
     stdout=''; stderr='';
-    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[],emissions:m.emissions||[],objectCalls:m.objectCalls||[]})); }
+    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[],emissions:m.emissions||[],objectCalls:m.objectCalls||[],scene:m.scene||0,actions:m.actions||[]})); }
     catch(e) { append('stderr',String(e));window.gdhResult(JSON.stringify({status:'bridge_error'})); }
   });
   if (typeof Engine !== 'function') { notify({type:'error',message:'Export Godot mancante'}); return; }
