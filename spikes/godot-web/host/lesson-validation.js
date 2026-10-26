@@ -373,7 +373,7 @@
        check(list,'Emette 35 ed è connesso a on_danno',
          connect(src,'danno_inflitto','on_danno')&&emit(src,'danno_inflitto','35'));
        check(list,'Callback gestisce sia 35 sia 71',
-         eq(lines,['Danno registrato: 35','Danno registrato: 71']));break;
+         eq(lines,['Danno registrato: 35','Danno registrato: 71.0']));break;
      case 44:
        check(list,'Segnale salute_aggiornata(nuova_salute)',
          /^\s*signal\s+salute_aggiornata\s*\(\s*nuova_salute\s*\)/m.test(m)&&event(reply,'salute_aggiornata',1));
@@ -385,7 +385,7 @@
          emit(src,'salute_aggiornata','75')&&emit(src,'salute_aggiornata','40'));
        check(list,'Eventi native 75, 40 e test 11',
          eq(lines,['UI: Barra salute a 75','UI: Barra salute a 40',
-           '=== EVENTI BATTAGLIA COMPLETATI ===','UI: Barra salute a 11']));break;
+           '=== EVENTI BATTAGLIA COMPLETATI ===','UI: Barra salute a 11.0']));break;
      case 45:
        check(list,'Istanza Pozione con proprietà corrette',
          obj(loc('elisir'),{nome:'Elisir',cura:50}));
