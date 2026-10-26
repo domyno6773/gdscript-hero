@@ -45,9 +45,13 @@
     frame.contentWindow.postMessage({
       v: VERSION, type: 'run', session, id, code: step.code,
       inspect: active.lesson ? active.lesson.properties : ['answer'],
-      locals: active.lesson && window.GDHLessonLab?.captureNames
-        ? window.GDHLessonLab.captureNames(active.lesson.id, step.code)
-        : (active.lesson ? active.lesson.locals : []),
+      // Scenario requests need only the native behavior (stdout/stderr and status).
+      // Do not rewrite GDScript to capture locals when their values are not graded.
+      locals: step.key === 'base'
+        ? (active.lesson && window.GDHLessonLab?.captureNames
+          ? window.GDHLessonLab.captureNames(active.lesson.id, step.code)
+          : (active.lesson ? active.lesson.locals : []))
+        : [],
       calls: step.key === 'base' && active.lesson ? active.lesson.calls || [] : [],
       emissions: step.key==='base' && active.lesson ? active.lesson.emissions||[]:[],
       objectCalls: step.key==='base' && active.lesson ? active.lesson.objectCalls||[]:[],
