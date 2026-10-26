@@ -4,6 +4,9 @@ extends Node
 var _receive_callback: JavaScriptObject
 var _captured_locals: Dictionary = {}
 var _captured_objects: Dictionary = {}
+# Runtime Sandbox tenuto vivo tra l'esecuzione e le interazioni con i nodi.
+var _sandbox_instance: Node = null
+var _sandbox_specs: Array = []
 
 func __gdh_normalize(value: Variant, depth: int = 0) -> Variant:
     if value is Vector2:
@@ -65,7 +68,11 @@ func _on_js_request(args: Array) -> void:
     var request = JSON.parse_string(str(args[0]))
     if not (request is Dictionary):
         return
-    var reply := run_candidate(str(request.get("code", "")), request.get("inspect", []), request.get("locals", []), request.get("calls", []), request.get("emissions", []), request.get("objectCalls", []), request.get("scene", null), request.get("actions", []))
+    var reply: Dictionary
+    if str(request.get("mode", "")) == "sandbox_action":
+        reply = _sandbox_action(str(request.get("node", "")), str(request.get("signal", "")))
+    else:
+        reply = run_candidate(str(request.get("code", "")), request.get("inspect", []), request.get("locals", []), request.get("calls", []), request.get("emissions", []), request.get("objectCalls", []), request.get("scene", null), request.get("actions", []), request.get("nodes", []), str(request.get("mode", "")) == "sandbox_start")
     reply["id"] = request.get("id", null)
     var browser := JavaScriptBridge.get_interface("window")
     browser.gdhResult(JSON.stringify(reply))
@@ -178,7 +185,126 @@ func _scene_snapshot(instance: Node, lesson_id: int) -> Dictionary:
         result[str(name)] = state
     return result
 
-func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = [], method_calls: Variant = [], signal_emissions: Variant = [], object_calls: Variant = [], scene_lesson: Variant = null, scene_actions: Variant = []) -> Dictionary:
+# Costruisce nodi Godot REALI usando solo tipi e proprietà ammesse.
+# I progetti salvati restano invariati: queste istanze vivono solo nella Sandbox.
+func _build_sandbox_scene(instance: Node, specs: Array) -> void:
+    if specs.size() > 48:
+        return
+    var valid := RegEx.new()
+    valid.compile("^[A-Za-z_][A-Za-z0-9_]{0,39}$")
+    var allowed := ["Node", "Node2D", "Label", "Button", "Timer", "ColorRect", "Sprite2D", "CharacterBody2D", "ProgressBar"]
+    var created: Dictionary = {}
+    for entry in specs:
+        if not (entry is Dictionary):
+            continue
+        var name := str(entry.get("name", ""))
+        var type_name := str(entry.get("type", "Node"))
+        var parent := str(entry.get("parent", ""))
+        if valid.search(name) == null or not allowed.has(type_name) or created.has(name):
+            continue
+        if parent.is_empty():
+            instance.name = name
+            created[name] = instance
+            continue
+        var child := ClassDB.instantiate(type_name) as Node
+        if child == null:
+            continue
+        child.name = name
+        if child is Label or child is Button:
+            child.text = str(entry.get("text", "")).substr(0, 200)
+        if child is Timer:
+            child.wait_time = clampf(float(entry.get("wait_time", 1.0)), 0.05, 120.0)
+        if child is ColorRect:
+            child.color = Color("#438eff")
+            child.size = Vector2(100, 30)
+        created[name] = child
+    # Consenti anche gerarchie annidate senza che l'ordine dei figli influisca.
+    for _pass in range(12):
+        var moved := false
+        for entry in specs:
+            if not (entry is Dictionary):
+                continue
+            var name := str(entry.get("name", ""))
+            var parent_name := str(entry.get("parent", ""))
+            if parent_name.is_empty() or name == parent_name:
+                continue
+            var node: Node = created.get(name, null)
+            var parent: Node = created.get(parent_name, null)
+            if node != null and parent != null and node.get_parent() == null and parent.is_inside_tree():
+                # Non consentire cicli e non collegare un nodo al suo discendente.
+                if not node.is_ancestor_of(parent):
+                    parent.add_child(node)
+                    moved = true
+        if not moved:
+            break
+    # In _ready() gli script possono collegare i segnali da soli.
+    # Le callback generate da Godot nell'editor (e presenti nella demo
+    # iniziale) vengono collegate soltanto se non esiste già una connessione.
+    for entry in specs:
+        if not (entry is Dictionary):
+            continue
+        var child: Node = created.get(str(entry.get("name", "")), null)
+        if child is Button and child.is_inside_tree():
+            if child.get_signal_connection_list("pressed").is_empty():
+                var button_name := str(entry.get("name", ""))
+                for callback in ["_on_" + button_name.to_lower() + "_pressed", "_on_" + button_name + "_pressed"]:
+                    if instance.has_method(callback):
+                        child.pressed.connect(Callable(instance, callback))
+                        break
+
+func _sandbox_snapshot() -> Dictionary:
+    var output: Dictionary = {}
+    if not is_instance_valid(_sandbox_instance):
+        return output
+    for entry in _sandbox_specs:
+        if not (entry is Dictionary):
+            continue
+        var name := str(entry.get("name", ""))
+        var parent_name := str(entry.get("parent", ""))
+        var node: Node
+        if parent_name.is_empty():
+            node = _sandbox_instance
+        else:
+            node = _sandbox_instance.find_child(name, true, false)
+        if node == null or not is_instance_valid(node):
+            output[name] = {"exists": false}
+            continue
+        var state := {"exists": true, "class": node.get_class(), "queued": node.is_queued_for_deletion(), "parent": parent_name}
+        if node is Label or node is Button:
+            state["text"] = node.text.substr(0, 200)
+        if node is Button:
+            state["disabled"] = node.disabled
+            state["pressed_connections"] = node.get_signal_connection_list("pressed").size()
+        if node is Timer:
+            state["wait_time"] = node.wait_time
+            state["stopped"] = node.is_stopped()
+        if node is ColorRect:
+            state["color"] = node.color.to_html(false)
+            state["size"] = {"x": node.size.x, "y": node.size.y}
+        if node is ProgressBar:
+            state["value"] = node.value
+        if node is Node2D:
+            state["position"] = {"x": node.position.x, "y": node.position.y}
+        if node is CanvasItem:
+            state["visible"] = node.visible
+        output[name] = state
+    return output
+
+func _sandbox_action(node_name: String, signal_name: String) -> Dictionary:
+    if not is_instance_valid(_sandbox_instance):
+        return {"status": "missing_session", "message": "Esegui prima la scena Sandbox"}
+    var selected := _sandbox_instance.find_child(node_name, true, false)
+    if selected == null or selected.is_queued_for_deletion():
+        return {"status": "missing_node", "message": "Nodo non disponibile"}
+    if signal_name == "pressed" and selected is Button:
+        selected.pressed.emit()
+    elif signal_name == "timeout" and selected is Timer:
+        selected.timeout.emit()
+    else:
+        return {"status": "invalid_action", "message": "Azione non supportata per questo nodo"}
+    return {"status": "executed", "scene": _sandbox_snapshot()}
+
+func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = [], method_calls: Variant = [], signal_emissions: Variant = [], object_calls: Variant = [], scene_lesson: Variant = null, scene_actions: Variant = [], scene_nodes: Variant = [], sandbox_live: bool = false) -> Dictionary:
     if source.length() > 10000:
         return {"status": "rejected", "message": "Superati 10000 caratteri"}
     var extends_regex := RegEx.new()
@@ -218,6 +344,11 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
         else:
             local_state = "unavailable"
             local_reason = "capture_limit_exceeded"
+    # In una nuova esecuzione Sandbox, distruggi la vecchia scena runtime.
+    if sandbox_live and is_instance_valid(_sandbox_instance):
+        _sandbox_instance.queue_free()
+        _sandbox_instance = null
+        _sandbox_specs = []
     # Only diagnostics emitted during ORIGINAL compilation or execution belong to
     # the student's error stream. Diagnostics from instrumentation stay separate.
     __gdh_phase("execution")
@@ -228,6 +359,10 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
     if scene_lesson is int or scene_lesson is float:
         active_scene = int(scene_lesson)
     _build_scene(instance, active_scene)
+    if sandbox_live and scene_nodes is Array:
+        _sandbox_specs = scene_nodes.duplicate(true)
+        _build_sandbox_scene(instance, _sandbox_specs)
+        _sandbox_instance = instance
     add_child(instance)
     var observed := {}
     if inspect is Array:
@@ -353,6 +488,7 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
                     if str(prop.get("name", "")) == name and int(prop.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE:
                         observed[name] = __gdh_normalize(instance.get(name))
                         break
-    var final_scene := _scene_snapshot(instance, active_scene)
-    instance.queue_free()
+    var final_scene := _sandbox_snapshot() if sandbox_live else _scene_snapshot(instance, active_scene)
+    if not sandbox_live:
+        instance.queue_free()
     return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state, "localCaptureReason": local_reason, "methodCalls": method_results, "signalEmissions": signal_results, "objectCalls": object_results, "scene": final_scene, "sceneBeforeActions": initial_scene, "sceneActions": action_results}
