@@ -29,15 +29,15 @@
  function scenarios(id,src){
    const specs={
      25:[['range4',{__range4:true}]],
-     26:[['other_enemies',{nemici:'["Ciclope", "Mago"]'}]],
-     27:[['start2',{conto:'2'}]],
-     28:[['two_enemies',{nemici:'["Mago", "Lupo"]'}]],
+     26:[['other_enemies',{nemici:'["Ciclope", "Mago"]'}],['no_enemies',{nemici:'[]'}]],
+     27:[['start2',{conto:'2'}],['start0',{conto:'0'}]],
+     28:[['two_enemies',{nemici:'["Mago", "Lupo"]'}],['one_enemy',{nemici:'["Mago"]'}]],
      34:[['speed70',{velocita:'70'}]],
      36:[['station_moved',{stazione:'Vector2(151, 170)'}],['position_moved',{posizione:'Vector2(95, 200)'}]],
-     17:[['below',{livello:'9'}]],
+     17:[['below',{livello:'9'}],['above',{livello:'11'}]],
      18:[['no_key',{ha_chiave:'false'}],['open_door',{porta_chiusa:'false'}]],
-     19:[['alive',{punti_vita:'100'}]],
-     20:[['low_energy',{energia:'20'}],['no_relic',{ha_amuleto:'false'}],
+     19:[['alive',{punti_vita:'100'}],['negative',{punti_vita:'-5'}]],
+     20:[['low_energy',{energia:'20'}],['threshold50',{energia:'50'}],['no_relic',{ha_amuleto:'false'}],
          ['key_instead',{ha_amuleto:'false',ha_chiave:'true'}]]
    };
    return (specs[id]||[]).flatMap(([key,overrides])=>{
@@ -289,6 +289,7 @@
        check(list,'Confronto if livello >= 10',/\bif\s+\(?\s*livello\s*(?:>=\s*10|>\s*9)\s*\)?\s*:/.test(m));
        check(list,'Con livello 10 stampa messaggio',eq(lines,['Livello raggiunto!']));
        check(list,'Con livello 9 NON stampa messaggio',scenarioOk(scenarioResults,'below',[]));
+       check(list,'Con livello 11 stampa ancora il messaggio',scenarioOk(scenarioResults,'above',['Livello raggiunto!']));
        break;
      case 18:
        check(list,'Due variabili booleane vere',(directSourceProof(id,src)||(loc('ha_chiave')===true&&loc('porta_chiusa')===true)));
@@ -302,6 +303,7 @@
        check(list,'if su punti_vita e ramo else',/\bif\b[^\n]*punti_vita[^\n]*:/.test(m)&&/\belse\s*:/.test(m));
        check(list,'Game Over quando salute è zero',eq(lines,['Game Over']));
        check(list,'In battaglia quando salute è 100',scenarioOk(scenarioResults,'alive',['In battaglia']));
+       check(list,'Game Over anche con salute -5',scenarioOk(scenarioResults,'negative',['Game Over']));
        break;
      case 20:
        check(list,'Configurazione iniziale del portale',
@@ -309,6 +311,7 @@
        check(list,'if / elif / else presenti',/\bif\b/.test(m)&&/\belif\b/.test(m)&&/\belse\b/.test(m));
        check(list,'Portale attivo nello scenario iniziale',
          (directSourceProof(id,src)||loc('stato_portale')==='Portale Attivato')&&eq(lines,['Stato: Portale Attivato']));
+       check(list,'Al limite esatto energia 50 il portale apre',scenarioOk(scenarioResults,'threshold50',['Stato: Portale Attivato']));
        check(list,'Energia insufficiente con energia 20',
          scenarioOk(scenarioResults,'low_energy',['Stato: Energia Insufficiente']));
        check(list,'Nessuna reliquia se non ha chiave né amuleto',
@@ -358,20 +361,23 @@
        check(list,'Iterazione sui nemici e stampa dinamica',
          /\bfor\s+nemico\s+in\s+nemici\s*:\s*\n[ \t]+print\s*\(\s*nemico\s*\)/.test(m));
        check(list,'Stampa di Goblin, Orco e Drago',eq(lines,['Goblin','Orco','Drago']));
-       check(list,'Funziona con Ciclope e Mago',scenarioOk(scenarioResults,'other_enemies',['Ciclope','Mago']));break;
+       check(list,'Funziona con Ciclope e Mago',scenarioOk(scenarioResults,'other_enemies',['Ciclope','Mago']));
+       check(list,'Nessun nemico non produce stampe',scenarioOk(scenarioResults,'no_enemies',[]));break;
      case 27:
        check(list,'while conto <= 3 e aggiornamento conto += 1',
          /\bwhile\s+conto\s*(?:<=\s*3|<\s*4)\s*:/.test(m)&&/\bconto\s*\+=\s*1\b/.test(m));
        check(list,'Valore finale conto = 4',(directSourceProof(id,src)||loc('conto')===4));
        check(list,'Sequenza Conto: 1, 2, 3',eq(lines,['Conto: 1','Conto: 2','Conto: 3']));
-       check(list,'Con conto iniziale 2 stampa 2 e 3',scenarioOk(scenarioResults,'start2',['Conto: 2','Conto: 3']));break;
+       check(list,'Con conto iniziale 2 stampa 2 e 3',scenarioOk(scenarioResults,'start2',['Conto: 2','Conto: 3']));
+       check(list,'Con conto iniziale 0 stampa 0,1,2,3',scenarioOk(scenarioResults,'start0',['Conto: 0','Conto: 1','Conto: 2','Conto: 3']));break;
      case 28:
        check(list,'Array iniziale di quattro nemici',
          (directSourceProof(id,src)||localsArray(s,'nemici',['Slime','Scheletro','Spettro','Boss Drago'])));
        check(list,'XP aggiornati con += 25',
          (directSourceProof(id,src)||loc('xp_totali')===100)&&/\bfor\s+nemico\s+in\s+nemici\s*:/.test(m)&&/\bxp_totali\s*\+=\s*25\b/.test(m));
        check(list,'Quattro allerte e XP 100',eq(lines,['Allerta: Slime','Allerta: Scheletro','Allerta: Spettro','Allerta: Boss Drago','XP Totali: 100']));
-       check(list,'Solo due nemici generano XP 50',scenarioOk(scenarioResults,'two_enemies',['Allerta: Mago','Allerta: Lupo','XP Totali: 50']));break;
+       check(list,'Solo due nemici generano XP 50',scenarioOk(scenarioResults,'two_enemies',['Allerta: Mago','Allerta: Lupo','XP Totali: 50']));
+       check(list,'Un solo nemico genera XP 25',scenarioOk(scenarioResults,'one_enemy',['Allerta: Mago','XP Totali: 25']));break;
      case 29:
        check(list,'Funzione _ready() definita',/\bfunc\s+_ready\s*\(\s*\)\s*:/.test(m));
        check(list,'Messaggio Nodo Inizializzato',eq(lines,['Nodo Inizializzato']));break;
