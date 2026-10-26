@@ -126,6 +126,19 @@ async function smoke(browser,url,width){
    editorScrollLeft:document.getElementById('code-editor').scrollLeft
  }));
  console.log('AFTER_ERROR_GEOMETRY '+width+'px '+JSON.stringify(viewportMetrics));
+ if(width<=820){
+   const ancestors=await page.evaluate(()=>{
+     const items=[];
+     let el=document.getElementById('code-editor');
+     while(el && items.length<15){
+       const st=getComputedStyle(el);
+       items.push({tag:el.tagName,id:el.id,cls:String(el.className).slice(0,55),scrollLeft:el.scrollLeft,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,overflowX:st.overflowX,rectLeft:Math.round(el.getBoundingClientRect().left)});
+       el=el.parentElement;
+     }
+     return items;
+   });
+   console.log('SCROLL_ANCESTORS '+JSON.stringify(ancestors));
+ }
  assert.equal(feedback.state,'error','Failed verification must show the error on top of dock');
  assert.ok(feedback.text.length>0,'Error summary must be present');
  if(process.env.E2E_SCREENSHOTS==='1'){
