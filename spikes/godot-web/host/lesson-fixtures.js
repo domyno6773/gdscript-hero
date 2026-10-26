@@ -322,5 +322,222 @@ window.GDHLessonFixtures = [
       "totale_slot"
     ],
     "properties": []
+  },
+  {
+    "id": 25,
+    "chapter": 7,
+    "title": "25. Ciclo for con range()",
+    "initialCode": "func _ready():\n    # Scrivi il ciclo for con range(3)\n    pass\n",
+    "solution": "func _ready():\n    for i in range(3):\n        print(i)\n",
+    "task": "Scrivi un ciclo for i in range(3): . All'interno del ciclo, stampa i con print(i) .",
+    "expectedOutput": "0\n1\n2",
+    "properties": [],
+    "locals": [],
+    "calls": []
+  },
+  {
+    "id": 26,
+    "chapter": 7,
+    "title": "26. Iterazione su liste di nemici",
+    "initialCode": "func _ready():\n    var nemici = [\"Goblin\", \"Orco\", \"Drago\"]\n    # Itera sui nemici con il ciclo for\n    pass\n",
+    "solution": "func _ready():\n    var nemici = [\"Goblin\", \"Orco\", \"Drago\"]\n    for nemico in nemici:\n        print(nemico)\n",
+    "task": "Dichiara nemici = [\"Goblin\", \"Orco\", \"Drago\"] . Usa for nemico in nemici: per stampare ogni nome con print(nemico) .",
+    "expectedOutput": "Goblin\nOrco\nDrago",
+    "properties": [],
+    "locals": [
+      "nemici"
+    ],
+    "calls": []
+  },
+  {
+    "id": 27,
+    "chapter": 7,
+    "title": "27. Ciclo while",
+    "initialCode": "func _ready():\n    var conto = 1\n    # BUG: il contatore diminuisce e il ciclo diventa infinito.\n    # Correggi l'aggiornamento per contare da 1 a 3.\n    while conto <= 3:\n        print(\"Conto: \" + str(conto))\n        conto -= 1\n",
+    "solution": "func _ready():\n    var conto = 1\n    while conto <= 3:\n        print(\"Conto: \" + str(conto))\n        conto += 1\n",
+    "task": "Dichiara conto = 1 . Scrivi un ciclo while conto . Stampa \"Conto: \" + str(conto) e incrementa conto += 1 .",
+    "expectedOutput": "Conto: 1\nConto: 2\nConto: 3",
+    "properties": [],
+    "locals": [
+      "conto"
+    ],
+    "calls": []
+  },
+  {
+    "id": 28,
+    "chapter": 7,
+    "title": "28. ⭐ Sfida di Apprendimento: Annuncio Ondate e Calcolo XP",
+    "initialCode": "extends Node\n\nfunc _ready():\n    var nemici = [\"Slime\", \"Scheletro\", \"Spettro\", \"Boss Drago\"]\n    var xp_totali = 0\n    \n    # Scrivi il ciclo for sotto\n    \n    # Non modificare la riga sotto\n    print(\"XP Totali: \", xp_totali)\n",
+    "solution": "extends Node\n\nfunc _ready():\n    var nemici = [\"Slime\", \"Scheletro\", \"Spettro\", \"Boss Drago\"]\n    var xp_totali = 0\n    \n    for nemico in nemici:\n        print(\"Allerta: \" + nemico)\n        xp_totali += 25\n        \n    # Non modificare la riga sotto\n    print(\"XP Totali: \", xp_totali)\n",
+    "task": "Itera con for nemico in nemici: Stampa \"Allerta: \" + nemico Incrementa xp_totali += 25",
+    "expectedOutput": "Allerta: Slime\nAllerta: Scheletro\nAllerta: Spettro\nAllerta: Boss Drago\nXP Totali: 100",
+    "properties": [],
+    "locals": [
+      "nemici",
+      "xp_totali"
+    ],
+    "calls": []
+  },
+  {
+    "id": 29,
+    "chapter": 8,
+    "title": "29. Il ciclo di vita func _ready()",
+    "initialCode": "func _ready():\n    # Inizializza il nodo e stampa il messaggio\n    pass\n",
+    "solution": "func _ready():\n    print(\"Nodo Inizializzato\")\n",
+    "task": "All'interno di _ready() , stampa: \"Nodo Inizializzato\" .",
+    "expectedOutput": "Nodo Inizializzato",
+    "properties": [],
+    "locals": [],
+    "calls": []
+  },
+  {
+    "id": 30,
+    "chapter": 8,
+    "title": "30. Funzioni con parametri",
+    "initialCode": "func saluta(nome):\n    # Stampa il saluto con il parametro nome\n    pass\n\nfunc _ready():\n    # Chiama saluta(\"Eroe\")\n    pass\n",
+    "solution": "func saluta(nome):\n    print(\"Ciao \" + nome)\n\nfunc _ready():\n    saluta(\"Eroe\")\n",
+    "task": "Definisci una funzione saluta(nome): che stampa \"Ciao \" + nome . All'interno di _ready(): , chiama saluta(\"Eroe\") .",
+    "expectedOutput": "Ciao Eroe",
+    "properties": [],
+    "locals": [],
+    "calls": [
+      {
+        "method": "saluta",
+        "args": [
+          "Ada"
+        ]
+      },
+      {
+        "method": "saluta",
+        "args": [
+          "Viaggiatore"
+        ]
+      }
+    ]
+  },
+  {
+    "id": 31,
+    "chapter": 8,
+    "title": "31. Valori di ritorno con return",
+    "initialCode": "func calcola_danno(attacco, difesa):\n    # Restituisci attacco - difesa con return\n    pass\n\nfunc _ready():\n    # Chiama calcola_danno(30, 5) e stampa il risultato\n    pass\n",
+    "solution": "func calcola_danno(attacco, difesa):\n    return attacco - difesa\n\nfunc _ready():\n    var danno = calcola_danno(30, 5)\n    print(danno)\n",
+    "task": "Definisci calcola_danno(attacco, difesa): return attacco - difesa . In _ready(): calcola var danno = calcola_danno(30, 5) e stampa danno .",
+    "expectedOutput": "25",
+    "properties": [],
+    "locals": [
+      "danno"
+    ],
+    "calls": [
+      {
+        "method": "calcola_danno",
+        "args": [
+          12,
+          7
+        ]
+      },
+      {
+        "method": "calcola_danno",
+        "args": [
+          20,
+          9
+        ]
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "chapter": 8,
+    "title": "32. ⭐ Sfida di Apprendimento: Motore di Calcolo Danno Critico",
+    "initialCode": "extends Node\n\n# Definisci la funzione calcola_colpo sotto\n\n\nfunc _ready():\n    # Non modificare le righe sotto\n    var normale = calcola_colpo(30, false)\n    var critico = calcola_colpo(30, true)\n    print(\"Colpo normale: \", normale)\n    print(\"Colpo critico: \", critico)\n",
+    "solution": "extends Node\n\nfunc calcola_colpo(attacco: int, critico: bool) -> int:\n    if critico:\n        return attacco * 2\n    else:\n        return attacco\n\nfunc _ready():\n    var normale = calcola_colpo(30, false)\n    var critico = calcola_colpo(30, true)\n    print(\"Colpo normale: \", normale)\n    print(\"Colpo critico: \", critico)\n",
+    "task": "Crea func calcola_colpo(attacco: int, critico: bool) -> int: Se critico è true ritorna attacco * 2 Altrimenti ritorna attacco",
+    "expectedOutput": "Colpo normale: 30\nColpo critico: 60",
+    "properties": [],
+    "locals": [
+      "normale",
+      "critico"
+    ],
+    "calls": [
+      {
+        "method": "calcola_colpo",
+        "args": [
+          7,
+          false
+        ]
+      },
+      {
+        "method": "calcola_colpo",
+        "args": [
+          7,
+          true
+        ]
+      },
+      {
+        "method": "calcola_colpo",
+        "args": [
+          12,
+          true
+        ]
+      }
+    ]
+  },
+  {
+    "id": 33,
+    "chapter": 9,
+    "title": "33. Vector2(x, y) e coordinate 2D",
+    "initialCode": "func _ready():\n    # Crea posizione come Vector2(100, 200) e stampala\n    pass\n",
+    "solution": "func _ready():\n    var posizione = Vector2(100, 200)\n    print(posizione)\n",
+    "task": "Crea posizione = Vector2(100, 200) . Stampa il vettore con print(posizione) . Godot mostra le coordinate come (100.0, 200.0) , senza la parola Vector2 nell'output.",
+    "expectedOutput": "(100.0, 200.0)",
+    "properties": [],
+    "locals": [
+      "posizione"
+    ],
+    "calls": []
+  },
+  {
+    "id": 34,
+    "chapter": 9,
+    "title": "34. Calcolo nuova posizione con velocità",
+    "initialCode": "func _ready():\n    # Aggiorna posizione.x con velocita e stampa\n    pass\n",
+    "solution": "func _ready():\n    var posizione = Vector2(100, 200)\n    var velocita = 50\n    posizione.x += velocita\n    print(posizione)\n",
+    "task": "Inizializza posizione = Vector2(100, 200) e velocita = 50 . Aggiorna posizione.x += velocita . Stampa il vettore finale con print(posizione) .",
+    "expectedOutput": "(150.0, 200.0)",
+    "properties": [],
+    "locals": [
+      "posizione",
+      "velocita"
+    ],
+    "calls": []
+  },
+  {
+    "id": 35,
+    "chapter": 9,
+    "title": "35. Movimento diagonale su entrambi gli assi",
+    "initialCode": "func _ready():\n    # Aggiorna pos.x e pos.y e stampa il vettore\n    pass\n",
+    "solution": "func _ready():\n    var pos = Vector2(100, 200)\n    pos.x += 20\n    pos.y -= 20\n    print(pos)\n",
+    "task": "Crea pos = Vector2(100, 200) . Aggiungi 20 a pos.x e sottrai 20 a pos.y . Stampa pos .",
+    "expectedOutput": "(120.0, 180.0)",
+    "properties": [],
+    "locals": [
+      "pos"
+    ],
+    "calls": []
+  },
+  {
+    "id": 36,
+    "chapter": 9,
+    "title": "36. ⭐ Sfida di Apprendimento: Navigazione Radar e Atterraggio 2D",
+    "initialCode": "extends Node\n\nfunc _ready():\n    # Crea posizione, aggiorna le coordinate e verifica atterrato sotto\n    \n    # Non modificare le righe sotto\n    print(\"Posizione finale: \", posizione)\n    print(\"Stazione raggiunta: \", atterrato)\n",
+    "solution": "extends Node\n\nfunc _ready():\n    var posizione = Vector2(100, 200)\n    posizione.x += 50\n    posizione.y -= 30\n    var stazione = Vector2(150, 170)\n    var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)\n    \n    # Non modificare le righe sotto\n    print(\"Posizione finale: \", posizione)\n    print(\"Stazione raggiunta: \", atterrato)\n",
+    "task": "Crea var posizione = Vector2(100, 200) Modifica posizione.x += 50 e posizione.y -= 30 Crea var stazione = Vector2(150, 170) Verifica var atterrato = (posizione.x == stazione.x and posizione.y == stazione.y)",
+    "expectedOutput": "Posizione finale: (150.0, 170.0)\nStazione raggiunta: true",
+    "properties": [],
+    "locals": [
+      "posizione",
+      "stazione",
+      "atterrato"
+    ],
+    "calls": []
   }
 ];

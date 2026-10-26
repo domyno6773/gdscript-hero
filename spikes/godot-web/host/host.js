@@ -45,7 +45,8 @@
     frame.contentWindow.postMessage({
       v: VERSION, type: 'run', session, id, code: step.code,
       inspect: active.lesson ? active.lesson.properties : ['answer'],
-      locals: active.lesson ? active.lesson.locals : []
+      locals: active.lesson ? active.lesson.locals : [],
+      calls: step.key === 'base' && active.lesson ? active.lesson.calls || [] : []
     }, '*');
     if (timer !== null) clearTimeout(timer);
     timer = setTimeout(() => {

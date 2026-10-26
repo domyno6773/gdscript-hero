@@ -33,11 +33,15 @@
     if(!m || typeof m!=='object' || m.v!==VERSION || m.type!=='run' || m.session!==session ||
        !Number.isSafeInteger(m.id) || m.id<1 || typeof m.code!=='string' || m.code.length>10000 ||
        !Array.isArray(m.inspect) || m.inspect.length>20 ||
+       (m.calls !== undefined && (!Array.isArray(m.calls) || m.calls.length>8 ||
+          m.calls.some(c=>!c || typeof c.method!=='string' || !/^[A-Za-z_]\w{0,59}$/.test(c.method) ||
+            !Array.isArray(c.args) || c.args.length>5 || c.args.some(a=>a!==null&&
+              !['number','boolean','string'].includes(typeof a))))) ||
        (m.locals !== undefined && (!Array.isArray(m.locals) || m.locals.length>20 || m.locals.some(x=>typeof x!=='string'||!/^[A-Za-z_]\w{0,59}$/.test(x)))) ||
        m.inspect.some(x=>typeof x!=='string'|| x.length>60))return;
     pending=m.id;
     stdout=''; stderr='';
-    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[]})); }
+    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[]})); }
     catch(e) { append('stderr',String(e));window.gdhResult(JSON.stringify({status:'bridge_error'})); }
   });
   if (typeof Engine !== 'function') { notify({type:'error',message:'Export Godot mancante'}); return; }

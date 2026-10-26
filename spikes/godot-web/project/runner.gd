@@ -4,8 +4,15 @@ extends Node
 var _receive_callback: JavaScriptObject
 var _captured_locals: Dictionary = {}
 
+func __gdh_normalize(value: Variant) -> Variant:
+    if value is Vector2:
+        return {"__type": "Vector2", "x": value.x, "y": value.y}
+    return value
+
 func __gdh_record(values: Dictionary) -> void:
-    _captured_locals = values
+    _captured_locals = {}
+    for key in values.keys():
+        _captured_locals[key] = __gdh_normalize(values[key])
 
 func _ready() -> void:
     if not OS.has_feature("web"):
@@ -22,7 +29,7 @@ func _on_js_request(args: Array) -> void:
     var request = JSON.parse_string(str(args[0]))
     if not (request is Dictionary):
         return
-    var reply := run_candidate(str(request.get("code", "")), request.get("inspect", []), request.get("locals", []))
+    var reply := run_candidate(str(request.get("code", "")), request.get("inspect", []), request.get("locals", []), request.get("calls", []))
     reply["id"] = request.get("id", null)
     var browser := JavaScriptBridge.get_interface("window")
     browser.gdhResult(JSON.stringify(reply))
@@ -69,7 +76,7 @@ func _with_local_capture(source: String, names: Array) -> String:
     lines.insert(insertion, indentation + "get_parent().call(\"__gdh_record\", {" + ", ".join(pairs) + "})")
     return "\n".join(lines)
 
-func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = []) -> Dictionary:
+func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = [], method_calls: Variant = []) -> Dictionary:
     if source.length() > 10000:
         return {"status": "rejected", "message": "Superati 10000 caratteri"}
     var extends_regex := RegEx.new()
@@ -117,5 +124,29 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
                     observed[name] = value
                 else:
                     observed[name] = str(value)
+    var method_results: Array = []
+    if method_calls is Array:
+        var identifier := RegEx.new()
+        identifier.compile("^[A-Za-z_][A-Za-z0-9_]*$")
+        for request_call in method_calls.slice(0, 8):
+            if not (request_call is Dictionary):
+                continue
+            var name := str(request_call.get("method", ""))
+            var args = request_call.get("args", [])
+            if identifier.search(name) == null or not (args is Array) or args.size() > 5:
+                method_results.append({"method": name, "status": "invalid"})
+                continue
+            if not instance.has_method(name):
+                method_results.append({"method": name, "status": "missing"})
+                continue
+            var valid_args := true
+            for arg in args:
+                if not (arg is int or arg is float or arg is bool or arg is String or arg == null):
+                    valid_args = false
+            if not valid_args:
+                method_results.append({"method": name, "status": "invalid"})
+                continue
+            var output = instance.callv(name, args)
+            method_results.append({"method": name, "args": args, "status": "executed", "value": __gdh_normalize(output)})
     instance.queue_free()
-    return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state}
+    return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state, "methodCalls": method_results}
