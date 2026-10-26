@@ -3390,8 +3390,8 @@ const App = {
             const ed = document.getElementById('code-editor');
             if (ed) code = ed.value || '';
         }
-        // Verifica limitazioni del transpiler web: non etichettare lo studente come in errore
-        if (typeof GDScriptDiagnostic !== 'undefined' && code) {
+        // La diagnostica del vecchio transpiler non va applicata a Godot nativo.
+        if (!result?.nativeStatus && typeof GDScriptDiagnostic !== 'undefined' && code) {
             const diag = GDScriptDiagnostic.analyze(code, result, null, null);
             if (diag && diag.isTranspilerLimitation) {
                 return 'internal';
@@ -5276,7 +5276,7 @@ const App = {
 
         // Diagnostica avanzata P3.2
         let diag = null;
-        if (typeof GDScriptDiagnostic !== 'undefined') {
+        if (!result?.nativeStatus && typeof GDScriptDiagnostic !== 'undefined') {
             diag = GDScriptDiagnostic.analyze(code, result, failedTest, currentLesson);
         }
 
@@ -5322,7 +5322,9 @@ const App = {
                 badgeText = "ERRORE SINTASSI / RUNTIME";
                 badgeClass = "badge-runtime";
                 title = "Errore durante l'esecuzione";
-                whyHtml = "Lo script si è interrotto in modo anomalo durante la transpilazione o l'esecuzione.";
+                whyHtml = result?.nativeStatus
+                    ? "Il motore Godot non è riuscito a eseguire lo script."
+                    : "Lo script si è interrotto in modo anomalo durante l'esecuzione.";
                 nextStepHtml = "Esamina il messaggio tecnico e verifica le istruzioni digitate.";
                 techHtml = `<div class="didactic-tech-err"><code>${this.escapeHtml(errStr)}</code></div>`;
             } else if (failedTest && failedTest.desc) {
