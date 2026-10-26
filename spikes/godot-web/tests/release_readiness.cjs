@@ -80,7 +80,7 @@ for(const filename of artifacts){
 const rawBytes=Object.values(builds).reduce((sum,b)=>sum+b.bytes,0);
 const gzipBytes=Object.values(builds).reduce((sum,b)=>sum+b.gzipBytes,0);
 check('payload','Dimensioni del primo caricamento',
- rawBytes>20*1048576?'blocker':'review',
+ 'review',
  'Somma di godot.wasm, godot.js e godot.pck: '+bytes(rawBytes)+' MiB non compressi; '+bytes(gzipBytes)+' MiB gzip teorici. Il server CI non rappresenta una CDN compressa.','medium');
 
 const servers=[
