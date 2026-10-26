@@ -539,5 +539,236 @@ window.GDHLessonFixtures = [
       "atterrato"
     ],
     "calls": []
+  },
+  {
+    "id": 37,
+    "chapter": 10,
+    "title": "37. Creare e accedere ai Dizionari",
+    "initialCode": "func _ready():\n    # Crea il dizionario eroe e stampa classe e livello sotto\n    pass\n",
+    "solution": "func _ready():\n    var eroe = { \"classe\": \"Guerriero\", \"livello\": 10 }\n    print(\"Classe: \", eroe[\"classe\"])\n    print(\"Livello: \", eroe[\"livello\"])\n",
+    "task": "Crea la variabile var eroe = { \"classe\": \"Guerriero\", \"livello\": 10 } . Stampa la classe: print(\"Classe: \", eroe[\"classe\"]) . Stampa il livello: print(\"Livello: \", eroe[\"livello\"]) .",
+    "expectedOutput": "Classe: Guerriero\nLivello: 10",
+    "properties": [],
+    "calls": [],
+    "locals": [
+      "eroe"
+    ],
+    "emissions": [],
+    "objectCalls": []
+  },
+  {
+    "id": 38,
+    "chapter": 10,
+    "title": "38. Modificare e aggiungere chiavi al Dizionario",
+    "initialCode": "func _ready():\n    var equip = { \"arma\": \"Spada\" }\n    # Aggiungi armatura, aggiorna arma e stampa sotto\n    pass\n",
+    "solution": "func _ready():\n    var equip = { \"arma\": \"Spada\" }\n    equip[\"armatura\"] = \"Scudo\"\n    equip[\"arma\"] = \"Spada Laser\"\n    print(\"Arma: \", equip[\"arma\"])\n    print(\"Armatura: \", equip[\"armatura\"])\n",
+    "task": "Inizializza var equip = { \"arma\": \"Spada\" } . Aggiungi la chiave armatura: equip[\"armatura\"] = \"Scudo\" . Aggiorna l'arma: equip[\"arma\"] = \"Spada Laser\" . Stampa: print(\"Arma: \", equip[\"arma\"]) e print(\"Armatura: \", equip[\"armatura\"]) .",
+    "expectedOutput": "Arma: Spada Laser\nArmatura: Scudo",
+    "properties": [],
+    "calls": [],
+    "locals": [
+      "equip"
+    ],
+    "emissions": [],
+    "objectCalls": []
+  },
+  {
+    "id": 39,
+    "chapter": 10,
+    "title": "39. Metodi dei Dizionari (has, keys)",
+    "initialCode": "func _ready():\n    var forziere = { \"oro\": 100 }\n    # BUG DI SICUREZZA: Verificare l'esistenza della chiave 'chiave' prima dell'accesso!\n    # Usa 'if forziere.has(\"oro\"):' per stampare \"Ha oro: true\":\n    print(\"Ha oro: \", forziere[\"oro\"])\n",
+    "solution": "func _ready():\n    var forziere = { \"oro\": 100, \"gemme\": 3 }\n    var ha_oro = forziere.has(\"oro\")\n    var ha_chiave = forziere.has(\"chiave\")\n    print(\"Possiede oro: \", ha_oro)\n    print(\"Possiede chiave: \", ha_chiave)\n",
+    "task": "Inizializza var forziere = { \"oro\": 100, \"gemme\": 3 } . Salva in var ha_oro il risultato di forziere.has(\"oro\") . Salva in var ha_chiave il risultato di forziere.has(\"chiave\") . Stampa: print(\"Possiede oro: \", ha_oro) e print(\"Possiede chiave: \", ha_chiave) .",
+    "expectedOutput": "Possiede oro: true\nPossiede chiave: false",
+    "properties": [],
+    "calls": [],
+    "locals": [
+      "forziere",
+      "ha_oro",
+      "ha_chiave"
+    ],
+    "emissions": [],
+    "objectCalls": []
+  },
+  {
+    "id": 40,
+    "chapter": 10,
+    "title": "40. ⭐ Sfida di Apprendimento: Statistiche del Boss Finale",
+    "initialCode": "extends Node\n\nfunc _ready():\n    # Crea e aggiorna boss e crea in_furia sotto\n    \n    # Non modificare le righe sotto\n    print(\"Boss: \", boss[\"nome\"])\n    print(\"HP rimanenti: \", boss[\"hp\"])\n    print(\"Attacco: \", boss[\"attacco\"])\n    print(\"Furia attiva: \", in_furia)\n",
+    "solution": "extends Node\n\nfunc _ready():\n    var boss = { \"nome\": \"Drago Antico\", \"hp\": 500 }\n    boss[\"attacco\"] = 75\n    boss[\"hp\"] = 420\n    var in_furia = boss.has(\"furia\")\n    \n    # Non modificare le righe sotto\n    print(\"Boss: \", boss[\"nome\"])\n    print(\"HP rimanenti: \", boss[\"hp\"])\n    print(\"Attacco: \", boss[\"attacco\"])\n    print(\"Furia attiva: \", in_furia)\n",
+    "task": "Crea boss = { \"nome\": \"Drago Antico\", \"hp\": 500 } Aggiungi boss[\"attacco\"] = 75 Imposta boss[\"hp\"] = 420 Verifica var in_furia = boss.has(\"furia\")",
+    "expectedOutput": "Boss: Drago Antico\nHP rimanenti: 420\nAttacco: 75\nFuria attiva: false",
+    "properties": [],
+    "calls": [],
+    "locals": [
+      "boss",
+      "in_furia"
+    ],
+    "emissions": [],
+    "objectCalls": []
+  },
+  {
+    "id": 41,
+    "chapter": 11,
+    "title": "41. Dichiarare ed emettere un Segnale",
+    "initialCode": "extends Node\n\n# Dichiara il segnale porta_aperta sotto\n\n\nfunc _ready():\n    porta_aperta.connect(quando_aperta)\n    print(\"Apertura in corso...\")\n    # Emetti il segnale sotto\n\n\nfunc quando_aperta():\n    print(\"Porta aperta con successo!\")\n",
+    "solution": "extends Node\n\nsignal porta_aperta\n\nfunc _ready():\n    porta_aperta.connect(quando_aperta)\n    print(\"Apertura in corso...\")\n    porta_aperta.emit()\n\nfunc quando_aperta():\n    print(\"Porta aperta con successo!\")\n",
+    "task": "Dichiara in cima allo script: signal porta_aperta . In _ready() , dopo la stampa, emetti il segnale: porta_aperta.emit() .",
+    "expectedOutput": "Apertura in corso...\nPorta aperta con successo!",
+    "properties": [],
+    "calls": [],
+    "locals": [],
+    "emissions": [
+      {
+        "signal": "porta_aperta",
+        "args": []
+      }
+    ],
+    "objectCalls": []
+  },
+  {
+    "id": 42,
+    "chapter": 11,
+    "title": "42. Connettere un Segnale a una Funzione (connect)",
+    "initialCode": "extends Node\n\nsignal moneta_raccolta\n\nfunc _ready():\n    # Connetti moneta_raccolta ad aggiungi_punti ed emettila sotto\n    pass\n\nfunc aggiungi_punti():\n    print(\"+10 Monete raccolte!\")\n",
+    "solution": "extends Node\n\nsignal moneta_raccolta\n\nfunc _ready():\n    moneta_raccolta.connect(aggiungi_punti)\n    moneta_raccolta.emit()\n\nfunc aggiungi_punti():\n    print(\"+10 Monete raccolte!\")\n",
+    "task": "Nel corpo di _ready() , connetti il segnale alla funzione: moneta_raccolta.connect(aggiungi_punti) . Subito dopo, lancia il segnale con: moneta_raccolta.emit() .",
+    "expectedOutput": "+10 Monete raccolte!",
+    "properties": [],
+    "calls": [],
+    "locals": [],
+    "emissions": [
+      {
+        "signal": "moneta_raccolta",
+        "args": []
+      }
+    ],
+    "objectCalls": []
+  },
+  {
+    "id": 43,
+    "chapter": 11,
+    "title": "43. Segnali con Parametri",
+    "initialCode": "extends Node\n\n# Dichiara signal danno_inflitto(valore) sotto\n\n\nfunc _ready():\n    danno_inflitto.connect(on_danno)\n    # Emetti danno_inflitto con 35 sotto\n\n\nfunc on_danno(v):\n    print(\"Danno registrato: \", v)\n",
+    "solution": "extends Node\n\nsignal danno_inflitto(valore)\n\nfunc _ready():\n    danno_inflitto.connect(on_danno)\n    danno_inflitto.emit(35)\n\nfunc on_danno(v):\n    print(\"Danno registrato: \", v)\n",
+    "task": "Dichiara in cima: signal danno_inflitto(valore) . In _ready() , emetti il segnale passando il valore 35: danno_inflitto.emit(35) .",
+    "expectedOutput": "Danno registrato: 35",
+    "properties": [],
+    "calls": [],
+    "locals": [],
+    "emissions": [
+      {
+        "signal": "danno_inflitto",
+        "args": [
+          71
+        ]
+      }
+    ],
+    "objectCalls": []
+  },
+  {
+    "id": 44,
+    "chapter": 11,
+    "title": "44. ⭐ Sfida di Apprendimento: Sistema di Eventi Battaglia",
+    "initialCode": "extends Node\n\n# Dichiara il segnale salute_aggiornata sotto\n\n\n# Crea la funzione quando_salute_cambia(hp) sotto\n\n\nfunc _ready():\n    # Connetti il segnale ed emetti due volte (75 e 40) sotto\n    \n    # Non modificare la riga sotto\n    print(\"=== EVENTI BATTAGLIA COMPLETATI ===\")\n",
+    "solution": "extends Node\n\nsignal salute_aggiornata(nuova_salute)\n\nfunc quando_salute_cambia(hp):\n    print(\"UI: Barra salute a \", hp)\n\nfunc _ready():\n    salute_aggiornata.connect(quando_salute_cambia)\n    salute_aggiornata.emit(75)\n    salute_aggiornata.emit(40)\n    \n    # Non modificare la riga sotto\n    print(\"=== EVENTI BATTAGLIA COMPLETATI ===\")\n",
+    "task": "Dichiara signal salute_aggiornata(nuova_salute) Crea func quando_salute_cambia(hp) con stampa Connetti ed emetti con 75 e 40",
+    "expectedOutput": "UI: Barra salute a 75\nUI: Barra salute a 40\n=== EVENTI BATTAGLIA COMPLETATI ===",
+    "properties": [],
+    "calls": [],
+    "locals": [],
+    "emissions": [
+      {
+        "signal": "salute_aggiornata",
+        "args": [
+          11
+        ]
+      }
+    ],
+    "objectCalls": []
+  },
+  {
+    "id": 45,
+    "chapter": 12,
+    "title": "45. Definire una Classe e il Costruttore _init()",
+    "initialCode": "extends Node\n\n# Definisci la classe Pozione sotto\n\n\nfunc _ready():\n    # Crea elisir con Pozione.new e stampa sotto\n    pass\n",
+    "solution": "extends Node\n\nclass Pozione:\n    var nome\n    var cura\n    func _init(n, c):\n        self.nome = n\n        self.cura = c\n\nfunc _ready():\n    var elisir = Pozione.new(\"Elisir\", 50)\n    print(\"Pozione creata: \", elisir.nome, \" (Cura: \", elisir.cura, \")\")\n",
+    "task": "Definisci la classe class Pozione: con campi var nome e var cura . Nel costruttore func _init(n, c): assegna self.nome = n e self.cura = c . In _ready() , crea l'oggetto: var elisir = Pozione.new(\"Elisir\", 50) . Stampa: print(\"Pozione creata: \", elisir.nome, \" (Cura: \", elisir.cura, \")\") .",
+    "expectedOutput": "Pozione creata: Elisir (Cura: 50)",
+    "properties": [],
+    "calls": [],
+    "locals": [
+      "elisir"
+    ],
+    "emissions": [],
+    "objectCalls": []
+  },
+  {
+    "id": 46,
+    "chapter": 12,
+    "title": "46. Creare Istanze Multiple con .new()",
+    "initialCode": "extends Node\n\nclass Guerriero:\n    var nome\n    var hp\n    func _init(n, h):\n        self.nome = n\n        self.hp = h\n\nfunc _ready():\n    # Crea g1 e g2 con .new() e stampa i loro stati sotto\n    pass\n",
+    "solution": "extends Node\n\nclass Guerriero:\n    var nome\n    var hp\n    func _init(n, h):\n        self.nome = n\n        self.hp = h\n\nfunc _ready():\n    var g1 = Guerriero.new(\"Arthur\", 100)\n    var g2 = Guerriero.new(\"Lancelot\", 90)\n    print(\"Eroe 1: \", g1.nome, \" (HP: \", g1.hp, \")\")\n    print(\"Eroe 2: \", g2.nome, \" (HP: \", g2.hp, \")\")\n",
+    "task": "In _ready() crea due guerrieri: var g1 = Guerriero.new(\"Arthur\", 100) e var g2 = Guerriero.new(\"Lancelot\", 90) . Stampa: print(\"Eroe 1: \", g1.nome, \" (HP: \", g1.hp, \")\") . Stampa: print(\"Eroe 2: \", g2.nome, \" (HP: \", g2.hp, \")\") .",
+    "expectedOutput": "Eroe 1: Arthur (HP: 100)\nEroe 2: Lancelot (HP: 90)",
+    "properties": [],
+    "calls": [],
+    "locals": [
+      "g1",
+      "g2"
+    ],
+    "emissions": [],
+    "objectCalls": []
+  },
+  {
+    "id": 47,
+    "chapter": 12,
+    "title": "47. Metodi di Classe (Comportamento)",
+    "initialCode": "extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    # Aggiungi func colpo_caricato() sotto\n\n\nfunc _ready():\n    # Istanzia eroe con attacco 25 e stampa il colpo caricato sotto\n    pass\n",
+    "solution": "extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    func colpo_caricato():\n        return self.attacco * 2\n\nfunc _ready():\n    var eroe = Personaggio.new(\"Eroe\", 25)\n    print(\"Danno colpo caricato: \", eroe.colpo_caricato())\n",
+    "task": "Nella classe Personaggio , aggiungi il metodo func colpo_caricato(): return self.attacco * 2 . In _ready() , crea var eroe = Personaggio.new(\"Eroe\", 25) . Stampa: print(\"Danno colpo caricato: \", eroe.colpo_caricato()) .",
+    "expectedOutput": "Danno colpo caricato: 50",
+    "properties": [],
+    "calls": [],
+    "locals": [
+      "eroe"
+    ],
+    "emissions": [],
+    "objectCalls": [
+      {
+        "variable": "eroe",
+        "method": "colpo_caricato",
+        "args": [],
+        "set": {
+          "attacco": 7
+        }
+      },
+      {
+        "variable": "eroe",
+        "method": "colpo_caricato",
+        "args": [],
+        "set": {
+          "attacco": 31
+        }
+      }
+    ]
+  },
+  {
+    "id": 48,
+    "chapter": 12,
+    "title": "48. ⭐ Sfida di Apprendimento Finale: Creazione Party RPG ad Oggetti",
+    "initialCode": "extends Node\n\n# Definisci la classe Avventuriero con _init sotto\n\n\nfunc _ready():\n    # Crea membro1, membro2 e calcola vita_totale sotto\n    \n    # Non modificare le righe sotto\n    print(\"Membro 1: \", membro1.nome, \" (\", membro1.ruolo, \")\")\n    print(\"Membro 2: \", membro2.nome, \" (\", membro2.ruolo, \")\")\n    print(\"Salute totale party: \", vita_totale)\n",
+    "solution": "extends Node\n\nclass Avventuriero:\n    var nome\n    var ruolo\n    var vita\n    func _init(n, r, v):\n        self.nome = n\n        self.ruolo = r\n        self.vita = v\n\nfunc _ready():\n    var membro1 = Avventuriero.new(\"Aria\", \"Maga\", 80)\n    var membro2 = Avventuriero.new(\"Krag\", \"Guerriero\", 120)\n    var vita_totale = membro1.vita + membro2.vita\n    \n    # Non modificare le righe sotto\n    print(\"Membro 1: \", membro1.nome, \" (\", membro1.ruolo, \")\")\n    print(\"Membro 2: \", membro2.nome, \" (\", membro2.ruolo, \")\")\n    print(\"Salute totale party: \", vita_totale)\n",
+    "task": "Crea la classe Avventuriero con _init Istanzia membro1 e membro2 con .new() Calcola var vita_totale = membro1.vita + membro2.vita",
+    "expectedOutput": "Membro 1: Aria (Maga)\nMembro 2: Krag (Guerriero)\nSalute totale party: 200",
+    "properties": [],
+    "calls": [],
+    "locals": [
+      "membro1",
+      "membro2",
+      "vita_totale"
+    ],
+    "emissions": [],
+    "objectCalls": []
   }
 ];
