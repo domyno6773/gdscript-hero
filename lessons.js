@@ -460,9 +460,9 @@ const LESSONS_DATA = [
         xp: 100,
         difficulty: "facile",
         difficultyLabel: "Facile",
-        scenario: "Il computer di bordo della navetta spaziale ha bisogno di verificare la diagnostica dei sistemi. Sotto il commento, aggiungi un commento e usa <code>print()</code> per completare la sequenza:",
+        scenario: "Il computer di bordo della navetta spaziale deve verificare la diagnostica dei sistemi. Completa la sequenza usando <code>print()</code>. I commenti, anche quelli già presenti, sono facoltativi e non influenzano l'esecuzione.",
         requirements: [
-            'Aggiungi un commento con cancelletto: <code># Diagnostica reattori</code>',
+            'Facoltativo: documenta il codice con un commento <code>#</code> (non viene valutato)',
             'Stampa la riga di sistema: <code>"Sistema: Godot OS"</code>',
             'Stampa l\'energia passando i tre valori separati da virgola: <code>"Energia: ", 100, "%"</code>'
         ],
@@ -476,14 +476,14 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida richiede di combinare documentazione (commento con cancelletto) e output di diagnostica nella console."
+                        "text": "Le righe che iniziano con # sono commenti: non vengono eseguite. La sfida viene valutata in base alle stampe effettive nella console."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Scrivi una riga che inizia con `#` per documentare il sistema, poi due istruzioni `print(...)` separate per i due parametri di diagnostica."
+                        "text": "Mantieni le stampe iniziale e finale e aggiungi le due stampe centrali. Lascia pure i commenti iniziali: non devono essere rimossi."
             },
             {
                         "level": 3,
@@ -504,7 +504,7 @@ const LESSONS_DATA = [
         `,
         task: `
             <ul>
-                <li>Aggiungi il commento <code># Diagnostica reattori</code></li>
+                <li>Facoltativo: aggiungi un commento come <code># Diagnostica reattori</code>. I commenti non modificano l'output</li>
                 <li>Stampa <code>"Sistema: Godot OS"</code></li>
                 <li>Stampa con valori multipli: <code>"Energia: ", 100, "%"</code></li>
             </ul>
@@ -512,13 +512,19 @@ const LESSONS_DATA = [
         validate: async (result) => {
     const tests = [];
     tests.push(formatExecutionCheck(result));
-    const hasComment = hasRealComment(result.code);
-    tests.push({ desc: "Commento di diagnostica '#' presente", passed: !!hasComment, diff: hasComment ? null : "Aggiungi un commento che inizia con '#'." });
-    const clean = (result.logs || []).join(' ').replace(/\s+/g, ' ');
-    const hasSystem = clean.includes("Sistema: Godot OS");
-    const hasEnergy = clean.includes("Energia: 100 %") || clean.includes("Energia: 100%");
-    tests.push({ desc: "Sistema: Godot OS stampato", passed: hasSystem, diff: hasSystem ? null : `Ricevuto: "${clean}"` });
-    tests.push({ desc: "Energia: 100 % stampato con valori multipli", passed: hasEnergy, diff: hasEnergy ? null : `Ricevuto: "${clean}"` });
+    // I commenti non generano output, la forma di print non deve influire.
+    // Il runtime JS legacy puo produrre "Energia: 100 %" anziche "100%".
+    const normalize = line => String(line).trim().replace(/(Energia:\s*100)\s+%$/, "$1%");
+    const expected = ["=== AVVIO SISTEMA ===", "Sistema: Godot OS", "Energia: 100%", "=== DIAGNOSTICA COMPLETATA ==="];
+    const actual = (result.logs || []).map(normalize);
+    const correct = actual.length === expected.length &&
+        expected.every((line, index) => actual[index] === line);
+    tests.push({
+        desc: "Le quattro righe di diagnostica sono stampate nell'ordine richiesto",
+        passed: correct,
+        diff: correct ? null : "Output atteso:\n" + expected.join("\n") +
+            "\n\nOutput ottenuto:\n" + (actual.join("\n") || "(nessun output)")
+    });
     return tests;
 }
     },

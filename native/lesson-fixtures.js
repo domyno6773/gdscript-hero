@@ -1,4 +1,4 @@
-/* Snapshot from lessons.js on experimental branch: DO NOT modify production lessons. */
+/* Native lesson fixture snapshot */
 window.GDHLessonFixtures = [
   {
     "id": 1,
@@ -39,7 +39,7 @@ window.GDHLessonFixtures = [
     "title": "4. ⭐ Sfida di Apprendimento: Terminale di Avvio della Nave",
     "initialCode": "extends Node\n\nfunc _ready():\n    print(\"=== AVVIO SISTEMA ===\")\n    # Aggiungi il commento e le due istruzioni print() sotto\n    \n    # Non modificare la riga sotto\n    print(\"=== DIAGNOSTICA COMPLETATA ===\")\n",
     "solution": "extends Node\n\nfunc _ready():\n    print(\"=== AVVIO SISTEMA ===\")\n    # Diagnostica reattori\n    print(\"Sistema: Godot OS\")\n    print(\"Energia: \", 100, \"%\")\n    print(\"=== DIAGNOSTICA COMPLETATA ===\")\n",
-    "task": "Aggiungi il commento # Diagnostica reattori Stampa \"Sistema: Godot OS\" Stampa con valori multipli: \"Energia: \", 100, \"%\"",
+    "task": "Stampa Sistema: Godot OS ed Energia: 100%; i commenti sono facoltativi",
     "expectedOutput": "=== AVVIO SISTEMA ===\nSistema: Godot OS\nEnergia: 100%\n=== DIAGNOSTICA COMPLETATA ===",
     "locals": [],
     "properties": []

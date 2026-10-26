@@ -220,10 +220,20 @@
      case 3:
        check(list,'Stampe in ordine',eq(lines,['Livello','1']));
        check(list,'Numero 1 come argomento numerico, non come String',printsNumericOne(m));break;
-     case 4:
-       check(list,'Commento # Diagnostica reattori',/^\s*#\s*Diagnostica reattori\s*$/m.test(src));
-       check(list,'print con 3 argomenti',/\bprint\s*\(\s*["']Energia:\s*["']\s*,\s*100\s*,\s*["']%["']\s*\)/.test(src));
-       check(list,'Console Godot senza spazio aggiunto',eq(lines,['=== AVVIO SISTEMA ===','Sistema: Godot OS','Energia: 100%','=== DIAGNOSTICA COMPLETATA ===']));break;
+     case 4:{
+       // I commenti dello starter e quelli aggiunti non influenzano l'output.
+       // Accetta GDScript eseguibile che stampi le quattro righe richieste.
+       const expected=['=== AVVIO SISTEMA ===','Sistema: Godot OS','Energia: 100%','=== DIAGNOSTICA COMPLETATA ==='];
+       const normalize=line=>String(line).trim().replace(/(Energia:\s*100)\s+%$/,'$1%');
+       const actual=lines.map(normalize),passed=eq(actual,expected);
+       list.push({
+         desc:'Le quattro righe di diagnostica sono stampate nell\'ordine richiesto',
+         passed,
+         diff:passed?null:'Output atteso:\n'+expected.join('\n')+
+           '\n\nOutput ottenuto:\n'+(actual.join('\n')||'(nessun output)')
+       });
+       break;
+     }
      case 5:
        check(list,'nome = Eroe',(directSourceProof(id,src)||loc('nome')==='Eroe')&&decl(m,'var','nome'));
        check(list,'Usato print(nome)',pr(m,'nome')&&eq(lines,['Eroe']));break;

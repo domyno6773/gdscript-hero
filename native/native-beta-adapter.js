@@ -207,7 +207,15 @@
         const label=document.createElement('span');
         label.className='test-desc';
         label.textContent=String(check.desc||'').slice(0,300);
-        row.append(symbol,label);results.append(row);
+        row.append(symbol,label);
+        if(!check.passed&&check.diff){
+          const detail=document.createElement('pre');
+          detail.className='test-diff';
+          detail.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px';
+          detail.textContent=String(check.diff).slice(0,4000);
+          row.append(detail);
+        }
+        results.append(row);
       }
       const notice=document.createElement('p');
       notice.className='test-diff';
@@ -224,7 +232,8 @@
     if(description)description.textContent=report.feedback.reason ||
       (report.feedback.verdict==='accepted'
         ? 'Codice accettato dal laboratorio nativo. Non vengono assegnati progressi.'
-        : checks.find(c=>!c.passed)?.desc || 'Esecuzione non completata.');
+        : checks.find(c=>!c.passed)?.diff || checks.find(c=>!c.passed)?.desc ||
+          'Esecuzione non completata.');
     const testCount=element('exercise-test-count');
     if(testCount)testCount.textContent=checks.filter(c=>c.passed).length+
       ' di '+checks.length+' verifiche native — senza XP';
