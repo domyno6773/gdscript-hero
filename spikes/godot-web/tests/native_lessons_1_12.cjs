@@ -97,6 +97,40 @@ async function run(page,id,code){
     'Engine error must be explicitly identified in lesson feedback');
   console.log('NATIVE_ERROR_AFTER_CORRECT_OUTPUT_REJECTED');
 
+  // Valid GDScript can place its variable inside a lexical branch. Our injected
+  // observation is OUTSIDE that scope and fails to compile. That is our fault,
+  // not a GDScript syntax error: show INCONCLUSIVE and run the original.
+  const scopedSource='func _ready():\n    if true:\n        var nome = "Eroe"\n        print(nome)';
+  const scoped=await run(page,5,scopedSource);
+  assert.equal(scoped.raw.status,'executed','Original scoped GDScript must compile');
+  assert.equal(scoped.stdout.trim(),'Eroe','The unmodified script should actually execute');
+  assert.equal(scoped.raw.localCapture,'unavailable','Local instrumentation is not valid outside branch scope');
+  assert.equal(scoped.raw.localCaptureReason,'instrumentation_compile_error');
+  assert.match(scoped.raw.diagnostics?.instrumentation||'',/nome|identifier|scope|not declared|not found/i,
+    'Instrumentation compiler error must be reported only as instrumentation diagnostic');
+  assert.equal((await page.locator('#stderr').textContent()).trim(),'',
+    'Our failed instrumentation must not contaminate student stderr');
+  assert.equal(scoped.feedback.verdict,'inconclusive');
+  assert.equal(scoped.feedback.passed,false);
+  console.log('NATIVE_INSTRUMENTATION_COMPILE_FAILURE_ISOLATED');
+
+  const originalBad='func _ready():\n    var nome: int = "Eroe"\n    print(nome)';
+  const bad=await run(page,5,originalBad);
+  assert.equal(bad.raw.status,'compile_error','Original invalid GDScript must still be rejected');
+  assert.equal(bad.feedback.verdict,'invalid_code');
+  assert.equal(bad.raw.localCapture,undefined,'Original compile failure must not run instrumentation');
+  console.log('NATIVE_ORIGINAL_COMPILE_ERROR_REJECTED');
+
+  // Even if the transformed source compiles, an early return means its
+  // injected tail never runs. Missing observations are NOT evidence of wrong code.
+  const earlyReturn='func _ready():\n    var nome = "Eroe"\n    print(nome)\n    return';
+  const early=await run(page,5,earlyReturn);
+  assert.equal(early.raw.status,'executed');
+  assert.equal(early.stdout.trim(),'Eroe');
+  assert.equal(early.feedback.verdict,'inconclusive');
+  assert.equal(early.feedback.passed,false);
+  console.log('NATIVE_MISSING_OBSERVATION_INCONCLUSIVE');
+
   await page.screenshot({path:path.join(output,'native-12-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-12-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){
