@@ -414,3 +414,76 @@ body[data-theme="light"] {
 [data-theme="light"] #view-practice #sandbox-line-numbers { color: #546a80; background: #eaf1f7; }
 [data-theme="light"] #view-practice #sandbox-console-output { color: #174667; }
 [data-theme="light"] #view-practice .sandbox-console-subhead { color: #315873; }
+
+
+/* Colori sintassi GDScript Sandbox: stessa grammatica del corso. */
+#view-practice .gdscript-edit-stack {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  background: #151c27;
+}
+#view-practice .gdscript-edit-stack #sandbox-code-editor,
+#view-practice .gdscript-edit-stack #sandbox-gdscript-highlight {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  padding: 16px 18px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  font: 500 14px/1.6 'Fira Code','JetBrains Mono',monospace !important;
+  letter-spacing: 0 !important;
+  tab-size: 4 !important;
+  white-space: pre !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+#view-practice #sandbox-gdscript-highlight {
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden !important;
+  color: #e8f2ff;
+  background: transparent;
+}
+#view-practice #sandbox-code-editor {
+  z-index: 2;
+  background: transparent !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  caret-color: #90ceff !important;
+  overflow: auto !important;
+  resize: none !important;
+}
+#view-practice #sandbox-code-editor::placeholder {
+  color: #a3bbd4 !important;
+  -webkit-text-fill-color: #a3bbd4 !important;
+}
+#view-practice #sandbox-code-editor::selection { background: rgba(91,161,218,.4); }
+#view-practice #sandbox-gdscript-highlight code { font: inherit; color: inherit; }
+#view-practice .gd-token-keyword { color: #f47b9b; }
+#view-practice .gd-token-type { color: #70dfd4; }
+#view-practice .gd-token-function { color: #95caff; }
+#view-practice .gd-token-string { color: #f0cd82; }
+#view-practice .gd-token-number,
+#view-practice .gd-token-constant { color: #d6a7ff; }
+#view-practice .gd-token-comment { color: #a8bed4; font-style: normal; }
+#view-practice .gd-token-annotation { color: #f1c469; }
+#view-practice .gd-token-node { color: #80dbc0; }
+[data-theme="light"] #view-practice .gdscript-edit-stack { background: #ffffff; }
+[data-theme="light"] #view-practice #sandbox-gdscript-highlight { color: #18334e; }
+[data-theme="light"] #view-practice .gd-token-keyword { color: #ad2450; }
+[data-theme="light"] #view-practice .gd-token-type { color: #006e68; }
+[data-theme="light"] #view-practice .gd-token-function { color: #125d9c; }
+[data-theme="light"] #view-practice .gd-token-string { color: #856011; }
+[data-theme="light"] #view-practice .gd-token-number,
+[data-theme="light"] #view-practice .gd-token-constant { color: #743eac; }
+[data-theme="light"] #view-practice .gd-token-comment { color: #53677b; }
+[data-theme="light"] #view-practice .gd-token-node { color: #136c55; }
