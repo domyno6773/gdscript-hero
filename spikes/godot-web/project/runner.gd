@@ -53,6 +53,12 @@ func _ready() -> void:
     browser.gdhReceive = _receive_callback
     JavaScriptBridge.eval("window.gdhReady?.()")
 
+# Separate compiler messages caused by the original script from messages caused by
+# our optional local-variable instrumentation. User GDScript never gets a trusted grade.
+func __gdh_phase(phase: String) -> void:
+    if OS.has_feature("web"):
+        JavaScriptBridge.eval("window.gdhPhase?.(" + JSON.stringify(phase) + ")")
+
 func _on_js_request(args: Array) -> void:
     if args.is_empty():
         return
@@ -165,6 +171,8 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
     extends_regex.compile("(?m)^\\s*extends\\s+")
     if extends_regex.search(source) == null:
         source = "extends Node\n" + source
+    # The ORIGINAL source is compiled first, without any modified student code.
+    __gdh_phase("original_compile")
     var candidate := GDScript.new()
     candidate.source_code = source
     var err := candidate.reload()
@@ -173,23 +181,32 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
     if not candidate.can_instantiate() or candidate.get_instance_base_type() != "Node":
         return {"status": "unsupported", "message": "Solo script Node in questo spike"}
     var local_state := "not_requested"
+    var local_reason := ""
     _captured_locals = {}
     _captured_objects = {}
     if capture_names is Array and not capture_names.is_empty():
         if capture_names.size() <= 20:
             var instrumented_source := _with_local_capture(source, capture_names)
             if not instrumented_source.is_empty():
+                __gdh_phase("instrumentation")
                 var instrumented_script := GDScript.new()
                 instrumented_script.source_code = instrumented_source
                 if instrumented_script.reload() == OK and instrumented_script.can_instantiate() and instrumented_script.get_instance_base_type() == "Node":
                     candidate = instrumented_script
                     local_state = "instrumented"
                 else:
+                    # Do not confuse our failed instrumentation with the student's code.
                     local_state = "unavailable"
+                    local_reason = "instrumentation_compile_error"
             else:
                 local_state = "unavailable"
+                local_reason = "transform_unavailable"
         else:
             local_state = "unavailable"
+            local_reason = "capture_limit_exceeded"
+    # Only diagnostics emitted during ORIGINAL compilation or execution belong to
+    # the student's error stream. Diagnostics from instrumentation stay separate.
+    __gdh_phase("execution")
     var instance := Node.new()
     instance.set_script(candidate)
     var active_scene := 0
@@ -323,4 +340,4 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
                         break
     var final_scene := _scene_snapshot(instance, active_scene)
     instance.queue_free()
-    return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state, "methodCalls": method_results, "signalEmissions": signal_results, "objectCalls": object_results, "scene": final_scene, "sceneBeforeActions": initial_scene, "sceneActions": action_results}
+    return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state, "localCaptureReason": local_reason, "methodCalls": method_results, "signalEmissions": signal_results, "objectCalls": object_results, "scene": final_scene, "sceneBeforeActions": initial_scene, "sceneActions": action_results}
