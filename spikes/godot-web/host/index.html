@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GDScript Hero — prova isolamento Godot</title>
+<link rel="stylesheet" href="style.css">
+</head><body><main>
+<h1>GDScript Hero — Runner isolato</h1>
+<p>Prototipo locale. Non collegare a sessioni, account o dati reali. Codice e output del runner non sono affidabili.</p>
+<p id="status" role="status">Avvio del motore separato…</p>
+<label for="code">Codice GDScript</label>
+<textarea id="code" spellcheck="false">extends Node
+var answer: int = 0
+func _ready():
+    answer = 100 / 3
+    print("A", "B")
+    print("Risultato: ", answer)</textarea>
+<div class="actions">
+<button id="run" disabled>Esegui in Godot</button>
+<button id="restart">Distruggi e riavvia Godot</button>
+<button id="invalid">Esempio con errore</button>
+</div>
+<label for="stdout">Output</label><pre id="stdout"></pre>
+<label for="stderr">Errori</label><pre id="stderr"></pre>
+<label for="result">Risultato non affidabile</label><pre id="result"></pre>
+<p id="generation"></p>
+<div id="runner-mount"></div>
+</main><script src="host.js"></script></body></html>
