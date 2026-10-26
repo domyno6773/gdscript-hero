@@ -9,7 +9,7 @@ const out=path.join(base,'test-artifacts'); fs.mkdirSync(out,{recursive:true});
 const PARENT='http://127.0.0.1:18767', RUNNER='http://localhost:18768';
 const procs=[
   spawn('python3',['-m','http.server','18767','--bind','127.0.0.1','--directory',path.join(base,'host')],{stdio:'ignore'}),
-  spawn('python3',['-m','http.server','18768','--bind','127.0.0.1','--directory',path.join(base,'web')],{stdio:'ignore'})
+  spawn('python3',['-m','http.server','18768','--bind','localhost','--directory',path.join(base,'web')],{stdio:'ignore'})
 ];
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function waitHttp(url) {
