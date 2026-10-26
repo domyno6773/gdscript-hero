@@ -158,11 +158,31 @@
     }
     return next;
   };
+  // Scene native dedicate alle varianti con nodi; gli oggetti rappresentati qui
+  // sono snapshot letti dal vero Godot, non un interprete JavaScript.
+  const reviewSceneIds=Object.freeze({
+    rev_scene_tree_01:61,rev_ui_button_01:62,rev_timers_01:63
+  });
+  const snapshotScene=snapshot=>{
+    if(!snapshot||typeof snapshot!=='object')return null;
+    const read=name=>{
+      const node=Object.prototype.hasOwnProperty.call(snapshot,name)?snapshot[name]:null;
+      if(!node?.exists)return null;
+      return Object.freeze({
+        name,type:node.class,text:node.text,
+        _is_queued_for_deletion:Boolean(node.queued),
+        queued:Boolean(node.queued)
+      });
+    };
+    return Object.freeze({has_node:name=>read(name)!==null,get_node:read});
+  };
   const executeCompat=async(source,options={})=>{
     const names=rootVariables(source),methods=methodsIn(source);
     const probes=methods.filter(name=>name.startsWith('__test_')).slice(0,8);
     const locals=[...new Set([...String(source).matchAll(/^\s+var\s+([A-Za-z_]\w*)/gm)].map(m=>m[1]))].slice(0,20);
-    const probeOptions={inspect:names,locals,scene:0,calls:probes.map(method=>({method,args:[]}))};
+    const reviewId=options.lesson?.id;
+    const sceneId=reviewSceneIds[reviewId]||0;
+    const probeOptions={inspect:names,locals,scene:sceneId,calls:probes.map(method=>({method,args:[]}))};
     const r=await raw(source,probeOptions);
     const success=r.status==='executed'&&!String(r.stderr||'').trim();
     const state={...(r.reply?.properties||{}),...(r.reply?.locals||{})};
@@ -185,7 +205,8 @@
       }
     }
     const result={success,code:source,logs:lines(r.stdout),error:success?null:
-      (r.stderr.trim()||'Codice non eseguibile in Godot'),scope:state,scene:null,native:r.reply};
+      (r.stderr.trim()||'Codice non eseguibile in Godot'),scope:state,
+      scene:sceneId?snapshotScene(r.reply?.scene):null,native:r.reply};
     if(typeof options.onLog==='function')result.logs.forEach(options.onLog);
     return result;
   };
