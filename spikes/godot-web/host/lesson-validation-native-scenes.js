@@ -29,6 +29,7 @@
     const checks=[],l=lines(stdout),code=clean(src),props=reply?.properties||{};
     const add=(title,result)=>checks.push({desc:title,passed:Boolean(result)});
     add('Script eseguito dal vero Godot',reply?.status==='executed');
+    add('Nessun errore segnalato dal motore Godot',!String(stderr||'').trim());
     switch(id){
       case 49:
         add('Giocatore è un vero nodo',node(reply,'Giocatore','Node'));
