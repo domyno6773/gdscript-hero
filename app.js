@@ -143,6 +143,9 @@ const App = {
         document.getElementById('btn-mobile-reset-code')?.addEventListener('click', () => {
             document.getElementById('btn-reset-code')?.click();
         });
+        document.getElementById('btn-mobile-toggle-tools')?.addEventListener('click', () => {
+            document.getElementById('btn-toggle-extra-tools')?.click();
+        });
         this.applyProfileUI();
         this.renderRoadmap();
         this.renderSidebarDailyQuests();
