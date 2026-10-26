@@ -69,6 +69,22 @@ async function smoke(browser,url,width){
    };
  });
  assert.ok(initialGeometry.feedbackAboveOutput&&initialGeometry.feedbackBeforeTests,'First feedback is above outputs and tests');
+ const outputLayout=await page.evaluate(()=>{
+   const el=document.querySelector('#view-exercise .output-comparison-grid');
+   const e=el.querySelector('.expected-box').getBoundingClientRect();
+   const o=el.querySelector('.real-box').getBoundingClientRect();
+   const style=getComputedStyle(el);
+   return {display:style.display,template:style.gridTemplateColumns,expected:{x:e.x,y:e.y,w:e.width},actual:{x:o.x,y:o.y,w:o.width}};
+ });
+ console.log('LAYOUT '+width+'px '+JSON.stringify(outputLayout));
+ assert.equal(outputLayout.display,'grid','Expected/actual must use CSS grid');
+ assert.ok(outputLayout.actual.x>outputLayout.expected.x+10,'Expected/actual must appear side-by-side');
+ const headerLayout=await page.evaluate(()=>{
+   const tab=document.querySelector('#view-exercise .editor-header .tab').getBoundingClientRect();
+   const run=document.getElementById('btn-run-code').getBoundingClientRect();
+   return {tabRight:tab.right,runLeft:run.left};
+ });
+ assert.ok(headerLayout.tabRight+4<headerLayout.runLeft,'Editor file tab and Verify must not overlap');
  assert.ok(initialGeometry.viewportHidden,'Introductory lesson must not show scene or viewport');
  assert.ok(initialGeometry.expectedShown,'Expected output must be visible before Verify');
  if(width>820)assert.ok(initialGeometry.dockBottom<=844,'Desktop dock must remain visible without page scrolling');
