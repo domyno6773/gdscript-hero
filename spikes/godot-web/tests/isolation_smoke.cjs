@@ -75,10 +75,13 @@ async function run(page,code,expected){
       assert.ok((await page.evaluate(()=>window.__gdhIsolation.generation))>initial.g);
       const recovered=await run(page,'func _ready():\n    print("AFTER_RESTART")\n','executed');
       assert.match(recovered.stdout,/AFTER_RESTART/);
+      // Dopo il riavvio il vecchio frame è stato distrutto; usa quello nuovo.
+      const navigableFrame = page.frame({url:/isolated\.html/});
+      assert.ok(navigableFrame, 'New sandboxed runner exists');
       // Navigazione deliberata verso l'origin del parent: l'iframe resta di origine opaca.
-      await frame.evaluate(() => { setTimeout(() => { window.location.href = 'http://127.0.0.1:18767/probe.html'; }, 120); });
-      await frame.waitForURL('http://127.0.0.1:18767/probe.html',{timeout:12000});
-      const afterNavigation=await frame.evaluate(()=>{
+      await navigableFrame.evaluate(() => { setTimeout(() => { window.location.href = 'http://127.0.0.1:18767/probe.html'; }, 120); });
+      await navigableFrame.waitForURL('http://127.0.0.1:18767/probe.html',{timeout:12000});
+      const afterNavigation=await navigableFrame.evaluate(()=>{
         try { return window.parent.document.title; }
         catch(e) { return e.name; }
       });
