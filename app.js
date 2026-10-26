@@ -139,6 +139,10 @@ const App = {
         this.applyTheme(this.state.theme || 'dark');
         this.checkDailyQuestsReset();
         this.bindEvents();
+        // In mobile il comando Ripristina vive nella toolbar, senza affollare l'header.
+        document.getElementById('btn-mobile-reset-code')?.addEventListener('click', () => {
+            document.getElementById('btn-reset-code')?.click();
+        });
         this.applyProfileUI();
         this.renderRoadmap();
         this.renderSidebarDailyQuests();
