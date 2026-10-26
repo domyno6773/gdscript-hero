@@ -84,7 +84,19 @@ async function smoke(browser,url,width){
  const sampleCode='extends Node2D\nvar clicks = 0\nfunc _ready():\n    $Label.text = "Nativo pronto"\n    print("SANDBOX_NODES_READY")\nfunc _on_button_pressed():\n    clicks += 1\n    $Label.text = "Click " + str(clicks)\n    print("SANDBOX_CLICK " + str(clicks))';
  await page.locator('#sandbox-code-editor').fill(sampleCode);
  await page.locator('#btn-sandbox-run').click({timeout:10000});
- await page.waitForFunction(()=>document.getElementById('sandbox-console-output').textContent.includes('SANDBOX_NODES_READY'),null,{timeout:20000});
+ try {
+   await page.waitForFunction(()=>document.getElementById('sandbox-console-output').textContent.includes('SANDBOX_NODES_READY'),null,{timeout:15000});
+ } catch(error){
+   const info=await page.evaluate(()=>({
+     output:document.getElementById('sandbox-console-output')?.textContent,
+     status:document.getElementById('sandbox-status-tag')?.textContent,
+     phase:window.GDHGodot?.lastStage,
+     scene:App.sandboxScene?.children?.map(x=>({name:x.name,text:x.text})),
+     connected:App.sandboxNativeSession,
+     selectedProject:App.getActiveSandboxProject()?.id
+   }));
+   throw Error('Sandbox scene diagnostic: '+JSON.stringify(info));
+ }
  const sceneStart=await page.evaluate(()=>{
    const s=App.sandboxScene;
    const label=s.children.find(x=>x.name==='Label');
