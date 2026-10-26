@@ -26,7 +26,7 @@
     session = crypto.randomUUID();
     frame = document.createElement('iframe');
     frame.id = 'isolated-runner';
-    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    frame.setAttribute('sandbox', 'allow-scripts');
     frame.referrerPolicy = 'no-referrer';
     frame.title = 'Godot runner — origin separato';
     frame.src = RUNNER_ORIGIN + '/isolated.html?session=' + encodeURIComponent(session);
@@ -36,7 +36,7 @@
   };
 
   window.addEventListener('message', event => {
-    if (event.origin !== RUNNER_ORIGIN || !frame || event.source !== frame.contentWindow) {
+    if (event.origin !== 'null' || !frame || event.source !== frame.contentWindow) {
       rejected++; return;
     }
     const m = event.data;

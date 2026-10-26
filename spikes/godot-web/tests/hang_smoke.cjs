@@ -8,7 +8,7 @@ const base=path.resolve(__dirname,'..');
 const out=path.join(base,'test-artifacts');fs.mkdirSync(out,{recursive:true});
 const servers=[
   spawn('python3',['-m','http.server','18767','--bind','127.0.0.1','--directory',path.join(base,'host')],{stdio:'ignore'}),
-  spawn('python3',['-m','http.server','18768','--bind','localhost','--directory',path.join(base,'web')],{stdio:'ignore'})
+  spawn('python3',[path.join(base,'tests','cors_server.py'),'18768',path.join(base,'web')],{stdio:'ignore'})
 ];
 const sleep=t=>new Promise(r=>setTimeout(r,t));
 async function waitHttp(url){
