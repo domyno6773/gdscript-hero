@@ -57,8 +57,14 @@ async function execute(page, source, expectStatus = 'executed') {
       assert.match(noExtends.stdout,/GDH_NO_EXTENDS_SUCCESS/,'Wrapper adds Node extends');
       const broken=await execute(page,'extends Node\nfunc _ready():\n    var x: int = "wrong"\n','compile_error');
       assert.match(broken.stderr,/Error|Parse|error|Invalid/i, 'Native diagnostic surfaced');
+      // Non legge dati personali: dimostra solo la presenza di accesso al window dello stesso origin.
+      const bridge=await execute(page,'extends Node\\nfunc _ready():\\n    var browser = JavaScriptBridge.get_interface("window")\\n    browser.gdhSecurityProof = "GDSCRIPT_CAN_ACCESS_WINDOW"\\n');
+      assert.equal(await page.evaluate(()=>window.gdhSecurityProof), 'GDSCRIPT_CAN_ACCESS_WINDOW',
+        'SECURITY: code executed inside Godot can access the hosting page window; prototype is NOT isolated');
+      const retry=await execute(page,'func _ready():\\n    print("RECOVERED_AFTER_ERROR")\\n');
+      assert.match(retry.stdout,/RECOVERED_AFTER_ERROR/);
       await page.screenshot({path:path.join(evidence,mobile?'mobile.png':'desktop.png'),fullPage:true});
-      const measure={viewport,loadedMs,valid, noExtends,broken, pageErrors:errors};
+      const measure={viewport,loadedMs,valid, noExtends,broken, bridge, retry, pageErrors:errors};
       fs.writeFileSync(path.join(evidence,mobile?'mobile.json':'desktop.json'),JSON.stringify(measure,null,2));
       console.log('WASM_PASS '+JSON.stringify({viewport, loadedMs, stdout:valid.stdout, errors:errors}));
       await ctx.close();

@@ -18,3 +18,9 @@ Installare il template Godot 4.4.1 Web. Esportare `project` con il preset `Web` 
 - Prova browser, mobile, memoria e tempi di avvio non ancora eseguiti.
 
 Il workflow CI su questo ramo esegue SOLTANTO la verifica native/headless: non è una certificazione di WebAssembly o sicurezza.
+
+## Risultato WebAssembly (26 ottobre 2026)
+
+L'export Web di Godot 4.4.1 con template ufficiale `web_nothreads_release.zip` è stato provato in CI con Chrome. I test hanno verificato compilazione dinamica, output nativo, divisione intera, lettura di proprietà, errori, recupero dopo un errore e dimensioni desktop/mobile **simulate**. La build Web generata occupa circa 43 MB non compressi, dei quali ~42 MB sono il file WebAssembly. I tempi misurati in GitHub Actions NON equivalgono a prestazioni di smartphone reali.
+
+**NON usare in produzione.** Il test mostra anche che uno script può accedere al `window` della pagina che lo ospita. Vedi [SECURITY.md](SECURITY.md) per le misure necessarie prima di qualsiasi integrazione.
