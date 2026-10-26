@@ -520,7 +520,10 @@
                 </div>
                 <div class="editor-wrapper">
                     <div class="line-numbers" id="sandbox-line-numbers">1</div>
-                    <textarea id="sandbox-code-editor" spellcheck="false" placeholder="Scrivi qui il tuo script GDScript..."></textarea>
+                    <div class="gdscript-edit-stack">
+                        <pre class="gdscript-highlight" id="sandbox-gdscript-highlight" aria-hidden="true"><code id="sandbox-gdscript-syntax-layer"></code></pre>
+                        <textarea id="sandbox-code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="Scrivi qui il tuo script GDScript..." aria-label="Editor Sandbox GDScript"></textarea>
+                    </div>
                 </div>
                 <!-- Barra Rapida Caratteri Speciali per Mobile -->
                 <div class="mobile-code-toolbar" id="sandbox-mobile-code-toolbar">
