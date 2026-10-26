@@ -62,6 +62,10 @@ func __gdh_phase(phase: String) -> void:
     if OS.has_feature("web"):
         JavaScriptBridge.eval("window.gdhPhase?.(" + JSON.stringify(phase) + ")")
 
+func _sandbox_trace(stage: String) -> void:
+    if OS.has_feature("web"):
+        JavaScriptBridge.eval("window.gdhTrace?.(" + JSON.stringify(stage) + ")")
+
 func _on_js_request(args: Array) -> void:
     if args.is_empty():
         return
@@ -361,10 +365,14 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
         active_scene = int(scene_lesson)
     _build_scene(instance, active_scene)
     if sandbox_live and scene_nodes is Array:
+        _sandbox_trace("before_scene_build")
         _sandbox_specs = scene_nodes.duplicate(true)
         _build_sandbox_scene(instance, _sandbox_specs)
+        _sandbox_trace("after_scene_build")
         _sandbox_instance = instance
     add_child(instance)
+    if sandbox_live:
+        _sandbox_trace("after_ready")
     if sandbox_live and scene_nodes is Array:
         _connect_sandbox_callbacks(instance, _sandbox_specs)
     var observed := {}
@@ -491,7 +499,11 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
                     if str(prop.get("name", "")) == name and int(prop.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE:
                         observed[name] = __gdh_normalize(instance.get(name))
                         break
+    if sandbox_live:
+        _sandbox_trace("before_snapshot")
     var final_scene := _sandbox_snapshot() if sandbox_live else _scene_snapshot(instance, active_scene)
+    if sandbox_live:
+        _sandbox_trace("after_snapshot")
     if not sandbox_live:
         instance.queue_free()
     return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state, "localCaptureReason": local_reason, "methodCalls": method_results, "signalEmissions": signal_results, "objectCalls": object_results, "scene": final_scene, "sceneBeforeActions": initial_scene, "sceneActions": action_results}
