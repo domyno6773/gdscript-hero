@@ -113,6 +113,19 @@ async function smoke(browser,url,width){
    title:document.getElementById('exercise-feedback-title').textContent,
    text:document.getElementById('exercise-feedback-description').textContent
  }));
+ const viewportMetrics=await page.evaluate(()=>({
+   scrollX:window.scrollX,
+   scrollLeft:document.documentElement.scrollLeft,
+   visualOffsetLeft:window.visualViewport?.offsetLeft,
+   bodyScrollWidth:document.body.scrollWidth,
+   rootScrollWidth:document.documentElement.scrollWidth,
+   innerWidth:window.innerWidth,
+   codePanelLeft:document.querySelector('#view-exercise .panel-code').getBoundingClientRect().left,
+   workspaceLeft:document.getElementById('exercise-workspace-grid').getBoundingClientRect().left,
+   editorWidth:document.getElementById('code-editor').getBoundingClientRect().width,
+   editorScrollLeft:document.getElementById('code-editor').scrollLeft
+ }));
+ console.log('AFTER_ERROR_GEOMETRY '+width+'px '+JSON.stringify(viewportMetrics));
  assert.equal(feedback.state,'error','Failed verification must show the error on top of dock');
  assert.ok(feedback.text.length>0,'Error summary must be present');
  if(process.env.E2E_SCREENSHOTS==='1'){
