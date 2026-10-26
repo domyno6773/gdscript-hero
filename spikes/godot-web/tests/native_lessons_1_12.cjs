@@ -47,7 +47,8 @@ async function run(page,id,code){
    const failed=r.feedback.checks.filter(c=>!c.passed);
    assert.equal(r.raw.status,'executed','Native execution failed lesson '+id);
    assert.equal(r.feedback.passed,true,'Official lesson '+id+' failed native grading: '+JSON.stringify({failed,raw:r.raw,stdout:r.stdout}));
-   if(id>=5)assert.equal(r.raw.localCapture,'instrumented','Local capture missing: '+id);
+   if([5,6,9].includes(id))assert.equal(r.raw.localCapture,'not_requested','Expected direct verification: '+id);
+   else if(id>=5)assert.equal(r.raw.localCapture,'instrumented','Local capture missing: '+id);
    results.push({id,positive:true,stdout:r.stdout,locals:r.raw.locals});
    console.log('NATIVE_LESSON_PASS '+id+' '+JSON.stringify({capture:r.raw.localCapture,stdout:r.stdout}));
   }

@@ -96,6 +96,35 @@
  const containsIndex=(source,owner,key)=>new RegExp('\\b'+owner+'\\s*\\[\\s*["\\x27]'+key+'["\\x27]\\s*\\]').test(noCommentLines(source));
  const emit=(source,name,arg)=>new RegExp('\\b'+name+'\\s*\\.\\s*emit\\s*\\(\\s*'+arg+'\\s*\\)').test(noCommentLines(source));
  const connect=(source,name,target)=>new RegExp('\\b'+name+'\\s*\\.\\s*connect\\s*\\(\\s*'+target+'\\s*\\)').test(noCommentLines(source));
+
+ // In simple lessons, native stdout plus explicit GDScript syntax is sufficient
+ // to avoid injecting a variable-capture instruction into the submitted code.
+ // For other solutions, preserve the existing optional capture path.
+ const directSourceProof=(id,src)=>{
+   const m=clean(src), raw=noCommentLines(src);
+   const literal=(name,type,value)=>{
+     const annotation=type?'(?:\\s*:\\s*'+type+')?':'';
+     return new RegExp('\\bvar\\s+'+name+annotation+'\\s*=\\s*["\\x27]'+value+'["\\x27](?=\\s*(?:$|#|;|,))','m').test(raw);
+   };
+   const number=(name,type,value)=>{
+     const annotation=type?'(?:\\s*:\\s*'+type+')?':'';
+     return new RegExp('\\bvar\\s+'+name+annotation+'\\s*=\\s*'+value+'(?=\\s*(?:$|#|;|,))','m').test(raw);
+   };
+   if(id===5)return literal('nome','String','Eroe')&&pr(m,'nome');
+   if(id===6)return literal('personaggio','String','Guerriero')&&number('punti_vita','int','100')&&
+      pr(m,'personaggio')&&pr(m,'punti_vita');
+   if(id===9)return number('velocita','float','4\\.5')&&number('ha_chiave','bool','true')&&
+      pr(m,'velocita')&&pr(m,'ha_chiave');
+   if(id===13)return /\bvar\s+somma(?:\s*:\s*int)?\s*=\s*(?:10\s*\+\s*5|5\s*\+\s*10)\b/.test(m)&&
+      /\bvar\s+prodotto(?:\s*:\s*int)?\s*=\s*(?:5\s*\*\s*2|2\s*\*\s*5)\b/.test(m)&&
+      pr(m,'somma')&&pr(m,'prodotto');
+   return false;
+ };
+ const captureNames=(id,source)=>{
+   const lesson=get(id);
+   return lesson ? (directSourceProof(id,source) ? [] : lesson.locals.slice()) : [];
+ };
+
  const check=(arr,desc,p)=>arr.push({desc,passed:Boolean(p)});
  function grade(id,src,reply,stdout,stderr,scenarioResults={}){
    const lesson=get(id);
@@ -109,7 +138,7 @@
        nativeStatus:reply?.status,
        reason:'Il codice originale non è eseguibile senza errori nel motore Godot.'};
    }
-   const requested=Array.isArray(lesson.locals)?lesson.locals:[];
+   const requested=Array.isArray(lesson.locals)&&!directSourceProof(id,src)?lesson.locals:[];
    if(requested.length){
      const captureComplete=reply?.localCapture==='instrumented' &&
        requested.every(name=>Object.prototype.hasOwnProperty.call(s,name));
@@ -141,11 +170,11 @@
        check(list,'print con 3 argomenti',/\bprint\s*\(\s*["']Energia:\s*["']\s*,\s*100\s*,\s*["']%["']\s*\)/.test(src));
        check(list,'Console Godot senza spazio aggiunto',eq(lines,['=== AVVIO SISTEMA ===','Sistema: Godot OS','Energia: 100%','=== DIAGNOSTICA COMPLETATA ===']));break;
      case 5:
-       check(list,'nome = Eroe',loc('nome')==='Eroe'&&decl(m,'var','nome'));
+       check(list,'nome = Eroe',(directSourceProof(id,src)||loc('nome')==='Eroe')&&decl(m,'var','nome'));
        check(list,'Usato print(nome)',pr(m,'nome')&&eq(lines,['Eroe']));break;
      case 6:
-       check(list,'personaggio = Guerriero',loc('personaggio')==='Guerriero'&&decl(m,'var','personaggio'));
-       check(list,'punti_vita = 100 numerico',loc('punti_vita')===100&&decl(m,'var','punti_vita'));
+       check(list,'personaggio = Guerriero',(directSourceProof(id,src)||loc('personaggio')==='Guerriero')&&decl(m,'var','personaggio'));
+       check(list,'punti_vita = 100 numerico',(directSourceProof(id,src)||loc('punti_vita')===100)&&decl(m,'var','punti_vita'));
        check(list,'Le variabili sono stampate',pr(m,'personaggio')&&pr(m,'punti_vita')&&eq(lines,['Guerriero','100']));break;
      case 7:
        check(list,'Valori nome/messaggio',loc('nome')==='Eroe'&&loc('messaggio')==='Giocatore: Eroe');
@@ -158,8 +187,8 @@
        check(list,'Tre dichiarazioni var', ['title','npc_line','door_code'].every(x=>decl(m,'var',x)));
        check(list,'Righe di output richieste',eq(lines,['Title: The "Lost" Key',"NPC: It's dangerous to go alone!",'Door code: 0420']));break;
      case 9:
-       check(list,'velocita float',loc('velocita')===4.5);
-       check(list,'ha_chiave boolean',loc('ha_chiave')===true);
+       check(list,'velocita float',(directSourceProof(id,src)||loc('velocita')===4.5));
+       check(list,'ha_chiave boolean',(directSourceProof(id,src)||loc('ha_chiave')===true));
        check(list,'Output delle variabili',pr(m,'velocita')&&pr(m,'ha_chiave')&&eq(lines,['4.5','true']));break;
      case 10:
        check(list,'vita = 100',loc('vita')===100);
@@ -176,8 +205,8 @@
        check(list,'scudo_attivo :=',loc('scudo_attivo')===true&&decl(m,'var','scudo_attivo','\\s*:=')); 
        check(list,'Output scheda',eq(lines,['Eroe: Valerius','HP: 150 / 200','Scudo: true']));break;
      case 13:
-       check(list,'somma = 15, calcolata con +',loc('somma')===15&&/\bvar\s+somma(?:\s*:\s*int)?\s*=\s*(?:10\s*\+\s*5|5\s*\+\s*10)\b/.test(m));
-       check(list,'prodotto = 10, calcolato con *',loc('prodotto')===10&&/\bvar\s+prodotto(?:\s*:\s*int)?\s*=\s*(?:5\s*\*\s*2|2\s*\*\s*5)\b/.test(m));
+       check(list,'somma = 15, calcolata con +',(directSourceProof(id,src)||loc('somma')===15)&&/\bvar\s+somma(?:\s*:\s*int)?\s*=\s*(?:10\s*\+\s*5|5\s*\+\s*10)\b/.test(m));
+       check(list,'prodotto = 10, calcolato con *',(directSourceProof(id,src)||loc('prodotto')===10)&&/\bvar\s+prodotto(?:\s*:\s*int)?\s*=\s*(?:5\s*\*\s*2|2\s*\*\s*5)\b/.test(m));
        check(list,'print(somma), print(prodotto) e output separati',pr(m,'somma')&&pr(m,'prodotto')&&eq(lines,['15','10']));
        break;
      case 14:
@@ -460,5 +489,5 @@
      nativeStatus:reply?.status,localCapture:reply?.localCapture,
      warning:'Non utilizzare questi esiti locali per assegnare XP, progressi salvati o accessi.'};
  }
- root.GDHLessonLab=Object.freeze({lessons:Object.freeze(lessons),get,grade,scenarios});
+ root.GDHLessonLab=Object.freeze({lessons:Object.freeze(lessons),get,grade,scenarios,captureNames});
 })(typeof window!=='undefined'?window:globalThis);
