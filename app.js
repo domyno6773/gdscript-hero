@@ -3252,6 +3252,7 @@ const App = {
             numbers += i + '\n';
         }
         lineNums.innerText = numbers;
+        window.GDScriptHighlighter?.sync();
     },
 
     // ==========================================
