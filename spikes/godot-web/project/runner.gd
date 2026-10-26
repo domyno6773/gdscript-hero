@@ -59,7 +59,7 @@ func _on_js_request(args: Array) -> void:
     var request = JSON.parse_string(str(args[0]))
     if not (request is Dictionary):
         return
-    var reply := run_candidate(str(request.get("code", "")), request.get("inspect", []), request.get("locals", []), request.get("calls", []), request.get("emissions", []), request.get("objectCalls", []))
+    var reply := run_candidate(str(request.get("code", "")), request.get("inspect", []), request.get("locals", []), request.get("calls", []), request.get("emissions", []), request.get("objectCalls", []), request.get("scene", null), request.get("actions", []))
     reply["id"] = request.get("id", null)
     var browser := JavaScriptBridge.get_interface("window")
     browser.gdhResult(JSON.stringify(reply))
@@ -106,7 +106,59 @@ func _with_local_capture(source: String, names: Array) -> String:
     lines.insert(insertion, indentation + "get_parent().call(\"__gdh_record\", {" + ", ".join(pairs) + "})")
     return "\n".join(lines)
 
-func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = [], method_calls: Variant = [], signal_emissions: Variant = [], object_calls: Variant = []) -> Dictionary:
+# Scene native minime per le lezioni 49-60 (non simulazioni di Label, Button o Timer).
+func _scene_spec(lesson_id: int) -> Dictionary:
+    match lesson_id:
+        49: return {"Giocatore": "Node"}
+        50: return {"Titolo": "Label"}
+        51: return {"SaluteLabel": "Label"}
+        52: return {"TitoloDungeon": "Label", "LivelloLabel": "Label", "MoneteLabel": "Label"}
+        53, 54: return {"AttaccaBtn": "Button"}
+        55: return {"ClickBtn": "Button", "PuntiLabel": "Label"}
+        56: return {"MotoriBtn": "Button", "AllarmeBtn": "Button", "StatoNave": "Label"}
+        57: return {"Cooldown": "Timer"}
+        58: return {"BarraVita": "ColorRect"}
+        59: return {"Moneta": "Node"}
+        60: return {"CompraPozioneBtn": "Button", "OroLabel": "Label", "MessaggioLabel": "Label"}
+        _: return {}
+
+func _build_scene(instance: Node, lesson_id: int) -> void:
+    for key in _scene_spec(lesson_id).keys():
+        var type_name := str(_scene_spec(lesson_id)[key])
+        var child: Node
+        match type_name:
+            "Label": child = Label.new()
+            "Button": child = Button.new()
+            "Timer": child = Timer.new()
+            "ColorRect": child = ColorRect.new()
+            _: child = Node.new()
+        child.name = str(key)
+        instance.add_child(child)
+
+func _scene_snapshot(instance: Node, lesson_id: int) -> Dictionary:
+    var result: Dictionary = {}
+    for name in _scene_spec(lesson_id).keys():
+        var node := instance.get_node_or_null(NodePath(str(name)))
+        if node == null:
+            result[str(name)] = {"exists": false}
+            continue
+        var state: Dictionary = {"exists": true, "class": node.get_class(), "queued": node.is_queued_for_deletion()}
+        if node is Label or node is Button:
+            state["text"] = node.text
+        if node is Button:
+            state["pressed_connections"] = node.get_signal_connection_list("pressed").size()
+        if node is Timer:
+            state["wait_time"] = node.wait_time
+            state["one_shot"] = node.one_shot
+            state["stopped"] = node.is_stopped()
+            state["timeout_connections"] = node.get_signal_connection_list("timeout").size()
+        if node is ColorRect:
+            state["color"] = node.color.to_html(false)
+            state["size"] = {"x": node.size.x, "y": node.size.y}
+        result[str(name)] = state
+    return result
+
+func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = [], method_calls: Variant = [], signal_emissions: Variant = [], object_calls: Variant = [], scene_lesson: Variant = null, scene_actions: Variant = []) -> Dictionary:
     if source.length() > 10000:
         return {"status": "rejected", "message": "Superati 10000 caratteri"}
     var extends_regex := RegEx.new()
@@ -140,6 +192,10 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
             local_state = "unavailable"
     var instance := Node.new()
     instance.set_script(candidate)
+    var active_scene := 0
+    if scene_lesson is int or scene_lesson is float:
+        active_scene = int(scene_lesson)
+    _build_scene(instance, active_scene)
     add_child(instance)
     var observed := {}
     if inspect is Array:
@@ -232,5 +288,39 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
                     object.set(str(key), updates[key])
             var output = object.callv(method, args)
             object_results.append({"variable": variable, "method": method, "status": "executed", "value": __gdh_normalize(output)})
+    var initial_scene := _scene_snapshot(instance, active_scene)
+    var action_results: Array = []
+    if scene_actions is Array:
+        for entry in scene_actions.slice(0, 7):
+            if not (entry is Dictionary):
+                continue
+            var child_name := str(entry.get("node", ""))
+            var signal_name := str(entry.get("signal", ""))
+            if not _scene_spec(active_scene).has(child_name):
+                action_results.append({"status": "invalid"})
+                continue
+            if signal_name != "pressed" and signal_name != "timeout":
+                action_results.append({"status": "invalid"})
+                continue
+            var selected := instance.get_node_or_null(NodePath(child_name))
+            if selected == null or not selected.has_signal(signal_name):
+                action_results.append({"status": "missing"})
+                continue
+            var connections := selected.get_signal_connection_list(signal_name).size()
+            selected.emit_signal(signal_name)
+            action_results.append({
+                "status": "emitted", "node": child_name, "signal": signal_name,
+                "connections": connections, "scene": _scene_snapshot(instance, active_scene)
+            })
+    # Properties of the root instance must be read AFTER button callbacks, for example punti/monete.
+    if inspect is Array:
+        for entry in inspect.slice(0, 20):
+            var name := str(entry)
+            if instance.get_script() != null:
+                for prop in instance.get_property_list():
+                    if str(prop.get("name", "")) == name and int(prop.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE:
+                        observed[name] = __gdh_normalize(instance.get(name))
+                        break
+    var final_scene := _scene_snapshot(instance, active_scene)
     instance.queue_free()
-    return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state, "methodCalls": method_results, "signalEmissions": signal_results, "objectCalls": object_results}
+    return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state, "methodCalls": method_results, "signalEmissions": signal_results, "objectCalls": object_results, "scene": final_scene, "sceneBeforeActions": initial_scene, "sceneActions": action_results}
