@@ -12,7 +12,7 @@
   const VERSION=1, MAX_CODE=10000, STARTUP_TIMEOUT=30000, EXEC_TIMEOUT=4500;
   const RUNNER_URL=new URL('native/isolated.html',document.baseURI);
   let frame=null,session=null,ready=false,startup=null,pending=null,nextId=0;
-  let queue=Promise.resolve(),fixturesPromise=null,validatorsPromise=null;
+  let queue=Promise.resolve(),fixturesPromise=null,validatorsPromise=null,lastStage='';
   const lines=text=>String(text||'').trimEnd().split(/\r?\n/).filter(Boolean);
   const messageOf=err=>String(err?.message||err||'Errore sconosciuto').slice(0,400);
 
@@ -27,6 +27,7 @@
     if(event.origin!=='null'||!frame||event.source!==frame.contentWindow)return;
     const msg=event.data;
     if(!msg||typeof msg!=='object'||msg.v!==VERSION||msg.session!==session)return;
+    if(msg.type==='progress'){lastStage=String(msg.stage||'');return;}
     if(msg.type==='ready'){
       if(startup){const item=startup;startup=null;clearTimeout(item.timer);ready=true;item.resolve();}
       return;
@@ -62,6 +63,7 @@
   };
   const raw=(code,options={})=>{
     const operation=async()=>{
+      lastStage='request';
       if(typeof code!=='string'||code.length>MAX_CODE)throw new Error('Codice troppo lungo: massimo 10000 caratteri');
       await start();
       const id=++nextId;
@@ -227,7 +229,7 @@
       native:run.reply};
   };
   const adapter=Object.freeze({verifyLesson,execute:executeCompat,sandboxAction,
-    runNative:raw,get engine(){return 'Godot 4.4.1 WebAssembly';}});
+    runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.4.1 WebAssembly';}});
   window.GDHGodot=adapter;
   if(window.GDScriptRuntime)window.GDScriptRuntime.execute=(...args)=>executeCompat(...args);
 })();
