@@ -48,7 +48,9 @@
       locals: active.lesson ? active.lesson.locals : [],
       calls: step.key === 'base' && active.lesson ? active.lesson.calls || [] : [],
       emissions: step.key==='base' && active.lesson ? active.lesson.emissions||[]:[],
-      objectCalls: step.key==='base' && active.lesson ? active.lesson.objectCalls||[]:[]
+      objectCalls: step.key==='base' && active.lesson ? active.lesson.objectCalls||[]:[],
+      scene: active.lesson ? active.lesson.scene || 0 : 0,
+      actions: step.actions || (active.lesson ? active.lesson.actions||[] : [])
     }, '*');
     if (timer !== null) clearTimeout(timer);
     timer = setTimeout(() => {
