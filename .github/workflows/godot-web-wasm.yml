@@ -6,6 +6,7 @@ on:
     paths:
       - 'spikes/godot-web/**'
       - 'index.html'
+      - 'lessons.js'
       - 'app.js'
       - '.github/workflows/godot-web-wasm.yml'
   workflow_dispatch:
@@ -22,6 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Ensure native fixtures match all 60 real course lessons
+        run: node spikes/godot-web/tests/fixture_parity.cjs
       - name: Install Playwright (Chrome provided by GitHub runner)
         run: npm install --no-save --no-package-lock playwright@1.56.1
       - name: Download official Godot 4.4.1 and export templates
