@@ -2869,7 +2869,12 @@ const App = {
             this.bindStandardHintEvents();
         }
 
-        document.getElementById('lesson-xp-badge').innerText = `+${lesson.xp} XP`;
+        const lessonXpBadge = document.getElementById('lesson-xp-badge');
+        lessonXpBadge.innerText = `+${lesson.xp} XP`;
+        lessonXpBadge.style.background = '';
+        lessonXpBadge.style.color = '';
+        const backButton = document.getElementById('btn-back-to-roadmap');
+        if (backButton) backButton.textContent = '← Torna alla Mappa';
 
         const savedCode = this.state.userCode[lessonId] || lesson.initialCode;
         const editor = document.getElementById('code-editor');
@@ -3022,8 +3027,11 @@ const App = {
         editor.addEventListener('input', () => {
             this.updateLineNumbers();
             this.checkAutocomplete();
-            this.state.userCode[this.state.currentLessonId] = editor.value;
-            this.saveStorage();
+            // Un ripasso non deve mai sovrascrivere il codice salvato del corso.
+            if (!this.isReviewMode) {
+                this.state.userCode[this.state.currentLessonId] = editor.value;
+                this.saveStorage();
+            }
         });
 
         editor.addEventListener('keydown', (e) => {
@@ -3228,8 +3236,10 @@ const App = {
             editor.value = editor.value.substring(0, replaceStart) + selected.name + editor.value.substring(pos);
             editor.selectionStart = editor.selectionEnd = replaceStart + selected.name.length;
             this.updateLineNumbers();
-            this.state.userCode[this.state.currentLessonId] = editor.value;
-            this.saveStorage();
+            if (!this.isReviewMode) {
+                this.state.userCode[this.state.currentLessonId] = editor.value;
+                this.saveStorage();
+            }
         }
 
         this.hideAutocomplete();
@@ -4781,10 +4791,15 @@ const App = {
         this.isReviewMode = true;
         this.currentReviewVariant = variant;
 
-        // Switch al view exercise
+        // Passaggio pulito anche da una sfida speciale del corso.
+        this.hideAutocomplete();
         this.switchView('view-exercise');
-
         this.updateNavSelection('review');
+        this.setMobileExerciseTab('instructions', false);
+        const backButton = document.getElementById('btn-back-to-roadmap');
+        if (backButton) backButton.textContent = '← Torna alla Palestra';
+        for (const id of ['btn-header-next', 'btn-header-prev'])
+            document.getElementById(id)?.classList.add('hidden');
 
         // Mostra il banner della modalità ripasso
         const revBanner = document.getElementById('review-exercise-banner');
@@ -4795,15 +4810,45 @@ const App = {
             if (conceptEl) conceptEl.innerText = conceptMeta ? `${conceptMeta.name} — ${variant.title}` : variant.title;
         }
 
-        // Configura contenuti didattici della variante
-        document.getElementById('lesson-title').innerText = variant.title;
-        document.getElementById('lesson-theory').innerHTML = `
-            <div class="review-scenario-box">
-                <span class="scenario-badge">SCENARIO ALTERNATIVO</span>
-                <p>${this.escapeHtml(variant.scenario)}</p>
+        // Il layout precedente potrebbe essere una sfida di padronanza, senza
+        // #lesson-title/#lesson-task: ricrea SEMPRE il pannello della variante.
+        const lessonContent = document.querySelector('#view-exercise .lesson-content');
+        lessonContent.innerHTML = `
+            <div class="lesson-header-row">
+                <h2 id="lesson-title">${this.escapeHtml(variant.title)}</h2>
             </div>
+            <div id="lesson-theory" class="theory-body">
+                <div class="review-scenario-box">
+                    <span class="scenario-badge">SCENARIO ALTERNATIVO</span>
+                    <p>${this.escapeHtml(variant.scenario)}</p>
+                </div>
+            </div>
+            <div class="task-box">
+                <div class="task-header">
+                    <span class="target-icon" aria-hidden="true">◎</span>
+                    <h3>Il Tuo Obiettivo di Ripasso:</h3>
+                </div>
+                <div id="lesson-task" class="task-body">${variant.task}</div>
+            </div>
+            <div class="hints-section">
+                <div class="hints-toggle-btn" id="btn-toggle-hint">
+                    <span class="hint-icon">💡</span>
+                    <span id="hint-toggle-text">Ti serve un consiglio? (0/${variant.hints.length} sbloccati)</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="hint-box hidden" id="hint-box">
+                    <div id="hint-stepper-nav" class="hint-stepper-nav"></div>
+                    <div class="hint-content" id="hint-text">Leggi attentamente il compito.</div>
+                    <div class="hint-actions">
+                        <button type="button" class="btn-subtle" id="btn-next-hint">Altro Consiglio ➔</button>
+                        <button type="button" class="btn-danger-subtle" id="btn-reveal-solution">Mostra Soluzione Completa</button>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn-mobile-to-code" id="btn-mobile-to-code"
+                onclick="App.setMobileExerciseTab('code')">Vai all'Editor di Codice ➔</button>
         `;
-        document.getElementById('lesson-task').innerHTML = variant.task;
+        this.bindStandardHintEvents();
 
         const xpBadge = document.getElementById('lesson-xp-badge');
         const isDone = this.state.reviewProgress?.completedVariants?.includes(variant.id);
