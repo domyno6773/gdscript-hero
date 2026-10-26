@@ -358,3 +358,59 @@ body[data-theme="light"] {
 .logo-text .accent {
     text-transform: capitalize !important;
 }
+
+
+/* Sandbox: contrasto leggibile in editor, scene tree e console.
+   Colori confinati alla Sandbox, senza modificare corso o Arena. */
+#view-practice .sandbox-title-wrap h2,
+#view-practice .sandbox-col-header,
+#view-practice .sandbox-col-title,
+#view-practice .sandbox-console-subhead,
+#view-practice .sandbox-node-details,
+#view-practice .scene-node-name,
+#view-practice .sandbox-selected-name {
+  color: #e8f1fc;
+}
+#view-practice .sandbox-node-hint,
+#view-practice .scene-node-type-badge,
+#view-practice .practice-tip,
+#view-practice .sandbox-sync-badge {
+  color: #adc2d9;
+}
+#view-practice .sandbox-editor-col .editor-wrapper {
+  background: #151c27;
+}
+#view-practice #sandbox-code-editor {
+  color: #f0f6ff;
+  caret-color: #90ceff;
+  -webkit-text-fill-color: #f0f6ff;
+}
+#view-practice #sandbox-code-editor::placeholder { color: #9ab0c8; opacity: 1; }
+#view-practice #sandbox-line-numbers { color: #a0b5cb; background: #1d2836; }
+#view-practice #sandbox-console-output { color: #d5efff; }
+#view-practice .sandbox-console-subhead { color: #b9d6f0; }
+
+[data-theme="light"] #view-practice .sandbox-title-wrap h2,
+[data-theme="light"] #view-practice .sandbox-col-header,
+[data-theme="light"] #view-practice .sandbox-col-title,
+[data-theme="light"] #view-practice .sandbox-node-details,
+[data-theme="light"] #view-practice .scene-node-name,
+[data-theme="light"] #view-practice .sandbox-selected-name {
+  color: #18334e;
+}
+[data-theme="light"] #view-practice .sandbox-node-hint,
+[data-theme="light"] #view-practice .scene-node-type-badge,
+[data-theme="light"] #view-practice .practice-tip,
+[data-theme="light"] #view-practice .sandbox-sync-badge {
+  color: #49647d;
+}
+[data-theme="light"] #view-practice .sandbox-editor-col .editor-wrapper { background: #ffffff; }
+[data-theme="light"] #view-practice #sandbox-code-editor {
+  color: #142b44;
+  caret-color: #176da8;
+  -webkit-text-fill-color: #142b44;
+}
+[data-theme="light"] #view-practice #sandbox-code-editor::placeholder { color: #62748a; opacity: 1; }
+[data-theme="light"] #view-practice #sandbox-line-numbers { color: #546a80; background: #eaf1f7; }
+[data-theme="light"] #view-practice #sandbox-console-output { color: #174667; }
+[data-theme="light"] #view-practice .sandbox-console-subhead { color: #315873; }
