@@ -79,6 +79,17 @@
    let end=start+1;while(end<lines.length&& !/^\S/.test(lines[end]))end++;
    return lines.slice(start,end).join('\n');
  };
+ const exactDict=(o,expect)=>Boolean(o&&typeof o==='object'&&!Array.isArray(o) &&
+    Object.keys(o).length===Object.keys(expect).length && Object.entries(expect).every(([k,v])=>o[k]===v));
+ const obj=(o,fields)=>Boolean(o&&o.__type==='Object'&&o.fields&&
+    Object.entries(fields).every(([k,v])=>o.fields[k]===v));
+ const event=(reply,name,count)=>Array.isArray(reply?.signalEmissions)&&
+    reply.signalEmissions.some(x=>x.signal===name&&x.status==='emitted'&&x.connections===count);
+ const callProbe=(reply,name,values)=>Array.isArray(reply?.objectCalls)&&reply.objectCalls.length===values.length&&
+    reply.objectCalls.every((v,i)=>v.variable===name&&v.method==='colpo_caricato'&&v.status==='executed'&&v.value===values[i]);
+ const containsIndex=(source,owner,key)=>new RegExp('\\b'+owner+'\\s*\\[\\s*["\\x27]'+key+'["\\x27]\\s*\\]').test(noCommentLines(source));
+ const emit=(source,name,arg)=>new RegExp('\\b'+name+'\\s*\\.\\s*emit\\s*\\(\\s*'+arg+'\\s*\\)').test(noCommentLines(source));
+ const connect=(source,name,target)=>new RegExp('\\b'+name+'\\s*\\.\\s*connect\\s*\\(\\s*'+target+'\\s*\\)').test(noCommentLines(source));
  const check=(arr,desc,p)=>arr.push({desc,passed:Boolean(p)});
  function grade(id,src,reply,stdout,stderr,scenarioResults={}){
    const lesson=get(id);
@@ -309,6 +320,113 @@
          scenarioOk(scenarioResults,'station_moved',['Posizione finale: (150.0, 170.0)','Stazione raggiunta: false']));
        check(list,'Spostamento posizione produce coordinate diverse',
          scenarioOk(scenarioResults,'position_moved',['Posizione finale: (145.0, 170.0)','Stazione raggiunta: false']));break;
+
+     case 37:
+       check(list,'Dizionario eroe con classe e livello corretti',
+         exactDict(loc('eroe'),{classe:'Guerriero',livello:10}));
+       check(list,'Accesso tramite le chiavi classe e livello',
+         containsIndex(src,'eroe','classe')&&containsIndex(src,'eroe','livello'));
+       check(list,'Output del dizionario',eq(lines,['Classe: Guerriero','Livello: 10']));break;
+     case 38:
+       check(list,'Equipaggiamento finale coerente',
+         exactDict(loc('equip'),{arma:'Spada Laser',armatura:'Scudo'}));
+       check(list,'Assegnazioni tramite le chiavi del dizionario',
+         /\bequip\s*\[\s*["']armatura["']\s*\]\s*=/.test(src)&&
+         /\bequip\s*\[\s*["']arma["']\s*\]\s*=/.test(src));
+       check(list,'Output arma e armatura',
+         eq(lines,['Arma: Spada Laser','Armatura: Scudo']));break;
+     case 39:
+       check(list,'Forziere con oro e gemme',
+         exactDict(loc('forziere'),{oro:100,gemme:3}));
+       check(list,'Valori booleani ha_oro e ha_chiave',
+         loc('ha_oro')===true&&loc('ha_chiave')===false);
+       check(list,'Entrambe le variabili calcolate tramite forziere.has',
+         /\bvar\s+ha_oro\s*=\s*forziere\.has\s*\(\s*["']oro["']\s*\)/.test(src)&&
+         /\bvar\s+ha_chiave\s*=\s*forziere\.has\s*\(\s*["']chiave["']\s*\)/.test(src));
+       check(list,'Output delle due condizioni',eq(lines,['Possiede oro: true','Possiede chiave: false']));break;
+     case 40:
+       check(list,'Boss finale coerente',
+         exactDict(loc('boss'),{nome:'Drago Antico',hp:420,attacco:75}));
+       check(list,'Modifiche esplicite a boss.hp e boss.attacco',
+         /\bboss\s*\[\s*["']hp["']\s*\]\s*=\s*420\b/.test(src)&&
+         /\bboss\s*\[\s*["']attacco["']\s*\]\s*=\s*75\b/.test(src));
+       check(list,'in_furia dipende da boss.has("furia")',
+         loc('in_furia')===false&&/\bvar\s+in_furia\s*=\s*boss\.has\s*\(\s*["']furia["']\s*\)/.test(src));
+       check(list,'Output del boss',eq(lines,['Boss: Drago Antico','HP rimanenti: 420','Attacco: 75','Furia attiva: false']));break;
+     case 41:
+       check(list,'Segnale porta_aperta dichiarato',
+         /^\s*signal\s+porta_aperta\s*$/m.test(m)&&event(reply,'porta_aperta',1));
+       check(list,'Connesso a quando_aperta e inviato da _ready',
+         connect(src,'porta_aperta','quando_aperta')&&emit(src,'porta_aperta',''));
+       check(list,'Emissione aggiuntiva chiama ancora il callback',
+         eq(lines,['Apertura in corso...','Porta aperta con successo!','Porta aperta con successo!']));break;
+     case 42:
+       check(list,'Segnale moneta_raccolta definito e connesso',
+         /^\s*signal\s+moneta_raccolta\s*$/m.test(m)&&event(reply,'moneta_raccolta',1));
+       check(list,'connect(aggiungi_punti) ed emit()',
+         connect(src,'moneta_raccolta','aggiungi_punti')&&emit(src,'moneta_raccolta',''));
+       check(list,'Callback richiamato due volte, anche dal test',
+         eq(lines,['+10 Monete raccolte!','+10 Monete raccolte!']));break;
+     case 43:
+       check(list,'Segnale danno_inflitto(valore) definito',
+         /^\s*signal\s+danno_inflitto\s*\(\s*valore\s*\)/m.test(m)&&event(reply,'danno_inflitto',1));
+       check(list,'Emette 35 ed è connesso a on_danno',
+         connect(src,'danno_inflitto','on_danno')&&emit(src,'danno_inflitto','35'));
+       check(list,'Callback gestisce sia 35 sia 71',
+         eq(lines,['Danno registrato: 35','Danno registrato: 71']));break;
+     case 44:
+       check(list,'Segnale salute_aggiornata(nuova_salute)',
+         /^\s*signal\s+salute_aggiornata\s*\(\s*nuova_salute\s*\)/m.test(m)&&event(reply,'salute_aggiornata',1));
+       check(list,'Funzione quando_salute_cambia(hp) registra il parametro',
+         /\bfunc\s+quando_salute_cambia\s*\(\s*hp\s*\)\s*:/.test(m)&&
+         /\bprint\s*\(\s*["']UI: Barra salute a\s*["']\s*,\s*hp\s*\)/.test(fn(src,'quando_salute_cambia')));
+       check(list,'Connessione ed emissioni 75, 40',
+         connect(src,'salute_aggiornata','quando_salute_cambia')&&
+         emit(src,'salute_aggiornata','75')&&emit(src,'salute_aggiornata','40'));
+       check(list,'Eventi native 75, 40 e test 11',
+         eq(lines,['UI: Barra salute a 75','UI: Barra salute a 40',
+           '=== EVENTI BATTAGLIA COMPLETATI ===','UI: Barra salute a 11']));break;
+     case 45:
+       check(list,'Istanza Pozione con proprietà corrette',
+         obj(loc('elisir'),{nome:'Elisir',cura:50}));
+       check(list,'Classe Pozione e costruttore _init(n,c)',
+         /\bclass\s+Pozione\s*:/.test(m)&&/\bfunc\s+_init\s*\(\s*n\s*,\s*c\s*\)/.test(m)&&
+         /\bself\.nome\s*=\s*n\b/.test(m)&&/\bself\.cura\s*=\s*c\b/.test(m));
+       check(list,'Crea istanza attraverso Pozione.new',
+         /\bvar\s+elisir\s*=\s*Pozione\.new\s*\(/.test(m));
+       check(list,'Output della pozione',
+         eq(lines,['Pozione creata: Elisir (Cura: 50)']));break;
+     case 46:
+       check(list,'Due istanze Guerriero indipendenti',
+         obj(loc('g1'),{nome:'Arthur',hp:100})&&obj(loc('g2'),{nome:'Lancelot',hp:90}));
+       check(list,'Entrambe le istanze create con Guerriero.new',
+         /\bvar\s+g1\s*=\s*Guerriero\.new\s*\(/.test(m)&&
+         /\bvar\s+g2\s*=\s*Guerriero\.new\s*\(/.test(m));
+       check(list,'Output dei due eroi',
+         eq(lines,['Eroe 1: Arthur (HP: 100)','Eroe 2: Lancelot (HP: 90)']));break;
+     case 47:
+       check(list,'Personaggio Eroe con attacco 25',
+         obj(loc('eroe'),{nome:'Eroe',attacco:25}));
+       check(list,'Funzione colpo_caricato restituisce self.attacco * 2',
+         /\bfunc\s+colpo_caricato\s*\(\s*\)/.test(m)&&
+         /\breturn\s+self\.attacco\s*\*\s*2\b/.test(m));
+       check(list,'Colpo iniziale 50',eq(lines,['Danno colpo caricato: 50']));
+       check(list,'Prove native con attacco 7 e 31 producono 14 e 62',
+         callProbe(reply,'eroe',[14,62]));break;
+     case 48:
+       check(list,'Due Avventurieri con campi coerenti',
+         obj(loc('membro1'),{nome:'Aria',ruolo:'Maga',vita:80})&&
+         obj(loc('membro2'),{nome:'Krag',ruolo:'Guerriero',vita:120}));
+       check(list,'Classe Avventuriero con costruttore e campi',
+         /\bclass\s+Avventuriero\s*:/.test(m)&&
+         /\bfunc\s+_init\s*\(\s*n\s*,\s*r\s*,\s*v\s*\)/.test(m)&&
+         /\bself\.nome\s*=\s*n\b/.test(m)&&/\bself\.ruolo\s*=\s*r\b/.test(m)&&
+         /\bself\.vita\s*=\s*v\b/.test(m));
+       check(list,'vita_totale calcolata dalla somma dei membri',
+         loc('vita_totale')===200&&
+         /\bvar\s+vita_totale\s*=\s*membro1\.vita\s*\+\s*membro2\.vita\b/.test(m));
+       check(list,'Output del party',
+         eq(lines,['Membro 1: Aria (Maga)','Membro 2: Krag (Guerriero)','Salute totale party: 200']));break;
      default:check(list,'Non supportato',false);
    }
    return{id,passed:list.every(x=>x.passed),checks:list,demoOnly:true,nativeStatus:reply?.status,localCapture:reply?.localCapture,
