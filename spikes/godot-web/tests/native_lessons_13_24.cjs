@@ -126,6 +126,21 @@ async function run(page,id,code){
     console.log('NATIVE_SEMANTIC_ALTERNATIVE_PASS '+id);
   }
 
+  // Counterexamples which passed the earlier, smaller scenario matrices.
+  const boundaryBypasses=[
+    [17,'func _ready():\n    var livello = 10\n    if livello >= 10:\n        if livello == 10:\n            print("Livello raggiunto!")','livello 11'],
+    [19,'func _ready():\n    var punti_vita = 0\n    if punti_vita <= 0:\n        if punti_vita == 0:\n            print("Game Over")\n    else:\n        print("In battaglia")','salute -5'],
+    [20,'extends Node\nfunc _ready():\n    var energia = 75\n    var ha_amuleto = true\n    var ha_chiave = false\n    var stato_portale = ""\n    if energia >= 50 and (ha_amuleto or ha_chiave):\n        if energia > 50:\n            stato_portale = "Portale Attivato"\n    elif energia < 50:\n        stato_portale = "Energia Insufficiente"\n    else:\n        stato_portale = "Nessuna Reliquia Trovata"\n    print("Stato: ",stato_portale)','energia 50']
+  ];
+  for(const [id,source,label] of boundaryBypasses){
+    const r=await run(page,id,source);
+    assert.equal(r.raw.status,'executed','Adversarial candidate should run in Godot: '+id);
+    assert.equal(r.feedback.passed,false,'Missing boundary test should reject: '+id+' '+JSON.stringify(r.feedback));
+    assert.ok(r.feedback.checks.some(c=>c.desc.includes(label)&&!c.passed),
+      'The native '+label+' scenario must specifically catch the bypass in '+id);
+    console.log('NATIVE_BOUNDARY_BYPASS_REJECTED '+id);
+  }
+
   await page.screenshot({path:path.join(output,'native-13-24-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-13-24-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){

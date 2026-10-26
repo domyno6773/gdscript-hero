@@ -121,6 +121,20 @@ async function run(page,id,code){
     console.log('NATIVE_SEMANTIC_ALTERNATIVE_PASS '+id);
   }
 
+  const boundaryBypasses=[
+    [26,'func _ready():\n    var nemici = ["Goblin", "Orco", "Drago"]\n    for nemico in nemici:\n        print(nemico)\n    if nemici.size() == 0:\n        print("Ghost")','Nessun nemico'],
+    [27,'func _ready():\n    var conto = 1\n    while conto <= 3:\n        if conto >= 1:\n            print("Conto: " + str(conto))\n        conto += 1','iniziale 0'],
+    [28,'extends Node\nfunc _ready():\n    var nemici = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali = 0\n    for nemico in nemici:\n        print("Allerta: " + nemico)\n        xp_totali += 25\n    if nemici.size() == 1:\n        xp_totali += 25\n    print("XP Totali: ",xp_totali)','Un solo nemico']
+  ];
+  for(const [id,source,label] of boundaryBypasses){
+    const r=await run(page,id,source);
+    assert.equal(r.raw.status,'executed','Bypass candidate should run in Godot: '+id);
+    assert.equal(r.feedback.passed,false,'Boundary regression not caught: '+id+' '+JSON.stringify(r.feedback));
+    assert.ok(r.feedback.checks.some(c=>c.desc.includes(label)&&!c.passed),
+      'Expected native boundary probe to fail for lesson '+id+' '+label);
+    console.log('NATIVE_BOUNDARY_BYPASS_REJECTED '+id);
+  }
+
   await page.screenshot({path:path.join(output,'native-25-36-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-25-36-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){
