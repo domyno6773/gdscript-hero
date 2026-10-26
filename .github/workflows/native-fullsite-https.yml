@@ -1,0 +1,146 @@
+name: Full GDScript Hero native Godot HTTPS preview
+
+on:
+  push:
+    branches: [spike/godot-native-proof-20261026]
+    paths:
+      - '.github/workflows/native-fullsite-https.yml'
+      - 'spikes/godot-web/preview/preview_fullsite.py'
+      - 'spikes/godot-web/tests/fullsite_public_smoke.cjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  site:
+    name: Full site + isolated Godot, HTTPS, 3h
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright for browser verification
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+      - name: Download Godot 4.4.1 official web export
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 5 -o /tmp/godot-linux.zip https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
+          unzip -q /tmp/godot-linux.zip -d /tmp
+          chmod +x /tmp/Godot_v4.4.1-stable_linux.x86_64
+          curl -fL -C - --retry 5 --retry-all-errors --retry-delay 8 -o /tmp/godot-templates.tpz https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz
+          unzip -p /tmp/godot-templates.tpz templates/web_nothreads_release.zip > /tmp/web_nothreads_release.zip
+      - name: Build true Godot WebAssembly
+        run: |
+          set -euo pipefail
+          cd spikes/godot-web/project
+          sed -i 's|custom_template/release=""|custom_template/release="/tmp/web_nothreads_release.zip"|' export_presets.cfg
+          /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path . --editor --quit
+          /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path . --export-release Web ../web/godot.html
+          test -s ../web/godot.js && test -s ../web/godot.wasm && test -s ../web/godot.pck
+      - name: Full site Chrome proof on separate local origins, no cloud
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PUBLIC_HOST_URL=http://127.0.0.1:18771
+          export PUBLIC_RUNNER_URL=http://localhost:18772
+          python3 spikes/godot-web/preview/preview_fullsite.py host 18771 > /tmp/local-site.log 2>&1 &
+          PID1=$!
+          python3 spikes/godot-web/preview/preview_fullsite.py runner 18772 > /tmp/local-runner.log 2>&1 &
+          PID2=$!
+          trap 'kill "$PID1" "$PID2" 2>/dev/null || true' EXIT
+          curl -fsSL --retry 15 --retry-connrefused --retry-delay 1 "$PUBLIC_HOST_URL/index.html" -o /dev/null
+          curl -fsSL --retry 15 --retry-connrefused --retry-delay 1 "$PUBLIC_RUNNER_URL/isolated.html" -o /dev/null
+          MAIN_URL="$PUBLIC_HOST_URL" RUNNER_URL="$PUBLIC_RUNNER_URL" timeout 155s node spikes/godot-web/tests/fullsite_public_smoke.cjs
+      - name: Install account-free Cloudflare quick tunnel
+        run: |
+          curl -fLsS --retry 3 -o /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+          chmod +x /tmp/cloudflared
+      - name: Create TWO temporary HTTPS origin URLs
+        id: tunnels
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/cloudflared tunnel --url http://127.0.0.1:18771 --no-autoupdate --protocol http2 > /tmp/host-tunnel.log 2>&1 &
+          echo $! > /tmp/host-tunnel.pid
+          /tmp/cloudflared tunnel --url http://127.0.0.1:18772 --no-autoupdate --protocol http2 > /tmp/runner-tunnel.log 2>&1 &
+          echo $! > /tmp/runner-tunnel.pid
+          HOST=""
+          RUNNER=""
+          for i in $(seq 1 90); do
+            HOST="$(grep -Eo 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/host-tunnel.log | head -n1 || true)"
+            RUNNER="$(grep -Eo 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/runner-tunnel.log | head -n1 || true)"
+            if [[ -n "$HOST" && -n "$RUNNER" ]]; then break; fi
+            kill -0 "$(cat /tmp/host-tunnel.pid)" 2>/dev/null || exit 1
+            kill -0 "$(cat /tmp/runner-tunnel.pid)" 2>/dev/null || exit 1
+            sleep 2
+          done
+          test -n "$HOST" && test -n "$RUNNER" && test "$HOST" != "$RUNNER"
+          echo "host=$HOST" >> "$GITHUB_OUTPUT"
+          echo "runner=$RUNNER" >> "$GITHUB_OUTPUT"
+          export PUBLIC_HOST_URL="$HOST" PUBLIC_RUNNER_URL="$RUNNER"
+          python3 spikes/godot-web/preview/preview_fullsite.py host 18771 > /tmp/public-site.log 2>&1 &
+          echo $! > /tmp/public-site.pid
+          python3 spikes/godot-web/preview/preview_fullsite.py runner 18772 > /tmp/public-runner.log 2>&1 &
+          echo $! > /tmp/public-runner.pid
+          curl -fsSL --retry 15 --retry-connrefused --retry-delay 1 http://127.0.0.1:18771/index.html -o /dev/null
+          curl -fsSL --retry 15 --retry-connrefused --retry-delay 1 http://127.0.0.1:18772/isolated.html -o /dev/null
+          echo "FULL_SITE_TEMP_URL=$HOST/index.html?nativeGodotVerify=1"
+      - name: Confirm actual HTTPS access to BOTH origins
+        shell: bash
+        env:
+          MAIN_URL: ${{ steps.tunnels.outputs.host }}
+          RUNNER_URL: ${{ steps.tunnels.outputs.runner }}
+        run: |
+          set -euo pipefail
+          pass=0
+          for i in $(seq 1 60); do
+            if curl -fsSL --connect-timeout 10 --max-time 25 "$MAIN_URL/index.html?nativeGodotVerify=1" -o /tmp/test-site.html &&
+               grep -q 'GDScript Hero' /tmp/test-site.html &&
+               curl -fsSL --connect-timeout 10 --max-time 25 "$RUNNER_URL/isolated.html" -o /tmp/test-runner.html &&
+               curl -fsSL --connect-timeout 10 --max-time 25 "$RUNNER_URL/godot.js" -o /tmp/test-godot.js; then
+              pass=1
+              break
+            fi
+            echo "Cloudflare HTTPS pending on probe $i"
+            kill -0 "$(cat /tmp/host-tunnel.pid)" 2>/dev/null || exit 1
+            kill -0 "$(cat /tmp/runner-tunnel.pid)" 2>/dev/null || exit 1
+            sleep 4
+          done
+          if [[ "$pass" != 1 ]]; then
+            tail -40 /tmp/host-tunnel.log /tmp/runner-tunnel.log
+            exit 1
+          fi
+          echo "PUBLIC_TWO_ORIGIN_HTTPS_VERIFIED"
+      - name: Verify public REAL SITE native coding in Chrome
+        env:
+          MAIN_URL: ${{ steps.tunnels.outputs.host }}
+          RUNNER_URL: ${{ steps.tunnels.outputs.runner }}
+        run: timeout 180s node spikes/godot-web/tests/fullsite_public_smoke.cjs
+      - name: Publish direct URL in experimental branch
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MAIN_URL: ${{ steps.tunnels.outputs.host }}
+        run: |
+          set -euo pipefail
+          LINK="$MAIN_URL/index.html?nativeGodotVerify=1"
+          TARGET="docs/native-fullsite-https-preview-link.md"
+          CONTENT="$(printf '# Anteprima HTTPS — GDScript Hero completo\n\n[Apri il sito completo con il pulsante Verifica su Godot](%s)\n\n**Demo temporanea (massimo circa 3 ore).** Nessun login cloud, credenziale Supabase, XP o progresso reale. Non inserire credenziali. Il sito pubblico non cambia.\n\n[GitHub Action](https://github.com/%s/actions/runs/%s)\n' "$LINK" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" | base64 -w0)"
+          SHA="$(gh api "repos/$GITHUB_REPOSITORY/contents/$TARGET?ref=$GITHUB_REF_NAME" --jq .sha 2>/dev/null || true)"
+          if [[ -n "$SHA" ]]; then
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$TARGET" \
+              -f message="docs(spike): update verified live Godot full-site URL" \
+              -f branch="$GITHUB_REF_NAME" -f sha="$SHA" -f content="$CONTENT" > /dev/null
+          else
+            gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$TARGET" \
+              -f message="docs(spike): publish verified live Godot full-site URL" \
+              -f branch="$GITHUB_REF_NAME" -f content="$CONTENT" > /dev/null
+          fi
+          echo "### GDScript Hero: anteprima completa Godot" >> "$GITHUB_STEP_SUMMARY"
+          echo "**[Apri il sito HTTPS]( $LINK )**" >> "$GITHUB_STEP_SUMMARY"
+          echo "VERIFIED_FULLSITE_URL=$LINK"
+      - name: Keep validated HTTPS demo online for 3 hours
+        run: sleep 10800
