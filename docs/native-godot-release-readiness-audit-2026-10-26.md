@@ -12,17 +12,17 @@ La [suite su Godot 4.4.1 WebAssembly](https://github.com/domyno6773/gdscript-her
 - **48/48 varianti corrette** approvate, includendo casi di semplice formattazione nelle lezioni 49–60;
 - isolamento cross-origin, riavvio dopo blocco e browser desktop/mobile **emulato** in Chrome CI.
 
-Il [primo audit automatico di release](https://github.com/domyno6773/gdscript-hero/actions/runs/40301419815) ha confermato la stessa suite e misurato:
+Il [primo audit automatico](https://github.com/domyno6773/gdscript-hero/actions/runs/40301419815) e la [seconda esecuzione di verifica](https://github.com/domyno6773/gdscript-hero/actions/runs/40301778759) hanno confermato la stessa suite e misurato:
 
 | Grandezza | Risultato | Interpretazione |
 |---|---:|---|
 | Export `godot.wasm` + `godot.js` + `godot.pck`, non compresso | **41,99 MiB** | Dimensione dei tre file locali, non traffico del sito completo |
 | Dimensione gzip calcolata sugli stessi tre file | **9,16 MiB** | Potenziale compresso: **non** prova che il server di produzione offra gzip |
-| Avvio su Chrome desktop, GitHub Actions | **1.941 ms** | Runner locale in CI, non connessione Internet |
-| Avvio con viewport mobile Chrome emulata | **1.237 ms** | Non smartphone Android/iOS reale |
+| Avvio su Chrome desktop, GitHub Actions | **1.480–1.941 ms** | Due run CI sul runner locale, non connessione Internet |
+| Avvio con viewport mobile Chrome emulata | **973–1.237 ms** | Due run CI, non smartphone Android/iOS reale |
 | Recupero dopo loop infinito | **circa 4,6 s** | Provato su Chrome CI, non garantito su ogni browser |
 
-La diagnostica è disponibile in `spikes/godot-web/tests/release_readiness.cjs`; il file `test-artifacts/release-readiness-audit.json` viene salvato come artifact della GitHub Action. Il controllo è **consultivo**: il job può riuscire mentre il verdetto di rilascio rimane NO-GO.
+La diagnostica è disponibile in `spikes/godot-web/tests/release_readiness.cjs`; il file `test-artifacts/release-readiness-audit.json` viene salvato come artifact della GitHub Action. Il controllo è **consultivo**: il job può riuscire mentre il verdetto di rilascio rimane NO-GO. Nell'ultima run sono emersi cinque gate bloccanti: integrazione, origine di deploy, attendibilità dei progressi, falsificabilità dei risultati e generalità dei validatori. La dimensione del bundle è invece un **rischio da misurare**, non un limite artificiale.
 
 ## Gate di rilascio
 
