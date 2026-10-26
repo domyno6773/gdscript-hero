@@ -47,7 +47,8 @@ async function run(page,id,code){
    const failed=r.feedback.checks.filter(c=>!c.passed);
    assert.equal(r.raw.status,'executed','Native execution failed lesson '+id);
    assert.equal(r.feedback.passed,true,'Official lesson '+id+' failed native grading: '+JSON.stringify({failed,raw:r.raw,stdout:r.stdout}));
-   if(![25,29,30].includes(id))assert.equal(r.raw.localCapture,'instrumented','Local capture missing: '+id);
+   if([26,27,28].includes(id))assert.equal(r.raw.localCapture,'not_requested','Expected no injection: '+id);
+   else if(![25,29,30].includes(id))assert.equal(r.raw.localCapture,'instrumented','Local capture missing: '+id);
    results.push({id,positive:true,stdout:r.stdout,locals:r.raw.locals});
    console.log('NATIVE_LESSON_PASS '+id+' '+JSON.stringify({capture:r.raw.localCapture,stdout:r.stdout}));
   }
@@ -104,6 +105,20 @@ async function run(page,id,code){
     assert.equal(r.raw.status,'executed','Native Godot rejected valid syntax: '+id);
     assert.equal(r.feedback.passed,true,'Quality regression: valid GDScript rejected in '+id+': '+JSON.stringify(r));
     console.log('NATIVE_IDIOMATIC_ALTERNATIVE_PASS '+id);
+  }
+
+  // Equivalent formatting logic and iteration use a different string-construction
+  // algorithm; they should remain valid even if selective direct proof falls back
+  // to local observation.
+  const richer=[
+    [27,'func _ready():\n    var conto = 1\n    while conto < 4:\n        print("Conto: %d" % conto)\n        conto += 1'],
+    [28,'extends Node\nfunc _ready():\n    var nemici: Array[String] = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali: int = 0\n    for nemico in nemici:\n        print("Allerta: %s" % nemico)\n        xp_totali += 25\n    print("XP Totali: ", xp_totali)']
+  ];
+  for(const [id,source] of richer){
+    const r=await run(page,id,source);
+    assert.equal(r.raw.status,'executed','Valid alternate GDScript should execute in '+id);
+    assert.equal(r.feedback.passed,true,'Equivalent algorithm should pass in '+id+': '+JSON.stringify(r.feedback));
+    console.log('NATIVE_SEMANTIC_ALTERNATIVE_PASS '+id);
   }
 
   await page.screenshot({path:path.join(output,'native-25-36-lessons-lab.png'),fullPage:true});

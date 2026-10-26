@@ -47,7 +47,7 @@ async function run(page,id,code){
    const failed=r.feedback.checks.filter(c=>!c.passed);
    assert.equal(r.raw.status,'executed','Native execution failed lesson '+id);
    assert.equal(r.feedback.passed,true,'Official lesson '+id+' failed native grading: '+JSON.stringify({failed,raw:r.raw,stdout:r.stdout}));
-   if(id===13)assert.equal(r.raw.localCapture,'not_requested','Expected direct verification: '+id);
+   if([13,17,18,19,20].includes(id))assert.equal(r.raw.localCapture,'not_requested','Expected direct verification: '+id);
    else assert.equal(r.raw.localCapture,'instrumented','Local capture missing: '+id);
    results.push({id,positive:true,stdout:r.stdout,locals:r.raw.locals});
    console.log('NATIVE_LESSON_PASS '+id+' '+JSON.stringify({capture:r.raw.localCapture,stdout:r.stdout}));
@@ -112,6 +112,19 @@ async function run(page,id,code){
     'Correct default output cannot hide a Godot error in mutated scenario');
   assert.equal(branch.feedback.checks.find(x=>x.desc.includes('livello 9'))?.passed,false);
   console.log('NATIVE_SCENARIO_ENGINE_ERROR_REJECTED');
+
+  // Behaviorally different, legitimately correct implementations, not mere whitespace.
+  const richAlternatives=[
+    [17,'func _ready():\n    var livello: int = 10\n    if livello > 9:\n        print("Livello raggiunto!")'],
+    [19,'func _ready():\n    var punti_vita: int = 0\n    if punti_vita < 1:\n        print("Game Over")\n    else:\n        print("In battaglia")'],
+    [20,'extends Node\nfunc _ready():\n    var energia: int = 75\n    var ha_amuleto: bool = true\n    var ha_chiave: bool = false\n    var stato_portale: String = ""\n    if energia > 49 and (ha_chiave or ha_amuleto):\n        stato_portale = "Portale Attivato"\n    elif energia <= 49:\n        stato_portale = "Energia Insufficiente"\n    else:\n        stato_portale = "Nessuna Reliquia Trovata"\n    print("Stato: ", stato_portale)']
+  ];
+  for(const [id,source] of richAlternatives){
+    const r=await run(page,id,source);
+    assert.equal(r.raw.status,'executed','Alternative valid Godot GDScript rejected: '+id);
+    assert.equal(r.feedback.passed,true,'Correct alternative failed in '+id+': '+JSON.stringify(r.feedback));
+    console.log('NATIVE_SEMANTIC_ALTERNATIVE_PASS '+id);
+  }
 
   await page.screenshot({path:path.join(output,'native-13-24-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-13-24-lessons.json'),JSON.stringify(results,null,2));

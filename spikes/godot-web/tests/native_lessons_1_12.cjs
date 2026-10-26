@@ -149,6 +149,17 @@ async function run(page,id,code){
   assert.equal(early.feedback.verdict,'inconclusive');
   console.log('NATIVE_MISSING_OBSERVATION_INCONCLUSIVE');
 
+  // Adversarial source contains a correct declaration + print(nome), but only
+  // inside a dead branch. Its actual output is a hardcoded print. Direct proof
+  // must decline and never grant a passing grade.
+  const deadCodeBypass='func _ready():\n    if false:\n        var nome = "Eroe"\n        print(nome)\n    print("Eroe")';
+  const dead=await run(page,5,deadCodeBypass);
+  assert.equal(dead.raw.status,'executed','Adversarial script is valid GDScript');
+  assert.equal(dead.stdout.trim(),'Eroe','Adversarial output superficially matches');
+  assert.notEqual(dead.raw.localCapture,'not_requested','Direct proof must refuse dead-code padding');
+  assert.equal(dead.feedback.passed,false,'Hardcoded output must not earn a pass');
+  console.log('NATIVE_DEAD_BRANCH_OUTPUT_BYPASS_REJECTED');
+
   await page.screenshot({path:path.join(output,'native-12-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-12-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){
