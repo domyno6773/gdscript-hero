@@ -441,6 +441,48 @@ window.GDHLessonFixtures = [
           20,
           9
         ]
+      },
+      {
+        "method": "calcola_danno",
+        "args": [
+          0,
+          4
+        ]
+      },
+      {
+        "method": "calcola_danno",
+        "args": [
+          -5,
+          3
+        ]
+      },
+      {
+        "method": "calcola_danno",
+        "args": [
+          9,
+          9
+        ]
+      },
+      {
+        "method": "calcola_danno",
+        "args": [
+          -3,
+          -12
+        ]
+      },
+      {
+        "method": "calcola_danno",
+        "args": [
+          30,
+          6
+        ]
+      },
+      {
+        "method": "calcola_danno",
+        "args": [
+          30,
+          -2
+        ]
       }
     ]
   },
@@ -476,6 +518,41 @@ window.GDHLessonFixtures = [
         "method": "calcola_colpo",
         "args": [
           12,
+          true
+        ]
+      },
+      {
+        "method": "calcola_colpo",
+        "args": [
+          0,
+          true
+        ]
+      },
+      {
+        "method": "calcola_colpo",
+        "args": [
+          -3,
+          true
+        ]
+      },
+      {
+        "method": "calcola_colpo",
+        "args": [
+          12,
+          false
+        ]
+      },
+      {
+        "method": "calcola_colpo",
+        "args": [
+          30,
+          false
+        ]
+      },
+      {
+        "method": "calcola_colpo",
+        "args": [
+          30,
           true
         ]
       }
@@ -749,6 +826,22 @@ window.GDHLessonFixtures = [
         "args": [],
         "set": {
           "attacco": 31
+        }
+      },
+      {
+        "variable": "eroe",
+        "method": "colpo_caricato",
+        "args": [],
+        "set": {
+          "attacco": 0
+        }
+      },
+      {
+        "variable": "eroe",
+        "method": "colpo_caricato",
+        "args": [],
+        "set": {
+          "attacco": -3
         }
       }
     ]

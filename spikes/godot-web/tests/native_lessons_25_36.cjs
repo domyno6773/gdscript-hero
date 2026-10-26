@@ -135,6 +135,30 @@ async function run(page,id,code){
     console.log('NATIVE_BOUNDARY_BYPASS_REJECTED '+id);
   }
 
+  // Semantic alternatives in the advanced function unit: exercise native
+  // methods on 8 input combinations, not string-match a literal return line.
+  const semanticFunctions=[
+    [31,'func calcola_danno(attacco: int, difesa: int) -> int:\n    return attacco + (-difesa)\nfunc _ready():\n    var danno: int = calcola_danno(30,5)\n    print(danno)'],
+    [32,'extends Node\nfunc calcola_colpo(attacco: int, critico: bool) -> int:\n    return attacco * (2 if critico else 1)\nfunc _ready():\n    var normale = calcola_colpo(30,false)\n    var critico = calcola_colpo(30,true)\n    print("Colpo normale: ",normale)\n    print("Colpo critico: ",critico)']
+  ];
+  for(const [id,source] of semanticFunctions){
+    const r=await run(page,id,source);
+    assert.equal(r.raw.status,'executed','Valid function alternative must compile in Godot '+id);
+    assert.equal(r.feedback.passed,true,'Equivalent native function rejected in '+id+': '+JSON.stringify(r.feedback));
+    console.log('NATIVE_ADVANCED_FUNCTION_ALTERNATIVE_PASS '+id);
+  }
+  // Prior samples could miss values where the default numbers happened to work.
+  const functionTricks=[
+    [31,'func calcola_danno(attacco, difesa):\n    if attacco == 30:\n        return 25\n    return attacco - difesa\nfunc _ready():\n    var danno = calcola_danno(30,5)\n    print(danno)'],
+    [32,'extends Node\nfunc calcola_colpo(attacco: int, critico: bool) -> int:\n    if critico:\n        if attacco < 0:\n            return 0\n        return attacco * 2\n    return attacco\nfunc _ready():\n    var normale = calcola_colpo(30,false)\n    var critico = calcola_colpo(30,true)\n    print("Colpo normale: ",normale)\n    print("Colpo critico: ",critico)']
+  ];
+  for(const [id,source] of functionTricks){
+    const r=await run(page,id,source);
+    assert.equal(r.raw.status,'executed','Adversarial function must compile '+id);
+    assert.equal(r.feedback.passed,false,'Overfitted return accepted in '+id+': '+JSON.stringify(r.feedback));
+    console.log('NATIVE_ADVANCED_FUNCTION_BYPASS_REJECTED '+id);
+  }
+
   await page.screenshot({path:path.join(output,'native-25-36-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-25-36-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){

@@ -388,23 +388,27 @@
        check(list,'Godot chiama la funzione con due nomi diversi',methods(reply,'saluta',[null,null])&&eq(lines,['Ciao Eroe','Ciao Ada','Ciao Viaggiatore']));break;
      case 31:
        check(list,'danno calcolato da calcola_danno(30,5)',
-         loc('danno')===25&&/\bvar\s+danno\s*=\s*calcola_danno\s*\(\s*30\s*,\s*5\s*\)/.test(m));
-       check(list,'calcola_danno restituisce attacco - difesa',
-         /\bfunc\s+calcola_danno\s*\(\s*attacco\s*,\s*difesa\s*\)\s*:/.test(m)&&/\breturn\s+attacco\s*-\s*difesa\b/.test(fn(src,'calcola_danno')));
+         loc('danno')===25&&/\bvar\s+danno(?:\s*:\s*int)?\s*=\s*calcola_danno\s*\(\s*30\s*,\s*5\s*\)/.test(m));
+       check(list,'calcola_danno usa i parametri e restituisce un valore',
+         /\bfunc\s+calcola_danno\s*\(\s*attacco(?:\s*:\s*int)?\s*,\s*difesa(?:\s*:\s*int)?\s*\)\s*(?:->\s*int\s*)?:/.test(m)&&
+         /\breturn\b/.test(clean(fn(src,'calcola_danno')))&&
+         /\battacco\b/.test(clean(fn(src,'calcola_danno')))&&
+         /\bdifesa\b/.test(clean(fn(src,'calcola_danno'))));
        check(list,'Output dal valore danno',pr(m,'danno')&&eq(lines,['25']));
-       check(list,'Prove parametri 12-7 e 20-9',methods(reply,'calcola_danno',[5,11]));break;
+       check(list,'Prove native: valori positivi, negativi, zero e 30 con altri parametri',
+         methods(reply,'calcola_danno',[5,11,-4,-8,0,9,24,32]));break;
      case 32:
        check(list,'Firma tipizzata della funzione',
          /\bfunc\s+calcola_colpo\s*\(\s*attacco\s*:\s*int\s*,\s*critico\s*:\s*bool\s*\)\s*->\s*int\s*:/.test(m));
-       check(list,'Ramificazioni e return sul parametro attacco',
-         /\bif\s+critico\s*:/.test(fn(src,'calcola_colpo'))&&
-         /\breturn\s+attacco\s*\*\s*2\b/.test(fn(src,'calcola_colpo'))&&
-         /\breturn\s+attacco\b/.test(fn(src,'calcola_colpo')));
+       check(list,'Restituzione dipendente dai parametri attacco e critico',
+         /\breturn\b/.test(clean(fn(src,'calcola_colpo')))&&
+         /\battacco\b/.test(clean(fn(src,'calcola_colpo')))&&
+         /\bcritico\b/.test(clean(fn(src,'calcola_colpo'))));
        check(list,'Normale 30, critico 60',
          loc('normale')===30&&loc('critico')===60&&
          eq(lines,['Colpo normale: 30','Colpo critico: 60']));
-       check(list,'Prove native con 7/12 e critico',
-         methods(reply,'calcola_colpo',[7,14,24]));break;
+       check(list,'Prove native: normale, critico, zero e attacchi negativi',
+         methods(reply,'calcola_colpo',[7,14,24,0,-6,12,30,60]));break;
      case 33:
        check(list,'Vero Vector2(100,200)',vec(loc('posizione'),100,200)&&
          /\bvar\s+posizione\s*(?::\s*Vector2\s*)?=\s*Vector2\s*\(\s*100\s*,\s*200\s*\)/.test(m));
@@ -506,7 +510,7 @@
        check(list,'Istanza Pozione con proprietà corrette',
          obj(loc('elisir'),{nome:'Elisir',cura:50}));
        check(list,'Classe Pozione e costruttore _init(n,c)',
-         /\bclass\s+Pozione\s*:/.test(m)&&/\bfunc\s+_init\s*\(\s*n\s*,\s*c\s*\)/.test(m)&&
+         /\bclass\s+Pozione\s*:/.test(m)&&/\bfunc\s+_init\s*\(\s*n(?:\s*:\s*String)?\s*,\s*c(?:\s*:\s*int)?\s*\)/.test(m)&&
          /\bself\.nome\s*=\s*n\b/.test(m)&&/\bself\.cura\s*=\s*c\b/.test(m));
        check(list,'Crea istanza attraverso Pozione.new',
          /\bvar\s+elisir\s*=\s*Pozione\.new\s*\(/.test(m));
@@ -523,19 +527,20 @@
      case 47:
        check(list,'Personaggio Eroe con attacco 25',
          obj(loc('eroe'),{nome:'Eroe',attacco:25}));
-       check(list,'Funzione colpo_caricato restituisce self.attacco * 2',
-         /\bfunc\s+colpo_caricato\s*\(\s*\)/.test(m)&&
-         /\breturn\s+self\.attacco\s*\*\s*2\b/.test(m));
+       check(list,'Metodo colpo_caricato usa self.attacco e restituisce un valore',
+         /\bfunc\s+colpo_caricato\s*\(\s*\)\s*:/.test(m)&&
+         /\breturn\b/.test(clean(fn(src,'colpo_caricato')))&&
+         /\bself\.attacco\b/.test(clean(fn(src,'colpo_caricato'))));
        check(list,'Colpo iniziale 50',eq(lines,['Danno colpo caricato: 50']));
-       check(list,'Prove native con attacco 7 e 31 producono 14 e 62',
-         callProbe(reply,'eroe',[14,62]));break;
+       check(list,'Prove native con attacco 7, 31, 0 e -3',
+         callProbe(reply,'eroe',[14,62,0,-6]));break;
      case 48:
        check(list,'Due Avventurieri con campi coerenti',
          obj(loc('membro1'),{nome:'Aria',ruolo:'Maga',vita:80})&&
          obj(loc('membro2'),{nome:'Krag',ruolo:'Guerriero',vita:120}));
        check(list,'Classe Avventuriero con costruttore e campi',
          /\bclass\s+Avventuriero\s*:/.test(m)&&
-         /\bfunc\s+_init\s*\(\s*n\s*,\s*r\s*,\s*v\s*\)/.test(m)&&
+         /\bfunc\s+_init\s*\(\s*n(?:\s*:\s*String)?\s*,\s*r(?:\s*:\s*String)?\s*,\s*v(?:\s*:\s*int)?\s*\)/.test(m)&&
          /\bself\.nome\s*=\s*n\b/.test(m)&&/\bself\.ruolo\s*=\s*r\b/.test(m)&&
          /\bself\.vita\s*=\s*v\b/.test(m));
        check(list,'vita_totale calcolata dalla somma dei membri',

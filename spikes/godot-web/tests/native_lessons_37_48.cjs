@@ -93,6 +93,25 @@ async function run(page,id,code){
     console.log('NATIVE_ALTERNATIVE_ACCEPTED '+id);
   }
 
+  // Equivalent class methods / typed constructors, backed by real Godot
+  // object instances and mutation probes rather than only exact source text.
+  const advancedClasses=[
+    [45,'extends Node\nclass Pozione:\n    var nome: String\n    var cura: int\n    func _init(n: String, c: int):\n        self.nome = n\n        self.cura = c\nfunc _ready():\n    var elisir = Pozione.new("Elisir",50)\n    print("Pozione creata: ",elisir.nome," (Cura: ",elisir.cura,")")'],
+    [47,'extends Node\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n,a):\n        self.nome=n\n        self.attacco=a\n    func colpo_caricato():\n        return self.attacco + self.attacco\nfunc _ready():\n    var eroe=Personaggio.new("Eroe",25)\n    print("Danno colpo caricato: ",eroe.colpo_caricato())'],
+    [48,'extends Node\nclass Avventuriero:\n    var nome: String\n    var ruolo: String\n    var vita: int\n    func _init(n: String, r: String, v: int):\n        self.nome = n\n        self.ruolo = r\n        self.vita = v\nfunc _ready():\n    var membro1 = Avventuriero.new("Aria","Maga",80)\n    var membro2 = Avventuriero.new("Krag","Guerriero",120)\n    var vita_totale = membro1.vita + membro2.vita\n    print("Membro 1: ",membro1.nome," (",membro1.ruolo,")")\n    print("Membro 2: ",membro2.nome," (",membro2.ruolo,")")\n    print("Salute totale party: ",vita_totale)']
+  ];
+  for(const [id,source] of advancedClasses){
+    const r=await run(page,id,source);
+    assert.equal(r.raw.status,'executed','Typed/semantic class source must run '+id);
+    assert.equal(r.feedback.passed,true,'Legitimate class alternative rejected '+id+': '+JSON.stringify(r.feedback));
+    console.log('NATIVE_ADVANCED_CLASS_ALTERNATIVE_PASS '+id);
+  }
+  const classTrick='extends Node\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n,a):\n        self.nome=n\n        self.attacco=a\n    func colpo_caricato():\n        return self.attacco * 2 if self.attacco >= 0 else 0\nfunc _ready():\n    var eroe=Personaggio.new("Eroe",25)\n    print("Danno colpo caricato: ",eroe.colpo_caricato())';
+  const tr=await run(page,47,classTrick);
+  assert.equal(tr.raw.status,'executed');
+  assert.equal(tr.feedback.passed,false,'Negative-attack behavior must be rejected');
+  console.log('NATIVE_ADVANCED_CLASS_BYPASS_REJECTED 47');
+
   await page.screenshot({path:path.join(output,'native-37-48-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-37-48-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){
