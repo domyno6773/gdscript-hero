@@ -36,6 +36,8 @@ async function smoke(browser,url,width){
  assert.equal(response.status(),200);
  await page.waitForFunction(()=>!!window.App&&!!window.LESSONS_DATA&&!document.getElementById('view-roadmap').classList.contains('hidden'));
  assert.equal(await page.evaluate(()=>LESSONS_DATA.length),60);
+ assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
+ assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
  if(width>820 && process.env.E2E_SCREENSHOTS==='1'){
    const dir=path.join(root,'test-artifacts');fs.mkdirSync(dir,{recursive:true});
