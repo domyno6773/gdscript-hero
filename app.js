@@ -2708,7 +2708,7 @@ const App = {
 
     toggleManualExerciseTools() {
         SoundFX.playClick();
-        const lesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId) || LESSONS_DATA[0];
+        const lesson = this.getCurrentActiveLessonOrVariant() || LESSONS_DATA[0];
         
         // Se attualmente visibili, nascondi; se nascosti, mostra
         const validationGrid = document.getElementById('exercise-validation-grid');
@@ -3999,11 +3999,15 @@ const App = {
 
         document.getElementById('btn-reset-code').onclick = () => {
             SoundFX.playClick();
-            const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
-            if (currentLesson && confirm("Vuoi ripristinare il codice iniziale e la scena di questo livello?")) {
-                document.getElementById('code-editor').value = currentLesson.initialCode;
+            const currentLesson = this.getCurrentActiveLessonOrVariant();
+            if (currentLesson && confirm("Vuoi ripristinare il codice iniziale e la scena di questo esercizio?")) {
+                document.getElementById('code-editor').value =
+                    this.isReviewMode ? currentLesson.starterCode : currentLesson.initialCode;
                 this.updateLineNumbers();
-                delete this.state.userCode[this.state.currentLessonId];
+                if (!this.isReviewMode) {
+                    delete this.state.userCode[this.state.currentLessonId];
+                    this.saveStorage();
+                }
                 if (currentLesson.initialNodes && Array.isArray(currentLesson.initialNodes) && window.GDScriptRuntime) {
                     this.currentScene = GDScriptRuntime.buildScene(currentLesson);
                 } else if (window.GD_Node) {
@@ -4012,7 +4016,9 @@ const App = {
                 this.selectedSceneNode = null;
                 this.renderSceneDock();
                 this.renderViewportOverlay();
-                this.saveStorage();
+                this.resetExerciseFeedback();
+                document.getElementById('test-results-view').replaceChildren();
+                document.getElementById('test-status-badge').textContent = 'In attesa di verifica';
             }
         };
 
@@ -4153,6 +4159,10 @@ const App = {
         document.getElementById('btn-modal-next').onclick = () => {
             SoundFX.playClick();
             document.getElementById('success-modal').classList.add('hidden');
+            if (this.isReviewMode) {
+                this.exitReviewMode();
+                return;
+            }
             const nextId = this.state.currentLessonId + 1;
             const nextLesson = LESSONS_DATA.find(l => l.id === nextId);
 
@@ -4168,7 +4178,7 @@ const App = {
             SoundFX.playClick();
             document.getElementById('success-modal').classList.add('hidden');
             const nextBtnHeader = document.getElementById('btn-header-next');
-            if (nextBtnHeader) nextBtnHeader.classList.remove('hidden');
+            if (nextBtnHeader && !this.isReviewMode) nextBtnHeader.classList.remove('hidden');
         };
 
         const btnModalStay = document.getElementById('btn-modal-stay');
@@ -4181,6 +4191,7 @@ const App = {
         if (btnHeaderNext) {
             btnHeaderNext.onclick = () => {
                 SoundFX.playClick();
+                if (this.isReviewMode) return this.exitReviewMode();
                 const nextId = this.state.currentLessonId + 1;
                 const nextLesson = LESSONS_DATA.find(l => l.id === nextId);
                 if (nextLesson) {
@@ -4196,6 +4207,7 @@ const App = {
         if (btnHeaderPrev) {
             btnHeaderPrev.onclick = () => {
                 SoundFX.playClick();
+                if (this.isReviewMode) return this.exitReviewMode();
                 const prevId = this.state.currentLessonId - 1;
                 const prevLesson = LESSONS_DATA.find(l => l.id === prevId);
                 if (prevLesson) {
@@ -4410,11 +4422,19 @@ const App = {
         const btnRevealSolution = document.getElementById('btn-reveal-solution');
         if (btnRevealSolution) {
             btnRevealSolution.onclick = () => {
-                const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+                const currentLesson = this.getCurrentActiveLessonOrVariant();
                 if (!currentLesson) return;
                 if (confirm("Vuoi visualizzare la soluzione completa?")) {
                     SoundFX.playHint();
-                    this.recordHintOpened(this.state.currentLessonId, 3);
+                    if (this.isReviewMode && this.currentReviewVariant) {
+                        if (typeof ReviewEngine !== 'undefined') {
+                            ReviewEngine.recordVariantHintOpened(
+                                this.currentReviewVariant.id, currentLesson.hints.length, this.state);
+                        }
+                        this.state.hintsRevealed = currentLesson.hints.length;
+                    } else {
+                        this.recordHintOpened(this.state.currentLessonId, 3);
+                    }
                     document.getElementById('code-editor').value = currentLesson.solution;
                     this.updateLineNumbers();
                 }
@@ -4475,6 +4495,8 @@ const App = {
                 execScene = this.currentScene;
             }
             const result = await GDScriptRuntime.execute(code, { initialScene: execScene, lesson: variant });
+            if (!this.isReviewMode || this.currentReviewVariant !== variant ||
+                document.getElementById('code-editor').value !== code) return;
 
             const realOutputPre = document.getElementById('real-output-pre');
             if (result.logs && result.logs.length > 0) {
@@ -4492,7 +4514,9 @@ const App = {
             expectedOutputPre.innerText = variant.expectedOutput || "// Nessun output richiesto";
 
             const tests = await variant.validate(result, GDScriptRuntime);
-            const allPassed = tests.every(t => t.passed);
+            if (!this.isReviewMode || this.currentReviewVariant !== variant ||
+                document.getElementById('code-editor').value !== code) return;
+            const allPassed = tests.length > 0 && tests.every(t => t.passed);
             this.showExerciseFeedback(result, tests);
 
             const isFirstTime = !(this.state.reviewProgress && Array.isArray(this.state.reviewProgress.completedVariants) && this.state.reviewProgress.completedVariants.includes(variant.id));
