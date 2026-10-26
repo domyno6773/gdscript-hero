@@ -6,6 +6,7 @@
     <title>GDScript Hero - Impara GDScript e Godot 4</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="exercise-redesign.css">
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -287,7 +288,10 @@
 
                 <div class="editor-wrapper">
                     <div class="line-numbers" id="line-numbers">1</div>
-                    <textarea id="code-editor" spellcheck="false" placeholder="Scrivi qui il tuo codice GDScript..."></textarea>
+                    <div class="gdscript-edit-stack">
+                        <pre class="gdscript-highlight" id="gdscript-highlight" aria-hidden="true"><code id="gdscript-syntax-layer"></code></pre>
+                        <textarea id="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="Scrivi qui il tuo codice GDScript..." aria-label="Editor di codice GDScript"></textarea>
+                    </div>
                     
                     <!-- Autocomplete popup contestuale -->
                     <div id="autocomplete-popup" class="autocomplete-popup hidden"></div>
@@ -1899,6 +1903,7 @@
     <script src="viewport2d.js"></script>
     <script src="auth.js"></script>
     <script src="stats.js"></script>
+    <script src="gdscript-highlighter.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
