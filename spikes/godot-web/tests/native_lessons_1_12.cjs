@@ -70,6 +70,22 @@ async function run(page,id,code){
    results.push({id,bypassRejected:true,failed:r.feedback.checks.filter(c=>!c.passed).map(c=>c.desc)});
    console.log('NATIVE_BYPASS_REJECTED '+id);
   }
+  // Varianti semanticamente corrette: il validatore non deve accettare solo la soluzione modello.
+  const validAlternatives=[
+    [1,"func _ready():\n    print('Ciao Godot!')\n"],
+    [2,'func _ready():\n    # Il mio primo commento\n    print("Benvenuto nel gioco")\n'],
+    [3,'func _ready():\n    var numero: int = 1\n    print("Livello")\n    print(numero)\n'],
+    [5,'func _ready():\n    var nome: String = "Eroe"\n    print(nome)\n'],
+    [10,'func _ready():\n    var vita: int = 60 + 40\n    print(vita)\n'],
+    [11,'const GRAVITA: float = 9.8\nfunc _ready():\n    print(GRAVITA)\n']
+  ];
+  for (const [id,source] of validAlternatives){
+    const r=await run(page,id,source);
+    assert.equal(r.feedback.passed,true,'Legitimate alternative rejected in lesson '+id+': '+JSON.stringify(r));
+    results.push({id,alternativeAccepted:true});
+    console.log('NATIVE_ALTERNATIVE_ACCEPTED '+id);
+  }
+
   await page.screenshot({path:path.join(output,'native-12-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-12-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){
