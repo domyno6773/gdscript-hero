@@ -179,12 +179,24 @@
     }
   };
 
+  const nativeVerdictLabels=Object.freeze({
+    accepted:'Soluzione corretta',
+    requirements_not_met:'Obiettivo non raggiunto',
+    invalid_code:'Errore nel codice',
+    inconclusive:'Verifica non conclusiva',
+    timeout:'Tempo di esecuzione scaduto'
+  });
   const showMainFeedback=(report,lesson,original)=>{
     const output=element('real-output-pre');
     const expected=element('expected-output-pre');
     const badge=element('test-status-badge');
     const results=element('test-results-view');
     const checks=Array.isArray(report.feedback?.checks)?report.feedback.checks:[];
+    const accepted=report.feedback.verdict==='accepted';
+    const verdictLabel=nativeVerdictLabels[report.feedback.verdict]||'Verifica non completata';
+    const firstFailure=checks.find(check=>!check.passed);
+    const engineError=String(original?.stderr||'').split(/\r?\n/).map(line=>line.trim())
+      .find(Boolean)?.slice(0,260);
     if(output){
       output.textContent=(original?.stdout||'').trim() ||
         (original?.stderr?('// Errore Godot: '+original.stderr.trim()):
@@ -193,9 +205,9 @@
     }
     if(expected)expected.textContent=lesson.expectedOutput||'// Nessun output richiesto';
     if(badge){
-      badge.textContent='Godot (PROVA): '+report.feedback.verdict+
+      badge.textContent='Godot (PROVA): '+verdictLabel+
         ' — nessun XP o progresso';
-      badge.style.color=report.feedback.verdict==='accepted'?'#10b981':'#f59e0b';
+      badge.style.color=accepted?'#10b981':'#f59e0b';
     }
     if(results){
       results.replaceChildren();
@@ -224,16 +236,33 @@
     }
     const mainArea=element('exercise-primary-feedback');
     if(mainArea)mainArea.dataset.state=
-      report.feedback.verdict==='accepted'?'success':'error';
+      accepted?'success':'error';
     const title=element('exercise-feedback-title');
-    if(title)title.textContent=report.feedback.verdict==='accepted'?
-      'Godot: verifiche superate (solo prova)': 'Godot: '+report.feedback.verdict;
+    if(title)title.textContent=accepted?
+      'Godot: esercizio superato (solo prova)': 'Godot: '+verdictLabel;
     const description=element('exercise-feedback-description');
-    if(description)description.textContent=report.feedback.reason ||
-      (report.feedback.verdict==='accepted'
-        ? 'Codice accettato dal laboratorio nativo. Non vengono assegnati progressi.'
-        : checks.find(c=>!c.passed)?.diff || checks.find(c=>!c.passed)?.desc ||
-          'Esecuzione non completata.');
+    if(description){
+      if(accepted){
+        description.textContent='Il codice soddisfa le richieste della lezione. Nessun progresso viene salvato in Beta.';
+      }else if(report.feedback.verdict==='invalid_code'){
+        description.textContent='Godot ha rilevato un errore nel codice.'+
+          (engineError?' Dettaglio: '+engineError:' Controlla il pannello Errori per i dettagli.');
+      }else if(report.feedback.verdict==='requirements_not_met'){
+        description.textContent=firstFailure?
+          'Da controllare: '+String(firstFailure.desc||'requisito non soddisfatto').slice(0,300)+
+          '. Consulta le verifiche qui sotto per i dettagli.':
+          'Il codice è stato eseguito, ma non soddisfa tutte le richieste della lezione.';
+      }else if(report.feedback.verdict==='inconclusive'){
+        description.textContent='Non è stato possibile stabilire se il codice è corretto. '+
+          String(report.feedback.reason||'Riprova la verifica.').slice(0,300);
+      }else if(report.feedback.verdict==='timeout'){
+        description.textContent='La verifica ha superato il tempo disponibile. '+
+          'Potrebbe esserci un ciclo infinito o un problema temporaneo del motore Beta.';
+      }else{
+        description.textContent=String(report.feedback.reason||
+          firstFailure?.desc||'Esecuzione non completata.').slice(0,300);
+      }
+    }
     const testCount=element('exercise-test-count');
     if(testCount)testCount.textContent=checks.filter(c=>c.passed).length+
       ' di '+checks.length+' verifiche native — senza XP';
@@ -244,7 +273,7 @@
       nativeStatus:original?.reply?.status,scene:original?.reply?.scene||{},
       notice:'Risultati locali non attendibili per progressi.'
     },null,2));
-    setStatus('Godot: '+report.feedback.verdict+
+    setStatus('Godot: '+verdictLabel+
       ' — prova nel pulsante Verifica, nessun progresso salvato');
   };
   const verifyFromMain=async app=>{
