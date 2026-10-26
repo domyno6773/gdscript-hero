@@ -56,6 +56,8 @@ jobs:
         run: timeout 110s node spikes/godot-web/tests/native_lessons_1_12.cjs
       - name: Validate native lessons 13-24 including branching and arrays
         run: timeout 130s node spikes/godot-web/tests/native_lessons_13_24.cjs
+      - name: Validate Godot native lessons 25-36 including loops, functions and Vector2
+        run: timeout 140s node spikes/godot-web/tests/native_lessons_25_36.cjs
       - name: Upload screenshots + browser results
         if: always()
         uses: actions/upload-artifact@v4
