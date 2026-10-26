@@ -62,7 +62,8 @@
  const linesEqual=(out,expected)=>eq(logs(out||''),expected);
  const scenarioOk=(all,key,expected)=>{
    const x=all && all[key];
-   return Boolean(x&&x.reply&&x.reply.status==='executed'&&linesEqual(x.stdout,expected));
+   return Boolean(x&&x.reply&&x.reply.status==='executed'&&
+     !String(x.stderr||'').trim()&&linesEqual(x.stdout,expected));
  };
  const localsArray=(s,name,values)=>Array.isArray(s[name])&&eq(s[name],values);
  const rightPrint=(masked,name,index)=>new RegExp('\\bprint\\s*\\(\\s*'+escape(name)+'\\s*\\[\\s*'+index+'\\s*\\]\\s*\\)').test(masked);
