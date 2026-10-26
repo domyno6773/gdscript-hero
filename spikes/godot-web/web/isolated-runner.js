@@ -38,10 +38,19 @@
             !Array.isArray(c.args) || c.args.length>5 || c.args.some(a=>a!==null&&
               !['number','boolean','string'].includes(typeof a))))) ||
        (m.locals !== undefined && (!Array.isArray(m.locals) || m.locals.length>20 || m.locals.some(x=>typeof x!=='string'||!/^[A-Za-z_]\w{0,59}$/.test(x)))) ||
+       (m.emissions !== undefined && (!Array.isArray(m.emissions) || m.emissions.length>6 ||
+          m.emissions.some(x=>!x || typeof x.signal!=='string' || !/^[A-Za-z_]\w{0,59}$/.test(x.signal) ||
+            !Array.isArray(x.args) || x.args.length>5 ||
+            x.args.some(arg=>arg!==null && !['string','number','boolean'].includes(typeof arg))))) ||
+       (m.objectCalls !== undefined && (!Array.isArray(m.objectCalls) || m.objectCalls.length>8 ||
+          m.objectCalls.some(x=>!x || typeof x.variable!=='string' ||
+            !/^[A-Za-z_]\w{0,59}$/.test(x.variable) || typeof x.method!=='string' ||
+            !/^[A-Za-z_]\w{0,59}$/.test(x.method) || !Array.isArray(x.args) || x.args.length>5 ||
+            !x.set || typeof x.set!=='object' || Array.isArray(x.set)))) ||
        m.inspect.some(x=>typeof x!=='string'|| x.length>60))return;
     pending=m.id;
     stdout=''; stderr='';
-    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[]})); }
+    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[],emissions:m.emissions||[],objectCalls:m.objectCalls||[]})); }
     catch(e) { append('stderr',String(e));window.gdhResult(JSON.stringify({status:'bridge_error'})); }
   });
   if (typeof Engine !== 'function') { notify({type:'error',message:'Export Godot mancante'}); return; }
