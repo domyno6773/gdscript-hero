@@ -82,7 +82,7 @@ async function preview(page,status){
   await ordinary.context.close();
   console.log('INTEGRATION_DEFAULT_INERT_PASS');
   const {context,page}=await contextPage(browser,host+'/index.html?nativeGodotPreview=1');
-  await page.waitForSelector('#gdh-native-preview-button',{timeout:15000});
+  await page.waitForSelector('#gdh-native-preview-button',{state:'attached',timeout:15000});
   assert.equal(await page.locator('#gdh-native-preview-runner').count(),0,'WASM must load lazily');
   assert.equal(await page.locator('#btn-run-code').count(),1,'Original verification button is retained');
   assert.equal(await page.evaluate(()=>window.__GDHNativePreview.enabled),true);
