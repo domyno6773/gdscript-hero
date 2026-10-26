@@ -201,6 +201,31 @@ async function smoke(browser,url,width){
    assert.ok(snap.back.includes('Palestra'),'Review back navigation wrong '+id);
    assert.ok(snap.baseDraft.includes('BOZZA_SOLO_CORSO'),'Course draft overwritten '+id);
  }
+ // Audit end-to-end delle soluzioni ufficiali con Godot WASM reale.
+ // Un solo desktop evita di eseguire due volte le 17 varianti su mobile.
+ if(width>820){
+   const nativeAudit=await page.evaluate(async()=>{
+     const results=[];
+     for(const v of REVIEW_VARIANTS){
+       try {
+         const initialScene=v.initialNodes?.length?GDScriptRuntime.buildScene(v):null;
+         const result=await GDScriptRuntime.execute(v.solution,{lesson:v,initialScene});
+         const checks=await v.validate(result,GDScriptRuntime);
+         results.push({
+           id:v.id,accepted:result.success&&checks.length>0&&checks.every(t=>t.passed),
+           nativeStatus:result.native?.status||null,error:result.error||null,
+           scene:result.scene?true:false,
+           checks:checks.filter(t=>!t.passed).map(t=>({desc:t.desc,diff:t.diff})).slice(0,8)
+         });
+       }catch(error){results.push({id:v.id,accepted:false,error:String(error)});}
+     }
+     return results;
+   });
+   console.log('REVIEW_NATIVE_AUDIT '+JSON.stringify(nativeAudit));
+   assert.equal(nativeAudit.length,17,'Native review audit did not cover all variants');
+   assert.ok(nativeAudit.every(x=>x.accepted),
+     'Godot rejected official review solutions: '+nativeAudit.filter(x=>!x.accepted).map(x=>x.id).join(', '));
+ }
  // Digitazione, Ripristina e Mostra soluzione agiscono soltanto sulla variante.
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
  await page.locator('#code-editor').fill('extends Node\\nfunc _ready():\\n    print("SOLO_RIPASSO")');
