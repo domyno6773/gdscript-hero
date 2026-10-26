@@ -47,6 +47,8 @@ async function run(page,id,code){
    const failed=r.feedback.checks.filter(c=>!c.passed);
    assert.equal(r.raw.status,'executed','Native execution failed lesson '+id);
    assert.equal(r.feedback.passed,true,'Official lesson '+id+' failed native grading: '+JSON.stringify({failed,raw:r.raw,stdout:r.stdout}));
+   assert.equal(r.feedback.verdict,'accepted','Missing accepted verdict on scene lesson '+id);
+   assert.equal(r.feedback.demoOnly,true,'Scene grading must be demo-only');
    
    results.push({id,positive:true,stdout:r.stdout,locals:r.raw.locals});
    console.log('NATIVE_LESSON_PASS '+id+' '+JSON.stringify({capture:r.raw.localCapture,stdout:r.stdout}));
@@ -117,6 +119,17 @@ async function run(page,id,code){
   assert.equal(damaged.feedback.passed,false,'Hidden low-money engine error must not pass');
   assert.ok(damaged.feedback.checks.some(c=>c.desc.includes('monete = 20')&&!c.passed));
   console.log('NATIVE_SCENE_HIDDEN_LOW_FUNDS_ERROR_REJECTED');
+
+  // If a native behavioral probe is missing, valid GDScript is inconclusive,
+  // not a confirmed failed requirement.
+  const missingProbe=await page.evaluate(()=>{
+    const lesson=window.GDHLessonLab.get(60);
+    return window.GDHLessonLab.grade(60,lesson.solution,{status:'executed'},'', '',{});
+  });
+  assert.equal(missingProbe.verdict,'inconclusive');
+  assert.equal(missingProbe.passed,false);
+  assert.equal(missingProbe.demoOnly,true);
+  console.log('NATIVE_SCENE_MISSING_PROBE_INCONCLUSIVE');
 
   await page.screenshot({path:path.join(output,'native-49-60-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-49-60-lessons.json'),JSON.stringify(results,null,2));

@@ -550,6 +550,21 @@
          eq(lines,['Membro 1: Aria (Maga)','Membro 2: Krag (Guerriero)','Salute totale party: 200']));break;
      default:check(list,'Non supportato',false);
    }
+   const needs={
+     17:['below','above'],18:['no_key','open_door'],19:['alive','negative'],
+     20:['low_energy','threshold50','no_relic','key_instead'],
+     25:['range4'],26:['other_enemies','no_enemies'],27:['start2','start0'],
+     28:['two_enemies','one_enemy'],34:['speed70'],36:['station_moved','position_moved']
+   };
+   const missing=(needs[id]||[]).filter(key=>!scenarioResults?.[key] ||
+     ['compile_error','unsupported','rejected'].includes(scenarioResults[key].reply?.status));
+   if(missing.length){
+     check(list,'Prove di comportamento disponibili',false);
+     return {id,passed:false,verdict:'inconclusive',checks:list,demoOnly:true,
+       nativeStatus:reply?.status,localCapture:reply?.localCapture,
+       reason:'Impossibile eseguire le prove native: '+missing.join(', '),
+       warning:'La diagnostica non assegna XP o progressi.'};
+   }
    const passed=list.every(x=>x.passed);
    return{id,passed,verdict:passed?'accepted':'requirements_not_met',checks:list,demoOnly:true,
      nativeStatus:reply?.status,localCapture:reply?.localCapture,

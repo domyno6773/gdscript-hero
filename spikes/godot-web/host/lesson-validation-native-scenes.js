@@ -135,8 +135,16 @@
             'Bottega Aperta','Pozione Acquistata!','Pozione Acquistata!',
             'Pozione Acquistata!','Pozione Acquistata!','Oro Insufficiente!']));break;
     }
-    return {id,passed:checks.every(x=>x.passed),checks,nativeStatus:reply?.status,
-      demoOnly:true,warning:'Validazione locale non attendibile per progressi, XP o accessi Premium.'};
+    const missing=id===55?(!steps.two_clicks?['two_clicks']:[]):
+      id===60?['low_money','five_clicks'].filter(key=>!steps[key]):[];
+    if(missing.length)add('Scenari di interazione disponibili',false);
+    const engineError=reply?.status!=='executed'||Boolean(String(stderr||'').trim());
+    const passed=!engineError&&!missing.length&&checks.every(x=>x.passed);
+    const verdict=engineError?'invalid_code':missing.length?'inconclusive':
+      passed?'accepted':'requirements_not_met';
+    return {id,passed,verdict,checks,nativeStatus:reply?.status,demoOnly:true,
+      reason:missing.length?'Impossibile generare le prove native: '+missing.join(', '):undefined,
+      warning:'Validazione locale non attendibile per progressi, XP o accessi Premium.'};
   }
   root.GDHLessonLab=Object.freeze({...base,grade,scenarios});
 })(window);

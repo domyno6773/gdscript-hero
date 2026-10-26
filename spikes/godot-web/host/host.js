@@ -64,7 +64,9 @@
         byId('result').textContent = JSON.stringify({id, status:'timeout', reset:true},null,2);
         if (document.getElementById('grade')) {
           document.getElementById('grade').textContent = JSON.stringify({
-            passed:false,reason:'Timeout in '+step.key+', nessuna validazione'
+            id:active.lesson?.id||null,passed:false,verdict:'timeout',demoOnly:true,
+            reason:'Timeout in '+step.key+', nessuna validazione',
+            warning:'Il timeout non può assegnare XP o completamenti.'
           });
         }
         reset('Timeout, contesto precedente eliminato');
