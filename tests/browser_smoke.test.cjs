@@ -130,6 +130,19 @@ async function smoke(browser,url,width){
  assert.ok(contrast>=4.5,'Sandbox editor text contrast below WCAG AA: '+contrast);
  assert.ok(await page.locator('#sandbox-gdscript-syntax-layer .gd-token-keyword').count()>0,
    'Sandbox editor does not highlight GDScript keywords');
+ const lightContrast=await page.evaluate(()=>{
+   document.documentElement.setAttribute('data-theme','light');
+   const text=getComputedStyle(document.getElementById('sandbox-gdscript-highlight')).color;
+   const bg=getComputedStyle(document.querySelector('#view-practice .gdscript-edit-stack')).backgroundColor;
+   const rgb=str=>(str.match(/\\d+(?:\\.\\d+)?/g)||[]).slice(0,3).map(Number);
+   const lum=str=>rgb(str).map(v=>{
+     const x=v/255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4;
+   }).reduce((a,b,i)=>a+b*[.2126,.7152,.0722][i],0);
+   const a=lum(text),b=lum(bg);
+   return (Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+ });
+ assert.ok(lightContrast>=4.5,'Sandbox light-theme editor text contrast below WCAG AA: '+lightContrast);
+ await page.evaluate(()=>document.documentElement.setAttribute('data-theme','dark'));
  // Anche nel rendering della scena, un nome nodo non deve trasformarsi in HTML attivo.
  await page.evaluate(()=>{
    const current=App.getActiveSandboxProject();
