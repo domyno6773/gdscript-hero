@@ -22,8 +22,14 @@ async function viewIs(page,name){
 async function smoke(browser,url,width){
  const context=await browser.newContext({viewport:{width,height:844},locale:'it-IT'});
  const page=await context.newPage();
- const errors=[];
+ const errors=[],network=[];
  page.on('pageerror',e=>errors.push(String(e)));
+ page.on('requestfailed',request=>{
+   if(request.url().includes('/native/')) network.push({url:request.url(),failure:request.failure()});
+ });
+ page.on('response',response=>{
+   if(response.url().includes('/native/'))network.push({url:response.url(),status:response.status()});
+ });
  // Avoid external services and real Supabase accounts.
  await page.route(/^https:\/\//,r=>r.abort('blockedbyclient'));
  const response=await page.goto(url,{waitUntil:'load',timeout:30000});
@@ -69,7 +75,7 @@ async function smoke(browser,url,width){
      frame:document.getElementById('gdh-native-runner')?.src,
      scripts:[...document.querySelectorAll('script[src]')].slice(-4).map(x=>x.src)
    }));
-   throw new Error('Godot Sandbox smoke diagnostic: '+JSON.stringify({diagnostics,pageErrors:errors}));
+   throw new Error('Godot Sandbox smoke diagnostic: '+JSON.stringify({diagnostics,pageErrors:errors,network}));
  }
  // Anche nel rendering della scena, un nome nodo non deve trasformarsi in HTML attivo.
  await page.evaluate(()=>{
