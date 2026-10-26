@@ -109,7 +109,10 @@ func _with_local_capture(source: String, names: Array) -> String:
         if leading <= header_indent.length():
             insertion = i
             break
-    lines.insert(insertion, indentation + "get_parent().call(\"__gdh_record\", {" + ", ".join(pairs) + "})")
+    # Keep runtime diagnostics from injected observation separate as well.
+    lines.insert(insertion, indentation + 'get_parent().call("__gdh_phase", "instrumentation")')
+    lines.insert(insertion + 1, indentation + "get_parent().call(\"__gdh_record\", {" + ", ".join(pairs) + "})")
+    lines.insert(insertion + 2, indentation + 'get_parent().call("__gdh_phase", "execution")')
     return "\n".join(lines)
 
 # Scene native minime per le lezioni 49-60 (non simulazioni di Label, Button o Timer).
