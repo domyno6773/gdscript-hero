@@ -36,6 +36,18 @@ async function smoke(browser,url,width){
    await page.screenshot({path:path.join(dir,'roadmap-1440-global-theme.png'),fullPage:false});
  }
  assert.ok(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor==='rgb(27, 31, 38)'),'Godot global background must replace neon theme');
+ const roadmapStyle=await page.evaluate(()=>{
+   const active=document.querySelector('#view-roadmap .pulse-current');
+   const cta=document.querySelector('#view-roadmap .btn-hero-continue');
+   return {
+     nodeCount:document.querySelectorAll('#view-roadmap .node-item').length,
+     nodeAnimation:active?getComputedStyle(active).animationName:null,
+     buttonShadow:cta?getComputedStyle(cta).boxShadow:null
+   };
+ });
+ assert.ok(roadmapStyle.nodeCount>0,'Roadmap nodes must remain rendered');
+ if(roadmapStyle.nodeAnimation!==null)assert.equal(roadmapStyle.nodeAnimation,'none','Roadmap node must not pulsate with neon');
+ console.log('ROADMAP_STYLE '+JSON.stringify(roadmapStyle));
  for(const section of ['roadmap','practice','projects','review','stats']){
    const selector=width<821?'#mob-nav-'+section:'#nav-'+section+'-btn';
    await page.locator(selector).click({timeout:15000});
