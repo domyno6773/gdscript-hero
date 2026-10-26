@@ -55,6 +55,9 @@ jobs:
             echo "No binary changes"
           else
             git commit -m "build(native): publish Godot 4.4.1 WebAssembly for GitHub Pages"
+            # Godot export temporarily edits export_presets.cfg. Restore those
+            # uncommitted working-tree changes before rebasing the binary commit.
+            git reset --hard HEAD
             # During export other commits can land on main. Preserve both sets
             # of changes instead of failing with a non-fast-forward push.
             for attempt in 1 2 3; do
