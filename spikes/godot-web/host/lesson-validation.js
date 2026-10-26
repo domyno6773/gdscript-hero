@@ -102,6 +102,7 @@
    const m=clean(src),lines=logs(stdout),s=reply?.locals||{},list=[];
    const loc=name=>Object.prototype.hasOwnProperty.call(s,name)?s[name]:undefined;
    check(list,'Compilazione ed esecuzione tramite Godot nativo',reply?.status==='executed');
+   check(list,'Nessun errore segnalato dal motore Godot',!String(stderr||'').trim());
    if(lesson.locals.length)check(list,'Valori locali rilevati nella funzione _ready',reply?.localCapture==='instrumented');
    switch(id){
      case 1:
