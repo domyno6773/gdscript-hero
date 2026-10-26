@@ -22,4 +22,12 @@ jobs:
       - name: Check system Chrome
         run: google-chrome --version
       - name: Test guest mode in Chrome desktop/mobile
-        run: node tests/browser_smoke.test.cjs
+        run: E2E_SCREENSHOTS=1 node tests/browser_smoke.test.cjs
+      - name: Upload visual previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exercise-ui-screenshots
+          path: test-artifacts/*.png
+          if-no-files-found: ignore
+          retention-days: 14

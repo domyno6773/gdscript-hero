@@ -139,6 +139,14 @@ const App = {
         this.applyTheme(this.state.theme || 'dark');
         this.checkDailyQuestsReset();
         this.bindEvents();
+        // In mobile il comando Ripristina vive nella toolbar, senza affollare l'header.
+        document.getElementById('btn-mobile-reset-code')?.addEventListener('click', () => {
+            document.getElementById('btn-reset-code')?.click();
+        });
+        document.getElementById('btn-mobile-toggle-tools')?.addEventListener('click', () => {
+            document.getElementById('btn-toggle-extra-tools')?.click();
+        });
+        document.getElementById('code-editor')?.addEventListener('input', () => this.keepExerciseAtHorizontalOrigin());
         this.applyProfileUI();
         this.renderRoadmap();
         this.renderSidebarDailyQuests();
@@ -2835,7 +2843,7 @@ const App = {
                 <div id="lesson-theory" class="theory-body">${lesson.theory}</div>
                 <div class="task-box ${lesson.isDebugging ? 'debugging-task-box' : ''}">
                     <div class="task-header">
-                        <span class="target-icon">${lesson.isDebugging ? '🐛' : '🎯'}</span>
+                        <span class="target-icon" aria-hidden="true"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span>
                         <h3>${lesson.isDebugging ? 'Compito di Debugging:' : 'Il Tuo Obiettivo:'}</h3>
                     </div>
                     <div id="lesson-task" class="task-body">${lesson.task}</div>
@@ -2897,6 +2905,7 @@ const App = {
         `;
         document.getElementById('test-status-badge').innerText = '• Non verificato';
         document.getElementById('test-status-badge').style.color = '#94a3b8';
+        this.resetExerciseFeedback();
 
         const hintBox = document.getElementById('hint-box');
         if (hintBox) hintBox.classList.add('hidden');
@@ -3243,6 +3252,7 @@ const App = {
             numbers += i + '\n';
         }
         lineNums.innerText = numbers;
+        window.GDScriptHighlighter?.sync();
     },
 
     // ==========================================
@@ -3509,6 +3519,59 @@ const App = {
         this.saveStorage();
     },
 
+    // Il dock rimane leggibile anche quando la lista dei test è molto lunga.
+    // L'errore più utile viene mostrato per primo, senza scorrere la pagina.
+    resetExerciseFeedback() {
+        this.keepExerciseAtHorizontalOrigin();
+        const area = document.getElementById('exercise-primary-feedback');
+        const title = document.getElementById('exercise-feedback-title');
+        const description = document.getElementById('exercise-feedback-description');
+        const count = document.getElementById('exercise-test-count');
+        const details = document.getElementById('exercise-test-details');
+        if (area) area.dataset.state = 'idle';
+        if (title) title.textContent = 'In attesa di verifica';
+        if (description) description.textContent = 'Scrivi il codice e premi Verifica il codice per controllare il risultato.';
+        if (count) count.textContent = 'Non ancora verificato';
+        if (details) details.open = false;
+    },
+
+    keepExerciseAtHorizontalOrigin() {
+        const exercise = document.getElementById('view-exercise');
+        if (exercise && !exercise.classList.contains('hidden')) {
+            // Chrome può spostare orizzontalmente BODY quando porta in vista
+            // il cursore di una riga molto lunga. Il codice deve invece
+            // scorrere soltanto dentro la textarea, mai tutta la pagina.
+            document.body.scrollLeft = 0;
+            document.documentElement.scrollLeft = 0;
+        }
+    },
+
+    showExerciseFeedback(result, tests) {
+        this.keepExerciseAtHorizontalOrigin();
+        const area = document.getElementById('exercise-primary-feedback');
+        const title = document.getElementById('exercise-feedback-title');
+        const description = document.getElementById('exercise-feedback-description');
+        const count = document.getElementById('exercise-test-count');
+        const details = document.getElementById('exercise-test-details');
+        if (!area || !title || !description) return;
+        const list = Array.isArray(tests) ? tests : [];
+        const passed = list.filter(test => test.passed).length;
+        const failed = list.find(test => !test.passed);
+        if (count) count.textContent = passed + ' di ' + list.length + ' superati';
+        if (details) details.open = false;
+        if (!failed && result?.success) {
+            area.dataset.state = 'success';
+            title.textContent = 'Ottimo! Tutti i controlli sono superati.';
+            description.textContent = 'Il codice produce il risultato richiesto. Puoi proseguire.';
+        } else {
+            area.dataset.state = 'error';
+            title.textContent = result?.error ? 'Errore di esecuzione' : 'Controlla il codice';
+            // Messaggi generati dal runtime/validatore: soltanto testo, mai HTML.
+            const message = failed?.diff || result?.error || failed?.desc || 'Almeno un controllo non è stato superato.';
+            description.textContent = String(message);
+        }
+    },
+
     async runAndValidate() {
         if (this.isValidating) return;
         this.isValidating = true;
@@ -3564,6 +3627,7 @@ const App = {
 
             const tests = await currentLesson.validate(result, GDScriptRuntime);
             const allPassed = tests.every(t => t.passed);
+            this.showExerciseFeedback(result, tests);
 
             // Registra telemetria P3.1 del tentativo di verifica
             this.recordLessonAttempt(currentLesson.id, result, tests, null, code);
@@ -4409,6 +4473,7 @@ const App = {
 
             const tests = await variant.validate(result, GDScriptRuntime);
             const allPassed = tests.every(t => t.passed);
+            this.showExerciseFeedback(result, tests);
 
             const isFirstTime = !(this.state.reviewProgress && Array.isArray(this.state.reviewProgress.completedVariants) && this.state.reviewProgress.completedVariants.includes(variant.id));
 
@@ -4759,6 +4824,7 @@ const App = {
         const badge = document.getElementById('test-status-badge');
         badge.innerText = "In attesa di verifica";
         badge.style.color = '#94a3b8';
+        this.resetExerciseFeedback();
 
         // Configura scena e strumenti contestuali per la variante (Scene Tree se richiesto)
         if (variant.initialNodes && Array.isArray(variant.initialNodes) && window.GDScriptRuntime) {

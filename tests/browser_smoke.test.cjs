@@ -31,6 +31,23 @@ async function smoke(browser,url,width){
  await page.waitForFunction(()=>!!window.App&&!!window.LESSONS_DATA&&!document.getElementById('view-roadmap').classList.contains('hidden'));
  assert.equal(await page.evaluate(()=>LESSONS_DATA.length),60);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
+ if(width>820 && process.env.E2E_SCREENSHOTS==='1'){
+   const dir=path.join(root,'test-artifacts');fs.mkdirSync(dir,{recursive:true});
+   await page.screenshot({path:path.join(dir,'roadmap-1440-global-theme.png'),fullPage:false});
+ }
+ assert.ok(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor==='rgb(27, 31, 38)'),'Godot global background must replace neon theme');
+ const roadmapStyle=await page.evaluate(()=>{
+   const active=document.querySelector('#view-roadmap .pulse-current');
+   const cta=document.querySelector('#view-roadmap .btn-hero-continue');
+   return {
+     nodeCount:document.querySelectorAll('#view-roadmap .node-item').length,
+     nodeAnimation:active?getComputedStyle(active).animationName:null,
+     buttonShadow:cta?getComputedStyle(cta).boxShadow:null
+   };
+ });
+ assert.ok(roadmapStyle.nodeCount>0,'Roadmap nodes must remain rendered');
+ if(roadmapStyle.nodeAnimation!==null)assert.equal(roadmapStyle.nodeAnimation,'none','Roadmap node must not pulsate with neon');
+ console.log('ROADMAP_STYLE '+JSON.stringify(roadmapStyle));
  for(const section of ['roadmap','practice','projects','review','stats']){
    const selector=width<821?'#mob-nav-'+section:'#nav-'+section+'-btn';
    await page.locator(selector).click({timeout:15000});
@@ -54,6 +71,67 @@ async function smoke(browser,url,width){
  await page.evaluate(()=>App.openLesson(1));
  await viewIs(page,'exercise');
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
+ assert.equal(await page.locator('#view-exercise .editor-header #btn-run-code').count(),1,'Verify button belongs to editor header');
+ assert.equal(await page.locator('#view-exercise .panel-lesson #expected-output-pre').count(),0,'Expected output must appear only in dock');
+ const initialGeometry=await page.evaluate(()=>{
+   const el=id=>document.getElementById(id).getBoundingClientRect();
+   const viewport=document.getElementById('exercise-viewport-col');
+   return {
+     feedbackAboveOutput:el('exercise-primary-feedback').top < el('expected-output-pre').top,
+     feedbackBeforeTests:el('exercise-primary-feedback').top < el('exercise-test-details').top,
+     viewportHidden:getComputedStyle(viewport).display==='none',
+     dockBottom:el('exercise-validation-panel').bottom,
+     buttonTop:el('btn-run-code').top,
+     expectedShown:getComputedStyle(document.getElementById('expected-output-pre')).display!=='none'
+   };
+ });
+ assert.ok(initialGeometry.feedbackAboveOutput&&initialGeometry.feedbackBeforeTests,'First feedback is above outputs and tests');
+ const outputLayout=await page.evaluate(()=>{
+   const el=document.querySelector('#view-exercise .output-comparison-grid');
+   const e=el.querySelector('.expected-box').getBoundingClientRect();
+   const o=el.querySelector('.real-box').getBoundingClientRect();
+   const style=getComputedStyle(el);
+   return {display:style.display,template:style.gridTemplateColumns,expected:{x:e.x,y:e.y,w:e.width},actual:{x:o.x,y:o.y,w:o.width}};
+ });
+ console.log('LAYOUT '+width+'px '+JSON.stringify(outputLayout));
+ assert.equal(outputLayout.display,'grid','Expected/actual must use CSS grid');
+ assert.ok(outputLayout.actual.x>outputLayout.expected.x+10,'Expected/actual must appear side-by-side');
+ const headerLayout=await page.evaluate(()=>{
+   const tab=document.querySelector('#view-exercise .editor-header .tab').getBoundingClientRect();
+   const run=document.getElementById('btn-run-code').getBoundingClientRect();
+   return {tabRight:tab.right,runLeft:run.left};
+ });
+ assert.ok(headerLayout.tabRight+4<headerLayout.runLeft,'Editor file tab and Verify must not overlap');
+ assert.ok(initialGeometry.viewportHidden,'Introductory lesson must not show scene or viewport');
+ assert.ok(initialGeometry.expectedShown,'Expected output must be visible before Verify');
+ if(width>820)assert.ok(initialGeometry.dockBottom<=844,'Desktop dock must remain visible without page scrolling');
+ if(process.env.E2E_SCREENSHOTS==='1'){
+   const dir=path.join(root,'test-artifacts');
+   fs.mkdirSync(dir,{recursive:true});
+   await page.screenshot({path:path.join(dir,'exercise-'+width+'-initial.png'),fullPage:false});
+ }
+ // Design acceptance: real colored GDScript tokens, no old neon theme.
+ const design=await page.evaluate(()=>{
+   const e=document.getElementById('code-editor');
+   const layer=document.getElementById('gdscript-syntax-layer');
+   const shell=document.querySelector('#view-exercise .panel-code');
+   const header=document.querySelector('body:has(#view-exercise:not(.hidden)) .navbar');
+   const tokens=layer?[...layer.querySelectorAll('[class^="gd-token-"]')]:[];
+   const getRGB=element=>getComputedStyle(element).backgroundColor;
+   return {
+      tokens:tokens.length,
+      comments:tokens.filter(x=>x.classList.contains('gd-token-comment')).length,
+      keywords:tokens.filter(x=>x.classList.contains('gd-token-keyword')).length,
+      editorColor:getRGB(shell),
+      navbarColor:header?getRGB(header):null,
+      syntaxLayerHeight:layer?layer.getBoundingClientRect().height:0,
+      inputTransparent:getComputedStyle(e).color
+   };
+ });
+ console.log('DESIGN '+width+'px '+JSON.stringify(design));
+ assert.ok(design.tokens>0 && design.keywords>0,'GDScript syntax must be highlighted');
+ assert.ok(design.syntaxLayerHeight>0,'Syntax layer must be rendered');
+ assert.ok(!design.navbarColor?.includes('0, 229, 255'),'Old neon header must not remain');
  const official=await page.evaluate(()=>LESSONS_DATA.find(l=>l.id===1).solution);
  await page.locator('#code-editor').fill(official);
  await page.locator('#btn-run-code').click({timeout:10000});
@@ -69,7 +147,47 @@ async function smoke(browser,url,width){
  await page.locator('#btn-run-code').click({timeout:10000});
  await page.waitForFunction(()=>!App.isValidating);
  assert.equal(await page.evaluate(()=>window.__auditXss||0),0,'XSS executed in validator');
+ const feedback=await page.evaluate(()=>({
+   state:document.getElementById('exercise-primary-feedback').dataset.state,
+   title:document.getElementById('exercise-feedback-title').textContent,
+   text:document.getElementById('exercise-feedback-description').textContent
+ }));
+ const viewportMetrics=await page.evaluate(()=>({
+   scrollX:window.scrollX,
+   scrollLeft:document.documentElement.scrollLeft,
+   visualOffsetLeft:window.visualViewport?.offsetLeft,
+   bodyScrollWidth:document.body.scrollWidth,
+   rootScrollWidth:document.documentElement.scrollWidth,
+   innerWidth:window.innerWidth,
+   codePanelLeft:document.querySelector('#view-exercise .panel-code').getBoundingClientRect().left,
+   workspaceLeft:document.getElementById('exercise-workspace-grid').getBoundingClientRect().left,
+   editorWidth:document.getElementById('code-editor').getBoundingClientRect().width,
+   editorScrollLeft:document.getElementById('code-editor').scrollLeft
+ }));
+ console.log('AFTER_ERROR_GEOMETRY '+width+'px '+JSON.stringify(viewportMetrics));
+ assert.equal(viewportMetrics.scrollX,0,'Root must not scroll horizontally');
+ assert.ok(viewportMetrics.codePanelLeft>=0,'Exercise workspace must not pan left after long output');
+ if(width<=820){
+   const ancestors=await page.evaluate(()=>{
+     const items=[];
+     let el=document.getElementById('code-editor');
+     while(el && items.length<15){
+       const st=getComputedStyle(el);
+       items.push({tag:el.tagName,id:el.id,cls:String(el.className).slice(0,55),scrollLeft:el.scrollLeft,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,overflowX:st.overflowX,rectLeft:Math.round(el.getBoundingClientRect().left)});
+       el=el.parentElement;
+     }
+     return items;
+   });
+   console.log('SCROLL_ANCESTORS '+JSON.stringify(ancestors));
+ }
+ assert.equal(feedback.state,'error','Failed verification must show the error on top of dock');
+ assert.ok(feedback.text.length>0,'Error summary must be present');
+ if(process.env.E2E_SCREENSHOTS==='1'){
+   await page.screenshot({path:path.join(root,'test-artifacts','exercise-'+width+'-error.png'),fullPage:false});
+ }
  assert.equal(await page.locator('#test-results-view img').count(),0,'HTML created from user output');
+ assert.equal(await page.locator('#gdscript-highlight img').count(),0,'Syntax highlighter must escape markup');
+ assert.ok(await page.locator('#gdscript-highlight .gd-token-string').count()>0,'String literal has a visible syntax token');
  await page.reload({waitUntil:'load'});
  await page.waitForFunction(()=>!!window.App&&App.state.finishedLessons.includes(1));
  assert.ok(await page.evaluate(()=>App.state.xp>0),'Progress lost on reload');
