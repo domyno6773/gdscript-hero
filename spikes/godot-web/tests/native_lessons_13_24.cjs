@@ -101,6 +101,17 @@ async function run(page,id,code){
     console.log('NATIVE_IDIOMATIC_ALTERNATIVE_PASS '+id);
   }
 
+  // The base case looks right. The altered level=9 branch is silent BUT emits
+  // a native error: scenario grading must not count it as a passing branch.
+  const brokenScenario='func _ready():\n    var livello = 10\n    if livello >= 10:\n        print("Livello raggiunto!")\n    else:\n        push_error("GDH_EXPECTED_BRANCH_ERROR")';
+  const branch=await run(page,17,brokenScenario);
+  assert.equal(branch.raw.status,'executed');
+  assert.equal(branch.stdout.trim(),'Livello raggiunto!');
+  assert.equal(branch.feedback.passed,false,
+    'Correct default output cannot hide a Godot error in mutated scenario');
+  assert.equal(branch.feedback.checks.find(x=>x.desc.includes('livello 9'))?.passed,false);
+  console.log('NATIVE_SCENARIO_ENGINE_ERROR_REJECTED');
+
   await page.screenshot({path:path.join(output,'native-13-24-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-13-24-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){
