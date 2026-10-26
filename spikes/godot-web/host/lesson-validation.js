@@ -101,7 +101,16 @@
  // to avoid injecting a variable-capture instruction into the submitted code.
  // For other solutions, preserve the existing optional capture path.
  const directSourceProof=(id,src)=>{
-   const m=clean(src), raw=noCommentLines(src);
+   // Examine _ready only: declarations or print() statements in never-called
+   // functions must not provide evidence for the execution under test.
+   const ready=fn(src,'_ready');
+   if(!ready)return false;
+   const m=clean(ready), raw=noCommentLines(ready);
+   // If a source contains extra print sites, do not trust a superficial
+   // combination of an unused print(variable) with a hardcoded actual output.
+   // Fall back to native local observation rather than accepting it directly.
+   const expectedPrints={5:1,6:2,9:2,13:2,17:1,18:1,19:2,20:1,26:1,27:1,28:2}[id];
+   if(expectedPrints!==undefined && (m.match(/\bprint\s*\(/g)||[]).length!==expectedPrints)return false;
    const literal=(name,type,value)=>{
      const annotation=type?'(?:\\s*:\\s*'+type+')?':'';
      return new RegExp('\\bvar\\s+'+name+annotation+'\\s*=\\s*["\\x27]'+value+'["\\x27](?=\\s*(?:$|#|;|,))','m').test(raw);
@@ -124,7 +133,7 @@
    // we can avoid injecting a tail into _ready() altogether.
    // Not a general-purpose GDScript parser: anything outside this narrow form
    // falls back to optional local observation and can remain inconclusive.
-   const body=fn(src,'_ready');
+   const body=ready;
    const seed=(name,pattern)=>{
      const typed='(?:\\s*:\\s*(?:[A-Za-z_]\\w*|Array\\s*\\[\\s*String\\s*\\]))?';
      const re=new RegExp('(?:^|\\n)[ \\t]+var\\s+'+escape(name)+typed+
