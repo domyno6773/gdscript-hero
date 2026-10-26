@@ -31,6 +31,11 @@ async function smoke(browser,url,width){
  await page.waitForFunction(()=>!!window.App&&!!window.LESSONS_DATA&&!document.getElementById('view-roadmap').classList.contains('hidden'));
  assert.equal(await page.evaluate(()=>LESSONS_DATA.length),60);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
+ if(width>820 && process.env.E2E_SCREENSHOTS==='1'){
+   const dir=path.join(root,'test-artifacts');fs.mkdirSync(dir,{recursive:true});
+   await page.screenshot({path:path.join(dir,'roadmap-1440-global-theme.png'),fullPage:false});
+ }
+ assert.ok(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor==='rgb(27, 31, 38)'),'Godot global background must replace neon theme');
  for(const section of ['roadmap','practice','projects','review','stats']){
    const selector=width<821?'#mob-nav-'+section:'#nav-'+section+'-btn';
    await page.locator(selector).click({timeout:15000});
@@ -169,6 +174,8 @@ async function smoke(browser,url,width){
    await page.screenshot({path:path.join(root,'test-artifacts','exercise-'+width+'-error.png'),fullPage:false});
  }
  assert.equal(await page.locator('#test-results-view img').count(),0,'HTML created from user output');
+ assert.equal(await page.locator('#gdscript-highlight img').count(),0,'Syntax highlighter must escape markup');
+ assert.ok(await page.locator('#gdscript-highlight .gd-token-string').count()>0,'String literal has a visible syntax token');
  await page.reload({waitUntil:'load'});
  await page.waitForFunction(()=>!!window.App&&App.state.finishedLessons.includes(1));
  assert.ok(await page.evaluate(()=>App.state.xp>0),'Progress lost on reload');
