@@ -91,6 +91,21 @@ async function run(page,id,code){
     console.log('NATIVE_ALTERNATIVE_ACCEPTED '+id);
   }
 
+  // Equivalent algorithms and declarations previously rejected by overly strict regex.
+  const qualityAlternatives=[
+    [25,'func _ready():\n    for i in range( 3 ):\n        print(i)'],
+    [26,'func _ready():\n    var nemici: Array[String] = ["Goblin", "Orco", "Drago"]\n    for nemico in nemici:\n        print(nemico)'],
+    [27,'func _ready():\n    var conto: int = 1\n    while conto < 4:\n        print("Conto: " + str(conto))\n        conto += 1'],
+    [28,'extends Node\nfunc _ready():\n    var nemici: Array[String] = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali = 0\n    for nemico in nemici:\n        print("Allerta: ", nemico)\n        xp_totali += 25\n    print("XP Totali: ", xp_totali)'],
+    [34,'func _ready():\n    var posizione = Vector2(100, 200)\n    var velocita := 50\n    posizione.x += velocita\n    print(posizione)']
+  ];
+  for(const [id,source] of qualityAlternatives){
+    const r=await run(page,id,source);
+    assert.equal(r.raw.status,'executed','Native Godot rejected valid syntax: '+id);
+    assert.equal(r.feedback.passed,true,'Quality regression: valid GDScript rejected in '+id+': '+JSON.stringify(r));
+    console.log('NATIVE_IDIOMATIC_ALTERNATIVE_PASS '+id);
+  }
+
   await page.screenshot({path:path.join(output,'native-25-36-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-25-36-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){
