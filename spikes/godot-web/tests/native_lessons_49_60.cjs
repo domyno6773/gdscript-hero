@@ -95,6 +95,60 @@ async function run(page,id,code){
     console.log('NATIVE_ALTERNATIVE_ACCEPTED '+id);
   }
 
+  // FINAL VALIDATOR-PHASE SCENE GATE: meaningful alternatives for all 12
+  // real Godot scene exercises, not just comments/whitespace changes.
+  // Every variant must execute on the actual scene and pass native grading.
+  const semanticSceneVariants={
+    49: src=>src.replace('print("Nodo rilevato: ", $Giocatore.name)',
+      'print("Nodo rilevato: %s" % $Giocatore.name)'),
+    50: src=>src.replace('$Titolo.text = "Benvenuto in Godot 4!"',
+      '$Titolo.text = "Benvenuto in " + "Godot 4!"'),
+    51: src=>src.replace('$SaluteLabel.text = "HP: 75"',
+      '$SaluteLabel.text = "HP: " + str(75)'),
+    52: src=>src
+      .replace('$TitoloDungeon.text = "Caverna dei Goblin"',
+        '$TitoloDungeon.text = "Caverna dei " + "Goblin"')
+      .replace('$LivelloLabel.text = "Livello: 1"',
+        '$LivelloLabel.text = "Livello: " + str(1)')
+      .replace('$MoneteLabel.text = "Oro: 50"',
+        '$MoneteLabel.text = "Oro: " + str(50)'),
+    53: src=>src.replace('$AttaccaBtn.text = "Sferra Attacco"',
+      '$AttaccaBtn.text = "Sferra " + "Attacco"'),
+    54: src=>src.replace('print("Colpo sferrato con successo!")',
+      'print("Colpo sferrato " + "con successo!")'),
+    55: src=>src.replace('$PuntiLabel.text = "Click: " + str(punti)',
+      '$PuntiLabel.text = "Click: %d" % punti'),
+    56: src=>src
+      .replace('$StatoNave.text = "Motori a Massima Potenza"',
+        '$StatoNave.text = "Motori a " + "Massima Potenza"')
+      .replace('$StatoNave.text = "Allarme Rosso Attivo"',
+        '$StatoNave.text = "Allarme " + "Rosso Attivo"'),
+    57: src=>src.replace('print("Timer avviato per: ", $Cooldown.wait_time, "s")',
+      'print("Timer avviato per: %ss" % $Cooldown.wait_time)'),
+    58: src=>src.replace('$BarraVita.color = "#22c55e"',
+      '$BarraVita.color = Color("#22c55e")'),
+    59: src=>src.replace('print("Moneta presente prima: ", has_node("Moneta"))',
+      'print("Moneta presente prima: %s" % str(has_node("Moneta")))'),
+    60: src=>src
+      .replace('var monete = 100','var monete := 100')
+      .replace('$OroLabel.text = "Monete: " + str(monete)',
+        '$OroLabel.text = "Monete: %d" % monete')
+  };
+  assert.equal(Object.keys(semanticSceneVariants).length,12);
+  for(let id=49;id<=60;id++){
+    const original=await page.evaluate(id=>window.GDHLessonLab.get(id).solution,id);
+    const changed=semanticSceneVariants[id](original);
+    assert.notEqual(changed,original,'Missing semantic source transformation '+id);
+    const grade=await run(page,id,changed);
+    assert.equal(grade.raw.status,'executed',
+      'Godot rejected scene source variant '+id+': '+JSON.stringify(grade.raw));
+    assert.equal(grade.feedback.verdict,'accepted',
+      'Valid scene behavior variation rejected '+id+': '+JSON.stringify(grade.feedback));
+    assert.equal(grade.feedback.passed,true);
+    console.log('NATIVE_SEMANTIC_SCENE_ALTERNATIVE_PASS '+id);
+  }
+  console.log('NATIVE_VALIDATOR_PHASE_SCENE_GATE_PASS all_12_semantic_scene_variants');
+
   // A correct-looking UI state can still be accompanied by an engine error.
   // The error only happens during the second click, so the default probe looks fine.
   const brokenClick='var punti = 0\nfunc _ready():\n    $ClickBtn.pressed.connect(al_click)\n    print("Clicker pronto")\nfunc al_click():\n    punti += 1\n    $PuntiLabel.text = "Click: " + str(punti)\n    print($PuntiLabel.text)\n    if punti == 2:\n        push_error("GDH_CLICK_TWO_ERR")';
