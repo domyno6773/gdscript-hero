@@ -208,6 +208,8 @@ async function smoke(browser,url,width){
  await page.locator('#btn-reset-code').click({timeout:10000});
  assert.equal(await page.locator('#code-editor').inputValue(),
    await page.evaluate(()=>App.currentReviewVariant.starterCode),'Review reset must use variant starter');
+ await page.locator('#btn-toggle-hint').click({timeout:10000});
+ assert.ok(await page.locator('#hint-box').isVisible(),'Review hint panel did not open');
  page.once('dialog',dialog=>dialog.accept());
  await page.locator('#btn-reveal-solution').click({timeout:10000});
  assert.equal(await page.locator('#code-editor').inputValue(),
