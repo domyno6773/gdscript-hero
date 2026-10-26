@@ -80,6 +80,11 @@ async function smoke(browser,url,width){
    }));
    throw new Error('Godot Sandbox smoke diagnostic: '+JSON.stringify({diagnostics,pageErrors:errors,network}));
  }
+ // Sandbox: aggiungi i nodi come farebbe un utente con un nuovo progetto vuoto.
+ await page.evaluate(()=>{
+   App.addSandboxNode('Label','Label','In attesa');
+   App.addSandboxNode('Button','Button','Clicca');
+ });
  // Sandbox: figli effettivamente istanziati, proprietà native e click persistenti.
  const sampleCode='extends Node2D\nvar clicks = 0\nfunc _ready():\n    $Label.text = "Nativo pronto"\n    print("SANDBOX_NODES_READY")\nfunc _on_button_pressed():\n    clicks += 1\n    $Label.text = "Click " + str(clicks)\n    print("SANDBOX_CLICK " + str(clicks))';
  await page.locator('#sandbox-code-editor').fill(sampleCode);
