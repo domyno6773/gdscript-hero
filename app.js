@@ -146,6 +146,7 @@ const App = {
         document.getElementById('btn-mobile-toggle-tools')?.addEventListener('click', () => {
             document.getElementById('btn-toggle-extra-tools')?.click();
         });
+        document.getElementById('code-editor')?.addEventListener('input', () => this.keepExerciseAtHorizontalOrigin());
         this.applyProfileUI();
         this.renderRoadmap();
         this.renderSidebarDailyQuests();
@@ -3520,6 +3521,7 @@ const App = {
     // Il dock rimane leggibile anche quando la lista dei test è molto lunga.
     // L'errore più utile viene mostrato per primo, senza scorrere la pagina.
     resetExerciseFeedback() {
+        this.keepExerciseAtHorizontalOrigin();
         const area = document.getElementById('exercise-primary-feedback');
         const title = document.getElementById('exercise-feedback-title');
         const description = document.getElementById('exercise-feedback-description');
@@ -3532,7 +3534,19 @@ const App = {
         if (details) details.open = false;
     },
 
+    keepExerciseAtHorizontalOrigin() {
+        const exercise = document.getElementById('view-exercise');
+        if (exercise && !exercise.classList.contains('hidden')) {
+            // Chrome può spostare orizzontalmente BODY quando porta in vista
+            // il cursore di una riga molto lunga. Il codice deve invece
+            // scorrere soltanto dentro la textarea, mai tutta la pagina.
+            document.body.scrollLeft = 0;
+            document.documentElement.scrollLeft = 0;
+        }
+    },
+
     showExerciseFeedback(result, tests) {
+        this.keepExerciseAtHorizontalOrigin();
         const area = document.getElementById('exercise-primary-feedback');
         const title = document.getElementById('exercise-feedback-title');
         const description = document.getElementById('exercise-feedback-description');
