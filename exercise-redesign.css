@@ -1180,3 +1180,12 @@ body:has(#view-exercise:not(.hidden)) .nav-right .stat-label {
     #view-exercise #btn-run-code .run-text { font-size: .72rem; }
     #view-exercise .editor-header .tab { flex-basis: 86px !important; }
 }
+
+#view-exercise #btn-run-code {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+#view-exercise .run-text {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
