@@ -350,3 +350,11 @@ body[data-theme="light"] {
     border-left-color: #89bee1 !important;
     box-shadow: 3px 4px 0 rgba(0,0,0,.24) !important;
 }
+
+/* Reference typography: the brand is lower-case with a capitalized Hero. */
+.logo-text {
+    text-transform: lowercase !important;
+}
+.logo-text .accent {
+    text-transform: capitalize !important;
+}
