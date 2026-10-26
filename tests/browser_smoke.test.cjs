@@ -126,6 +126,8 @@ async function smoke(browser,url,width){
    editorScrollLeft:document.getElementById('code-editor').scrollLeft
  }));
  console.log('AFTER_ERROR_GEOMETRY '+width+'px '+JSON.stringify(viewportMetrics));
+ assert.equal(viewportMetrics.scrollX,0,'Root must not scroll horizontally');
+ assert.ok(viewportMetrics.codePanelLeft>=0,'Exercise workspace must not pan left after long output');
  if(width<=820){
    const ancestors=await page.evaluate(()=>{
      const items=[];
