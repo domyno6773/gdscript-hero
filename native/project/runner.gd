@@ -115,9 +115,13 @@ func _with_local_capture(source: String, names: Array) -> String:
     lines.insert(insertion + 2, indentation + 'get_parent().call("__gdh_phase", "execution")')
     return "\n".join(lines)
 
-# Scene native minime per le lezioni 49-60 (non simulazioni di Label, Button o Timer).
+# Scene native per le lezioni 49-60 e per le tre varianti di Ripasso con nodi.
+# ID 61-63 riservati soltanto ai fixture delle varianti, mai ai progressi del corso.
 func _scene_spec(lesson_id: int) -> Dictionary:
     match lesson_id:
+        61: return {"MonitorTermico": "Label"}
+        62: return {"BtnLancio": "Button"}
+        63: return {"TimerMina": "Timer", "MinaGrafica": "ColorRect"}
         49: return {"Giocatore": "Node"}
         50: return {"Titolo": "Label"}
         51: return {"SaluteLabel": "Label"}
@@ -142,6 +146,13 @@ func _build_scene(instance: Node, lesson_id: int) -> void:
             "ColorRect": child = ColorRect.new()
             _: child = Node.new()
         child.name = str(key)
+        # Stato iniziale coerente con la consegna di ogni variante.
+        if lesson_id == 61 and child is Label:
+            child.text = "Temperatura: Sconosciuta"
+        if lesson_id == 62 and child is Button:
+            child.text = "Inizia Sequenza"
+        if lesson_id == 63 and child is Timer:
+            child.wait_time = 1.0
         instance.add_child(child)
 
 func _scene_snapshot(instance: Node, lesson_id: int) -> Dictionary:
