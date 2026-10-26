@@ -54,6 +54,29 @@ async function smoke(browser,url,width){
  await page.evaluate(()=>App.openLesson(1));
  await viewIs(page,'exercise');
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
+ assert.equal(await page.locator('#view-exercise .editor-header #btn-run-code').count(),1,'Verify button belongs to editor header');
+ assert.equal(await page.locator('#view-exercise .panel-lesson #expected-output-pre').count(),0,'Expected output must appear only in dock');
+ const initialGeometry=await page.evaluate(()=>{
+   const el=id=>document.getElementById(id).getBoundingClientRect();
+   const viewport=document.getElementById('exercise-viewport-col');
+   return {
+     feedbackAboveOutput:el('exercise-primary-feedback').top < el('expected-output-pre').top,
+     feedbackBeforeTests:el('exercise-primary-feedback').top < el('exercise-test-details').top,
+     viewportHidden:getComputedStyle(viewport).display==='none',
+     dockBottom:el('exercise-validation-panel').bottom,
+     buttonTop:el('btn-run-code').top,
+     expectedShown:getComputedStyle(document.getElementById('expected-output-pre')).display!=='none'
+   };
+ });
+ assert.ok(initialGeometry.feedbackAboveOutput&&initialGeometry.feedbackBeforeTests,'First feedback is above outputs and tests');
+ assert.ok(initialGeometry.viewportHidden,'Introductory lesson must not show scene or viewport');
+ assert.ok(initialGeometry.expectedShown,'Expected output must be visible before Verify');
+ if(width>820)assert.ok(initialGeometry.dockBottom<=844,'Desktop dock must remain visible without page scrolling');
+ if(process.env.E2E_SCREENSHOTS==='1'){
+   const dir=path.join(root,'test-artifacts');
+   fs.mkdirSync(dir,{recursive:true});
+   await page.screenshot({path:path.join(dir,'exercise-'+width+'-initial.png'),fullPage:false});
+ }
  const official=await page.evaluate(()=>LESSONS_DATA.find(l=>l.id===1).solution);
  await page.locator('#code-editor').fill(official);
  await page.locator('#btn-run-code').click({timeout:10000});
@@ -69,6 +92,16 @@ async function smoke(browser,url,width){
  await page.locator('#btn-run-code').click({timeout:10000});
  await page.waitForFunction(()=>!App.isValidating);
  assert.equal(await page.evaluate(()=>window.__auditXss||0),0,'XSS executed in validator');
+ const feedback=await page.evaluate(()=>({
+   state:document.getElementById('exercise-primary-feedback').dataset.state,
+   title:document.getElementById('exercise-feedback-title').textContent,
+   text:document.getElementById('exercise-feedback-description').textContent
+ }));
+ assert.equal(feedback.state,'error','Failed verification must show the error on top of dock');
+ assert.ok(feedback.text.length>0,'Error summary must be present');
+ if(process.env.E2E_SCREENSHOTS==='1'){
+   await page.screenshot({path:path.join(root,'test-artifacts','exercise-'+width+'-error.png'),fullPage:false});
+ }
  assert.equal(await page.locator('#test-results-view img').count(),0,'HTML created from user output');
  await page.reload({waitUntil:'load'});
  await page.waitForFunction(()=>!!window.App&&App.state.finishedLessons.includes(1));
