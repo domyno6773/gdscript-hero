@@ -155,5 +155,172 @@ window.GDHLessonFixtures = [
       "scudo_attivo"
     ],
     "properties": []
+  },
+  {
+    "id": 13,
+    "chapter": 4,
+    "title": "13. Operazioni aritmetiche (+, -, *, /, %)",
+    "initialCode": "func _ready():\n    # Calcola somma (10 + 5) e prodotto (5 * 2), poi stampali\n    pass\n",
+    "solution": "func _ready():\n    var somma = 10 + 5\n    var prodotto = 5 * 2\n    print(somma)\n    print(prodotto)\n",
+    "task": "Calcola la somma: var somma = 10 + 5 e stampala. Calcola la moltiplicazione: var prodotto = 5 * 2 e stampala.",
+    "expectedOutput": "15\n10",
+    "locals": [
+      "somma",
+      "prodotto"
+    ],
+    "properties": []
+  },
+  {
+    "id": 14,
+    "chapter": 4,
+    "title": "14. Assegnazioni rapide (+=, -=)",
+    "initialCode": "func _ready():\n    # Crea punti_vita = 100, sottrai 20 con -= e stampa\n    pass\n",
+    "solution": "func _ready():\n    var punti_vita = 100\n    punti_vita -= 20\n    print(punti_vita)\n",
+    "task": "Crea punti_vita = 100 . Sottrai 20 usando punti_vita -= 20 . Stampa il valore finale di punti_vita (80).",
+    "expectedOutput": "80",
+    "locals": [
+      "punti_vita"
+    ],
+    "properties": []
+  },
+  {
+    "id": 15,
+    "chapter": 4,
+    "title": "15. Calcolo del danno, punteggi e monete",
+    "initialCode": "func _ready():\n    # Calcola monete_totali e stampala\n    pass\n",
+    "solution": "func _ready():\n    var monete_base = 50\n    var moltiplicatore = 3\n    var monete_totali = monete_base * moltiplicatore\n    print(monete_totali)\n",
+    "task": "Dichiara monete_base = 50 . Dichiara moltiplicatore = 3 . Crea monete_totali = monete_base * moltiplicatore e stampala.",
+    "expectedOutput": "150",
+    "locals": [
+      "monete_base",
+      "moltiplicatore",
+      "monete_totali"
+    ],
+    "properties": []
+  },
+  {
+    "id": 16,
+    "chapter": 4,
+    "title": "16. ⭐ Sfida di Apprendimento: Bottino del Dungeon e Danno Subito",
+    "initialCode": "extends Node\n\nfunc _ready():\n    var salute_rimasta = 100\n    # Aggiorna salute_rimasta e calcola monete_per_membro e monete_avanzate sotto\n    \n    # Non modificare le righe sotto\n    print(\"Salute Guerriero: \", salute_rimasta)\n    print(\"Monete per membro: \", monete_per_membro)\n    print(\"Monete avanzate: \", monete_avanzate)\n",
+    "solution": "extends Node\n\nfunc _ready():\n    var salute_rimasta = 100\n    salute_rimasta -= 35\n    var monete_per_membro = 100 / 3\n    var monete_avanzate = 100 % 3\n    \n    # Non modificare le righe sotto\n    print(\"Salute Guerriero: \", salute_rimasta)\n    print(\"Monete per membro: \", monete_per_membro)\n    print(\"Monete avanzate: \", monete_avanzate)\n",
+    "task": "Sottrai 35 da salute_rimasta con -= Calcola var monete_per_membro = 100 / 3 Calcola var monete_avanzate = 100 % 3",
+    "expectedOutput": "Salute Guerriero: 65\nMonete per membro: 33\nMonete avanzate: 1",
+    "locals": [
+      "salute_rimasta",
+      "monete_per_membro",
+      "monete_avanzate"
+    ],
+    "properties": []
+  },
+  {
+    "id": 17,
+    "chapter": 5,
+    "title": "17. Operatori di confronto (==, !=, >, <)",
+    "initialCode": "func _ready():\n    var livello = 10\n    # Confronta con >= e stampa\n    pass\n",
+    "solution": "func _ready():\n    var livello = 10\n    if livello >= 10:\n        print(\"Livello raggiunto!\")\n",
+    "task": "Dichiara livello = 10 . Se livello >= 10: , stampa \"Livello raggiunto!\" .",
+    "expectedOutput": "Livello raggiunto!",
+    "locals": [
+      "livello"
+    ],
+    "properties": []
+  },
+  {
+    "id": 18,
+    "chapter": 5,
+    "title": "18. Operatori logici (and, or, not)",
+    "initialCode": "func _ready():\n    var ha_chiave = true\n    var porta_chiusa = true\n    # Combina con and e stampa\n    pass\n",
+    "solution": "func _ready():\n    var ha_chiave = true\n    var porta_chiusa = true\n    if ha_chiave and porta_chiusa:\n        print(\"Accesso consentito\")\n",
+    "task": "Dichiara ha_chiave = true e porta_chiusa = true . Se ha_chiave and porta_chiusa: stampa \"Accesso consentito\" .",
+    "expectedOutput": "Accesso consentito",
+    "locals": [
+      "ha_chiave",
+      "porta_chiusa"
+    ],
+    "properties": []
+  },
+  {
+    "id": 19,
+    "chapter": 5,
+    "title": "19. Logica gameplay (Game Over con if / else)",
+    "initialCode": "func _ready():\n    var punti_vita = 0\n    # BUG LOGICO: Manca il ramo 'else:' per quando il giocatore e' ancora in vita!\n    # Aggiungi il ramo 'else:' per stampare \"In battaglia\":\n    if punti_vita <= 0:\n        print(\"Game Over\")\n",
+    "solution": "func _ready():\n    var punti_vita = 0\n    if punti_vita <= 0:\n        print(\"Game Over\")\n    else:\n        print(\"In battaglia\")\n",
+    "task": "Dichiara punti_vita = 0 . Se punti_vita stampa \"Game Over\" . Altrimenti ( else: ) stampa \"In battaglia\" .",
+    "expectedOutput": "Game Over",
+    "locals": [
+      "punti_vita"
+    ],
+    "properties": []
+  },
+  {
+    "id": 20,
+    "chapter": 5,
+    "title": "20. ⭐ Sfida di Apprendimento: Il Portale Antico del Tempio",
+    "initialCode": "extends Node\n\nfunc _ready():\n    var energia = 75\n    var ha_amuleto = true\n    var ha_chiave = false\n    var stato_portale = \"\"\n    \n    # Scrivi la catena if / elif / else sotto\n    \n    # Non modificare la riga sotto\n    print(\"Stato: \", stato_portale)\n",
+    "solution": "extends Node\n\nfunc _ready():\n    var energia = 75\n    var ha_amuleto = true\n    var ha_chiave = false\n    var stato_portale = \"\"\n    \n    if energia >= 50 and (ha_amuleto or ha_chiave):\n        stato_portale = \"Portale Attivato\"\n    elif energia < 50:\n        stato_portale = \"Energia Insufficiente\"\n    else:\n        stato_portale = \"Nessuna Reliquia Trovata\"\n        \n    # Non modificare la riga sotto\n    print(\"Stato: \", stato_portale)\n",
+    "task": "Se energia >= 50 and (ha_amuleto or ha_chiave) : imposta \"Portale Attivato\" Se energia : imposta \"Energia Insufficiente\" Altrimenti: imposta \"Nessuna Reliquia Trovata\"",
+    "expectedOutput": "Stato: Portale Attivato",
+    "locals": [
+      "energia",
+      "ha_amuleto",
+      "ha_chiave",
+      "stato_portale"
+    ],
+    "properties": []
+  },
+  {
+    "id": 21,
+    "chapter": 6,
+    "title": "21. Creare un inventario con gli Array",
+    "initialCode": "func _ready():\n    # Crea l'inventario e stampa il primo elemento\n    pass\n",
+    "solution": "func _ready():\n    var inventario = [\"Spada\", \"Scudo\", \"Pozione\"]\n    print(inventario[0])\n",
+    "task": "Crea inventario = [\"Spada\", \"Scudo\", \"Pozione\"] . Stampa il primo oggetto dell'inventario ( inventario[0] ).",
+    "expectedOutput": "Spada",
+    "locals": [
+      "inventario"
+    ],
+    "properties": []
+  },
+  {
+    "id": 22,
+    "chapter": 6,
+    "title": "22. Accesso per indice",
+    "initialCode": "func _ready():\n    var oggetti = [\"Spada\", \"Scudo\", \"Pozione\"]\n    # BUG DI INDICE: Gli array in GDScript partono da [0]!\n    # Correggi gli indici sotto per stampare 'Scudo' (2° elemento) e 'Pozione' (3° elemento):\n    print(oggetti[0])\n    print(oggetti[1])\n",
+    "solution": "func _ready():\n    var oggetti = [\"Spada\", \"Scudo\", \"Pozione\"]\n    print(oggetti[1])\n    print(oggetti[2])\n",
+    "task": "Dato oggetti = [\"Spada\", \"Scudo\", \"Pozione\"] . Stampa il secondo elemento ( oggetti[1] ) e poi il terzo ( oggetti[2] ).",
+    "expectedOutput": "Scudo\nPozione",
+    "locals": [
+      "oggetti"
+    ],
+    "properties": []
+  },
+  {
+    "id": 23,
+    "chapter": 6,
+    "title": "23. Metodi append() e size()",
+    "initialCode": "func _ready():\n    var inventario = [\"Mappa\", \"Bussola\"]\n    # Aggiungi \"Torcia\" e stampa la dimensione\n    pass\n",
+    "solution": "func _ready():\n    var inventario = [\"Mappa\", \"Bussola\"]\n    inventario.append(\"Torcia\")\n    print(inventario.size())\n",
+    "task": "Crea inventario = [\"Mappa\", \"Bussola\"] . Aggiungi \"Torcia\" con inventario.append(\"Torcia\") . Stampa la dimensione dell'array con print(inventario.size()) .",
+    "expectedOutput": "3",
+    "locals": [
+      "inventario"
+    ],
+    "properties": []
+  },
+  {
+    "id": 24,
+    "chapter": 6,
+    "title": "24. ⭐ Sfida di Apprendimento: Gestione dello Zaino d'Avventura",
+    "initialCode": "extends Node\n\nfunc _ready():\n    var zaino = [\"Spada\", \"Ramo Secco\", \"Pozione di Vita\"]\n    \n    # Modifica lo zaino e crea ha_cura e totale_slot sotto\n    \n    # Non modificare le righe sotto\n    print(\"Zaino: \", zaino)\n    print(\"Ha pozione: \", ha_cura)\n    print(\"Totale slot: \", totale_slot)\n",
+    "solution": "extends Node\n\nfunc _ready():\n    var zaino = [\"Spada\", \"Ramo Secco\", \"Pozione di Vita\"]\n    \n    zaino.append(\"Arco Elfico\")\n    zaino.erase(\"Ramo Secco\")\n    var ha_cura = zaino.has(\"Pozione di Vita\")\n    var totale_slot = zaino.size()\n    \n    # Non modificare le righe sotto\n    print(\"Zaino: \", zaino)\n    print(\"Ha pozione: \", ha_cura)\n    print(\"Totale slot: \", totale_slot)\n",
+    "task": "zaino.append(\"Arco Elfico\") zaino.erase(\"Ramo Secco\") var ha_cura = zaino.has(\"Pozione di Vita\") var totale_slot = zaino.size()",
+    "expectedOutput": "Zaino: [\"Spada\", \"Pozione di Vita\", \"Arco Elfico\"]\nHa pozione: true\nTotale slot: 3",
+    "locals": [
+      "zaino",
+      "ha_cura",
+      "totale_slot"
+    ],
+    "properties": []
   }
 ];
