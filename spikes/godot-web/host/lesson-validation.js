@@ -9,6 +9,17 @@
  const pr=(m,name)=>new RegExp('\\bprint\\s*\\(\\s*'+escape(name)+'\\s*\\)').test(m);
  const logs=x=>String(x||'').trimEnd().split(/\r?\n/).filter(Boolean);
  const eq=(a,b)=>a.length===b.length&&a.every((v,i)=>v===b[i]);
+ // Accetta anche print(numero) se numero è dichiarato come intero 1; non accetta var numero = "1".
+ const printsNumericOne=m=>{
+   if(/\bprint\s*\(\s*1\s*\)/.test(m))return true;
+   for(const match of m.matchAll(/\bprint\s*\(\s*([A-Za-z_]\w*)\s*\)/g)){
+     const variable=match[1];
+     const expression=new RegExp('\\b(?:var|const)\\s+'+escape(variable)+'\\b\\s*(?::\\s*int\\s*)?(?::=|=)\\s*1\\b');
+     if(expression.test(m))return true;
+   }
+   return false;
+ };
+
  const check=(arr,desc,p)=>arr.push({desc,passed:Boolean(p)});
  function grade(id,src,reply,stdout,stderr){
    const lesson=get(id);
@@ -28,7 +39,7 @@
      }
      case 3:
        check(list,'Stampe in ordine',eq(lines,['Livello','1']));
-       check(list,'Numero 1 come argomento numerico, non come String',/\bprint\s*\(\s*1\s*\)/.test(m));break;
+       check(list,'Numero 1 come argomento numerico, non come String',printsNumericOne(m));break;
      case 4:
        check(list,'Commento # Diagnostica reattori',/^\s*#\s*Diagnostica reattori\s*$/m.test(src));
        check(list,'print con 3 argomenti',/\bprint\s*\(\s*["']Energia:\s*["']\s*,\s*100\s*,\s*["']%["']\s*\)/.test(src));
