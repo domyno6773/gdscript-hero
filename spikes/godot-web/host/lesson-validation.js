@@ -28,6 +28,12 @@
  };
  function scenarios(id,src){
    const specs={
+     25:[['range4',{__replace:['range(3)','range(4)']}]],
+     26:[['other_enemies',{nemici:'["Ciclope", "Mago"]'}]],
+     27:[['start2',{conto:'2'}]],
+     28:[['two_enemies',{nemici:'["Mago", "Lupo"]'}]],
+     34:[['speed70',{velocita:'70'}]],
+     36:[['station_moved',{stazione:'Vector2(151, 170)'}],['position_moved',{posizione:'Vector2(95, 200)'}]],
      17:[['below',{livello:'9'}]],
      18:[['no_key',{ha_chiave:'false'}],['open_door',{porta_chiusa:'false'}]],
      19:[['alive',{punti_vita:'100'}]],
@@ -37,8 +43,13 @@
    return (specs[id]||[]).flatMap(([key,overrides])=>{
      let result=src;
      for(const [name,value] of Object.entries(overrides)){
-       result=overwriteSeed(result,name,value);
-       if(result===null)return [];
+       if(name==='__replace'){
+         if(!result.includes(value[0]))return [];
+         result=result.replace(value[0],value[1]);
+       }else {
+         result=overwriteSeed(result,name,value);
+         if(result===null)return [];
+       }
      }
      return [{key,code:result}];
    });
@@ -58,6 +69,16 @@
    return re.test(noCommentLines(source));
  };
 
+
+ const vec=(v,x,y)=>Boolean(v&&typeof v==='object'&&v.__type==='Vector2'&&v.x===x&&v.y===y);
+ const methods=(reply,name,expected)=>{const r=reply?.methodCalls||[];return r.length===expected.length&&r.every((v,i)=>
+   v.method===name&&v.status==='executed'&&(expected[i]===null?v.value===null:v.value===expected[i]));};
+ const fn=(src,name)=>{
+   const lines=noCommentLines(src).split(/\r?\n/),start=lines.findIndex(line=>new RegExp('^\\s*func\\s+'+escape(name)+'\\s*\\(').test(line));
+   if(start<0)return '';
+   let end=start+1;while(end<lines.length&& !/^\S/.test(lines[end]))end++;
+   return lines.slice(start,end).join('\n');
+ };
  const check=(arr,desc,p)=>arr.push({desc,passed:Boolean(p)});
  function grade(id,src,reply,stdout,stderr,scenarioResults={}){
    const lesson=get(id);
@@ -206,6 +227,88 @@
          'Ha pozione: true','Totale slot: 3'
        ]));
        break;
+
+     case 25:
+       check(list,'Ciclo for i in range(3) con print(i) nel corpo',/\bfor\s+i\s+in\s+range\s*\(\s*3\s*\)\s*:\s*\n[ \t]+print\s*\(\s*i\s*\)/.test(m));
+       check(list,'Output 0, 1, 2',eq(lines,['0','1','2']));
+       check(list,'range(4) genera anche il numero 3',scenarioOk(scenarioResults,'range4',['0','1','2','3']));break;
+     case 26:
+       check(list,'Array nemici iniziale',localsArray(s,'nemici',['Goblin','Orco','Drago']));
+       check(list,'Iterazione sui nemici e stampa dinamica',
+         /\bfor\s+nemico\s+in\s+nemici\s*:\s*\n[ \t]+print\s*\(\s*nemico\s*\)/.test(m));
+       check(list,'Stampa di Goblin, Orco e Drago',eq(lines,['Goblin','Orco','Drago']));
+       check(list,'Funziona con Ciclope e Mago',scenarioOk(scenarioResults,'other_enemies',['Ciclope','Mago']));break;
+     case 27:
+       check(list,'while conto <= 3 e aggiornamento conto += 1',
+         /\bwhile\s+conto\s*<=\s*3\s*:/.test(m)&&/\bconto\s*\+=\s*1\b/.test(m));
+       check(list,'Valore finale conto = 4',loc('conto')===4);
+       check(list,'Sequenza Conto: 1, 2, 3',eq(lines,['Conto: 1','Conto: 2','Conto: 3']));
+       check(list,'Con conto iniziale 2 stampa 2 e 3',scenarioOk(scenarioResults,'start2',['Conto: 2','Conto: 3']));break;
+     case 28:
+       check(list,'Array iniziale di quattro nemici',
+         localsArray(s,'nemici',['Slime','Scheletro','Spettro','Boss Drago']));
+       check(list,'XP aggiornati con += 25',
+         loc('xp_totali')===100&&/\bfor\s+nemico\s+in\s+nemici\s*:/.test(m)&&/\bxp_totali\s*\+=\s*25\b/.test(m));
+       check(list,'Quattro allerte e XP 100',eq(lines,['Allerta: Slime','Allerta: Scheletro','Allerta: Spettro','Allerta: Boss Drago','XP Totali: 100']));
+       check(list,'Solo due nemici generano XP 50',scenarioOk(scenarioResults,'two_enemies',['Allerta: Mago','Allerta: Lupo','XP Totali: 50']));break;
+     case 29:
+       check(list,'Funzione _ready() definita',/\bfunc\s+_ready\s*\(\s*\)\s*:/.test(m));
+       check(list,'Messaggio Nodo Inizializzato',eq(lines,['Nodo Inizializzato']));break;
+     case 30:
+       check(list,'Funzione saluta(nome)',/\bfunc\s+saluta\s*\(\s*nome\s*\)\s*:/.test(m));
+       check(list,'_ready invoca saluta("Eroe")',/\bsaluta\s*\(\s*["']Eroe["']\s*\)/.test(noCommentLines(src)));
+       check(list,'print usa parametro nome',/\bprint\s*\(\s*["']Ciao\s+["']\s*\+\s*nome\s*\)/.test(fn(src,'saluta')));
+       check(list,'Godot chiama la funzione con due nomi diversi',methods(reply,'saluta',[null,null])&&eq(lines,['Ciao Eroe','Ciao Ada','Ciao Viaggiatore']));break;
+     case 31:
+       check(list,'danno calcolato da calcola_danno(30,5)',
+         loc('danno')===25&&/\bvar\s+danno\s*=\s*calcola_danno\s*\(\s*30\s*,\s*5\s*\)/.test(m));
+       check(list,'calcola_danno restituisce attacco - difesa',
+         /\bfunc\s+calcola_danno\s*\(\s*attacco\s*,\s*difesa\s*\)\s*:/.test(m)&&/\breturn\s+attacco\s*-\s*difesa\b/.test(fn(src,'calcola_danno')));
+       check(list,'Output dal valore danno',pr(m,'danno')&&eq(lines,['25']));
+       check(list,'Prove parametri 12-7 e 20-9',methods(reply,'calcola_danno',[5,11]));break;
+     case 32:
+       check(list,'Firma tipizzata della funzione',
+         /\bfunc\s+calcola_colpo\s*\(\s*attacco\s*:\s*int\s*,\s*critico\s*:\s*bool\s*\)\s*->\s*int\s*:/.test(m));
+       check(list,'Ramificazioni e return sul parametro attacco',
+         /\bif\s+critico\s*:/.test(fn(src,'calcola_colpo'))&&
+         /\breturn\s+attacco\s*\*\s*2\b/.test(fn(src,'calcola_colpo'))&&
+         /\breturn\s+attacco\b/.test(fn(src,'calcola_colpo')));
+       check(list,'Normale 30, critico 60',
+         loc('normale')===30&&loc('critico')===60&&
+         eq(lines,['Colpo normale: 30','Colpo critico: 60']));
+       check(list,'Prove native con 7/12 e critico',
+         methods(reply,'calcola_colpo',[7,14,24]));break;
+     case 33:
+       check(list,'Vero Vector2(100,200)',vec(loc('posizione'),100,200)&&
+         /\bvar\s+posizione\s*(?::\s*Vector2\s*)?=\s*Vector2\s*\(\s*100\s*,\s*200\s*\)/.test(m));
+       check(list,'Stampa della variabile posizione',
+         pr(m,'posizione')&&eq(lines,['(100.0, 200.0)']));break;
+     case 34:
+       check(list,'posizione finale Vector2(150,200)',vec(loc('posizione'),150,200));
+       check(list,'velocita e aggiornamento posizione.x',
+         loc('velocita')===50&&/\bposizione\s*\.\s*x\s*\+=\s*velocita\b/.test(m));
+       check(list,'Output vettore finale',pr(m,'posizione')&&eq(lines,['(150.0, 200.0)']));
+       check(list,'Con velocita 70 ottiene (170,200)',
+         scenarioOk(scenarioResults,'speed70',['(170.0, 200.0)']));break;
+     case 35:
+       check(list,'pos finale Vector2(120,180)',vec(loc('pos'),120,180));
+       check(list,'Incrementi sugli assi x ed y',
+         /\bpos\s*\.\s*x\s*\+=\s*20\b/.test(m)&&/\bpos\s*\.\s*y\s*-=\s*20\b/.test(m));
+       check(list,'Stampa pos',pr(m,'pos')&&eq(lines,['(120.0, 180.0)']));break;
+     case 36:
+       check(list,'posizione/stazione corrette e atterrato=true',
+         vec(loc('posizione'),150,170)&&vec(loc('stazione'),150,170)&&loc('atterrato')===true);
+       check(list,'Incrementi di posizione corretti',
+         /\bposizione\s*\.\s*x\s*\+=\s*50\b/.test(m)&&/\bposizione\s*\.\s*y\s*-=\s*30\b/.test(m));
+       check(list,'Confronto dinamico degli assi con and',
+         /\bvar\s+atterrato\b/.test(m)&&/\bposizione\s*\.\s*x\s*==\s*stazione\s*\.\s*x\b/.test(m)&&
+         /\bposizione\s*\.\s*y\s*==\s*stazione\s*\.\s*y\b/.test(m)&&/\band\b/.test(m));
+       check(list,'Output radar corretto',
+         eq(lines,['Posizione finale: (150.0, 170.0)','Stazione raggiunta: true']));
+       check(list,'Spostamento stazione impedisce atterraggio',
+         scenarioOk(scenarioResults,'station_moved',['Posizione finale: (150.0, 170.0)','Stazione raggiunta: false']));
+       check(list,'Spostamento posizione produce coordinate diverse',
+         scenarioOk(scenarioResults,'position_moved',['Posizione finale: (145.0, 170.0)','Stazione raggiunta: false']));break;
      default:check(list,'Non supportato',false);
    }
    return{id,passed:list.every(x=>x.passed),checks:list,demoOnly:true,nativeStatus:reply?.status,localCapture:reply?.localCapture,
