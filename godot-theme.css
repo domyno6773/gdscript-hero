@@ -279,3 +279,74 @@ body[data-theme="light"] {
 [data-theme="light"] .node-label { color: #2d4f70 !important; }
 [data-theme="light"] .nav-btn.active,
 [data-theme="light"] .node-item.current .node-label { color: #1f4e72 !important; background: #e2edf6 !important; }
+
+
+/* Roadmap: preserve the hex nodes and their positions but remove flashing neon. */
+#view-roadmap .pulse-current,
+#view-roadmap .pulse-mastery,
+#view-roadmap .node-item.current .hex-svg,
+#view-roadmap .node-item.unlocked .hex-svg,
+#view-roadmap .node-item.completed .hex-svg {
+    animation: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+#view-roadmap .node-item.current .hex-svg path:first-child,
+#view-roadmap .node-item.unlocked .hex-svg path:first-child {
+    fill: #1d3042 !important;
+}
+#view-roadmap .node-item.current .hex-svg path:nth-child(2),
+#view-roadmap .node-item.unlocked .hex-svg path:nth-child(2) {
+    fill: #283b4c !important;
+    stroke: #65abd8 !important;
+}
+#view-roadmap .node-item.current .hex-svg polygon,
+#view-roadmap .node-item.unlocked .hex-svg polygon {
+    fill: #83c1e9 !important;
+}
+#view-roadmap .node-item.completed .hex-svg path:nth-child(2) {
+    stroke: #78c6a9 !important;
+}
+#view-roadmap .node-item.mastery.current .hex-svg path:nth-child(2) {
+    stroke: #efb94a !important;
+}
+#view-roadmap .tag-continua,
+#view-roadmap .node-current-tag {
+    animation: none !important;
+    background: #4c96c3 !important;
+    border-color: #649fc7 !important;
+    color: #132b40 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+#view-roadmap .btn-hero-continue {
+    background: #5b9ecc !important;
+    color: #152d44 !important;
+    border: 1px solid #81b8df !important;
+    border-radius: 6px !important;
+    box-shadow: 0 3px 0 #2b5c7e !important;
+    text-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+}
+#view-roadmap .btn-hero-continue:hover {
+    background: #76b5dd !important;
+    box-shadow: 0 3px 0 #2b5c7e !important;
+    transform: none !important;
+}
+#view-roadmap .chapter-banner,
+#view-roadmap .overall-course-card,
+#view-roadmap .chapter-card {
+    filter: none !important;
+    text-shadow: none !important;
+}
+#view-roadmap .chapter-banner {
+    background: #252e39 !important;
+    border-color: #40566c !important;
+    border-left-color: #649fc7 !important;
+    box-shadow: 3px 4px 0 rgba(0,0,0,.24) !important;
+}
+#view-roadmap .chapter-banner:hover {
+    border-left-color: #89bee1 !important;
+    box-shadow: 3px 4px 0 rgba(0,0,0,.24) !important;
+}
