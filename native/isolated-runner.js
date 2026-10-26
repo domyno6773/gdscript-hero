@@ -64,7 +64,7 @@
             !/^[A-Za-z_]\w{0,59}$/.test(x.variable) || typeof x.method!=='string' ||
             !/^[A-Za-z_]\w{0,59}$/.test(x.method) || !Array.isArray(x.args) || x.args.length>5 ||
             !x.set || typeof x.set!=='object' || Array.isArray(x.set)))) ||
-       (m.scene !== undefined && (!Number.isSafeInteger(m.scene) || m.scene<0 || m.scene>60)) ||
+       (m.scene !== undefined && (!Number.isSafeInteger(m.scene) || m.scene<0 || m.scene>63)) ||
        (m.actions !== undefined && (!Array.isArray(m.actions) || m.actions.length>7 ||
           m.actions.some(x=>!x||typeof x.node!=='string'|| x.node.length>40 ||
             (x.signal!=='pressed'&&x.signal!=='timeout')))) ||
