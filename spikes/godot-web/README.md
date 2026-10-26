@@ -1,41 +1,38 @@
-# GDScript Hero — prototipo Godot 4 WebAssembly
+# GDScript Hero — prototipo del vero Godot WebAssembly
 
-**Solo prova tecnica, non pronta per produzione.** Nessun codice è stato integrato nel sito pubblico.
+**Prototipo sperimentale, separato dal sito pubblico. Non usare in produzione.**
 
-## Stato verificato
+## Fattibilità dimostrata (26 ottobre 2026)
 
-- Il progetto Godot 4.4.1 viene esportato per il Web con il template ufficiale senza thread.
-- Il browser invia nuovo codice GDScript al motore e ne riceve output, errori e informazioni sulle variabili.
-- Il laboratorio separato host/lesson-lab.html contiene 48 lezioni tratte dal dataset reale.
-- Sono passate **48 soluzioni ufficiali**, **47 test negativi** e **36 alternative valide**: https://github.com/domyno6773/gdscript-hero/actions/runs/40263356901
-- Il runner è isolato in iframe sandboxed con origine opaca su una diversa origine HTTP, e i test Chrome verificano blocchi DOM/localStorage, riavvio e interruzione di un ciclo infinito.
-- La build generata pesa circa 43 MB non compressi, soprattutto WebAssembly. Non è stata misurata su smartphone reali.
+[Workflow browser con Godot 4.4.1 — 60 lezioni](https://github.com/domyno6773/gdscript-hero/actions/runs/40264354237)
 
-## Percorsi utili
+- **60/60 soluzioni ufficiali** eseguite e validate in Chrome con Godot WebAssembly.
+- **59/59 test negativi** respinti.
+- **48/48 varianti corrette** accettate; quelle 49–60 variano solo commenti e formattazione.
+- Il runner Godot usa un iframe a origine opaca, comunica mediante postMessage e si può distruggere/ricreare dopo un timeout.
+- Prototipate le API native di GDScript, Dictionary, Array, Vector2, segnali, classi, Label, Button, Timer, ColorRect, queue_free e scene figlie.
 
-- Editor didattico: host/lesson-lab.html
-- Dati delle lezioni: host/lesson-fixtures.js (snapshot manuale di lessons.js)
-- Validazione dimostrativa: host/lesson-validation.js
-- Motore Godot: project/runner.gd
-- Test lezioni: tests/native_lessons_1_12.cjs, tests/native_lessons_13_24.cjs e tests/native_lessons_25_36.cjs e tests/native_lessons_37_48.cjs
-- Approfondimenti: ISOLATION.md, SECURITY.md e docs/native-godot-lesson-lab-audit-37-48-2026-10-26.md nella radice repository.
+## File principali
+
+- `host/lesson-lab.html` — laboratorio indipendente di tutte le 60 lezioni.
+- `host/lesson-fixtures.js` — snapshot manuale delle lezioni pubbliche.
+- `host/lesson-validation.js` — controlli didattici di 1–48.
+- `host/lesson-validation-native-scenes.js` — controlli di 49–60.
+- `host/host.js` — editor e richieste al runner isolato.
+- `project/runner.gd` — motore nativo WebAssembly, scene, test dinamici.
+- `tests/native_lessons_1_12.cjs`, `native_lessons_13_24.cjs`, `native_lessons_25_36.cjs`, `native_lessons_37_48.cjs`, `native_lessons_49_60.cjs` — regression test.
+- `ISOLATION.md`, `SECURITY.md` e `docs/native-godot-final-audit-2026-10-26.md` — limiti e valutazione.
 
 ## Riproduzione
 
-Il workflow .github/workflows/godot-web-wasm.yml scarica Godot 4.4.1 e i template, esporta il progetto, avvia due server HTTP e usa Chrome automatizzato per le verifiche.
+La CI scarica Godot 4.4.1 e il template Web ufficiale, esporta il progetto, avvia due server HTTP di origine distinta ed esegue test Playwright con Chrome.
 
-Per eseguire manualmente bisogna esportare project/ in web/godot.html e avviare:
-- il server host sulla origine http://127.0.0.1:18767
-- il server WebAssembly con CORS sulla origine http://localhost:18768 (vedi tests/cors_server.py)
+Per eseguirlo localmente: esportare `project/` in `web/godot.html` con template Web 4.4.1. Dalla directory `spikes/godot-web`, avviare un server HTTP per `host/` su `127.0.0.1:18767` e `python3 tests/cors_server.py 18768 web` per la WebAssembly sul nome `localhost:18768`. Aprire `http://127.0.0.1:18767/lesson-lab.html`.
 
-La pagina web/index.html appartiene al primo esperimento NON isolato e non deve essere usata per dati o utenti reali.
+## Cautele
 
-## Limiti da risolvere
+Le scene sono create da veri nodi Godot; i clic vengono emessi artificialmente, e il Timer della lezione 57 è avviato davvero ma il timeout di prova viene emesso manualmente. Godot stampa il Color della lezione 58 come componenti RGBA, non come codice HEX. Le lezioni 4, 6 e 39 hanno altri problemi nei materiali originali.
 
-La lettura delle variabili locali avviene inserendo una chiamata in una copia temporanea di _ready; non funziona automaticamente con ogni costrutto GDScript. Gli scenari alternativi cambiano dichiarazioni iniziali semplici, e i controlli sulle sintassi utilizzano ancora regex. Il grading nel browser è falsificabile e non deve governare XP, progressi salvati o abbonamenti. La sicurezza dell'isolamento va ulteriormente verificata su browser e dispositivi reali, e la migrazione richiede ulteriori test su nodi, scene, risorse, funzioni complesse e casi reali non ancora coperti.
+I validatori usano ancora strumentazione delle variabili locali ed euristiche sintattiche. I risultati sul client non sono sicuri contro manipolazioni e **non devono assegnare XP, progressi cloud o accessi Premium**. Mancano test su dispositivi mobili reali, Safari e connessioni lente. La build Web precedentemente misurata è di circa 43 MB non compressi.
 
-## Segnali, Dizionari e Classi (37–48)
-
-Il runner espone il contenuto dei dizionari e le proprietà elementari delle istanze interne di GDScript. Esegue prove extra sui segnali (connessioni, emissione e output del callback) e può invocare metodi sugli oggetti creati in `_ready()`, per esempio variando l'attacco del personaggio nella lezione 47.
-
-Le funzioni di osservazione sono limitate: dati molto annidati vengono troncati; il codice è strumentato con una trasformazione testuale semplificata, non un parser completo. Le emissioni inviate dal browser tramite JSON possono essere numeri float: nel test i callback stampano `71.0` e `11.0` per valori aggiunti dal sistema di prova. I risultati restano non attendibili per XP e progressi persistenti.
+**Il branch main e il sito pubblico non sono stati modificati.**
