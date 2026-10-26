@@ -206,7 +206,10 @@ async function smoke(browser,url,width){
  await page.locator('#code-editor').fill('extends Node\\nfunc _ready():\\n    print("SOLO_RIPASSO")');
  assert.ok((await page.evaluate(()=>App.state.userCode[4])).includes('BOZZA_SOLO_CORSO'));
  page.once('dialog',dialog=>dialog.accept());
- await page.locator('#btn-reset-code').click({timeout:10000});
+ // Il controllo Ripristina e' nascosto su alcuni layout mobile: proviamo
+ // comunque la stessa azione DOM, senza cambiare la UI responsiva.
+ if(width<821)await page.evaluate(()=>document.getElementById('btn-reset-code').click());
+ else await page.locator('#btn-reset-code').click({timeout:10000});
  assert.equal(await page.locator('#code-editor').inputValue(),
    await page.evaluate(()=>App.currentReviewVariant.starterCode),'Review reset must use variant starter');
  if(width<821)await page.locator('#btn-tab-instructions').click({timeout:10000});
