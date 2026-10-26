@@ -180,7 +180,7 @@ async function smoke(browser,url,width){
        scenario:document.getElementById('lesson-theory')?.textContent||'',
        task:document.getElementById('lesson-task')?.textContent,
        wantedTask:sample.textContent,code:document.getElementById('code-editor').value,
-       starter:v.starterCode,expected:document.getElementById('expected-output-pre').textContent,
+       starter:v.starterCode,expected:document.getElementById('expected-output-pre').innerText,
        expectedVariant:v.expectedOutput||'// Nessun output richiesto',
        hint:!!document.getElementById('btn-toggle-hint'),
        nextHidden:document.getElementById('btn-header-next').classList.contains('hidden'),
@@ -213,6 +213,18 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#code-editor').inputValue(),
    await page.evaluate(()=>App.currentReviewVariant.solution),'Review reveal must use variant solution');
  assert.ok((await page.evaluate(()=>App.state.userCode[4])).includes('BOZZA_SOLO_CORSO'));
+ // Una soluzione di ripasso accettata dà i suoi XP, non completa la lezione 4.
+ await page.evaluate(()=>App.openReviewVariant('rev_syntax_01'));
+ const reviewXpBefore=await page.evaluate(()=>App.state.xp);
+ const reviewSolution=await page.evaluate(()=>REVIEW_VARIANTS.find(v=>v.id==='rev_syntax_01').solution);
+ await page.locator('#code-editor').fill(reviewSolution);
+ await page.locator('#btn-run-code').click({timeout:10000});
+ await page.waitForFunction(()=>App.state.reviewProgress.completedVariants.includes('rev_syntax_01'),null,{timeout:20000});
+ assert.equal(await page.evaluate(()=>App.state.xp),reviewXpBefore+10,'Incorrect review XP reward');
+ assert.ok(!(await page.evaluate(()=>App.state.finishedLessons.includes(4))),'Review completed original lesson');
+ await page.locator('#btn-modal-next').click({timeout:10000});
+ await viewIs(page,'review');
+ assert.equal(await page.evaluate(()=>App.isReviewMode),false,'Victory modal must return to review');
  // Uscire dal Ripasso preserva la bozza precedente del corso.
  await page.evaluate(()=>App.openLesson(4));
  assert.ok((await page.locator('#code-editor').inputValue()).includes('BOZZA_SOLO_CORSO'));
