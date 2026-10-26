@@ -10,3 +10,15 @@ test_*.py
 Thumbs.db
 .vscode/
 .idea/
+
+# Browser tests and development dependencies
+node_modules/
+test-artifacts/
+playwright-report/
+test-results/
+coverage/
+
+# Local environment files (never publish private keys)
+.env
+.env.*
+!.env.example
