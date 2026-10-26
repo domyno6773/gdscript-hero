@@ -87,7 +87,8 @@
     byId('stderr').textContent = '';
     byId('result').textContent = '';
     setStatus('Esecuzione in corso…');
-    frame.contentWindow.postMessage({v: VERSION, type:'run', session, id, code, inspect:['answer']}, RUNNER_ORIGIN);
+    // Opaque-origin iframe: targetOrigin must be '*'; the frame reference and session are validated on reply.
+    frame.contentWindow.postMessage({v: VERSION, type:'run', session, id, code, inspect:['answer']}, '*');
     timer = setTimeout(() => {
       if (active && active.id === id) {
         byId('result').textContent = JSON.stringify({id, status:'timeout', reset:true},null,2);
