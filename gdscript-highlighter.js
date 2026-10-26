@@ -48,26 +48,31 @@
         // Maintain the final blank line and code-block height.
         return result + (source.endsWith('\n') ? ' ' : '');
     }
-    function sync() {
-        const input = document.getElementById('code-editor');
-        const layer = document.getElementById('gdscript-syntax-layer');
-        if (!input || !layer) return;
-        layer.innerHTML = highlight(input.value);
-        const pre = document.getElementById('gdscript-highlight');
-        if (pre) {
-            pre.scrollTop = input.scrollTop;
-            pre.scrollLeft = input.scrollLeft;
+    const targets = {
+        exercise: ['code-editor','gdscript-syntax-layer','gdscript-highlight'],
+        sandbox: ['sandbox-code-editor','sandbox-gdscript-syntax-layer','sandbox-gdscript-highlight']
+    };
+    function sync(which = 'exercise') {
+        const ids=targets[which] || targets.exercise;
+        const input=document.getElementById(ids[0]);
+        const layer=document.getElementById(ids[1]);
+        const pre=document.getElementById(ids[2]);
+        if(!input||!layer)return;
+        layer.innerHTML=highlight(input.value);
+        if(pre){
+            pre.scrollTop=input.scrollTop;
+            pre.scrollLeft=input.scrollLeft;
         }
     }
     function init() {
-        const input = document.getElementById('code-editor');
-        if (!input || input.dataset.syntaxLayerReady) return;
-        input.dataset.syntaxLayerReady = 'true';
-        input.addEventListener('input', sync);
-        input.addEventListener('scroll', sync);
-        // Programmatic changes (lesson loads, reset, hints) call
-        // App.updateLineNumbers(), which invokes sync() as well.
-        sync();
+        for(const [key,ids] of Object.entries(targets)){
+            const input=document.getElementById(ids[0]);
+            if(!input||input.dataset.syntaxLayerReady)continue;
+            input.dataset.syntaxLayerReady='true';
+            input.addEventListener('input',()=>sync(key));
+            input.addEventListener('scroll',()=>sync(key));
+            sync(key);
+        }
     }
     window.GDScriptHighlighter = { init, sync, highlight };
     if (document.readyState === 'loading') {
