@@ -237,13 +237,14 @@ func _build_sandbox_scene(instance: Node, specs: Array) -> void:
                     moved = true
         if not moved:
             break
-    # In _ready() gli script possono collegare i segnali da soli.
-    # Le callback generate da Godot nell'editor (e presenti nella demo
-    # iniziale) vengono collegate soltanto se non esiste già una connessione.
+# In _ready() gli script collegano normalmente i propri segnali.
+# Le callback nominate come quelle dell'editor Godot vengono collegate
+# solo dopo _ready e solo quando manca una connessione esplicita.
+func _connect_sandbox_callbacks(instance: Node, specs: Array) -> void:
     for entry in specs:
         if not (entry is Dictionary):
             continue
-        var child: Node = created.get(str(entry.get("name", "")), null)
+        var child: Node = instance.find_child(str(entry.get("name", "")), true, false)
         if child is Button and child.is_inside_tree():
             if child.get_signal_connection_list("pressed").is_empty():
                 var button_name := str(entry.get("name", ""))
@@ -364,6 +365,8 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
         _build_sandbox_scene(instance, _sandbox_specs)
         _sandbox_instance = instance
     add_child(instance)
+    if sandbox_live and scene_nodes is Array:
+        _connect_sandbox_callbacks(instance, _sandbox_specs)
     var observed := {}
     if inspect is Array:
         var declared := {}
