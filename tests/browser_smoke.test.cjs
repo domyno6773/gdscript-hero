@@ -202,12 +202,14 @@ async function smoke(browser,url,width){
    assert.ok(snap.baseDraft.includes('BOZZA_SOLO_CORSO'),'Course draft overwritten '+id);
  }
  // Digitazione, Ripristina e Mostra soluzione agiscono soltanto sulla variante.
+ if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
  await page.locator('#code-editor').fill('extends Node\\nfunc _ready():\\n    print("SOLO_RIPASSO")');
  assert.ok((await page.evaluate(()=>App.state.userCode[4])).includes('BOZZA_SOLO_CORSO'));
  page.once('dialog',dialog=>dialog.accept());
  await page.locator('#btn-reset-code').click({timeout:10000});
  assert.equal(await page.locator('#code-editor').inputValue(),
    await page.evaluate(()=>App.currentReviewVariant.starterCode),'Review reset must use variant starter');
+ if(width<821)await page.locator('#btn-tab-instructions').click({timeout:10000});
  await page.locator('#btn-toggle-hint').click({timeout:10000});
  assert.ok(await page.locator('#hint-box').isVisible(),'Review hint panel did not open');
  page.once('dialog',dialog=>dialog.accept());
@@ -219,6 +221,7 @@ async function smoke(browser,url,width){
  await page.evaluate(()=>App.openReviewVariant('rev_syntax_01'));
  const reviewXpBefore=await page.evaluate(()=>App.state.xp);
  const reviewSolution=await page.evaluate(()=>REVIEW_VARIANTS.find(v=>v.id==='rev_syntax_01').solution);
+ if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
  await page.locator('#code-editor').fill(reviewSolution);
  await page.locator('#btn-run-code').click({timeout:10000});
  await page.waitForFunction(()=>App.state.reviewProgress.completedVariants.includes('rev_syntax_01'),null,{timeout:20000});
