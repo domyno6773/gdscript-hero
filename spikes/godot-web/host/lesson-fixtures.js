@@ -770,5 +770,232 @@ window.GDHLessonFixtures = [
     ],
     "emissions": [],
     "objectCalls": []
+  },
+  {
+    "id": 49,
+    "chapter": 13,
+    "title": "49. Cos'è un Nodo e l'Albero di Godot",
+    "initialCode": "func _ready():\n    # Accedi al nodo $Giocatore presente nella scena e stampa il suo nome\n    pass\n",
+    "solution": "func _ready():\n    print(\"Nodo rilevato: \", $Giocatore.name)\n",
+    "task": "Nel pannello Scena Godot a destra puoi osservare il nodo Giocatore già presente nell'albero. In _ready() , accedi al nodo con la sintassi nativa $Giocatore . Stampa a console: print(\"Nodo rilevato: \", $Giocatore.name) .",
+    "expectedOutput": "Nodo rilevato: Giocatore",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 49,
+    "actions": []
+  },
+  {
+    "id": 50,
+    "chapter": 13,
+    "title": "50. Testo a Schermo: Il nodo Label",
+    "initialCode": "func _ready():\n    # Modifica $Titolo.text e stampa a console\n    pass\n",
+    "solution": "func _ready():\n    $Titolo.text = \"Benvenuto in Godot 4!\"\n    print(\"Testo a schermo: \", $Titolo.text)\n",
+    "task": "Nella scena è già presente il nodo $Titolo (visibile anche nell'anteprima 2D). Modifica il testo della label: $Titolo.text = \"Benvenuto in Godot 4!\" . Stampa a console: print(\"Testo a schermo: \", $Titolo.text) .",
+    "expectedOutput": "Testo a schermo: Benvenuto in Godot 4!",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 50,
+    "actions": []
+  },
+  {
+    "id": 51,
+    "chapter": 13,
+    "title": "51. L'operatore $: Accedere ai Nodi Figli",
+    "initialCode": "func _ready():\n    # Accedi a $SaluteLabel con l'operatore $, aggiorna il testo a \"HP: 75\" e stampa\n    pass\n",
+    "solution": "func _ready():\n    $SaluteLabel.text = \"HP: 75\"\n    print(\"Nuova salute: \", $SaluteLabel.text)\n",
+    "task": "Nella scena è già presente il nodo $SaluteLabel . Modifica il suo testo: $SaluteLabel.text = \"HP: 75\" . Stampa il valore aggiornato: print(\"Nuova salute: \", $SaluteLabel.text) .",
+    "expectedOutput": "Nuova salute: HP: 75",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 51,
+    "actions": []
+  },
+  {
+    "id": 52,
+    "chapter": 13,
+    "title": "52. ⭐ Sfida di Apprendimento: La Targhetta del Dungeon",
+    "initialCode": "extends Node\n\nfunc _ready():\n    # Configura $TitoloDungeon, $LivelloLabel e $MoneteLabel sotto\n    \n    # Non modificare le righe sotto\n    print(\"Dungeon: \", $TitoloDungeon.text)\n    print(\"Difficolta: \", $LivelloLabel.text)\n    print(\"Bottino: \", $MoneteLabel.text)\n",
+    "solution": "extends Node\n\nfunc _ready():\n    $TitoloDungeon.text = \"Caverna dei Goblin\"\n    $LivelloLabel.text = \"Livello: 1\"\n    $MoneteLabel.text = \"Oro: 50\"\n    \n    # Non modificare le righe sotto\n    print(\"Dungeon: \", $TitoloDungeon.text)\n    print(\"Difficolta: \", $LivelloLabel.text)\n    print(\"Bottino: \", $MoneteLabel.text)\n",
+    "task": "Imposta $TitoloDungeon.text = \"Caverna dei Goblin\" Imposta $LivelloLabel.text = \"Livello: 1\" Imposta $MoneteLabel.text = \"Oro: 50\"",
+    "expectedOutput": "Dungeon: Caverna dei Goblin\nDifficolta: Livello: 1\nBottino: Oro: 50",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 52,
+    "actions": []
+  },
+  {
+    "id": 53,
+    "chapter": 14,
+    "title": "53. Il primo Pulsante: Il nodo Button",
+    "initialCode": "func _ready():\n    # Modifica il testo di $AttaccaBtn e stampa a console\n    pass\n",
+    "solution": "func _ready():\n    $AttaccaBtn.text = \"Sferra Attacco\"\n    print(\"Pulsante configurato: \", $AttaccaBtn.text)\n",
+    "task": "Nella scena è già presente il nodo $AttaccaBtn (visibile anche nell'anteprima Viewport 2D in basso a destra). Modifica la proprietà text del pulsante: $AttaccaBtn.text = \"Sferra Attacco\" . Stampa a console il testo aggiornato: print(\"Pulsante configurato: \", $AttaccaBtn.text) .",
+    "expectedOutput": "Pulsante configurato: Sferra Attacco",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 53,
+    "actions": []
+  },
+  {
+    "id": 54,
+    "chapter": 14,
+    "title": "54. Rendere vivo il pulsante: Il Segnale pressed",
+    "initialCode": "func _ready():\n    # Connetti $AttaccaBtn.pressed e stampa \"Pulsante connesso\"\n    pass\n\n# Definisci func quando_premuto() sotto\n",
+    "solution": "func _ready():\n    $AttaccaBtn.pressed.connect(quando_premuto)\n    print(\"Pulsante connesso\")\n\nfunc quando_premuto():\n    print(\"Colpo sferrato con successo!\")\n",
+    "task": "In _ready() , connetti il segnale: $AttaccaBtn.pressed.connect(quando_premuto) . Stampa in _ready() : print(\"Pulsante connesso\") . Definisci la funzione func quando_premuto(): che stampa print(\"Colpo sferrato con successo!\") .",
+    "expectedOutput": "Pulsante connesso\nColpo sferrato con successo!",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 54,
+    "actions": [
+      {
+        "node": "AttaccaBtn",
+        "signal": "pressed"
+      }
+    ]
+  },
+  {
+    "id": 55,
+    "chapter": 14,
+    "title": "55. Costruire un mini Clicker Game",
+    "initialCode": "var punti = 0\n\nfunc _ready():\n    # Connetti $ClickBtn.pressed ad al_click e stampa \"Clicker pronto\"\n    pass\n\nfunc al_click():\n    # Incrementa punti, aggiorna $PuntiLabel.text e stampa\n    pass\n",
+    "solution": "var punti = 0\n\nfunc _ready():\n    $ClickBtn.pressed.connect(al_click)\n    print(\"Clicker pronto\")\n\nfunc al_click():\n    punti += 1\n    $PuntiLabel.text = \"Click: \" + str(punti)\n    print($PuntiLabel.text)\n",
+    "task": "Crea la variabile var punti = 0 . In _ready() connetti $ClickBtn.pressed.connect(al_click) e stampa print(\"Clicker pronto\") . In func al_click(): incrementa punti += 1 e aggiorna $PuntiLabel.text = \"Click: \" + str(punti) . Stampa il testo aggiornato: print($PuntiLabel.text) .",
+    "expectedOutput": "Clicker pronto\nClick: 1",
+    "locals": [],
+    "properties": [
+      "punti",
+      "monete"
+    ],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 55,
+    "actions": [
+      {
+        "node": "ClickBtn",
+        "signal": "pressed"
+      }
+    ]
+  },
+  {
+    "id": 56,
+    "chapter": 14,
+    "title": "56. ⭐ Sfida di Apprendimento: Il Pannello di Controllo dell'Astronave",
+    "initialCode": "extends Node\n\nfunc _ready():\n    # Connetti $MotoriBtn e $AllarmeBtn sotto\n    \n    # Non modificare la riga sotto\n    print(\"Plancia Operativa\")\n\n# Definisci le funzioni attiva_motori e attiva_allarme sotto\n",
+    "solution": "extends Node\n\nfunc _ready():\n    $MotoriBtn.pressed.connect(attiva_motori)\n    $AllarmeBtn.pressed.connect(attiva_allarme)\n    \n    # Non modificare la riga sotto\n    print(\"Plancia Operativa\")\n\nfunc attiva_motori():\n    $StatoNave.text = \"Motori a Massima Potenza\"\n    print(\"Velocita Aumentata\")\n\nfunc attiva_allarme():\n    $StatoNave.text = \"Allarme Rosso Attivo\"\n    print(\"Scudi al 100%\")\n",
+    "task": "Connetti $MotoriBtn.pressed a attiva_motori Connetti $AllarmeBtn.pressed a attiva_allarme Aggiorna $StatoNave.text nelle rispettive funzioni",
+    "expectedOutput": "Plancia Operativa\nVelocita Aumentata\nScudi al 100%",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 56,
+    "actions": [
+      {
+        "node": "MotoriBtn",
+        "signal": "pressed"
+      },
+      {
+        "node": "AllarmeBtn",
+        "signal": "pressed"
+      }
+    ]
+  },
+  {
+    "id": 57,
+    "chapter": 15,
+    "title": "57. Il nodo Timer: wait_time e segnale timeout",
+    "initialCode": "func _ready():\n    # Configura $Cooldown (wait_time, one_shot), connetti timeout, avvia e stampa\n    pass\n\nfunc quando_scaduto():\n    pass\n",
+    "solution": "func _ready():\n    $Cooldown.wait_time = 2.5\n    $Cooldown.one_shot = true\n    $Cooldown.timeout.connect(quando_scaduto)\n    $Cooldown.start()\n    print(\"Timer avviato per: \", $Cooldown.wait_time, \"s\")\n\nfunc quando_scaduto():\n    print(\"Tempo scaduto!\")\n",
+    "task": "Nella scena è già presente il nodo $Cooldown (Timer). Imposta $Cooldown.wait_time = 2.5 e $Cooldown.one_shot = true . Connetti il segnale $Cooldown.timeout.connect(quando_scaduto) e avvia il timer con $Cooldown.start() . Stampa: print(\"Timer avviato per: \", $Cooldown.wait_time, \"s\") . Definisci func quando_scaduto(): che stampa print(\"Tempo scaduto!\") .",
+    "expectedOutput": "Timer avviato per: 2.5s\nTempo scaduto!",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 57,
+    "actions": [
+      {
+        "node": "Cooldown",
+        "signal": "timeout"
+      }
+    ]
+  },
+  {
+    "id": 58,
+    "chapter": 15,
+    "title": "58. Grafica e Forme: Il nodo ColorRect",
+    "initialCode": "func _ready():\n    # Modifica $BarraVita (color e size) e stampa a console\n    pass\n",
+    "solution": "func _ready():\n    $BarraVita.color = \"#22c55e\"\n    $BarraVita.size = Vector2(200, 20)\n    print(\"Barra salute aggiornata con colore: \", $BarraVita.color)\n",
+    "task": "Nella scena è già presente il nodo $BarraVita (ColorRect visibile nella Viewport 2D). Imposta il colore verde: $BarraVita.color = \"#22c55e\" . Imposta le dimensioni a 200x20: $BarraVita.size = Vector2(200, 20) . Stampa a console: print(\"Barra salute aggiornata con colore: \", $BarraVita.color) .",
+    "expectedOutput": "Barra salute aggiornata con colore: #22c55e",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 58,
+    "actions": []
+  },
+  {
+    "id": 59,
+    "chapter": 15,
+    "title": "59. Ciclo di Vita: Eliminare Nodi con queue_free()",
+    "initialCode": "func _ready():\n    # Verifica has_node(\"Moneta\"), accoda queue_free(), poi usa is_queued_for_deletion()\n    pass\n",
+    "solution": "func _ready():\n    print(\"Moneta presente prima: \", has_node(\"Moneta\"))\n    $Moneta.queue_free()\n    print(\"Moneta in attesa di eliminazione: \", $Moneta.is_queued_for_deletion())\n",
+    "task": "Nella scena è presente il nodo $Moneta . Stampa: print(\"Moneta presente prima: \", has_node(\"Moneta\")) . Rimuovi la moneta con: $Moneta.queue_free() . Stampa la conferma: print(\"Moneta in attesa di eliminazione: \", $Moneta.is_queued_for_deletion()) .",
+    "expectedOutput": "Moneta presente prima: true\nMoneta in attesa di eliminazione: true",
+    "locals": [],
+    "properties": [],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 59,
+    "actions": []
+  },
+  {
+    "id": 60,
+    "chapter": 15,
+    "title": "60. 🏆 Sfida di Apprendimento Finale: Il Negozio dell'Avventuriero",
+    "initialCode": "extends Node\n\nvar monete = 100\n\nfunc _ready():\n    # Connetti $CompraPozioneBtn sotto\n    \n    # Non modificare la riga sotto\n    print(\"Bottega Aperta\")\n\n# Definisci func compra_pozione() sotto\n",
+    "solution": "extends Node\n\nvar monete = 100\n\nfunc _ready():\n    $CompraPozioneBtn.pressed.connect(compra_pozione)\n    \n    # Non modificare la riga sotto\n    print(\"Bottega Aperta\")\n\nfunc compra_pozione():\n    if monete >= 25:\n        monete -= 25\n        $OroLabel.text = \"Monete: \" + str(monete)\n        $MessaggioLabel.text = \"Pozione Acquistata!\"\n    else:\n        $MessaggioLabel.text = \"Oro Insufficiente!\"\n    print($MessaggioLabel.text)\n",
+    "task": "Connetti $CompraPozioneBtn.pressed a compra_pozione Sottrai 25 oro se disponibile e aggiorna $OroLabel.text Aggiorna $MessaggioLabel.text con esito dell'acquisto",
+    "expectedOutput": "Bottega Aperta\nPozione Acquistata!",
+    "locals": [],
+    "properties": [
+      "punti",
+      "monete"
+    ],
+    "calls": [],
+    "emissions": [],
+    "objectCalls": [],
+    "scene": 60,
+    "actions": [
+      {
+        "node": "CompraPozioneBtn",
+        "signal": "pressed"
+      }
+    ]
   }
 ];
