@@ -106,8 +106,9 @@ async function smoke(browser,url,width){
    sceneStart.projectLabel,'Runtime properties must not overwrite saved scene definition');
  // Contrasto del testo: tema scuro e tema chiaro.
  const contrast=await page.evaluate(()=>{
-   const text=getComputedStyle(document.getElementById('sandbox-code-editor')).color;
-   const bg=getComputedStyle(document.querySelector('.sandbox-editor-col .editor-wrapper')).backgroundColor;
+   const syntax=document.getElementById('sandbox-gdscript-highlight');
+   const text=getComputedStyle(syntax).color;
+   const bg=getComputedStyle(document.querySelector('.sandbox-editor-col .gdscript-edit-stack')).backgroundColor;
    const rgb=str=>(str.match(/\d+(?:\.\d+)?/g)||[]).slice(0,3).map(Number);
    const lum=tuple=>tuple.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;})
       .reduce((total,v,i)=>total+v*[.2126,.7152,.0722][i],0);
@@ -115,6 +116,8 @@ async function smoke(browser,url,width){
    return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);
  });
  assert.ok(contrast>=4.5,'Sandbox editor text contrast below WCAG AA: '+contrast);
+ assert.ok(await page.locator('#sandbox-gdscript-syntax-layer .gd-token-keyword').count()>0,
+   'Sandbox editor does not highlight GDScript keywords');
  // Anche nel rendering della scena, un nome nodo non deve trasformarsi in HTML attivo.
  await page.evaluate(()=>{
    const current=App.getActiveSandboxProject();
