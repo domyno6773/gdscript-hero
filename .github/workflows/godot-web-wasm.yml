@@ -5,6 +5,8 @@ on:
     branches: [spike/godot-native-proof-20261026]
     paths:
       - 'spikes/godot-web/**'
+      - 'index.html'
+      - 'app.js'
       - '.github/workflows/godot-web-wasm.yml'
   workflow_dispatch:
 
@@ -64,6 +66,8 @@ jobs:
         run: timeout 160s node spikes/godot-web/tests/native_lessons_49_60.cjs
       - name: Capture advisory release-readiness, payload and startup measurements
         run: timeout 150s node spikes/godot-web/tests/release_readiness.cjs
+      - name: Real editor integration E2E (offline auth, no XP or progress mutation)
+        run: timeout 145s node spikes/godot-web/tests/main_editor_adapter.cjs
       - name: Upload screenshots + browser results
         if: always()
         uses: actions/upload-artifact@v4
