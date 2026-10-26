@@ -93,6 +93,31 @@ async function run(page,id,code){
     console.log('NATIVE_ALTERNATIVE_ACCEPTED '+id);
   }
 
+  // A correct-looking UI state can still be accompanied by an engine error.
+  // The error only happens during the second click, so the default probe looks fine.
+  const brokenClick='var punti = 0\nfunc _ready():\n    $ClickBtn.pressed.connect(al_click)\n    print("Clicker pronto")\nfunc al_click():\n    punti += 1\n    $PuntiLabel.text = "Click: " + str(punti)\n    print($PuntiLabel.text)\n    if punti == 2:\n        push_error("GDH_CLICK_TWO_ERR")';
+  const badClick=await run(page,55,brokenClick);
+  assert.equal(badClick.raw.status,'executed','Two-click adversary must run');
+  assert.equal(badClick.feedback.passed,false,'An error on the second click must fail');
+  assert.ok(badClick.feedback.checks.some(c=>c.desc.includes('Due clic')&&!c.passed));
+  console.log('NATIVE_SCENE_HIDDEN_SECOND_CLICK_ERROR_REJECTED');
+
+  // Typed instance state should not skip the low-funds behavior probe.
+  const typedShop='extends Node\nvar monete: int = 100\nfunc _ready():\n    $CompraPozioneBtn.pressed.connect(compra_pozione)\n    print("Bottega Aperta")\nfunc compra_pozione():\n    if monete >= 25:\n        monete -= 25\n        $OroLabel.text = "Monete: " + str(monete)\n        $MessaggioLabel.text = "Pozione Acquistata!"\n    else:\n        $MessaggioLabel.text = "Oro Insufficiente!"\n    print($MessaggioLabel.text)';
+  const typedShopGrade=await run(page,60,typedShop);
+  assert.equal(typedShopGrade.raw.status,'executed');
+  assert.equal(typedShopGrade.feedback.passed,true,'Typed shop should preserve all scenarios: '+JSON.stringify(typedShopGrade.feedback));
+  console.log('NATIVE_SCENE_TYPED_SHOP_ALTERNATIVE_PASS');
+
+  // A shop which raises an error only after funds run out must be rejected,
+  // even though the printed message and native Label/coin states are correct.
+  const damagedShop=typedShop.replace('    else:\n        $MessaggioLabel', '    else:\n        push_error("GDH_EMPTY_SHOP_ERR")\n        $MessaggioLabel');
+  const damaged=await run(page,60,damagedShop);
+  assert.equal(damaged.raw.status,'executed');
+  assert.equal(damaged.feedback.passed,false,'Hidden low-money engine error must not pass');
+  assert.ok(damaged.feedback.checks.some(c=>c.desc.includes('monete = 20')&&!c.passed));
+  console.log('NATIVE_SCENE_HIDDEN_LOW_FUNDS_ERROR_REJECTED');
+
   await page.screenshot({path:path.join(output,'native-49-60-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-49-60-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){

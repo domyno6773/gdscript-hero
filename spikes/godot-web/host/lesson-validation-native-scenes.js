@@ -19,7 +19,8 @@
       {node:'ClickBtn',signal:'pressed'},{node:'ClickBtn',signal:'pressed'}]});
     if(id===60){
       steps.push({key:'five_clicks',code:src,actions:Array.from({length:5},()=>({node:'CompraPozioneBtn',signal:'pressed'}))});
-      const low=String(src).replace(/(^\s*var\s+monete\s*=\s*)100\b/m,'$120');
+      const low=String(src).replace(/(^[ \t]*var\s+monete(?:\s*:\s*int)?\s*(?:=|:=)\s*)100\b/m,
+        (_match,prefix)=>prefix+'20');
       if(low!==src)steps.push({key:'low_money',code:low,actions:[{node:'CompraPozioneBtn',signal:'pressed'}]});
     }
     return steps;
@@ -28,6 +29,8 @@
     if(id<49||id>60)return base.grade(id,src,reply,stdout,stderr,steps);
     const checks=[],l=lines(stdout),code=clean(src),props=reply?.properties||{};
     const add=(title,result)=>checks.push({desc:title,passed:Boolean(result)});
+    const scenarioClean=key=>Boolean(steps[key]?.reply?.status==='executed'&&
+      !String(steps[key]?.stderr||'').trim());
     add('Script eseguito dal vero Godot',reply?.status==='executed');
     add('Nessun errore segnalato dal motore Godot',!String(stderr||'').trim());
     switch(id){
@@ -69,7 +72,7 @@
         add('Label aggiornata e stampata',text(reply,'PuntiLabel','Click: 1')&&assign(src,'PuntiLabel')&&
           eq(l,['Clicker pronto','Click: 1']));
         add('Due clic aggiornano punti a 2',
-          steps.two_clicks?.reply?.properties?.punti===2&&
+          scenarioClean('two_clicks')&&steps.two_clicks?.reply?.properties?.punti===2&&
           steps.two_clicks?.reply?.scene?.PuntiLabel?.text==='Click: 2'&&
           eq(lines(steps.two_clicks?.stdout),['Clicker pronto','Click: 1','Click: 2']));break;
       case 56:
@@ -121,11 +124,11 @@
         add('Controllo fondi e ramo else',
           /\bif\s+monete\s*>=\s*25\s*:/.test(code)&&/\belse\s*:/.test(code));
         add('Acquisto rifiutato quando monete = 20',
-          steps.low_money?.reply?.properties?.monete===20&&
+          scenarioClean('low_money')&&steps.low_money?.reply?.properties?.monete===20&&
           steps.low_money?.reply?.scene?.MessaggioLabel?.text==='Oro Insufficiente!'&&
           eq(lines(steps.low_money?.stdout),['Bottega Aperta','Oro Insufficiente!']));
         add('Cinque click: quattro acquisti, poi fondi insufficienti',
-          steps.five_clicks?.reply?.properties?.monete===0&&
+          scenarioClean('five_clicks')&&steps.five_clicks?.reply?.properties?.monete===0&&
           steps.five_clicks?.reply?.scene?.OroLabel?.text==='Monete: 0'&&
           steps.five_clicks?.reply?.scene?.MessaggioLabel?.text==='Oro Insufficiente!'&&
           eq(lines(steps.five_clicks?.stdout),[
