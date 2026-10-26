@@ -26,6 +26,9 @@
       stdout=(stdout+text+'\n').slice(0,MAX_OUT);
     }
   };
+  window.gdhTrace = stage => {
+    if(pending!==null)notify({type:'progress',stage:String(stage).slice(0,48)});
+  };
   window.gdhReady = () => { ready = true; notify({type:'ready'}); };
   window.gdhResult = raw => {
     if(!pending)return;
