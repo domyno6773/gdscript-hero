@@ -84,9 +84,26 @@ jobs:
         run: |
           set -euo pipefail
           URL="${{ steps.tunnel.outputs.url }}"
-          curl -fL --retry 6 --retry-delay 5 --connect-timeout 15 "$URL/lesson-lab.html" -o /tmp/godot-demo-public.html
-          grep -q 'Laboratorio sperimentale' /tmp/godot-demo-public.html
-          curl -fL --retry 5 --retry-delay 5 --connect-timeout 15 -sS -o /dev/null "$URL/godot.js"
+          echo "Checking Cloudflare DNS and HTTPS; temporary URLs can take time to become reachable."
+          SUCCESS=0
+          for attempt in $(seq 1 45); do
+            if curl -fLsS --connect-timeout 10 --max-time 22 "$URL/lesson-lab.html" -o /tmp/godot-demo-public.html &&
+               grep -q 'Laboratorio sperimentale' /tmp/godot-demo-public.html &&
+               curl -fLsS --connect-timeout 10 --max-time 22 "$URL/godot.js" -o /tmp/godot-public-js; then
+              SUCCESS=1
+              break
+            fi
+            echo "HTTPS probe attempt $attempt did not succeed; will retry."
+            if ! kill -0 "$(cat /tmp/godot-tunnel.pid)" 2>/dev/null; then
+              cat /tmp/godot-preview-tunnel.log
+              exit 1
+            fi
+            sleep 4
+          done
+          if [[ "$SUCCESS" -ne 1 ]]; then
+            cat /tmp/godot-preview-tunnel.log
+            exit 1
+          fi
           echo "TEMP_GODOT_DEMO_PUBLIC_VERIFIED=$URL/lesson-lab.html"
       - name: Publish direct demo link on experimental branch
         shell: bash
