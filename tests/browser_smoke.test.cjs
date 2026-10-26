@@ -79,6 +79,41 @@ async function smoke(browser,url,width){
    }));
    throw new Error('Godot Sandbox smoke diagnostic: '+JSON.stringify({diagnostics,pageErrors:errors,network}));
  }
+ // Sandbox: figli effettivamente istanziati, proprietà native e click persistenti.
+ const sampleCode='extends Node2D\nvar clicks = 0\nfunc _ready():\n    $Label.text = "Nativo pronto"\n    print("SANDBOX_NODES_READY")\nfunc _on_button_pressed():\n    clicks += 1\n    $Label.text = "Click " + str(clicks)\n    print("SANDBOX_CLICK " + str(clicks))';
+ await page.locator('#sandbox-code-editor').fill(sampleCode);
+ await page.locator('#btn-sandbox-run').click({timeout:10000});
+ await page.waitForFunction(()=>document.getElementById('sandbox-console-output').textContent.includes('SANDBOX_NODES_READY'),null,{timeout:20000});
+ const sceneStart=await page.evaluate(()=>{
+   const s=App.sandboxScene;
+   const label=s.children.find(x=>x.name==='Label');
+   const native=App.sandboxNativeSession;
+   const project=App.getActiveSandboxProject();
+   return {label:label?.text,native:!!native,projectLabel:project.nodes.find(x=>x.name==='Label')?.text,
+     scene:document.getElementById('sandbox-ui-overlay')?.textContent};
+ });
+ assert.equal(sceneStart.label,'Nativo pronto','Godot _ready must update native Label');
+ assert.ok(sceneStart.native,'Godot persistent session missing');
+ assert.ok(sceneStart.scene.includes('Nativo pronto'),'Viewport not synced with Godot');
+ for(let click=1;click<=2;click++){
+   await page.locator('#sandbox-ui-overlay .godot-ui-btn').click({timeout:10000});
+   await page.waitForFunction(i=>document.getElementById('sandbox-console-output').textContent.includes('SANDBOX_CLICK '+i),click,{timeout:8000});
+   assert.equal(await page.evaluate(()=>App.sandboxScene.children.find(x=>x.name==='Label').text),
+     'Click '+click,'Godot instance did not persist click state');
+ }
+ assert.equal(await page.evaluate(()=>App.getActiveSandboxProject().nodes.find(x=>x.name==='Label').text),
+   sceneStart.projectLabel,'Runtime properties must not overwrite saved scene definition');
+ // Contrasto del testo: tema scuro e tema chiaro.
+ const contrast=await page.evaluate(()=>{
+   const text=getComputedStyle(document.getElementById('sandbox-code-editor')).color;
+   const bg=getComputedStyle(document.querySelector('.sandbox-editor-col .editor-wrapper')).backgroundColor;
+   const rgb=str=>(str.match(/\d+(?:\.\d+)?/g)||[]).slice(0,3).map(Number);
+   const lum=tuple=>tuple.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;})
+      .reduce((total,v,i)=>total+v*[.2126,.7152,.0722][i],0);
+   const l1=lum(rgb(text)),l2=lum(rgb(bg));
+   return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);
+ });
+ assert.ok(contrast>=4.5,'Sandbox editor text contrast below WCAG AA: '+contrast);
  // Anche nel rendering della scena, un nome nodo non deve trasformarsi in HTML attivo.
  await page.evaluate(()=>{
    const current=App.getActiveSandboxProject();
