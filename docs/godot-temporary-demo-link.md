@@ -1,7 +1,7 @@
 # Godot native — anteprima temporanea
 
-[Apri il laboratorio Godot (60 lezioni)](https://techno-establish-rpg-moreover.trycloudflare.com/lesson-lab.html)
+[Apri il laboratorio Godot (60 lezioni)](https://quality-possibility-widespread-discovery.trycloudflare.com/lesson-lab.html)
 
 Questa demo senza account, XP o progressi è temporanea; rimane attiva solo finché GitHub Actions esegue il relativo job (massimo circa 3 ore). Il link può scadere.
 
-Workflow: https://github.com/domyno6773/gdscript-hero/actions/runs/40317076817
+Workflow: https://github.com/domyno6773/gdscript-hero/actions/runs/40317136381
