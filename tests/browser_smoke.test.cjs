@@ -160,6 +160,63 @@ async function smoke(browser,url,width){
  assert.ok(saved.finishedLessons.includes(1),'Lesson missing from localStorage');
  // Chiudi la modale di successo come farebbe lo studente prima della seconda prova.
  await page.locator('#btn-modal-stay').click({timeout:10000});
+ // Ripasso: TUTTE le varianti devono mostrare il proprio compito/starter,
+ // anche dopo una sfida di apprendimento con layout differente (lezione 4).
+ await page.evaluate(()=>{
+   App.state.userCode[4]='func _ready():\\n    print("BOZZA_SOLO_CORSO")';
+   App.saveStorage();
+   App.openLesson(4);
+ });
+ const reviewIds=await page.evaluate(()=>REVIEW_VARIANTS.map(v=>v.id));
+ assert.equal(reviewIds.length,17,'Expected 17 review variants');
+ for(const id of reviewIds){
+   const snap=await page.evaluate(variantId=>{
+     App.openReviewVariant(variantId);
+     const v=REVIEW_VARIANTS.find(x=>x.id===variantId);
+     const sample=document.createElement('div');sample.innerHTML=v.task;
+     return {
+       isReview:App.isReviewMode,activeId:App.currentReviewVariant?.id,
+       title:document.getElementById('lesson-title')?.textContent,
+       scenario:document.getElementById('lesson-theory')?.textContent||'',
+       task:document.getElementById('lesson-task')?.textContent,
+       wantedTask:sample.textContent,code:document.getElementById('code-editor').value,
+       starter:v.starterCode,expected:document.getElementById('expected-output-pre').textContent,
+       expectedVariant:v.expectedOutput||'// Nessun output richiesto',
+       hint:!!document.getElementById('btn-toggle-hint'),
+       nextHidden:document.getElementById('btn-header-next').classList.contains('hidden'),
+       previousHidden:document.getElementById('btn-header-prev').classList.contains('hidden'),
+       banner:!document.getElementById('review-exercise-banner').classList.contains('hidden'),
+       back:document.getElementById('btn-back-to-roadmap').textContent,
+       baseDraft:App.state.userCode[4],titleExpected:v.title,scenarioExpected:v.scenario
+     };
+   },id);
+   assert.equal(snap.isReview,true,'Not in review: '+id);
+   assert.equal(snap.activeId,id);
+   assert.equal(snap.title,snap.titleExpected,'Stale title '+id);
+   assert.ok(snap.scenario.includes(snap.scenarioExpected),'Stale scenario '+id);
+   assert.equal(snap.task,snap.wantedTask,'Stale assignment '+id);
+   assert.equal(snap.code,snap.starter,'Stale editor content '+id);
+   assert.equal(snap.expected,snap.expectedVariant,'Stale expected output '+id);
+   assert.ok(snap.hint&&snap.nextHidden&&snap.previousHidden&&snap.banner,'Review controls out of sync '+id);
+   assert.ok(snap.back.includes('Palestra'),'Review back navigation wrong '+id);
+   assert.ok(snap.baseDraft.includes('BOZZA_SOLO_CORSO'),'Course draft overwritten '+id);
+ }
+ // Digitazione, Ripristina e Mostra soluzione agiscono soltanto sulla variante.
+ await page.locator('#code-editor').fill('extends Node\\nfunc _ready():\\n    print("SOLO_RIPASSO")');
+ assert.ok((await page.evaluate(()=>App.state.userCode[4])).includes('BOZZA_SOLO_CORSO'));
+ page.once('dialog',dialog=>dialog.accept());
+ await page.locator('#btn-reset-code').click({timeout:10000});
+ assert.equal(await page.locator('#code-editor').inputValue(),
+   await page.evaluate(()=>App.currentReviewVariant.starterCode),'Review reset must use variant starter');
+ page.once('dialog',dialog=>dialog.accept());
+ await page.locator('#btn-reveal-solution').click({timeout:10000});
+ assert.equal(await page.locator('#code-editor').inputValue(),
+   await page.evaluate(()=>App.currentReviewVariant.solution),'Review reveal must use variant solution');
+ assert.ok((await page.evaluate(()=>App.state.userCode[4])).includes('BOZZA_SOLO_CORSO'));
+ // Uscire dal Ripasso preserva la bozza precedente del corso.
+ await page.evaluate(()=>App.openLesson(4));
+ assert.ok((await page.locator('#code-editor').inputValue()).includes('BOZZA_SOLO_CORSO'));
+ assert.equal(await page.evaluate(()=>App.isReviewMode),false);
  await page.evaluate(()=>App.openLesson(1));
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
  await page.locator('#code-editor').fill('func _ready():\n    print("<img src=x onerror=window.__auditXss=1>")');
