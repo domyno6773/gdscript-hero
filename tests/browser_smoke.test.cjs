@@ -211,10 +211,13 @@ async function smoke(browser,url,width){
          const initialScene=v.initialNodes?.length?GDScriptRuntime.buildScene(v):null;
          const result=await GDScriptRuntime.execute(v.solution,{lesson:v,initialScene});
          const checks=await v.validate(result,GDScriptRuntime);
+         const sceneMatches=!v.initialNodes?.length || v.initialNodes.every(node=>
+           result.native?.scene?.[node.name]?.exists===true &&
+           result.native.scene[node.name].class===node.type);
          results.push({
-           id:v.id,accepted:result.success&&checks.length>0&&checks.every(t=>t.passed),
+           id:v.id,accepted:result.success&&sceneMatches&&checks.length>0&&checks.every(t=>t.passed),
            nativeStatus:result.native?.status||null,error:result.error||null,
-           scene:result.scene?true:false,
+           scene:result.scene?true:false,sceneMatches,
            checks:checks.filter(t=>!t.passed).map(t=>({desc:t.desc,diff:t.diff})).slice(0,8)
          });
        }catch(error){results.push({id:v.id,accepted:false,error:String(error)});}
