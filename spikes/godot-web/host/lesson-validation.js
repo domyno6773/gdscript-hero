@@ -103,7 +103,26 @@
    const loc=name=>Object.prototype.hasOwnProperty.call(s,name)?s[name]:undefined;
    check(list,'Compilazione ed esecuzione tramite Godot nativo',reply?.status==='executed');
    check(list,'Nessun errore segnalato dal motore Godot',!String(stderr||'').trim());
-   if(lesson.locals.length)check(list,'Valori locali rilevati nella funzione _ready',reply?.localCapture==='instrumented');
+   if(reply?.status!=='executed'||String(stderr||'').trim()){
+     return {id,passed:false,verdict:'invalid_code',checks:list,demoOnly:true,
+       nativeStatus:reply?.status,
+       reason:'Il codice originale non è eseguibile senza errori nel motore Godot.'};
+   }
+   const requested=Array.isArray(lesson.locals)?lesson.locals:[];
+   if(requested.length){
+     const captureComplete=reply?.localCapture==='instrumented' &&
+       requested.every(name=>Object.prototype.hasOwnProperty.call(s,name));
+     if(!captureComplete){
+       check(list,'Osservazione locale disponibile e completa',false);
+       return {id,passed:false,verdict:'inconclusive',checks:list,demoOnly:true,
+         nativeStatus:reply?.status,localCapture:reply?.localCapture,
+         localCaptureReason:reply?.localCaptureReason||'values_not_observed',
+         reason:'Godot ha eseguito il codice originale senza errori, ma il laboratorio non riesce a osservare tutte le variabili richieste. Non è una prova che il codice sia sbagliato.',
+         instrumentationDiagnostics:reply?.diagnostics?.instrumentation||'',
+         warning:'Nessun XP o progresso viene assegnato da questa diagnostica.'};
+     }
+     check(list,'Valori locali rilevati nella funzione _ready',true);
+   }
    switch(id){
      case 1:
        check(list,'Stampa Ciao Godot! esatta',eq(lines,['Ciao Godot!']));break;
@@ -435,7 +454,9 @@
          eq(lines,['Membro 1: Aria (Maga)','Membro 2: Krag (Guerriero)','Salute totale party: 200']));break;
      default:check(list,'Non supportato',false);
    }
-   return{id,passed:list.every(x=>x.passed),checks:list,demoOnly:true,nativeStatus:reply?.status,localCapture:reply?.localCapture,
+   const passed=list.every(x=>x.passed);
+   return{id,passed,verdict:passed?'accepted':'requirements_not_met',checks:list,demoOnly:true,
+     nativeStatus:reply?.status,localCapture:reply?.localCapture,
      warning:'Non utilizzare questi esiti locali per assegnare XP, progressi salvati o accessi.'};
  }
  root.GDHLessonLab=Object.freeze({lessons:Object.freeze(lessons),get,grade,scenarios});
