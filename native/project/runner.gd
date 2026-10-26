@@ -230,7 +230,7 @@ func _build_sandbox_scene(instance: Node, specs: Array) -> void:
                 continue
             var node: Node = created.get(name, null)
             var parent: Node = created.get(parent_name, null)
-            if node != null and parent != null and node.get_parent() == null and parent.is_inside_tree():
+            if node != null and parent != null and node.get_parent() == null and (parent == instance or parent.get_parent() != null):
                 # Non consentire cicli e non collegare un nodo al suo discendente.
                 if not node.is_ancestor_of(parent):
                     parent.add_child(node)
