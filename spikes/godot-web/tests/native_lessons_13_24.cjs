@@ -89,6 +89,18 @@ async function run(page,id,code){
     console.log('NATIVE_ALTERNATIVE_ACCEPTED '+id);
   }
 
+  // Distinct, idiomatic Godot syntax: typed arithmetic and grouped conditions.
+  const qualityAlternatives=[
+    [13,'func _ready():\n    var somma: int = 10 + 5\n    var prodotto: int = 5 * 2\n    print(somma)\n    print(prodotto)'],
+    [17,'func _ready():\n    var livello: int = 10\n    if (livello >= 10):\n        print("Livello raggiunto!")']
+  ];
+  for(const [id,source] of qualityAlternatives){
+    const r=await run(page,id,source);
+    assert.equal(r.raw.status,'executed','Native Godot rejected valid syntax: '+id);
+    assert.equal(r.feedback.passed,true,'Quality regression: valid GDScript rejected in '+id+': '+JSON.stringify(r));
+    console.log('NATIVE_IDIOMATIC_ALTERNATIVE_PASS '+id);
+  }
+
   await page.screenshot({path:path.join(output,'native-13-24-lessons-lab.png'),fullPage:true});
   fs.writeFileSync(path.join(output,'native-13-24-lessons.json'),JSON.stringify(results,null,2));
  }catch(e){
