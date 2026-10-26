@@ -26,7 +26,7 @@
     session = crypto.randomUUID();
     frame = document.createElement('iframe');
     frame.id = 'isolated-runner';
-    frame.sandbox = 'allow-scripts allow-same-origin';
+    frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
     frame.referrerPolicy = 'no-referrer';
     frame.title = 'Godot runner — origin separato';
     frame.src = RUNNER_ORIGIN + '/isolated.html?session=' + encodeURIComponent(session);
