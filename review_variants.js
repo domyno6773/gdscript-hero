@@ -14,6 +14,14 @@ async function reviewAuditMutation(result, variantId, alternateCode, expectedLin
  return (result.logs || []).some(v => String(v).trim() === target) &&
      !(replay.logs || []).some(v => String(v).trim() === target);
 }
+// Verifica causale con Godot autentico: elimina l'emissione del segnale,
+// riesegue il codice e controlla che il risultato richiesto scompaia.
+// Non si affida al vecchio oggetto Signal del runtime JavaScript.
+async function reviewEmissionAudit(result, variantId, patterns, expectedLine) {
+ let modified = String(result.code || '');
+ for(const pattern of patterns)modified=modified.replace(pattern,'$1pass');
+ return reviewAuditMutation(result, variantId, modified, expectedLine);
+}
 const REVIEW_VARIANTS = [
     // ---------------------------------------------------------
     // 1. SINTASSI BASE & OUTPUT (syntax_basics)
@@ -773,7 +781,10 @@ func on_allarme_attivato():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "[ALLARME] Violazione perimetro rilevata!", Ricevuto: "${logs.join(' | ')}"`
             });
-            const causalAudit = !!(result.scope?.allarme_attivato?.emissions?.some(args => args.length === 0));
+            const causalAudit = await reviewEmissionAudit(result, 'rev_signals_01', [
+                /^([ \t]*)allarme_attivato\.emit\s*\([^\n]*\)[ \t]*$/m,
+                /^([ \t]*)emit_signal\s*\(\s*["']allarme_attivato["'][^\n]*\)[ \t]*$/m
+            ], '[ALLARME] Violazione perimetro rilevata!');
             tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
@@ -850,7 +861,10 @@ func quando_ricaricato(quantita):
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Energia ripristinata: +50 MW", Ricevuto: "${logs.join(' | ')}"`
             });
-            const causalAudit = !!(result.scope?.energia_ricaricata?.emissions?.some(args => args.length === 1 && args[0] === 50));
+            const causalAudit = await reviewEmissionAudit(result, 'rev_signals_02', [
+                /^([ \t]*)energia_ricaricata\.emit\s*\([^\n]*\)[ \t]*$/m,
+                /^([ \t]*)emit_signal\s*\(\s*["']energia_ricaricata["'][^\n]*\)[ \t]*$/m
+            ], 'Energia ripristinata: +50 MW');
             tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
@@ -1081,7 +1095,9 @@ func quando_premuto():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Sequenza di lancio avviata con successo!", Ricevuto: "${logs.join(' | ')}"`
             });
-            const causalAudit = !!(result.scene?.get_node('BtnLancio')?.pressed?.emissions?.length);
+            const causalAudit = await reviewEmissionAudit(result, 'rev_ui_button_01', [
+                /^([ \t]*)(?:\$BtnLancio|get_node\(\s*["']BtnLancio["']\s*\))\.pressed\.emit\s*\([^\n]*\)[ \t]*$/m
+            ], 'Sequenza di lancio avviata con successo!');
             tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
@@ -1168,7 +1184,9 @@ func fai_esplodere():
                 passed: hasLog,
                 diff: hasLog ? null : `Atteso: "Detonazione mina energetica!", Ricevuto: "${logs.join(' | ')}"`
             });
-            const causalAudit = !!(result.scene?.get_node('TimerMina')?.timeout?.emissions?.length);
+            const causalAudit = await reviewEmissionAudit(result, 'rev_timers_01', [
+                /^([ \t]*)(?:\$TimerMina|get_node\(\s*["']TimerMina["']\s*\))\.timeout\.emit\s*\([^\n]*\)[ \t]*$/m
+            ], 'Detonazione mina energetica!');
             tests.push({ desc: "Il concetto richiesto viene realmente eseguito", passed: !!causalAudit, diff: causalAudit ? null : "Esegui realmente il ciclo, la funzione, la condizione o il segnale richiesto." });
             return tests;
         }
