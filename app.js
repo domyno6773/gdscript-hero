@@ -4511,7 +4511,7 @@ const App = {
             }
 
             const expectedOutputPre = document.getElementById('expected-output-pre');
-            expectedOutputPre.innerText = variant.expectedOutput || "// Nessun output richiesto";
+            expectedOutputPre.textContent = variant.expectedOutput || "// Nessun output richiesto";
 
             const tests = await variant.validate(result, GDScriptRuntime);
             if (!this.isReviewMode || this.currentReviewVariant !== variant ||
@@ -4898,7 +4898,7 @@ const App = {
         // Resetta console e test results
         document.getElementById('real-output-pre').innerText = "// Clicca su 'Verifica Codice' per eseguire lo script della variante";
         document.getElementById('real-output-pre').style.color = '#94a3b8';
-        document.getElementById('expected-output-pre').innerText = variant.expectedOutput || "// Nessun output richiesto";
+        document.getElementById('expected-output-pre').textContent = variant.expectedOutput || "// Nessun output richiesto";
         document.getElementById('test-results-view').innerHTML = '';
         const badge = document.getElementById('test-status-badge');
         badge.innerText = "In attesa di verifica";
