@@ -1,0 +1,94 @@
+name: Temporary Godot demo — no setup
+
+on:
+  push:
+    branches: [spike/godot-native-proof-20261026]
+    paths:
+      - 'spikes/godot-web/preview/**'
+      - 'spikes/godot-web/tests/preview_public_smoke.cjs'
+      - '.github/workflows/godot-temporary-demo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  demo:
+    name: Temporary HTTPS lesson lab (3 hours)
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test harness
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+      - name: Download Godot 4.4.1 and official web template
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 5 -o /tmp/godot-linux.zip https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
+          unzip -q /tmp/godot-linux.zip -d /tmp
+          chmod +x /tmp/Godot_v4.4.1-stable_linux.x86_64
+          curl -fL -C - --retry 5 --retry-all-errors --retry-delay 8 -o /tmp/godot-templates.tpz https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz
+          unzip -p /tmp/godot-templates.tpz templates/web_nothreads_release.zip > /tmp/web_nothreads_release.zip
+          test -s /tmp/web_nothreads_release.zip
+      - name: Build Godot WebAssembly
+        run: |
+          set -euo pipefail
+          cd spikes/godot-web/project
+          sed -i 's|custom_template/release=""|custom_template/release="/tmp/web_nothreads_release.zip"|' export_presets.cfg
+          /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path . --editor --quit
+          /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path . --export-release Web ../web/godot.html
+          test -s ../web/godot.js
+          test -s ../web/godot.wasm
+          test -s ../web/godot.pck
+          du -h ../web/godot.wasm
+      - name: Test local preview in actual Chrome
+        run: timeout 135s node spikes/godot-web/tests/preview_public_smoke.cjs
+      - name: Download free temporary tunnel client
+        run: |
+          curl -fLsS --retry 3 -o /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+          chmod +x /tmp/cloudflared
+          /tmp/cloudflared --version
+      - name: Start temporary public HTTPS demo
+        id: tunnel
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 spikes/godot-web/preview/serve_preview.py 18769 > /tmp/godot-preview-http.log 2>&1 &
+          echo $! > /tmp/godot-http.pid
+          curl -fsS --retry 10 --retry-connrefused --retry-delay 1 http://127.0.0.1:18769/lesson-lab.html -o /dev/null
+          /tmp/cloudflared tunnel --url http://127.0.0.1:18769 --no-autoupdate --protocol http2 > /tmp/godot-preview-tunnel.log 2>&1 &
+          echo $! > /tmp/godot-tunnel.pid
+          URL=""
+          for i in $(seq 1 80); do
+            URL="$(grep -Eo 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/godot-preview-tunnel.log | head -n 1 || true)"
+            if [[ -n "$URL" ]]; then break; fi
+            if ! kill -0 "$(cat /tmp/godot-tunnel.pid)" 2>/dev/null; then
+              cat /tmp/godot-preview-tunnel.log
+              exit 1
+            fi
+            sleep 2
+          done
+          if [[ -z "$URL" ]]; then cat /tmp/godot-preview-tunnel.log; exit 1; fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "TEMP_GODOT_DEMO_URL=$URL/lesson-lab.html"
+          echo "### Demo temporanea: Godot nativo" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**[Apri la demo interattiva]($URL/lesson-lab.html)**" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Nessun account, XP o progressi. URL pubblico temporaneo, attivo finché il job non termina." >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify real public HTTPS endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="${{ steps.tunnel.outputs.url }}"
+          curl -fL --retry 6 --retry-delay 5 --connect-timeout 15 "$URL/lesson-lab.html" -o /tmp/godot-demo-public.html
+          grep -q 'Laboratorio sperimentale' /tmp/godot-demo-public.html
+          curl -fL --retry 5 --retry-delay 5 --connect-timeout 15 -sS -o /dev/null "$URL/godot.js"
+          echo "TEMP_GODOT_DEMO_PUBLIC_VERIFIED=$URL/lesson-lab.html"
+      - name: Keep demo accessible for three hours
+        run: |
+          echo "Temporary Godot preview is now accessible from the HTTPS link above."
+          sleep 10800
