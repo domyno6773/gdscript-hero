@@ -550,14 +550,14 @@ func __test_status_thresholds():
     var res = []
     salute = 100
     is_vivo = true
-    res.push(get_status()) # In Forma
+    res.append(get_status()) # In Forma
     salute = 50
-    res.push(get_status()) # Ferito
+    res.append(get_status()) # Ferito
     salute = 20
-    res.push(get_status()) # Critico
+    res.append(get_status()) # Critico
     salute = 0
     is_vivo = false
-    res.push(get_status()) # Sconfitto
+    res.append(get_status()) # Sconfitto
     return res
 `;
                 try {
