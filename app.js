@@ -2843,7 +2843,7 @@ const App = {
                 <div id="lesson-theory" class="theory-body">${lesson.theory}</div>
                 <div class="task-box ${lesson.isDebugging ? 'debugging-task-box' : ''}">
                     <div class="task-header">
-                        <span class="target-icon">${lesson.isDebugging ? '🐛' : '🎯'}</span>
+                        <span class="target-icon" aria-hidden="true"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span>
                         <h3>${lesson.isDebugging ? 'Compito di Debugging:' : 'Il Tuo Obiettivo:'}</h3>
                     </div>
                     <div id="lesson-task" class="task-body">${lesson.task}</div>
