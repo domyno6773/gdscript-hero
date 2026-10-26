@@ -75,14 +75,19 @@ Su Windows è presente anche `avvia.bat`, che apre direttamente `index.html`. Pe
 
 ## Architettura
 
-L'esecuzione didattica usa un **runtime JavaScript nel browser** che implementa un sottoinsieme di GDScript e alcuni comportamenti di Godot. È uno strumento di apprendimento, **non** l'interprete completo del motore Godot: alcuni programmi o API potrebbero comportarsi diversamente nel progetto Godot nativo.
+La verifica del **corso principale** usa ora direttamente **Godot Engine 4.4.1 WebAssembly**, eseguito in un iframe isolato. Non esiste più un selettore Beta: il pulsante «Verifica il codice» utilizza il motore Godot per tutte le 60 lezioni. Gli esiti accettati attivano le ricompense XP, lo sblocco dei capitoli, la telemetria e i salvataggi esistenti. Le verifiche inconclusive non attribuiscono XP.
+
+**Anche Sandbox, Ripasso e Arena invocano Godot per eseguire GDScript**, tramite un adattatore che conserva il formato dei risultati usato dall'interfaccia. Alcune funzioni avanzate della vecchia simulazione (ad esempio scene Sandbox dinamiche e interazioni persistenti tra chiamate) non sono ancora equivalenti alle funzionalità native di Godot e richiedono ulteriori rifiniture; il runtime JavaScript viene mantenuto nel repository per le classi di rappresentazione delle scene e per vecchi test, ma non è più usato come interprete del codice nella UI pubblica.
+
+**Limite di sicurezza:** XP e salvataggi attuali sono gestiti dal client, come già avveniva prima. Un risultato Godot nel browser **non** è una certificazione server-side: un utente malintenzionato può alterare il client e i suoi messaggi. Non usare questi dati per classifiche competitive affidabili o autorizzazioni Premium senza verifica sul server.
 
 | File | Funzione |
 | --- | --- |
 | `index.html`, `app.js` | Interfaccia e logica applicativa |
 | `lessons.js` | Capitoli, lezioni, verifiche e catalogo dei progetti |
-| `runtime.js`, `diagnostic.js` | Runtime didattico e analisi degli errori |
+| `runtime.js`, `diagnostic.js` | Classi di compatibilità scena, vecchi test e diagnostica didattica |
 | `gdscript-highlighter.js` | Colorazione della sintassi nel codice |
+| `native/` | Motore Godot WebAssembly, runner isolato e validatori nativi |
 | `styles.css`, `godot-theme.css`, `exercise-redesign.css` | Sistema visivo e layout degli esercizi |
 | `viewport2d.js` | Strumenti e viewport 2D |
 | `arena_project.js` | Progetto guidato Arena del Gladiatore |
