@@ -51,6 +51,13 @@ check('isolation','Sandbox del runner separata dalla pagina principale',
  opaque?'Sandbox senza allow-same-origin, messaggi con controlli su finestra, origine/sessione; CI esegue anche probe di navigazione.':
  'Configurazione iframe/messaggi diversa da quella revisionata: ripetere audit di sicurezza.','high');
 
+const localOrigins=host.includes("const RUNNER_ORIGIN = 'http://localhost:18768'") &&
+ isolated.includes("const PARENT_ORIGIN = 'http://127.0.0.1:18767'");
+check('production-origins','Configurazione sicura delle origini per un eventuale deploy',
+ localOrigins?'blocker':'review',
+ localOrigins?'Origini hard-coded di localhost/127.0.0.1 per il proof of concept; serve configurazione esplicita di due domini distinti, CORS e CSP.':
+  'La configurazione è cambiata: verificare i domini consentiti, i cookie e le regole CORS/CSP.','high');
+
 const mayBridge=runner.includes('JavaScriptBridge')&&isolated.includes('window.gdhResult');
 check('forged-results','Origine dei risultati del runner attendibile',
  mayBridge?'blocker':'review',
