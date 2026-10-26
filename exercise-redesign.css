@@ -583,3 +583,600 @@ body:has(#view-exercise:not(.hidden)) {
         outline-offset: 1px;
     }
 }
+
+
+/* ======================================================================
+   GODOT REFERENCE PASS V2 — Actual editor interface, not a neon re-skin.
+   Applies to exercise mode only; the roadmap and other layouts stay intact.
+   ====================================================================== */
+body:has(#view-exercise:not(.hidden)) {
+    --bg-void: #1b1f26;
+    --bg-base: #1b1f26;
+    --bg-surface: #262d38;
+    --bg-elevated: #2c3542;
+    --bg-card: #262d38;
+    --bg-editor: #161b22;
+    --bg-panel: #222a35;
+    --border: #405064;
+    --border-dim: #3d4b5f;
+    --border-bright: #566b83;
+    --neon-cyan: #559bd0;
+    --neon-mint: #6cb69a;
+    --neon-amber: #f1b640;
+    --accent-cyan: #559bd0;
+    --accent-primary: #559bd0;
+    --accent-reward: #f1b640;
+    --text-main: #eaf2fc;
+    --text-muted: #a8bdd3;
+    background: #1b1f26;
+    color: #eaf2fc;
+}
+body:has(#view-exercise:not(.hidden)) .navbar {
+    background: #252b35 !important;
+    border-bottom: 1px solid #405064 !important;
+    box-shadow: none !important;
+    min-height: 66px;
+    height: 66px;
+}
+body:has(#view-exercise:not(.hidden)) .navbar::before,
+body:has(#view-exercise:not(.hidden)) .navbar::after,
+body:has(#view-exercise:not(.hidden)) .nav-btn::before,
+body:has(#view-exercise:not(.hidden)) .nav-btn::after {
+    box-shadow: none !important;
+    filter: none !important;
+}
+body:has(#view-exercise:not(.hidden)) .logo-text {
+    font-family: 'Silkscreen','Chakra Petch',monospace !important;
+    font-size: 1.00rem !important;
+    letter-spacing: -.045em !important;
+    text-shadow: none !important;
+    text-transform: lowercase;
+    color: #f2f7fd !important;
+}
+body:has(#view-exercise:not(.hidden)) .logo-text .accent,
+body:has(#view-exercise:not(.hidden)) .logo-icon {
+    color: #569dd1 !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+body:has(#view-exercise:not(.hidden)) .nav-center {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    gap: 2px;
+}
+body:has(#view-exercise:not(.hidden)) .nav-center .nav-btn {
+    color: #a8bdd3 !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    filter: none !important;
+    font: 500 .80rem/1.15 'Inter',sans-serif !important;
+    letter-spacing: 0 !important;
+    text-shadow: none !important;
+    transition: background-color .12s,border-color .12s;
+}
+body:has(#view-exercise:not(.hidden)) .nav-center .nav-btn .icon { color: #699ac0; }
+body:has(#view-exercise:not(.hidden)) .nav-center .nav-btn.active {
+    background: #343e4b !important;
+    border: 1px solid #47596d !important;
+    border-bottom: 2px solid #f2b944 !important;
+    color: #fbfdff !important;
+}
+body:has(#view-exercise:not(.hidden)) .nav-center .nav-btn:hover {
+    background: #303a47 !important;
+    color: #f9fbff !important;
+}
+body:has(#view-exercise:not(.hidden)) .stat-pill,
+body:has(#view-exercise:not(.hidden)) .nav-right .stat-pill,
+body:has(#view-exercise:not(.hidden)) .nav-right .profile-btn,
+body:has(#view-exercise:not(.hidden)) .nav-right .avatar-container {
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+body:has(#view-exercise:not(.hidden)) .xp-pill .stat-value,
+body:has(#view-exercise:not(.hidden)) .xp-pill .xp-icon {
+    color: #f3b544 !important;
+}
+body:has(#view-exercise:not(.hidden)) .nav-right .stat-label {
+    color: #a5b8d0 !important;
+}
+#view-exercise {
+    --ex-bg: #1b1f26;
+    --ex-surface: #252c36;
+    --ex-elevated: #2d3846;
+    --ex-editor: #161b22;
+    --ex-border: #45566b;
+    --ex-muted: #aabed2;
+    --ex-blue: #4c96c3;
+    --ex-amber: #f5b642;
+    background: #1b1f26 !important;
+    font-family: 'Inter','Plus Jakarta Sans',sans-serif;
+    color: #d5e2f2;
+}
+#view-exercise .workspace-grid {
+    gap: 16px !important;
+    grid-template-columns: minmax(315px, 375px) minmax(0,1fr) !important;
+    padding: 22px 24px !important;
+    height: calc(100dvh - 68px) !important;
+    min-height: 540px;
+    background: #1b1f26 !important;
+}
+#view-exercise .panel-lesson,
+#view-exercise .panel-code {
+    background: #242b35 !important;
+    border: 2px solid #45566b !important;
+    border-radius: 10px !important;
+    box-shadow: 5px 6px 0 rgba(0,0,0,.45) !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+}
+#view-exercise .panel-lesson {
+    padding: 21px 23px 25px !important;
+    overflow-y: auto;
+}
+#view-exercise .panel-code {
+    background: #161b22 !important;
+    overflow: hidden !important;
+    min-width: 0;
+}
+#view-exercise .lesson-meta {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #3c4755;
+    margin-bottom: 19px;
+}
+#view-exercise .back-link {
+    font-size: .78rem;
+    font-weight: 600;
+    color: #8fb4d5 !important;
+    text-shadow: none !important;
+}
+#view-exercise .back-link:hover { color: #d3ecff !important; }
+#view-exercise #lesson-xp-badge {
+    color: #f5b642 !important;
+    background: rgba(245,182,66,.10) !important;
+    border: 1px solid rgba(245,182,66,.28) !important;
+    border-radius: 5px !important;
+    padding: 5px 8px !important;
+    box-shadow: none !important;
+    font-family: 'Inter',sans-serif;
+}
+#view-exercise .lesson-header-row {
+    min-height: 63px;
+    padding-right: 82px;
+    margin-bottom: 11px;
+    border: none !important;
+}
+#view-exercise #lesson-title {
+    font-family: 'Silkscreen','Chakra Petch',monospace !important;
+    font-size: clamp(1.0rem, 1.25vw, 1.45rem) !important;
+    line-height: 1.55 !important;
+    color: #e9f2fb !important;
+    text-shadow: none !important;
+    letter-spacing: -.055em !important;
+    font-weight: 700 !important;
+}
+#view-exercise .exercise-mascot-slot {
+    top: 76px;
+    right: 20px;
+    width: 66px;
+    height: 66px;
+    border: 1.5px dashed #6c829b;
+    border-radius: 12px;
+    background: #2d3947;
+    box-shadow: none;
+}
+#view-exercise .exercise-mascot-slot-mark {
+    color: #90afce;
+    font-size: 27px;
+}
+#view-exercise .lesson-content,
+#view-exercise .theory-body,
+#view-exercise .task-body,
+#view-exercise .hint-content {
+    font-size: .85rem;
+    line-height: 1.65;
+    color: #b9cee4 !important;
+    text-shadow: none !important;
+}
+#view-exercise .lesson-content h3,
+#view-exercise .theory-body h3,
+#view-exercise .task-header h3 {
+    font-family: 'Silkscreen','Chakra Petch',monospace !important;
+    font-weight: 700 !important;
+    font-size: .97rem !important;
+    line-height: 1.5;
+    letter-spacing: -.04em;
+    color: #f0f6ff !important;
+    text-shadow: none !important;
+}
+#view-exercise .lesson-content p,
+#view-exercise .lesson-content li {
+    color: #b9cee4;
+}
+#view-exercise .lesson-content pre,
+#view-exercise .theory-body pre,
+#view-exercise .lesson-content .code-preview {
+    background: #171c24 !important;
+    color: #d6eaff !important;
+    border: 1px solid #3c4c60 !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+}
+#view-exercise .lesson-content code:not(pre code) {
+    border: 1px solid #34485c !important;
+    background: #1d303e !important;
+    color: #8dc7ee !important;
+    border-radius: 3px;
+}
+#view-exercise .task-box,
+#view-exercise .task-box.debugging-task-box {
+    background: #2a3543 !important;
+    border: 1px solid #45617e !important;
+    border-left: 3px solid #579dc8 !important;
+    box-shadow: none !important;
+    border-radius: 7px !important;
+    padding: 15px !important;
+}
+#view-exercise .task-header,
+#view-exercise .task-header h3,
+#view-exercise .target-icon { color: #f1f6ff !important; }
+#view-exercise .hints-section {
+    background: #2a3340 !important;
+    border: 1px solid #40556c !important;
+    border-radius: 7px !important;
+    box-shadow: none !important;
+}
+#view-exercise .hints-toggle-btn {
+    color: #d8e6f5 !important;
+    background: transparent !important;
+}
+#view-exercise .hints-toggle-btn:hover {
+    background: #303f50 !important;
+}
+#view-exercise .hint-box {
+    background: #242e3b !important;
+    box-shadow: none !important;
+}
+#view-exercise button.btn-subtle,
+#view-exercise button.btn-danger-subtle {
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+#view-exercise .editor-header {
+    background: #242c36 !important;
+    border-bottom: 2px solid #40546b !important;
+    height: 55px !important;
+    min-height: 55px !important;
+    padding: 0 11px 0 0 !important;
+    box-shadow: none !important;
+}
+#view-exercise .editor-header .tab {
+    background: #2d3744 !important;
+    border-right: 1px solid #40546b !important;
+    border-bottom: 3px solid #f4b841 !important;
+    height: 55px !important;
+    min-height: 55px !important;
+    padding: 0 15px;
+    gap: 8px;
+    color: #f0f8ff;
+    white-space: nowrap;
+}
+#view-exercise .editor-header .tab .lang-tag {
+    color: #9ccae9 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0;
+    font-size: .65rem !important;
+}
+#view-exercise .editor-header .tab .file-name {
+    font: 700 .88rem/1.2 'Inter',sans-serif !important;
+    color: #f5f9ff !important;
+    text-shadow: none !important;
+}
+#view-exercise .editor-tools .btn-tool {
+    color: #c1d2e6 !important;
+    background: #2e3a49 !important;
+    border: 1px solid #445b76 !important;
+    border-radius: 5px !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+#view-exercise .editor-tools .btn-tool:hover {
+    color: #f5faff !important;
+    background: #3a4d61 !important;
+}
+#view-exercise #btn-run-code {
+    background: #4b96c4 !important;
+    color: #12273b !important;
+    border: 1px solid #6cb6dd !important;
+    box-shadow: 0 3px 0 #275d82 !important;
+    border-radius: 6px !important;
+    font: 800 .80rem/1.1 'Inter',sans-serif !important;
+    padding: 0 15px !important;
+    min-height: 39px !important;
+    height: 39px !important;
+    white-space: nowrap;
+}
+#view-exercise #btn-run-code .run-icon,
+#view-exercise #btn-run-code .run-text { color: #0f2537 !important; }
+#view-exercise .exercise-run-shortcut { color: #245170 !important; }
+#view-exercise #btn-run-code:hover {
+    background: #69b1dd !important;
+    transform: translateY(0) !important;
+    filter: none !important;
+}
+#view-exercise .editor-wrapper {
+    background: #151b22 !important;
+    border: 0 !important;
+    min-height: 145px;
+    position: relative;
+    box-shadow: none !important;
+}
+#view-exercise .line-numbers {
+    width: 52px !important;
+    flex: 0 0 52px;
+    box-sizing: border-box;
+    padding: 16px 12px 16px 0 !important;
+    text-align: right;
+    background: #151b22 !important;
+    border-right: 1px solid #303e50 !important;
+    color: #7188a5 !important;
+    font: 400 14px/1.6 'Fira Code','JetBrains Mono',monospace !important;
+    text-shadow: none !important;
+    white-space: pre !important;
+    overflow: hidden;
+}
+#view-exercise .gdscript-edit-stack {
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+    background: #151b22;
+}
+#view-exercise .gdscript-edit-stack #code-editor,
+#view-exercise .gdscript-edit-stack #gdscript-highlight {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    padding: 16px 18px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    outline: none !important;
+    border-radius: 0 !important;
+    font: 500 14px/1.6 'Fira Code','JetBrains Mono',monospace !important;
+    letter-spacing: 0 !important;
+    tab-size: 4 !important;
+    white-space: pre !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    text-align: left !important;
+    -webkit-text-size-adjust: 100%;
+}
+#view-exercise .gdscript-edit-stack #gdscript-highlight {
+    z-index: 1;
+    background: transparent;
+    pointer-events: none;
+    user-select: none;
+    color: #cad8ed;
+    overflow: hidden !important;
+}
+#view-exercise .gdscript-edit-stack #code-editor {
+    z-index: 2;
+    background: transparent !important;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    caret-color: #8bd2ff !important;
+    overflow: auto !important;
+    resize: none !important;
+    box-shadow: none !important;
+}
+#view-exercise .gdscript-edit-stack #code-editor::placeholder {
+    color: #7388a3 !important;
+    -webkit-text-fill-color: #7388a3 !important;
+}
+#view-exercise .gdscript-edit-stack #code-editor::selection {
+    background: rgba(91,161,218,.4);
+}
+#view-exercise .gdscript-highlight code { font: inherit; color: inherit; }
+#view-exercise .gd-token-keyword { color: #ed6587 !important; }
+#view-exercise .gd-token-type { color: #57d9cc !important; }
+#view-exercise .gd-token-function { color: #82bdff !important; }
+#view-exercise .gd-token-string { color: #e4c16e !important; }
+#view-exercise .gd-token-number { color: #ca9cf4 !important; }
+#view-exercise .gd-token-constant { color: #ca9cf4 !important; }
+#view-exercise .gd-token-comment { color: #778dab !important; font-style: normal; }
+#view-exercise .gd-token-annotation { color: #f1b642 !important; }
+#view-exercise .gd-token-node { color: #7accb6 !important; }
+#view-exercise .mobile-code-toolbar {
+    background: #242c37 !important;
+    border-top: 1px solid #40546b !important;
+    box-shadow: none !important;
+}
+#view-exercise .mobile-code-toolbar .quick-key {
+    color: #b8d6ed !important;
+    background: #303d4c !important;
+    border: 1px solid #4b6079 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+#view-exercise .validation-panel,
+#view-exercise .validation-panel.console-only {
+    height: 288px !important;
+    min-height: 288px !important;
+    max-height: 288px !important;
+    flex: 0 0 288px !important;
+    border-top: 2px solid #45566a !important;
+    background: #242c36 !important;
+    box-shadow: none !important;
+}
+#view-exercise .validation-split-grid {
+    background: #242c36 !important;
+    padding: 9px !important;
+    gap: 10px !important;
+}
+#view-exercise .validation-console-col {
+    background: #242c36 !important;
+    border: 0 !important;
+    padding-right: 0 !important;
+    box-shadow: none !important;
+}
+#view-exercise .validation-col-header {
+    background: transparent !important;
+    border-bottom: 1px solid #435368 !important;
+    border-radius: 0 !important;
+    height: 35px !important;
+    min-height: 35px !important;
+    padding: 0 8px !important;
+}
+#view-exercise .vtab-title-tag {
+    font: 700 .96rem/1.3 'Silkscreen','Chakra Petch',monospace !important;
+    color: #f2f7ff !important;
+    letter-spacing: -.035em !important;
+    text-shadow: none !important;
+}
+#view-exercise .vtab-icon { opacity: .6; font-size: .75rem; }
+#view-exercise .validation-col-content { padding: 9px 7px !important; }
+#view-exercise .exercise-primary-feedback {
+    padding: 8px 10px !important;
+    background: #273c50 !important;
+    border: 1px solid #476888 !important;
+    border-radius: 5px !important;
+    box-shadow: none !important;
+}
+#view-exercise .exercise-primary-feedback[data-state="error"] {
+    background: #493036 !important;
+    border-color: #9a6068 !important;
+}
+#view-exercise .exercise-primary-feedback[data-state="success"] {
+    background: #264338 !important;
+    border-color: #569c7a !important;
+}
+#view-exercise .exercise-feedback-copy strong {
+    font: 700 .77rem/1.35 'Inter',sans-serif !important;
+    color: #baddf7 !important;
+    text-shadow: none !important;
+}
+#view-exercise .exercise-feedback-copy p { color: #d0deef !important; font-size: .75rem !important; }
+#view-exercise .output-comparison-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 12px !important;
+}
+#view-exercise .output-box {
+    background: #171d26 !important;
+    border: 1px solid #405269 !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+#view-exercise .output-box-header {
+    background: #293443 !important;
+    border-bottom: 1px solid #3c5067 !important;
+    border-radius: 5px 5px 0 0;
+    padding: 6px 9px !important;
+}
+#view-exercise .output-label {
+    color: #a9c5e4 !important;
+    font: 700 .69rem/1.3 'Inter',sans-serif !important;
+    letter-spacing: .01em !important;
+    text-shadow: none !important;
+}
+#view-exercise .output-pre,
+#view-exercise .expected-box .output-pre,
+#view-exercise .real-box .output-pre {
+    background: #171d26 !important;
+    color: #e4eefc !important;
+    font: 500 .76rem/1.5 'Fira Code',monospace !important;
+}
+#view-exercise .exercise-test-details {
+    background: #26313e !important;
+    border: 1px solid #435771 !important;
+    box-shadow: none !important;
+}
+#view-exercise .exercise-test-details summary { color: #b8d8ee !important; }
+#view-exercise .validation-viewport-col {
+    background: #252e3b !important;
+    border: 1px solid #41536a !important;
+    box-shadow: none !important;
+}
+#view-exercise .validation-viewport-col .viewport-canvas-wrapper {
+    background: #202b3a !important;
+}
+
+/* Only the responsive arrangement changes; no new viewport appears. */
+@media (max-width: 1280px) and (min-width: 821px) {
+    #view-exercise .workspace-grid {
+        grid-template-columns: minmax(278px,318px) minmax(0,1fr) !important;
+        gap: 12px !important;
+        padding: 16px 15px !important;
+    }
+    #view-exercise .editor-tools .btn-tool { padding: 6px !important; }
+}
+@media (max-width: 820px) {
+    body:has(#view-exercise:not(.hidden)) .navbar {
+        height: 52px !important;
+        min-height: 52px !important;
+    }
+    #view-exercise .workspace-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 4px 10px 85px !important;
+        gap: 5px !important;
+        min-height: 0;
+        height: auto !important;
+    }
+    #view-exercise .panel-lesson { padding: 16px 15px !important; }
+    #view-exercise .editor-header { height: 54px !important; min-height: 54px !important; }
+    #view-exercise .editor-header .tab {
+        height: 54px !important;
+        min-height: 54px !important;
+        flex: 0 1 116px !important;
+        padding: 0 9px !important;
+    }
+    #view-exercise .editor-header .tab .lang-tag { display: none !important; }
+    #view-exercise .editor-tools #btn-reset-code { display: none !important; }
+    #view-exercise .editor-wrapper {
+        min-height: 240px !important;
+        height: min(45dvh,335px) !important;
+    }
+    #view-exercise .validation-panel,
+    #view-exercise .validation-panel.console-only {
+        height: 314px !important;
+        min-height: 314px !important;
+        max-height: 314px !important;
+        flex: 0 0 314px !important;
+    }
+    #view-exercise .validation-console-col { min-height: 296px !important; }
+    #view-exercise .validation-viewport-col { flex: 0 0 240px !important; }
+    #view-exercise .line-numbers {
+        width: 42px !important;
+        flex-basis: 42px !important;
+        font-size: 12px !important;
+    }
+    #view-exercise .gdscript-edit-stack #code-editor,
+    #view-exercise .gdscript-edit-stack #gdscript-highlight {
+        font-size: 12px !important;
+        padding: 16px 11px !important;
+    }
+    #view-exercise .output-comparison-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+        gap: 6px !important;
+    }
+    #view-exercise .vtab-title-tag { font-size: .77rem !important; }
+    #view-exercise .exercise-mascot-slot {
+        top: 73px; width: 58px; height: 58px;
+    }
+}
+@media (max-width: 380px) {
+    #view-exercise #btn-run-code .run-text { font-size: .72rem; }
+    #view-exercise .editor-header .tab { flex-basis: 86px !important; }
+}
