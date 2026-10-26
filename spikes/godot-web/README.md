@@ -1,26 +1,35 @@
-# GDScript Hero — Spike Godot runtime
+# GDScript Hero — prototipo Godot 4 WebAssembly
 
-Prototipo separato dal sito e NON sicuro per codice di utenti reali.
+**Solo prova tecnica, non pronta per produzione.** Nessun codice è stato integrato nel sito pubblico.
 
-## Esecuzione nativa
-`GODOT=/path/to/Godot ./spikes/godot-web/tests/test_native.sh`
+## Stato verificato
 
-Lo script compila GDScript dinamicamente, istanzia un Node ed esegue _ready, controlla l'output print("A","B") -> AB, divisione tra interi 100/3 -> 33, proprietà script answer -> 33 e un errore di compilazione.
+- Il progetto Godot 4.4.1 viene esportato per il Web con il template ufficiale senza thread.
+- Il browser invia nuovo codice GDScript al motore e ne riceve output, errori e informazioni sulle variabili.
+- Il laboratorio separato host/lesson-lab.html contiene 24 lezioni tratte dal dataset reale.
+- Sono passate 24 soluzioni ufficiali, 23 test negativi e 14 varianti valide: https://github.com/domyno6773/gdscript-hero/actions/runs/40260935126
+- Il runner è isolato in iframe sandboxed con origine opaca su una diversa origine HTTP, e i test Chrome verificano blocchi DOM/localStorage, riavvio e interruzione di un ciclo infinito.
+- La build generata pesa circa 43 MB non compressi, soprattutto WebAssembly. Non è stata misurata su smartphone reali.
 
-## Web (non ancora validato dal CI)
-Installare il template Godot 4.4.1 Web. Esportare `project` con il preset `Web` a `../web/godot.html`; avviare un server HTTP su `web/` e aprire `index.html`. Il file di hosting usa il vero `godot.js` e `godot.wasm`, con `onPrint`, `onPrintError` e callback JavascriptBridge.
+## Percorsi utili
 
-### Limiti
-- NON isolato: il GDScript può accedere a JavaScriptBridge e API Godot. Solo demo locale senza sessioni, dati o account.
-- Possibili loop infiniti o blocchi del main thread: richiede strategia di terminazione e isolamento.
-- Lo script Node accetta solo var di classe osservabili; le locali in _ready non sono ispezionabili con `get`.
-- I validatori didattici restano necessari; l'autenticità del runtime non valida l'intenzione didattica.
-- Prova browser, mobile, memoria e tempi di avvio non ancora eseguiti.
+- Editor didattico: host/lesson-lab.html
+- Dati delle lezioni: host/lesson-fixtures.js (snapshot manuale di lessons.js)
+- Validazione dimostrativa: host/lesson-validation.js
+- Motore Godot: project/runner.gd
+- Test lezioni: tests/native_lessons_1_12.cjs e tests/native_lessons_13_24.cjs
+- Approfondimenti: ISOLATION.md, SECURITY.md, e docs/native-godot-lesson-lab-audit-13-24-2026-10-26.md nella radice repository.
 
-Il workflow CI su questo ramo esegue SOLTANTO la verifica native/headless: non è una certificazione di WebAssembly o sicurezza.
+## Riproduzione
 
-## Risultato WebAssembly (26 ottobre 2026)
+Il workflow .github/workflows/godot-web-wasm.yml scarica Godot 4.4.1 e i template, esporta il progetto, avvia due server HTTP e usa Chrome automatizzato per le verifiche.
 
-L'export Web di Godot 4.4.1 con template ufficiale `web_nothreads_release.zip` è stato provato in CI con Chrome. I test hanno verificato compilazione dinamica, output nativo, divisione intera, lettura di proprietà, errori, recupero dopo un errore e dimensioni desktop/mobile **simulate**. La build Web generata occupa circa 43 MB non compressi, dei quali ~42 MB sono il file WebAssembly. I tempi misurati in GitHub Actions NON equivalgono a prestazioni di smartphone reali.
+Per eseguire manualmente bisogna esportare project/ in web/godot.html e avviare:
+- il server host sulla origine http://127.0.0.1:18767
+- il server WebAssembly con CORS sulla origine http://localhost:18768 (vedi tests/cors_server.py)
 
-**NON usare in produzione.** Il test mostra anche che uno script può accedere al `window` della pagina che lo ospita. Vedi [SECURITY.md](SECURITY.md) per le misure necessarie prima di qualsiasi integrazione.
+La pagina web/index.html appartiene al primo esperimento NON isolato e non deve essere usata per dati o utenti reali.
+
+## Limiti da risolvere
+
+La lettura delle variabili locali avviene inserendo una chiamata in una copia temporanea di _ready; non funziona automaticamente con ogni costrutto GDScript. Gli scenari alternativi cambiano dichiarazioni iniziali semplici, e i controlli sulle sintassi utilizzano ancora regex. Il grading nel browser è falsificabile e non deve governare XP, progressi salvati o abbonamenti. La sicurezza dell'isolamento va ulteriormente verificata su browser e dispositivi reali, e la migrazione richiede test su nodi, funzioni, segnali e classi.
