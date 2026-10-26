@@ -68,7 +68,7 @@
             !/^[A-Za-z_]\w{0,59}$/.test(x.method) || !Array.isArray(x.args) || x.args.length>5 ||
             !x.set || typeof x.set!=='object' || Array.isArray(x.set)))) ||
        (m.scene !== undefined && (!Number.isSafeInteger(m.scene) || m.scene<0 || m.scene>63)) ||
-       (m.mode !== undefined && !['sandbox_start','sandbox_action'].includes(m.mode)) ||
+       (m.mode !== undefined && !['','sandbox_start','sandbox_action'].includes(m.mode)) ||
        (m.mode === 'sandbox_action' && (!/^[A-Za-z_]\w{0,39}$/.test(m.node||'') ||
          !['pressed','timeout'].includes(m.signal))) ||
        (m.nodes !== undefined && (!Array.isArray(m.nodes) || m.nodes.length>48 ||
