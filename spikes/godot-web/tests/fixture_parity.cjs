@@ -26,3 +26,15 @@ for(let id=1;id<=60;id++){
   assert.ok(Array.isArray(s.properties),'Missing property capture policy at '+id);
 }
 console.log('NATIVE_FIXTURE_PARITY_PASS 60/60 lesson source, starter, solution and output');
+
+
+const byId=id=>live.find(x=>x.id===id);
+assert.match(byId(4).expectedOutput,/Energia: 100%/);
+assert.match(byId(6).initialCode,/var personaggio = Guerriero/);
+assert.doesNotMatch(byId(6).initialCode,/nome_giocatore/);
+assert.match(byId(39).initialCode,/var ha_chiave = forziere\["chiave"\]/);
+assert.match(byId(39).initialCode,/Possiede chiave:/);
+assert.match(byId(58).expectedOutput,/0\.1333, 0\.7725, 0\.3686/);
+assert.ok(byId(58).hints.every(h=>!/Timer|timeout|_on_timeout/.test(h.text)),
+ 'ColorRect hints must not teach the unrelated Timer lesson');
+console.log('NATIVE_LESSON_CONTENT_FIXES_PASS lessons 4, 6, 39, 58');
