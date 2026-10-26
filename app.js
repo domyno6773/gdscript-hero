@@ -1015,6 +1015,8 @@ const App = {
             this.updateSandboxLineNumbers();
         }
 
+        // Un progetto cambiato richiede una nuova istanza Godot prima dei clic.
+        this.sandboxNativeSession = null;
         // Costruisci e renderizza Scena Godot
         this.sandboxScene = this.buildSceneFromNodes(cur.nodes || []);
         this.renderSandboxSceneDock();
@@ -1260,6 +1262,27 @@ const App = {
         this.renderSandboxSceneDock();
     },
 
+    // Il modello JS serve unicamente per la rappresentazione. Testi e proprietà
+    // vengono letti dallo snapshot restituito da Godot, senza mutare il progetto.
+    applySandboxNativeSnapshot(snapshot) {
+        if (!snapshot || typeof snapshot !== 'object' || !this.sandboxScene) return;
+        const visit = node => {
+            if (!node) return;
+            const state = snapshot[node.name];
+            if (state?.exists) {
+                if (typeof state.text === 'string') node.text = state.text;
+                if (typeof state.disabled === 'boolean') node.disabled = state.disabled;
+                if (typeof state.visible === 'boolean') node.visible = state.visible;
+                if (typeof state.color === 'string' && /^[a-f0-9]{6}$/i.test(state.color)) node.color = '#' + state.color;
+                if (Number.isFinite(state.value)) node.value = state.value;
+            }
+            node.children = (node.children || []).filter(child =>
+                snapshot[child.name]?.exists !== false && !snapshot[child.name]?.queued);
+            for (const child of node.children) visit(child);
+        };
+        visit(this.sandboxScene);
+    },
+
     renderSandboxViewportOverlay() {
         const overlay = document.getElementById('sandbox-ui-overlay');
         if (!overlay) return;
@@ -1296,36 +1319,29 @@ const App = {
                 btn.title = `Clicca nodo Button: $${node.name}`;
                 btn.addEventListener('click', async () => {
                     SoundFX.playClick();
-                    if (node.pressed) {
-                        node.pressed.emit();
+                    const output = document.getElementById('sandbox-console-output');
+                    const project = this.getActiveSandboxProject();
+                    if (!this.sandboxNativeSession || this.sandboxNativeSession !== project?.id) {
+                        if (output) output.textContent = '// Premi Esegui Scena prima di interagire con i nodi.';
+                        return;
                     }
-
-                    // Se c'è una funzione associata nello script (es. _on_button_pressed o _on_NomeNodo_pressed)
-                    if (this.sandboxScope) {
-                        const candidates = [
-                            `_on_${node.name.toLowerCase()}_pressed`,
-                            `_on_${node.name}_pressed`,
-                            `_on_button_pressed`,
-                            `on_button_pressed`
-                        ];
-                        for (const fn of candidates) {
-                            if (typeof this.sandboxScope[fn] === 'function') {
-                                try {
-                                    await this.sandboxScope[fn]();
-                                } catch (err) {
-                                    const outputPre = document.getElementById('sandbox-console-output') || document.getElementById('practice-console-output');
-                                    if (outputPre) {
-                                        outputPre.innerText += `\n// Errore in ${fn}: ${err.message}`;
-                                        outputPre.scrollTop = outputPre.scrollHeight;
-                                    }
-                                }
-                                break;
-                            }
+                    btn.disabled = true;
+                    try {
+                        // Emette il vero segnale pressed sull'istanza Godot già avviata:
+                        // salute, variabili e connessioni rimangono persistenti.
+                        const response = await window.GDHGodot.sandboxAction(node.name, 'pressed');
+                        if (output) {
+                            if (response.logs.length) output.textContent += '\n' + response.logs.join('\n');
+                            if (response.error) output.textContent += '\n// Errore Godot: ' + response.error;
+                            output.scrollTop = output.scrollHeight;
                         }
+                        if (response.success) this.applySandboxNativeSnapshot(response.native?.scene);
+                    } catch (error) {
+                        if (output) output.textContent += '\n// Errore: ' + String(error.message || error);
+                    } finally {
+                        this.renderSandboxSceneDock();
+                        this.renderSandboxViewportOverlay();
                     }
-
-                    this.renderSandboxSceneDock();
-                    this.renderSandboxViewportOverlay();
                 });
                 overlay.appendChild(btn);
             } else if (node.type === 'Label') {
@@ -1365,14 +1381,16 @@ const App = {
             this.saveStorage();
         }
 
-        // Ricostruisci scena da nodi
+        // Ricostruisci la vista dal progetto: il motore riceve questi stessi nodi.
+        this.sandboxNativeSession = null;
         this.sandboxScene = this.buildSceneFromNodes(cur ? cur.nodes : []);
 
         // Registra progresso missione code_runs
         this.recordDailyQuestProgress('code_runs', 1);
 
         try {
-            const res = await GDScriptRuntime.execute(code, {
+            const res = await window.GDHGodot.execute(code, {
+                sandboxNodes: cur ? cur.nodes : [],
                 initialScene: this.sandboxScene,
                 onLog: (line) => {
                     if (outputPre.innerText === "// Console ripulita" || outputPre.innerText.startsWith("// Esecuzione completata")) {
@@ -1384,9 +1402,19 @@ const App = {
                 }
             });
             this.sandboxScope = res.scope;
+            this.sandboxNativeSession = res.success ? cur?.id : null;
+            if (res.success) this.applySandboxNativeSnapshot(res.native?.scene);
             const elapsed = Math.round(performance.now() - startT);
 
-            if (res.logs && res.logs.length > 0) {
+            if (res.error) {
+                outputPre.textContent = '// Errore Godot: ' + res.error;
+                outputPre.style.color = '#ffb4b4';
+                if (statusTag) {
+                    statusTag.textContent = 'Errore Script';
+                    statusTag.style.color = '#fca5a5';
+                }
+                SoundFX.playError();
+            } else if (res.logs && res.logs.length > 0) {
                 outputPre.innerText = res.logs.join('\n');
                 outputPre.style.color = '#38bdf8';
                 if (statusTag) {
@@ -1394,14 +1422,6 @@ const App = {
                     statusTag.style.color = '#10b981';
                 }
                 SoundFX.playSuccess();
-            } else if (res.error) {
-                outputPre.innerText = `// Errore: ${res.error}`;
-                outputPre.style.color = '#f87171';
-                if (statusTag) {
-                    statusTag.innerText = "Errore Script";
-                    statusTag.style.color = '#ef4444';
-                }
-                SoundFX.playError();
             } else {
                 outputPre.innerText = "// Esecuzione completata (nessun output print a console)";
                 outputPre.style.color = '#94a3b8';
