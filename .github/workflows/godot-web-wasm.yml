@@ -71,6 +71,8 @@ jobs:
         run: timeout 150s node spikes/godot-web/tests/release_readiness.cjs
       - name: Real editor integration E2E (offline auth, no XP or progress mutation)
         run: timeout 145s node spikes/godot-web/tests/main_editor_adapter.cjs
+      - name: Real Verify button uses Godot (flagged) without progress; JS rollback
+        run: timeout 160s node spikes/godot-web/tests/main_editor_verify.cjs
       - name: Upload screenshots + browser results
         if: always()
         uses: actions/upload-artifact@v4
