@@ -60,6 +60,8 @@ jobs:
         run: timeout 140s node spikes/godot-web/tests/native_lessons_25_36.cjs
       - name: Validate native Godot dictionaries, signals, classes for lessons 37-48
         run: timeout 150s node spikes/godot-web/tests/native_lessons_37_48.cjs
+      - name: Validate native scene lessons 49-60 including buttons, timer and shop
+        run: timeout 160s node spikes/godot-web/tests/native_lessons_49_60.cjs
       - name: Upload screenshots + browser results
         if: always()
         uses: actions/upload-artifact@v4
