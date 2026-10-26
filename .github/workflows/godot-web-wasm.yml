@@ -49,6 +49,9 @@ jobs:
         run: node spikes/godot-web/tests/web_smoke.cjs
       - name: Cross-origin Godot runner proof (no user data)
         run: timeout 110s node spikes/godot-web/tests/isolation_smoke.cjs
+      - name: Experimental infinite-loop recovery (not a release gate)
+        continue-on-error: true
+        run: timeout 75s node spikes/godot-web/tests/hang_smoke.cjs
       - name: Upload screenshots + browser results
         if: always()
         uses: actions/upload-artifact@v4
