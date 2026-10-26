@@ -139,7 +139,7 @@ async function smoke(browser,url,width){
    document.documentElement.setAttribute('data-theme','light');
    const text=getComputedStyle(document.getElementById('sandbox-gdscript-highlight')).color;
    const bg=getComputedStyle(document.querySelector('#view-practice .gdscript-edit-stack')).backgroundColor;
-   const rgb=str=>(str.match(/\\d+(?:\\.\\d+)?/g)||[]).slice(0,3).map(Number);
+   const rgb=str=>(str.match(/\d+(?:\.\d+)?/g)||[]).slice(0,3).map(Number);
    const lum=str=>rgb(str).map(v=>{
      const x=v/255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4;
    }).reduce((a,b,i)=>a+b*[.2126,.7152,.0722][i],0);
