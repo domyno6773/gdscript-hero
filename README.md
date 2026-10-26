@@ -1,40 +1,126 @@
-# 🎮 GDScript Hero (Versione Locale Offline)
+# GDScript Hero
 
-Un'applicazione educativa, interattiva e gamificata per imparare a programmare videogiochi in **GDScript per Godot 4**, pensata per girare al 100% in locale sul tuo computer.
+**Impara GDScript per Godot 4 scrivendo codice, risolvendo esercizi e costruendo progetti.**
+
+[Apri GDScript Hero](https://domyno6773.github.io/gdscript-hero/) · [Repository](https://github.com/domyno6773/gdscript-hero) · [Roadmap](ROADMAP.md)
+
+GDScript Hero è una piattaforma didattica **gratuita e in italiano** per imparare GDScript e familiarizzare con Godot 4, direttamente dal browser. Il progetto è indipendente, in sviluppo attivo, e non è un prodotto ufficiale di Godot Engine.
+
+> **Stato: ottobre 2026.** Il corso, l'editor, la Sandbox, il ripasso, le statistiche e un primo progetto interattivo sono disponibili. **Non esistono attualmente abbonamenti, pagamenti o sezioni Premium bloccate.**
+
+## Funzionalità attuali
+
+| Sezione | Stato | Descrizione |
+| --- | --- | --- |
+| **Corso gratuito** | Disponibile | **60 lezioni in 15 capitoli**, con teoria, esempi, esercizi, suggerimenti e verifiche |
+| **Editor GDScript** | Disponibile | Sintassi colorata, numeri di riga, completamento contestuale e comandi rapidi |
+| **Risultati e diagnostica** | Disponibile | Output atteso/ottenuto, errori in evidenza e dettagli dei test |
+| **Sandbox** | Disponibile | Sperimentazione con codice, nodi, scena e viewport 2D |
+| **Progetti** | In espansione | **Arena del Gladiatore** è giocabile; altre proposte sono segnalate come future |
+| **Ripasso** | Disponibile | Esercizi alternativi, varianti e percorsi di consolidamento |
+| **Statistiche** | Disponibile | Progressione, autonomia, tentativi e aree da approfondire |
+| **Gamification** | Disponibile | XP, livelli, traguardi, missioni e mappa del percorso |
+| **Salvataggi e account** | Disponibile | Modalità ospite, dati locali, backup e integrazione Supabase |
+
+La nuova interfaccia è ispirata all'editor di Godot: palette blu-grigio, pannelli ordinati, **evidenziazione reale del codice** e area risultati sempre vicina all'editor. Su mobile sono disponibili schede dedicate a compito e codice. Scena e viewport compaiono quando necessari agli esercizi o attivati dall'utente.
+
+## Corso e apprendimento
+
+Il corso comprende **15 capitoli e 60 lezioni**. Si parte dalle basi (output, variabili, operatori, condizioni) per arrivare a strutture dati, cicli, funzioni e meccaniche tipiche di Godot. Ogni livello offre un obiettivo concreto, test di verifica e aiuti progressivi.
+
+**L'obiettivo è mantenere il corso principale gratuito.** Le eventuali funzioni aggiuntive a pagamento non dovranno impedire di completarlo.
+
+## Progetti interattivi
+
+**Arena del Gladiatore** è il primo progetto guidato giocabile: gestione della salute, funzioni, condizioni, HUD interattivo ed esportazione verso Godot 4.
+
+Altre schede del catalogo descrivono idee *in preparazione*, non progetti già disponibili.
+
+### Direzione futura, non ancora attiva
+
+È allo studio una libreria di progetti **semplici e complessi**, espansa nel tempo. I progetti complessi potrebbero includere file Godot, sprite e audio originali per costruire giochi completi.
+
+L'accesso a questa libreria, alle statistiche avanzate e al ripasso personalizzato **potrebbe** rientrare in un abbonamento Premium. **Al momento non sono implementati né il pagamento né le autorizzazioni Premium**: ripasso e statistiche esistenti restano accessibili secondo il funzionamento attuale.
+
+I file creati dagli studenti e gli eventuali asset forniti dal progetto dovranno avere regole di utilizzo distinte. Nessuna licenza per futuri asset Premium viene concessa con questo README. Per lo stato e le priorità, consulta [ROADMAP.md](ROADMAP.md).
+
+## Utilizzo
+
+### Online
+
+Apri **https://domyno6773.github.io/gdscript-hero/**: puoi iniziare dalla mappa senza installare Godot sul computer.
+
+### In locale
+
+L'interfaccia è composta da file HTML, CSS e JavaScript statici: non richiede una fase di build.
+
+1. Clona il repository:
+
+   ```bash
+   git clone https://github.com/domyno6773/gdscript-hero.git
+   cd gdscript-hero
+   ```
+
+2. Avvia il server locale incluso (richiede Python):
+
+   ```bash
+   python server.py
+   ```
+
+3. Visita **http://localhost:8080/** se il browser non si apre automaticamente.
+
+Su Windows è presente anche `avvia.bat`, che apre direttamente `index.html`. Per il comportamento web più prevedibile è consigliabile usare un server HTTP.
+
+**Offline:** una parte consistente dell'esperienza è elaborata nel browser e utilizza salvataggi locali; font, librerie da CDN, login e sincronizzazione cloud possono però richiedere Internet. La disponibilità completa offline non è garantita.
+
+## Architettura
+
+L'esecuzione didattica usa un **runtime JavaScript nel browser** che implementa un sottoinsieme di GDScript e alcuni comportamenti di Godot. È uno strumento di apprendimento, **non** l'interprete completo del motore Godot: alcuni programmi o API potrebbero comportarsi diversamente nel progetto Godot nativo.
+
+| File | Funzione |
+| --- | --- |
+| `index.html`, `app.js` | Interfaccia e logica applicativa |
+| `lessons.js` | Capitoli, lezioni, verifiche e catalogo dei progetti |
+| `runtime.js`, `diagnostic.js` | Runtime didattico e analisi degli errori |
+| `gdscript-highlighter.js` | Colorazione della sintassi nel codice |
+| `styles.css`, `godot-theme.css`, `exercise-redesign.css` | Sistema visivo e layout degli esercizi |
+| `viewport2d.js` | Strumenti e viewport 2D |
+| `arena_project.js` | Progetto guidato Arena del Gladiatore |
+| `review_variants.js`, `stats.js` | Ripasso e statistiche |
+| `auth.js`, `supabase-config.js`, `supabase_schema.sql` | Autenticazione, salvataggi e integrazione cloud |
+
+L'integrazione Supabase è prevista per account e sincronizzazione; il codice gira anche in modalità ospite. **Credenziali private e autorizzazioni di accesso non devono essere affidate ai soli file del client**. Un'eventuale monetizzazione richiederà verifiche lato server e un controllo specifico della sicurezza.
+
+## Test
+
+Sono presenti workflow GitHub Actions per regressioni, browser e controlli mirati sul comportamento di Godot:
+
+- `tests/audit_validator_regression.test.cjs` — validatori e casi negativi.
+- `tests/auth_reliability.test.cjs` — salvataggi, backup e affidabilità dell'integrazione.
+- `tests/browser_smoke.test.cjs` — prove funzionali in Chrome desktop e mobile.
+- `tests/native_godot/` — confronti mirati con Godot 4.4.1.
+
+I test basati su Node.js possono essere avviati dalla radice della repository:
+
+```bash
+node tests/audit_validator_regression.test.cjs
+node tests/auth_reliability.test.cjs
+```
+
+Per avviare i test browser o nativi, consulta [.github/workflows/](.github/workflows/) per strumenti e versioni. I test verificano i comportamenti coperti, **non** la piena compatibilità del runtime con tutte le funzioni di Godot.
+
+## Sviluppo e segnalazioni
+
+Questo è un prodotto in evoluzione: la priorità immediata è **consolidare l'esperienza già disponibile**, correggere problemi e migliorare l'affidabilità prima di introdurre nuove sezioni. Puoi inviare segnalazioni e proposte attraverso [GitHub Issues](https://github.com/domyno6773/gdscript-hero/issues).
+
+I prossimi passi, senza date di rilascio promesse, sono raccolti in [ROADMAP.md](ROADMAP.md).
+
+## Licenze e diritti
+
+**Il repository è pubblico ma, attualmente, non contiene un file `LICENSE` che conceda una licenza esplicita sul codice.** Rendere il sorgente consultabile non equivale automaticamente a concedere il permesso di riutilizzarlo o redistribuirlo. La licenza del codice resta da decidere.
+
+Per eventuali progetti Premium, **codice e asset grafici/audio devono essere trattati separatamente**. L'orientamento progettuale è concedere agli abbonati l'uso didattico e il download dei materiali forniti, senza autorizzarne automaticamente la rivendita, la redistribuzione separata o l'uso commerciale. I termini definitivi dovranno essere pubblicati prima di rendere disponibili tali contenuti.
 
 ---
 
-## 🚀 Nuove Funzionalità Aggiornate
-
-1. **Nuova Identità: GDScript Hero**:
-   - Branding rinnovato con look moderno, icone personalizzate e stile dark gaming.
-
-2. **Pannello Output Interattivo (Affiancato)**:
-   - **Tuo Output (Reale)**: mostra esattamente ciò che il tuo codice stampa in console o gli eventuali errori di sintassi.
-   - **Output Previsto (Atteso)**: mostra l'output obiettivo che la lezione richiede di produrre.
-   - **Verifica Requisiti**: checklist con esito verde (✅) o rosso (❌) per ogni singolo test.
-
-3. **IDE Smart Assistant (Editor Intelligente)**:
-   - **Auto-Closing delle Coppie**:
-     - Digitando `(` inserisce in automatico `)` con il cursore in mezzo.
-     - Digitando `"` inserisce in automatico `"` con il cursore in mezzo.
-     - Digitando `'`, `[`, `{` gestisce le rispettive chiusure e cancellazioni intelligenti (Backspace cancella la coppia).
-     - Riconosce quando il carattere di chiusura è già presente e fa skip senza duplicarlo.
-   - **Testo Predittivo & Intellisense**:
-     - Menu popup a comparsa rapida mentre scrivi.
-     - Suggerisce parole chiave di GDScript (`print`, `Vector2`, `_ready`, `var`, `func`, `int`, `float`, `String`...).
-     - **Rileva in tempo reale le variabili create da te nel codice** (es. `player_name`, `health`, `pos`, `speed`) e te le propone!
-     - Navigabile con le frecce <kbd>↓</kbd> / <kbd>↑</kbd> e selezionabile con <kbd>Tab</kbd> o <kbd>Invio</kbd>.
-
-4. **Verifica Robusta (Nessun Blocco)**:
-   - Motore di compilazione protetto: la verifica non si blocca mai, gestisce qualsiasi errore di battitura e sblocca sempre il pulsante "Verifica Codice".
-
-5. **Gamification & Suoni Offline**:
-   - Punti XP, serie giornaliera (Streak 🔥), livelli giocatore, coriandoli e suoni sintetizzati con Web Audio API.
-
----
-
-## 💻 Come Avviarlo
-
-- **Doppio clic** su `avvia.bat` (o direttamente su `index.html`)
-- Oppure via server Python: `python server.py`
+*GDScript Hero è una piattaforma indipendente dedicata all'apprendimento di GDScript e Godot 4.*
