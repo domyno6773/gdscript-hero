@@ -69,15 +69,15 @@
             !x.set || typeof x.set!=='object' || Array.isArray(x.set)))) ||
        (m.scene !== undefined && (!Number.isSafeInteger(m.scene) || m.scene<0 || m.scene>63)) ||
        (m.mode !== undefined && !['sandbox_start','sandbox_action'].includes(m.mode)) ||
-       (m.mode === 'sandbox_action' && (!/^[A-Za-z_]\\w{0,39}$/.test(m.node||'') ||
+       (m.mode === 'sandbox_action' && (!/^[A-Za-z_]\w{0,39}$/.test(m.node||'') ||
          !['pressed','timeout'].includes(m.signal))) ||
        (m.nodes !== undefined && (!Array.isArray(m.nodes) || m.nodes.length>48 ||
          m.nodes.some(n=>!n || typeof n!=='object' || Array.isArray(n) ||
-           typeof n.name!=='string' || !/^[A-Za-z_]\\w{0,39}$/.test(n.name) ||
+           typeof n.name!=='string' || !/^[A-Za-z_]\w{0,39}$/.test(n.name) ||
            typeof n.type!=='string' ||
            !['Node','Node2D','Label','Button','Timer','ColorRect','Sprite2D','CharacterBody2D','ProgressBar'].includes(n.type) ||
            (n.parent!==null && n.parent!==undefined &&
-             (typeof n.parent!=='string'|| !/^[A-Za-z_]\\w{0,39}$/.test(n.parent))) ||
+             (typeof n.parent!=='string'|| !/^[A-Za-z_]\w{0,39}$/.test(n.parent))) ||
            (n.text!==undefined && (typeof n.text!=='string' || n.text.length>200))))) ||
        (m.actions !== undefined && (!Array.isArray(m.actions) || m.actions.length>7 ||
           m.actions.some(x=>!x||typeof x.node!=='string'|| x.node.length>40 ||
