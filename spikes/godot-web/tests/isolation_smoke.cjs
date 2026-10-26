@@ -75,9 +75,19 @@ async function run(page,code,expected){
       assert.ok((await page.evaluate(()=>window.__gdhIsolation.generation))>initial.g);
       const recovered=await run(page,'func _ready():\n    print("AFTER_RESTART")\n','executed');
       assert.match(recovered.stdout,/AFTER_RESTART/);
+      // Navigazione deliberata verso l'origin del parent: l'iframe resta di origine opaca.
+      await frame.evaluate(() => { window.location.href = 'http://127.0.0.1:18767/probe.html'; });
+      await frame.waitForURL('http://127.0.0.1:18767/probe.html',{timeout:12000});
+      const afterNavigation=await frame.evaluate(()=>{
+        try { return window.parent.document.title; }
+        catch(e) { return e.name; }
+      });
+      assert.equal(afterNavigation,'SecurityError','Navigating to parent origin must not escape opaque sandbox');
+      await page.locator('#restart').click();
+      await ready(page);
       await page.screenshot({path:path.join(out,viewport.width<500?'isolated-mobile.png':'isolated-desktop.png'),fullPage:true});
-      results.push({viewport,loadedMs,probe,storage,valid,malicious,broken,recovered});
-      console.log('ISOLATION_PASS '+JSON.stringify({viewport,loadedMs,probe,storage,securityFlagOnlyInRunner:true,manualRestart:true}));
+      results.push({viewport,loadedMs,probe,storage,valid,malicious,broken,recovered, afterNavigation});
+      console.log('ISOLATION_PASS '+JSON.stringify({viewport,loadedMs,probe,storage,securityFlagOnlyInRunner:true,manualRestart:true, navigationIsolated:true}));
       await ctx.close();
     }
     fs.writeFileSync(path.join(out,'isolation.json'),JSON.stringify(results,null,2));

@@ -9,6 +9,7 @@
 - Ricreazione iframe: prototipo di kill switch; **da verificare con un vero loop infinito**, può non riuscire se il browser condivide processo o main thread.
 - Il codice GDScript può comunque usare \`JavaScriptBridge\` e controllare il **proprio** origin, inviare messaggi falsi, alterare i risultati o inviare richieste di rete. Un runner diverso non è una sandbox fidata. Nessun output del runner deve decidere premi/progressi/abbonamenti senza policy server e verifica separata.
 - Un sistema di origine separata per il runner richiede un secondo dominio/origine e controllo sulle policy CSP del runner. GitHub Pages di default può ospitare il parent, ma in produzione il runner deve stare su un'origine dedicata, senza cookie/chiavi.
+- Un test forza la navigazione dell'iframe verso una pagina servita dall'origine del parent: il browser deve continuare a negare la lettura del DOM parent (SecurityError).
 - I test desktop e mobile sono entrambi Chrome su runner CI; NON Safari/Android reali.
 - Godot WebAssembly ~42 MB non compressi; misurare con compressione, cache, rete lenta e dispositivi reali.
 
