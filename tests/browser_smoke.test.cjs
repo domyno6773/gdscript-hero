@@ -798,7 +798,7 @@ async function smoke(browser,url,width){
  await page.locator('#code-editor').fill(reviewSolution);
  await page.locator('#btn-run-code').click({timeout:10000});
  await page.waitForFunction(()=>App.state.reviewProgress.completedVariants.includes('rev_syntax_01'),null,{timeout:20000});
- assert.equal(await page.evaluate(()=>App.state.xp),reviewXpBefore+10,'Incorrect review XP reward');
+ assert.equal(await page.evaluate(()=>App.state.xp),reviewXpBefore+15,'Incorrect review XP reward');
  assert.ok(!(await page.evaluate(()=>App.state.finishedLessons.includes(4))),'Review completed original lesson');
  await page.locator('#btn-modal-next').click({timeout:10000});
  await viewIs(page,'review');
