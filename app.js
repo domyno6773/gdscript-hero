@@ -151,6 +151,12 @@ const App = {
                 reviewVariantId: current.id === 'view-exercise' && this.isReviewMode
                     ? this.currentReviewVariant?.id : null,
                 reviewTab: this.state.currentReviewTab === 'all' ? 'all' : 'recommended',
+                projectsTab: current.id === 'view-projects'
+                    ? (!document.getElementById('official-arena-workspace')?.classList.contains('hidden')
+                        ? 'official'
+                        : !document.getElementById('competition-workspace')?.classList.contains('hidden')
+                            ? 'demo' : 'catalog')
+                    : null,
                 mobileTab: workspace?.classList.contains('show-code') ? 'code' : 'instructions'
             };
             sessionStorage.setItem('gdscript_hero_position_v1', JSON.stringify(snapshot));
@@ -214,7 +220,9 @@ const App = {
             } else if (view === 'view-practice') {
                 this.openPracticeView();
             } else if (view === 'view-projects') {
-                this.openProjectsView();
+                if (position.projectsTab === 'official') this.openOfficialArena();
+                else if (position.projectsTab === 'demo') this.openCompetitiveArena();
+                else this.openProjectsView();
             } else if (view === 'view-review') {
                 this.showReviewView();
                 if (position.reviewTab === 'all') this.setReviewTab('all');
@@ -1783,6 +1791,7 @@ const App = {
         document.getElementById('competition-workspace')?.classList.remove('hidden');
         this.updateNavSelection('projects');
         CompetitionArena.select(CompetitionArena.activeId);
+        this.saveNavigationPosition();
         window.scrollTo({top:0,behavior:'smooth'});
     },
 
@@ -1800,6 +1809,7 @@ const App = {
         document.getElementById('official-arena-workspace')?.classList.remove('hidden');
         this.updateNavSelection('projects');
         void OfficialArena.open();
+        this.saveNavigationPosition();
         window.scrollTo({top:0,behavior:'smooth'});
     },
 

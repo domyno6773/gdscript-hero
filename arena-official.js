@@ -69,6 +69,9 @@ const OfficialArena=(()=>{
  }
  function pickChallenge(id){
    const next=challenges.find(row=>row.id===id);if(!next||busy)return;
+   if(selected && selected.id!==next.id && $('official-code')?.value?.trim() &&
+      $('official-code').value!=='extends Node\\n\\n# Scrivi qui la tua soluzione\\n' &&
+      !window.confirm('Il codice non viene salvato automaticamente. Hai scaricato la tua soluzione prima di cambiare sfida?'))return;
    selected=next;
    label('official-task-title',next.title);
    label('official-task-meta',next.difficulty+' · '+next.points_max+' punti competitivi · +'+next.xp_once+' XP a soluzione completa');

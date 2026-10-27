@@ -154,6 +154,18 @@ async function smoke(browser,url,width){
  await page.locator('#btn-close-competitive-arena').click();
  assert.equal(await page.locator('#competition-workspace').isHidden(),true);
  assert.equal(await page.locator('.competition-archive-locked').isVisible(),true);
+ // Senza un backend ufficiale configurato, nessun punteggio o classifica inventati.
+ await page.locator('#btn-open-official-arena').click();
+ assert.equal(await page.locator('#official-arena-workspace').isVisible(),true);
+ await page.waitForFunction(()=>document.querySelector('#official-status')?.textContent?.includes('non sono ancora attive'),null,{timeout:10000});
+ assert.equal(await page.locator('#official-stage-live').isHidden(),true);
+ assert.equal(await page.locator('#official-submit').isVisible(),false);
+ assert.equal(await page.evaluate(()=>App.state.xp),demoXpBefore);
+ // Persistenza posizione nel sito, anche nella nuova sottosezione ufficiale.
+ await page.reload({waitUntil:'load'});
+ await page.waitForFunction(()=>document.querySelector('#official-arena-workspace')&&!document.querySelector('#official-arena-workspace').classList.contains('hidden'));
+ await page.locator('#btn-back-official').click();
+ assert.equal(await page.locator('#official-arena-workspace').isHidden(),true);
  await page.evaluate(()=>App.showRoadmap());
  if(width>820 && process.env.E2E_SCREENSHOTS==='1'){
    const dir=path.join(root,'test-artifacts');fs.mkdirSync(dir,{recursive:true});
