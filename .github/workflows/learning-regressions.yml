@@ -24,5 +24,7 @@ jobs:
         run: node tests/lesson4_comments_output.test.cjs
       - name: Godot debug messages and reliable line numbers
         run: node tests/error_guide.test.cjs
+      - name: Code comprehension throughout the course
+        run: node tests/code_guide.test.cjs
       - name: Backups and cloud sync
         run: node tests/auth_reliability.test.cjs

@@ -278,7 +278,10 @@ const LESSONS_DATA = [
         expectedOutput: "Ciao Godot!",
         theory: `
             <p>Benvenuto in <strong>GDScript Hero</strong>! In questo corso imparerai a programmare per <strong>Godot Engine</strong> passo dopo passo attraverso sfide pratiche ed interattive.</p>
-            <p>In GDScript, quando un nodo entra nella scena, Godot esegue automaticamente la funzione <code>_ready()</code>.</p>
+            <p>In Godot un <strong>nodo</strong> è un elemento della scena: può rappresentare un oggetto, un contenitore o un'interfaccia. Uno script aggiunge comportamenti a un nodo.</p>
+            <p>La riga <code>extends Node</code> significa che lo script parte dal tipo base Node; la incontrerai negli esercizi successivi. Non devi scriverla in ogni esercizio: quando manca, il laboratorio prepara il nodo automaticamente.</p>
+            <p><code>func</code> serve a dichiarare una funzione, cioè un gruppo di istruzioni. <code>_ready()</code> è una funzione che Godot esegue automaticamente quando il nodo entra nella scena; i due punti e il rientro indicano quali righe le appartengono.</p>
+            <p>Nel codice iniziale vedrai anche <code>#</code> (un commento, che non viene eseguito) e <code>pass</code> (non fa nulla: lascia il blocco vuoto finché non aggiungi le istruzioni richieste).</p>
             <p>Per inviare un messaggio alla console di debug, usiamo la funzione incorporata <code>print(...)</code> inserendo il testo tra virgolette:</p>
             <div class="code-preview">
 <pre><span class="k">func</span> <span class="nf">_ready</span>():

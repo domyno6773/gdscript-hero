@@ -3056,6 +3056,7 @@ const App = {
         const editor = document.getElementById('code-editor');
         editor.value = savedCode;
         this.updateLineNumbers();
+        this.mountCodeGuide(lesson, savedCode);
 
         const headerNextBtn = document.getElementById('btn-header-next');
         if (headerNextBtn) {
@@ -3247,6 +3248,44 @@ const App = {
         editor.dispatchEvent(new Event('input', { bubbles: true }));
     },
 
+    mountCodeGuide(lesson, source) {
+        const root = document.querySelector('#view-exercise .lesson-content');
+        if (!root || !window.GDHCodeGuide) return;
+        root.querySelector('.gdh-code-guide-mount')?.remove();
+        const mount = document.createElement('div');
+        mount.className = 'gdh-code-guide-mount';
+        const before = root.querySelector('.hints-section, .coddy-hints-container');
+        if (before) before.before(mount);
+        else root.append(mount);
+        const previous = typeof lesson.id === 'number'
+            ? GDHCodeGuide.unseenKeys(lesson.id, LESSONS_DATA) : new Set();
+        const items = GDHCodeGuide.analyze(lesson.initialCode || lesson.starterCode || '');
+        const newKeys = items.filter(x => !previous.has(x.key)).map(x => x.key);
+        mount.dataset.newKeys = JSON.stringify(newKeys);
+        // Prima comparsa nel corso: leggibile subito. Il ripasso resta sempre apribile.
+        GDHCodeGuide.render(mount, source, {
+            expanded: typeof lesson.id !== 'number' || newKeys.length > 0, newKeys
+        });
+        mount.addEventListener('click', event => {
+            const button = event.target.closest('.gdh-code-guide-jump');
+            if (!button || !mount.contains(button)) return;
+            const editor = document.getElementById('code-editor');
+            const line = Number(button.dataset.line);
+            if (!editor || !Number.isSafeInteger(line) || line < 1) return;
+            this.setMobileExerciseTab('code', false);
+            window.GDHErrorGuide?.jump(editor, line);
+        });
+    },
+
+    refreshCodeGuide() {
+        const mount = document.querySelector('#view-exercise .gdh-code-guide-mount');
+        const editor = document.getElementById('code-editor');
+        if (!mount || !editor || !window.GDHCodeGuide) return;
+        let newKeys = [];
+        try { newKeys = JSON.parse(mount.dataset.newKeys || '[]'); } catch (_) {}
+        GDHCodeGuide.render(mount, editor.value, {newKeys});
+    },
+
     setupEditor() {
         const editor = document.getElementById('code-editor');
         if (!editor) return;
@@ -3255,6 +3294,7 @@ const App = {
             window.GDHErrorGuide?.clearMark(editor);
             window.GDHErrorGuide?.clear('#exercise-debug-area');
             this.updateLineNumbers();
+            this.refreshCodeGuide();
             this.checkAutocomplete();
             // Un ripasso non deve mai sovrascrivere il codice salvato del corso.
             if (!this.isReviewMode) {
@@ -5195,6 +5235,7 @@ const App = {
         const editor = document.getElementById('code-editor');
         editor.value = variant.starterCode;
         this.updateLineNumbers();
+        this.mountCodeGuide(variant, editor.value);
         this.saveReviewDraft();
 
         // Resetta console e test results

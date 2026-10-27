@@ -1,0 +1,37 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const context={};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'..','code-guide.js'),'utf8'),context);
+const guide=context.GDHCodeGuide;
+assert.ok(guide);
+const chapter1='func _ready():\n    # Stampa il saluto\n    pass';
+const first=guide.analyze(chapter1);
+assert.ok(first.some(x=>x.key==='ready'));
+assert.ok(first.some(x=>x.key==='comment'));
+assert.ok(first.some(x=>x.key==='pass'));
+const challenge='extends Node\n\nfunc _ready():\n    print("=== AVVIO SISTEMA ===")\n    # Completa le stampe\n    print("=== FINE ===")';
+const entries=guide.analyze(challenge);
+const extend=entries.find(x=>x.key==='extends');
+assert.ok(extend);
+assert.deepEqual(Array.from(extend.lines),[1]);
+assert.match(extend.detail,/nodo|Node/);
+assert.match(entries.find(x=>x.key==='ready').detail,/automaticamente/);
+assert.deepEqual(Array.from(entries.find(x=>x.key==='print').lines),[4,6]);
+assert.ok(!entries.some(x=>x.detail.includes('print("Sistema: Godot OS")')),
+ 'Il glossario non deve anticipare la soluzione dell’esercizio');
+assert.ok(!entries.some(x=>x.key==='func' && x.title.includes('_ready')));
+const previous=guide.unseenKeys(4,[{id:1,initialCode:chapter1},{id:4,initialCode:challenge}]);
+assert.equal(previous.has('ready'),true);
+assert.equal(previous.has('extends'),false);
+const updated=guide.analyze(challenge+'\n    var nomi = ["A", "B"]\n    signal attivato');
+assert.ok(updated.some(x=>x.key==='var'));
+assert.ok(updated.some(x=>x.key==='array'));
+assert.ok(updated.some(x=>x.key==='signal'));
+const comment=guide.analyze('# extends Node\n# print("test")\npass');
+assert.equal(comment.some(x=>x.key==='extends'||x.key==='print'),false,
+ 'I commenti non vanno interpretati come codice eseguibile');
+assert.equal(guide.analyze('').length,0);
+console.log('PASS: context-aware code explanations, first encounter, live constructs and no solutions');

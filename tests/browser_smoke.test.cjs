@@ -473,6 +473,15 @@ async function smoke(browser,url,width){
  });
  console.log('DESIGN '+width+'px '+JSON.stringify(design));
  assert.ok(design.tokens>0 && design.keywords>0,'GDScript syntax must be highlighted');
+ assert.ok(await page.locator('.gdh-code-guide').count()===1,'La guida al codice deve comparire in ogni lezione');
+ assert.match(await page.locator('.gdh-code-guide').textContent(),/func _ready/);
+ await page.evaluate(()=>App.openLesson(4));
+ assert.equal(await page.locator('.gdh-code-guide').evaluate(el=>el.open),true,
+   'La sfida 4 deve spiegare automaticamente extends Node al suo primo incontro');
+ assert.match(await page.locator('.gdh-code-guide').textContent(),/extends Node/);
+ assert.match(await page.locator('.gdh-code-guide').textContent(),/nodo/i);
+ await page.evaluate(()=>App.openLesson(1));
+
  assert.ok(design.syntaxLayerHeight>0,'Syntax layer must be rendered');
  assert.ok(!design.navbarColor?.includes('0, 229, 255'),'Old neon header must not remain');
  // Errore sintattico reale: Godot deve popolare il pannello didattico.
