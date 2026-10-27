@@ -491,7 +491,7 @@ async function smoke(browser,url,width){
  assert.ok(debugState.hint?.length>20,'Debugger lacks an explanatory hint');
  assert.ok(debugState.technical?.length>5,'Debugger must preserve original Godot message');
  assert.equal(debugState.finished,false,'Debugging should not complete a lesson');
- const noExtendsCode='func _ready():\\n    # Stampa esattamente\\n    prin("Ciao Godot!")\\n';
+ const noExtendsCode='func _ready():\n    # Stampa esattamente\n    prin("Ciao Godot!")\n';
  await page.locator('#code-editor').fill(noExtendsCode);
  await page.locator('#btn-run-code').click({timeout:10000});
  await page.waitForFunction(()=>!App.isValidating,null,{timeout:18000});
@@ -505,8 +505,7 @@ async function smoke(browser,url,width){
  assert.deepEqual(mappedError.row,[3],'Il colore rosso deve evidenziare la riga 3, non quella vuota 4');
  assert.equal(mappedError.bannerHidden,true,'Il riquadro rosso duplicato deve sparire');
  assert.equal(mappedError.hasGuide,true,'La spiegazione didattica deve rimanere visibile');
- if(debugState.jump){
-   const line=Number(debugState.jump.match(/\d+/)?.[0]);
+ if(mappedError.jump){
    await page.locator('#exercise-debug-area .gdh-debug-jump').click();
    assert.equal(await page.locator('#code-editor').evaluate(el=>{
      return el.value.slice(0,el.selectionStart).split('\n').length;

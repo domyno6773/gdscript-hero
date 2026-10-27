@@ -45,7 +45,7 @@ const typo=guide.diagnose({
  error:'SCRIPT ERROR: Parse Error: Function "prin()" not found in base self. at: GDScript::reload (gdscript://-9223372012930464558.gd:4)'
 });
 assert.equal(typo.line,4); // Il sorgente ha già extends, nessun offset.
-const noExtendsSource = 'func _ready():\\n    # Stampa qualcosa\\n    prin("ciao")\\n';
+const noExtendsSource = 'func _ready():\n    # Stampa qualcosa\n    prin("ciao")\n';
 const prefixedTypo = guide.diagnose({
  source:noExtendsSource,
  error:'SCRIPT ERROR: Parse Error: Function "prin()" not found in base self. at: GDScript::reload (gdscript://-9223372012930464558.gd:4)'
