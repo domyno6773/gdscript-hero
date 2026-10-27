@@ -195,6 +195,9 @@ const App = {
                         document.getElementById('code-editor').value = draft.code;
                         this.updateLineNumbers();
                         window.GDScriptHighlighter?.sync('exercise');
+                        // openReviewVariant salva inizialmente lo starter: ripristina
+                        // anche lo snapshot, cosi' i refresh successivi conservano la bozza.
+                        this.saveReviewDraft();
                     }
                 } else {
                     const id = Number(position.lessonId);
