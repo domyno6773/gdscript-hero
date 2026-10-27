@@ -846,3 +846,126 @@ body[data-theme="light"] {
         flex: 1 1 auto;
     }
 }
+
+
+/* Debugger didattico - diagnostica Godot senza risolvere l'esercizio al posto dello studente. */
+.gdh-debug-host:empty { display: none; }
+#view-exercise .gdh-debug-host,
+#view-practice .gdh-debug-host { min-width: 0; }
+#view-exercise .gdh-debug-panel,
+#view-practice .gdh-debug-panel {
+  margin: 8px 0 12px;
+  padding: 11px 12px;
+  border: 1px solid #617b94;
+  border-left: 3px solid #82b9da;
+  border-radius: 7px;
+  color: #e5eef8;
+  background: #293746;
+  box-shadow: none;
+  font: 400 12px/1.55 'Inter', sans-serif;
+  overflow-wrap: anywhere;
+}
+#view-exercise .gdh-debug-panel[data-kind="engine"],
+#view-practice .gdh-debug-panel[data-kind="engine"] {
+  border-left-color: #e2a27c;
+}
+.gdh-debug-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 7px;
+}
+.gdh-debug-top strong {
+  color: #f3f7ff;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.gdh-debug-tag {
+  padding: 3px 7px;
+  border: 1px solid #607f99;
+  border-radius: 4px;
+  color: #b5dff6;
+  background: #354c61;
+  font: 700 10px/1.25 'Inter',sans-serif;
+  letter-spacing: .045em;
+}
+[data-kind="engine"] .gdh-debug-tag {
+  color: #ffceae;
+  border-color: #916c57;
+  background: #524037;
+}
+.gdh-debug-explanation,
+.gdh-debug-hint p { margin: 0; color: #d9e5f2; }
+.gdh-debug-hint {
+  margin: 10px 0 0;
+  padding: 9px 10px;
+  border-radius: 5px;
+  border: 1px solid #526980;
+  background: #243241;
+}
+.gdh-debug-hint strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: #a9d6f3;
+}
+.gdh-debug-jump {
+  display: inline-flex;
+  min-height: 31px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  padding: 6px 11px;
+  border-radius: 5px;
+  border: 1px solid #679bbd;
+  background: #385a75;
+  color: #e7f5ff;
+  font: 700 11px/1.2 'Inter',sans-serif;
+  cursor: pointer;
+}
+.gdh-debug-jump:hover { background: #426b88; }
+.gdh-debug-jump:focus-visible { outline: 2px solid #aed8f5; outline-offset: 2px; }
+.gdh-debug-location { display:block; margin-top: 7px; color: #b5c9d9; }
+.gdh-debug-requirement { margin: 8px 0 0; color: #d8e7f5; white-space: pre-wrap; }
+.gdh-debug-technical { margin-top: 9px; border-top: 1px solid #526174; padding-top: 7px; }
+.gdh-debug-technical summary { cursor: pointer; color: #a9cde9; font-size: 11px; font-weight: 650; }
+.gdh-debug-technical pre {
+  max-height: 132px;
+  margin: 7px 0 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #e5edf6;
+  background: #1b2835;
+  border-radius: 4px;
+  padding: 8px;
+  font: 500 11px/1.5 'Fira Code',monospace;
+}
+[data-theme="light"] #view-exercise .gdh-debug-panel,
+[data-theme="light"] #view-practice .gdh-debug-panel {
+  color: #253c52;
+  background: #f2f6fa;
+  border-color: #a1b5c9;
+  border-left-color: #477eab;
+}
+[data-theme="light"] #view-exercise .gdh-debug-panel[data-kind="engine"],
+[data-theme="light"] #view-practice .gdh-debug-panel[data-kind="engine"] { border-left-color: #a96543; }
+[data-theme="light"] .gdh-debug-top strong { color: #223d54; }
+[data-theme="light"] .gdh-debug-explanation,
+[data-theme="light"] .gdh-debug-hint p,
+[data-theme="light"] .gdh-debug-requirement { color: #2c4359; }
+[data-theme="light"] .gdh-debug-hint { color: #28435c; background: #e8f1f8; border-color: #c4d4e0; }
+[data-theme="light"] .gdh-debug-hint strong { color: #2a6b96; }
+[data-theme="light"] .gdh-debug-tag { color: #2b638b; background: #e4eff8; border-color: #b1cce1; }
+[data-theme="light"] [data-kind="engine"] .gdh-debug-tag { color: #8b4b2e; background: #f7e9df; border-color: #d9b29f; }
+[data-theme="light"] .gdh-debug-jump { color: #fff; background: #397dac; border-color: #397dac; }
+[data-theme="light"] .gdh-debug-location { color: #567087; }
+[data-theme="light"] .gdh-debug-technical { border-top-color: #ccd8e2; }
+[data-theme="light"] .gdh-debug-technical summary { color: #2c698f; }
+[data-theme="light"] .gdh-debug-technical pre { background: #e4edf5; color: #284157; }
+@media (max-width: 820px) {
+  #view-exercise .gdh-debug-panel,
+  #view-practice .gdh-debug-panel { padding: 10px; }
+  .gdh-debug-jump { min-height: 38px; }
+}
