@@ -475,8 +475,33 @@ async function smoke(browser,url,width){
  assert.ok(design.tokens>0 && design.keywords>0,'GDScript syntax must be highlighted');
  assert.ok(design.syntaxLayerHeight>0,'Syntax layer must be rendered');
  assert.ok(!design.navbarColor?.includes('0, 229, 255'),'Old neon header must not remain');
+ // Errore sintattico reale: Godot deve popolare il pannello didattico.
+ const badCode='extends Node\\nfunc _ready():\\n    if true\\n        print("FAIL")';
+ await page.locator('#code-editor').fill(badCode);
+ await page.locator('#btn-run-code').click({timeout:10000});
+ await page.waitForFunction(()=>!App.isValidating,null,{timeout:18000});
+ const debugState=await page.evaluate(()=>({
+   kind:document.querySelector('#exercise-debug-area .gdh-debug-panel')?.dataset.kind,
+   hint:document.querySelector('#exercise-debug-area .gdh-debug-hint')?.textContent,
+   technical:document.querySelector('#exercise-debug-area .gdh-debug-technical pre')?.textContent,
+   jump:document.querySelector('#exercise-debug-area .gdh-debug-jump')?.textContent,
+   finished:App.state.finishedLessons.includes(1)
+ }));
+ assert.equal(debugState.kind,'engine','Godot syntax error lacks debugger panel');
+ assert.ok(debugState.hint?.length>20,'Debugger lacks an explanatory hint');
+ assert.ok(debugState.technical?.length>5,'Debugger must preserve original Godot message');
+ assert.equal(debugState.finished,false,'Debugging should not complete a lesson');
+ if(debugState.jump){
+   const line=Number(debugState.jump.match(/\\d+/)?.[0]);
+   await page.locator('#exercise-debug-area .gdh-debug-jump').click();
+   assert.equal(await page.locator('#code-editor').evaluate(el=>{
+     return el.value.slice(0,el.selectionStart).split('\\n').length;
+   }),line,'Debugger jump does not focus the indicated line');
+ }
  const official=await page.evaluate(()=>LESSONS_DATA.find(l=>l.id===1).solution);
  await page.locator('#code-editor').fill(official);
+ assert.equal(await page.locator('#exercise-debug-area .gdh-debug-panel').count(),0,
+   'Editing the code should clear the previous error');
  await page.locator('#btn-run-code').click({timeout:10000});
  try {
    await page.waitForFunction(()=>App.state.finishedLessons.includes(1),null,{timeout:15000});
