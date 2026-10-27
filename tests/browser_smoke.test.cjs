@@ -554,7 +554,13 @@ async function smoke(browser,url,width){
  // Cliccare una parola nel vero editor apre la spiegazione, senza cambiare codice.
  if(width<821)await page.locator('#btn-tab-code').click();
  const codeBeforeHelp=await page.locator('#code-editor').inputValue();
- await page.locator('#code-editor').click({position:{x:27,y:28}});
+ // Il dock mobile ha un header fisso: simuliamo il click sull'istruzione
+ // senza far scorrere la textarea dietro l'header di navigazione.
+ await page.locator('#code-editor').evaluate(el=>{
+   el.focus();
+   el.setSelectionRange(2,2);
+   el.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:300,clientY:250}));
+ });
  assert.equal(await page.locator('#gdh-inline-code-help').isVisible(),true,
    'Click su extends deve aprire la spiegazione nell’editor');
  assert.equal(await page.locator('#gdh-inline-code-help').getAttribute('data-concept'),'extends');
