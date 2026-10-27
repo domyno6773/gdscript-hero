@@ -740,6 +740,7 @@ const App = {
         let autoSaveDebounce = null;
         editor.addEventListener('input', () => {
             this.updateSandboxLineNumbers();
+            this.checkAutocomplete('sandbox');
             this.updateSandboxSyncStatus('saving');
             clearTimeout(autoSaveDebounce);
             autoSaveDebounce = setTimeout(() => {
@@ -759,16 +760,47 @@ const App = {
             if (linesEl) linesEl.scrollTop = editor.scrollTop;
         });
 
-        // Tab e Scorciatoie da tastiera (Ctrl+Enter per eseguire scena)
+        // Stessi suggerimenti, tasti e completamento automatico dell'editor lezioni.
         editor.addEventListener('keydown', (e) => {
+            const popup = document.getElementById('sandbox-autocomplete-popup');
+            if (popup && !popup.classList.contains('hidden')) {
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    this.moveAutocompleteSelection(1, 'sandbox');
+                    return;
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.moveAutocompleteSelection(-1, 'sandbox');
+                    return;
+                } else if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault();
+                    this.commitAutocompleteSelection('sandbox');
+                    return;
+                } else if (e.key === 'Escape') {
+                    this.hideAutocomplete();
+                    return;
+                }
+            }
+
+            if (e.key === '(' || e.key === '"') {
+                e.preventDefault();
+                const pos = editor.selectionStart;
+                const pair = e.key === '(' ? '()' : '""';
+                editor.value = editor.value.substring(0, pos) + pair + editor.value.substring(editor.selectionEnd);
+                editor.selectionStart = editor.selectionEnd = pos + 1;
+                editor.dispatchEvent(new Event('input', { bubbles: true }));
+                return;
+            }
             if (e.key === 'Tab') {
                 e.preventDefault();
                 const start = editor.selectionStart;
                 const end = editor.selectionEnd;
                 editor.value = editor.value.substring(0, start) + "    " + editor.value.substring(end);
                 editor.selectionStart = editor.selectionEnd = start + 4;
-                this.updateSandboxLineNumbers();
-            } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                editor.dispatchEvent(new Event('input', { bubbles: true }));
+                return;
+            }
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 this.runSandboxCode();
             }
@@ -3114,8 +3146,9 @@ const App = {
         });
     },
 
-    checkAutocomplete() {
-        const editor = document.getElementById('code-editor');
+    checkAutocomplete(context = 'exercise') {
+        const editor = document.getElementById(context === 'sandbox' ? 'sandbox-code-editor' : 'code-editor');
+        if (!editor) return;
         const pos = editor.selectionStart;
         const textBefore = editor.value.substring(0, pos);
         
@@ -3143,9 +3176,10 @@ const App = {
             return;
         }
 
+        this.hideAutocomplete();
         this.state.autocompleteList = matches.slice(0, 6);
         this.state.selectedAutocompleteIndex = 0;
-        this.renderAutocompletePopup();
+        this.renderAutocompletePopup(context);
     },
 
     getCaretCoordinates(element, position) {
@@ -3188,9 +3222,9 @@ const App = {
         return { top, left, height };
     },
 
-    renderAutocompletePopup() {
-        const popup = document.getElementById('autocomplete-popup');
-        const editor = document.getElementById('code-editor');
+    renderAutocompletePopup(context = 'exercise') {
+        const popup = document.getElementById(context === 'sandbox' ? 'sandbox-autocomplete-popup' : 'autocomplete-popup');
+        const editor = document.getElementById(context === 'sandbox' ? 'sandbox-code-editor' : 'code-editor');
         if (!popup || !editor) return;
 
         popup.innerHTML = '';
@@ -3204,13 +3238,14 @@ const App = {
             el.onmousedown = (e) => {
                 e.preventDefault();
                 this.state.selectedAutocompleteIndex = idx;
-                this.commitAutocompleteSelection();
+                this.commitAutocompleteSelection(context);
             };
             popup.appendChild(el);
         });
 
         const caret = this.getCaretCoordinates(editor, editor.selectionStart);
-        const wrapper = editor.parentElement;
+        const wrapper = editor.closest('.editor-wrapper');
+        if (!wrapper) return;
         const wrapperRect = wrapper.getBoundingClientRect();
         const editorRect = editor.getBoundingClientRect();
 
@@ -3235,18 +3270,19 @@ const App = {
         popup.classList.remove('hidden');
     },
 
-    moveAutocompleteSelection(delta) {
+    moveAutocompleteSelection(delta, context = 'exercise') {
         const len = this.state.autocompleteList.length;
         if (len === 0) return;
         this.state.selectedAutocompleteIndex = (this.state.selectedAutocompleteIndex + delta + len) % len;
-        this.renderAutocompletePopup();
+        this.renderAutocompletePopup(context);
     },
 
-    commitAutocompleteSelection() {
+    commitAutocompleteSelection(context = 'exercise') {
         const selected = this.state.autocompleteList[this.state.selectedAutocompleteIndex];
         if (!selected) return;
 
-        const editor = document.getElementById('code-editor');
+        const editor = document.getElementById(context === 'sandbox' ? 'sandbox-code-editor' : 'code-editor');
+        if (!editor) return;
         const pos = editor.selectionStart;
         const textBefore = editor.value.substring(0, pos);
         const match = textBefore.match(/([a-zA-Z0-9_]+)$/);
@@ -3255,10 +3291,22 @@ const App = {
             const replaceStart = pos - match[1].length;
             editor.value = editor.value.substring(0, replaceStart) + selected.name + editor.value.substring(pos);
             editor.selectionStart = editor.selectionEnd = replaceStart + selected.name.length;
-            this.updateLineNumbers();
-            if (!this.isReviewMode) {
-                this.state.userCode[this.state.currentLessonId] = editor.value;
-                this.saveStorage();
+            if (context === 'sandbox') {
+                this.updateSandboxLineNumbers();
+                window.GDScriptHighlighter?.sync('sandbox');
+                const project = this.getActiveSandboxProject();
+                if (project) {
+                    project.code = editor.value;
+                    project.updatedAt = new Date().toISOString();
+                    this.saveStorage();
+                    this.updateSandboxSyncStatus('saved');
+                }
+            } else {
+                this.updateLineNumbers();
+                if (!this.isReviewMode) {
+                    this.state.userCode[this.state.currentLessonId] = editor.value;
+                    this.saveStorage();
+                }
             }
         }
 
@@ -3266,8 +3314,10 @@ const App = {
     },
 
     hideAutocomplete() {
-        const popup = document.getElementById('autocomplete-popup');
-        if (popup) popup.classList.add('hidden');
+        for (const id of ['autocomplete-popup', 'sandbox-autocomplete-popup']) {
+            const popup = document.getElementById(id);
+            if (popup) popup.classList.add('hidden');
+        }
         this.state.autocompleteList = [];
     },
 
