@@ -846,6 +846,7 @@ const App = {
         // Auto-save debounced a 800ms
         let autoSaveDebounce = null;
         editor.addEventListener('input', () => {
+            window.GDHErrorGuide?.clear('#sandbox-debug-area');
             this.updateSandboxLineNumbers();
             this.checkAutocomplete('sandbox');
             this.updateSandboxSyncStatus('saving');
@@ -1514,6 +1515,7 @@ const App = {
         const startT = performance.now();
         const code = editor.value;
 
+        window.GDHErrorGuide?.clear('#sandbox-debug-area');
         // Salva codice nel progetto attivo
         const cur = this.getActiveSandboxProject();
         if (cur) {
@@ -1542,6 +1544,8 @@ const App = {
                     outputPre.scrollTop = outputPre.scrollHeight;
                 }
             });
+            // La diagnostica è restituita dal vero Godot, non dal runtime JS.
+            if (editor.value === code) this.updateDidacticDebugger(res, [], 'sandbox');
             this.sandboxScope = res.scope;
             this.sandboxNativeSession = res.success ? cur?.id : null;
             if (res.success) this.applySandboxNativeSnapshot(res.native?.scene);
@@ -1580,6 +1584,7 @@ const App = {
             this.renderSandboxViewportOverlay();
             this.updateSandboxSyncStatus('saved');
         } catch (e) {
+            if (editor.value === code) this.updateDidacticDebugger({error:String(e.message || e),nativeStatus:'inconclusive'}, [], 'sandbox');
             outputPre.innerText = `// Errore inaspettato: ${e.message}`;
             outputPre.style.color = '#f87171';
             if (statusTag) {
@@ -1594,6 +1599,7 @@ const App = {
         SoundFX.playClick();
         const outputPre = document.getElementById('sandbox-console-output') || document.getElementById('practice-console-output');
         const statusTag = document.getElementById('sandbox-status-tag') || document.getElementById('practice-status-tag');
+        window.GDHErrorGuide?.clear('#sandbox-debug-area');
         if (outputPre) outputPre.innerText = "// Console ripulita";
         if (statusTag) statusTag.innerText = "Pronto";
     },
@@ -3242,6 +3248,7 @@ const App = {
         if (!editor) return;
 
         editor.addEventListener('input', () => {
+            window.GDHErrorGuide?.clear('#exercise-debug-area');
             this.updateLineNumbers();
             this.checkAutocomplete();
             // Un ripasso non deve mai sovrascrivere il codice salvato del corso.
@@ -3777,7 +3784,29 @@ const App = {
 
     // Il dock rimane leggibile anche quando la lista dei test è molto lunga.
     // L'errore più utile viene mostrato per primo, senza scorrere la pagina.
+    // Debugger didattico comune a Corso, Ripasso e Sandbox.
+    // Mostra solo righe confermate dal messaggio Godot: niente posizioni inventate.
+    updateDidacticDebugger(result, tests = [], context = 'exercise') {
+        if (!window.GDHErrorGuide) return;
+        const sandbox = context === 'sandbox';
+        const host = sandbox ? '#sandbox-debug-area' : '#exercise-debug-area';
+        const editor = document.getElementById(sandbox ? 'sandbox-code-editor' : 'code-editor');
+        const failed = Array.isArray(tests) ? tests.find(t => !t.passed) : null;
+        const error = result?.error || '';
+        if (!error && !failed) {
+            GDHErrorGuide.clear(host);
+            return;
+        }
+        const diagnosis = GDHErrorGuide.diagnose({
+            source: editor?.value || '',
+            error, failedTest: failed,
+            verdict: result?.nativeFeedback?.verdict || ''
+        });
+        GDHErrorGuide.render(host, diagnosis, line => GDHErrorGuide.jump(editor, line));
+    },
+
     resetExerciseFeedback() {
+        window.GDHErrorGuide?.clear('#exercise-debug-area');
         this.keepExerciseAtHorizontalOrigin();
         const area = document.getElementById('exercise-primary-feedback');
         const title = document.getElementById('exercise-feedback-title');
@@ -3892,6 +3921,7 @@ const App = {
                 if (failure) failure.diff = native.feedback.reason;
             }
             this.showExerciseFeedback(result, tests);
+            this.updateDidacticDebugger(allPassed ? null : result, allPassed ? [] : tests);
 
             // Registra telemetria P3.1 del tentativo di verifica
             this.recordLessonAttempt(currentLesson.id, result, tests,
@@ -4044,6 +4074,7 @@ const App = {
             }
 
         } catch (criticalErr) {
+            if (editor.value === code) this.updateDidacticDebugger({error:String(criticalErr.message || criticalErr)}, []);
             console.error("Errore durante la verifica:", criticalErr);
             this.recordLessonAttempt(currentLesson.id, null, null, criticalErr, code);
             const realOutputPre = document.getElementById('real-output-pre');
@@ -4764,6 +4795,7 @@ const App = {
                 document.getElementById('code-editor').value !== code) return;
             const allPassed = tests.length > 0 && tests.every(t => t.passed);
             this.showExerciseFeedback(result, tests);
+            this.updateDidacticDebugger(allPassed ? null : result, allPassed ? [] : tests);
 
             const isFirstTime = !(this.state.reviewProgress && Array.isArray(this.state.reviewProgress.completedVariants) && this.state.reviewProgress.completedVariants.includes(variant.id));
 
@@ -4847,6 +4879,9 @@ const App = {
             }
 
         } catch (err) {
+            if (this.currentReviewVariant === variant &&
+                document.getElementById('code-editor')?.value === code)
+                this.updateDidacticDebugger({error:String(err.message || err)}, []);
             console.error("Errore verifica variante ripasso:", err);
             SoundFX.playError();
         } finally {
