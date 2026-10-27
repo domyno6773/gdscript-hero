@@ -98,6 +98,33 @@ async function smoke(browser,url,width){
  const sandboxNav=width<821?'#mob-nav-practice':'#nav-practice-btn';
  await page.locator(sandboxNav).click({timeout:15000});
  await viewIs(page,'practice');
+ // Le icone Sandbox devono essere veri SVG visibili, non emoji o glifi testuali.
+ const iconAudit=await page.evaluate(()=>{
+   const root=document.getElementById('view-practice');
+   const icons=[...root.querySelectorAll('svg.sandbox-svg-icon')];
+   const missing=icons.filter(svg=>{
+     const use=svg.querySelector('use');
+     const id=use?.getAttribute('href');
+     return !id?.startsWith('#gdh-icon-') || !document.getElementById(id.slice(1)) ||
+       svg.getBBox().width<=0 || svg.getBBox().height<=0;
+   });
+   const pictographs=[...root.textContent].filter(c=>/\p{Extended_Pictographic}/u.test(c));
+   return {count:icons.length,missing:missing.map(x=>x.outerHTML.slice(0,180)),pictographs};
+ });
+ assert.ok(iconAudit.count>=12,'Missing Sandbox SVG icons: '+JSON.stringify(iconAudit));
+ assert.equal(iconAudit.missing.length,0,'Unrendered Sandbox icon: '+JSON.stringify(iconAudit));
+ assert.deepEqual(iconAudit.pictographs,[],'Emoji remain in Sandbox: '+JSON.stringify(iconAudit));
+ for(const [open,modal,close] of [
+   ['#btn-sandbox-help','#modal-sandbox-welcome','#btn-close-sandbox-welcome'],
+   ['#btn-sandbox-new-project','#modal-sandbox-new-project','#btn-cancel-sandbox-new'],
+   ['#btn-sandbox-add-node','#add-node-modal','#btn-cancel-add-node']
+ ]){
+   await page.locator(open).click({timeout:10000});
+   await page.locator(modal).waitFor({state:'visible'});
+   const iconCount=await page.locator(modal+' svg.sandbox-svg-icon use').count();
+   assert.ok(iconCount>=1,'Missing SVG icon in '+modal);
+   await page.locator(close).click({timeout:10000});
+ }
  // Stesso autocomplete del corso: suggerimenti, Tab/Enter, frecce, Escape
  // e completamento delle variabili definite dall'utente.
  await page.locator('#sandbox-code-editor').fill('extends Node2D\n\npri');
