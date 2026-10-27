@@ -20,7 +20,7 @@ assert.equal(syntax.steps.length,2);
 assert.equal(syntax.line,3);
 assert.equal(syntax.exact,true);
 assert.match(syntax.title,/due punti/);
-assert.match(syntax.hint,/rientrat/);
+assert.match(syntax.hint,/fine della riga/);
 assert.ok(!syntax.hint.includes('if health > 0:'));
 
 const undefinedVar=guide.diagnose({
