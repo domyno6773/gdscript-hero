@@ -551,6 +551,24 @@ async function smoke(browser,url,width){
    'La sfida 4 deve spiegare automaticamente extends Node al suo primo incontro');
  assert.match(await page.locator('.gdh-code-guide').textContent(),/extends Node/);
  assert.match(await page.locator('.gdh-code-guide').textContent(),/nodo/i);
+ // Cliccare una parola nel vero editor apre la spiegazione, senza cambiare codice.
+ if(width<821)await page.locator('#btn-tab-code').click();
+ const codeBeforeHelp=await page.locator('#code-editor').inputValue();
+ await page.locator('#code-editor').click({position:{x:27,y:28}});
+ assert.equal(await page.locator('#gdh-inline-code-help').isVisible(),true,
+   'Click su extends deve aprire la spiegazione nell’editor');
+ assert.equal(await page.locator('#gdh-inline-code-help').getAttribute('data-concept'),'extends');
+ assert.match(await page.locator('#gdh-inline-code-help').textContent(),/Node/);
+ assert.equal(await page.locator('#code-editor').inputValue(),codeBeforeHelp,
+   'Aprire la spiegazione non deve modificare il codice');
+ await page.locator('#gdh-inline-code-help .gdh-inline-help-close').click();
+ assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true);
+ await page.locator('#code-editor').evaluate(el=>{el.focus();el.setSelectionRange(2,2);});
+ await page.locator('#code-editor').press('F1');
+ assert.equal(await page.locator('#gdh-inline-code-help').isVisible(),true,
+   'F1 deve aprire la guida anche da tastiera');
+ await page.locator('#code-editor').press('Escape');
+ assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true);
  await page.evaluate(()=>App.openLesson(1));
  if(width<821)await page.locator('#btn-tab-code').click();
 

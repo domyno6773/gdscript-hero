@@ -183,5 +183,72 @@
       content.append(entry);
     }
   }
-  root.GDHCodeGuide=Object.freeze({analyze,render,unseenKeys});
+
+  // Restituisce una spiegazione SOLO per un costrutto presente nel codice al
+  // punto indicato. Non interpreta stringhe/commenti come istruzioni.
+  function explainAt(source, offset) {
+    const text=String(source||'');
+    if (!Number.isSafeInteger(offset)||offset<0||offset>text.length) return null;
+    const begin=text.lastIndexOf('\n',Math.max(0,offset-1))+1;
+    const endIndex=text.indexOf('\n',offset);
+    const end=endIndex===-1?text.length:endIndex;
+    const line=text.slice(begin,end), column=offset-begin;
+    if(column<0||column>line.length) return null;
+    // Scanner molto limitato: serve soltanto a ignorare testo tra apici e note.
+    let quote=null, comment=-1, quotedStart=-1, quotedRanges=[];
+    for(let i=0;i<line.length;i++){
+      const char=line[i];
+      if(quote){
+        if(char==='\\'){i++;continue;}
+        if(char===quote){quotedRanges.push([quotedStart,i+1]);quote=null;}
+      }else if(char==='"'||char==="'"){quote=char;quotedStart=i;}
+      else if(char==='#'){comment=i;break;}
+    }
+    if(quote)quotedRanges.push([quotedStart,line.length]);
+    const insideQuoted=p=>quotedRanges.some(([a,b])=>p>=a&&p<b);
+    const tokens=[...line.matchAll(/[$@]?[A-Za-z_]\w*|#/g)];
+    const candidates=tokens.filter(t=>t.index<=column&&column<t.index+t[0].length);
+    if(!candidates.length&&column>0)candidates.push(...tokens.filter(t=>t.index+t[0].length===column));
+    const token=candidates[0];
+    if(!token)return null;
+    const word=token[0],pos=token.index;
+    if(insideQuoted(pos))return null;
+    if(comment>=0){
+      if(pos>=comment&&word!=='#')return null;
+      if(word==='#'&&pos===comment){
+        return analyze('# commento').find(item=>item.key==='comment')||null;
+      }
+    }
+    let key=null;
+    const original=line.trim();
+    if(/^extends\s+\w+/.test(original)&&(/^(extends|Node|Node2D|Control|Resource|RefCounted)$/.test(word)||
+       new RegExp('^extends\\s+'+word+'(?:\\s|$)').test(original)))key='extends';
+    else if(/^(?:static\s+)?func\s+_ready\s*\(/.test(original)&&/^(func|_ready)$/.test(word))key='ready';
+    else if(/^(?:static\s+)?func\s+_init\s*\(/.test(original)&&word==='_init')key='init';
+    else if(/^(?:static\s+)?func\s+\w+\s*\(/.test(original)&&word==='func')key='func';
+    else if(/^var\s+\w+/.test(original)&&word==='var')key='var';
+    else if(/^const\s+\w+/.test(original)&&word==='const')key='const';
+    else if(/^signal\s+\w+/.test(original)&&word==='signal')key='signal';
+    else if(/^(?:class|class_name)\s+\w+/.test(original)&&/^(class|class_name)$/.test(word))key='class';
+    else if(/^(?:var|const)\s+\w+\s*:\s*(?:int|float|String|bool|Vector2|Array|Dictionary)\b/.test(original)&&
+      /^(int|float|String|bool|Vector2|Array|Dictionary)$/.test(word))key='type';
+    else if(word[0]==='
+})(typeof window!=='undefined'?window:globalThis);
+)key='nodepath';
+    else if(word==='@export')key='export';
+    else if(word==='@onready')key='onready';
+    else if(word==='print'&&/^\s*\(/.test(line.slice(pos+word.length)))key='print';
+    else if(word==='range'&&/^\s*\(/.test(line.slice(pos+word.length)))key='range';
+    else if(word==='Vector2'&&/^\s*\(/.test(line.slice(pos+word.length)))key='vector';
+    else if(['connect','emit','new'].includes(word)&&pos>0&&line.slice(0,pos).trimEnd().endsWith('.')){
+      key=word;
+    }else if(word==='true'||word==='false')key='boolean';
+    else if(['pass','if','elif','else','for','while','match','return','break','continue','await'].includes(word)){
+      key=word==='if'?'condition':word;
+    }
+    if(!key)return null;
+    const entry=analyze(line).find(item=>item.key===key);
+    return entry?Object.freeze({key:entry.key,title:entry.title,detail:entry.detail,line:text.slice(0,begin).split('\n').length,word}):null;
+  }
+  root.GDHCodeGuide=Object.freeze({analyze,render,unseenKeys,explainAt});
 })(typeof window!=='undefined'?window:globalThis);

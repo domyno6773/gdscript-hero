@@ -81,3 +81,72 @@
   #view-exercise .gdh-code-guide > summary { padding: 14px; }
   #view-exercise .gdh-code-guide-jump { min-height: 34px; }
 }
+
+
+/* Schede contestuali all'interno dell'editor — nessuna copertura del codice
+   durante la digitazione e niente glow. Fixed per evitare ritagli nel dock. */
+.gdh-inline-code-help {
+  position: fixed;
+  z-index: 1200;
+  width: min(310px, calc(100vw - 24px));
+  max-height: min(300px, calc(100dvh - 24px));
+  overflow-y: auto;
+  padding: 13px 14px 12px;
+  border: 1px solid #6184a1;
+  border-radius: 9px;
+  background: #273847;
+  color: #deebf7;
+  box-shadow: 0 8px 22px rgba(0,0,0,.28);
+  font-family: 'Inter','Plus Jakarta Sans',sans-serif;
+  font-size: 12px;
+  line-height: 1.55;
+  overscroll-behavior: contain;
+}
+.gdh-inline-code-help[hidden] { display: none !important; }
+.gdh-inline-help-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+.gdh-inline-help-title {
+  margin: 0;
+  color: #a9d9f5;
+  font: 700 13px/1.4 'Fira Code','JetBrains Mono',monospace;
+  overflow-wrap: anywhere;
+}
+.gdh-inline-help-description { margin: 0; color: #dfebf6; }
+.gdh-inline-help-close {
+  appearance: none;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #566f84;
+  border-radius: 5px;
+  color: #d6e9f8;
+  background: #33495b;
+  font: 700 17px/1 'Inter',sans-serif;
+  cursor: pointer;
+}
+.gdh-inline-help-close:hover { background: #42617a; }
+.gdh-inline-help-close:focus-visible { outline: 2px solid #aedcf6; outline-offset: 2px; }
+[data-theme="light"] .gdh-inline-code-help {
+  background: #f8fbfe;
+  border-color: #aac4d8;
+  color: #304d64;
+  box-shadow: 0 8px 22px rgba(40,62,82,.14);
+}
+[data-theme="light"] .gdh-inline-help-title { color: #245d84; }
+[data-theme="light"] .gdh-inline-help-description { color: #345269; }
+[data-theme="light"] .gdh-inline-help-close {
+  background: #e7f0f7;
+  border-color: #b4cadb;
+  color: #2c536f;
+}
+@media(max-width: 480px){
+  .gdh-inline-code-help { width: min(300px,calc(100vw - 20px)); padding: 12px; }
+}

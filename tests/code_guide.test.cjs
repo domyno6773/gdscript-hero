@@ -34,4 +34,27 @@ const comment=guide.analyze('# extends Node\n# print("test")\npass');
 assert.equal(comment.some(x=>x.key==='extends'||x.key==='print'),false,
  'I commenti non vanno interpretati come codice eseguibile');
 assert.equal(guide.analyze('').length,0);
+// Selezionare un termine nell'editor non deve rivelare soluzioni o interpretare
+// testo fra virgolette, commenti o parole sconosciute come istruzioni.
+const help=guide.explainAt;
+const at=(source,word)=>help(source,source.indexOf(word)+1);
+assert.equal(at(challenge,'extends').key,'extends');
+assert.equal(at(challenge,'Node').key,'extends');
+assert.equal(at(challenge,'_ready').key,'ready');
+assert.equal(at(challenge,'print').key,'print');
+assert.equal(at('var salute = 100','var').key,'var');
+assert.equal(at('func heal(amount):\n    pass','func').key,'func');
+assert.equal(at('func _ready():\n    pass','pass').key,'pass');
+assert.equal(at('if health > 0:\n    print(health)','if').key,'condition');
+assert.equal(at('var x = true','true').key,'boolean');
+assert.equal(at('$Label.text = "ok"','$Label').key,'nodepath');
+assert.equal(at('var x = range(3)','range').key,'range');
+assert.equal(at('print("extends Node")','extends'),null);
+assert.equal(at('# usa print()','print'),null);
+assert.equal(at('# usa print()','#').key,'comment');
+assert.equal(help(challenge,-1),null);
+assert.equal(help(challenge,challenge.length+1),null);
+assert.equal(at('foo = 1','foo'),null);
+assert.equal(at('printer()','printer'),null);
+assert.ok(!at('print("segreto")','print').detail.includes('segreto'));
 console.log('PASS: context-aware code explanations, first encounter, live constructs and no solutions');
