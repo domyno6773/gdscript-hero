@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="godot-theme.css">
     <link rel="stylesheet" href="exercise-redesign.css">
     <link rel="stylesheet" href="code-guide.css">
+    <link rel="stylesheet" href="progression.css">
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -974,7 +975,8 @@
                     </div>
                     <h3 class="profile-name-display" id="profile-name-display">Eroe Godot</h3>
                     <div class="profile-tag-badge" id="profile-tag-display">Sviluppatore GDScript</div>
-                    <div class="profile-level-badge" id="profile-level-display">Livello 1 • Recluta Godot</div>
+                    <div class="profile-level-badge" id="profile-level-display">Livello 1 • Apprendista Godot</div>
+                    <div class="profile-prestige hidden" id="profile-prestige-display" aria-label="Grado di prestigio"></div>
 
                     <!-- Link Rapido Statistiche di Apprendimento P3.4 -->
                     <button type="button" class="profile-stats-link-btn" id="btn-profile-to-stats" onclick="App.closeProfileModal(); App.showStatsView();">
@@ -1924,6 +1926,7 @@
     <script src="runtime.js"></script>
     <script src="diagnostic.js"></script>
     <script src="error-guide.js"></script>
+    <script src="progression.js"></script>
     <script src="lessons.js"></script>
     <script src="code-guide.js"></script>
     <script src="inline-code-help.js"></script>

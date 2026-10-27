@@ -4964,24 +4964,11 @@ const ACHIEVEMENTS_DATA = [
     }
 ];
 
-const LEVELS_CONFIG = [
-    { level: 1, title: "Recluta Godot", minXp: 0, maxXp: 99 },
-    { level: 2, title: "Apprendista Script", minXp: 100, maxXp: 249 },
-    { level: 3, title: "Sviluppatore 2D", minXp: 250, maxXp: 449 },
-    { level: 4, title: "Alchimista dei Tipi", minXp: 450, maxXp: 699 },
-    { level: 5, title: "Mago della Logica", minXp: 700, maxXp: 999 },
-    { level: 6, title: "Maestro degli Array", minXp: 1000, maxXp: 1399 },
-    { level: 7, title: "Architetto di Cicli", minXp: 1400, maxXp: 1899 },
-    { level: 8, title: "Ingegnere di Nodi", minXp: 1900, maxXp: 2499 },
-    { level: 9, title: "Pilota dei Vettori", minXp: 2500, maxXp: 3199 },
-    { level: 10, title: "Custode dei Dizionari", minXp: 3200, maxXp: 3999 },
-    { level: 11, title: "Comandante di Segnali", minXp: 4000, maxXp: 4899 },
-    { level: 12, title: "Architetto di Classi", minXp: 4900, maxXp: 5899 },
-    { level: 13, title: "Pioniere della Scena", minXp: 5900, maxXp: 6999 },
-    { level: 14, title: "Mastro d'Interfaccia", minXp: 7000, maxXp: 8199 },
-    { level: 15, title: "Ingegnere di Godot 4", minXp: 8200, maxXp: 9499 },
-    { level: 16, title: "Godot Hero Trascendente", minXp: 9500, maxXp: 99999 }
-];
+const LEVELS_CONFIG = Array.from({length:50},(_,index)=>{
+    const level=index+1;
+    const info=ProgressionV2.levelFromXp(ProgressionV2.threshold(level));
+    return {level,title:info.tier.title,minXp:info.tier.minXp,maxXp:info.tier.maxXp};
+});
 
 const STREAK_TIERS = {
     rilassato: { target: 2, label: "Rilassato", icon: "☕", desc: "2 giorni / settimana" },
@@ -4996,23 +4983,23 @@ const DAILY_QUESTS_CONFIG = [
         desc: "Completa con successo almeno 1 livello oggi",
         icon: "📖",
         target: 1,
-        xpReward: 20
+        xpReward: 10
     },
     {
-        id: "no_hints",
-        title: "Mente Brillante",
-        desc: "Supera un esercizio senza usare suggerimenti",
-        icon: "🧠",
+        id: "review_success",
+        title: "Ripasso del Giorno",
+        desc: "Completa una variante di ripasso (anche con suggerimenti)",
+        icon: "book-open",
         target: 1,
-        xpReward: 30
+        xpReward: 10
     },
     {
-        id: "code_runs",
-        title: "Sperimentatore",
-        desc: "Esegui e testa il codice almeno 3 volte",
-        icon: "🔬",
-        target: 3,
-        xpReward: 20
+        id: "study_variety",
+        title: "Studio Completo",
+        desc: "Completa un esercizio del corso e un ripasso nello stesso giorno",
+        icon: "layers",
+        target: 1,
+        xpReward: 10
     }
 ];
 

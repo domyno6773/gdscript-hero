@@ -570,7 +570,7 @@ const AuthManager = {
                 user_id: user.id,
                 email: user.email,
                 xp: snapshot.xp || 0,
-                level: Math.floor((snapshot.xp || 0) / 100) + 1,
+                level: window.ProgressionV2 ? window.ProgressionV2.levelFromXp(snapshot.xp).tier.level : 1,
                 streak: snapshot.streak || 0,
                 streak_weeks: snapshot.streakWeeks || 0,
                 finished_lessons_count: (snapshot.finishedLessons || []).length,
@@ -699,7 +699,7 @@ const AuthManager = {
                 name: acc.name,
                 provider: acc.provider || 'email',
                 xp: p.xp || 0,
-                level: Math.floor((p.xp || 0) / 100) + 1,
+                level: window.ProgressionV2 ? window.ProgressionV2.levelFromXp(p.xp).tier.level : 1,
                 finishedLessons: (p.finishedLessons || []).length,
                 createdAt: acc.createdAt,
                 lastLogin: acc.lastLogin
@@ -752,6 +752,7 @@ const AuthManager = {
             data: {
                 theme: appState.theme || 'dark',
                 xp: appState.xp || 0,
+                rewardsV2: appState.rewardsV2 || null,
                 streak: appState.streak || 1,
                 streakWeeks: appState.streakWeeks || 0,
                 streakMode: appState.streakMode || 'rilassato',
@@ -879,6 +880,11 @@ const AuthManager = {
         const merged = { ...current };
 
         merged.xp = Math.max(current.xp || 0, imported.xp || 0);
+        // Registro ricorrente locale: unione per identificativo, mai somma dei due saldi.
+        // Non è una prova server di XP verificati.
+        merged.rewardsV2 = window.ProgressionV2
+            ? window.ProgressionV2.mergeRewards(current.rewardsV2,imported.rewardsV2,merged.xp)
+            : (current.rewardsV2 || imported.rewardsV2 || null);
         merged.streak = Math.max(current.streak || 1, imported.streak || 1);
         merged.streakWeeks = Math.max(current.streakWeeks || 0, imported.streakWeeks || 0);
 

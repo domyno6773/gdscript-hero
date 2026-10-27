@@ -10,6 +10,7 @@ const App = {
         devAllUnlocked: false, // Default false: la modalità test/verifica si attiva solo in locale
         unlockedAchievements: [],
         xp: 0,
+        rewardsV2: null, // Registro locale UX, non valido per la classifica ufficiale
         streak: 1,
         level: 1,
         streakMode: "rilassato", // "rilassato" (2), "concentrato" (4), "lockin" (6)
@@ -287,6 +288,7 @@ const App = {
             if (saved) {
                 const parsed = JSON.parse(saved);
                 this.state.xp = parsed.xp || 0;
+                this.state.rewardsV2 = ProgressionV2.normalizeRewards(parsed.rewardsV2,this.state.xp,parsed.dailyQuests);
                 this.state.streak = parsed.streak || 1;
                 this.state.finishedLessons = parsed.finishedLessons || [];
                 this.state.completedLessons = parsed.completedLessons || [1];
@@ -375,6 +377,7 @@ const App = {
                 }
             } else {
                 this.state.currentWeekId = this.getWeekId();
+                this.state.rewardsV2 = ProgressionV2.createRewards(0);
                 this.state.sandbox = this.getDefaultSandboxState();
                 this.state.learningTelemetry = { schema_version: 1, lessons: {}, daily_activity: {} };
                 if (this.isLocalEnvironment()) {
@@ -392,6 +395,7 @@ const App = {
         const payload = {
             theme: this.state.theme,
             xp: this.state.xp,
+            rewardsV2: this.state.rewardsV2,
             streak: this.state.streak,
             finishedLessons: this.state.finishedLessons,
             completedLessons: this.state.completedLessons,
@@ -496,6 +500,14 @@ const App = {
             avatarDisp.style.boxShadow = `0 0 25px ${p.color}55`;
         }
         if (levelDisp) levelDisp.innerText = `Livello ${info.tier.level} • ${info.tier.title}`;
+        const prestige = document.getElementById('profile-prestige-display');
+        if (prestige) {
+            prestige.classList.toggle('hidden',!info.grade);
+            prestige.innerHTML = info.grade
+                ? ProgressionV2.gradeIcon(info.grade)+'<span>'+info.grade.title+'</span>'
+                : '';
+            if(info.grade) prestige.style.setProperty('--prestige-color',info.grade.color);
+        }
 
         // Statistiche Carriera
         document.getElementById('profile-stat-xp').innerText = this.state.xp;
@@ -545,19 +557,11 @@ const App = {
     // ==========================================
     checkDailyQuestsReset() {
         const today = this.getTodayISO();
-        if (this.state.dailyQuests.date !== today) {
+        if (!this.state.dailyQuests || this.state.dailyQuests.date !== today) {
             this.state.dailyQuests = {
                 date: today,
-                progress: {
-                    daily_exercise: 0,
-                    no_hints: 0,
-                    code_runs: 0
-                },
-                claimed: {
-                    daily_exercise: false,
-                    no_hints: false,
-                    code_runs: false
-                }
+                progress: {daily_exercise:0,review_success:0,study_variety:0},
+                claimed: {daily_exercise:false,review_success:false,study_variety:false}
             };
             this.saveStorage();
         }
@@ -565,8 +569,11 @@ const App = {
 
     recordDailyQuestProgress(type, amount = 1) {
         this.checkDailyQuestsReset();
-        const cur = this.state.dailyQuests.progress[type] || 0;
-        this.state.dailyQuests.progress[type] = cur + amount;
+        if (!['daily_exercise','review_success'].includes(type)) return;
+        if (!Number.isInteger(amount) || amount <= 0) return;
+        const progress=this.state.dailyQuests.progress;
+        progress[type]=Math.min(1,(Number(progress[type])||0)+amount);
+        progress.study_variety=(progress.daily_exercise>=1 && progress.review_success>=1)?1:0;
         this.saveStorage();
         this.updateQuestsBadge();
         this.renderSidebarDailyQuests();
@@ -611,9 +618,9 @@ const App = {
         switch (questId) {
             case 'daily_exercise':
                 return '<svg class="ui-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
-            case 'no_hints':
+            case 'review_success':
                 return '<svg class="ui-icon" viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5A7.85 7.85 0 0 1 9 14"/></svg>';
-            case 'code_runs':
+            case 'study_variety':
                 return '<svg class="ui-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
             default:
                 return '<svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>';
@@ -761,34 +768,40 @@ const App = {
     },
 
     claimQuestReward(questId) {
+        this.checkDailyQuestsReset();
         const quest = DAILY_QUESTS_CONFIG.find(q => q.id === questId);
-        if (!quest) return;
-
+        if (!quest || !this.state.dailyQuests ||
+            this.state.dailyQuests.date !== this.getTodayISO() ||
+            this.state.dailyQuests.claimed?.[questId] ||
+            !Number.isFinite(Number(this.state.dailyQuests.progress?.[questId])) ||
+            Number(this.state.dailyQuests.progress[questId]) < quest.target) return false;
+        this.state.rewardsV2 = ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp,this.state.dailyQuests);
+        const gain = ProgressionV2.grantRecurring(this.state.rewardsV2,'quests',
+            'daily:'+this.getTodayISO()+':'+questId,quest.xpReward);
+        if (!gain) {
+            this.showToast({tag:'LIMITE SETTIMANALE',title:'Missioni: 40 XP a settimana',
+                desc:'Hai già ottenuto il massimo premio dalle missioni di questa settimana.'});
+            return false;
+        }
         this.state.dailyQuests.claimed[questId] = true;
-        this.state.xp += quest.xpReward;
+        this.state.xp += gain;
         this.state.claimedQuestsCount++;
         this.saveStorage();
 
         SoundFX.playFanfare();
         ConfettiFX.burst();
-
         this.showToast({
-            icon: "🎯",
-            tag: "RICOMPENSA RISCATTATA!",
+            tag: "RICOMPENSA RISCATTATA",
             title: quest.title,
-            desc: `Hai guadagnato +${quest.xpReward} XP extra!`
+            desc: `Hai guadagnato +${gain} XP extra!`
         });
-
         this.checkAchievements();
         this.updateStatsUI();
         this.updateQuestsBadge();
         this.renderSidebarDailyQuests();
-
-        // Ri-renderizza il modale solo se era attualmente aperto
         const modal = document.getElementById('quests-modal');
-        if (modal && !modal.classList.contains('hidden')) {
-            this.openQuestsModal();
-        }
+        if (modal && !modal.classList.contains('hidden')) this.openQuestsModal();
+        return true;
     },
 
     // =========================================================
@@ -1529,10 +1542,7 @@ const App = {
         this.sandboxNativeSession = null;
         this.sandboxScene = this.buildSceneFromNodes(cur ? cur.nodes : []);
 
-        // Registra progresso missione code_runs
-        this.recordDailyQuestProgress('code_runs', 1);
-
-        try {
+         try {
             const res = await window.GDHGodot.execute(code, {
                 sandboxNodes: cur ? cur.nodes : [],
                 initialScene: this.sandboxScene,
@@ -1923,6 +1933,7 @@ const App = {
 
         // Reset completo dello stato in memoria
         this.state.xp = 0;
+        this.state.rewardsV2 = ProgressionV2.createRewards(0);
         this.state.streak = 1;
         this.state.level = 1;
         this.state.streakWeeks = 0;
@@ -1942,8 +1953,8 @@ const App = {
         };
         this.state.dailyQuests = {
             date: this.getTodayISO(),
-            progress: { daily_exercise: 0, no_hints: 0, code_runs: 0 },
-            claimed: { daily_exercise: false, no_hints: false, code_runs: false }
+            progress: { daily_exercise: 0, review_success: 0, study_variety: 0 },
+            claimed: { daily_exercise: false, review_success: false, study_variety: false }
         };
         this.state.learningTelemetry = { schema_version: 1, lessons: {}, daily_activity: {} };
 
@@ -1967,42 +1978,15 @@ const App = {
 
     // Calcolo Livello e Progresso XP
     getCurrentLevelInfo() {
-        const xp = this.state.xp;
-        let currentTier = LEVELS_CONFIG[0];
-
-        for (let i = 0; i < LEVELS_CONFIG.length; i++) {
-            if (xp >= LEVELS_CONFIG[i].minXp) {
-                currentTier = LEVELS_CONFIG[i];
-            }
-        }
-
-        const span = currentTier.maxXp - currentTier.minXp + 1;
-        const progressInTier = xp - currentTier.minXp;
-        const percent = Math.min(100, Math.max(0, Math.round((progressInTier / span) * 100)));
-        const xpToNext = Math.max(0, (currentTier.maxXp + 1) - xp);
-
-        return {
-            tier: currentTier,
-            percent: percent,
-            xpToNext: xpToNext
-        };
+        return ProgressionV2.levelFromXp(this.state.xp);
     },
 
     getTodayISO() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return ProgressionV2.dateKey();
     },
 
     getWeekId(d = new Date()) {
-        const date = new Date(d.getTime());
-        date.setHours(0, 0, 0, 0);
-        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-        const week1 = new Date(date.getFullYear(), 0, 4);
-        const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-        return `${date.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+        return ProgressionV2.weekKey(d);
     },
 
     getCurrentWeekDays() {
@@ -2044,11 +2028,9 @@ const App = {
             const currentTier = STREAK_TIERS[this.state.streakMode] || STREAK_TIERS.rilassato;
             const metGoal = this.state.activeDaysThisWeek.length >= currentTier.target;
 
-            if (metGoal) {
-                this.state.streakWeeks += 1;
-            } else {
-                this.state.streakWeeks = 0; // Reset streak se obiettivo mancato!
-            }
+            // La settimana è già stata conteggiata al raggiungimento
+            // dell'obiettivo: non incrementarla una seconda volta al reset.
+            if (!metGoal) this.state.streakWeeks = 0;
 
             this.state.activeDaysThisWeek = [];
             this.state.currentWeekId = currentWeek;
@@ -2069,14 +2051,18 @@ const App = {
 
             if (daysCount === currentTier.target) {
                 this.state.streakWeeks += 1;
-                SoundFX.playFanfare();
-                this.showToast({
-                    icon: "🔥",
-                    tag: "OBIETTIVO SETTIMANALE RAGGIUNTO!",
-                    title: `Streak ${currentTier.label} Conquistata!`,
-                    desc: `Hai completato ${daysCount} giorni questa settimana. La serie è al sicuro (+50 XP)!`
-                });
-                this.state.xp += 50;
+                this.state.rewardsV2 = ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp);
+                const gain = ProgressionV2.grantRecurring(this.state.rewardsV2,'streak',
+                    'week:'+this.getWeekId(),20);
+                if (gain) {
+                    this.state.xp += gain;
+                    SoundFX.playFanfare();
+                    this.showToast({
+                        tag: "OBIETTIVO SETTIMANALE RAGGIUNTO!",
+                        title: `Streak ${currentTier.label} Conquistata!`,
+                        desc: `Hai completato ${daysCount} giorni questa settimana (+${gain} XP).`
+                    });
+                }
             } else if (daysCount < currentTier.target) {
                 this.showToast({
                     icon: "🔥",
@@ -3938,7 +3924,6 @@ const App = {
             const runBtn = document.getElementById('btn-run-code');
             runBtn.style.opacity = '0.7';
             runBtn.querySelector('.run-text').innerText = "Verifica in corso...";
-            this.recordDailyQuestProgress('code_runs', 1);
             await this.runAndValidateReviewVariant(code, runBtn);
             return;
         }
@@ -3952,10 +3937,7 @@ const App = {
         runBtn.style.opacity = '0.7';
         runBtn.querySelector('.run-text').innerText = "Verifica in corso...";
 
-        // Registra progresso missione: esecuzione codice
-        this.recordDailyQuestProgress('code_runs', 1);
-
-        try {
+         try {
             if (!window.GDHGodot) throw new Error('Motore Godot non disponibile');
             const native = await window.GDHGodot.verifyLesson(currentLesson.id, code);
             // Non attribuire a una lezione l'esito di un codice cambiato durante la verifica.
@@ -4081,10 +4063,7 @@ const App = {
                 // Registra missione quotidiana: esercizio completato
                 this.recordDailyQuestProgress('daily_exercise', 1);
 
-                // Se non ha usato aiuti, registra missione no_hints
-                if (this.state.hintsRevealed === 0) {
-                    this.recordDailyQuestProgress('no_hints', 1);
-                }
+                // Chiedere aiuto non riduce gli XP né blocca una missione.
 
                 // Controllo sblocco traguardi
                 this.checkAchievements({
@@ -4902,10 +4881,14 @@ const App = {
                     if (!this.state.reviewProgress.completedVariants.includes(variant.id)) {
                         this.state.reviewProgress.completedVariants.push(variant.id);
                     }
-                    gainXp = variant.xpReward || 10;
-                    this.state.xp += gainXp;
+                    gainXp = 15;
+                } else {
+                    this.state.rewardsV2 = ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp);
+                    gainXp = ProgressionV2.grantRecurring(this.state.rewardsV2,'reviews',
+                        'variant:'+variant.id,5);
                 }
-
+                this.state.xp += gainXp;
+                this.recordDailyQuestProgress('review_success',1);
                 this.saveStorage();
                 this.updateStatsUI();
                 this.checkAchievements();
@@ -4920,10 +4903,11 @@ const App = {
                 if (modalTitle) modalTitle.innerText = "⭐ VARIANTE DI RIPASSO SUPERATA!";
                 if (modalSubtitle) {
                     modalSubtitle.innerText = isFirstTime
-                        ? "Ottimo lavoro! Hai rafforzato questo concetto con successo e ottenuto +10 XP bonus di ripasso!"
-                        : "Ottimo lavoro! La variante di ripasso è stata nuovamente verificata con successo.";
+                        ? "Ottimo lavoro! Hai rafforzato questo concetto e ottenuto +15 XP!"
+                        : (gainXp ? "Ottimo lavoro! Hai ricevuto +5 XP per il ripasso settimanale." :
+                            "Ripasso superato! Il premio settimanale per questa variante è già stato ottenuto oppure hai raggiunto il limite.");
                 }
-                if (modalGain) modalGain.innerText = isFirstTime ? `+${gainXp}` : "+0";
+                if (modalGain) modalGain.innerText = `+${gainXp}`;
 
                 setTimeout(() => {
                     document.getElementById('success-modal').classList.remove('hidden');
@@ -6713,6 +6697,7 @@ const App = {
         if (!data) return;
 
         if (data.xp !== undefined) this.state.xp = data.xp;
+        this.state.rewardsV2 = ProgressionV2.normalizeRewards(data.rewardsV2,this.state.xp,data.dailyQuests);
         if (data.streak !== undefined) this.state.streak = data.streak;
         if (data.streakWeeks !== undefined) this.state.streakWeeks = data.streakWeeks;
         if (data.streakMode) this.state.streakMode = data.streakMode;

@@ -1,0 +1,17 @@
+/* GDScript Hero 2.0 — grado automatico nel profilo */
+.profile-prestige {
+    --prestige-color:#619bd2;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin:9px auto 0;
+    padding:6px 12px;
+    border:1px solid color-mix(in srgb,var(--prestige-color) 55%,transparent);
+    border-radius:9px;
+    background:color-mix(in srgb,var(--prestige-color) 10%,transparent);
+    color:var(--prestige-color);
+    font-weight:700;
+    font-size:0.85rem;
+}
+.profile-prestige.hidden { display:none; }
+.profile-prestige .ui-icon { width:18px;height:18px;flex-shrink:0; }
