@@ -23,11 +23,11 @@ Il workflow ottiene dal servizio GitHub una credenziale temporanea e stampa **so
 - `iss`: `https://token.actions.githubusercontent.com`
 - `aud`: `gdh-oci-readonly`
 - `repository`: `domyno6773/gdscript-hero`
-- `sub`: `repo:domyno6773/gdscript-hero:environment:oci-readonly`
+- `sub`: identità **immutabile** (formato `repo:domyno6773@OWNER_ID/gdscript-hero@REPOSITORY_ID:environment:oci-readonly`). Il verificatore confronta gli ID pubblici esatti del repository GitHub, senza stamparli in chiaro nei log.
 - `event_name`: `workflow_dispatch`
 - `ref`: `refs/heads/main`
 
-Il token completo **non viene stampato né salvato**; il processo non contatta OCI. Se l'identità differisce, fallisce. Comunica in chat soltanto se il controllo è **verde** o **rosso**, senza inviare JWT o altri segreti.
+Il token completo **non viene stampato né salvato**; il processo non contatta OCI. **Nota 27 ottobre 2026:** il primo test è fallito per una validazione OIDC troppo restrittiva. Per i repository creati dopo il 15 luglio 2026 GitHub usa il formato immutabile del `sub`; il validatore e i test sono stati aggiornati. Dopo la modifica occorre lanciare un **nuovo** `Run workflow` su `main` (non rieseguire il vecchio commit). Se l'identità differisce, fallisce. Comunica in chat soltanto se il controllo è **verde** o **rosso**, senza inviare JWT o altri segreti.
 
 ## Passaggio 3: configurazione una tantum in OCI, ancora senza provisioning
 
