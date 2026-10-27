@@ -124,11 +124,26 @@ def github_token(env, http=http_json):
     return token
 
 
+def public_key_content(public_pem):
+    """Oracle token exchange expects Base64 DER, without PEM framing."""
+    lines = public_pem.strip().splitlines()
+    if (len(lines) < 3 or lines[0] != "-----BEGIN PUBLIC KEY-----"
+            or lines[-1] != "-----END PUBLIC KEY-----"):
+        raise FederationError("Formato chiave pubblica non valido.")
+    content = "".join(line.strip() for line in lines[1:-1])
+    try:
+        if not base64.b64decode(content, validate=True):
+            raise ValueError()
+    except (ValueError, base64.binascii.Error):
+        raise FederationError("Contenuto chiave pubblica non valido.") from None
+    return content
+
+
 def exchange(origin, env, jwt, public_pem, http=http_json):
     body = urllib.parse.urlencode({
         "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
         "requested_token_type": "urn:oci:token-type:oci-rpst",
-        "public_key": public_pem,
+        "public_key": public_key_content(public_pem),
         "subject_token_type": "jwt", "subject_token": jwt,
         "res_type": "gdhgithubreadonly", "rpst_exp": "20",
     }).encode("utf-8")

@@ -21,6 +21,9 @@ def jwt(claims):
     return "eyJhbGciOiJSUzI1NiJ9." + body + ".signature"
 
 
+PUBLIC_PEM = "-----BEGIN PUBLIC KEY-----\nYWJj\nZGVm\n-----END PUBLIC KEY-----\n"
+
+
 class FederationTests(unittest.TestCase):
     def setUp(self):
         self.env = {
@@ -77,16 +80,28 @@ class FederationTests(unittest.TestCase):
         def http(req):
             self.assertEqual(req.full_url, self.env["OCI_FED_DOMAIN_URL"] + "/oauth2/v1/token")
             fields = fed.urllib.parse.parse_qs(req.data.decode())
+            self.assertEqual(fields["public_key"], ["YWJjZGVm"])
             self.assertEqual(fields["rpst_exp"], ["20"])
             self.assertEqual(fields["requested_token_type"], ["urn:oci:token-type:oci-rpst"])
             self.assertEqual(fields["res_type"], ["gdhgithubreadonly"])
             return {"token": jwt(self.rpst_claims)}
         self.assertEqual(fed.exchange(self.env["OCI_FED_DOMAIN_URL"], self.env,
-                                     "GITHUB-JWT", "PUBLIC-KEY", http=http), jwt(self.rpst_claims))
+                                     "GITHUB-JWT", PUBLIC_PEM, http=http), jwt(self.rpst_claims))
         for changes in ({"var_domain.id": "other"}, {"var_name": "other"}, {"exp": 1}):
             with self.subTest(changes=changes), self.assertRaises(fed.FederationError):
-                fed.exchange(self.env["OCI_FED_DOMAIN_URL"], self.env, "JWT", "PUBLIC",
+                fed.exchange(self.env["OCI_FED_DOMAIN_URL"], self.env, "JWT", PUBLIC_PEM,
                              http=lambda _: {"token": jwt(dict(self.rpst_claims, **changes))})
+
+    def test_public_key_encoding_rejects_invalid_input_before_http(self):
+        for value in ("PUBLIC", "-----BEGIN PRIVATE KEY-----\\nYWJj\\n-----END PRIVATE KEY-----",
+                      "-----BEGIN PUBLIC KEY-----\\nnot-base64!\\n-----END PUBLIC KEY-----"):
+            with self.subTest(value=value), self.assertRaises(fed.FederationError):
+                http = Mock()
+                try:
+                    fed.exchange(self.env["OCI_FED_DOMAIN_URL"], self.env, "JWT", value, http=http)
+                finally:
+                    http.assert_not_called()
+        self.assertEqual(base64.b64decode(fed.public_key_content(PUBLIC_PEM)), b"abcdef")
 
     def test_redirect_blocked_and_http_errors_sanitized(self):
         with self.assertRaises(fed.FederationError):
