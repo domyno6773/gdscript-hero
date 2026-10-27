@@ -9,7 +9,7 @@ const OfficialArena=(()=>{
  let busy=false,season=null,challenges=[],selected=null,country=null,boardScope='global',opening=false;
  const $=id=>document.getElementById(id);
  const client=()=>window.AuthManager?.supabaseClient||null;
- const apiBase=()=>typeof window.SupabaseConfig?.arenaApiBaseUrl==='string'
+ const apiBase=()=>typeof window!=='undefined' && typeof window.SupabaseConfig?.arenaApiBaseUrl==='string'
    ?window.SupabaseConfig.arenaApiBaseUrl.trim().replace(/\/$/,''):'';
  const canSubmit=()=>/^https:\/\/[A-Za-z0-9.-]+(?::\d+)?$/.test(apiBase());
  const formatCountry=(code)=>{
