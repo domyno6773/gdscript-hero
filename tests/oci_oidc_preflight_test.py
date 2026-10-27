@@ -95,14 +95,32 @@ class TestOIDC(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     probe.validate_endpoint(url)
 
-    def test_workflow_manual_only_and_no_oci_calls(self):
+    def test_workflow_manual_only_and_oci_opt_in(self):
         text = (HERE / ".github" / "workflows" / "oci-oidc-preflight.yml").read_text()
         self.assertIn("workflow_dispatch", text)
         self.assertIn("id-token: write", text)
-        self.assertNotIn("pull_request:", text)
-        self.assertNotIn("schedule:", text)
-        self.assertNotIn("secrets.", text)
+        for trigger in ("pull_request:", "schedule:", "push:"):
+            self.assertNotIn(trigger, text)
+        self.assertIn("environment: oci-readonly", text)
+        self.assertIn("oracle_audit:", text)
+        input_block = text.split("oracle_audit:", 1)[1].split("permissions:", 1)[0]
+        self.assertIn("default: false", input_block)
+        self.assertIn("type: boolean", input_block)
+        steps = text.split("      - ")[1:]
+        secret_steps = [step for step in steps if "secrets." in step]
+        oracle_steps = [step for step in steps if "scripts/oci_federated_readonly.py" in step]
+        self.assertEqual(len(secret_steps), 1)
+        self.assertEqual(secret_steps, oracle_steps)
+        self.assertIn("if: ${{ inputs.oracle_audit }}", secret_steps[0])
+        for step in steps:
+            if "oci==2.189.0" in step:
+                self.assertIn("if: ${{ inputs.oracle_audit }}", step)
         self.assertNotIn("oci cli", text.lower())
+
+    def test_identity_probe_still_does_not_use_oracle_credentials(self):
+        source = (HERE / "scripts" / "oci_github_oidc_probe.py").read_text()
+        self.assertNotIn("OCI_FED_", source)
+        self.assertNotIn("import oci", source)
 
 
 if __name__ == "__main__":
