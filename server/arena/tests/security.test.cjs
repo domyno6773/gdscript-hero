@@ -1,0 +1,23 @@
+'use strict';
+const {test}=require('node:test'),a=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const coordinator=fs.readFileSync(path.join(root,'coordinator.js'),'utf8');
+const runner=fs.readFileSync(path.join(root,'runner.js'),'utf8');
+const gd=fs.readFileSync(path.join(root,'godot/grader.gd'),'utf8');
+test('private fixtures are not served, scored in the browser or mounted together',()=>{
+ a.match(coordinator,/GDH_PRIVATE_FIXTURES_DIR/);
+ a.match(coordinator,/gdh_record_verified_verdict/);
+ a.match(coordinator,/auth\/v1\/user/);
+ a.match(coordinator,/privateFixture\(challenge\)/);
+ a.match(runner,/--network','none'/);
+ a.match(runner,/--read-only/);
+ a.match(runner,/--cap-drop','ALL'/);
+ a.match(runner,/--memory','192m'/);
+ a.match(runner,/--pids-limit','64'/);
+ a.match(runner,/--security-opt','no-new-privileges'/);
+ a.ok(!runner.includes('expected'));
+ a.ok(!gd.includes('expected'));
+ a.ok(!gd.includes('service_role'));
+ a.ok(!runner.includes('service_role'));
+});

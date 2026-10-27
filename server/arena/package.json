@@ -1,0 +1,8 @@
+{
+  "name": "gdscript-hero-arena-coordinator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {"node": ">=22"},
+  "scripts": {"start": "node coordinator.js", "test": "node --test tests/*.test.cjs"}
+}
