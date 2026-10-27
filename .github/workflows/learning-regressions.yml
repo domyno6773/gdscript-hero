@@ -38,3 +38,5 @@ jobs:
         run: node --test server/arena/tests/*.test.cjs
       - name: Official Arena client contracts
         run: node tests/arena_official.test.cjs
+      - name: Oracle bridge OIDC claim validation (offline, no OCI credentials)
+        run: python3 -m unittest discover -s tests -p 'oci_oidc_preflight_test.py' -v
