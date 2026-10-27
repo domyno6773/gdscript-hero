@@ -4884,8 +4884,14 @@ const App = {
                     gainXp = 15;
                 } else {
                     this.state.rewardsV2 = ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp);
-                    gainXp = ProgressionV2.grantRecurring(this.state.rewardsV2,'reviews',
-                        'variant:'+variant.id,5);
+                    const firstSuccess = this.state.reviewProgress.variantHistory?.[variant.id]?.first_success_at;
+                    // La ripetizione premia solo a partire da una settimana diversa
+                    // da quella in cui è stata completata la variante per la prima volta.
+                    const firstWeek = firstSuccess ? this.getWeekId(new Date(firstSuccess)) : null;
+                    if (firstWeek !== this.getWeekId()) {
+                        gainXp = ProgressionV2.grantRecurring(this.state.rewardsV2,'reviews',
+                            'variant:'+variant.id,5);
+                    }
                 }
                 this.state.xp += gainXp;
                 this.recordDailyQuestProgress('review_success',1);
