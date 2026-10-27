@@ -75,6 +75,26 @@ class TestOIDC(unittest.TestCase):
         with self.assertRaises(ValueError):
             probe.extract_claims("invalid")
 
+    def test_token_endpoints_allow_documented_github_hosts_only(self):
+        for url in (
+            "https://vstoken.actions.githubusercontent.com/_apis/distributedtask/hubs/build/plans/123?x=1",
+            "https://pipelines.actions.githubusercontent.com/_apis/token?x=1",
+            "https://pipelinesghubeus12.actions.githubusercontent.com/_apis/token?x=1",
+        ):
+            with self.subTest(url=url):
+                probe.validate_endpoint(url)
+        for url in (
+            "http://vstoken.actions.githubusercontent.com/token",
+            "https://vstoken.actions.githubusercontent.com.evil.example/token",
+            "https://vstoken.actions.githubusercontent.com@evil.example/token",
+            "https://evil.example/token",
+            "https://actions.githubusercontent.com/token",
+            "https://vstoken.actions.githubusercontent.com:444/token",
+        ):
+            with self.subTest(url=url):
+                with self.assertRaises(ValueError):
+                    probe.validate_endpoint(url)
+
     def test_workflow_manual_only_and_no_oci_calls(self):
         text = (HERE / ".github" / "workflows" / "oci-oidc-preflight.yml").read_text()
         self.assertIn("workflow_dispatch", text)

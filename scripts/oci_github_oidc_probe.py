@@ -64,21 +64,24 @@ def validate_claims(c: dict) -> dict:
     return expected
 
 
+def validate_endpoint(base: str) -> None:
+    if not base.startswith("https://"):
+        raise ValueError("Invalid GitHub token endpoint")
+    parsed = urllib.parse.urlsplit(base)
+    # Restrict to GitHub Actions service hosts, not arbitrary or lookalike URLs.
+    host = parsed.hostname or ""
+    if not re.fullmatch(r"[a-z0-9-]+\.actions\.githubusercontent\.com", host):
+        raise ValueError("Unexpected GitHub token host")
+    if parsed.username or parsed.password or parsed.port not in (None, 443):
+        raise ValueError("Unexpected GitHub token endpoint")
+
+
 def main() -> int:
     try:
         base = os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]
         bearer = os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]
-        if not base.startswith("https://"):
-            raise ValueError("Invalid GitHub token endpoint")
+        validate_endpoint(base)
         parsed = urllib.parse.urlsplit(base)
-        # GitHub hosts OIDC requests on vstoken and regional service hosts.
-        # Allow only a single subdomain under the documented trusted domain;
-        # never follow arbitrary externally supplied token URLs.
-        host = parsed.hostname or ""
-        if not re.fullmatch(r"[a-z0-9-]+\.actions\.githubusercontent\.com", host):
-            raise ValueError("Unexpected GitHub token host")
-        if parsed.username or parsed.password or parsed.port not in (None, 443):
-            raise ValueError("Unexpected GitHub token endpoint")
         join = "&" if parsed.query else "?"
         url = base + join + urllib.parse.urlencode({"audience": AUDIENCE})
         req = urllib.request.Request(url, headers={"Authorization": "Bearer " + bearer})
