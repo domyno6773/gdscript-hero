@@ -232,9 +232,7 @@
     else if(/^(?:class|class_name)\s+\w+/.test(original)&&/^(class|class_name)$/.test(word))key='class';
     else if(/^(?:var|const)\s+\w+\s*:\s*(?:int|float|String|bool|Vector2|Array|Dictionary)\b/.test(original)&&
       /^(int|float|String|bool|Vector2|Array|Dictionary)$/.test(word))key='type';
-    else if(word[0]==='
-})(typeof window!=='undefined'?window:globalThis);
-)key='nodepath';
+    else if(word.charCodeAt(0)===36)key='nodepath';
     else if(word==='@export')key='export';
     else if(word==='@onready')key='onready';
     else if(word==='print'&&/^\s*\(/.test(line.slice(pos+word.length)))key='print';
