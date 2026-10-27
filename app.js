@@ -3801,6 +3801,7 @@ const App = {
         if (!error && !failed) {
             GDHErrorGuide.clearMark(editor);
             GDHErrorGuide.clear(host);
+            if (!sandbox) document.getElementById('exercise-primary-feedback')?.classList.remove('hidden');
             return;
         }
         const diagnosis = GDHErrorGuide.diagnose({
@@ -3810,9 +3811,15 @@ const App = {
         });
         GDHErrorGuide.mark(editor, diagnosis?.kind === 'engine' ? diagnosis.line : null);
         GDHErrorGuide.render(host, diagnosis, line => GDHErrorGuide.jump(editor, line));
+        // Evita due riquadri consecutivi per lo stesso problema.
+        // La guida è il feedback principale quando viene mostrata.
+        if (!sandbox) {
+            document.getElementById('exercise-primary-feedback')?.classList.toggle('hidden', Boolean(diagnosis));
+        }
     },
 
     resetExerciseFeedback() {
+        document.getElementById('exercise-primary-feedback')?.classList.remove('hidden');
         window.GDHErrorGuide?.clearMark(document.getElementById('code-editor'));
         window.GDHErrorGuide?.clear('#exercise-debug-area');
         this.keepExerciseAtHorizontalOrigin();
@@ -3847,6 +3854,7 @@ const App = {
         const count = document.getElementById('exercise-test-count');
         const details = document.getElementById('exercise-test-details');
         if (!area || !title || !description) return;
+        area.classList.remove('hidden');
         const list = Array.isArray(tests) ? tests : [];
         const passed = list.filter(test => test.passed).length;
         const failed = list.find(test => !test.passed);

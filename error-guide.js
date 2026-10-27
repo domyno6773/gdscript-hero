@@ -15,7 +15,14 @@
     for (const pattern of patterns) {
       const match = String(message || '').match(pattern);
       if (!match) continue;
-      const line = Number(match[1]);
+      const godotLine = Number(match[1]);
+      // Il runner inserisce "extends Node\\n" prima del codice se manca extends.
+      // I numeri restituiti dallo script GDScript temporaneo sono quindi +1.
+      // Correggiamo soltanto quei percorsi: file esterni / messaggi generici
+      // non hanno una mappatura affidabile con l'editor dello studente.
+      const generatedScript = /gdscript:\/\/[^\s()]*?\.gd:\d+/i.test(match[0]);
+      const hasExtends = /^\s*extends\s+/m.test(String(source || ''));
+      const line = generatedScript && !hasExtends ? godotLine - 1 : godotLine;
       if (Number.isSafeInteger(line) && line > 0 && line <= total) return line;
     }
     return null;

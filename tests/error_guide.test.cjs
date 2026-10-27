@@ -44,7 +44,22 @@ const typo=guide.diagnose({
  source:'extends Node\n\nfunc _ready():\n    prin("ciao")',
  error:'SCRIPT ERROR: Parse Error: Function "prin()" not found in base self. at: GDScript::reload (gdscript://-9223372012930464558.gd:4)'
 });
-assert.equal(typo.line,4);
+assert.equal(typo.line,4); // Il sorgente ha già extends, nessun offset.
+const noExtendsSource = 'func _ready():\\n    # Stampa qualcosa\\n    prin("ciao")\\n';
+const prefixedTypo = guide.diagnose({
+ source:noExtendsSource,
+ error:'SCRIPT ERROR: Parse Error: Function "prin()" not found in base self. at: GDScript::reload (gdscript://-9223372012930464558.gd:4)'
+});
+assert.equal(prefixedTypo.line,3, 'Il runner antepone extends Node: la riga 4 di Godot è la riga 3 dell’editor');
+assert.equal(prefixedTypo.exact,true);
+assert.equal(guide.diagnose({
+ source:noExtendsSource,
+ error:'Error at: GDScript::reload (gdscript://-9223372012930464558.gd:1)'
+}).line,null, 'La riga sintetica del runner non appartiene all’editor');
+assert.equal(guide.diagnose({
+ source:noExtendsSource,
+ error:'Error in res://student.gd:3'
+}).line,3, 'Non sottrarre offset ai percorsi che non appartengono allo script temporaneo');
 assert.match(typo.title,/Funzione non riconosciuta/);
 assert.match(typo.why,/prin/);
 assert.match(typo.hint,/print/);

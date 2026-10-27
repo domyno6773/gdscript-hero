@@ -491,12 +491,26 @@ async function smoke(browser,url,width){
  assert.ok(debugState.hint?.length>20,'Debugger lacks an explanatory hint');
  assert.ok(debugState.technical?.length>5,'Debugger must preserve original Godot message');
  assert.equal(debugState.finished,false,'Debugging should not complete a lesson');
+ const noExtendsCode='func _ready():\\n    # Stampa esattamente\\n    prin("Ciao Godot!")\\n';
+ await page.locator('#code-editor').fill(noExtendsCode);
+ await page.locator('#btn-run-code').click({timeout:10000});
+ await page.waitForFunction(()=>!App.isValidating,null,{timeout:18000});
+ const mappedError=await page.evaluate(()=>({
+   jump:document.querySelector('#exercise-debug-area .gdh-debug-jump')?.textContent,
+   row:[...document.querySelectorAll('#line-numbers .gdh-error-number')].map(el=>Number(el.textContent)),
+   bannerHidden:document.getElementById('exercise-primary-feedback').classList.contains('hidden'),
+   hasGuide:!!document.querySelector('#exercise-debug-area .gdh-debug-panel')
+ }));
+ assert.equal(mappedError.jump,'Vai alla riga 3','Il debugger deve indicare la riga dell’editor, non quella preceduta da extends Node');
+ assert.deepEqual(mappedError.row,[3],'Il colore rosso deve evidenziare la riga 3, non quella vuota 4');
+ assert.equal(mappedError.bannerHidden,true,'Il riquadro rosso duplicato deve sparire');
+ assert.equal(mappedError.hasGuide,true,'La spiegazione didattica deve rimanere visibile');
  if(debugState.jump){
    const line=Number(debugState.jump.match(/\d+/)?.[0]);
    await page.locator('#exercise-debug-area .gdh-debug-jump').click();
    assert.equal(await page.locator('#code-editor').evaluate(el=>{
      return el.value.slice(0,el.selectionStart).split('\n').length;
-   }),line,'Debugger jump does not focus the indicated line');
+   }),3,'Debugger jump does not focus the correctly mapped line');
  }
  const official=await page.evaluate(()=>LESSONS_DATA.find(l=>l.id===1).solution);
  await page.locator('#code-editor').fill(official);
