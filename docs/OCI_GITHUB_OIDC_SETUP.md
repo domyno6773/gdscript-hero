@@ -1,6 +1,8 @@
 # GDScript Hero — ponte GitHub Actions → Oracle Cloud (OIDC)
 
-**Stato al 27 ottobre 2026:** il primo workflow OIDC è stato aggiunto, ma è **solo un test d'identità GitHub**. Non ha accesso a Oracle Cloud. **Nessuna VM o risorsa OCI è stata creata.**
+**Aggiornamento:** trust inattivo creato e riletto dall'utente con bootstrap locale. Il workflow ora include l'opzione manuale `oracle_audit` (predefinita **false**) e lo script `scripts/oci_federated_readonly.py`. Il percorso federato e verificato offline ma **non ancora collaudato contro OCI**. Richiede secrets nell'ambiente protetto, policy IAM di inventario e attivazione controllata. Il token personale amministrativo resta locale e NON va inserito in GitHub. Vedi `docs/OCI_FEDERATED_AUDIT_SETUP.md`.
+
+**Stato precedente al 27 ottobre 2026:** il primo workflow OIDC è stato aggiunto, ma è **solo un test d'identità GitHub**. Non ha accesso a Oracle Cloud. **Nessuna VM o risorsa OCI è stata creata.**
 
 ## Vincolo inderogabile: zero addebiti
 

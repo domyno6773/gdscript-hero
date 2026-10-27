@@ -1,6 +1,12 @@
 name: "OCI bridge - OIDC identity check (NO CLOUD WRITES)"
 on:
   workflow_dispatch:
+    inputs:
+      oracle_audit:
+        description: "Run partial read-only Oracle inventory (requires protected environment setup)"
+        required: true
+        default: false
+        type: boolean
 permissions:
   contents: read
   id-token: write
@@ -9,12 +15,14 @@ concurrency:
   cancel-in-progress: false
 jobs:
   identity-only:
-    name: "GitHub OIDC identity check - Oracle NOT contacted"
+    name: "GitHub identity check; optional OCI read-only audit"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     environment: oci-readonly
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -22,3 +30,16 @@ jobs:
         run: python3 -m py_compile scripts/oci_github_oidc_probe.py
       - name: Inspect signed GitHub identity (no tokens printed)
         run: python3 scripts/oci_github_oidc_probe.py
+      - name: Install Oracle SDK for optional read-only audit
+        if: ${{ inputs.oracle_audit }}
+        run: python3 -m pip install --disable-pip-version-check 'oci==2.189.0'
+      - name: Exchange GitHub identity and read partial OCI inventory
+        if: ${{ inputs.oracle_audit }}
+        env:
+          OCI_FED_DOMAIN_URL: ${{ secrets.OCI_FED_DOMAIN_URL }}
+          OCI_FED_CLIENT_ID: ${{ secrets.OCI_FED_CLIENT_ID }}
+          OCI_FED_CLIENT_SECRET: ${{ secrets.OCI_FED_CLIENT_SECRET }}
+          OCI_FED_TENANCY: ${{ secrets.OCI_FED_TENANCY }}
+          OCI_FED_REGION: ${{ secrets.OCI_FED_REGION }}
+          OCI_FED_DOMAIN_OCID: ${{ secrets.OCI_FED_DOMAIN_OCID }}
+        run: python3 scripts/oci_federated_readonly.py

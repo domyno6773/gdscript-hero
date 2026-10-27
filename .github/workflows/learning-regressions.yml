@@ -42,3 +42,5 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'oci_trust_setup_test.py' -v
       - name: Oracle bridge OIDC claim validation (offline, no OCI credentials)
         run: python3 -m unittest discover -s tests -p 'oci_oidc_preflight_test.py' -v
+      - name: Federated OCI audit authentication and read-only contracts (offline)
+        run: python3 -m unittest discover -s tests -p 'oci_federated_readonly_test.py' -v

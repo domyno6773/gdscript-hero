@@ -76,8 +76,9 @@ def pages(oci, method, *args, **kwargs):
     return oci.pagination.list_call_get_all_results(method, *args, **kwargs).data
 
 
-def inventory_oci(oci, config):
-    ident = oci.identity.IdentityClient(config)
+def inventory_oci(oci, config, signer=None):
+    auth = {"signer": signer} if signer is not None else {}
+    ident = oci.identity.IdentityClient(config, **auth)
     tenancy = config["tenancy"]
     subscriptions = pages(oci, ident.list_region_subscriptions, tenancy)
     home = [x.region_name for x in subscriptions if getattr(x, "is_home_region", False) is True]
@@ -92,8 +93,8 @@ def inventory_oci(oci, config):
     compartments.extend(x.id for x in entries if getattr(x, "lifecycle_state", "") == "ACTIVE")
     compartments = list(dict.fromkeys(compartments))
     summary = Inventory(compartments=len(compartments), domains=len(ads))
-    compute = oci.core.ComputeClient(config)
-    block = oci.core.BlockstorageClient(config)
+    compute = oci.core.ComputeClient(config, **auth)
+    block = oci.core.BlockstorageClient(config, **auth)
     for compartment_id in compartments:
         # API failures stop the whole audit; "unknown" is never treated as zero.
         for instance in pages(oci, compute.list_instances, compartment_id):
