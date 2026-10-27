@@ -10,6 +10,7 @@ const ORIGIN=process.env.GDH_ALLOWED_ORIGIN||'https://domyno6773.github.io';
 const SUPA=process.env.SUPABASE_URL,KEY=process.env.SUPABASE_SERVICE_ROLE_KEY;
 const FIXTURES=process.env.GDH_PRIVATE_FIXTURES_DIR;
 const MAX_BODY=14000;
+const TRUST_IP_GEO=process.env.GDH_TRUST_CLOUDFLARE_COUNTRY==='1';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CHALLENGE=/^[a-z0-9][a-z0-9_-]{3,79}$/;
 const tasks=new Map();
@@ -24,7 +25,7 @@ function response(res,status,body,origin){
  res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
    'X-Content-Type-Options':'nosniff','Vary':'Origin',...(origin===ORIGIN?{
    'Access-Control-Allow-Origin':ORIGIN,'Access-Control-Allow-Headers':'authorization,content-type',
-   'Access-Control-Allow-Methods':'POST,OPTIONS'}:{})});
+   'Access-Control-Allow-Methods':'GET,POST,OPTIONS'}:{})});
  res.end(JSON.stringify(body));
 }
 async function parseBody(req) {
@@ -124,6 +125,13 @@ function createServer(){
    if(origin && origin!==ORIGIN){response(res,403,{error:'Origine non autorizzata'},origin);return;}
    if(req.url==='/healthz'&&req.method==='GET'){
      response(res,200,{ready:true},origin);return;
+   }
+   if(req.url==='/api/arena/country-suggestion'&&req.method==='GET'){
+     // Trust only when deployed behind a Cloudflare reverse proxy configured
+     // to strip incoming visitor-supplied CF-IPCountry headers.
+     const code=TRUST_IP_GEO?String(req.headers['cf-ipcountry']||'').toUpperCase():'';
+     response(res,200,{country:/^[A-Z]{2}$/.test(code)&&code!=='XX'&&code!=='T1'?code:null},origin);
+     return;
    }
    if(req.url==='/api/arena/submit'&&req.method==='OPTIONS'){
      response(res,204,{},origin);return;

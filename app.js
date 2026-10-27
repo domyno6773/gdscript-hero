@@ -1767,6 +1767,7 @@ const App = {
         if (cat) cat.classList.remove('hidden');
         if (ws) ws.classList.add('hidden');
         document.getElementById('competition-workspace')?.classList.add('hidden');
+        document.getElementById('official-arena-workspace')?.classList.add('hidden');
 
         this.updateNavSelection('projects');
         this.renderProjectsGrid();
@@ -1778,6 +1779,7 @@ const App = {
         this.hideAutocomplete();
         document.getElementById('projects-catalog-section')?.classList.add('hidden');
         document.getElementById('project-arena-workspace')?.classList.add('hidden');
+        document.getElementById('official-arena-workspace')?.classList.add('hidden');
         document.getElementById('competition-workspace')?.classList.remove('hidden');
         this.updateNavSelection('projects');
         CompetitionArena.select(CompetitionArena.activeId);
@@ -1786,6 +1788,19 @@ const App = {
 
     closeCompetitiveArena() {
         this.openProjectsView();
+    },
+
+    openOfficialArena() {
+        SoundFX.playClick();
+        this.switchView('view-projects');
+        this.hideAutocomplete();
+        document.getElementById('projects-catalog-section')?.classList.add('hidden');
+        document.getElementById('project-arena-workspace')?.classList.add('hidden');
+        document.getElementById('competition-workspace')?.classList.add('hidden');
+        document.getElementById('official-arena-workspace')?.classList.remove('hidden');
+        this.updateNavSelection('projects');
+        void OfficialArena.open();
+        window.scrollTo({top:0,behavior:'smooth'});
     },
 
     renderProjectsGrid() {
@@ -4170,6 +4185,9 @@ const App = {
         document.getElementById('btn-close-competitive-arena')?.addEventListener('click',()=>this.closeCompetitiveArena());
         document.getElementById('competition-run')?.addEventListener('click',()=>CompetitionArena.run());
         document.getElementById('competition-save-code')?.addEventListener('click',()=>CompetitionArena.download());
+        document.getElementById('btn-open-official-arena')?.addEventListener('click',()=>this.openOfficialArena());
+        document.getElementById('btn-back-official')?.addEventListener('click',()=>this.openProjectsView());
+        OfficialArena.wire();
         const navReviewBtn = document.getElementById('nav-review-btn');
         if (navReviewBtn) navReviewBtn.onclick = () => this.showReviewView();
 
@@ -7061,6 +7079,7 @@ const App = {
         const ws = document.getElementById('project-arena-workspace');
         if (cat) cat.classList.add('hidden');
         document.getElementById('competition-workspace')?.classList.add('hidden');
+        document.getElementById('official-arena-workspace')?.classList.add('hidden');
         if (ws) ws.classList.remove('hidden');
 
         let phase = targetPhase;

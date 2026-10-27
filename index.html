@@ -624,6 +624,7 @@
                 </div>
             </section>
 
+            <div class="official-entry"><div><span class="competition-eyebrow">STAGIONI E CLASSIFICHE</span><h3>Arena Classificata ufficiale</h3><p>Una stagione al mese, classifiche mondiale e nazionale, sfide aperte a tutti. I risultati vengono attribuiti solo dopo la verifica di un server Godot.</p></div><button type="button" id="btn-open-official-arena" class="competition-secondary">Controlla stagione e classifiche</button></div>
             <div class="projects-grid" id="projects-grid-container">
                 <!-- Popolato dinamicamente da app.js -->
             </div>
@@ -657,6 +658,67 @@
                         <h4>Feedback bilanciato</h4>
                         <div id="competition-results"></div>
                     </section>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Competizioni ufficiali: nessun risultato inventato, abilitate solo con servizi reali. -->
+        <section id="official-arena-workspace" class="competition-workspace hidden" aria-labelledby="official-heading">
+            <div class="competition-top">
+                <button type="button" id="btn-back-official" class="competition-back">Torna ai Progetti</button>
+                <span class="competition-eyebrow">ARENA CLASSIFICATA · STAGIONI MENSILI</span>
+            </div>
+            <h2 id="official-heading">Classifiche e sfide ufficiali</h2>
+            <p class="competition-notice" id="official-status" role="status">Controllo della stagione in corso...</p>
+            <div id="official-stage-empty" class="official-empty">
+                <p>La modalità classificata viene attivata solo dopo la distribuzione del valutatore Godot sicuro e la pubblicazione di una stagione verificata.</p>
+                <button type="button" class="competition-secondary" id="official-login">Accedi al tuo account</button>
+            </div>
+            <div id="official-stage-live" class="hidden">
+                <h3 id="official-season-title"></h3>
+                <p class="competition-result-note">Le prove della stagione sono gratuite. Per registrare risultati ufficiali devi accedere e confermare il Paese. Nessun vantaggio competitivo per gli abbonati.</p>
+                <section class="official-country" aria-label="Paese per la classifica nazionale">
+                    <p id="official-country-confirmed" class="hidden"></p>
+                    <div id="official-country-form" class="hidden">
+                        <label for="official-country-select">Paese della stagione</label>
+                        <div class="official-country-fields">
+                            <select id="official-country-select"><option value="">Seleziona il Paese</option></select>
+                            <button id="official-country-save" type="button" class="competition-secondary">Conferma Paese</button>
+                        </div>
+                        <p id="official-country-help" class="competition-result-note">Una volta confermato, il Paese resta bloccato fino alla stagione successiva.</p>
+                    </div>
+                </section>
+                <div class="competition-grid">
+                    <aside class="competition-side">
+                        <h3>Sfide del mese</h3>
+                        <div id="official-challenge-list" class="competition-list"></div>
+                        <div class="official-leaderboard-box">
+                            <h3>Classifiche</h3>
+                            <div class="official-scope">
+                                <button type="button" id="official-rank-global" class="competition-secondary active" aria-pressed="true">Globale</button>
+                                <button type="button" id="official-rank-country" class="competition-secondary" aria-pressed="false">Nazionale</button>
+                            </div>
+                            <div id="official-leaderboard" aria-live="polite"></div>
+                        </div>
+                    </aside>
+                    <div class="competition-main">
+                        <h3 id="official-task-title">Seleziona una sfida</h3>
+                        <p id="official-task-meta" class="competition-meta"></p>
+                        <p id="official-task-description" class="competition-task"></p>
+                        <label for="official-code" class="competition-code-label">Codice GDScript</label>
+                        <textarea id="official-code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Editor della sfida ufficiale"></textarea>
+                        <div class="competition-actions">
+                            <button type="button" id="official-submit" class="competition-primary" disabled>Invia soluzione classificata</button>
+                            <button type="button" id="official-download" class="competition-secondary">Scarica il mio codice .gd</button>
+                        </div>
+                        <section class="competition-feedback" aria-live="polite">
+                            <h4>Valutazione ufficiale</h4>
+                            <p id="official-result">Il punteggio ufficiale sarà registrato soltanto dopo la verifica server.</p>
+                            <div id="official-feedback"></div>
+                        </section>
+                        <p class="competition-result-note">Quando la stagione termina, le sfide passano all'Archivio Premium chiuso. Conserva una copia personale del codice.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1986,6 +2048,7 @@
     <script src="stats.js"></script>
     <script src="gdscript-highlighter.js"></script>
     <script src="arena-competition.js"></script>
+    <script src="arena-official.js"></script>
     <script src="app.js"></script>
     <!-- Il motore Godot WebAssembly e' la verifica standard di tutte le lezioni. -->
     <script src="native/native-beta-adapter.js"></script>
