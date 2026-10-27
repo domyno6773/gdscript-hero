@@ -7,6 +7,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import re
 import sys
 import urllib.parse
 import urllib.request
@@ -15,6 +16,18 @@ AUDIENCE = "gdh-oci-readonly"
 REPOSITORY = "domyno6773/gdscript-hero"
 ENVIRONMENT = "oci-readonly"
 ISSUER = "https://token.actions.githubusercontent.com"
+# Public, immutable identifiers verified against the GitHub repository API.
+# Since this repository was created October 24, 2026, its OIDC subject
+# follows the post-July-15-2026 immutable owner/repository ID format.
+OWNER_ID = "134240680"
+REPOSITORY_ID = "1431761977"
+EXPECTED_SUBJECT = (
+    f"repo:domyno6773@{OWNER_ID}/gdscript-hero@{REPOSITORY_ID}"
+    f":environment:{ENVIRONMENT}"
+)
+WORKFLOW_REF = (
+    f"{REPOSITORY}/.github/workflows/oci-oidc-preflight.yml@refs/heads/main"
+)
 
 
 def extract_claims(token: str) -> dict:
@@ -29,12 +42,15 @@ def extract_claims(token: str) -> dict:
 
 
 def validate_claims(c: dict) -> dict:
-    expected_subject = f"repo:{REPOSITORY}:environment:{ENVIRONMENT}"
     expected = {
         "iss": ISSUER,
         "aud": AUDIENCE,
         "repository": REPOSITORY,
-        "sub": expected_subject,
+        "repository_id": REPOSITORY_ID,
+        "repository_owner_id": OWNER_ID,
+        "environment": ENVIRONMENT,
+        "workflow_ref": WORKFLOW_REF,
+        "sub": EXPECTED_SUBJECT,
         "event_name": "workflow_dispatch",
         "ref": "refs/heads/main",
     }
@@ -55,10 +71,13 @@ def main() -> int:
         if not base.startswith("https://"):
             raise ValueError("Invalid GitHub token endpoint")
         parsed = urllib.parse.urlsplit(base)
-        if parsed.hostname != "pipelines.actions.githubusercontent.com":
-            # GitHub documents multiple token endpoint hostnames. Do not
-            # weaken validation without inspecting the actual runner URL.
+        # GitHub runs issue short-lived JWTs from several regional pipelines
+        # under actions.githubusercontent.com, not just the "pipelines" host.
+        host = parsed.hostname or ""
+        if not re.fullmatch(r"pipelines[a-z0-9-]*\.actions\.githubusercontent\.com", host):
             raise ValueError("Unexpected GitHub token host")
+        if parsed.username or parsed.password or parsed.port not in (None, 443):
+            raise ValueError("Unexpected GitHub token endpoint")
         join = "&" if parsed.query else "?"
         url = base + join + urllib.parse.urlencode({"audience": AUDIENCE})
         req = urllib.request.Request(url, headers={"Authorization": "Bearer " + bearer})
@@ -69,14 +88,20 @@ def main() -> int:
             raise ValueError("GitHub OIDC JWT missing")
         claims = validate_claims(extract_claims(token))
         print("GITHUB OIDC: verified temporary claims (NO OCI operations):")
-        for key in ("iss", "aud", "repository", "sub", "event_name", "ref"):
+        for key in ("iss", "aud", "repository", "environment", "event_name", "ref"):
             print(key + ": " + claims[key])
+        print("sub: immutable repository identity verified (value redacted)")
+        print("workflow_ref: required workflow verified")
         print("NOT CONNECTED TO ORACLE. NO RESOURCE CREATION OR COSTS.")
         return 0
     except Exception as exc:
         # Never expose JWT, request URL, tokens or raw network exceptions.
         print("OIDC preflight incomplete. No Oracle operations performed.")
         print("Error category: " + type(exc).__name__)
+        # ValueError messages here come exclusively from static validation
+        # paths above, never from OCI, HTTP responses or token payloads.
+        if isinstance(exc, ValueError):
+            print("Safe validation detail: " + str(exc))
         return 1
 
 

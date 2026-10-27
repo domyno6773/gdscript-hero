@@ -24,8 +24,12 @@ class TestOIDC(unittest.TestCase):
         return {
             "iss": probe.ISSUER,
             "aud": probe.AUDIENCE,
-            "sub": f"repo:{probe.REPOSITORY}:environment:{probe.ENVIRONMENT}",
+            "sub": probe.EXPECTED_SUBJECT,
             "repository": probe.REPOSITORY,
+            "repository_id": probe.REPOSITORY_ID,
+            "repository_owner_id": probe.OWNER_ID,
+            "environment": probe.ENVIRONMENT,
+            "workflow_ref": probe.WORKFLOW_REF,
             "event_name": "workflow_dispatch",
             "ref": "refs/heads/main",
             "iat": 100,
@@ -44,12 +48,22 @@ class TestOIDC(unittest.TestCase):
             ("ref", "refs/heads/experimental"),
             ("aud", "unexpected"),
             ("sub", "repo:someone/another-repo:environment:oci-readonly"),
+            ("repository_id", "000000000"),
+            ("repository_owner_id", "000000000"),
+            ("environment", "oci-provision"),
+            ("workflow_ref", "domyno6773/gdscript-hero/.github/workflows/untrusted.yml@refs/heads/main"),
         ]:
             payload = self.claims()
             payload[key] = value
             with self.subTest(key=key):
                 with self.assertRaises(ValueError):
                     probe.validate_claims(payload)
+
+    def test_rejects_previous_subject_format(self):
+        payload = self.claims()
+        payload["sub"] = f"repo:{probe.REPOSITORY}:environment:{probe.ENVIRONMENT}"
+        with self.assertRaises(ValueError):
+            probe.validate_claims(payload)
 
     def test_rejects_expired_or_unreasonable_lifetime(self):
         payload = self.claims()
