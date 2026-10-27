@@ -137,6 +137,24 @@ async function smoke(browser,url,width){
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
  assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
+ // Gli ospiti possono usare il vero Godot nella demo, senza XP o punteggi ufficiali.
+ await page.evaluate(()=>App.openProjectsView());
+ await page.locator('#btn-open-competitive-arena').click();
+ assert.equal(await page.locator('#competition-workspace').isVisible(),true);
+ assert.equal(await page.locator('.competition-demo-tab').count(),3);
+ const demoXpBefore=await page.evaluate(()=>App.state.xp);
+ await page.locator('#competition-code-editor').fill(
+   'extends Node\n\nfunc raddoppia(valore: int) -> int:\n    return valore * 2'
+ );
+ await page.locator('#competition-run').click();
+ await page.waitForFunction(()=>document.querySelector('.competition-result-summary'),null,{timeout:20000});
+ assert.ok((await page.locator('.competition-result-summary').textContent()).includes('100 / 100'));
+ assert.equal(await page.evaluate(()=>App.state.xp),demoXpBefore,
+   'Demo must not award unverified XP');
+ await page.locator('#btn-close-competitive-arena').click();
+ assert.equal(await page.locator('#competition-workspace').isHidden(),true);
+ assert.equal(await page.locator('.competition-archive-locked').isVisible(),true);
+ await page.evaluate(()=>App.showRoadmap());
  if(width>820 && process.env.E2E_SCREENSHOTS==='1'){
    const dir=path.join(root,'test-artifacts');fs.mkdirSync(dir,{recursive:true});
    await page.screenshot({path:path.join(dir,'roadmap-1440-global-theme.png'),fullPage:false});
