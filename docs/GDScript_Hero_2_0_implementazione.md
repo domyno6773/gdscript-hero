@@ -25,7 +25,7 @@ Questa pagina accompagna la specifica principale; non dichiara operative funzion
 | P1: ripassi 15 XP + 5 XP da settimana successiva | **Implementato nel client** | una sola volta per variante/settimana e massimo 60 XP |
 | P1: importazioni legacy | **Compatibilità parziale** | XP storico preservato, nuovo stato `rewardsV2` serializzato; necessario ledger server |
 | P2: gradi e icone SVG nel profilo | **Implementato** | fino al grado Leggenda; livelli illimitati |
-| P3: Arena Classificata, sfide e verifica autorevole | **Demo locale e schema SQL pronti; ufficiale non attiva** | 3 esercizi gratuiti verificabili con Godot 4.4.1 WebAssembly; nessun XP/punto ufficiale; worker server ancora da distribuire |
+| P3: Arena Classificata, sfide e verifica autorevole | **Demo locale e backend headless implementati nel repository; ufficiale non attiva** | 3 esercizi gratuiti con Godot WebAssembly; coordinatore Node 22 + Godot 4.4.1 headless containerizzato con casi riservati; SQL, Docker e Supabase non ancora distribuiti sul server |
 | P4: classifiche globali/nazionali, Paese e stagioni | **Schema SQL pronto; UI live non attiva** | migr. Supabase da applicare, `gdh_leaderboard` e Paese bloccato; non pubblicare graduatorie senza runner sicuro |
 | P4: pagamento e Archivio Premium chiuso | **UI chiusa e SQL preparato; billing non attivo** | nessun accesso gratuito ai vecchi task via RLS; niente contenuti di stagioni reali ancora pubblicati |
 
@@ -38,3 +38,9 @@ Questa pagina accompagna la specifica principale; non dichiara operative funzion
 5. Automatizzare migrazione, rollback e verifiche mobile/desktop/tema prima di dichiarare completo GDScript Hero 2.0.
 
 Per verificare l'attuale blocco, eseguire `node tests/progression_v2.test.cjs` e gli altri test nei workflow GitHub Actions. Questo documento non è un autorizzazione a distribuire i nuovi componenti server non ancora collaudati.
+
+## Avanzamento valutatore headless (27 ottobre 2026)
+
+Il codice in `server/arena/` introduce autenticazione tramite JWT Supabase, limitazione delle richieste, caricamento di test riservati dal server, esecuzione di singoli casi mediante Godot 4.4.1 in contenitori con rete disabilitata e risorse limitate, punteggio calcolato lato coordinatore e API RPC per accrediti idempotenti. Il valutatore non espone risultati attesi al browser e non salva il codice inviato nel database. **Non è ancora ospitato né collegato all'interfaccia pubblica** e non assegna punti reali finché non verrà collaudata l'infrastruttura Docker/Supabase. I test GitHub CI comprendono un'esecuzione headless reale di Godot e test di regressione del contratto server; non equivalgono a test di integrazione con Supabase o al build/avvio dell'immagine Docker.
+
+Per deployment, audit e gestione segreti consultare `server/arena/README.md` e `docs/arena_backend.md`.
