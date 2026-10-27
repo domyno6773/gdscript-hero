@@ -154,6 +154,56 @@ async function smoke(browser,url,width){
  assert.ok(roadmapStyle.nodeCount>0,'Roadmap nodes must remain rendered');
  if(roadmapStyle.nodeAnimation!==null)assert.equal(roadmapStyle.nodeAnimation,'none','Roadmap node must not pulsate with neon');
  console.log('ROADMAP_STYLE '+JSON.stringify(roadmapStyle));
+
+ // CTA Ripasso: nessun testo sottolineato o controllo senza layout nel callout.
+ const reviewCalloutStyle=await page.evaluate(()=>{
+   const panel=document.getElementById('roadmap-review-callout');
+   panel.classList.remove('hidden');
+   const primary=panel.querySelector('button.btn-primary');
+   const secondary=panel.querySelector('button.btn-subtle');
+   const prior=document.documentElement.getAttribute('data-theme');
+   const inspect=()=>{
+     const first=getComputedStyle(primary),second=getComputedStyle(secondary);
+     return {
+       primary:{bg:first.backgroundColor,color:first.color,padding:first.paddingLeft,
+         radius:first.borderTopLeftRadius,height:primary.getBoundingClientRect().height,
+         decoration:first.textDecorationLine,shadow:first.boxShadow},
+       secondary:{bg:second.backgroundColor,radius:second.borderTopLeftRadius,
+         height:secondary.getBoundingClientRect().height}
+     };
+   };
+   document.documentElement.setAttribute('data-theme','dark');
+   const dark=inspect();
+   document.documentElement.setAttribute('data-theme','light');
+   const light=inspect();
+   if(prior===null)document.documentElement.removeAttribute('data-theme');
+   else document.documentElement.setAttribute('data-theme',prior);
+   return {dark,light};
+ });
+ assert.equal(reviewCalloutStyle.dark.primary.bg,'rgb(87, 157, 204)',
+   'CTA Apri Ripasso missing Godot button background');
+ assert.equal(reviewCalloutStyle.light.primary.bg,'rgb(63, 143, 190)',
+   'CTA Apri Ripasso missing light-theme background');
+ assert.equal(reviewCalloutStyle.dark.primary.radius,'8px');
+ assert.equal(reviewCalloutStyle.dark.secondary.radius,'8px');
+ assert.equal(reviewCalloutStyle.dark.primary.decoration,'none');
+ assert.equal(reviewCalloutStyle.dark.primary.shadow,'none');
+ assert.ok(reviewCalloutStyle.dark.primary.height>=39);
+ assert.ok(reviewCalloutStyle.dark.secondary.height>=39);
+ const primaryPadding=parseFloat(reviewCalloutStyle.dark.primary.padding);
+ assert.ok(primaryPadding>=10,'CTA missing horizontal padding');
+ await page.locator('#roadmap-review-callout button.btn-primary').click();
+ await viewIs(page,'review');
+ await page.evaluate(()=>App.showRoadmap());
+ await page.evaluate(()=>document.getElementById('roadmap-review-callout').classList.remove('hidden'));
+ await page.locator('#roadmap-review-callout button.btn-subtle').click();
+ assert.ok(await page.locator('#roadmap-review-callout').isHidden(),
+   'Non adesso must dismiss the callout');
+ await page.evaluate(()=>{
+   App.state.sessionDismissedReviewCallout=false;
+   App.updateReviewIndicators();
+ });
+
  await testNavigationPersistence(page,width);
  for(const section of ['roadmap','practice','projects','review','stats']){
    const selector=width<821?'#mob-nav-'+section:'#nav-'+section+'-btn';
