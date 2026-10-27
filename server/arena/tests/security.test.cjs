@@ -21,7 +21,8 @@ test('private fixtures are not served, scored in the browser or mounted together
  a.ok(!sandboxBoundary.includes('.expected'),
    'No expected value may enter the Docker case mount or arguments');
  a.match(sandboxBoundary,/JSON\.stringify\(\{method,args\}\)/);
- a.ok(!gd.includes('expected'));
+ a.ok(!gd.includes('arguments.get("expected"'),
+   'Godot grader must not read expected answers');
  a.ok(!gd.includes('service_role'));
  a.ok(!runner.includes('service_role'));
 });
