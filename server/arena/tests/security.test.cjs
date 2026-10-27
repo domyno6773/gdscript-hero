@@ -16,7 +16,11 @@ test('private fixtures are not served, scored in the browser or mounted together
  a.match(runner,/--memory','192m'/);
  a.match(runner,/--pids-limit','64'/);
  a.match(runner,/--security-opt','no-new-privileges'/);
- a.ok(!runner.includes('expected'));
+ const sandboxBoundary=runner.slice(runner.indexOf('async function dockerCase('),
+   runner.indexOf('function safeCompare('));
+ a.ok(!sandboxBoundary.includes('.expected'),
+   'No expected value may enter the Docker case mount or arguments');
+ a.match(sandboxBoundary,/JSON\.stringify\(\{method,args\}\)/);
  a.ok(!gd.includes('expected'));
  a.ok(!gd.includes('service_role'));
  a.ok(!runner.includes('service_role'));
