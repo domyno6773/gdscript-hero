@@ -140,8 +140,15 @@ class FederationTests(unittest.TestCase):
             list_availability_domains=Mock(return_value=[SimpleNamespace(name="ad1")]),
             list_compartments=Mock(return_value=[]))
         compute = SimpleNamespace(list_instances=Mock(return_value=[]))
-        block = SimpleNamespace(**{name: Mock(return_value=[]) for name in (
-            "list_volumes", "list_boot_volumes", "list_volume_backups", "list_boot_volume_backups")})
+        # Match the OCI SDK's keyword-only storage API signatures. Mocks
+        # accepting arbitrary positional arguments hid the previous TypeError.
+        def list_volumes(*, compartment_id):
+            return []
+        def list_boot_volumes(*, availability_domain, compartment_id):
+            return []
+        block = SimpleNamespace(list_volumes=list_volumes, list_boot_volumes=list_boot_volumes,
+            **{name: Mock(return_value=[]) for name in (
+            "list_volume_backups", "list_boot_volume_backups")})
         sdk = SimpleNamespace(identity=SimpleNamespace(IdentityClient=Mock(return_value=identity)),
             core=SimpleNamespace(ComputeClient=Mock(return_value=compute), BlockstorageClient=Mock(return_value=block)),
             pagination=SimpleNamespace(list_call_get_all_results=lambda fn, *a, **kw: SimpleNamespace(data=fn(*a, **kw))))

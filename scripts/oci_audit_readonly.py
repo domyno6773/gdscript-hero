@@ -99,10 +99,10 @@ def inventory_oci(oci, config, signer=None):
         # API failures stop the whole audit; "unknown" is never treated as zero.
         for instance in pages(oci, compute.list_instances, compartment_id):
             count_instance(instance, summary)
-        for volume in pages(oci, block.list_volumes, compartment_id):
+        for volume in pages(oci, block.list_volumes, compartment_id=compartment_id):
             count_volume(volume, summary, False)
         for ad in ads:
-            for volume in pages(oci, block.list_boot_volumes, ad.name, compartment_id):
+            for volume in pages(oci, block.list_boot_volumes, availability_domain=ad.name, compartment_id=compartment_id):
                 count_volume(volume, summary, True)
         for backup in pages(oci, block.list_volume_backups, compartment_id):
             if alive(backup):
