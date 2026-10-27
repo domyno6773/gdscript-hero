@@ -399,6 +399,8 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#sandbox-scene-tree img').count(),0,'HTML in Sandbox node tree');
  await page.evaluate(()=>App.openLesson(1));
  await viewIs(page,'exercise');
+ assert.equal(await page.locator('#view-exercise .exercise-mascot-slot').count(),0,
+   'Il vecchio placeholder della mascotte non deve comparire nelle lezioni');
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
  await testSmartIndent(page,'#code-editor');
  // Il completamento originale delle lezioni rimane operativo.
@@ -476,6 +478,8 @@ async function smoke(browser,url,width){
  assert.ok(await page.locator('.gdh-code-guide').count()===1,'La guida al codice deve comparire in ogni lezione');
  assert.match(await page.locator('.gdh-code-guide').textContent(),/func _ready/);
  await page.evaluate(()=>App.openLesson(4));
+ assert.equal(await page.locator('#view-exercise .exercise-mascot-slot').count(),0,
+   'Il vecchio placeholder della mascotte non deve comparire nelle sfide');
  assert.equal(await page.locator('.gdh-code-guide').evaluate(el=>el.open),true,
    'La sfida 4 deve spiegare automaticamente extends Node al suo primo incontro');
  assert.match(await page.locator('.gdh-code-guide').textContent(),/extends Node/);

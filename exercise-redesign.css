@@ -49,8 +49,6 @@
 #view-exercise .lesson-header-row {
     display: flex;
     align-items: flex-start;
-    padding-right: 75px;
-    min-height: 58px;
     margin-bottom: 8px;
 }
 #view-exercise #lesson-title {
@@ -60,24 +58,6 @@
     letter-spacing: -.015em;
     line-height: 1.15;
     overflow-wrap: anywhere;
-}
-#view-exercise .exercise-mascot-slot {
-    position: absolute;
-    right: 20px;
-    top: 62px;
-    width: 64px;
-    height: 64px;
-    border-radius: 8px;
-    border: 1.5px dashed #728ba7;
-    display: grid;
-    place-items: center;
-    color: #7895b3;
-    background: rgba(12, 23, 35, .24);
-    pointer-events: none;
-}
-#view-exercise .exercise-mascot-slot-mark {
-    font: 400 27px/1 'Chakra Petch', sans-serif;
-    opacity: .72;
 }
 #view-exercise .theory-body,
 #view-exercise .task-body,
@@ -744,8 +724,6 @@ body:has(#view-exercise:not(.hidden)) .nav-right .stat-label {
     font-family: 'Inter',sans-serif;
 }
 #view-exercise .lesson-header-row {
-    min-height: 63px;
-    padding-right: 82px;
     margin-bottom: 11px;
     border: none !important;
 }
@@ -757,20 +735,6 @@ body:has(#view-exercise:not(.hidden)) .nav-right .stat-label {
     text-shadow: none !important;
     letter-spacing: -.055em !important;
     font-weight: 700 !important;
-}
-#view-exercise .exercise-mascot-slot {
-    top: 76px;
-    right: 20px;
-    width: 66px;
-    height: 66px;
-    border: 1.5px dashed #6c829b;
-    border-radius: 12px;
-    background: #2d3947;
-    box-shadow: none;
-}
-#view-exercise .exercise-mascot-slot-mark {
-    color: #90afce;
-    font-size: 27px;
 }
 #view-exercise .lesson-content,
 #view-exercise .theory-body,
@@ -1172,9 +1136,6 @@ body:has(#view-exercise:not(.hidden)) .nav-right .stat-label {
         gap: 6px !important;
     }
     #view-exercise .vtab-title-tag { font-size: .77rem !important; }
-    #view-exercise .exercise-mascot-slot {
-        top: 73px; width: 58px; height: 58px;
-    }
 }
 @media (max-width: 380px) {
     #view-exercise #btn-run-code .run-text { font-size: .72rem; }
