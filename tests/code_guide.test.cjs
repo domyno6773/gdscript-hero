@@ -46,7 +46,7 @@ assert.equal(at('var salute = 100','var').key,'var');
 assert.equal(at('func heal(amount):\n    pass','func').key,'func');
 assert.equal(at('func _ready():\n    pass','pass').key,'pass');
 assert.equal(at('if health > 0:\n    print(health)','if').key,'if');
-assert.equal(at('var x = true','true').key,'boolean');
+assert.equal(at('var x = true','true').key,'true');
 assert.equal(at('$Label.text = "ok"','$Label').key,'nodepath');
 assert.equal(at('var x = range(3)','range').key,'range');
 assert.equal(at('print("extends Node")','extends'),null);
