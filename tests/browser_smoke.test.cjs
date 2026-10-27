@@ -132,6 +132,39 @@ async function smoke(browser,url,width){
  await page.locator('#sandbox-code-editor').fill('extends Node2D\n\npri');
  await page.locator('#sandbox-autocomplete-popup').waitFor({state:'visible',timeout:4000});
  assert.equal(await page.locator('#sandbox-autocomplete-popup .autocomplete-name').first().textContent(),'print');
+ // Menu delle lezioni e Sandbox: stessa resa Godot, senza gradienti e senza glow.
+ const autocompletePaint=await page.evaluate(()=>{
+   const root=document.documentElement;
+   const prior=root.getAttribute('data-theme');
+   const measure=()=>{
+     const selectors=['#sandbox-autocomplete-popup','#autocomplete-popup'];
+     return selectors.map(id=>{
+       const popup=document.querySelector(id);
+       const styles=getComputedStyle(popup);
+       const item=getComputedStyle(document.querySelector('#sandbox-autocomplete-popup .autocomplete-item.selected'));
+       return {background:styles.backgroundColor,image:styles.backgroundImage,
+         radius:styles.borderTopLeftRadius,selected:item.backgroundColor};
+     });
+   };
+   root.setAttribute('data-theme','dark');
+   const dark=measure();
+   root.setAttribute('data-theme','light');
+   const light=measure();
+   if(prior===null)root.removeAttribute('data-theme');
+   else root.setAttribute('data-theme',prior);
+   return {dark,light};
+ });
+ for(const item of autocompletePaint.dark){
+   assert.equal(item.background,'rgb(36, 45, 57)','Dark autocomplete not using new Godot palette');
+   assert.equal(item.image,'none','Old gradient remains in autocomplete');
+   assert.equal(item.radius,'8px','Old autocomplete border radius remains');
+ }
+ for(const item of autocompletePaint.light){
+   assert.equal(item.background,'rgb(247, 250, 252)','Light autocomplete not using new Godot palette');
+   assert.equal(item.image,'none','Autocomplete light theme has gradient');
+ }
+ assert.equal(autocompletePaint.dark[0].selected,'rgb(52, 74, 96)',
+   'Autocomplete selected row still uses old neon highlight');
  await page.locator('#sandbox-code-editor').press('ArrowDown');
  await page.locator('#sandbox-code-editor').press('ArrowUp');
  await page.locator('#sandbox-code-editor').press('Tab');
