@@ -481,6 +481,7 @@ async function smoke(browser,url,width){
  assert.match(await page.locator('.gdh-code-guide').textContent(),/extends Node/);
  assert.match(await page.locator('.gdh-code-guide').textContent(),/nodo/i);
  await page.evaluate(()=>App.openLesson(1));
+ if(width<821)await page.locator('#btn-tab-code').click();
 
  assert.ok(design.syntaxLayerHeight>0,'Syntax layer must be rendered');
  assert.ok(!design.navbarColor?.includes('0, 229, 255'),'Old neon header must not remain');
