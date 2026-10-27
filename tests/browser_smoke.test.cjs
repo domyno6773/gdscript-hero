@@ -81,6 +81,9 @@ async function testNavigationPersistence(page,width){
    'Wrong review variant after reload');
  assert.equal(await page.locator('#code-editor').inputValue(),reviewDraft,
    'Review draft lost on reload');
+ await reload('exercise');
+ assert.equal(await page.locator('#code-editor').inputValue(),reviewDraft,
+   'Review draft lost on second consecutive reload');
  assert.equal(await page.evaluate(()=>App.isReviewMode),true);
  if(width<821)assert.ok(await page.locator('#exercise-workspace-grid')
    .evaluate(el=>el.classList.contains('show-code')),'Mobile code tab lost on reload');
