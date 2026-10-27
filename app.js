@@ -846,6 +846,7 @@ const App = {
         // Auto-save debounced a 800ms
         let autoSaveDebounce = null;
         editor.addEventListener('input', () => {
+            window.GDHErrorGuide?.clearMark(editor);
             window.GDHErrorGuide?.clear('#sandbox-debug-area');
             this.updateSandboxLineNumbers();
             this.checkAutocomplete('sandbox');
@@ -1158,6 +1159,8 @@ const App = {
         // Imposta codice nell'editor
         const editor = document.getElementById('sandbox-code-editor') || document.getElementById('practice-code-editor');
         if (editor) {
+            window.GDHErrorGuide?.clearMark(editor);
+            window.GDHErrorGuide?.clear('#sandbox-debug-area');
             editor.value = cur.code || '';
             this.updateSandboxLineNumbers();
         }
@@ -1515,6 +1518,7 @@ const App = {
         const startT = performance.now();
         const code = editor.value;
 
+        window.GDHErrorGuide?.clearMark(editor);
         window.GDHErrorGuide?.clear('#sandbox-debug-area');
         // Salva codice nel progetto attivo
         const cur = this.getActiveSandboxProject();
@@ -3248,6 +3252,7 @@ const App = {
         if (!editor) return;
 
         editor.addEventListener('input', () => {
+            window.GDHErrorGuide?.clearMark(editor);
             window.GDHErrorGuide?.clear('#exercise-debug-area');
             this.updateLineNumbers();
             this.checkAutocomplete();
@@ -3794,6 +3799,7 @@ const App = {
         const failed = Array.isArray(tests) ? tests.find(t => !t.passed) : null;
         const error = result?.error || '';
         if (!error && !failed) {
+            GDHErrorGuide.clearMark(editor);
             GDHErrorGuide.clear(host);
             return;
         }
@@ -3802,10 +3808,12 @@ const App = {
             error, failedTest: failed,
             verdict: result?.nativeFeedback?.verdict || ''
         });
+        GDHErrorGuide.mark(editor, diagnosis?.kind === 'engine' ? diagnosis.line : null);
         GDHErrorGuide.render(host, diagnosis, line => GDHErrorGuide.jump(editor, line));
     },
 
     resetExerciseFeedback() {
+        window.GDHErrorGuide?.clearMark(document.getElementById('code-editor'));
         window.GDHErrorGuide?.clear('#exercise-debug-area');
         this.keepExerciseAtHorizontalOrigin();
         const area = document.getElementById('exercise-primary-feedback');
@@ -3850,9 +3858,12 @@ const App = {
             description.textContent = 'Il codice produce il risultato richiesto. Puoi proseguire.';
         } else {
             area.dataset.state = 'error';
-            title.textContent = result?.error ? 'Errore di esecuzione' : 'Controlla il codice';
-            // Messaggi generati dal runtime/validatore: soltanto testo, mai HTML.
-            const message = failed?.diff || result?.error || failed?.desc || 'Almeno un controllo non è stato superato.';
+            title.textContent = result?.error ? 'Ho trovato un problema nel codice' : 'Controlla il codice';
+            // Il messaggio tecnico resta disponibile nei dettagli del debugger.
+            // Non presentarlo come primo testo a chi sta imparando.
+            const message = result?.error
+                ? 'Guarda la spiegazione qui sotto e la riga evidenziata nell’editor.'
+                : (failed?.diff || failed?.desc || 'Almeno un controllo non è stato superato.');
             description.textContent = String(message);
         }
     },
