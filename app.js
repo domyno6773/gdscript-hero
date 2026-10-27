@@ -3847,7 +3847,19 @@ const App = {
             verdict: result?.nativeFeedback?.verdict || ''
         });
         GDHErrorGuide.mark(editor, diagnosis?.kind === 'engine' ? diagnosis.line : null);
-        GDHErrorGuide.render(host, diagnosis, line => GDHErrorGuide.jump(editor, line));
+        GDHErrorGuide.render(host, diagnosis, line => GDHErrorGuide.jump(editor, line), level => {
+            // Solo gli indizi aperti volontariamente contano come aiuti.
+            // Anche il debugger rispetta quindi la missione "senza suggerimenti".
+            if (sandbox || !level) return;
+            this.state.hintsRevealed = Math.max(this.state.hintsRevealed || 0, level);
+            if (this.isReviewMode && this.currentReviewVariant) {
+                if (typeof ReviewEngine !== 'undefined') {
+                    ReviewEngine.recordVariantHintOpened(this.currentReviewVariant.id, level, this.state);
+                }
+            } else {
+                this.recordHintOpened(this.state.currentLessonId, level);
+            }
+        });
         // Evita due riquadri consecutivi per lo stesso problema.
         // La guida è il feedback principale quando viene mostrata.
         if (!sandbox) {

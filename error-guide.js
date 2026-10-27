@@ -27,101 +27,153 @@
     }
     return null;
   };
+  // La guida parte da un controllo semplice; gli indizi successivi si aprono
+  // su richiesta e non includono mai la soluzione completa.
   const rules = [
     {
       pattern: /expected\s*["']?:["']?|expected.*colon|missing.*colon/i,
       title: 'Mancano i due punti (:)',
-      why: 'Per aprire un blocco, come una condizione if o una funzione, GDScript richiede i due punti alla fine della riga.',
-      hint: 'Controlla la fine della riga che apre il blocco e assicurati che le istruzioni sotto siano rientrate.'
+      why: 'Godot non riconosce la fine di un’istruzione che dovrebbe aprire un blocco.',
+      hint: 'Guarda la fine della riga segnalata: come si indica l’inizio di un blocco in GDScript?',
+      steps: [
+        'Un if, un ciclo o una funzione introduce un gruppo di istruzioni. Il simbolo che apre quel gruppo si trova alla fine della sua riga.',
+        'Confronta l’ultima parte della riga con un esempio nella teoria. Dopo l’apertura, le istruzioni del blocco vanno anche rientrate.'
+      ]
     },
     {
       pattern: /indent|unindent|tabs and spaces|mixed tabs|expected.*indented/i,
       title: 'Il rientro del codice non è corretto',
-      why: 'In GDScript gli spazi a inizio riga indicano quali istruzioni appartengono a una funzione, a un if o a un ciclo.',
-      hint: 'Confronta il rientro delle righe vicine. Dopo un blocco che termina con : serve un livello di indentazione in più.'
+      why: 'Godot usa il rientro per capire quali righe appartengono allo stesso blocco.',
+      hint: 'Confronta la posizione della riga segnalata con le istruzioni vicine.',
+      steps: [
+        'Le istruzioni dentro func, if o for devono avere un rientro rispetto alla riga che apre il blocco.',
+        'Guarda il rientro della prima istruzione del blocco e rendi coerenti le righe dello stesso livello. Evita di mescolare tabulazioni e spazi.'
+      ]
     },
     {
       pattern: /unterminated string|unclosed string|expected closing.*quote|string not terminated/i,
-      title: 'Manca una virgoletta di chiusura',
-      why: 'Hai iniziato a scrivere un testo tra virgolette, ma il testo non è stato chiuso.',
-      hint: 'Trova la stringa nella riga segnalata e controlla che le virgolette siano presenti sia all’inizio sia alla fine.'
+      title: 'C’è un testo non chiuso',
+      why: 'Godot ha trovato un testo iniziato con le virgolette senza riuscire a trovarne la fine.',
+      hint: 'Conta le virgolette presenti nella zona indicata.',
+      steps: [
+        'Una stringa inizia e termina con lo stesso tipo di virgolette.',
+        'Controlla il testo passato alle funzioni nelle righe coinvolte: verifica che ogni apertura abbia la sua chiusura.'
+      ]
     },
     {
       pattern: /identifier.*(not declared|not found)|unknown identifier|not declared in the current scope|undeclared identifier/i,
-      title: 'Una variabile o un nome non è riconosciuto',
-      why: 'Il codice utilizza un nome che Godot non conosce in questo punto dello script.',
-      hint: 'Controlla se hai dichiarato la variabile, se si trova nell’ambito giusto e se hai scritto correttamente maiuscole e minuscole.'
+      title: 'Un nome non è riconosciuto',
+      why: 'Stai usando un nome che Godot non conosce nel punto in cui lo hai scritto.',
+      hint: 'Dove viene creato o dichiarato questo nome?',
+      steps: [
+        'Una variabile deve esistere prima di poter essere usata e dev’essere visibile nella funzione o nel blocco corretto.',
+        'Confronta carattere per carattere il nome usato con quello della dichiarazione: anche le maiuscole e le minuscole contano.'
+      ]
     },
     {
       pattern: /invalid operands|invalid operator|cannot (?:convert|assign)|type mismatch|cannot be assigned/i,
-      title: 'L’operazione usa valori incompatibili',
-      why: 'Stai combinando due valori che non possono essere utilizzati insieme in quell’operazione.',
-      hint: 'Osserva il tipo dei valori coinvolti: ad esempio, un numero e un testo non sempre possono essere sommati direttamente.'
+      title: 'Stai combinando valori incompatibili',
+      why: 'Godot non riesce a eseguire questa operazione con i tipi di dato presenti.',
+      hint: 'Quali valori entrano nell’operazione? Sono numeri, testi o altri tipi?',
+      steps: [
+        'Per calcolare o confrontare valori, il tipo dei dati fa la differenza. Un testo non è automaticamente un numero.',
+        'Controlla i valori prima dell’operazione e verifica se puoi usare tipi compatibili, senza cambiare l’obiettivo dell’esercizio.'
+      ]
     },
     {
       pattern: /invalid (?:get|set)|nil|null instance|nonexistent function|invalid call/i,
-      title: 'Stai usando un oggetto o una funzione in modo non valido',
-      why: 'Godot non riesce a eseguire un accesso o una chiamata: l’oggetto potrebbe non esistere oppure quella funzione non è disponibile.',
-      hint: 'Verifica che l’oggetto sia presente e che la proprietà o la funzione appartenga davvero a quell’oggetto.'
+      title: 'Chiamata o accesso non valido',
+      why: 'Il programma prova a usare una proprietà o una funzione che l’oggetto non mette a disposizione.',
+      hint: 'Controlla quale oggetto stai utilizzando e cosa stai chiedendogli di fare.',
+      steps: [
+        'Un metodo appartiene a determinati tipi di oggetto. Non tutte le funzioni funzionano su qualunque nodo o valore.',
+        'Verifica che il riferimento non sia nullo e che il nome della funzione o della proprietà appartenga davvero al tipo usato.'
+      ]
     },
     {
       pattern: /expected.*\)|expected.*\]|expected.*\}/i,
-      title: 'Manca una parentesi di chiusura',
-      why: 'Godot ha trovato una parentesi aperta senza la chiusura corrispondente.',
-      hint: 'Controlla le parentesi nella riga indicata e nelle righe immediatamente precedenti.'
+      title: 'Manca una chiusura',
+      why: 'Godot ha trovato una parentesi o un altro delimitatore senza la sua chiusura.',
+      hint: 'Controlla le aperture e le chiusure nella riga indicata.',
+      steps: [
+        'Ogni parentesi aperta richiede una parentesi dello stesso tipo per chiudere il gruppo.',
+        'Controlla anche la riga prima di quella segnalata: a volte Godot si accorge del problema soltanto all’istruzione successiva.'
+      ]
     }
   ];
   function functionAdvice(message) {
     const match = String(message).match(/Function\s+["']([^"']+?)["']\s+not found in base self/i);
     if (!match) return null;
     const name = match[1].replace(/\(\)$/, '');
-    const suggestions = { prin: 'print', pritn: 'print', pirnt: 'print', prnt: 'print',
-      rng: 'range', strr: 'str' };
-    const suggestion = suggestions[name.toLowerCase()];
     return {
       title: 'Funzione non riconosciuta',
-      why: 'Hai chiamato "' + name + '()", ma Godot non trova una funzione con questo nome.',
-      hint: suggestion
-        ? 'Controlla il nome: forse intendevi "' + suggestion + '()". In GDScript anche una sola lettera diversa cambia il significato.'
-        : 'Controlla l’ortografia della funzione e verifica che sia disponibile in questo script. Maiuscole e minuscole contano.'
+      why: 'Godot ha trovato la chiamata "' + name + '()", ma non conosce una funzione con questo nome in questo script.',
+      hint: 'Rileggi il nome della funzione che hai scritto: potrebbe esserci una lettera in più, mancante o fuori posto.',
+      steps: [
+        'Ripensa allo scopo di questa riga: vuoi stampare un testo, eseguire un calcolo o richiamare una funzione creata da te? Cerca il comando corrispondente nella teoria.',
+        'Confronta una lettera alla volta il nome nella riga con quello della funzione che hai studiato. Puoi aiutarti con i suggerimenti automatici dell’editor, senza riscrivere tutto il programma.'
+      ]
     };
   }
   function diagnose({source = '', error = '', failedTest = null, verdict = ''} = {}) {
     const raw = cut(error);
     const failure = cut(failedTest?.diff || failedTest?.desc || '', 800);
     if (!raw && !failure) return null;
+
     const engine = Boolean(raw);
     const line = engine ? lineOf(raw, source) : null;
-    let title, why, hint;
-    if (engine) {
-      const infra = /failed to fetch|networkerror|motore godot non disponibile|failed to load.*wasm/i.test(raw);
-      const match = !infra && functionAdvice(raw) || (!infra && rules.find(rule => rule.pattern.test(raw)));
-      if (infra) {
-        title = 'La verifica non è riuscita ad avviarsi';
-        why = 'Il motore di verifica non è disponibile in questo momento. Non significa che il codice sia sbagliato.';
-        hint = 'Riprova la verifica. Se il problema persiste, ricarica la pagina.';
-      } else if (match) {
-        ({title, why, hint} = match);
-      } else if (verdict === 'timeout') {
-        title = 'Il programma impiega troppo tempo';
-        why = 'L’esecuzione non è terminata entro il tempo disponibile.';
-        hint = 'Controlla se hai creato un ciclo che potrebbe non terminare.';
-      } else if (/parse error|parser error|syntax error|unexpected token/i.test(raw)) {
-        title = 'Godot non riesce a interpretare un’istruzione';
-        why = 'Una parte del codice non rispetta la sintassi di GDScript, quindi il programma non può partire.';
-        hint = 'Controlla parentesi, virgolette, due punti e nomi delle istruzioni nella zona segnalata.';
+    const infra = engine && /failed to fetch|networkerror|motore godot non disponibile|failed to load.*wasm|webassembly.*failed/i.test(raw);
+    const timedOut = engine && !infra && (verdict === 'timeout' || /timed out|timeout|time limit exceeded/i.test(raw));
+    const syntax = engine && !infra && !timedOut &&
+      /parse error|parser error|syntax error|unexpected token|expected.*(?:colon|:|indent)|not declared in the current scope|function\s+["'][^"']+["']\s+not found in base self/i.test(raw);
+    const category = infra ? 'system' : timedOut ? 'timeout' :
+      !engine ? 'requirement' : syntax ? 'syntax' : 'runtime';
+    let title, why, hint, steps;
+    if (infra) {
+      title = 'La verifica non è riuscita ad avviarsi';
+      why = 'Il motore Godot non è disponibile in questo momento: questo non dimostra che il tuo codice sia sbagliato.';
+      hint = 'Riprova la verifica. Se continua a non funzionare, ricarica la pagina.';
+      steps = [];
+    } else if (timedOut) {
+      title = 'Il programma impiega troppo tempo';
+      why = 'L’esecuzione non è terminata nel tempo disponibile.';
+      hint = 'Controlla se il programma può terminare o se continua a ripetere le stesse istruzioni.';
+      steps = [
+        'Un ciclo while continua finché la condizione è vera. Che cosa deve accadere perché diventi falsa?',
+        'Segui a mente due o tre iterazioni del ciclo: un valore cambia davvero, oppure rimane sempre uguale?'
+      ];
+    } else if (engine) {
+      const match = functionAdvice(raw) || rules.find(rule => rule.pattern.test(raw));
+      if (match) ({title, why, hint, steps} = match);
+      else if (syntax) {
+        title = 'Godot non riesce a leggere un’istruzione';
+        why = 'Una parte del codice non segue la sintassi di GDScript, quindi il programma non può partire.';
+        hint = 'Parti dalla zona segnalata e cerca un simbolo o un nome diverso dagli esempi studiati.';
+        steps = [
+          'Controlla i segni che formano la struttura delle istruzioni: virgolette, parentesi, due punti e rientro.',
+          'Isola una sola istruzione e confrontala con un esempio della lezione. Verifica anche la riga precedente a quella segnalata.'
+        ];
       } else {
-        title = 'Un’istruzione non può essere completata';
-        why = 'Il motore si è fermato mentre cercava di usare una funzione, un valore o un oggetto del programma.';
-        hint = 'Controlla che le variabili abbiano un valore valido e che gli oggetti e le funzioni utilizzati esistano.';
+        title = 'Un’istruzione si blocca durante l’esecuzione';
+        why = 'Godot ha iniziato a elaborare il programma, ma non è riuscito a completare un’operazione.';
+        hint = 'Chiediti quale valore o quale oggetto usa l’istruzione coinvolta.';
+        steps = [
+          'Controlla da dove provengono i valori usati in quel punto e se l’oggetto esiste davvero.',
+          'Segui l’ordine delle istruzioni fino al punto in cui avviene il problema: un valore potrebbe non essere ancora pronto.'
+        ];
       }
     } else {
       title = 'Il programma funziona, ma manca un requisito';
-      why = 'Godot ha eseguito il codice, ma il risultato non soddisfa ancora tutta la consegna.';
-      hint = 'Confronta il risultato con ciò che chiede l’esercizio: controlla valori, ordine delle istruzioni e testo stampato.';
+      why = 'Godot ha eseguito il programma, ma il risultato non corrisponde ancora a tutti i requisiti della consegna.';
+      hint = 'Confronta un requisito alla volta con ciò che il programma produce realmente.';
+      steps = [
+        'Parti dalla consegna: quali valori, testi oppure comportamenti sono richiesti? Confrontali con ciò che ottieni, senza modificare più istruzioni insieme.',
+        'Se ci sono stampe, controlla anche l’ordine delle righe, gli spazi e i simboli. Se il compito richiede un comportamento, verifica quando accade e con quali valori.'
+      ];
     }
     return Object.freeze({
-      kind: engine ? 'engine' : 'requirement', title, why, hint, line,
+      kind: engine ? 'engine' : 'requirement',
+      category, title, why, hint, steps: Object.freeze([...(steps || [])]), line,
       raw: engine ? raw : '', requirement: failure, exact: line !== null
     });
   }
@@ -129,7 +181,7 @@
     const host = typeof container === 'string' ? document.querySelector(container) : container;
     if (host) host.querySelectorAll(':scope > .gdh-debug-panel').forEach(node => node.remove());
   }
-  function render(container, diagnosis, onLine) {
+  function render(container, diagnosis, onLine, onHint) {
     const host = typeof container === 'string' ? document.querySelector(container) : container;
     if (!host) return;
     clear(host);
@@ -137,16 +189,21 @@
     const card = document.createElement('section');
     card.className = 'gdh-debug-panel';
     card.dataset.kind = diagnosis.kind;
+    card.dataset.category = diagnosis.category;
     card.setAttribute('aria-label', 'Guida alla correzione');
     const top = document.createElement('div');
     top.className = 'gdh-debug-top';
     const tag = document.createElement('span');
     tag.className = 'gdh-debug-tag';
-    tag.textContent = diagnosis.kind === 'engine' ? 'ERRORE GODOT' : 'REQUISITO';
+    tag.textContent = ({
+      syntax: 'SINTASSI', runtime: 'ESECUZIONE', requirement: 'REQUISITO',
+      timeout: 'TEMPO ESAURITO', system: 'VERIFICA NON DISPONIBILE'
+    })[diagnosis.category] || 'ERRORE GODOT';
     const heading = document.createElement('strong');
     heading.textContent = diagnosis.title;
     top.append(tag, heading);
     card.append(top);
+
     const label = document.createElement('strong');
     label.className = 'gdh-debug-section-label';
     label.textContent = 'Che cosa significa';
@@ -154,6 +211,7 @@
     explain.className = 'gdh-debug-explanation';
     explain.textContent = diagnosis.why;
     card.append(label, explain);
+
     if (diagnosis.line !== null && typeof onLine === 'function') {
       const jump = document.createElement('button');
       jump.type = 'button';
@@ -161,25 +219,73 @@
       jump.textContent = 'Vai alla riga ' + diagnosis.line;
       jump.addEventListener('click', () => onLine(diagnosis.line));
       card.append(jump);
-    } else if (diagnosis.kind === 'engine') {
+    } else if (diagnosis.kind === 'engine' && diagnosis.category !== 'system') {
       const where = document.createElement('small');
       where.className = 'gdh-debug-location';
       where.textContent = 'Godot non ha fornito una riga attendibile per questo problema.';
       card.append(where);
     }
+
     const box = document.createElement('div');
     box.className = 'gdh-debug-hint';
     const hintTitle = document.createElement('strong');
-    hintTitle.textContent = 'Come provare a correggerlo';
+    hintTitle.textContent = diagnosis.category === 'system' ? 'Che cosa puoi fare' : 'Da dove iniziare';
     const hint = document.createElement('p');
     hint.textContent = diagnosis.hint;
     box.append(hintTitle, hint);
     card.append(box);
+
+    if (diagnosis.steps?.length) {
+      const progress = document.createElement('div');
+      progress.className = 'gdh-debug-steps';
+      const count = document.createElement('p');
+      count.className = 'gdh-debug-steps-status';
+      count.textContent = 'Se non basta, puoi chiedere altri indizi. Nessuna soluzione viene inserita nel codice.';
+      progress.append(count);
+      const extra = document.createElement('div');
+      extra.className = 'gdh-debug-steps-revealed';
+      extra.setAttribute('aria-live','polite');
+      progress.append(extra);
+      const next = document.createElement('button');
+      next.className = 'gdh-debug-next-hint';
+      next.type = 'button';
+      let shown = 0;
+      const update = () => {
+        if (shown >= diagnosis.steps.length) {
+          next.remove();
+          count.textContent = 'Hai letto tutti gli indizi. Prova a correggere il codice e verifica di nuovo.';
+        } else {
+          next.textContent = 'Mostra indizio ' + (shown + 1) + ' di ' + diagnosis.steps.length;
+        }
+      };
+      next.addEventListener('click', () => {
+        if (shown >= diagnosis.steps.length) return;
+        shown++;
+        const row = document.createElement('div');
+        row.className = 'gdh-debug-step';
+        const title = document.createElement('strong');
+        title.textContent = 'Indizio ' + shown;
+        const description = document.createElement('p');
+        description.textContent = diagnosis.steps[shown - 1];
+        row.append(title, description);
+        extra.append(row);
+        if (typeof onHint === 'function') onHint(shown);
+        update();
+      });
+      progress.append(next);
+      update();
+      card.append(progress);
+    }
+
     if (diagnosis.requirement) {
-      const req = document.createElement('p');
-      req.className = 'gdh-debug-requirement';
-      req.textContent = diagnosis.requirement;
-      card.append(req);
+      const details = document.createElement('details');
+      details.className = 'gdh-debug-technical';
+      const summary = document.createElement('summary');
+      summary.textContent = 'Dettaglio del controllo non superato';
+      const pre = document.createElement('pre');
+      pre.textContent = diagnosis.requirement;
+      details.append(summary, pre);
+      card.append(details);
     }
     if (diagnosis.raw) {
       const details = document.createElement('details');

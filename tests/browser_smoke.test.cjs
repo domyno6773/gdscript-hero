@@ -572,6 +572,19 @@ async function smoke(browser,url,width){
  assert.ok(debugState.hint?.length>20,'Debugger lacks an explanatory hint');
  assert.ok(debugState.technical?.length>5,'Debugger must preserve original Godot message');
  assert.equal(debugState.finished,false,'Debugging should not complete a lesson');
+ assert.equal(await page.locator('#exercise-debug-area .gdh-debug-next-hint').count(),1,
+   'Il debugger deve mostrare un pulsante per gli indizi progressivi');
+ assert.equal(await page.locator('#exercise-debug-area .gdh-debug-step').count(),0,
+   'Gli indizi approfonditi non devono essere svelati subito');
+ const initialHintCount=await page.evaluate(()=>App.state.hintsRevealed);
+ await page.locator('#exercise-debug-area .gdh-debug-next-hint').click();
+ assert.equal(await page.locator('#exercise-debug-area .gdh-debug-step').count(),1);
+ assert.ok(await page.locator('#exercise-debug-area .gdh-debug-step').first().textContent().then(x=>x.length>25));
+ assert.ok(await page.evaluate(()=>App.state.hintsRevealed>initialHintCount),
+   'Aprire gli indizi nel debugger deve contare come aiuto');
+ await page.locator('#exercise-debug-area .gdh-debug-next-hint').click();
+ assert.equal(await page.locator('#exercise-debug-area .gdh-debug-step').count(),2);
+ assert.equal(await page.locator('#exercise-debug-area .gdh-debug-next-hint').count(),0);
  const noExtendsCode='func _ready():\n    # Stampa esattamente\n    prin("Ciao Godot!")\n';
  await page.locator('#code-editor').fill(noExtendsCode);
  await page.locator('#btn-run-code').click({timeout:10000});
