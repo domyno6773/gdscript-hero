@@ -762,6 +762,11 @@ const App = {
 
         // Stessi suggerimenti, tasti e completamento automatico dell'editor lezioni.
         editor.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                this.runSandboxCode();
+                return;
+            }
             const popup = document.getElementById('sandbox-autocomplete-popup');
             if (popup && !popup.classList.contains('hidden')) {
                 if (e.key === 'ArrowDown') {
@@ -800,9 +805,10 @@ const App = {
                 editor.dispatchEvent(new Event('input', { bubbles: true }));
                 return;
             }
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            if (e.key === 'Enter' && !e.altKey && !e.isComposing) {
                 e.preventDefault();
-                this.runSandboxCode();
+                this.insertSmartNewline(editor);
+                return;
             }
         });
 
@@ -3072,6 +3078,41 @@ const App = {
         }));
     },
 
+    // Indentazione GDScript condivisa da corso, Ripasso e Sandbox.
+    // Usa il testo fino al cursore: non completa righe parziali o commenti.
+    insertSmartNewline(editor) {
+        if (!editor) return;
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const lineStart = editor.value.lastIndexOf('\n', start - 1) + 1;
+        const prefix = editor.value.slice(lineStart, start);
+        const indent = prefix.match(/^[ \t]*/)[0];
+
+        // Ignora i due-punti dentro stringhe o commenti.
+        let code = '', quote = '', escaped = false;
+        for (const ch of prefix) {
+            if (quote) {
+                if (escaped) escaped = false;
+                else if (ch === '\\') escaped = true;
+                else if (ch === quote) quote = '';
+            } else if (ch === '#') {
+                break;
+            } else if (ch === '"' || ch === "'") {
+                quote = ch;
+            } else {
+                code += ch;
+            }
+        }
+        const statement = code.trim();
+        const block = /:\s*$/.test(statement) &&
+            /^(?:(?:static\s+)?func\b|if\b|elif\b|else\b|for\b|while\b|match\b|when\b|class\b|get\b|set\b)/.test(statement);
+        const unit = indent.includes('\t') && !indent.includes(' ') ? '\t' : '    ';
+        editor.setRangeText('\n' + indent + (block ? unit : ''), start, end, 'end');
+        // Notifica la stessa pipeline di aggiornamento usata dalla digitazione:
+        // numeri di riga, colori, suggerimenti, autosalvataggio e progressi.
+        editor.dispatchEvent(new Event('input', { bubbles: true }));
+    },
+
     setupEditor() {
         const editor = document.getElementById('code-editor');
         if (!editor) return;
@@ -3087,6 +3128,12 @@ const App = {
         });
 
         editor.addEventListener('keydown', (e) => {
+            // Ctrl+Invio esegue anche quando è aperto un suggerimento.
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                this.runAndValidate();
+                return;
+            }
             // Autocomplete navigazione da tastiera
             const popup = document.getElementById('autocomplete-popup');
             if (popup && !popup.classList.contains('hidden')) {
@@ -3139,9 +3186,10 @@ const App = {
             }
 
             // Scorciatoia Ctrl+Enter per eseguire
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            if (e.key === 'Enter' && !e.altKey && !e.isComposing) {
                 e.preventDefault();
-                this.runAndValidate();
+                this.insertSmartNewline(editor);
+                return;
             }
         });
     },
