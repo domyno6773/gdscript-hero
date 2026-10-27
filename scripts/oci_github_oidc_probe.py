@@ -71,10 +71,11 @@ def main() -> int:
         if not base.startswith("https://"):
             raise ValueError("Invalid GitHub token endpoint")
         parsed = urllib.parse.urlsplit(base)
-        # GitHub runs issue short-lived JWTs from several regional pipelines
-        # under actions.githubusercontent.com, not just the "pipelines" host.
+        # GitHub hosts OIDC requests on vstoken and regional service hosts.
+        # Allow only a single subdomain under the documented trusted domain;
+        # never follow arbitrary externally supplied token URLs.
         host = parsed.hostname or ""
-        if not re.fullmatch(r"pipelines[a-z0-9-]*\.actions\.githubusercontent\.com", host):
+        if not re.fullmatch(r"[a-z0-9-]+\.actions\.githubusercontent\.com", host):
             raise ValueError("Unexpected GitHub token host")
         if parsed.username or parsed.password or parsed.port not in (None, 443):
             raise ValueError("Unexpected GitHub token endpoint")
