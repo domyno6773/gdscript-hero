@@ -59,7 +59,7 @@ nei dischi, segreti, policy IAM o modifiche di infrastruttura e richiesto.
 
 ## Attivazione e prova reale: ancora da completare
 
-Occorre abilitare l'app e il trust verificato dopo il controllo dei permessi.
+Occorre abilitare l'app e il trust verificato dopo il controllo dei permessi. Il modo locale `--prepare-activation` ora automatizza i controlli e l'attivazione; vedi `OCI_ACTIVATION_LOCAL.md`.
 Lo script di bootstrap iniziale non attiva nulla. Non rieseguire `--apply`
 per attivare: rifiuta deliberatamente trust gia esistenti.
 

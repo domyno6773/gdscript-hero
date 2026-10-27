@@ -44,3 +44,5 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'oci_oidc_preflight_test.py' -v
       - name: Federated OCI audit authentication and read-only contracts (offline)
         run: python3 -m unittest discover -s tests -p 'oci_federated_readonly_test.py' -v
+      - name: OCI local activation and list-only policy protections (offline)
+        run: python3 -m unittest discover -s tests -p 'oci_trust_activation_test.py' -v

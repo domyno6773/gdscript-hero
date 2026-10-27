@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Local OCI trust bootstrap. Python 3.10+, standard library only.
 
-Default: offline preview. --apply: create ONE INACTIVE identity trust after
-local confirmation. Never activates apps/trusts, grants IAM permissions,
-creates hosting resources, or communicates with GitHub. Admin token stays local.
+Default: offline preview. --apply: create ONE INACTIVE identity trust.
+--prepare-activation: generate a list-only IAM policy locally; after the owner
+creates it, revalidate app/trust and activate only those two identities with
+explicit local confirmation. Never grants IAM permissions or creates hosting
+resources. Admin token stays local; never communicates with GitHub.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -149,13 +153,176 @@ def create_inactive(origin, token, payload, confirm=input, api=request_json):
     return True
 
 
+def readonly_policy(domain_ocid):
+    if not re.fullmatch(r"ocid1\.domain\.oc1\.[a-z0-9.]+", domain_ocid):
+        raise SetupError("Domain OCID non valido.")
+    common = "request.principal.type='gdhgithubreadonly', request.domain.id='" + domain_ocid + "'"
+    rules = [
+        ("inspect tenancies", ["ListRegionSubscriptions"]),
+        ("inspect compartments", ["ListCompartments", "ListAvailabilityDomains"]),
+        ("read instances", ["ListInstances"]),
+        ("inspect volumes", ["ListVolumes", "ListBootVolumes", "ListVolumeBackups", "ListBootVolumeBackups"]),
+        ("inspect volume-backups", ["ListVolumeBackups"]),
+        ("inspect boot-volume-backups", ["ListBootVolumeBackups"]),
+    ]
+    result = []
+    for grant, operations in rules:
+        ops = ["request.operation='" + op + "'" for op in operations]
+        condition = ops[0] if len(ops) == 1 else "any {" + ", ".join(ops) + "}"
+        result.append("Allow any-user to " + grant + " in tenancy where all {" + common + ", " + condition + "}")
+    return "\n".join(result) + "\n"
+
+
+def activation_api(origin, token, method, suffix, payload=None, version=None):
+    allowed_read = re.fullmatch(r"/admin/v1/(Apps|Grants|IdentityPropagationTrusts)(/[0-9a-f]{32})?(\?[^#]*)?", suffix)
+    app_write = method == "PUT" and re.fullmatch(r"/admin/v1/AppStatusChanger/[0-9a-f]{32}", suffix)
+    trust_write = method == "PATCH" and re.fullmatch(r"/admin/v1/IdentityPropagationTrusts/[0-9a-f]{32}", suffix)
+    if method == "GET":
+        if not allowed_read or payload is not None:
+            raise SetupError("Lettura non consentita.")
+    elif app_write:
+        if payload != {"schemas": ["urn:ietf:params:scim:schemas:oracle:idcs:AppStatusChanger"], "active": True}:
+            raise SetupError("Solo attivazione dell'app consentita.")
+    elif trust_write:
+        if payload != {"schemas": ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+                       "Operations": [{"op": "replace", "path": "active", "value": True}]}:
+            raise SetupError("Solo attivazione del trust consentita.")
+        if not isinstance(version, str) or not version:
+            raise SetupError("Versione trust assente: attivazione fermata.")
+    else:
+        raise SetupError("Operazione di attivazione non consentita.")
+    headers = {"Authorization": "Bearer " + token, "Accept": "application/scim+json",
+               "Content-Type": "application/scim+json"}
+    if version:
+        headers["If-Match"] = version
+    req = urllib.request.Request(domain_origin(origin) + suffix,
+        data=None if payload is None else json.dumps(payload).encode("utf-8"),
+        method=method, headers=headers)
+    try:
+        with urllib.request.build_opener(NoRedirect()).open(req, timeout=30) as response:
+            raw = response.read(131073)
+            if len(raw) > 131072:
+                raise SetupError("Risposta Oracle troppo grande.")
+            result = json.loads(raw) if raw else {}
+    except urllib.error.HTTPError as exc:
+        raise SetupError("Attivazione o verifica rifiutata (HTTP %d). Nessun retry automatico." % exc.code) from None
+    except (urllib.error.URLError, TimeoutError):
+        raise SetupError("Connessione interrotta: verificare lo stato dell'app e del trust prima di riprovare.") from None
+    if not isinstance(result, dict):
+        raise SetupError("Risposta Oracle inattesa.")
+    return result
+
+
+def one_resource(result):
+    rows = result.get("Resources")
+    if type(result.get("totalResults")) is not int or result["totalResults"] != 1 or not isinstance(rows, list) or len(rows) != 1:
+        raise SetupError("Serve esattamente una identita corrispondente: nessuna modifica.")
+    row = rows[0]
+    if not isinstance(row, dict) or not re.fullmatch(r"[0-9a-f]{32}", str(row.get("id", ""))):
+        raise SetupError("Identificativo Oracle inatteso.")
+    return row
+
+
+APP_ATTRS = "id,name,displayName,active,domainOcid,isOAuthClient,clientType,allowedGrants,trustScope,allowedScopes,grantedAppRoles"
+
+
+def activation_snapshot(origin, token, client_id, domain_ocid, api=activation_api):
+    expected = trust_payload(client_id)
+    query = urllib.parse.urlencode({"filter": 'issuer eq "' + ISSUER + '"', "count": "2"})
+    trust = one_resource(api(origin, token, "GET", COLLECTION + "?" + query))
+    if type(trust.get("active")) is not bool or trust.get("domainOcid") != domain_ocid:
+        raise SetupError("Dominio o stato del trust non verificato.")
+    expected["active"] = trust["active"]
+    validate_saved(trust, expected)
+    query = urllib.parse.urlencode({"filter": 'name eq "' + client_id + '"', "count": "2", "attributes": APP_ATTRS})
+    app = one_resource(api(origin, token, "GET", "/admin/v1/Apps?" + query))
+    if (app.get("domainOcid") != domain_ocid or app.get("name") != client_id
+            or app.get("displayName") != TRUST_NAME or app.get("isOAuthClient") is not True
+            or app.get("clientType") != "confidential" or app.get("trustScope") != "Explicit"
+            or app.get("allowedGrants") != ["client_credentials"] or type(app.get("active")) is not bool
+            or app.get("allowedScopes") or app.get("grantedAppRoles")):
+        raise SetupError("Configurazione app non conforme: nessuna attivazione.")
+    query = urllib.parse.urlencode({"filter": 'grantee.value eq "' + app["id"] + '"', "count": "1"})
+    grants = api(origin, token, "GET", "/admin/v1/Grants?" + query)
+    if type(grants.get("totalResults")) is not int or grants["totalResults"] != 0 or grants.get("Resources", []):
+        raise SetupError("App con assegnazioni o inventario incompleto: nessuna attivazione.")
+    version = trust.get("meta", {}).get("version")
+    if not trust["active"] and (not isinstance(version, str) or not version):
+        raise SetupError("Versione trust non verificata.")
+    return trust, app
+
+
+def activate_verified(origin, token, client_id, domain_ocid, confirm=input, api=activation_api):
+    trust, app = activation_snapshot(origin, token, client_id, domain_ocid, api)
+    print("Controlli OK: app senza scope o grant aggiuntivi; trust esatto per repository, workflow e ambiente.")
+    print("La policy IAM e stata confermata da te, NON verificata da queste API Identity Domains.")
+    print("Modifiche previste: attivare solo gdh-github-readonly e il relativo trust. Nessuna policy assegnata dallo script.")
+    if confirm("Per autorizzare scrivi ATTIVA PONTE SOLA LETTURA: ").strip() != "ATTIVA PONTE SOLA LETTURA":
+        print("Annullato: nessuna attivazione.")
+        return False
+    # Refresh all identity checks immediately before writes; conditional trust
+    # PATCH rejects concurrent edits rather than overwriting changed constraints.
+    trust, app = activation_snapshot(origin, token, client_id, domain_ocid, api)
+    if not app["active"]:
+        api(origin, token, "PUT", "/admin/v1/AppStatusChanger/" + app["id"],
+            {"schemas": ["urn:ietf:params:scim:schemas:oracle:idcs:AppStatusChanger"], "active": True})
+        print("Richiesta attivazione app inviata; verifica finale in corso.")
+    if not trust["active"]:
+        api(origin, token, "PATCH", COLLECTION + "/" + trust["id"],
+            {"schemas": ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+             "Operations": [{"op": "replace", "path": "active", "value": True}]},
+            version=trust["meta"]["version"])
+        print("Richiesta attivazione trust inviata; verifica finale in corso.")
+    saved_trust, saved_app = activation_snapshot(origin, token, client_id, domain_ocid, api)
+    if saved_trust["active"] is not True or saved_app["active"] is not True:
+        raise SetupError("Attivazione non confermata: verificare console e stato prima di riprovare.")
+    print("APP E TRUST ATTIVI: configurazione riletta e verificata.")
+    print("Restano da verificare lo scambio reale e l'efficacia della policy con il workflow manuale oracle_audit=true.")
+    return True
+
+
+def prepare_activation(origin, client_id):
+    domain_ocid = input("OCID dominio Default (lo stesso salvato in OCI_FED_DOMAIN_OCID): ").strip()
+    policy = readonly_policy(domain_ocid)
+    # Generated policy contains identifiers only, never credentials. Keep it
+    # local; opening it in Notepad avoids six manual replacements in the UI.
+    with tempfile.NamedTemporaryFile(mode="w", suffix="-gdh-readonly-policy.txt", delete=False, encoding="utf-8") as f:
+        f.write(policy)
+        policy_path = f.name
+    print("\nPolicy generata nel file locale: " + policy_path)
+    if os.name == "nt":
+        os.startfile(policy_path)
+    print("Su Oracle: Identity & Security -> Policies (IAM tenancy, non Domain policies).")
+    print("Compartment radice -> Create policy -> nome gdh-github-inventory-readonly.")
+    print("Descrizione: Inventario GDScript Hero in sola lettura.")
+    print("Policy Builder -> Show manual editor -> incolla tutte le righe del file e crea la policy.")
+    print("Questa policy concede solo le operazioni List indicate. L'efficacia verra verificata dal workflow.")
+    if input("Dopo aver verificato e creato la policy, scrivi POLICY SOLA LETTURA CREATA: ").strip() != "POLICY SOLA LETTURA CREATA":
+        print("Preparazione terminata senza attivazioni.")
+        return
+    print("Verifica che l'ambiente GitHub oci-readonly abbia reviewer obbligatorio, solo main e i sei secrets previsti.")
+    print("Le protezioni GitHub non sono verificabili da questo script locale.")
+    print("Ora serve un token personale Identity Domains ancora valido. Se il precedente e scaduto, scaricane uno nuovo da My access tokens.")
+    token_path = input("Percorso locale del nuovo tokens.tok (non il contenuto): ").strip().strip('"')
+    token = read_token(token_path)
+    try:
+        activate_verified(origin, token, client_id, domain_ocid)
+    finally:
+        token = None
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--apply", action="store_true", help="Crea solo il trust inattivo dopo conferma locale")
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--apply", action="store_true", help="Crea solo il trust inattivo dopo conferma locale")
+    modes.add_argument("--prepare-activation", action="store_true", help="Genera policy locale e guida l'attivazione verificata")
     args = parser.parse_args(argv)
     try:
         origin = domain_origin(input("Domain URL principale Oracle (non e un segreto): "))
         payload = trust_payload(input("Client ID OAuth dell'app gdh-github-readonly: ").strip())
+        if args.prepare_activation:
+            prepare_activation(origin, payload["oauthClients"][0])
+            return 0
         print("\nANTEPRIMA: trust inattivo; nessuna VM, policy IAM o risorsa di hosting.")
         print("Destinazione: " + origin)
         print(json.dumps(payload, indent=2))

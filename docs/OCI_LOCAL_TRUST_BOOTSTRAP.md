@@ -3,7 +3,9 @@
 Stato: script preparato e verificato con test offline. **Non eseguito sull'account Oracle.**
 Non costituisce un'autorizzazione al provisioning o una verifica dei costi dell'account.
 
-## Scopo e limiti
+**Aggiornamento:** lo stesso script ora supporta anche `--prepare-activation`, una procedura separata e interattiva per generare la policy locale e attivare app/trust dopo revisione. `--apply` conserva il comportamento originario di sola creazione inattiva. Vedi `OCI_ACTIVATION_LOCAL.md`.
+
+## Scopo e limiti del modo --apply
 
 `scripts/oci_trust_setup.py` riduce la configurazione manuale dell'Identity
 Propagation Trust a un'esecuzione locale su Windows (Python 3.10+).
