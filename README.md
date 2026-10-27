@@ -6,7 +6,7 @@
 
 GDScript Hero è una piattaforma didattica **gratuita e in italiano** per imparare GDScript e familiarizzare con Godot 4, direttamente dal browser. Il progetto è indipendente, in sviluppo attivo, e non è un prodotto ufficiale di Godot Engine.
 
-> **Stato: ottobre 2026.** Il corso, l'editor, la Sandbox, il ripasso, le statistiche e un primo progetto interattivo sono disponibili. **Non esistono attualmente abbonamenti, pagamenti o sezioni Premium bloccate.**
+> **Stato: ottobre 2026.** Il corso, l'editor, la Sandbox, il ripasso, le statistiche, il primo progetto e tre **sfide dimostrative gratuite con Godot** sono disponibili. L'**Archivio Premium** appare come sezione chiusa, ma non esistono ancora abbonamenti acquistabili o contenuti storici. Le **classifiche ufficiali** non sono attive: lo schema server non è stato ancora distribuito.
 
 ## Funzionalità attuali
 
@@ -17,6 +17,7 @@ GDScript Hero è una piattaforma didattica **gratuita e in italiano** per impara
 | **Risultati e diagnostica** | Disponibile | Output atteso/ottenuto, errori in evidenza e dettagli dei test |
 | **Sandbox** | Disponibile | Sperimentazione con codice, nodi, scena e viewport 2D |
 | **Progetti** | In espansione | **Arena del Gladiatore** è giocabile; altre proposte sono segnalate come future |
+| **Arena Classificata** | Demo disponibile | Tre sfide gratuite con Godot reale; l'interfaccia per stagioni e classifiche è pronta ma inattiva senza Supabase e il backend affidabile |
 | **Ripasso** | Disponibile | Esercizi alternativi, varianti e percorsi di consolidamento |
 | **Statistiche** | Disponibile | Progressione, autonomia, tentativi e aree da approfondire |
 | **Gamification** | Disponibile | XP, livelli, traguardi, missioni e mappa del percorso |
@@ -129,3 +130,11 @@ Per eventuali progetti Premium, **codice e asset grafici/audio devono essere tra
 ---
 
 *GDScript Hero è una piattaforma indipendente dedicata all'apprendimento di GDScript e Godot 4.*
+
+## GDScript Hero 2.0: implementazione e prerequisiti
+
+L'interfaccia dell'Arena ufficiale legge le stagioni da Supabase e prevede le classifiche **globale e nazionale**, scelta del Paese con conferma per stagione e invio dei risultati al valutatore Godot. Non si attiva semplicemente configurando una chiave anon: l'invio server è **disabilitato** in `supabase-config.js` finché non sarà distribuito e verificato il servizio `server/arena/`.
+
+Sono ancora necessari: migrazione del database in staging, deployment protetto del valutatore Godot 4.4.1 con test privati, verifica integrata anti-abuso, pubblicazione delle prime 12 sfide stagionali effettive, integrazione del ledger XP ufficiale nel profilo e abbonamenti Premium con gestione dei pagamenti e verifica dell'accesso lato server.
+
+Per monitorare il lavoro senza interpretare le parti preparatorie come già operative: [registro di avanzamento](docs/GDScript_Hero_2_0_implementazione.md) e [deployment del backend](server/arena/README.md).

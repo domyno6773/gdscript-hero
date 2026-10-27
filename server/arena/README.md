@@ -44,3 +44,11 @@ This fixture is an **illustrative example only**. Real published challenges must
 ## Outstanding before public leaderboard launch
 
 Deployment, private case review, actual Supabase migration, real verified test results on staging, replay/race testing, IP-based country suggestion with manual correction, Premium billing/entitlements, and long-term auditing.
+
+## Collegamento al sito (quando pronto)
+
+L'interfaccia del sito utilizza `arena-official.js` e legge **senza privilegi** le stagioni attive e le classifiche tramite il client Supabase già presente. L'endpoint del coordinatore resta vuoto nella proprietà pubblica `SupabaseConfig.arenaApiBaseUrl` fino a deploy HTTPS, verifica TLS e prove end-to-end.
+
+Il coordinatore espone `GET /api/arena/country-suggestion` con un risultato del tipo `{"country":"IT"}` soltanto se è impostata `GDH_TRUST_CLOUDFLARE_COUNTRY=1` **e** le intestazioni `CF-IPCountry` sono realmente gestite da un proxy Cloudflare fidato che scarta quelle fornite dall'utente. Altrimenti ritorna `{"country":null}` e l'utente sceglie il Paese manualmente. Non richiedere geolocalizzazione precisa né fidarsi delle intestazioni dirette di una connessione non filtrata.
+
+L'API `POST /api/arena/submit` accetta un JWT Supabase nel campo Authorization e restituisce il punteggio verificato e, se dovuto, l'XP competitivo una tantum. **Non usare questa API come risorsa pubblica finché non è stata collaudata con un database di staging**, compresi tentativi duplicati, risultati parziali, blocco del Paese e fine stagione.
