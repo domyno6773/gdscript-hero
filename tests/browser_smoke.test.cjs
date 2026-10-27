@@ -103,6 +103,8 @@ async function smoke(browser,url,width){
    const root=document.getElementById('view-practice');
    const icons=[...root.querySelectorAll('svg.sandbox-svg-icon')];
    const missing=icons.filter(svg=>{
+     // Il tasto Rimuovi nodo resta nascosto finché non c'è una selezione.
+     if(!svg.getClientRects().length)return false;
      const use=svg.querySelector('use');
      const id=use?.getAttribute('href');
      return !id?.startsWith('#gdh-icon-') || !document.getElementById(id.slice(1)) ||
