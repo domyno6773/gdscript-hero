@@ -36,3 +36,7 @@ Before deployment: exercise an actual ARM64 build in a disposable **local** envi
 - Billing details and how to distinguish Trial / Always Free / Pay As You Go: https://docs.oracle.com/en-us/iaas/Content/GSG/Concepts/console_topic-AccountCenter-Billing.htm
 - Budgets are soft alerts, not limits: https://docs.oracle.com/en-us/iaas/Content/Billing/Concepts/budgetsoverview.htm
 - Godot 4.4.1 official ARM64 distribution: https://github.com/godotengine/godot-builds/releases/tag/4.4.1-stable
+
+## Ponte GitHub OIDC, 27 ottobre 2026
+
+Preparato workflow **esclusivamente per la verifica dell'identità GitHub**: `.github/workflows/oci-oidc-preflight.yml`. Il token GitHub non viene visualizzato e il workflow non interroga Oracle. Per l'attivazione delle autorizzazioni federate OCI seguire `docs/OCI_GITHUB_OIDC_SETUP.md`: il proprietario deve proteggere l'ambiente GitHub e configurare un trust IAM a privilegi minimi. **NON è ancora presente alcun workflow di provisioning. Nessun account cloud è stato toccato.**
