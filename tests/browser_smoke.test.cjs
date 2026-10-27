@@ -161,6 +161,9 @@ async function smoke(browser,url,width){
    panel.classList.remove('hidden');
    const primary=panel.querySelector('button.btn-primary');
    const secondary=panel.querySelector('button.btn-subtle');
+   // Per confrontare i colori finali, non i frame intermedi di transition.
+   primary.style.transition='none';
+   secondary.style.transition='none';
    const prior=document.documentElement.getAttribute('data-theme');
    const inspect=()=>{
      const first=getComputedStyle(primary),second=getComputedStyle(secondary);
