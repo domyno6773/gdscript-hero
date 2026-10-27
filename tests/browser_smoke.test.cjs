@@ -65,6 +65,32 @@ async function smoke(browser,url,width){
  const sandboxNav=width<821?'#mob-nav-practice':'#nav-practice-btn';
  await page.locator(sandboxNav).click({timeout:15000});
  await viewIs(page,'practice');
+ // Stesso autocomplete del corso: suggerimenti, Tab/Enter, frecce, Escape
+ // e completamento delle variabili definite dall'utente.
+ await page.locator('#sandbox-code-editor').fill('extends Node2D\n\npri');
+ await page.locator('#sandbox-autocomplete-popup').waitFor({state:'visible',timeout:4000});
+ assert.equal(await page.locator('#sandbox-autocomplete-popup .autocomplete-name').first().textContent(),'print');
+ await page.locator('#sandbox-code-editor').press('ArrowDown');
+ await page.locator('#sandbox-code-editor').press('ArrowUp');
+ await page.locator('#sandbox-code-editor').press('Tab');
+ assert.ok((await page.locator('#sandbox-code-editor').inputValue()).endsWith('print'),'Sandbox Tab completion failed');
+ assert.ok(await page.locator('#sandbox-autocomplete-popup').isHidden(),'Sandbox autocomplete remains open after Tab');
+ assert.ok((await page.evaluate(()=>App.getActiveSandboxProject().code)).endsWith('print'),
+   'Sandbox completion not saved into the active project');
+ await page.locator('#sandbox-code-editor').fill('var energia_totale = 10\nener');
+ await page.locator('#sandbox-autocomplete-popup').waitFor({state:'visible',timeout:4000});
+ assert.equal(await page.locator('#sandbox-autocomplete-popup .autocomplete-name').first().textContent(),'energia_totale');
+ await page.locator('#sandbox-autocomplete-popup .autocomplete-item').first().click();
+ assert.ok((await page.locator('#sandbox-code-editor').inputValue()).endsWith('energia_totale'),
+   'Sandbox variable autocomplete failed by mouse click');
+ await page.locator('#sandbox-code-editor').fill('pri');
+ await page.locator('#sandbox-autocomplete-popup').waitFor({state:'visible'});
+ await page.locator('#sandbox-code-editor').press('Escape');
+ assert.ok(await page.locator('#sandbox-autocomplete-popup').isHidden(),'Escape must close Sandbox autocomplete');
+ await page.locator('#sandbox-code-editor').fill('pri');
+ await page.locator('#sandbox-code-editor').press('Enter');
+ assert.equal(await page.locator('#sandbox-code-editor').inputValue(),'print',
+   'Sandbox Enter completion failed');
  await page.locator('#sandbox-code-editor').fill('extends Node2D\n\nfunc _ready():\n    print("BROWSER_SANDBOX_OK")');
  await page.locator('#btn-sandbox-run').click({timeout:10000});
  try {
@@ -159,6 +185,13 @@ async function smoke(browser,url,width){
  await page.evaluate(()=>App.openLesson(1));
  await viewIs(page,'exercise');
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
+ // Il completamento originale delle lezioni rimane operativo.
+ await page.locator('#code-editor').fill('pri');
+ await page.locator('#autocomplete-popup').waitFor({state:'visible',timeout:4000});
+ assert.equal(await page.locator('#autocomplete-popup .autocomplete-name').first().textContent(),'print');
+ await page.locator('#code-editor').press('Tab');
+ assert.equal(await page.locator('#code-editor').inputValue(),'print');
+ await page.evaluate(()=>App.openLesson(1));
  assert.equal(await page.locator('#view-exercise .editor-header #btn-run-code').count(),1,'Verify button belongs to editor header');
  assert.equal(await page.locator('#view-exercise .panel-lesson #expected-output-pre').count(),0,'Expected output must appear only in dock');
  const initialGeometry=await page.evaluate(()=>{
