@@ -133,6 +133,100 @@ const App = {
         }
     },
 
+    // La posizione e' locale alla singola scheda: non e' progresso utente,
+    // non finisce nei backup e non va sincronizzata con account diversi.
+    saveNavigationPosition() {
+        try {
+            const current = document.querySelector('.view-container:not(.hidden)');
+            if (!current) return;
+            const allowed = ['view-roadmap','view-exercise','view-practice',
+                'view-projects','view-review','view-stats'];
+            if (!allowed.includes(current.id)) return;
+            const workspace = document.getElementById('exercise-workspace-grid');
+            const snapshot = {
+                version: 1,
+                view: current.id,
+                lessonId: this.state.currentLessonId,
+                reviewVariantId: current.id === 'view-exercise' && this.isReviewMode
+                    ? this.currentReviewVariant?.id : null,
+                reviewTab: this.state.currentReviewTab === 'all' ? 'all' : 'recommended',
+                mobileTab: workspace?.classList.contains('show-code') ? 'code' : 'instructions'
+            };
+            sessionStorage.setItem('gdscript_hero_position_v1', JSON.stringify(snapshot));
+        } catch (error) {
+            // La navigazione funziona anche se lo storage e' disabilitato.
+        }
+    },
+
+    saveReviewDraft() {
+        if (!this.isReviewMode || !this.currentReviewVariant) return;
+        try {
+            const editor = document.getElementById('code-editor');
+            if (editor) sessionStorage.setItem('gdscript_hero_review_draft_v1',
+                JSON.stringify({id:this.currentReviewVariant.id,code:editor.value}));
+        } catch (error) {}
+    },
+
+    restoreNavigationPosition() {
+        let position = null;
+        try {
+            position = JSON.parse(sessionStorage.getItem('gdscript_hero_position_v1') || 'null');
+        } catch (error) { return; }
+        if (!position || position.version !== 1) return;
+
+        // Non fidarsi di chiavi obsolete o di ID arbitrari nello storage.
+        const view = position.view;
+        const allowed = ['view-roadmap','view-exercise','view-practice',
+            'view-projects','view-review','view-stats'];
+        if (!allowed.includes(view)) return;
+        try {
+            if (view === 'view-exercise') {
+                if (typeof position.reviewVariantId === 'string' &&
+                    typeof REVIEW_VARIANTS !== 'undefined' &&
+                    REVIEW_VARIANTS.some(v => v.id === position.reviewVariantId)) {
+                    // Leggere la bozza PRIMA di openReviewVariant, che inizializza
+                    // l'editor al codice starter della nuova variante.
+                    let draft = null;
+                    try {
+                        draft = JSON.parse(sessionStorage.getItem('gdscript_hero_review_draft_v1') || 'null');
+                    } catch (error) {}
+                    this.openReviewVariant(position.reviewVariantId);
+                    if (draft?.id === position.reviewVariantId && typeof draft.code === 'string') {
+                        document.getElementById('code-editor').value = draft.code;
+                        this.updateLineNumbers();
+                        window.GDScriptHighlighter?.sync('exercise');
+                    }
+                } else {
+                    const id = Number(position.lessonId);
+                    const lesson = LESSONS_DATA.find(l => l.id === id);
+                    // Non ripristinare lezioni ormai bloccate o inesistenti.
+                    const accessible = lesson && (id === 1 || this.state.devAllUnlocked ||
+                        this.state.completedLessons.includes(id) ||
+                        this.state.finishedLessons.includes(id));
+                    if (!accessible) return;
+                    this.openLesson(id);
+                }
+                this.setMobileExerciseTab(position.mobileTab === 'code' ? 'code' : 'instructions', false);
+            } else if (view === 'view-practice') {
+                this.openPracticeView();
+            } else if (view === 'view-projects') {
+                this.openProjectsView();
+            } else if (view === 'view-review') {
+                this.showReviewView();
+                if (position.reviewTab === 'all') this.setReviewTab('all');
+            } else if (view === 'view-stats') {
+                this.showStatsView();
+            } else {
+                // La Mappa e' gia' pronta all'avvio.
+                this.saveNavigationPosition();
+            }
+        } catch (error) {
+            // Nessun blocco all'avvio, anche con uno stato vecchio o incompleto.
+            this.switchView('view-roadmap');
+            this.updateNavSelection('roadmap');
+        }
+    },
+
     init() {
         this.loadStorage();
         this.ensureUnlockedConsistency();
@@ -174,6 +268,7 @@ const App = {
 
         // Inizializzazione Autenticazione & Salvataggio Cloud / Backup
         this.initAuthAndSync();
+        this.restoreNavigationPosition();
 
         window.addEventListener('resize', () => {
             const roadmapView = document.getElementById('view-roadmap');
@@ -1017,6 +1112,7 @@ const App = {
                 }
             }
         });
+        this.saveNavigationPosition();
     },
 
     openPracticeView() {
@@ -3050,6 +3146,7 @@ const App = {
             if (btnTabCode) btnTabCode.classList.remove('active');
             if (btnTabInstructions) btnTabInstructions.classList.add('active');
         }
+        this.saveNavigationPosition();
     },
 
     insertTextAtEditor(targetId, textToInsert, cursorOffset = 0) {
@@ -3148,6 +3245,8 @@ const App = {
             if (!this.isReviewMode) {
                 this.state.userCode[this.state.currentLessonId] = editor.value;
                 this.saveStorage();
+            } else {
+                this.saveReviewDraft();
             }
         });
 
@@ -3378,6 +3477,8 @@ const App = {
                 if (!this.isReviewMode) {
                     this.state.userCode[this.state.currentLessonId] = editor.value;
                     this.saveStorage();
+                } else {
+                    this.saveReviewDraft();
                 }
             }
         }
@@ -4811,6 +4912,7 @@ const App = {
     setReviewTab(tab) {
         SoundFX.playClick();
         this.state.currentReviewTab = tab;
+        this.saveNavigationPosition();
         const btnRec = document.getElementById('tab-review-recommended');
         const btnAll = document.getElementById('tab-review-all');
         const paneRec = document.getElementById('review-content-recommended');
@@ -5036,6 +5138,7 @@ const App = {
         const editor = document.getElementById('code-editor');
         editor.value = variant.starterCode;
         this.updateLineNumbers();
+        this.saveReviewDraft();
 
         // Resetta console e test results
         document.getElementById('real-output-pre').innerText = "// Clicca su 'Verifica Codice' per eseguire lo script della variante";
