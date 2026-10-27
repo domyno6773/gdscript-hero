@@ -52,6 +52,68 @@ async function testSmartIndent(page,selector) {
  assert.equal(await editor.inputValue(),'    if enabled:\n        ',
    'Enter should replace selection and indent branch in '+selector);
 }
+async function testNavigationPersistence(page,width){
+ const reload=async(name)=>{
+   await page.reload({waitUntil:'load'});
+   await page.waitForFunction(()=>!!window.App?.state?.sandbox);
+   await viewIs(page,name);
+ };
+ await page.evaluate(()=>App.openPracticeView());
+ const sandbox=await page.evaluate(()=>({
+   id:App.getActiveSandboxProject()?.id,code:document.getElementById('sandbox-code-editor').value
+ }));
+ await reload('practice');
+ assert.deepEqual(await page.evaluate(()=>({
+   id:App.getActiveSandboxProject()?.id,code:document.getElementById('sandbox-code-editor').value
+ })),sandbox,'Sandbox project or code not restored');
+
+ await page.evaluate(()=>{App.showReviewView();App.setReviewTab('all');});
+ await reload('review');
+ assert.ok(await page.locator('#tab-review-all').evaluate(el=>el.classList.contains('active')),
+   'Review All tab not restored');
+
+ await page.evaluate(()=>App.openReviewVariant('rev_variables_01'));
+ if(width<821)await page.locator('#btn-tab-code').click();
+ const reviewDraft='extends Node\n\nfunc _ready():\n    print("RIPASSO_BOZZA")';
+ await page.locator('#code-editor').fill(reviewDraft);
+ await reload('exercise');
+ assert.equal(await page.evaluate(()=>App.currentReviewVariant?.id),'rev_variables_01',
+   'Wrong review variant after reload');
+ assert.equal(await page.locator('#code-editor').inputValue(),reviewDraft,
+   'Review draft lost on reload');
+ assert.equal(await page.evaluate(()=>App.isReviewMode),true);
+ if(width<821)assert.ok(await page.locator('#exercise-workspace-grid')
+   .evaluate(el=>el.classList.contains('show-code')),'Mobile code tab lost on reload');
+
+ await page.evaluate(()=>App.openLesson(1));
+ if(width<821)await page.locator('#btn-tab-code').click();
+ const exerciseDraft='extends Node\n\nfunc _ready():\n    print("LEZIONE_BOZZA")';
+ await page.locator('#code-editor').fill(exerciseDraft);
+ await reload('exercise');
+ assert.equal(await page.evaluate(()=>App.state.currentLessonId),1);
+ assert.equal(await page.evaluate(()=>App.isReviewMode),false);
+ assert.equal(await page.locator('#code-editor').inputValue(),exerciseDraft,'Lesson draft lost');
+ if(width<821)assert.ok(await page.locator('#exercise-workspace-grid')
+   .evaluate(el=>el.classList.contains('show-code')),'Lesson code tab lost');
+
+ await page.evaluate(()=>App.showStatsView());
+ await reload('stats');
+ await page.evaluate(()=>App.openProjectsView());
+ await reload('projects');
+ await page.evaluate(()=>App.showRoadmap());
+ await reload('roadmap');
+
+ // Corrupt/obsolete position data must never prevent the page loading.
+ await page.evaluate(()=>sessionStorage.setItem('gdscript_hero_position_v1',
+   JSON.stringify({version:1,view:'view-hack'})));
+ await reload('roadmap');
+ // Delete the temporary lesson draft to leave the existing browser tests unchanged.
+ await page.evaluate(()=>{
+   delete App.state.userCode[1];
+   App.saveStorage();
+   sessionStorage.removeItem('gdscript_hero_review_draft_v1');
+ });
+}
 async function smoke(browser,url,width){
  const context=await browser.newContext({viewport:{width,height:844},locale:'it-IT'});
  const page=await context.newPage();
@@ -89,6 +151,7 @@ async function smoke(browser,url,width){
  assert.ok(roadmapStyle.nodeCount>0,'Roadmap nodes must remain rendered');
  if(roadmapStyle.nodeAnimation!==null)assert.equal(roadmapStyle.nodeAnimation,'none','Roadmap node must not pulsate with neon');
  console.log('ROADMAP_STYLE '+JSON.stringify(roadmapStyle));
+ await testNavigationPersistence(page,width);
  for(const section of ['roadmap','practice','projects','review','stats']){
    const selector=width<821?'#mob-nav-'+section:'#nav-'+section+'-btn';
    await page.locator(selector).click({timeout:15000});
