@@ -580,7 +580,7 @@ async function smoke(browser,url,width){
  await page.locator('#exercise-debug-area .gdh-debug-next-hint').click();
  assert.equal(await page.locator('#exercise-debug-area .gdh-debug-step').count(),1);
  assert.ok(await page.locator('#exercise-debug-area .gdh-debug-step').first().textContent().then(x=>x.length>25));
- assert.ok(await page.evaluate(()=>App.state.hintsRevealed>initialHintCount),
+ assert.ok((await page.evaluate(()=>App.state.hintsRevealed))>initialHintCount,
    'Aprire gli indizi nel debugger deve contare come aiuto');
  await page.locator('#exercise-debug-area .gdh-debug-next-hint').click();
  assert.equal(await page.locator('#exercise-debug-area .gdh-debug-step').count(),2);
