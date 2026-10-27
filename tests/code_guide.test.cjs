@@ -57,4 +57,21 @@ assert.equal(help(challenge,challenge.length+1),null);
 assert.equal(at('foo = 1','foo'),null);
 assert.equal(at('printer()','printer'),null);
 assert.ok(!at('print("segreto")','print').detail.includes('segreto'));
+// Parole digitate dallo studente, anche prima di aggiungere sintassi completa.
+for(const [source,word,key] of [
+ ['func','func','func'],['var','var','var'],['extends','extends','extends'],
+ ['print','print','print'],['const','const','const'],
+ ['func nuova():','func','func'],['var vita','var','var'],
+ ['if','if','if'],['for','for','for'],['signal','signal','signal'],
+ ['return','return','return'],['@export','@export','@export'],
+ ['print("ciao")','print','print']
+]){
+  assert.equal(at(source,word)?.key,key,'La parola '+word+' appena scritta deve avere una spiegazione');
+}
+assert.equal(guide.explainAt('func',4,{strict:true}),null,'Fuori dalla parola non deve apparire il tooltip');
+assert.equal(guide.explainAt('func',3,{strict:true}).key,'func');
+assert.equal(guide.explainAt('func x():\n    var hp = 0',14,{strict:true}),null,
+ 'Non interpretare spazi bianchi come istruzioni');
+assert.equal(at('"func"','func'),null,'Niente popup nel testo fra virgolette');
+assert.equal(at('# func','func'),null,'Niente popup sui commenti');
 console.log('PASS: context-aware code explanations, first encounter, live constructs and no solutions');

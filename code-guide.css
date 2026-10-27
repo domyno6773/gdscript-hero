@@ -101,15 +101,9 @@
   font-size: 12px;
   line-height: 1.55;
   overscroll-behavior: contain;
+  pointer-events: none;
 }
 .gdh-inline-code-help[hidden] { display: none !important; }
-.gdh-inline-help-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 7px;
-}
 .gdh-inline-help-title {
   margin: 0;
   color: #a9d9f5;
@@ -117,23 +111,6 @@
   overflow-wrap: anywhere;
 }
 .gdh-inline-help-description { margin: 0; color: #dfebf6; }
-.gdh-inline-help-close {
-  appearance: none;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border: 1px solid #566f84;
-  border-radius: 5px;
-  color: #d6e9f8;
-  background: #33495b;
-  font: 700 17px/1 'Inter',sans-serif;
-  cursor: pointer;
-}
-.gdh-inline-help-close:hover { background: #42617a; }
-.gdh-inline-help-close:focus-visible { outline: 2px solid #aedcf6; outline-offset: 2px; }
 [data-theme="light"] .gdh-inline-code-help {
   background: #f8fbfe;
   border-color: #aac4d8;
@@ -142,11 +119,8 @@
 }
 [data-theme="light"] .gdh-inline-help-title { color: #245d84; }
 [data-theme="light"] .gdh-inline-help-description { color: #345269; }
-[data-theme="light"] .gdh-inline-help-close {
-  background: #e7f0f7;
-  border-color: #b4cadb;
-  color: #2c536f;
-}
 @media(max-width: 480px){
   .gdh-inline-code-help { width: min(300px,calc(100vw - 20px)); padding: 12px; }
 }
+
+.gdh-inline-help-title { display:block; margin:0 0 7px; }

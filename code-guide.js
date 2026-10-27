@@ -184,69 +184,116 @@
     }
   }
 
-  // Restituisce una spiegazione SOLO per un costrutto presente nel codice al
-  // punto indicato. Non interpreta stringhe/commenti come istruzioni.
-  function explainAt(source, offset) {
+  // Cerca parole in QUALSIASI codice (anche un singolo "func" appena digitato).
+  // La spiegazione completa è la stessa del glossario; le parole isolate
+  // ricadono su una definizione generale e non richiedono una sintassi completa.
+  const inlineBasics={
+    extends:{title:'extends',detail:'Indica da quale tipo di nodo o classe parte questo script. Per esempio, Node è un tipo base di elemento della scena.'},
+    func:{title:'func',detail:'Introduce una funzione, cioè un gruppo di istruzioni con un nome. Le parentesi possono contenere parametri; il blocco di istruzioni viene scritto sotto.'},
+    var:{title:'var',detail:'Dichiara una variabile: uno spazio con un nome per conservare un valore, che potrai cambiare durante il programma.'},
+    const:{title:'const',detail:'Dichiara una costante: un valore con un nome che non puoi modificare dopo averlo definito.'},
+    signal:{title:'signal',detail:'Dichiara un segnale: un avviso che questo nodo potrà emettere perché altri nodi reagiscano.'},
+    class_name:{title:'class_name',detail:'Assegna un nome alla classe dello script così da poterla riconoscere e utilizzare in altre parti del progetto.'},
+    class:{title:'class',detail:'Dichiara una classe: un modello che raccoglie dati e funzioni per creare oggetti.'},
+    _ready:{title:'_ready()',detail:'È una funzione speciale: Godot la esegue automaticamente quando il nodo entra nella scena, dopo che i suoi figli sono pronti.'},
+    _init:{title:'_init()',detail:'È la funzione di inizializzazione, chiamata quando viene creato un oggetto.'},
+    print:{title:'print(...)',detail:'Scrive nella console il testo o i valori indicati fra parentesi. Non mostra testo direttamente sulla schermata del gioco.'},
+    str:{title:'str(...)',detail:'Converte un valore in testo (String), per esempio per comporre un messaggio.'},
+    int:{title:'int',detail:'Rappresenta numeri interi, senza parte decimale. int(...) può convertire un valore in intero.'},
+    float:{title:'float',detail:'Rappresenta numeri che possono contenere una parte decimale.'},
+    String:{title:'String',detail:'È il tipo usato per rappresentare testo, come nomi e frasi.'},
+    bool:{title:'bool',detail:'È il tipo logico: può valere true (vero) oppure false (falso).'},
+    Vector2:{title:'Vector2',detail:'È una coppia di numeri, spesso utilizzata per le coordinate X e Y in uno spazio 2D.'},
+    Array:{title:'Array',detail:'È una lista ordinata di valori. La prima posizione è identificata dall’indice 0.'},
+    Dictionary:{title:'Dictionary',detail:'Contiene valori associati a chiavi, utili per ritrovare dati tramite un nome.'},
+    range:{title:'range(...)',detail:'Genera una sequenza di numeri, spesso usata per ripetere istruzioni con for.'},
+    abs:{title:'abs(...)',detail:'Restituisce il valore assoluto di un numero, cioè la sua distanza da zero.'},
+    min:{title:'min(...)',detail:'Restituisce il minore fra due o più valori.'},
+    max:{title:'max(...)',detail:'Restituisce il maggiore fra due o più valori.'},
+    clamp:{title:'clamp(...)',detail:'Limita un valore entro un intervallo minimo e massimo.'},
+    round:{title:'round(...)',detail:'Arrotonda un numero al valore intero più vicino.'},
+    await:{title:'await',detail:'Attende che finisca un’operazione o arrivi un segnale prima di continuare.'},
+    return:{title:'return',detail:'Termina l’esecuzione della funzione corrente e, facoltativamente, restituisce un valore.'},
+    if:{title:'if',detail:'Verifica una condizione. Se è vera, Godot esegue il blocco di istruzioni rientrato sotto.'},
+    elif:{title:'elif',detail:'Permette di controllare una condizione alternativa quando le precedenti non sono vere.'},
+    else:{title:'else',detail:'Indica cosa eseguire quando le condizioni precedenti non sono soddisfatte.'},
+    for:{title:'for',detail:'Ripete un blocco per ogni elemento di una sequenza o raccolta.'},
+    while:{title:'while',detail:'Ripete un blocco finché una condizione resta vera. Attenzione a non creare cicli infiniti.'},
+    match:{title:'match',detail:'Confronta un valore con più possibilità ed esegue il blocco corrispondente.'},
+    pass:{title:'pass',detail:'Non fa nulla: serve come istruzione provvisoria in un blocco ancora vuoto.'},
+    break:{title:'break',detail:'Interrompe immediatamente il ciclo in cui si trova.'},
+    continue:{title:'continue',detail:'Passa direttamente all’iterazione successiva di un ciclo.'},
+    true:{title:'true',detail:'È il valore logico vero.'},
+    false:{title:'false',detail:'È il valore logico falso.'},
+    null:{title:'null',detail:'Indica l’assenza di un oggetto o valore.'},
+    '@export':{title:'@export',detail:'Espone una variabile all’Inspector di Godot per poterla modificare senza riscrivere lo script.'},
+    '@onready':{title:'@onready',detail:'Inizializza una variabile quando il nodo è pronto, spesso per ottenere altri nodi della scena.'},
+    connect:{title:'.connect(...)',detail:'Collega un segnale a una funzione che verrà chiamata quando il segnale viene emesso.'},
+    emit:{title:'.emit(...)',detail:'Emette un segnale per avvisare gli altri nodi che qualcosa è accaduto.'},
+    new:{title:'.new(...)',detail:'Crea una nuova istanza di una classe.'}
+  };
+  function explainAt(source, offset, {strict=false}={}) {
     const text=String(source||'');
-    if (!Number.isSafeInteger(offset)||offset<0||offset>text.length) return null;
+    if(!Number.isSafeInteger(offset)||offset<0||offset>text.length)return null;
     const begin=text.lastIndexOf('\n',Math.max(0,offset-1))+1;
     const endIndex=text.indexOf('\n',offset);
-    const end=endIndex===-1?text.length:endIndex;
-    const line=text.slice(begin,end), column=offset-begin;
-    if(column<0||column>line.length) return null;
-    // Scanner molto limitato: serve soltanto a ignorare testo tra apici e note.
-    let quote=null, comment=-1, quotedStart=-1, quotedRanges=[];
+    const end=endIndex<0?text.length:endIndex;
+    const line=text.slice(begin,end),column=offset-begin;
+    if(column<0||column>line.length)return null;
+    let quote=null,comment=-1,quotedStart=-1;
+    const quoted=[];
     for(let i=0;i<line.length;i++){
-      const char=line[i];
+      const ch=line[i];
       if(quote){
-        if(char==='\\'){i++;continue;}
-        if(char===quote){quotedRanges.push([quotedStart,i+1]);quote=null;}
-      }else if(char==='"'||char==="'"){quote=char;quotedStart=i;}
-      else if(char==='#'){comment=i;break;}
+        if(ch==='\\'){i++;continue;}
+        if(ch===quote){quoted.push([quotedStart,i+1]);quote=null;}
+      }else if(ch==='"'||ch==="'"){quote=ch;quotedStart=i;}
+      else if(ch==='#'){comment=i;break;}
     }
-    if(quote)quotedRanges.push([quotedStart,line.length]);
-    const insideQuoted=p=>quotedRanges.some(([a,b])=>p>=a&&p<b);
+    if(quote)quoted.push([quotedStart,line.length]);
     const tokens=[...line.matchAll(/[$@]?[A-Za-z_]\w*|#/g)];
-    const candidates=tokens.filter(t=>t.index<=column&&column<t.index+t[0].length);
-    if(!candidates.length&&column>0)candidates.push(...tokens.filter(t=>t.index+t[0].length===column));
-    const token=candidates[0];
+    let token=tokens.find(t=>t.index<=column&&column<t.index+t[0].length);
+    if(!strict&&!token&&column>0)token=tokens.find(t=>t.index+t[0].length===column);
     if(!token)return null;
     const word=token[0],pos=token.index;
-    if(insideQuoted(pos))return null;
-    if(comment>=0){
-      if(pos>=comment&&word!=='#')return null;
-      if(word==='#'&&pos===comment){
-        return analyze('# commento').find(item=>item.key==='comment')||null;
-      }
+    if(quoted.some(([a,b])=>pos>=a&&pos<b))return null;
+    if(comment>=0&&pos>=comment){
+      if(pos!==comment||word!=='#')return null;
+      const item=analyze('# nota').find(i=>i.key==='comment');
+      return Object.freeze({key:'comment',title:item.title,detail:item.detail,line:text.slice(0,begin).split('\n').length,word,start:begin+pos,end:begin+pos+1});
     }
+    const trimmed=line.trimStart();
+    const starts=word=>new RegExp('^(?:static\\s+)?'+word+'(?:\\s|\\(|:|$)').test(trimmed);
     let key=null;
-    const original=line.trim();
-    if(/^extends\s+\w+/.test(original)&&(/^(extends|Node|Node2D|Control|Resource|RefCounted)$/.test(word)||
-       new RegExp('^extends\\s+'+word+'(?:\\s|$)').test(original)))key='extends';
-    else if(/^(?:static\s+)?func\s+_ready\s*\(/.test(original)&&/^(func|_ready)$/.test(word))key='ready';
-    else if(/^(?:static\s+)?func\s+_init\s*\(/.test(original)&&word==='_init')key='init';
-    else if(/^(?:static\s+)?func\s+\w+\s*\(/.test(original)&&word==='func')key='func';
-    else if(/^var\s+\w+/.test(original)&&word==='var')key='var';
-    else if(/^const\s+\w+/.test(original)&&word==='const')key='const';
-    else if(/^signal\s+\w+/.test(original)&&word==='signal')key='signal';
-    else if(/^(?:class|class_name)\s+\w+/.test(original)&&/^(class|class_name)$/.test(word))key='class';
-    else if(/^(?:var|const)\s+\w+\s*:\s*(?:int|float|String|bool|Vector2|Array|Dictionary)\b/.test(original)&&
-      /^(int|float|String|bool|Vector2|Array|Dictionary)$/.test(word))key='type';
-    else if(word.charCodeAt(0)===36)key='nodepath';
-    else if(word==='@export')key='export';
-    else if(word==='@onready')key='onready';
-    else if(word==='print'&&/^\s*\(/.test(line.slice(pos+word.length)))key='print';
-    else if(word==='range'&&/^\s*\(/.test(line.slice(pos+word.length)))key='range';
-    else if(word==='Vector2'&&/^\s*\(/.test(line.slice(pos+word.length)))key='vector';
-    else if(['connect','emit','new'].includes(word)&&pos>0&&line.slice(0,pos).trimEnd().endsWith('.')){
+    if((word==='extends'||/^\s*extends\s+\w+/.test(line)&&new RegExp('\\b'+word+'\\b').test(line))&&/^extends\b/.test(trimmed))key='extends';
+    else if((word==='func'||word==='_ready')&&/^(?:static\s+)?func\s+_ready\s*\(/.test(trimmed))key='ready';
+    else if(word==='_init'&&/^(?:static\s+)?func\s+_init\s*\(/.test(trimmed))key='init';
+    else if(word==='func'&&starts('func'))key='func';
+    else if(word==='var'&&starts('var'))key='var';
+    else if(word==='const'&&starts('const'))key='const';
+    else if(word==='signal'&&starts('signal'))key='signal';
+    else if((word==='class_name'||word==='class')&&starts(word))key=word;
+    else if(word[0]==='$')key='nodepath';
+    else if(word==='@export'||word==='@onready')key=word;
+    else if(['connect','emit','new'].includes(word)&&pos>0&&line.slice(0,pos).trimEnd().endsWith('.'))key=word;
+    else if(['if','elif','else','for','while','match','return','pass','break','continue'].includes(word)&&starts(word))key=word;
+    else if(word==='await')key=word;
+    else if(Object.prototype.hasOwnProperty.call(inlineBasics,word)){
+      // Funzioni integrate riconoscibili anche prima di digitare le parentesi.
+      if(['print','str','range','abs','min','max','clamp','round'].includes(word)&&
+        !(new RegExp('\\b'+word+'\\b').test(line)))return null;
       key=word;
-    }else if(word==='true'||word==='false')key='boolean';
-    else if(['pass','if','elif','else','for','while','match','return','break','continue','await'].includes(word)){
-      key=word==='if'?'condition':word;
     }
     if(!key)return null;
-    const entry=analyze(line).find(item=>item.key===key);
-    return entry?Object.freeze({key:entry.key,title:entry.title,detail:entry.detail,line:text.slice(0,begin).split('\n').length,word}):null;
+    const detailed=analyze(line).find(item=>item.key===(key==='if'?'condition':key==='class_name'?'class':key==='@export'?'export':key==='@onready'?'onready':key));
+    const basic=inlineBasics[key]||inlineBasics[word];
+    const item=detailed||basic;
+    if(!item)return null;
+    return Object.freeze({
+      key,title:item.title,detail:item.detail,word,
+      line:text.slice(0,begin).split('\n').length,
+      start:begin+pos,end:begin+pos+word.length
+    });
   }
   root.GDHCodeGuide=Object.freeze({analyze,render,unseenKeys,explainAt});
 })(typeof window!=='undefined'?window:globalThis);

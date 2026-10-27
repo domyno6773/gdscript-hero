@@ -551,28 +551,50 @@ async function smoke(browser,url,width){
    'La sfida 4 deve spiegare automaticamente extends Node al suo primo incontro');
  assert.match(await page.locator('.gdh-code-guide').textContent(),/extends Node/);
  assert.match(await page.locator('.gdh-code-guide').textContent(),/nodo/i);
- // Cliccare una parola nel vero editor apre la spiegazione, senza cambiare codice.
+ // Hover sulla parola: nessun click, nessuna X, sparisce uscendo dal termine.
  if(width<821)await page.locator('#btn-tab-code').click();
  const codeBeforeHelp=await page.locator('#code-editor').inputValue();
- // Il dock mobile ha un header fisso: simuliamo il click sull'istruzione
- // senza far scorrere la textarea dietro l'header di navigazione.
- await page.locator('#code-editor').evaluate(el=>{
-   el.focus();
-   el.setSelectionRange(2,2);
-   el.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:300,clientY:250}));
- });
+ const hoverToken=async (index,context='code-editor')=>page.locator('#'+context).evaluate((el,i)=>{
+   const style=getComputedStyle(el),rect=el.getBoundingClientRect();
+   const fontSize=parseFloat(style.fontSize);
+   const lineHeight=parseFloat(style.lineHeight)||fontSize*1.6;
+   const canvas=document.createElement('canvas');
+   const ctx=canvas.getContext('2d');
+   ctx.font=[style.fontStyle,style.fontWeight,style.fontSize,style.fontFamily].join(' ');
+   const charWidth=ctx.measureText('M').width;
+   const x=rect.left+el.clientLeft+parseFloat(style.paddingLeft)+charWidth*(i+.5)-el.scrollLeft;
+   const y=rect.top+el.clientTop+parseFloat(style.paddingTop)+lineHeight/2-el.scrollTop;
+   el.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerType:'mouse',clientX:x,clientY:y}));
+ },index);
+ await hoverToken(2);
  assert.equal(await page.locator('#gdh-inline-code-help').isVisible(),true,
-   'Click su extends deve aprire la spiegazione nell’editor');
+   'Il passaggio del mouse su extends deve aprire il tooltip');
  assert.equal(await page.locator('#gdh-inline-code-help').getAttribute('data-concept'),'extends');
  assert.match(await page.locator('#gdh-inline-code-help').textContent(),/Node/);
- assert.equal(await page.locator('#code-editor').inputValue(),codeBeforeHelp,
-   'Aprire la spiegazione non deve modificare il codice');
- await page.locator('#gdh-inline-code-help .gdh-inline-help-close').click();
+ assert.equal(await page.locator('#gdh-inline-code-help .gdh-inline-help-close').count(),0,
+   'Non deve esserci un pulsante X');
+ assert.equal(await page.locator('#code-editor').inputValue(),codeBeforeHelp);
+ // Anche uscire dalla parola, pur restando sopra l'editor, deve chiudere.
+ await hoverToken(13);
  assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true);
+ // Codice DIGITATO dallo studente, senza parametri né parentesi.
+ await page.locator('#code-editor').fill('func');
+ await hoverToken(2);
+ assert.equal(await page.locator('#gdh-inline-code-help').getAttribute('data-concept'),'func');
+ await page.locator('#code-editor').evaluate(el=>el.dispatchEvent(new PointerEvent('pointerleave',{bubbles:true,pointerType:'mouse'})));
+ assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true);
+ await page.locator('#code-editor').fill('var');
+ await hoverToken(1);
+ assert.equal(await page.locator('#gdh-inline-code-help').getAttribute('data-concept'),'var');
+ await page.locator('#code-editor').fill('# nota: func');
+ await hoverToken(9);
+ assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true,
+   'Non interpretare come codice le parole dei commenti');
+ // F1 resta disponibile per la navigazione con tastiera.
+ await page.locator('#code-editor').fill('func');
  await page.locator('#code-editor').evaluate(el=>{el.focus();el.setSelectionRange(2,2);});
  await page.locator('#code-editor').press('F1');
- assert.equal(await page.locator('#gdh-inline-code-help').isVisible(),true,
-   'F1 deve aprire la guida anche da tastiera');
+ assert.equal(await page.locator('#gdh-inline-code-help').isVisible(),true);
  await page.locator('#code-editor').press('Escape');
  assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true);
  await page.evaluate(()=>App.openLesson(1));
