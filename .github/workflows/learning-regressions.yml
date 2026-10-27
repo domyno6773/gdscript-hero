@@ -22,5 +22,7 @@ jobs:
         run: node tests/audit_validator_regression.test.cjs
       - name: Lesson 4 comments ignored and real output evaluated
         run: node tests/lesson4_comments_output.test.cjs
+      - name: Godot debug messages and reliable line numbers
+        run: node tests/error_guide.test.cjs
       - name: Backups and cloud sync
         run: node tests/auth_reliability.test.cjs
