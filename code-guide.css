@@ -124,3 +124,87 @@
 }
 
 .gdh-inline-help-title { display:block; margin:0 0 7px; }
+
+
+/* Controllo guida integrata — un'unica preferenza per Corso, Ripasso e Sandbox. */
+button.gdh-inline-help-toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 5px 9px;
+  margin: 0;
+  border: 1px solid #4a6279;
+  border-radius: 7px;
+  background: #2d3c4c;
+  background-image: none;
+  color: #d2e3f1;
+  box-shadow: none;
+  text-shadow: none;
+  font: 600 11px/1.2 'Inter','Plus Jakarta Sans',sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+button.gdh-inline-help-toggle:hover { background: #384d60; border-color: #7295b0; }
+button.gdh-inline-help-toggle:focus-visible {
+  outline: 2px solid #b2ddf7;
+  outline-offset: 2px;
+}
+.gdh-inline-toggle-track {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 17px;
+  padding: 2px;
+  box-sizing: border-box;
+  border-radius: 99px;
+  background: #6799bc;
+  border: 1px solid #8bb8d5;
+  transition: background-color .15s ease;
+}
+.gdh-inline-toggle-thumb {
+  width: 11px;
+  height: 11px;
+  background: #f7fbff;
+  border-radius: 50%;
+  transform: translateX(13px);
+  transition: transform .15s ease;
+}
+button.gdh-inline-help-toggle[aria-checked="false"] .gdh-inline-toggle-track {
+  background: #526277;
+  border-color: #6b7d91;
+}
+button.gdh-inline-help-toggle[aria-checked="false"] .gdh-inline-toggle-thumb {
+  transform: translateX(0);
+}
+.gdh-sandbox-editor-controls { display: flex; align-items: center; gap: 10px; min-width: 0; }
+#view-exercise .mobile-code-toolbar > .gdh-inline-help-toggle,
+#view-practice .mobile-code-toolbar > .gdh-inline-help-toggle { display: none; }
+[data-theme="light"] button.gdh-inline-help-toggle {
+  background: #eef4f9;
+  border-color: #b3c9d9;
+  color: #35566f;
+}
+[data-theme="light"] button.gdh-inline-help-toggle:hover { background: #e1eef7; border-color: #86afcb; }
+[data-theme="light"] .gdh-inline-toggle-track { background: #4989b5; border-color: #4682ae; }
+[data-theme="light"] button.gdh-inline-help-toggle[aria-checked="false"] .gdh-inline-toggle-track {
+  background: #bdcbd5; border-color: #9cadba;
+}
+@media (min-width: 821px) and (max-width: 1100px) {
+  #view-exercise .editor-tools .gdh-inline-toggle-text { display: none; }
+}
+@media (max-width: 820px) {
+  #view-exercise .editor-tools > .gdh-inline-help-toggle { display: none !important; }
+  #view-exercise .mobile-code-toolbar > .gdh-inline-help-toggle,
+  #view-practice .mobile-code-toolbar > .gdh-inline-help-toggle {
+    display: inline-flex !important;
+    min-height: 34px;
+  }
+  #view-practice .sandbox-col-header .gdh-inline-help-toggle { display: none !important; }
+  #view-practice .sandbox-col-header .practice-tip { display: block; }
+}

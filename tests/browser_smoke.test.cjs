@@ -574,6 +574,36 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#gdh-inline-code-help .gdh-inline-help-close').count(),0,
    'Non deve esserci un pulsante X');
  assert.equal(await page.locator('#code-editor').inputValue(),codeBeforeHelp);
+ // Interruttore della guida: chiusura immediata, sincronizzazione e persistenza.
+ assert.equal(await page.locator('.gdh-inline-help-toggle[aria-checked="true"]').count(),4,
+   'Il toggle deve essere inizialmente attivo in tutti gli editor');
+ const toggle=page.locator('#view-exercise .editor-tools .gdh-inline-help-toggle');
+ await toggle.evaluate(button=>button.click());
+ assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true,
+   'Disattivare la guida deve chiudere la finestra già aperta');
+ assert.equal(await page.locator('.gdh-inline-help-toggle[aria-checked="false"]').count(),4,
+   'I toggle delle lezioni e Sandbox devono condividere la preferenza');
+ await hoverToken(2);
+ assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true,
+   'Con la guida spenta non devono apparire tooltip passando sulle parole');
+ await page.locator('#code-editor').evaluate(el=>{el.focus();el.setSelectionRange(2,2);});
+ await page.locator('#code-editor').press('F1');
+ assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true,
+   'F1 non deve aggirare il toggle spento');
+ await page.reload({waitUntil:'load'});
+ await page.waitForFunction(()=>!!window.App?.state?.sandbox);
+ assert.equal(await page.locator('.gdh-inline-help-toggle[aria-checked="false"]').count(),4,
+   'La guida deve restare disattivata dopo il ricaricamento');
+ await page.evaluate(()=>App.openLesson(4));
+ if(width<821)await page.locator('#btn-tab-code').click();
+ await hoverToken(2);
+ assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true);
+ await page.locator('#view-exercise .mobile-code-toolbar .gdh-inline-help-toggle')
+   .evaluate(button=>button.click());
+ assert.equal(await page.locator('.gdh-inline-help-toggle[aria-checked="true"]').count(),4);
+ await hoverToken(2);
+ assert.equal(await page.locator('#gdh-inline-code-help').isVisible(),true,
+   'La guida riattivata deve tornare a funzionare senza ricaricare la pagina');
  // Anche uscire dalla parola, pur restando sopra l'editor, deve chiudere.
  await hoverToken(13);
  assert.equal(await page.locator('#gdh-inline-code-help').isHidden(),true);

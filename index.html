@@ -272,6 +272,10 @@
                         <span class="file-name">Player.gd</span>
                     </div>
                     <div class="editor-tools">
+                        <button type="button" class="gdh-inline-help-toggle" role="switch" aria-checked="true" aria-label="Spiegazioni del codice automatiche" title="Attiva o disattiva le spiegazioni al passaggio del mouse">
+    <span class="gdh-inline-toggle-text">Guida codice</span>
+    <span class="gdh-inline-toggle-track" aria-hidden="true"><span class="gdh-inline-toggle-thumb"></span></span>
+</button>
                         <button type="button" class="btn-tool btn-tool-toggle-tools" id="btn-toggle-extra-tools" title="Mostra/Nascondi Schermo 2D e Scena Godot">
                             <svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4m-2-2v4m8-2h.01m2-2h.01"/></svg>
                             <span>Strumenti 2D</span>
@@ -300,6 +304,10 @@
 
                 <!-- Barra Rapida Caratteri Speciali per Tastiera Mobile -->
                 <div class="mobile-code-toolbar" id="mobile-code-toolbar">
+                    <button type="button" class="gdh-inline-help-toggle" role="switch" aria-checked="true" aria-label="Spiegazioni del codice automatiche" title="Attiva o disattiva le spiegazioni al passaggio del mouse">
+    <span class="gdh-inline-toggle-text">Guida codice</span>
+    <span class="gdh-inline-toggle-track" aria-hidden="true"><span class="gdh-inline-toggle-thumb"></span></span>
+</button>
                     <button type="button" class="exercise-mobile-utility exercise-mobile-reset" id="btn-mobile-reset-code" title="Ripristina il codice iniziale">↺ Ripristina</button>
                     <button type="button" class="exercise-mobile-utility" id="btn-mobile-toggle-tools" title="Mostra o nascondi gli strumenti 2D">Strumenti 2D</button>
                     <button type="button" class="quick-key" data-target="code-editor" data-insert="    ">Tab</button>
@@ -517,7 +525,13 @@
             <div class="sandbox-editor-col">
                 <div class="sandbox-col-header">
                     <span class="tab"><svg class="ui-icon sandbox-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#gdh-icon-file"></use></svg> main.gd</span>
-                    <span class="practice-tip">Auto-salvataggio in tempo reale</span>
+                    <div class="gdh-sandbox-editor-controls">
+                        <span class="practice-tip">Auto-salvataggio in tempo reale</span>
+                        <button type="button" class="gdh-inline-help-toggle" role="switch" aria-checked="true" aria-label="Spiegazioni del codice automatiche" title="Attiva o disattiva le spiegazioni al passaggio del mouse">
+    <span class="gdh-inline-toggle-text">Guida codice</span>
+    <span class="gdh-inline-toggle-track" aria-hidden="true"><span class="gdh-inline-toggle-thumb"></span></span>
+</button>
+                    </div>
                 </div>
                 <div class="editor-wrapper">
                     <div class="line-numbers" id="sandbox-line-numbers">1</div>
@@ -530,6 +544,10 @@
                 </div>
                 <!-- Barra Rapida Caratteri Speciali per Mobile -->
                 <div class="mobile-code-toolbar" id="sandbox-mobile-code-toolbar">
+                    <button type="button" class="gdh-inline-help-toggle" role="switch" aria-checked="true" aria-label="Spiegazioni del codice automatiche" title="Attiva o disattiva le spiegazioni al passaggio del mouse">
+    <span class="gdh-inline-toggle-text">Guida codice</span>
+    <span class="gdh-inline-toggle-track" aria-hidden="true"><span class="gdh-inline-toggle-thumb"></span></span>
+</button>
                     <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="    ">Tab</button>
                     <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert=":">:</button>
                     <button type="button" class="quick-key" data-target="sandbox-code-editor" data-insert="(&quot;&quot;)" data-cursor="-2">(" ")</button>

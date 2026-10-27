@@ -4,8 +4,31 @@
  */
 (function(root){
   const EDITORS=['code-editor','sandbox-code-editor'];
+  const STORAGE_KEY='gdh_inline_code_help_enabled_v1';
   const editors=[];
   let popup=null,active=null,canvas=null;
+  let enabled=true;
+  function readPreference(){
+    try {return localStorage.getItem(STORAGE_KEY)!=='false';}
+    catch(_){return true;}
+  }
+  function syncControls(){
+    document.querySelectorAll('.gdh-inline-help-toggle').forEach(button=>{
+      button.setAttribute('aria-checked',String(enabled));
+      button.title=enabled?'Disattiva le spiegazioni al passaggio del mouse':'Attiva le spiegazioni al passaggio del mouse';
+      button.setAttribute('aria-label',button.title);
+    });
+  }
+  function setEnabled(value,{persist=true}={}){
+    enabled=Boolean(value);
+    if(!enabled)close();
+    if(persist){
+      try {localStorage.setItem(STORAGE_KEY,String(enabled));} catch(_) {}
+    }
+    syncControls();
+    return enabled;
+  }
+  function isEnabled(){return enabled;}
   function close(){
     active=null;
     if(popup)popup.hidden=true;
@@ -26,7 +49,7 @@
     return popup;
   }
   function show(editor,result,clientX,clientY,mode){
-    if(!result)return close();
+    if(!enabled||!result)return close();
     const card=ensurePopup();
     const same=active&&active.editor===editor&&active.start===result.start&&active.end===result.end;
     if(!same){
@@ -49,6 +72,7 @@
     return result;
   }
   function showAt(editor,offset,position={}){
+    if(!enabled)return close();
     const concept=root.GDHCodeGuide?.explainAt(editor?.value,offset);
     return show(editor,concept,position.clientX,position.clientY,'keyboard');
   }
@@ -92,6 +116,7 @@
     return null;
   }
   function hover(editor,x,y){
+    if(!enabled)return close();
     const offset=offsetAtPoint(editor,x,y);
     if(offset===null)return close();
     const item=root.GDHCodeGuide?.explainAt(editor.value,offset,{strict:true});
@@ -111,7 +136,7 @@
     editor.addEventListener('pointerleave',close);
     // Nei touch screen il mouse non esiste: un tap apre, un altro altrove chiude.
     editor.addEventListener('pointerup',e=>{
-      if(e.pointerType!=='touch')return;
+      if(!enabled||e.pointerType!=='touch')return;
       const offset=offsetAtPoint(editor,e.clientX,e.clientY);
       if(offset===null)return close();
       const item=root.GDHCodeGuide?.explainAt(editor.value,offset,{strict:true});
@@ -119,6 +144,7 @@
     });
     editor.addEventListener('keydown',e=>{
       if(e.key==='F1'){
+        if(!enabled)return;
         e.preventDefault();
         if(active?.editor===editor&&active.mode==='keyboard')return close();
         showAt(editor,editor.selectionStart);
@@ -128,14 +154,19 @@
     editor.addEventListener('scroll',close);
   }
   function init(){
+    enabled=readPreference();
     for(const id of EDITORS)attach(document.getElementById(id));
+    document.querySelectorAll('.gdh-inline-help-toggle').forEach(button=>{
+      button.addEventListener('click',()=>setEnabled(!enabled));
+    });
+    syncControls();
     document.addEventListener('pointerdown',e=>{
       if(active&&!editors.includes(e.target))close();
     });
     document.addEventListener('visibilitychange',()=>{if(document.hidden)close()});
     window.addEventListener('blur',close);
   }
-  root.GDHInlineCodeHelp=Object.freeze({init,close,showAt,hover,offsetAtPoint});
+  root.GDHInlineCodeHelp=Object.freeze({init,close,showAt,hover,offsetAtPoint,setEnabled,isEnabled});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })(typeof window!=='undefined'?window:globalThis);
