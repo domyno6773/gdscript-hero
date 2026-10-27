@@ -648,7 +648,7 @@ const App = {
         const todayDateEl = document.getElementById('sidebar-today-date');
         if (todayDateEl) {
             const now = new Date();
-            todayDateEl.innerText = now.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+            todayDateEl.innerText = now.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }) + ' UTC';
         }
 
         let completedCount = 0;
@@ -718,7 +718,7 @@ const App = {
         const todayDateEl = document.getElementById('quests-today-date');
         if (todayDateEl) {
             const now = new Date();
-            todayDateEl.innerText = now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' });
+            todayDateEl.innerText = now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' }) + ' UTC';
         }
 
         DAILY_QUESTS_CONFIG.forEach(quest => {
@@ -1990,31 +1990,18 @@ const App = {
     },
 
     getCurrentWeekDays() {
+        // I periodi XP ufficiali seguono la settimana UTC, non il fuso del browser.
         const now = new Date();
-        const dayOfWeek = (now.getDay() + 6) % 7; // 0 = Lunedi, 6 = Domenica
-        const monday = new Date(now);
-        monday.setDate(now.getDate() - dayOfWeek);
-        monday.setHours(0, 0, 0, 0);
-
-        const days = [];
-        const labels = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
+        const dayOfWeek = (now.getUTCDay() + 6) % 7;
+        const monday = new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),
+            now.getUTCDate()-dayOfWeek));
+        const labels = ["Lun","Mar","Mer","Gio","Ven","Sab","Dom"];
         const todayISO = this.getTodayISO();
-
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(monday);
-            d.setDate(monday.getDate() + i);
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const iso = `${year}-${month}-${day}`;
-
-            days.push({
-                label: labels[i],
-                iso: iso,
-                isToday: iso === todayISO
-            });
-        }
-        return days;
+        return labels.map((label,index) => {
+            const day=new Date(monday.getTime()+index*86400000);
+            const iso=ProgressionV2.dateKey(day);
+            return {label,iso,isToday:iso===todayISO};
+        });
     },
 
     checkWeekReset() {
