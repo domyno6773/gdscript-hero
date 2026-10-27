@@ -28,6 +28,8 @@ async function testSmartIndent(page,selector) {
   ['    for enemy in enemies:', '    for enemy in enemies:\n        '],
   ['else:', 'else:\n    '],
   ['match action:', 'match action:\n    '],
+  ['match action:\n    1:', 'match action:\n    1:\n        '],
+  ['match action:\n    "pronto":', 'match action:\n    "pronto":\n        '],
   ['        print("ok")', '        print("ok")\n        '],
   ['var title = "if ok:"', 'var title = "if ok:"\n'],
   ['# if enabled:', '# if enabled:\n'],
