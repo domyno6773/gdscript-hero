@@ -37,6 +37,37 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise FederationError("Redirect rifiutato: credenziali non inoltrate.")
 
 
+def oauth_error_summary(exc):
+    """Expose only fixed vocabulary, never server text or credential values."""
+    details = []
+    try:
+        raw = exc.read(16385)
+        if len(raw) > 16384:
+            return ""
+        body = json.loads(raw)
+        if not isinstance(body, dict):
+            return ""
+        code = body.get("error")
+        if code in ("invalid_request", "invalid_client", "invalid_grant",
+                    "unauthorized_client", "unsupported_grant_type", "invalid_scope",
+                    "access_denied", "server_error", "temporarily_unavailable"):
+            details.append("OAuth=" + code)
+        description = body.get("error_description", "")
+        if isinstance(description, str):
+            # Labels are hints from the response, not a diagnosis. No source
+            # substring (including tokens, IDs or descriptions) is emitted.
+            words = set(re.findall(r"[a-z_]+", description.lower()))
+            labels = [word for word in ("audience", "issuer", "signature", "certificate",
+                      "public_key", "client", "trust", "claim", "subject", "grant",
+                      "expired", "scope", "resource", "unsupported", "disabled")
+                      if word in words]
+            if labels:
+                details.append("riferimenti=" + ",".join(labels))
+    except Exception:
+        pass
+    return "; " + "; ".join(details) if details else ""
+
+
 def http_json(request):
     try:
         with urllib.request.build_opener(NoRedirect()).open(request, timeout=20) as response:
@@ -46,7 +77,8 @@ def http_json(request):
                 raise FederationError("Risposta troppo grande.")
             body = json.loads(raw)
     except urllib.error.HTTPError as exc:
-        raise FederationError("Autenticazione rifiutata (HTTP %d)." % exc.code) from None
+        raise FederationError("Autenticazione rifiutata (HTTP %d)%s." %
+                              (exc.code, oauth_error_summary(exc))) from None
     except urllib.error.URLError:
         raise FederationError("Connessione di autenticazione non riuscita.") from None
     if not isinstance(body, dict):
@@ -126,7 +158,9 @@ def run(env):
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     public_pem = key.public_key().public_bytes(
         serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode("ascii")
+    print("Fase: richiesta identita GitHub.")
     jwt = github_token(env)
+    print("Fase: scambio token GitHub con Oracle.")
     rpst = exchange(origin, env, jwt, public_pem)
     signer = oci.auth.signers.SecurityTokenSigner(rpst, key)
     config = {"tenancy": env["OCI_FED_TENANCY"], "region": env["OCI_FED_REGION"]}

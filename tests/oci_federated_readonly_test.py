@@ -100,6 +100,24 @@ class FederationTests(unittest.TestCase):
         self.assertNotIn("SECRET", str(caught.exception))
         self.assertIn("401", str(caught.exception))
 
+    def test_oauth_diagnostics_never_echo_server_values(self):
+        payloads = [
+            ({"error": "invalid_grant", "error_description": "SECRET subject claim expired"},
+             ("OAuth=invalid_grant", "claim", "subject", "expired")),
+            ({"error": "SECRET", "error_description": "SECRET", "token": "SECRET"}, ()),
+            (["SECRET"], ()),
+        ]
+        for body, expected in payloads:
+            error = fed.urllib.error.HTTPError("https://example.test", 400, "SECRET", {},
+                                             io.BytesIO(json.dumps(body).encode()))
+            result = fed.oauth_error_summary(error)
+            self.assertNotIn("SECRET", result)
+            for label in expected:
+                self.assertIn(label, result)
+        for raw in (b"SECRET-not-json", b"x" * 16385):
+            error = fed.urllib.error.HTTPError("https://example.test", 400, "SECRET", {}, io.BytesIO(raw))
+            self.assertEqual(fed.oauth_error_summary(error), "")
+
     def test_inventory_passes_ephemeral_signer_and_only_lists_resources(self):
         signer = object()
         identity = SimpleNamespace(
