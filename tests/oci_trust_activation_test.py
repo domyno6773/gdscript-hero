@@ -60,12 +60,26 @@ class ActivationTests(unittest.TestCase):
             "ListRegionSubscriptions", "ListCompartments", "ListAvailabilityDomains",
             "ListInstances", "ListVolumes", "ListBootVolumes", "ListVolumeBackups", "ListBootVolumeBackups"})
         for line in lines:
-            self.assertIn("request.domain.id='" + self.domain + "'", line)
-            self.assertIn("request.principal.type='gdhgithubreadonly'", line)
+            self.assertIn("request.principal.domain.id='" + self.domain + "'", line)
+            self.assertIn("request.principal.type='identityfederateddomainapp'", line)
+            self.assertIn("request.principal.name='" + setup.SUBJECT + "'", line)
+            self.assertIn("request.principal.ext_repository='domyno6773/gdscript-hero'", line)
+            self.assertIn("request.principal.ext_workflow_ref='" + setup.WORKFLOW + "'", line)
+            self.assertIn("request.principal.ext_event_name='workflow_dispatch'", line)
             self.assertNotIn(" to manage ", line)
             self.assertNotIn(" to use ", line)
         with self.assertRaises(setup.SetupError):
             setup.readonly_policy("ocid1.domain.oc1..x' }, request.principal.type='user")
+
+    def test_policy_only_never_reads_credentials_or_calls_oracle(self):
+        with patch("builtins.input", return_value=self.domain), \
+             patch.object(setup, "read_token") as token, \
+             patch.object(setup.urllib.request, "build_opener") as network, \
+             patch.object(setup.os, "startfile", create=True), \
+             redirect_stdout(io.StringIO()):
+            self.assertEqual(setup.main(["--policy-only"]), 0)
+        token.assert_not_called()
+        network.assert_not_called()
 
     def test_cancel_never_activates(self):
         self.assertFalse(self.activate("no"))

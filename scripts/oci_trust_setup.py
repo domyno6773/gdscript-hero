@@ -156,7 +156,14 @@ def create_inactive(origin, token, payload, confirm=input, api=request_json):
 def readonly_policy(domain_ocid):
     if not re.fullmatch(r"ocid1\.domain\.oc1\.[a-z0-9.]+", domain_ocid):
         raise SetupError("Domain OCID non valido.")
-    common = "request.principal.type='gdhgithubreadonly', request.domain.id='" + domain_ocid + "'"
+    # RPST principal type is fixed; impersonatingResource is an exchange
+    # constraint, not the IAM principal type. Scope to the exact GitHub subject.
+    common = ("request.principal.type='identityfederateddomainapp', "
+              "request.principal.domain.id='" + domain_ocid + "', "
+              "request.principal.name='" + SUBJECT + "', "
+              "request.principal.ext_repository='domyno6773/gdscript-hero', "
+              "request.principal.ext_workflow_ref='" + WORKFLOW + "', "
+              "request.principal.ext_event_name='workflow_dispatch'")
     rules = [
         ("inspect tenancies", ["ListRegionSubscriptions"]),
         ("inspect compartments", ["ListCompartments", "ListAvailabilityDomains"]),
@@ -316,8 +323,21 @@ def main(argv=None):
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--apply", action="store_true", help="Crea solo il trust inattivo dopo conferma locale")
     modes.add_argument("--prepare-activation", action="store_true", help="Genera policy locale e guida l'attivazione verificata")
+    modes.add_argument("--policy-only", action="store_true", help="Genera solo la policy corretta; nessun token o chiamata Oracle")
     args = parser.parse_args(argv)
     try:
+        if args.policy_only:
+            policy = readonly_policy(input("OCID dominio Default: ").strip())
+            with tempfile.NamedTemporaryFile(mode="w", suffix="-gdh-readonly-policy.txt",
+                                             delete=False, encoding="utf-8") as f:
+                f.write(policy)
+                policy_path = f.name
+            if os.name == "nt":
+                os.startfile(policy_path)
+            print("Policy locale: " + policy_path)
+            print("Apri gdh-github-inventory-readonly nella console IAM, modifica gli statement")
+            print("e sostituisci tutte le sei righe con il testo generato. Nessun token richiesto.")
+            return 0
         origin = domain_origin(input("Domain URL principale Oracle (non e un segreto): "))
         payload = trust_payload(input("Client ID OAuth dell'app gdh-github-readonly: ").strip())
         if args.prepare_activation:
