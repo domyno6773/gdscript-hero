@@ -30,3 +30,5 @@ jobs:
         run: node tests/auth_reliability.test.cjs
       - name: XP 2.0, weekly limits and quest claims
         run: node tests/progression_v2.test.cjs
+      - name: Arena and official leaderboard schema invariants
+        run: node tests/competition_schema.test.cjs
