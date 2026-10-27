@@ -4964,10 +4964,17 @@ const ACHIEVEMENTS_DATA = [
     }
 ];
 
+// Compatibile anche con i test che caricano lessons.js da solo.
+// ProgressionV2 resta l'unica fonte di calcolo del livello a runtime.
 const LEVELS_CONFIG = Array.from({length:50},(_,index)=>{
     const level=index+1;
-    const info=ProgressionV2.levelFromXp(ProgressionV2.threshold(level));
-    return {level,title:info.tier.title,minXp:info.tier.minXp,maxXp:info.tier.maxXp};
+    const minXp=(level-1)*(10*level+40);
+    const nextLevel=level+1;
+    const maxXp=(nextLevel-1)*(10*nextLevel+40)-1;
+    const title=level>=50?'Leggenda':level>=40?'Maestro':
+        level>=30?'Architetto':level>=20?'Forgiatore':
+        level>=10?'Esploratore':'Apprendista Godot';
+    return {level,title,minXp,maxXp};
 });
 
 const STREAK_TIERS = {
