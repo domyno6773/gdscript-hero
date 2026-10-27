@@ -191,7 +191,12 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#autocomplete-popup .autocomplete-name').first().textContent(),'print');
  await page.locator('#code-editor').press('Tab');
  assert.equal(await page.locator('#code-editor').inputValue(),'print');
- await page.evaluate(()=>App.openLesson(1));
+ // Il controllo del completamento non deve alterare lo starter della lezione 1.
+ await page.evaluate(()=>{
+   delete App.state.userCode[1];
+   App.saveStorage();
+   App.openLesson(1);
+ });
  assert.equal(await page.locator('#view-exercise .editor-header #btn-run-code').count(),1,'Verify button belongs to editor header');
  assert.equal(await page.locator('#view-exercise .panel-lesson #expected-output-pre').count(),0,'Expected output must appear only in dock');
  const initialGeometry=await page.evaluate(()=>{
