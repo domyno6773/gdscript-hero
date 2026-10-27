@@ -19,6 +19,37 @@ async function viewIs(page,name){
  const active=await page.evaluate(()=>[...document.querySelectorAll('.view-container:not(.hidden)')].map(e=>e.id));
  assert.deepEqual(active,['view-'+name],'Section '+name+' not active: '+active.join(','));
 }
+async function testSmartIndent(page,selector) {
+ const editor=page.locator(selector);
+ const cases=[
+  ['if health > 0:', 'if health > 0:\n    '],
+  ['    if is_alive: # condizione', '    if is_alive: # condizione\n        '],
+  ['func heal(amount):', 'func heal(amount):\n    '],
+  ['    for enemy in enemies:', '    for enemy in enemies:\n        '],
+  ['else:', 'else:\n    '],
+  ['match action:', 'match action:\n    '],
+  ['        print("ok")', '        print("ok")\n        '],
+  ['var title = "if ok:"', 'var title = "if ok:"\n'],
+  ['# if enabled:', '# if enabled:\n'],
+  ['if ok:\n    while alive:', 'if ok:\n    while alive:\n        ']
+ ];
+ for(const [source,expected] of cases){
+   await editor.fill(source);
+   await editor.press('Enter');
+   assert.equal(await editor.inputValue(),expected,
+     'Incorrect smart indentation in '+selector+' for '+JSON.stringify(source));
+   assert.equal(await editor.evaluate(e=>e.selectionStart),expected.length,
+     'Caret misplaced after autoindent in '+selector);
+ }
+ await editor.fill('    if enabled:__SELEZIONE__');
+ await editor.evaluate(e=>{
+   const start=e.value.indexOf('__SELEZIONE__');
+   e.setSelectionRange(start,e.value.length);
+ });
+ await editor.press('Enter');
+ assert.equal(await editor.inputValue(),'    if enabled:\n        ',
+   'Enter should replace selection and indent branch in '+selector);
+}
 async function smoke(browser,url,width){
  const context=await browser.newContext({viewport:{width,height:844},locale:'it-IT'});
  const page=await context.newPage();
@@ -91,6 +122,7 @@ async function smoke(browser,url,width){
  await page.locator('#sandbox-code-editor').press('Enter');
  assert.equal(await page.locator('#sandbox-code-editor').inputValue(),'print',
    'Sandbox Enter completion failed');
+ await testSmartIndent(page,'#sandbox-code-editor');
  await page.locator('#sandbox-code-editor').fill('extends Node2D\n\nfunc _ready():\n    print("BROWSER_SANDBOX_OK")');
  await page.locator('#btn-sandbox-run').click({timeout:10000});
  try {
@@ -185,6 +217,7 @@ async function smoke(browser,url,width){
  await page.evaluate(()=>App.openLesson(1));
  await viewIs(page,'exercise');
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
+ await testSmartIndent(page,'#code-editor');
  // Il completamento originale delle lezioni rimane operativo.
  await page.locator('#code-editor').fill('pri');
  await page.locator('#autocomplete-popup').waitFor({state:'visible',timeout:4000});
