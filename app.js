@@ -589,13 +589,10 @@ const App = {
         const badge = document.getElementById('quests-count-badge');
         if (badge) {
             badge.innerText = `${completedCount}/${DAILY_QUESTS_CONFIG.length}`;
-            if (readyCount > 0) {
-                badge.style.background = '#10b981';
-                badge.style.color = '#fff';
-            } else {
-                badge.style.background = 'var(--bg-panel)';
-                badge.style.color = 'var(--accent-cyan)';
-            }
+            // Lo stato grafico è gestito dal tema, non da colori neon inline.
+            badge.style.removeProperty('background');
+            badge.style.removeProperty('color');
+            badge.classList.toggle('has-rewards', readyCount > 0);
         }
 
         const sidebarBadge = document.getElementById('sidebar-quests-badge');
@@ -678,7 +675,7 @@ const App = {
                 </div>
                 <div class="sidebar-quest-action">
                     <button class="sidebar-quest-btn ${isClaimed ? 'claimed' : (isCompleted ? 'active' : 'in-progress')}" id="sidebar-btn-quest-${quest.id}">
-                        ${isClaimed ? '✓ Riscattato' : (isCompleted ? 'Riscatta Ricompensa ⚡' : 'In Corso')}
+                        ${isClaimed ? '✓ Riscattato' : (isCompleted ? 'Riscatta ricompensa' : 'In Corso')}
                     </button>
                 </div>
             `;

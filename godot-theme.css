@@ -1014,3 +1014,202 @@ body[data-theme="light"] {
   border-right-color: #d62a3b;
 }
 [data-theme="light"] .gdh-debug-section-label { color: #295d7f; }
+
+
+/* Missioni giornaliere — stati sobri coerenti con la palette Godot.
+   Le modifiche sono solo estetiche: XP, soglie e pulsanti restano invariati. */
+#view-roadmap .daily-quests-sidebar-card:hover {
+  border-color: #546b83 !important;
+  box-shadow: 3px 4px 0 rgba(0,0,0,.25) !important;
+}
+#view-roadmap .sidebar-card-badge,
+#quests-count-badge {
+  color: #badcf1 !important;
+  background: #31485b !important;
+  background-image: none !important;
+  border: 1px solid #54748f !important;
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+#view-roadmap .sidebar-card-badge.has-rewards,
+#quests-count-badge.has-rewards {
+  color: #eaf6ff !important;
+  background: #356387 !important;
+  border-color: #6194b6 !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+#view-roadmap .sidebar-quest-item {
+  background: #273442 !important;
+  background-image: none !important;
+  border: 1px solid #40566e !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+#view-roadmap .sidebar-quest-item:hover { background: #2d3b4b !important; border-color: #527596 !important; }
+#view-roadmap .sidebar-quest-item.ready {
+  background: #2a3c4d !important;
+  background-image: none !important;
+  border-color: #5e8bab !important;
+  box-shadow: none !important;
+}
+#view-roadmap .sidebar-quest-item.claimed {
+  opacity: 1 !important;
+  background: #28343f !important;
+  border-color: #42586d !important;
+}
+#view-roadmap .sidebar-quest-bar,
+#quests-modal .quest-progress-track { background: #1b2733 !important; }
+#view-roadmap .sidebar-quest-fill,
+#view-roadmap .sidebar-quest-item.ready .sidebar-quest-fill,
+#quests-modal .quest-progress-fill {
+  background: #5896c0 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+#view-roadmap .sidebar-quest-btn {
+  min-height: 38px;
+  border-radius: 7px !important;
+  font-family: 'Inter','Plus Jakarta Sans',sans-serif;
+  letter-spacing: 0;
+  text-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+#view-roadmap .sidebar-quest-btn.in-progress {
+  background: #26333f !important;
+  background-image: none !important;
+  color: #a9bbce !important;
+  border: 1px solid #3d5167 !important;
+  box-shadow: none !important;
+  cursor: default;
+}
+#view-roadmap .sidebar-quest-btn.active,
+#quests-modal .btn-claim-quest.active {
+  color: #f5faff !important;
+  background: #477fa6 !important;
+  background-image: none !important;
+  border: 1px solid #6ba7d0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+  animation: none !important;
+  transform: none !important;
+  cursor: pointer;
+}
+#view-roadmap .sidebar-quest-btn.active:hover,
+#quests-modal .btn-claim-quest.active:hover {
+  background: #5b94bb !important;
+  border-color: #8bc1e4 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+#view-roadmap .sidebar-quest-btn:focus-visible,
+#quests-modal .btn-claim-quest:focus-visible {
+  outline: 2px solid #a4d4f3;
+  outline-offset: 2px;
+}
+#view-roadmap .sidebar-quest-btn.claimed,
+#quests-modal .btn-claim-quest.claimed {
+  color: #b1c6d7 !important;
+  background: #293946 !important;
+  background-image: none !important;
+  border: 1px solid #4b657b !important;
+  box-shadow: none !important;
+  animation: none !important;
+  cursor: default;
+}
+#quests-modal .quest-card,
+#quests-modal .quest-card.ready-to-claim {
+  background: #293747 !important;
+  background-image: none !important;
+  border: 1px solid #485d74 !important;
+  box-shadow: none !important;
+}
+#quests-modal .quest-card.ready-to-claim {
+  border-color: #628ead !important;
+  background: #2b4051 !important;
+}
+#quests-modal .quests-countdown-bar {
+  color: #b3d4ec !important;
+  background: #263848 !important;
+  border-color: #4d718d !important;
+}
+#quests-modal .btn-claim-quest {
+  background-image: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+[data-theme="light"] #view-roadmap .daily-quests-sidebar-card:hover {
+  border-color: #bacfdf !important;
+  box-shadow: 3px 4px 0 rgba(29,52,71,.08) !important;
+}
+[data-theme="light"] #view-roadmap .sidebar-card-badge,
+[data-theme="light"] #quests-count-badge {
+  color: #315d7c !important;
+  background: #e7f0f8 !important;
+  border-color: #aac7dd !important;
+}
+[data-theme="light"] #view-roadmap .sidebar-card-badge.has-rewards,
+[data-theme="light"] #quests-count-badge.has-rewards {
+  color: #164563 !important;
+  background: #cbe4f4 !important;
+  border-color: #83b5d4 !important;
+}
+[data-theme="light"] #view-roadmap .sidebar-quest-item {
+  background: #f6f9fc !important;
+  border-color: #d1dee9 !important;
+}
+[data-theme="light"] #view-roadmap .sidebar-quest-item:hover { background: #eff5fa !important; border-color: #a8c8df !important; }
+[data-theme="light"] #view-roadmap .sidebar-quest-item.ready {
+  background: #edf5fb !important;
+  border-color: #8fbad5 !important;
+}
+[data-theme="light"] #view-roadmap .sidebar-quest-item.claimed {
+  background: #f4f7fa !important;
+  border-color: #d0dde8 !important;
+}
+[data-theme="light"] #view-roadmap .sidebar-quest-bar,
+[data-theme="light"] #quests-modal .quest-progress-track { background: #d8e5ef !important; }
+[data-theme="light"] #view-roadmap .sidebar-quest-fill,
+[data-theme="light"] #view-roadmap .sidebar-quest-item.ready .sidebar-quest-fill,
+[data-theme="light"] #quests-modal .quest-progress-fill { background: #4287b4 !important; }
+[data-theme="light"] #view-roadmap .sidebar-quest-btn.in-progress {
+  background: #e8eef4 !important;
+  color: #65798d !important;
+  border-color: #c1cedb !important;
+}
+[data-theme="light"] #view-roadmap .sidebar-quest-btn.active,
+[data-theme="light"] #quests-modal .btn-claim-quest.active {
+  background: #3f8ab8 !important;
+  border-color: #3578a4 !important;
+  color: #fff !important;
+}
+[data-theme="light"] #view-roadmap .sidebar-quest-btn.active:hover,
+[data-theme="light"] #quests-modal .btn-claim-quest.active:hover {
+  background: #3377a4 !important;
+  border-color: #2d6d97 !important;
+}
+[data-theme="light"] #view-roadmap .sidebar-quest-btn.claimed,
+[data-theme="light"] #quests-modal .btn-claim-quest.claimed {
+  background: #edf2f6 !important;
+  color: #45637c !important;
+  border-color: #c0d1df !important;
+}
+[data-theme="light"] #quests-modal .quest-card {
+  background: #fff !important;
+  border-color: #d1dfeb !important;
+}
+[data-theme="light"] #quests-modal .quest-card.ready-to-claim {
+  background: #edf5fb !important;
+  border-color: #95bcd6 !important;
+}
+[data-theme="light"] #quests-modal .quests-countdown-bar {
+  color: #315d7b !important;
+  background: #eef5fa !important;
+  border-color: #c0d8e8 !important;
+}

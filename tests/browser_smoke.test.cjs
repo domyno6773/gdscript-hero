@@ -155,6 +155,69 @@ async function smoke(browser,url,width){
  if(roadmapStyle.nodeAnimation!==null)assert.equal(roadmapStyle.nodeAnimation,'none','Roadmap node must not pulsate with neon');
  console.log('ROADMAP_STYLE '+JSON.stringify(roadmapStyle));
 
+ // Il riscatto deve mantenere i colori Godot in dark/light, senza neon né animazioni.
+ // Con progressi simulati controlliamo anche che il clic accrediti gli XP una sola volta.
+ const questPaint=await page.evaluate(()=>{
+   const original=JSON.parse(JSON.stringify(App.state.dailyQuests));
+   const originalXP=App.state.xp;
+   const originalCount=App.state.claimedQuestsCount;
+   const first=DAILY_QUESTS_CONFIG[0],second=DAILY_QUESTS_CONFIG[1];
+   try {
+     App.state.dailyQuests.progress[first.id]=first.target;
+     App.state.dailyQuests.progress[second.id]=0;
+     App.state.dailyQuests.claimed[first.id]=false;
+     App.state.dailyQuests.claimed[second.id]=false;
+     App.renderSidebarDailyQuests();
+     App.updateQuestsBadge();
+     const prior=document.documentElement.getAttribute('data-theme');
+     const inspect=()=>{
+       const ready=document.querySelector('#sidebar-quests-list .sidebar-quest-item.ready');
+       const button=ready.querySelector('.sidebar-quest-btn.active');
+       const badge=document.getElementById('sidebar-quests-badge');
+       const fill=ready.querySelector('.sidebar-quest-fill');
+       const s=getComputedStyle(button),b=getComputedStyle(badge);
+       return {background:s.backgroundColor,image:s.backgroundImage,shadow:s.boxShadow,
+         animation:s.animationName,badgeBackground:b.backgroundColor,badgeImage:b.backgroundImage,
+         badgeShadow:b.boxShadow,badgeAnimation:b.animationName,
+         fillImage:getComputedStyle(fill).backgroundImage};
+     };
+     document.documentElement.setAttribute('data-theme','dark');
+     const dark=inspect();
+     document.documentElement.setAttribute('data-theme','light');
+     const light=inspect();
+     if(prior===null)document.documentElement.removeAttribute('data-theme');
+     else document.documentElement.setAttribute('data-theme',prior);
+     const label=document.querySelector('#sidebar-quests-list .sidebar-quest-btn.active').textContent.trim();
+     document.querySelector('#sidebar-quests-list .sidebar-quest-btn.active').click();
+     const awarded=App.state.xp-originalXP;
+     const claimed=App.state.dailyQuests.claimed[first.id];
+     const state=document.querySelector('#sidebar-quests-list .sidebar-quest-btn.claimed')?.textContent.trim();
+     return {dark,light,label,awarded,expectedXP:first.xpReward,claimed,state};
+   } finally {
+     App.state.dailyQuests=original;
+     App.state.xp=originalXP;
+     App.state.claimedQuestsCount=originalCount;
+     App.renderSidebarDailyQuests();
+     App.updateQuestsBadge();
+   }
+ });
+ for(const theme of ['dark','light']){
+   const paint=questPaint[theme];
+   assert.equal(paint.image,'none',theme+' ready reward button still has a neon gradient');
+   assert.equal(paint.badgeImage,'none',theme+' quest badge still has a gradient');
+   assert.equal(paint.shadow,'none',theme+' claim button still glows');
+   assert.equal(paint.badgeShadow,'none',theme+' quest badge still glows');
+   assert.equal(paint.animation,'none',theme+' claim button still pulses');
+   assert.equal(paint.badgeAnimation,'none',theme+' quest badge still pulses');
+   assert.equal(paint.fillImage,'none',theme+' progress bar still has a gradient');
+ }
+ assert.equal(questPaint.dark.background,'rgb(71, 127, 166)','Ready button has wrong Godot dark color');
+ assert.equal(questPaint.light.background,'rgb(63, 138, 184)','Ready button has wrong Godot light color');
+ assert.equal(questPaint.label,'Riscatta ricompensa','Old neon reward emoji should be removed');
+ assert.equal(questPaint.claimed,true);
+ assert.equal(questPaint.awarded,questPaint.expectedXP,'Quest claim must credit the correct XP');
+ assert.match(questPaint.state,/Riscattato/);
+
  // CTA Ripasso: nessun testo sottolineato o controllo senza layout nel callout.
  const reviewCalloutStyle=await page.evaluate(()=>{
    const panel=document.getElementById('roadmap-review-callout');
