@@ -25,9 +25,9 @@ Questa pagina accompagna la specifica principale; non dichiara operative funzion
 | P1: ripassi 15 XP + 5 XP da settimana successiva | **Implementato nel client** | una sola volta per variante/settimana e massimo 60 XP |
 | P1: importazioni legacy | **Compatibilità parziale** | XP storico preservato, nuovo stato `rewardsV2` serializzato; necessario ledger server |
 | P2: gradi e icone SVG nel profilo | **Implementato** | fino al grado Leggenda; livelli illimitati |
-| P3: Arena Classificata, sfide e verifica autorevole | **Da implementare** | non pubblicare punteggi né test segreti nel frontend |
-| P4: classifiche globali/nazionali, Paese e stagioni | **Da implementare** | nessuna graduatoria ufficiale senza runner sicuro |
-| P4: pagamento e Archivio Premium chiuso | **Da implementare** | enforcement degli entitlement lato server, non solo CSS |
+| P3: Arena Classificata, sfide e verifica autorevole | **Demo locale e schema SQL pronti; ufficiale non attiva** | 3 esercizi gratuiti verificabili con Godot 4.4.1 WebAssembly; nessun XP/punto ufficiale; worker server ancora da distribuire |
+| P4: classifiche globali/nazionali, Paese e stagioni | **Schema SQL pronto; UI live non attiva** | migr. Supabase da applicare, `gdh_leaderboard` e Paese bloccato; non pubblicare graduatorie senza runner sicuro |
+| P4: pagamento e Archivio Premium chiuso | **UI chiusa e SQL preparato; billing non attivo** | nessun accesso gratuito ai vecchi task via RLS; niente contenuti di stagioni reali ancora pubblicati |
 
 ## Passi di implementazione successivi
 

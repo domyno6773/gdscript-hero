@@ -32,3 +32,5 @@ jobs:
         run: node tests/progression_v2.test.cjs
       - name: Arena and official leaderboard schema invariants
         run: node tests/competition_schema.test.cjs
+      - name: Godot Arena demo scoring and no fraudulent XP
+        run: node tests/competition_arena.test.cjs

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="exercise-redesign.css">
     <link rel="stylesheet" href="code-guide.css">
     <link rel="stylesheet" href="progression.css">
+    <link rel="stylesheet" href="arena-competition.css">
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -607,10 +608,58 @@
                 </p>
             </div>
 
+
+            <!-- Arena Classificata 2.0: demo libera, NON la competizione ufficiale. -->
+            <section class="competition-entry" aria-labelledby="competition-entry-title">
+                <div>
+                    <span class="competition-eyebrow">ARENA CLASSIFICATA · ANTEPRIMA GRATUITA</span>
+                    <h3 id="competition-entry-title">Mettiti alla prova con Godot</h3>
+                    <p>Tre esercizi dimostrativi aperti anche agli ospiti. Il codice viene verificato dal vero Godot, ma non vengono assegnati XP o punti in classifica finché il server competitivo non sarà operativo.</p>
+                    <button type="button" id="btn-open-competitive-arena" class="competition-primary">Prova le sfide dimostrative</button>
+                </div>
+                <div class="competition-archive-locked" aria-label="Archivio delle stagioni non disponibile">
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                    <strong>Archivio stagioni · Premium</strong>
+                    <span>Sezione chiusa. Sarà accessibile solo con un abbonamento attivo; salva personalmente il codice prima della fine delle stagioni.</span>
+                </div>
+            </section>
+
             <div class="projects-grid" id="projects-grid-container">
                 <!-- Popolato dinamicamente da app.js -->
             </div>
         </div>
+
+
+        <!-- Area dimostrativa: nessun punto ufficiale, nessun XP, nessun salvataggio automatico. -->
+        <section id="competition-workspace" class="competition-workspace hidden" aria-labelledby="competition-heading">
+            <div class="competition-top">
+                <button type="button" id="btn-close-competitive-arena" class="competition-back">Torna ai Progetti</button>
+                <span class="competition-eyebrow">ARENA CLASSIFICATA · MODALITÀ DEMO</span>
+            </div>
+            <h2 id="competition-heading">Sfide di allenamento con Godot</h2>
+            <p class="competition-notice">Le sfide ufficiali e le classifiche globale/nazionale non sono ancora attive. Questi risultati restano sullo schermo e <strong>non generano XP, punti competitivi o premi</strong>. I tuoi file non vengono archiviati: scarica il codice se vuoi conservarlo.</p>
+            <div class="competition-grid">
+                <aside class="competition-side">
+                    <h3>Scegli una difficoltà</h3>
+                    <div id="competition-challenge-list" class="competition-list"></div>
+                </aside>
+                <div class="competition-main">
+                    <h3 id="competition-current-title">Raddoppia il valore</h3>
+                    <p id="competition-current-meta" class="competition-meta"></p>
+                    <p id="competition-current-task" class="competition-task"></p>
+                    <label for="competition-code-editor" class="competition-code-label">Codice GDScript</label>
+                    <textarea id="competition-code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Editor della sfida dimostrativa"></textarea>
+                    <div class="competition-actions">
+                        <button type="button" id="competition-run" class="competition-primary">Verifica con Godot</button>
+                        <button type="button" id="competition-save-code" class="competition-secondary">Scarica codice .gd</button>
+                    </div>
+                    <section class="competition-feedback" aria-live="polite" aria-label="Risultati dei test">
+                        <h4>Feedback bilanciato</h4>
+                        <div id="competition-results"></div>
+                    </section>
+                </div>
+            </div>
+        </section>
 
         <!-- SEZIONE 2: WORKSPACE INTERATTIVO MINI-PROGETTO ARENA -->
         <div id="project-arena-workspace" class="hidden">
@@ -1936,6 +1985,7 @@
     <script src="auth.js"></script>
     <script src="stats.js"></script>
     <script src="gdscript-highlighter.js"></script>
+    <script src="arena-competition.js"></script>
     <script src="app.js"></script>
     <!-- Il motore Godot WebAssembly e' la verifica standard di tutte le lezioni. -->
     <script src="native/native-beta-adapter.js"></script>
