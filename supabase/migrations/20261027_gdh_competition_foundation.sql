@@ -274,7 +274,7 @@ BEGIN
  )
  SELECT dense_rank() OVER(ORDER BY board.total DESC) AS rank,
    board.user_id,board.display_name,board.country,board.total
- FROM board ORDER BY rank,board.user_id LIMIT LEAST(GREATEST(p_limit,1),100);
+ FROM board ORDER BY board.total DESC,board.user_id LIMIT LEAST(GREATEST(p_limit,1),100);
 END;
 $$;
 REVOKE ALL ON FUNCTION public.gdh_leaderboard(TEXT,TEXT,INT) FROM PUBLIC;
