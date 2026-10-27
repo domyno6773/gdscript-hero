@@ -3104,10 +3104,25 @@ const App = {
             }
         }
         const statement = code.trim();
-        const block = /:\s*$/.test(statement) &&
+        const hasColon = /:\s*$/.test(statement);
+        const block = hasColon &&
             /^(?:(?:static\s+)?func\b|if\b|elif\b|else\b|for\b|while\b|match\b|when\b|class\b|get\b|set\b)/.test(statement);
+        // I rami di match (1:, _:, "nome":, ecc.) sono blocchi pur non
+        // iniziando con una parola chiave. Riconosci il loro match genitore.
+        let matchArm = false;
+        if (hasColon && !block && indent.length) {
+            const previous = editor.value.slice(0, lineStart).split('\n');
+            for (let i = previous.length - 1; i >= 0; i--) {
+                const line = previous[i];
+                if (!line.trim() || /^\s*#/.test(line)) continue;
+                if (line.match(/^[ \t]*/)[0].length < indent.length) {
+                    matchArm = /^match\b.*:\s*(?:#.*)?$/.test(line.trim());
+                    break;
+                }
+            }
+        }
         const unit = indent.includes('\t') && !indent.includes(' ') ? '\t' : '    ';
-        editor.setRangeText('\n' + indent + (block ? unit : ''), start, end, 'end');
+        editor.setRangeText('\n' + indent + (block || matchArm ? unit : ''), start, end, 'end');
         // Notifica la stessa pipeline di aggiornamento usata dalla digitazione:
         // numeri di riga, colori, suggerimenti, autosalvataggio e progressi.
         editor.dispatchEvent(new Event('input', { bubbles: true }));
