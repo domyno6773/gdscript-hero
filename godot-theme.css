@@ -759,3 +759,90 @@ body[data-theme="light"] {
   background: #f8e8ed;
   border-color: #e3bcc8;
 }
+
+
+/* CTA Ripasso in Mappa: due pulsanti veri, coerenti con il tema Godot.
+   Il vecchio .btn-primary era privo di regole di base (padding, font, bordo). */
+#roadmap-review-callout .callout-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+#roadmap-review-callout .callout-actions button {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 39px;
+    padding: 9px 15px;
+    margin: 0;
+    border: 1px solid;
+    border-radius: 8px;
+    font-family: var(--font-ui), sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color .14s ease, border-color .14s ease;
+}
+#roadmap-review-callout .callout-actions .btn-subtle {
+    background: #303b4b;
+    border-color: #56677d;
+    color: #e9f2fc;
+    box-shadow: none;
+}
+#roadmap-review-callout .callout-actions .btn-subtle:hover {
+    background: #3b4c60;
+    border-color: #718aa2;
+}
+#roadmap-review-callout .callout-actions .btn-primary {
+    background: #579dcc !important;
+    background-image: none !important;
+    border-color: #7bb9dd !important;
+    color: #122c41 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+#roadmap-review-callout .callout-actions .btn-primary:hover {
+    background: #78b8de !important;
+    border-color: #93cae8 !important;
+    box-shadow: none !important;
+}
+#roadmap-review-callout .callout-actions button:focus-visible {
+    outline: 2px solid #a4d8f4;
+    outline-offset: 3px;
+}
+[data-theme="light"] #roadmap-review-callout .callout-actions .btn-subtle {
+    background: #f6f9fc;
+    border-color: #aabfd0;
+    color: #284258;
+}
+[data-theme="light"] #roadmap-review-callout .callout-actions .btn-subtle:hover {
+    background: #e6eff7;
+    border-color: #839fb8;
+}
+[data-theme="light"] #roadmap-review-callout .callout-actions .btn-primary {
+    background: #3f8fbe !important;
+    border-color: #327baa !important;
+    color: #fff !important;
+}
+[data-theme="light"] #roadmap-review-callout .callout-actions .btn-primary:hover {
+    background: #317fab !important;
+    border-color: #286f99 !important;
+}
+@media (max-width: 480px) {
+    #roadmap-review-callout .callout-actions {
+        width: 100%;
+    }
+    #roadmap-review-callout .callout-actions button {
+        flex: 1 1 auto;
+    }
+}
