@@ -94,7 +94,7 @@ async function submit(payload,token) {
  applyRateLimit(user.id);
  active++;tasks.set(user.id,true);
  try{
-   await checkCountry(token,(payload.challengeId||'').slice(0,7)); // Rechecked below against DB.
+   // The authoritative season comes from the challenge row, never the ID prefix.
    const challenge=await activeChallenge(payload.challengeId);
    // SQL transaction is final authority, but reject clearly inactive challenges early.
    const seasonRows=await supaFetch('/rest/v1/gdh_seasons?'+new URLSearchParams({

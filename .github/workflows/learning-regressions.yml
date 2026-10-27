@@ -34,3 +34,5 @@ jobs:
         run: node tests/competition_schema.test.cjs
       - name: Godot Arena demo scoring and no fraudulent XP
         run: node tests/competition_arena.test.cjs
+      - name: Private Arena coordinator tests
+        run: node --test server/arena/tests/*.test.cjs

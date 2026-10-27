@@ -28,3 +28,11 @@ jobs:
           grep -F "NATIVE_QUEUED: true" /tmp/godot_native.log
           grep -F "NATIVE_AFTER_FRAME_PRESENT: false" /tmp/godot_native.log
           grep -F "NATIVE_VECTOR2: (100.0, 200.0)" /tmp/godot_native.log
+      - name: Exercise isolated Arena headless grader with actual Godot 4.4.1
+        run: |
+          sudo mkdir -p /work
+          sudo chmod 755 /work
+          printf 'extends Node\nfunc double_value(n: int) -> int:\n    return n * 2\n' | sudo tee /work/student.gd >/dev/null
+          printf '%s\n' '{"method":"double_value","args":[7]}' | sudo tee /work/input.json >/dev/null
+          /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64 --headless --path server/arena/godot --script res://grader.gd -- /work/student.gd /work/input.json 2>&1 | tee /tmp/gdh-arena-grader.log
+          grep -F 'GDH_VERDICT:{"status":"executed","value":14}' /tmp/gdh-arena-grader.log
