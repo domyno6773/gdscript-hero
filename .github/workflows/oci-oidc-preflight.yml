@@ -1,0 +1,24 @@
+name: "OCI bridge - OIDC identity check (NO CLOUD WRITES)"
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: oci-oidc-identity-check
+  cancel-in-progress: false
+jobs:
+  identity-only:
+    name: "GitHub OIDC identity check - Oracle NOT contacted"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: oci-readonly
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Confirm Python probe is syntactically valid
+        run: python3 -m py_compile scripts/oci_github_oidc_probe.py
+      - name: Inspect signed GitHub identity (no tokens printed)
+        run: python3 scripts/oci_github_oidc_probe.py
