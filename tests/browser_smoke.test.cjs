@@ -170,10 +170,13 @@ async function smoke(browser,url,width){
      App.renderSidebarDailyQuests();
      App.updateQuestsBadge();
      const prior=document.documentElement.getAttribute('data-theme');
+     const ready=document.querySelector('#sidebar-quests-list .sidebar-quest-item.ready');
+     const button=ready.querySelector('.sidebar-quest-btn.active');
+     const badge=document.getElementById('sidebar-quests-badge');
+     // Senza le transizioni: confrontiamo lo stile finale, non il frame intermedio.
+     button.style.transition='none';
+     badge.style.transition='none';
      const inspect=()=>{
-       const ready=document.querySelector('#sidebar-quests-list .sidebar-quest-item.ready');
-       const button=ready.querySelector('.sidebar-quest-btn.active');
-       const badge=document.getElementById('sidebar-quests-badge');
        const fill=ready.querySelector('.sidebar-quest-fill');
        const s=getComputedStyle(button),b=getComputedStyle(badge);
        return {background:s.backgroundColor,image:s.backgroundImage,shadow:s.boxShadow,
