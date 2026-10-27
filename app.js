@@ -82,7 +82,7 @@ const App = {
                 {
                     id: 'proj_default',
                     name: 'Il Mio Gioco Godot',
-                    code: `extends Node2D\n\nvar clicks = 0\n\nfunc _ready():\n    print("🎮 Benvenuto nella Sandbox di Godot 4!")\n    $Label.text = "Clicca il pulsante sotto per iniziare."\n\nfunc _on_button_pressed():\n    clicks += 1\n    print("Pulsante cliccato! Volte:", clicks)\n    $Label.text = "Bravo! Hai cliccato " + str(clicks) + " volte!"\n`,
+                    code: `extends Node2D\n\nvar clicks = 0\n\nfunc _ready():\n    print("Benvenuto nella Sandbox di Godot 4!")\n    $Label.text = "Clicca il pulsante sotto per iniziare."\n\nfunc _on_button_pressed():\n    clicks += 1\n    print("Pulsante cliccato! Volte:", clicks)\n    $Label.text = "Bravo! Hai cliccato " + str(clicks) + " volte!"\n`,
                     nodes: [
                         { name: 'Main', type: 'Node2D', parent: null },
                         { name: 'Label', type: 'Label', text: 'Clicca il pulsante sotto per iniziare.', parent: 'Main' },
@@ -699,6 +699,15 @@ const App = {
     // =========================================================
     // VISTA SANDBOX & MINI-IDE GODOT 4 (Libera Sperimentazione)
     // =========================================================
+    // Icone SVG statiche; nessun dato proveniente dai progetti entra nei riferimenti.
+    sandboxIcon(name) {
+        const allowed = new Set(['gamepad','folder','plus','pencil','trash','help',
+            'package','play','network','file','monitor','terminal','bulb','refresh',
+            'button','tag','clock','square','locate','circle','rocket','image','user','chart']);
+        const id = allowed.has(name) ? name : 'circle';
+        return `<svg class="ui-icon sandbox-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#gdh-icon-${id}"></use></svg>`;
+    },
+
     getDefaultSandboxState() {
         return {
             activeProjectId: 'proj_default',
@@ -706,7 +715,7 @@ const App = {
                 {
                     id: 'proj_default',
                     name: 'Il Mio Gioco Godot',
-                    code: `extends Node2D\n\nfunc _ready():\n    print("🎮 Sandbox avviata! Scrivi il tuo codice qui.")\n`,
+                    code: `extends Node2D\n\nfunc _ready():\n    print("Sandbox avviata! Scrivi il tuo codice qui.")\n`,
                     nodes: [
                         { name: 'Main', type: 'Node2D', parent: null }
                     ],
@@ -1082,7 +1091,7 @@ const App = {
         const newProj = {
             id: id,
             name: name,
-            code: `extends Node2D\n\nfunc _ready():\n    print("🎮 Progetto ${name} avviato!")\n`,
+            code: `extends Node2D\n\nfunc _ready():\n    print("Progetto ${name} avviato!")\n`,
             nodes: [
                 { name: 'Main', type: 'Node2D', parent: null }
             ],
@@ -1097,7 +1106,7 @@ const App = {
 
         SoundFX.playFanfare();
         this.showToast({
-            icon: '🚀',
+            iconName: 'rocket',
             tag: 'SANDBOX',
             title: 'Nuovo Progetto Creato',
             desc: `"${name}" è ora attivo e sincronizzato!`
@@ -1113,7 +1122,7 @@ const App = {
         this.loadActiveSandboxProject();
         SoundFX.playSuccess();
         this.showToast({
-            icon: '✏️',
+            iconName: 'pencil',
             tag: 'SANDBOX',
             title: 'Progetto Rinominato',
             desc: `Nome aggiornato in "${newName}"`
@@ -1141,7 +1150,7 @@ const App = {
         this.loadActiveSandboxProject();
         SoundFX.playClick();
         this.showToast({
-            icon: '🗑️',
+            iconName: 'trash',
             tag: 'SANDBOX',
             title: 'Progetto Rimosso',
             desc: 'La lista progetti è stata aggiornata.'
@@ -1211,18 +1220,13 @@ const App = {
             countEl.innerText = `${nodesList.length} ${nodesList.length === 1 ? 'nodo' : 'nodi'}`;
         }
 
-        const getNodeIcon = (type) => {
-            switch (type) {
-                case 'Button': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
-                case 'Label': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="9" y1="20" x2="15" y2="20"/></svg>';
-                case 'Timer': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg>';
-                case 'ColorRect': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
-                case 'Sprite2D': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
-                case 'CharacterBody2D': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2"/></svg>';
-                case 'ProgressBar': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>';
-                case 'Node2D': return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><circle cx="18" cy="19" r="3"/><path d="M12 8v5m-4.5 3.5L12 13m4.5 3.5L12 13"/></svg>';
-                default: return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>';
-            }
+        const getNodeIcon = type => {
+            const icons = {
+                Button:'button', Label:'tag', Timer:'clock', ColorRect:'square',
+                Sprite2D:'image', CharacterBody2D:'user', ProgressBar:'chart',
+                Node2D:'network', Node:'circle'
+            };
+            return this.sandboxIcon(icons[type] || 'package');
         };
 
         const buildTreeDom = (node, depth = 0) => {
@@ -1290,7 +1294,7 @@ const App = {
                     detail.append(textLabel, textValue);
                 }
             } else {
-                detailsEl.innerHTML = `<div class="sandbox-node-hint">💡 Clicca un nodo per selezionarlo o usa '➕ Nodo' per aggiungerne altri</div>`;
+                detailsEl.innerHTML = `<div class="sandbox-node-hint">${this.sandboxIcon('bulb')} <span>Clicca un nodo per selezionarlo oppure usa <strong>Nodo</strong> per aggiungerne altri.</span></div>`;
             }
         }
     },
@@ -1556,7 +1560,7 @@ const App = {
 
         SoundFX.playFanfare();
         this.showToast({
-            icon: '📦',
+            iconName: 'package',
             tag: 'ESPORTAZIONE GODOT 4',
             title: 'File main.gd e main.tscn Scaricati!',
             desc: 'Trascina i file nella cartella di un progetto Godot Engine 4 per eseguirli!'
@@ -1592,7 +1596,7 @@ const App = {
 
         SoundFX.playSuccess();
         this.showToast({
-            icon: '➕',
+            iconName: 'plus',
             tag: 'SCENA GODOT',
             title: 'Nodo Aggiunto!',
             desc: `Nodo '$${finalName}' (${type}) aggiunto alla scena Sandbox.`
@@ -1622,7 +1626,7 @@ const App = {
 
         SoundFX.playClick();
         this.showToast({
-            icon: '🗑️',
+            iconName: 'trash',
             tag: 'SCENA GODOT',
             title: 'Nodo Rimosso',
             desc: `Il nodo '$${targetNode.name}' è stato rimosso dalla scena.`
@@ -2129,7 +2133,12 @@ const App = {
         const toast = document.getElementById('achievement-toast');
         if (!toast) return;
 
-        document.getElementById('toast-icon').innerText = data.icon;
+        const toastIcon = document.getElementById('toast-icon');
+        if (data.iconName) {
+            toastIcon.innerHTML = this.sandboxIcon(data.iconName);
+        } else {
+            toastIcon.textContent = data.icon || '';
+        }
         toast.querySelector('.toast-tag').innerText = data.tag;
         document.getElementById('toast-title').innerText = data.title;
         document.getElementById('toast-desc').innerText = data.desc;
