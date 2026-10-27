@@ -26,7 +26,7 @@ Questa pagina accompagna la specifica principale; non dichiara operative funzion
 | P1: importazioni legacy | **Compatibilità parziale** | XP storico preservato, nuovo stato `rewardsV2` serializzato; necessario ledger server |
 | P2: gradi e icone SVG nel profilo | **Implementato** | fino al grado Leggenda; livelli illimitati |
 | P3: Arena Classificata, sfide e verifica autorevole | **Demo locale e backend headless implementati nel repository; ufficiale non attiva** | 3 esercizi gratuiti con Godot WebAssembly; coordinatore Node 22 + Godot 4.4.1 headless containerizzato con casi riservati; SQL, Docker e Supabase non ancora distribuiti sul server |
-| P4: classifiche globali/nazionali, Paese e stagioni | **UI integrata, backend non distribuito** | `arena-official.js` legge cataloghi Supabase e RPC: globale/nazionale, Paese confermabile, invio al valutatore solo se configurato. Nessun dato inventato; migration e server ancora da distribuire |
+| P4: classifiche globali/nazionali, Paese e stagioni | **UI e migration Supabase live; valutatore non distribuito** | `arena-official.js` legge cataloghi Supabase e RPC: globale/nazionale, Paese confermabile, invio al valutatore solo se configurato. Nessun dato inventato; migration e server ancora da distribuire |
 | P4: pagamento e Archivio Premium chiuso | **UI chiusa e SQL preparato; billing non attivo** | nessun accesso gratuito ai vecchi task via RLS; niente contenuti di stagioni reali ancora pubblicati |
 
 ## Passi di implementazione successivi
@@ -50,3 +50,13 @@ Per deployment, audit e gestione segreti consultare `server/arena/README.md` e `
 Il pannello `official-arena-workspace` fa parte della sezione Progetti e resta accessibile anche senza registrazione per consultare eventuali contenuti pubblici della stagione. In assenza della migrazione Supabase o del servizio attivo, comunica chiaramente che non esiste alcuna stagione classificate operativa. `arena-official.js` implementa il catalogo di sfide, una sola selezione Paese per stagione mediante RPC, due sole classifiche mondiale/nazionale, visualizzazione sicura dei nomi con `textContent`, salvataggio manuale di file `.gd` e sottomissione ufficiale solo dopo aver impostato l'endpoint HTTPS in `supabase-config.js`. La risposta di invio non accredita autonomamente XP locali: l'integrazione completa del ledger sul profilo è una fase aperta. Il Paese è suggerito da IP solo con un server fidato dietro Cloudflare; in caso contrario è selezionabile senza falso rilevamento.
 
 **Dipendenze esterne non risolte nel solo GitHub:** applicare la migration e verificare RLS in Supabase; distribuire su un provider con Docker l'API e il valutatore, configurare i segreti soltanto nell'ambiente protetto, revisionare e creare fixture private, collaudare il contratto RPC e la concorrenza; successivamente integrare billing/Premium e avviare una stagione reale. Non considerare percentuali o scadenze fittizie come segno di completamento.
+
+## Supabase live (27 ottobre 2026)
+
+**Migrazione applicata al progetto reale `gdscript-hero`:** `gdh_competition_foundation_20261027`. Schema `gdh_private` e tabelle pubbliche `gdh_*` create correttamente. Verificato dopo migrazione: 4 profili e 4 salvataggi esistenti, invariati nel conteggio; **0 stagioni, 0 punteggi e 0 accrediti** (nessun contenuto ufficiale fittizio). Tutte le tabelle nuove sono in RLS.
+
+**Permessi verificati sul database:** `anon` e `authenticated` non hanno privilegi `INSERT/UPDATE/DELETE` sulla tabella punteggi; `anon` non ha accesso allo schema privato; `anon` e `authenticated` non possono invocare `gdh_record_verified_verdict`; `service_role` sì. Si tratta di test di grant; restano necessari test RLS con JWT reali e test integrati del worker Docker.
+
+**Stato pubblico:** le classifiche rimangono senza dati finché non si avvia una stagione reale. Non attivare `arenaApiBaseUrl` nel client finché il coordinatore Godot non sia stato distribuito, collaudato e protetto su HTTPS.
+
+**Osservazioni dei consulenti di sicurezza Supabase:** sono presenti avvisi preesistenti su `public.admin_stats_overview` (vista security definer), `public.handle_new_user` (search_path/permessi) e protezione password compromesse disabilitata. Le nuove tabelle riservate senza policy SELECT sono **intenzionalmente chiuse**. I metodi RPC `SECURITY DEFINER` esposti con permessi ristretti vanno comunque verificati in audit.
