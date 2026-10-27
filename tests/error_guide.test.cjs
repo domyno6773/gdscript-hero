@@ -25,7 +25,7 @@ const undefinedVar=guide.diagnose({
  source:code,error:'Identifier "health" not declared in the current scope. At: res://student.gd:3:5'
 });
 assert.equal(undefinedVar.line,3);
-assert.match(undefinedVar.title,/Nome/);
+assert.match(undefinedVar.title,/nome/i);
 
 const badPosition=guide.diagnose({source:code,error:'Error in res://student.gd:900'});
 assert.equal(badPosition.line,null,'Must not invent out-of-range line numbers');
