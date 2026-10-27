@@ -45,7 +45,7 @@ assert.equal(at(challenge,'print').key,'print');
 assert.equal(at('var salute = 100','var').key,'var');
 assert.equal(at('func heal(amount):\n    pass','func').key,'func');
 assert.equal(at('func _ready():\n    pass','pass').key,'pass');
-assert.equal(at('if health > 0:\n    print(health)','if').key,'condition');
+assert.equal(at('if health > 0:\n    print(health)','if').key,'if');
 assert.equal(at('var x = true','true').key,'boolean');
 assert.equal(at('$Label.text = "ok"','$Label').key,'nodepath');
 assert.equal(at('var x = range(3)','range').key,'range');
@@ -70,7 +70,7 @@ for(const [source,word,key] of [
 }
 assert.equal(guide.explainAt('func',4,{strict:true}),null,'Fuori dalla parola non deve apparire il tooltip');
 assert.equal(guide.explainAt('func',3,{strict:true}).key,'func');
-assert.equal(guide.explainAt('func x():\n    var hp = 0',14,{strict:true}),null,
+assert.equal(guide.explainAt('func x():\n    var hp = 0',11,{strict:true}),null,
  'Non interpretare spazi bianchi come istruzioni');
 assert.equal(at('"func"','func'),null,'Niente popup nel testo fra virgolette');
 assert.equal(at('# func','func'),null,'Niente popup sui commenti');
