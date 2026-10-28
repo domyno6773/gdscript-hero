@@ -41,7 +41,16 @@ async function testGodotEditorExtras(page,selector){
  await editor.fill(base);
  const gutter=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-gutter':
    '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-gutter';
- await page.waitForFunction(s=>document.querySelector(s)?.querySelector('button'),gutter);
+ const debug=await page.evaluate(s=>{
+   const el=document.querySelector(s), editor=document.activeElement;
+   return {ux:typeof window.GDHEditorUX,blockRanges:
+     [...(window.GDHEditorUX?.ranges(editor?.value||'')||new Map())],
+     gutterPresent:!!el,buttons:el?.querySelectorAll('button').length||0,
+     active:editor?.id,editorScroll:editor?.scrollTop,
+     editorRect:editor?.getBoundingClientRect().toJSON()};
+ },gutter);
+ console.log('FOLD_DEBUG '+selector+' '+JSON.stringify(debug));
+ assert.ok(debug.buttons>0,'No fold arrows: '+JSON.stringify(debug));
  await page.locator(gutter+' button').first().click();
  const preview=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-preview':
    '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-preview';
