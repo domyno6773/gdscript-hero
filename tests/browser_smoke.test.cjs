@@ -1782,16 +1782,17 @@ async function smoke(browser,url,width){
  for(let index=1;index<4;index++){
    assert.equal(await page.locator('#lesson-practice-counter').textContent(),
      'Compito '+(index+1)+' di 4');
+   if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
    if(index===1){
      await page.locator('#code-editor').fill('func _ready():\n    print("Bozza")');
      await page.reload({waitUntil:'load'});
      await page.evaluate(()=>App.openLesson(1));
+     if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
      assert.equal(await page.locator('#lesson-practice-counter').textContent(),'Compito 2 di 4',
        'Reload must restore current task');
      assert.ok((await page.locator('#code-editor').inputValue()).includes('Bozza'),
        'Reload must preserve code of the current task');
    }
-   if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
    const solution=await page.evaluate(i=>{
      const lesson=LESSONS_DATA.find(l=>l.id===1);
      return LessonPractice.tasksFor(lesson)[i].solution;

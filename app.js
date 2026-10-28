@@ -2180,6 +2180,8 @@ const App = {
         this.state.unlockedAchievements = [];
         this.state.currentLessonId = 1;
         this.state.userCode = {};
+        this.state.lessonTaskProgress = {};
+        this.currentPracticeTaskIndex = null;
         try {
             const owner=String(this._saveOwner||'guest');
             for(let id=201;id<=230;id++)sessionStorage.removeItem('gdh_chapter_quiz_v1:'+owner+':'+id);
@@ -5353,6 +5355,7 @@ const App = {
                     }
                     document.getElementById('code-editor').value = currentLesson.solution;
                     this.updateLineNumbers();
+                    if(this.saveCurrentPracticeCode())this.saveStorage();
                 }
             };
         }
@@ -6432,6 +6435,7 @@ const App = {
             this.recordHintOpened(this.state.currentLessonId, 3);
             document.getElementById('code-editor').value = currentLesson.solution;
             this.updateLineNumbers();
+            if(this.saveCurrentPracticeCode())this.saveStorage();
         }
     },
 
