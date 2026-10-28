@@ -1,0 +1,53 @@
+/* GDScript Hero — Unified unobtrusive scrollbars
+   Covers page sections, editor panes, modal dialogs and panels.
+   Does not change overflow or create a scrollbar where none is needed. */
+:root {
+  --gdh-scroll-track: #19232f;
+  --gdh-scroll-thumb: #526e88;
+  --gdh-scroll-thumb-hover: #76a3c7;
+}
+[data-theme="light"] {
+  --gdh-scroll-track: #e9eff5;
+  --gdh-scroll-thumb: #a2b6c9;
+  --gdh-scroll-thumb-hover: #6c90b2;
+}
+/* Firefox and current browsers implementing the standard scrollbar API. */
+html, body, body * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gdh-scroll-thumb) var(--gdh-scroll-track);
+}
+/* Chrome, Safari, and other engines using the WebKit scrollbar pseudo-elements. */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: var(--gdh-scroll-track);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gdh-scroll-thumb);
+  border: 2px solid var(--gdh-scroll-track);
+  border-radius: 999px;
+  background-clip: padding-box;
+  min-height: 25px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gdh-scroll-thumb-hover);
+  border: 2px solid var(--gdh-scroll-track);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: var(--gdh-scroll-track);
+}
+/* Preserve the compact horizontally scrollable quick-key toolbar on phones. */
+.mobile-code-toolbar {
+  scrollbar-width: thin;
+}
+.mobile-code-toolbar::-webkit-scrollbar {
+  height: 3px;
+}
+.mobile-code-toolbar::-webkit-scrollbar-thumb {
+  border: 0;
+  background: var(--gdh-scroll-thumb);
+}

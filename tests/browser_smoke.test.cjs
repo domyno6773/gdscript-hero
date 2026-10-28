@@ -577,6 +577,55 @@ async function testSettingsModalRefresh(page, initialWidth) {
      await page.screenshot({path:path.join(dir,'settings-refresh-admin-'+width+'.png'),fullPage:false});
    }
  }
+
+ // The modal must have natural height on a large screen (even for admins)
+ // and scroll only when the available height is genuinely insufficient.
+ for(const variant of [
+   {width:1440,height:1080,admin:true,expectScroll:false},
+   {width:1440,height:1080,admin:false,expectScroll:false},
+   {width:1440,height:540,admin:true,expectScroll:true}
+ ]){
+   await page.setViewportSize({width:variant.width,height:variant.height});
+   const result=await page.evaluate(({admin})=>{
+     const settings=document.getElementById('settings-modal');
+     const card=settings.querySelector('.settings-modal-card');
+     document.getElementById('admin-settings-row').classList.toggle('hidden',!admin);
+     card.scrollTop=0;
+     const style=getComputedStyle(card);
+     const close=document.getElementById('btn-close-settings').getBoundingClientRect();
+     return {height:card.getBoundingClientRect().height,content:card.scrollHeight,
+       client:card.clientHeight,scrollable:card.scrollHeight>card.clientHeight+1,
+       overflowY:style.overflowY,gutter:style.scrollbarGutter,
+       closeTop:close.top,closeBottom:close.bottom};
+   },variant);
+   assert.equal(result.gutter,'auto','Modal must not reserve a permanent scrollbar gutter');
+   assert.equal(result.scrollable,variant.expectScroll,
+     'Incorrect settings scroll behavior at '+variant.height+'px: '+JSON.stringify(result));
+   assert.ok(result.closeTop>=0&&result.closeBottom<=variant.height+1,
+     'Settings close control must remain in view');
+ }
+ // All panels share one restrained scrollbar palette, including the light theme.
+ const scrollbarTheme=await page.evaluate(()=>{
+   const sample=document.querySelector('.view-container');
+   const settings=document.querySelector('#settings-modal .settings-modal-card');
+   const read=()=>({width:getComputedStyle(sample).scrollbarWidth,
+     color:getComputedStyle(sample).scrollbarColor,
+     settingsColor:getComputedStyle(settings).scrollbarColor});
+   const before=document.body.getAttribute('data-theme');
+   document.body.setAttribute('data-theme','dark');
+   const dark=read();
+   document.body.setAttribute('data-theme','light');
+   const light=read();
+   if(before===null)document.body.removeAttribute('data-theme');
+   else document.body.setAttribute('data-theme',before);
+   return {dark,light};
+ });
+ assert.equal(scrollbarTheme.dark.width,'thin','Custom scrollbars must be thin');
+ assert.notEqual(scrollbarTheme.dark.color,scrollbarTheme.light.color,
+   'Light mode should use a separate scrollbar color');
+ assert.equal(scrollbarTheme.dark.color,scrollbarTheme.dark.settingsColor,
+   'Scrollbars must be consistent between page and modal');
+
  // Clicking inside does NOT dismiss; clicking the backdrop does.
  await page.setViewportSize({width:960,height:650});
  await page.evaluate(()=>{
