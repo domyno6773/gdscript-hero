@@ -837,6 +837,26 @@ async function smoke(browser,url,width){
    }));
    throw new Error('Godot Sandbox smoke diagnostic: '+JSON.stringify({diagnostics,pageErrors:errors,network}));
  }
+ // Stesso errore reale sia negli esercizi sia nella Sandbox:
+ // la guida deve spiegare la parentesi mancante, non dire solo "ricontrolla".
+ const missingParenthesis='func _ready():\\n    print("Ciao"'.replace('\\n','\n');
+ await page.locator('#sandbox-code-editor').fill(missingParenthesis);
+ await page.locator('#btn-sandbox-run').click({timeout:10000});
+ await page.waitForFunction(()=>
+   !!document.querySelector('#sandbox-debug-area .gdh-debug-panel'),null,{timeout:15000});
+ const sandboxParenthesis=await page.evaluate(()=>({
+   title:document.querySelector('#sandbox-debug-area .gdh-debug-top strong')?.textContent,
+   why:document.querySelector('#sandbox-debug-area .gdh-debug-explanation')?.textContent,
+   hint:document.querySelector('#sandbox-debug-area .gdh-debug-hint')?.textContent,
+   raw:document.querySelector('#sandbox-console-output')?.textContent,
+   category:document.querySelector('#sandbox-debug-area .gdh-debug-panel')?.dataset.category,
+   line:document.querySelector('#sandbox-debug-area .gdh-debug-jump')?.textContent
+ }));
+ assert.match([sandboxParenthesis.title,sandboxParenthesis.why,
+   sandboxParenthesis.hint].join(' '),/parentes/i,
+   'Sandbox must explain an unclosed print parenthesis: '+JSON.stringify(sandboxParenthesis));
+ assert.equal(sandboxParenthesis.category,'syntax',
+   'Sandbox must classify missing parenthesis as syntax: '+JSON.stringify(sandboxParenthesis));
  // Sandbox: aggiungi i nodi come farebbe un utente con un nuovo progetto vuoto.
  await page.evaluate(()=>{
    App.addSandboxNode('Label','Label','In attesa');
