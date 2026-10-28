@@ -226,7 +226,7 @@ async function testAllLessonCodeSamplesFit(page,width){
          const limit=r.right-(parseFloat(style.paddingRight)||0)-1;
          let textNode;
          while((textNode=walker.nextNode())){
-           const visibleText=textNode.textContent.replace(/\\s+$/,'');
+           const visibleText=textNode.textContent.replace(/\s+$/,'');
            if(!visibleText.trim())continue;
            // A Range containing a trailing newline/indent stop includes
            // invisible whitespace beyond a wrapped line's right edge.
