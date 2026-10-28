@@ -902,6 +902,83 @@
     ]
   }
 ];
+  const CONSOLIDATION_BRIEFS = {
+  "4": [
+    "Diagnostica di bordo",
+    "Completa la sequenza di avvio della navetta: tra il messaggio iniziale e quello finale devono comparire il sistema operativo «Sistema: Godot OS» e il livello energia «Energia: 100%». Mantieni le stampe già presenti; i commenti sono facoltativi.",
+    "Metti insieme output ordinato, testi e valori multipli, senza riscrivere l'intero programma."
+  ],
+  "8": [
+    "Il messaggio nascosto",
+    "Il sistema deve memorizzare tre valori testuali: il titolo The \"Lost\" Key, la battuta It's dangerous to go alone! e il codice di accesso 0420 (con lo zero iniziale). Usa le variabili title, npc_line e door_code: le stampe finali sono già pronte.",
+    "Scegli correttamente i delimitatori delle stringhe e non trasformare il codice della porta in un numero."
+  ],
+  "12": [
+    "La scheda del personaggio",
+    "Prepara una scheda verificabile: costante globale MAX_HP intera a 200, nome eroe «Valerius» tipizzato String, salute intera 150 e scudo_attivo vero con tipo inferito tramite :=. Il report esistente deve leggere i tuoi valori.",
+    "Combina costanti, tipi espliciti e inferenza senza modificare le righe del report."
+  ],
+  "16": [
+    "Bottino dopo lo scontro",
+    "Un combattente parte con 100 punti vita e subisce 35 danni. Tre compagni devono inoltre dividersi 100 monete: ciascuno riceve la propria quota intera e le monete avanzate restano nel forziere. Completa salute_rimasta, monete_per_membro e monete_avanzate, conservando le stampe di fine missione.",
+    "Usa una sottrazione rapida e distingui divisione intera e resto."
+  ],
+  "20": [
+    "Il portale antico",
+    "Il portale si attiva quando l'energia è almeno 50 e il personaggio possiede una chiave o un amuleto. Se non ha abbastanza energia, lo stato deve essere «Energia Insufficiente»; negli altri casi «Nessuna Reliquia Trovata». Assegna stato_portale mediante if, elif ed else.",
+    "Scegli l'ordine dei controlli affinché ogni risultato corrisponda davvero allo stato del personaggio."
+  ],
+  "24": [
+    "Equipaggiamento per la partenza",
+    "Lo zaino contiene Spada, Ramo Secco e Pozione di Vita. Prima della spedizione l'eroe raccoglie un Arco Elfico e scarta il Ramo Secco. Registra con ha_cura se rimane una Pozione di Vita e con totale_slot il numero degli oggetti restanti.",
+    "Combina ricerca, aggiunta, rimozione e conteggio in un singolo problema."
+  ],
+  "28": [
+    "Allerta delle ondate",
+    "L'arena deve annunciare ogni nemico della lista nemici e attribuire 25 XP per avvistamento. Produci i messaggi «Allerta: ...» durante la scansione e accumula l'esperienza in xp_totali, inizialmente zero. Il report finale è già presente.",
+    "La stessa procedura deve funzionare con elenchi di lunghezza diversa."
+  ],
+  "32": [
+    "Calcolo del colpo",
+    "Il sistema di combattimento richiede una funzione calcola_colpo(attacco: int, critico: bool) -> int: capace di restituire il danno normale o il doppio in caso di colpo critico. Le verifiche di attacco nella funzione _ready() sono già presenti.",
+    "Scrivi una funzione riutilizzabile, non una stampa codificata per un solo danno."
+  ],
+  "36": [
+    "Rotta verso la stazione",
+    "La sonda parte da Vector2(100, 200), si muove di +50 sull'asse X e -30 sull'asse Y e deve capire se coincide con la stazione a Vector2(150, 170). Memorizza la conclusione in atterrato confrontando entrambe le coordinate.",
+    "Verifica la posizione dopo la modifica e non basarti soltanto su valori stampati."
+  ],
+  "40": [
+    "Analisi del boss",
+    "Registra il Drago Antico in un dizionario boss con 500 HP iniziali; aggiungi un attacco pari a 75 e aggiorna i punti vita a 420 dopo lo scontro. Il flag in_furia deve indicare se esiste la proprietà opzionale furia.",
+    "L'aggiornamento dello stato non deve perdere i dati originali del boss."
+  ],
+  "44": [
+    "Eventi di battaglia",
+    "La UI deve reagire ai cambiamenti di salute tramite il segnale salute_aggiornata(nuova_salute). Definisci quando_salute_cambia(hp) per stampare il nuovo valore, collega il segnale e invia gli aggiornamenti 75 e 40.",
+    "La callback deve usare il parametro ricevuto, così potrà gestire anche altri valori."
+  ],
+  "48": [
+    "Un party di due avventurieri",
+    "Definisci la classe Avventuriero con nome, ruolo e vita, e un costruttore che riceva questi dati. Crea Aria (Maga, 80 HP) e Krag (Guerriero, 120 HP), quindi calcola la salute complessiva in vita_totale.",
+    "Ogni istanza deve conservare i propri dati: la somma nasce dalle proprietà dei due oggetti."
+  ],
+  "52": [
+    "La targhetta del dungeon",
+    "Nella scena trovi tre Label esistenti. Il titolo deve diventare «Caverna dei Goblin», il livello «Livello: 1» e il denaro «Oro: 50». Aggiorna i nodi TitoloDungeon, LivelloLabel e MoneteLabel e lascia attivo il report già predisposto.",
+    "Applica lo stesso meccanismo a nodi diversi dell'albero senza creare nuove etichette."
+  ],
+  "56": [
+    "Plancia dell'astronave",
+    "Il pulsante MotoriBtn deve richiamare attiva_motori, aggiornare StatoNave a «Motori a Massima Potenza» e stampare «Velocita Aumentata». AllarmeBtn deve invece richiamare attiva_allarme, mostrare «Allarme Attivato» e stampare «Sistemi di Difesa Online».",
+    "I due pulsanti non devono condividere per errore la stessa azione."
+  ],
+  "60": [
+    "Acquisti nella bottega",
+    "La bottega parte con 100 monete e vende pozioni a 25. Quando premi CompraPozioneBtn il saldo deve diminuire soltanto se c'è oro sufficiente; aggiorna OroLabel e MessaggioLabel con l'esito dell'operazione. I messaggi sono «Pozione Acquistata!» oppure «Oro Insufficiente!».",
+    "La logica deve continuare a funzionare dopo acquisti ripetuti, anche a saldo zero."
+  ]
+};
   if (typeof LESSONS_DATA === 'undefined' || !Array.isArray(LESSONS_DATA)) {
     throw new Error('Caricare curriculum_extension.js dopo lessons.js');
   }
@@ -911,10 +988,19 @@
       lesson.title = lesson.title
         .replace(/^[0-9]+\.\s*(?:⭐|🏆)\s*/, match => match.match(/\d+/)[0] + '. ')
         .replace(/Sfida di Apprendimento(?: Finale)?:\s*/, 'Consolidamento: ');
-      lesson.task = [
-        lesson.scenario ? '<p>' + lesson.scenario + '</p>' : '',
-        lesson.requirements ? '<ul>' + lesson.requirements.map(r => '<li>' + r + '</li>').join('') + '</ul>' : lesson.task
-      ].join('');
+      const brief = CONSOLIDATION_BRIEFS[lesson.id];
+      if (brief) {
+        lesson.theory = '<p><strong>' + brief[0] + '</strong> — ' + brief[2] + '</p>';
+        lesson.task = '<p>' + brief[1] + '</p>';
+      }
+    }
+  }
+  // Traguardi storici: ora fanno riferimento agli esercizi di consolidamento.
+  if (typeof ACHIEVEMENTS_DATA !== 'undefined') {
+    for (const achievement of ACHIEVEMENTS_DATA) {
+      achievement.desc = String(achievement.desc||'')
+        .replace(/Sfida di (?:Padronanza|Apprendimento)(?: Finale)?/gi,
+          'esercizio di consolidamento');
     }
   }
   const ids=new Set(LESSONS_DATA.map(l=>l.id));
