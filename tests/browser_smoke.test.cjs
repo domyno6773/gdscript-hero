@@ -628,9 +628,18 @@ async function testSettingsModalRefresh(page, initialWidth) {
    for(const theme of ['dark','light']){
      root.setAttribute('data-theme',theme);
      body.setAttribute('data-theme',theme);
-     // Allow the normal 150ms button color transition to settle before
-     // comparing computed colors. SVG icon color does not animate.
-     await new Promise(resolve=>setTimeout(resolve,230));
+     // The modal has its own entrance animation; browser frames can
+     // delay the start of the button's color transition. Compare only after
+     // all three buttons actually reach matching final colors.
+     const finished=()=>{
+       const sample=read();
+       return ['admin','reset'].every(name=>
+         ['background','border','color'].every(key=>
+           sample[name][key]===sample.normal[key]));
+     };
+     const until=performance.now()+1200;
+     while(!finished() && performance.now()<until)
+       await new Promise(resolve=>setTimeout(resolve,30));
      themes[theme]=read();
    }
    if(before[0]===null)root.removeAttribute('data-theme');
