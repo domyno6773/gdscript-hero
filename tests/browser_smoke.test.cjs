@@ -41,19 +41,7 @@ async function testGodotEditorExtras(page,selector){
  await editor.fill(base);
  const gutter=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-gutter':
    '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-gutter';
- const forced=await editor.evaluate(el=>{try{window.GDHEditorUX.init();return {ok:true,gutters:document.querySelectorAll('.gdh-fold-gutter').length}}catch(e){return {error:String(e),stack:String(e.stack)}}});
- console.log('FOLD_INIT '+selector+' '+JSON.stringify(forced));
- const debug=await page.evaluate(s=>{
-   const el=document.querySelector(s), editor=document.activeElement;
-   return {ux:typeof window.GDHEditorUX,blockRanges:
-     [...(window.GDHEditorUX?.ranges(editor?.value||'')||new Map())],
-     gutterPresent:!!el,buttons:el?.querySelectorAll('button').length||0,
-     active:editor?.id,editorScroll:editor?.scrollTop,
-     editorRect:editor?.getBoundingClientRect().toJSON()};
- },gutter);
- const hostInfo=await editor.evaluate(el=>({hostClass:el.closest('.editor-wrapper')?.className,hostHtml:el.closest('.editor-wrapper')?.outerHTML.slice(-800),globalGutters:document.querySelectorAll('.gdh-fold-gutter').length,inPractice:!!el.closest('#view-practice'),inSandbox:!!el.closest('.sandbox-editor-col')}));
- console.log('FOLD_DEBUG '+selector+' '+JSON.stringify({debug,hostInfo}));
- assert.ok(debug.buttons>0,'No fold arrows: '+JSON.stringify(debug));
+ await page.waitForFunction(s=>document.querySelector(s)?.querySelector('button'),gutter);
  await page.locator(gutter+' button').first().click();
  const preview=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-preview':
    '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-preview';

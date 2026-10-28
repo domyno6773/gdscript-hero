@@ -205,7 +205,7 @@ function attach(el){
  });
  refresh(el);
 }
-function init(){IDS.forEach(id=>attach(document.getElementById(id)));}
+function init(){IDs.forEach(id=>attach(document.getElementById(id)));}
 window.GDHEditorUX={init,indent,backspace,refresh,toggle,ranges};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
 else init();
