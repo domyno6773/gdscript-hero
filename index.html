@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="arena-competition.css">
     <link rel="stylesheet" href="responsive-layout.css">
     <link rel="stylesheet" href="godot-editor-extras.css">
+    <link rel="stylesheet" href="accessibility.css">
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -815,7 +816,7 @@
                     </div>
 
                     <div class="arena-code-wrap">
-                        <textarea id="arena-code-editor" spellcheck="false" placeholder="# Scrivi qui il codice del gladiatore..."></textarea>
+                        <textarea id="arena-code-editor" spellcheck="false" aria-label="Editor GDScript della modalità Arena" placeholder="# Scrivi qui il codice del gladiatore..."></textarea>
                     </div>
 
                     <div class="arena-action-bar">
@@ -1126,12 +1127,12 @@
                 <!-- Colonna Destra: Modulo di Personalizzazione -->
                 <div class="profile-edit-form">
                     <div class="form-group">
-                        <label class="form-label">Nome Utente:</label>
+                        <label class="form-label" for="profile-username-input">Nome Utente:</label>
                         <input type="text" id="profile-username-input" class="form-input" maxlength="25" placeholder="Inserisci il tuo nome da sviluppatore">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Titolo / Tag Eroe:</label>
+                        <label class="form-label" for="profile-tag-select">Titolo / Tag Eroe:</label>
                         <select id="profile-tag-select" class="form-input">
                             <option value="Sviluppatore GDScript">Sviluppatore GDScript</option>
                             <option value="Creatore di Mondi 2D">Creatore di Mondi 2D</option>
@@ -1340,7 +1341,7 @@
                         <span class="settings-item-sub">Suoni di successo, errori, click e fanfare</span>
                     </div>
                     <label class="toggle-switch">
-                        <input type="checkbox" id="setting-sound-enabled" checked>
+                        <input type="checkbox" id="setting-sound-enabled" aria-label="Effetti sonori abilitati" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -1352,7 +1353,7 @@
                     </div>
                     <div class="volume-slider-wrapper">
                         <span class="volume-icon-min">🔈</span>
-                        <input type="range" min="0" max="100" value="80" class="volume-slider" id="setting-volume-slider">
+                        <input type="range" min="0" max="100" value="80" class="volume-slider" id="setting-volume-slider" aria-label="Volume effetti sonori">
                         <span class="volume-icon-max">🔊</span>
                     </div>
                 </div>
@@ -1968,7 +1969,7 @@
     </div>
 
     <!-- BARRA DI NAVIGAZIONE INFERIORE MOBILE (Attiva solo su smartphone e schermi <= 820px) -->
-    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Navigazione mobile">
         <button type="button" class="mob-nav-item active" id="mob-nav-roadmap" title="Mappa dei Livelli">
             <span class="mob-nav-icon"><svg class="ui-icon" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
             <span class="mob-nav-label">Mappa</span>
@@ -2031,5 +2032,6 @@
     <script src="app.js"></script>
     <!-- Il motore Godot WebAssembly e' la verifica standard di tutte le lezioni. -->
     <script src="native/native-beta-adapter.js"></script>
+    <script src="accessibility.js"></script>
 </body>
 </html>

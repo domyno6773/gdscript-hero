@@ -61,8 +61,6 @@ body { height:100vh; height:100dvh; min-width:0; }
     min-width:0; width:100%; max-height:320px; overflow-y:auto!important;
   }
   #view-exercise .panel-code { min-width:0; width:100%; min-height:570px; }
-  #view-practice .sandbox-header-card,
-  #view-practice .practice-header-card { flex-wrap:wrap; }
 }
 @media (max-width:1100px) and (min-width:821px) {
   .navbar .nav-right .level-pill { display:none; }
@@ -76,6 +74,9 @@ body { height:100vh; height:100dvh; min-width:0; }
   #view-practice .sandbox-scene-col { max-height:250px; min-height:180px; }
   #view-practice .sandbox-editor-col { min-height:340px; }
   #view-practice .sandbox-output-col { grid-column:auto; min-height:360px; }
+}
+/* One responsive header rule instead of two overlapping breakpoint overrides. */
+@media (max-width:1060px) {
   #view-practice .sandbox-header-card,
   #view-practice .practice-header-card { flex-wrap:wrap; }
 }

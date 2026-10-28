@@ -1,0 +1,31 @@
+/* Focus, motion and text safety are deliberately separated from the
+   Godot editor/folding styles. This sheet is loaded last. */
+:where(button, a[href], input, select, textarea, [role="button"], [role="radio"]):focus-visible {
+  outline:3px solid #f4bd52;
+  outline-offset:3px;
+}
+[data-theme="light"] :where(button, a[href], input, select, textarea, [role="button"], [role="radio"]):focus-visible {
+  outline-color:#155a90;
+}
+.node-type-option[role="radio"]:focus-visible {
+  outline:3px solid #f4bd52;
+  outline-offset:-3px;
+  border-radius:6px;
+}
+[data-theme="light"] .node-type-option[role="radio"]:focus-visible {
+  outline-color:#155a90;
+}
+.modal-overlay [role="radio"], .navbar [role="button"] { cursor:pointer; }
+.modal-card { max-width:calc(100vw - 24px); }
+.modal-card :is(pre, code, .form-group, .settings-row) { min-width:0; }
+.modal-card pre { max-width:100%; overflow-x:auto; }
+.modal-card :is(.modal-subtitle, .settings-item-sub, .form-label) { overflow-wrap:anywhere; }
+@media (prefers-reduced-motion:reduce) {
+  html:focus-within { scroll-behavior:auto; }
+  *, *::before, *::after {
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}

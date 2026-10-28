@@ -335,7 +335,7 @@ async function testNavigationPersistence(page,width){
  });
 }
 async function testResponsiveLayout(page,initialWidth) {
-  const presets=[1440,1366,1280,1180,1024,900,820,768,390];
+  const presets=[1440,1366,1280,1200,1180,1100,1060,1024,901,900,821,820,768,430,414,390,375,360,320];
   const views=[
     ['roadmap',()=>App.showRoadmap(),'.roadmap-layout-container'],
     ['exercise',()=>App.openLesson(1),'#view-exercise .workspace-grid'],
@@ -374,6 +374,82 @@ async function testResponsiveLayout(page,initialWidth) {
   }
   await page.setViewportSize({width:initialWidth,height:844});
   await page.evaluate(()=>App.showRoadmap());
+}
+
+
+async function testAccessibilityKeyboard(page,width){
+  const status=await page.evaluate(()=>{
+    const ids=['profile-username-input','profile-tag-select','setting-sound-enabled',
+      'setting-volume-slider','arena-code-editor'];
+    const fields=ids.map(id=>{
+      const el=document.getElementById(id);
+      return {id,hasLabel:!!(el?.labels?.length||el?.getAttribute('aria-label'))};
+    });
+    const dialogs=[...document.querySelectorAll('.modal-overlay')].map(el=>({
+      id:el.id,role:el.getAttribute('role'),modal:el.getAttribute('aria-modal'),
+      label:el.getAttribute('aria-labelledby')||el.getAttribute('aria-label')
+    }));
+    return {fields,dialogs};
+  });
+  assert.ok(status.fields.every(x=>x.hasLabel),
+    'Unlabelled form fields: '+JSON.stringify(status.fields.filter(x=>!x.hasLabel)));
+  assert.ok(status.dialogs.length>=12,'Not all dialogs were discovered');
+  assert.ok(status.dialogs.every(x=>x.role==='dialog'&&x.modal==='true'&&x.label),
+    'Unlabelled dialogs: '+JSON.stringify(status.dialogs.filter(x=>!x.label||x.role!=='dialog')));
+
+  // A click-only navigation DIV must work using Space and restore focus on close.
+  const profile=page.locator('#btn-open-profile');
+  await profile.focus();await page.keyboard.press('Enter');
+  assert.equal(await page.locator('#profile-modal').isVisible(),true,'Profile not keyboard-accessible');
+  assert.equal(await page.evaluate(()=>document.activeElement.closest('#profile-modal')!==null),true,
+    'Opening a dialog should move keyboard focus inside it');
+  assert.equal(await page.locator('#btn-close-profile').getAttribute('aria-label'),'Chiudi finestra');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#profile-modal').isHidden(),true,'Escape did not close profile');
+  assert.equal(await page.evaluate(()=>document.activeElement?.id),'btn-open-profile',
+    'Close dialog must restore focus to its launcher');
+  const streak=page.locator('#btn-streak-modal');
+  await streak.focus();await page.keyboard.press('Space');
+  assert.equal(await page.locator('#streak-modal').isVisible(),true);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#streak-modal').isHidden(),true);
+
+  // Tab/Shift+Tab remain inside the active settings dialog.
+  await page.locator('#btn-open-settings').click();
+  assert.equal(await page.locator('#settings-modal').isVisible(),true);
+  await page.locator('#btn-close-settings').focus();
+  await page.keyboard.press('Shift+Tab');
+  assert.equal(await page.evaluate(()=>document.activeElement.closest('#settings-modal')!==null),true,
+    'Shift+Tab escaped the dialog');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#settings-modal').isHidden(),true);
+
+  // Godot's custom node picker must expose radio semantics and arrow keys.
+  await page.evaluate(()=>document.getElementById('add-node-modal').classList.remove('hidden'));
+  const picker=page.locator('#node-type-selector-grid');
+  assert.equal(await picker.getAttribute('role'),'radiogroup');
+  const selected=picker.locator('.node-type-option.selected');
+  assert.equal(await selected.getAttribute('aria-checked'),'true');
+  await selected.focus();await page.keyboard.press('ArrowRight');
+  assert.equal(await picker.locator('.node-type-option.selected').getAttribute('data-node-type'),'Label');
+  assert.equal(await picker.locator('.node-type-option.selected').getAttribute('aria-checked'),'true');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#add-node-modal').isHidden(),true);
+
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const motion=await page.evaluate(()=>{
+    const el=document.createElement('div');
+    el.style.animation='gdh-fake-motion 2s infinite';
+    el.style.transition='opacity 2s';
+    document.body.append(el);
+    const value={animation:getComputedStyle(el).animationDuration,
+      transition:getComputedStyle(el).transitionDuration};
+    el.remove();return value;
+  });
+  assert.ok(parseFloat(motion.animation)<0.01&&parseFloat(motion.transition)<0.01,
+    'Reduced motion is not honored: '+JSON.stringify(motion));
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  console.log('PASS: keyboard, dialogs, field labels, node picker, reduced motion '+width+'px');
 }
 
 async function testLongEmailSettings(page, initialWidth) {
@@ -462,6 +538,7 @@ async function smoke(browser,url,width){
    App.renderSyncStatus({kind:'synced',message:''});
  });
  assert.equal(await page.locator('#gdh-save-notice').isHidden(),true);
+ await testAccessibilityKeyboard(page,width);
  await testLongEmailSettings(page,width);
  await testResponsiveLayout(page,width);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
