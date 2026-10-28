@@ -213,8 +213,67 @@ async function inspect(engine, url) {
       }
     }
   }
+  // Sandbox onboarding: riproduce il caso Safari/MacBook in cui
+  // l'intestazione scompariva sopra la finestra e il CTA finiva sotto il Dock.
+  // Su viewport basse scrollano SOLO le quattro istruzioni: header e CTA fissi.
+  await page.evaluate(()=>{
+    document.querySelectorAll('.modal-overlay').forEach(x=>x.classList.add('hidden'));
+    document.getElementById('modal-sandbox-welcome').classList.remove('hidden');
+  });
+  for(const width of [320,390,768,1024,1280,1512,1728,1920]){
+    for(const height of [420,600,720,900]){
+      await page.setViewportSize({width,height});
+      const measure=await page.evaluate(()=>{
+        const rect=selector=>document.querySelector(selector).getBoundingClientRect();
+        const card=rect('#modal-sandbox-welcome > .modal-card');
+        const header=rect('#modal-sandbox-welcome .modal-header-row');
+        const title=rect('#modal-sandbox-welcome .modal-header-row h2');
+        const button=rect('#btn-start-sandbox-welcome');
+        const scroller=document.querySelector('#modal-sandbox-welcome .sandbox-welcome-features');
+        const area=scroller.getBoundingClientRect();
+        const items=scroller.querySelectorAll('.sandbox-welcome-item');
+        const overflow=scroller.scrollHeight-scroller.clientHeight;
+        scroller.scrollTop=scroller.scrollHeight;
+        const last=items[items.length-1].getBoundingClientRect();
+        return {
+          card:{top:card.top,bottom:card.bottom,left:card.left,right:card.right},
+          header:{top:header.top,bottom:header.bottom},
+          title:{top:title.top,bottom:title.bottom},
+          button:{top:button.top,bottom:button.bottom},
+          area:{top:area.top,bottom:area.bottom},
+          last:{top:last.top,bottom:last.bottom},
+          scrollable:overflow>2,scrolled:scroller.scrollTop,
+          accessible:scroller.tabIndex===0&&scroller.getAttribute('role')==='region',
+          count:items.length,viewport:{width:innerWidth,height:innerHeight}
+        };
+      });
+      const msg=engine.name()+' '+width+'x'+height+' '+JSON.stringify(measure);
+      assert.ok(measure.card.top>=7&&measure.card.bottom<=height-7,
+        'Sandbox welcome modal must be entirely on-screen: '+msg);
+      assert.ok(measure.card.left>=0&&measure.card.right<=width,
+        'Sandbox welcome modal overflows horizontally: '+msg);
+      assert.ok(measure.title.top>=measure.card.top-2&&measure.header.bottom<=measure.area.top+2,
+        'Sandbox welcome title clipped above its scroll region: '+msg);
+      assert.ok(measure.button.bottom<=measure.card.bottom+1&&
+        measure.button.top>=measure.area.bottom-2,
+        'Sandbox welcome start button hidden behind the viewport: '+msg);
+      assert.equal(measure.count,4,'Sandbox features unexpectedly hidden: '+msg);
+      assert.ok(measure.accessible,'Sandbox instructions need keyboard scrolling: '+msg);
+      if(measure.scrollable){
+        assert.ok(measure.scrolled>1,'Sandbox feature list cannot be scrolled: '+msg);
+        assert.ok(measure.last.bottom<=measure.area.bottom+2 &&
+          measure.last.top>=measure.area.top-2,
+          'Last sandbox instruction unreachable: '+msg);
+      }
+      if(width===1512&&height===720&&process.env.E2E_SCREENSHOTS==='1'){
+        fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});
+        await page.screenshot({path:path.join(root,'test-artifacts','macbook-sandbox-welcome-'+engine.name()+'.png')});
+      }
+    }
+  }
+  await page.evaluate(()=>document.getElementById('modal-sandbox-welcome').classList.add('hidden'));
   await context.close();
-  console.log('PASS: '+engine.name()+' navbar and adaptive daily quests on desktop, MacBook, tablet and mobile');
+  console.log('PASS: '+engine.name()+' navbar and adaptive daily quests and sandbox onboarding on desktop, MacBook, tablet and mobile');
  } finally {await browser.close();}
 }
 (async()=>{
