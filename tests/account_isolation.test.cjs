@@ -17,6 +17,7 @@ const SoundFX={enabled:true,volume:.8,setVolume(x){this.volume=x;}};
 const win={addEventListener:()=>{},location:{hostname:'example.com',protocol:'https:',origin:'https://example.com',pathname:'/gdscript-hero/'}};
 const ProgressionV2={
   normalizeRewards:()=>({}),createRewards:()=>({}),
+  weekKey:()=> '2026-W44',dateKey:()=> '2026-10-28',
   levelFromXp:()=>({tier:{level:1}})
 };
 const ctx={window:win,localStorage,sessionStorage,console,SoundFX,ProgressionV2,
