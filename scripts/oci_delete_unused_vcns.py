@@ -34,7 +34,10 @@ def active(seq):
 
 
 def full(oci, op, *args, **kwargs):
-    return oci.pagination.list_call_get_all_results(op, *args, **kwargs).data
+    try:
+        return oci.pagination.list_call_get_all_results(op, *args, **kwargs).data
+    except TypeError as exc:
+        raise Stop("Chiamata SDK errata: " + getattr(op, "__name__", "sconosciuta")) from exc
 
 
 def protected(row):
