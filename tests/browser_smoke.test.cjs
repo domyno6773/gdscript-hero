@@ -1103,7 +1103,7 @@ async function smoke(browser,url,width){
  await page.locator('#site-goal-gate [data-goal="concentrato"]').click();
  assert.equal(await page.locator('#site-goal-gate').isHidden(),true);
  assert.equal(await page.evaluate(()=>App.state.streakMode),'concentrato');
- assert.equal(await page.evaluate(()=>App.state.streakGoalSelection.week===App.getWeekId()),true);
+ assert.equal(await page.evaluate(()=>App.state.streakGoalSelection.week===App.streakGoalWeekKey()),true);
  assert.equal(await page.evaluate(()=>App.setStreakMode('lockin')),false);
  await page.locator('#btn-close-streak').click();
  await page.reload({waitUntil:'load'});

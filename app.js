@@ -2344,9 +2344,21 @@ const App = {
         }
     },
 
+    // La finestra di modifica segue il calendario LOCALE dello studente,
+    // senza cambiare le regole XP/UTC gia' usate dalla serie settimanale.
+    streakGoalWeekKey(date=new Date()){
+        const d=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+        d.setDate(d.getDate()-((d.getDay()+6)%7));
+        return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),
+            String(d.getDate()).padStart(2,'0')].join('-');
+    },
     canChangeStreakGoal(){
-        if(!this.state.streakGoalSelection)return true;
-        return new Date().getUTCDay()===1 && this.state.streakGoalSelection.week!==this.getWeekId();
+        const selection=this.state.streakGoalSelection;
+        if(!selection)return true;
+        if(new Date().getDay()!==1)return false;
+        // Compatibilita' con scelte precedenti salvate con weekKey UTC.
+        return selection.week!==this.streakGoalWeekKey() &&
+            selection.week!==this.getWeekId();
     },
     ensureSiteOnboarding(){
         const welcome=document.getElementById('site-welcome'),gate=document.getElementById('site-goal-gate');
@@ -2442,7 +2454,8 @@ const App = {
         // Conteggia PRIMA la settimana conclusa col vecchio obiettivo.
         this.checkWeekReset();
         this.state.streakMode=tier;
-        this.state.streakGoalSelection={week:this.getWeekId(),selectedDate:this.getTodayISO()};
+        this.state.streakGoalSelection={week:this.streakGoalWeekKey(),
+            selectedDate:new Date().toLocaleDateString('en-CA')};
         this.state.siteWelcomeSeen=true;
         this.saveStorage();
         this.updateStatsUI();
