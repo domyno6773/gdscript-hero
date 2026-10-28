@@ -109,12 +109,20 @@ class TestOIDC(unittest.TestCase):
         steps = text.split("      - ")[1:]
         secret_steps = [step for step in steps if "secrets." in step]
         oracle_steps = [step for step in steps if "scripts/oci_federated_readonly.py" in step]
-        self.assertEqual(len(secret_steps), 1)
-        self.assertEqual(secret_steps, oracle_steps)
-        self.assertIn("if: ${{ inputs.oracle_audit }}", secret_steps[0])
+        self.assertEqual(len(secret_steps), 2)
+        self.assertEqual(len(oracle_steps), 1)
+        self.assertIn("if: ${{ inputs.oracle_audit }}", oracle_steps[0])
+        host_steps = [step for step in secret_steps if "oci_cloudshell_bootstrap.py --github" in step]
+        self.assertEqual(len(host_steps), 1)
+        self.assertIn("if: ${{ inputs.host_action != 'none' }}", host_steps[0])
+        host_input = text.split("host_action:", 1)[1].split("permissions:", 1)[0]
+        self.assertIn("default: none", host_input)
+        self.assertIn("free_tier_account:", host_input)
+        self.assertIn("default: false", host_input)
+        self.assertIn("GDH_FREE_TIER_ACCOUNT: ${{ inputs.free_tier_account }}", host_steps[0])
         for step in steps:
             if "oci==2.189.0" in step:
-                self.assertIn("if: ${{ inputs.oracle_audit }}", step)
+                self.assertIn("if: ${{ inputs.oracle_audit || inputs.host_action != 'none' }}", step)
         self.assertNotIn("oci cli", text.lower())
 
     def test_identity_probe_still_does_not_use_oracle_credentials(self):

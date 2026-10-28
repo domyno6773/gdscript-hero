@@ -8,8 +8,8 @@
 - [ ] No button or flow labeled **Upgrade**, **Pay As You Go**, **Paid**, **trial-credit resources**, or similar will be accepted. Promotional free credits are **not** the same thing as Always Free.
 - [ ] Identify the account **home region** in the Oracle console. Provision ONLY there and verify the VM shows Always Free eligibility.
 - [ ] Check **all existing Compute and Boot/Block Volume usage** across compartments and availability domains in the home region. Never assume free resources are unallocated.
-- [ ] Proposed starting deployment: **one VM.Standard.A1.Flex, 1 OCPU, 4 GB RAM, one 50 GB boot volume**, using an Always Free eligible OS image. This is below even Oracle's conservative published 1,500 OCPU-hours and 9,000 GB-hours monthly allowance for 2 OCPU/12 GB at Always Free tenancy capacity. Never multiply by additional instances.
-- [ ] Check estimated charges/price information **twice**: at the resource shape/volume configuration and the final create/review screen. If anything says an amount other than **0**, or does not clearly establish Always Free eligibility, **STOP**.
+- [ ] Proposed starting deployment: **one VM.Standard.A1.Flex, 1 OCPU, 6 GB RAM, one 50 GB boot volume**, using an Always Free eligible OS image. This is below even Oracle's conservative published 1,500 OCPU-hours and 9,000 GB-hours monthly allowance for 2 OCPU/12 GB at Always Free tenancy capacity. Never multiply by additional instances.
+- [ ] For console creation, inspect shape/volume and final prices twice; stop on nonzero or unclear cost. For the automated API path follow `docs/OCI_STAGING_HOST.md`: require current unupgraded Free Tier attestation, live shape billing classification, fixed platform image/storage and fresh aggregate usage/quotas before both initial mutations and launch. The API path has no checkout screen and does not independently certify subscription status or total billing.
 - [ ] NO paid upgrades in storage performance, backups, snapshots, networking, public IP add-ons, load balancers, additional volumes, managed databases, paid marketplace images, or paid monitoring. Check each component separately against current Oracle pricing and tenancy limits.
 - [ ] Read **Governance & Administration -> Limits, Quotas and Usage** before provisioning. Do NOT assume an empty "Free Tier" badge covers all resources.
 - [ ] Never use budget alerts as a hard stop: Oracle explicitly says budgets are **soft limits**, checked periodically. Optional notifications help discover anomalies but do not prevent charges.
@@ -37,6 +37,12 @@ Before deployment: exercise an actual ARM64 build in a disposable **local** envi
 - Budgets are soft alerts, not limits: https://docs.oracle.com/en-us/iaas/Content/Billing/Concepts/budgetsoverview.htm
 - Godot 4.4.1 official ARM64 distribution: https://github.com/godotengine/godot-builds/releases/tag/4.4.1-stable
 
-## Ponte GitHub OIDC, 27 ottobre 2026
+## Ponte GitHub e staging, 28 ottobre 2026
 
-Preparato workflow **esclusivamente per la verifica dell'identità GitHub**: `.github/workflows/oci-oidc-preflight.yml`. Il token GitHub non viene visualizzato e il workflow non interroga Oracle. Per l'attivazione delle autorizzazioni federate OCI seguire `docs/OCI_GITHUB_OIDC_SETUP.md`: il proprietario deve proteggere l'ambiente GitHub e configurare un trust IAM a privilegi minimi. **NON è ancora presente alcun workflow di provisioning. Nessun account cloud è stato toccato.**
+Il ponte federato ha completato l'inventario reale in sola lettura: Milano e home
+region; due compartment; zero VM, volumi e backup al momento del controllo.
+Il workflow aggiunge un percorso manuale per pianificare/creare un singolo host,
+descritto in [OCI_STAGING_HOST.md](OCI_STAGING_HOST.md). Il push non crea risorse.
+La preparazione in Cloud Shell crea solo l'ambito IAM dedicato senza trasferire
+credenziali amministrative in GitHub. Restano necessari account Free Tier non
+aggiornato, controlli runtime e verifica del bootstrap prima di collegare il sito.
