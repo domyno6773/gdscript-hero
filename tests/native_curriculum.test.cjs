@@ -49,8 +49,8 @@ function failures(verdict){
    // and lesson validators are all served from this local test origin.
    await page.route(/^https:\/\//,route=>route.abort('blockedbyclient'));
    await page.goto('http://127.0.0.1:'+server.address().port,{waitUntil:'load'});
-   await page.waitForFunction(()=>window.GDHGodot?.engine==='Godot 4.4.1 WebAssembly'&&window.LESSONS_DATA?.length===60);
-   const ids=await page.evaluate(()=>LESSONS_DATA.map(x=>x.id));
+   await page.waitForFunction(()=>window.GDHGodot?.engine==='Godot 4.4.1 WebAssembly'&&window.LESSONS_DATA?.length===81);
+   const ids=await page.evaluate(()=>LESSONS_DATA.filter(x=>x.id<=60).map(x=>x.id));
    assert.deepEqual(ids,Array.from({length:60},(_,i)=>i+1),'Missing lessons in native curriculum');
    let passed=0,failed=0;
    for(const id of ids){
