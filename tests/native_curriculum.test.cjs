@@ -64,7 +64,7 @@ function failures(verdict){
            error:data.execution?.error||null,steps:Object.keys(data.original||{})};
        }catch(error){return {accepted:false,error:String(error),stage:GDHGodot.lastStage};}
      },id);
-     if(!result.accepted){
+     if(!result.accepted || result.nativeStatus!=='executed'){
        if(id===1 && result.error && (/Failed to fetch|Godot:|scaduto|startup/i.test(result.error))) {
          throw new Error('Godot runtime unavailable (not a lesson failure): '+JSON.stringify({
            result,browserErrors,failedAssets
@@ -79,6 +79,53 @@ function failures(verdict){
    }
    assert.equal(failed,0,'Godot WASM rejected '+failed+' of 60 official solutions');
    assert.equal(passed,60);
+
+   // Fixture snapshots must stay synchronized with the actual 60 lessons.
+   const snapshots=await page.evaluate(()=>LESSONS_DATA.flatMap(l=>{
+     const f=GDHLessonFixtures.find(x=>x.id===l.id);
+     const mismatches=[];
+     if(!f){mismatches.push('missing fixture');return [{id:l.id,mismatches}];}
+     if(f.solution!==l.solution)mismatches.push('official solution differs');
+     if(f.initialCode!==l.initialCode)mismatches.push('starter differs');
+     return mismatches.length?[{id:l.id,mismatches}]:[];
+   }));
+   assert.deepEqual(snapshots,[],'Native metadata is stale: '+JSON.stringify(snapshots));
+
+   // Every starter must be rejected. Every correct solution must tolerate an
+   // ordinary trailing comment, regardless of chapter or script complexity.
+   let incompleteAccepted=0,commentRejected=0;
+   for(const id of ids){
+     const outcomes=await page.evaluate(async id=>{
+       const l=LESSONS_DATA.find(x=>x.id===id);
+       const runs=[
+         {case:'starter',code:l.initialCode},
+         {case:'comment',code:l.solution+(l.solution.endsWith('\n')?'':'\n')+
+           '# Commento facoltativo che non modifica la logica\n'}
+       ];
+       const results=[];
+       for(const run of runs){
+         try{
+           const r=await GDHGodot.verifyLesson(id,run.code);
+           results.push({case:run.case,accepted:r.accepted,nativeStatus:r.execution?.nativeStatus,
+             verdict:r.feedback?.verdict,failed:(r.feedback?.checks||[])
+               .filter(c=>!c.passed).map(c=>c.desc).slice(0,10),
+             error:r.execution?.error||null});
+         }catch(e){results.push({case:run.case,accepted:false,error:String(e)});}
+       }
+       return results;
+     },id);
+     if(outcomes[0].accepted){
+       incompleteAccepted++;
+       console.error('STARTER INCORRECTLY ACCEPTED lesson '+id+': '+JSON.stringify(outcomes[0]));
+     }
+     if(!outcomes[1].accepted||outcomes[1].nativeStatus!=='executed'){
+       commentRejected++;
+       console.error('VALID COMMENT REJECTED lesson '+id+': '+JSON.stringify(outcomes[1]));
+     }
+     if(id%10===0)console.log('NATIVE STARTER/COMMENT CHECK '+id+'/60');
+   }
+   assert.equal(incompleteAccepted,0,'Unfinished starter code accepted in '+incompleteAccepted+' lessons');
+   assert.equal(commentRejected,0,'Comment-only changes rejected in '+commentRejected+' lessons');
 
    // Correct equivalent code and harmless comments must not be rejected.
    const positives=[
@@ -114,8 +161,9 @@ function failures(verdict){
      variants++;
    }
    assert.deepEqual(browserErrors,[],'Uncaught browser errors');
-   console.log('NATIVE CURRICULUM SUCCESS: '+passed+'/60 official accepted; '+variants+
-     ' positive/negative variants confirmed by the deployed WASM engine.');
+   console.log('NATIVE CURRICULUM SUCCESS: '+passed+'/60 official accepted; 60/60 starters rejected; '+
+     '60/60 solutions with extra comments accepted; '+variants+
+     ' extra variants confirmed by the Godot WASM engine.');
    await context.close();
  }finally{
    if(browser)await browser.close();
