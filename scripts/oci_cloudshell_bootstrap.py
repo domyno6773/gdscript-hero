@@ -324,7 +324,8 @@ def authorize_github(sdk, config, state):
             name="gdh-arena-staging-provision", description="Exact GitHub workflow, staging compartment, create-only operations",
             statements=statements, freeform_tags=TAGS), opc_retry_token=retry_token(tenancy, "github-policy"),
             retry_strategy=sdk.retry.NoneRetryStrategy()).data
-        saved = identity.get_policy(saved.id).data
+        saved = sdk.wait_until(identity, identity.get_policy(saved.id), "lifecycle_state", "ACTIVE",
+                               max_wait_seconds=120).data
         require(saved.statements == statements, "Policy non confermata dopo creazione.")
     print("AUTORIZZAZIONE GITHUB PRONTA. Nessuna VM creata e nessun secret aggiuntivo.")
     print("Il workflow manuale puo creare solo nel compartment dedicato; nessun upgrade o permesso IAM.")

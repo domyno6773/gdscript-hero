@@ -68,7 +68,7 @@ jobs:
           node - <<'JS'
           const assert = require('node:assert/strict');
           const {dockerCase} = require('./server/arena/runner.js');
-          dockerCase('extends RefCounted\nfunc double_value(x):\n    return x * 2\n', 'double_value', [4])
+          dockerCase('extends Node\nfunc double_value(x):\n    return x * 2\n', 'double_value', [4])
             .then(result => { assert.equal(result.status, 'executed'); assert.equal(result.value, 8); })
-            .catch(() => { console.error('ARM64 grader smoke failed'); process.exitCode = 1; });
+            .catch(error => { console.error('ARM64 grader smoke failed:', error.message); process.exitCode = 1; });
           JS
