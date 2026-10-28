@@ -22,8 +22,10 @@ const server=http.createServer((req,res)=>{
  if(!filename.startsWith(root+path.sep)){res.writeHead(403).end();return;}
  fs.readFile(filename,(err,buffer)=>{
    if(err){res.writeHead(404).end();return;}
+   // The Godot iframe deliberately has an opaque (null) origin. Godot's WASM
+   // and pack fetches therefore require CORS even on localhost.
    res.writeHead(200,{'Content-Type':mime[path.extname(filename)]||'application/octet-stream',
-     'Cache-Control':'no-store'});res.end(buffer);
+     'Cache-Control':'no-store','Access-Control-Allow-Origin':'*'});res.end(buffer);
  });
 });
 function failures(verdict){
@@ -37,8 +39,12 @@ function failures(verdict){
    const context=await browser.newContext({viewport:{width:1280,height:800},locale:'it-IT'});
    const page=await context.newPage();
    page.setDefaultTimeout(30000);
-   const browserErrors=[];
+   const browserErrors=[],failedAssets=[];
    page.on('pageerror',e=>browserErrors.push(String(e)));
+   page.on('requestfailed',req=>{
+     if(/\/(?:native\/)?godot\.(?:pck|wasm|js)/.test(req.url()))
+       failedAssets.push({url:req.url(),failure:req.failure()});
+   });
    // Prevent third-party network/auth calls; the native WebAssembly files
    // and lesson validators are all served from this local test origin.
    await page.route(/^https:\/\//,route=>route.abort('blockedbyclient'));
@@ -59,6 +65,11 @@ function failures(verdict){
        }catch(error){return {accepted:false,error:String(error),stage:GDHGodot.lastStage};}
      },id);
      if(!result.accepted){
+       if(id===1 && result.error && (/Failed to fetch|Godot:|scaduto|startup/i.test(result.error))) {
+         throw new Error('Godot runtime unavailable (not a lesson failure): '+JSON.stringify({
+           result,browserErrors,failedAssets
+         }));
+       }
        failed++;
        console.error('NATIVE FAIL lesson '+id+': '+JSON.stringify(result));
      }else{
