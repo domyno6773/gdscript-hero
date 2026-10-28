@@ -2219,6 +2219,16 @@ const App = {
         }
     },
 
+    // La modale mostra SOLO gli XP realmente ottenuti per l'attività completata.
+    // Se l'attività non assegna XP, il riquadro premio scompare del tutto.
+    setSuccessModalReward(earnedXp) {
+        const amount = Number.isFinite(earnedXp) ? Math.max(0, earnedXp) : 0;
+        const card = document.getElementById('modal-xp-card');
+        const gain = document.getElementById('modal-xp-gain');
+        if (gain) gain.innerText = `+${amount}`;
+        if (card) card.classList.toggle('hidden', amount === 0);
+    },
+
     // Sistema Traguardi / Achievements
     checkAchievements(meta = {}) {
         let unlockedAny = false;
@@ -4041,9 +4051,10 @@ const App = {
                 badge.style.color = '#10b981';
 
                 const isFirstTime = !this.state.finishedLessons.includes(currentLesson.id);
+                const earnedLessonXp = isFirstTime ? currentLesson.xp : 0;
                 if (isFirstTime) {
                     this.state.finishedLessons.push(currentLesson.id);
-                    this.state.xp += currentLesson.xp;
+                    this.state.xp += earnedLessonXp;
 
                     const isCore = !currentLesson.isMastery;
                     const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === currentLesson.chapterId);
@@ -4113,12 +4124,14 @@ const App = {
                 // Aggiorna modale vittoria
                 const modalTitle = document.getElementById('modal-success-title');
                 const modalSubtitle = document.getElementById('modal-success-subtitle');
-                const modalGain = document.getElementById('modal-xp-gain');
 
-                if (currentLesson.isMastery) {
+                if (!isFirstTime) {
+                    // Una ripetizione corretta non sblocca il capitolo né assegna XP della lezione.
+                    if (modalTitle) modalTitle.innerText = "ESERCIZIO COMPLETATO!";
+                    if (modalSubtitle) modalSubtitle.innerText = "Soluzione corretta. Hai già completato questo esercizio.";
+                } else if (currentLesson.isMastery) {
                     if (modalTitle) modalTitle.innerText = "⭐ SFIDA DI APPRENDIMENTO SUPERATA!";
                     if (modalSubtitle) modalSubtitle.innerText = "Incredibile! Hai completato la sfida bonus e dimostrato la tua padronanza!";
-                    if (modalGain) modalGain.innerText = `+${currentLesson.xp}`;
                 } else {
                     const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === currentLesson.chapterId);
                     const coreLessons = chapterLessons.filter(l => !l.isMastery);
@@ -4126,12 +4139,12 @@ const App = {
 
                     if (modalTitle) modalTitle.innerText = isLastCore ? "CAPITOLO COMPLETATO!" : "MISSIONE COMPIUTA!";
                     if (modalSubtitle) {
-                        modalSubtitle.innerText = isLastCore 
+                        modalSubtitle.innerText = isLastCore
                             ? "Ottimo lavoro! Hai sbloccato il capitolo successivo e la ⭐ Sfida di Apprendimento Bonus!"
                             : "Ottimo lavoro! Il tuo script GDScript funziona alla perfezione.";
                     }
-                    if (modalGain) modalGain.innerText = `+${currentLesson.xp}`;
                 }
+                this.setSuccessModalReward(earnedLessonXp);
 
                 setTimeout(() => {
                     document.getElementById('success-modal').classList.remove('hidden');
@@ -4941,8 +4954,6 @@ const App = {
                 // Modale di vittoria per ripasso
                 const modalTitle = document.getElementById('modal-success-title');
                 const modalSubtitle = document.getElementById('modal-success-subtitle');
-                const modalGain = document.getElementById('modal-xp-gain');
-
                 if (modalTitle) modalTitle.innerText = "⭐ VARIANTE DI RIPASSO SUPERATA!";
                 if (modalSubtitle) {
                     modalSubtitle.innerText = isFirstTime
@@ -4950,7 +4961,7 @@ const App = {
                         : (gainXp ? "Ottimo lavoro! Hai ricevuto +5 XP per il ripasso settimanale." :
                             "Ripasso superato! Il premio settimanale per questa variante è già stato ottenuto oppure hai raggiunto il limite.");
                 }
-                if (modalGain) modalGain.innerText = `+${gainXp}`;
+                this.setSuccessModalReward(gainXp);
 
                 setTimeout(() => {
                     document.getElementById('success-modal').classList.remove('hidden');

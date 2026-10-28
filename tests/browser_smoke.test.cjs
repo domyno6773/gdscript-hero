@@ -775,6 +775,26 @@ async function smoke(browser,url,width){
  assert.ok(await page.evaluate(()=>App.state.xp>0),'Missing XP reward');
  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('gdscript_hero_save_v4')));
  assert.ok(saved.finishedLessons.includes(1),'Lesson missing from localStorage');
+ await page.waitForFunction(()=>!document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:4000});
+ assert.equal(await page.locator('#modal-xp-gain').textContent(),
+   '+'+await page.evaluate(()=>LESSONS_DATA.find(l=>l.id===1).xp),
+   'First successful completion must show its real XP');
+ assert.equal(await page.locator('#modal-xp-card').isVisible(),true,
+   'First successful completion must show the XP card');
+ // Ripetere lo stesso esercizio non deve assegnare XP né prometterne nella modale.
+ await page.locator('#btn-modal-stay').click({timeout:10000});
+ const xpBeforeReplay=await page.evaluate(()=>App.state.xp);
+ await page.locator('#btn-run-code').click({timeout:10000});
+ await page.waitForFunction(()=>!App.isValidating &&
+   !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
+ assert.equal(await page.evaluate(()=>App.state.xp),xpBeforeReplay,
+   'Repeating a completed lesson must not assign XP again');
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('gdscript_hero_save_v4')).xp),xpBeforeReplay,
+   'Repeated lesson must not persist extra XP');
+ assert.equal(await page.locator('#modal-success-title').textContent(),'ESERCIZIO COMPLETATO!',
+   'Repeated lesson must display a neutral success title');
+ assert.equal(await page.locator('#modal-xp-card').isHidden(),true,
+   'Repeated lesson must not show an XP reward card');
  // Chiudi la modale di successo come farebbe lo studente prima della seconda prova.
  await page.locator('#btn-modal-stay').click({timeout:10000});
  // Ripasso: TUTTE le varianti devono mostrare il proprio compito/starter,
