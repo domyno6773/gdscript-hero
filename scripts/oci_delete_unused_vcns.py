@@ -45,6 +45,7 @@ def protected(row):
 
 def check_unused(oci, net, comp_ids, vcn):
     resource_types = {
+        "vtaps": net.list_vtaps,
         "subnets": net.list_subnets,
         "route_tables": net.list_route_tables,
         "security_lists": net.list_security_lists,
@@ -60,9 +61,12 @@ def check_unused(oci, net, comp_ids, vcn):
     found = {k: [] for k in resource_types}
     for cid in comp_ids:
         for k, method in resource_types.items():
-            found[k] += active(full(oci, method, cid, vcn_id=vcn.id))
+            # list_network_security_groups exposes **kwargs only: passing cid
+            # positionally raises TypeError before any deletion can start.
+            opts = {"compartment_id": cid, "vcn_id": vcn.id}
+            found[k] += active(full(oci, method, **opts))
     # Peering, DRG, NSGs and VLANs can be used outside the simple network.
-    for label in ("local_peering_gateways", "network_security_groups", "vlans", "drg_attachments"):
+    for label in ("local_peering_gateways", "network_security_groups", "vlans", "drg_attachments", "vtaps"):
         demand(not found[label], f"VCN {vcn.display_name}: collegamenti {label} presenti. Nessuna cancellazione.")
     # IP checks catch Compute VNICs, load balancers, mount targets, databases,
     # and detached reserved IPs. Unknown scan errors abort the entire operation.
