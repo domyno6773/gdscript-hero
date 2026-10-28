@@ -508,6 +508,90 @@ async function testNonBlockingCloudConflict(page){
     AuthManager.setSyncStatus('idle','');
   });
 }
+
+async function testSettingsModalRefresh(page, initialWidth) {
+ const widths=[1440,1024,820,640,600,430,390,320];
+ const iconAudit=await page.evaluate(()=>{
+   const modal=document.getElementById('settings-modal');
+   const icons=[...modal.querySelectorAll('svg.settings-icon use')];
+   const unresolved=icons.map(icon=>icon.getAttribute('href'))
+     .filter(href=>!href?.startsWith('#')||!document.querySelector(href));
+   const emojis=[...modal.textContent].filter(ch=>/\p{Extended_Pictographic}/u.test(ch));
+   return {count:icons.length,unresolved,emojis};
+ });
+ assert.ok(iconAudit.count>=16,'Not enough settings SVG icons: '+JSON.stringify(iconAudit));
+ assert.deepEqual(iconAudit.unresolved,[],'Settings SVG sprite symbols not found');
+ assert.deepEqual(iconAudit.emojis,[],'Settings still contain emoji');
+ await page.evaluate(()=>{
+   // The dashboard only exists for admins, but geometry must be safe for them.
+   document.getElementById('admin-settings-row').classList.remove('hidden');
+   App.openSettingsModal();
+   document.getElementById('admin-settings-row').classList.remove('hidden');
+ });
+ for(const width of widths){
+   await page.setViewportSize({width,height:480});
+   const geometry=await page.evaluate(()=>{
+     const modal=document.getElementById('settings-modal');
+     const card=modal.querySelector('.modal-card');
+     const close=document.getElementById('btn-close-settings');
+     const header=modal.querySelector('.modal-header-row');
+     const admin=document.getElementById('admin-settings-row');
+     const danger=modal.querySelector('.danger-group');
+     const regular=modal.querySelector('.settings-group:not(.danger-group)');
+     const children=[...modal.querySelectorAll('.settings-row:not(.hidden) > button')];
+     const bounds=node=>{const r=node.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width};};
+     return {
+       viewport:innerWidth,card:bounds(card),close:bounds(close),header:bounds(header),
+       admin:bounds(admin),buttons:children.map(bounds),
+       maxHeight:getComputedStyle(card).maxHeight,
+       scrollHeight:card.scrollHeight,clientHeight:card.clientHeight,scrollWidth:card.scrollWidth,clientWidth:card.clientWidth,
+       dangerBackground:getComputedStyle(danger).backgroundColor,
+       regularBackground:getComputedStyle(regular).backgroundColor,
+       dangerGradient:getComputedStyle(danger).backgroundImage
+     };
+   });
+   for(const key of ['card','close','header','admin']){
+     const rect=geometry[key];
+     assert.ok(rect.left>=-1&&rect.right<=width+1,
+       'Settings '+key+' horizontal overflow at '+width+': '+JSON.stringify(geometry));
+   }
+   assert.ok(geometry.buttons.every(rect=>rect.left>=-1&&rect.right<=width+1),
+     'Settings action overflow at '+width+': '+JSON.stringify(geometry));
+   assert.ok(geometry.scrollWidth<=geometry.clientWidth+2,
+     'Settings modal horizontally scrolls at '+width+': '+JSON.stringify(geometry));
+   assert.equal(geometry.dangerBackground,geometry.regularBackground,
+     'Danger card still uses the old separate color scheme');
+   assert.equal(geometry.dangerGradient,'none',
+     'Old gradient still present in settings danger section');
+   assert.ok(geometry.close.top>=0&&geometry.close.bottom<=480,
+     'Close button must remain in viewport at '+width);
+   await page.evaluate(()=>{
+     const card=document.querySelector('#settings-modal .modal-card');
+     card.scrollTop=card.scrollHeight;
+   });
+   const closeAfterScroll=await page.locator('#btn-close-settings').boundingBox();
+   assert.ok(closeAfterScroll && closeAfterScroll.y>=-1&&closeAfterScroll.y+closeAfterScroll.height<=481,
+     'Close button disappeared when scrolling settings at '+width);
+   if(process.env.E2E_SCREENSHOTS==='1'&&[1440,390].includes(width)){
+     const dir=path.join(root,'test-artifacts');fs.mkdirSync(dir,{recursive:true});
+     await page.screenshot({path:path.join(dir,'settings-refresh-admin-'+width+'.png'),fullPage:false});
+   }
+ }
+ // Clicking inside does NOT dismiss; clicking the backdrop does.
+ await page.setViewportSize({width:960,height:650});
+ await page.evaluate(()=>{
+   document.querySelector('#settings-modal .modal-card').scrollTop=0;
+ });
+ await page.locator('#settings-modal .settings-group-title').first().click();
+ assert.equal(await page.locator('#settings-modal').isVisible(),true,
+   'Clicking inside settings incorrectly closed the modal');
+ await page.mouse.click(2,2);
+ assert.equal(await page.locator('#settings-modal').isHidden(),true,
+   'Clicking the settings backdrop should close it');
+ await page.evaluate(()=>document.getElementById('admin-settings-row').classList.add('hidden'));
+ await page.setViewportSize({width:initialWidth,height:844});
+ console.log('PASS: settings SVG icons, danger redesign, dashboard responsive and backdrop dismissal');
+}
 async function testLongEmailSettings(page, initialWidth) {
  const longEmail = 'studente.' + 'x'.repeat(175) + '@' + 'example'.repeat(9) + '.com';
  const widths = [1440, 1024, 820, 768, 390, 320];
@@ -597,6 +681,7 @@ async function smoke(browser,url,width){
  await testAccessibilityKeyboard(page,width);
  await testNonBlockingCloudConflict(page);
  await testLongEmailSettings(page,width);
+ await testSettingsModalRefresh(page,width);
  await testResponsiveLayout(page,width);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
  // L'Arena classificata e i progetti Premium sono in pausa, ma il progetto gratuito resta aperto.

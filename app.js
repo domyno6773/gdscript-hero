@@ -4606,6 +4606,15 @@ const App = {
         if (btnCloseSettings) {
             btnCloseSettings.onclick = () => this.closeSettingsModal();
         }
+        // Chiude soltanto quando il clic e' sull'overlay, mai dentro il pannello:
+        // pulsanti, toggle e conferme rimangono utilizzabili.
+        const settingsOverlay=document.getElementById('settings-modal');
+        if(settingsOverlay){
+            settingsOverlay.addEventListener('click',event=>{
+                if(event.target===settingsOverlay && !settingsOverlay.classList.contains('hidden'))
+                    this.closeSettingsModal();
+            });
+        }
 
         const btnThemeDark = document.getElementById('btn-theme-dark');
         const btnThemeLight = document.getElementById('btn-theme-light');
@@ -6534,7 +6543,11 @@ const App = {
             settingsAccountDesc.title = fullEmail;
         }
         if (btnSettingsAuth) {
-            btnSettingsAuth.innerText = isGuest ? '🔑 Accedi' : '🚪 Esci';
+            // Cambia solo la label: l'icona SVG deve rimanere intatta.
+            const label=btnSettingsAuth.querySelector('.settings-button-label');
+            if(label)label.textContent=isGuest?'Accedi':'Esci';
+            else btnSettingsAuth.textContent=isGuest?'Accedi':'Esci';
+            btnSettingsAuth.dataset.action=isGuest?'login':'logout';
         }
 
         // Visibilità riga Admin nelle Impostazioni: VISIBILE SOLO SE L'UTENTE È L'ADMIN
