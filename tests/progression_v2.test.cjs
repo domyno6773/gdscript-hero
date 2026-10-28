@@ -74,7 +74,7 @@ app.state.dailyQuests.progress.review_success=1;
 const beforeCapXp=app.state.xp;
 const beforeCapCount=app.state.claimedQuestsCount;
 assert.equal(app.claimQuestReward('review_success'),true,
-    'Missione completa anche se il budget settimanale XP e' terminato');
+    'Missione completa anche se il budget settimanale XP è terminato');
 assert.equal(app.state.xp,beforeCapXp,'Il limite XP non viene aggirato');
 assert.equal(app.state.claimedQuestsCount,beforeCapCount+1);
 assert.equal(app.state.dailyQuests.claimed.review_success,true);
