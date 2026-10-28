@@ -567,3 +567,13 @@ html, body { overflow-x:clip; }
 @media(prefers-reduced-motion:reduce) {
   .site-onboarding-overlay .site-onboarding-card {animation:none}
 }
+
+/* Il piccolo triangolo indica il controllo spiegato nel tour. */
+.navbar .site-tour-highlight::after,.mobile-bottom-nav .site-tour-highlight::after {
+  content:'';position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);
+  border-left:7px solid transparent;border-right:7px solid transparent;
+  border-bottom:9px solid var(--accent-primary);pointer-events:none;
+}
+@media(max-width:820px){
+  .mobile-bottom-nav .site-tour-highlight::after {bottom:auto;top:-18px;transform:translateX(-50%) rotate(180deg)}
+}

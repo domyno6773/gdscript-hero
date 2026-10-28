@@ -324,7 +324,9 @@ const App = {
                 }
                 this.state.unlockedAchievements = parsed.unlockedAchievements || [];
                 this.state.streakMode = parsed.streakMode || "rilassato";
-                this.state.streakGoalSelection=parsed.streakGoalSelection || {week:parsed.currentWeekId||this.getWeekId(),selectedDate:'legacy'};
+                this.state.streakGoalSelection=Object.hasOwn(parsed,'streakGoalSelection')
+                    ? parsed.streakGoalSelection
+                    : {week:parsed.currentWeekId||this.getWeekId(),selectedDate:'legacy'};
                 this.state.siteWelcomeSeen=parsed.siteWelcomeSeen!==false;
                 this.state.streakWeeks = parsed.streakWeeks || 0;
                 this.state.activeDaysThisWeek = parsed.activeDaysThisWeek || [];
@@ -2437,6 +2439,8 @@ const App = {
     setStreakMode(tier){
         if(!Object.hasOwn(STREAK_TIERS,tier)||!this.canChangeStreakGoal())return false;
         SoundFX.playClick();
+        // Conteggia PRIMA la settimana conclusa col vecchio obiettivo.
+        this.checkWeekReset();
         this.state.streakMode=tier;
         this.state.streakGoalSelection={week:this.getWeekId(),selectedDate:this.getTodayISO()};
         this.state.siteWelcomeSeen=true;
@@ -4690,6 +4694,12 @@ const App = {
             const el = document.getElementById(`tier-${tier}`);
             if (el) {
                 el.onclick = () => this.setStreakMode(tier);
+                el.addEventListener('keydown',event=>{
+                    if(event.key==='Enter'||event.key===' '){
+                        event.preventDefault();
+                        this.setStreakMode(tier);
+                    }
+                });
             }
         });
 
