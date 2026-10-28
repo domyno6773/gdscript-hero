@@ -76,8 +76,11 @@ function ranges(source){
   let end=i,content=false;
   for(let j=i+1;j<rows.length;j++){
    const trimmed=rows[j].trim();
-   if(trimmed&&!trimmed.startsWith('#')&&indents[j]<=indents[i])break;
-   if(trimmed&&!trimmed.startsWith('#'))content=true;
+   // A dedented comment belongs to the next section, never this block.
+   // Trailing empty separator lines must remain visible after folding.
+   if(trimmed&&indents[j]<=indents[i])break;
+   if(!trimmed)continue;
+   if(!trimmed.startsWith('#'))content=true;
    end=j;
   }
   if(content&&end>i)result.set(i,end);
@@ -155,7 +158,14 @@ function preview(el,state){
 }
 function refresh(el){
  const s=items.get(el);if(!s)return;
- if(el.value!==s.source)s.folds.clear();
+ if(el.value!==s.source){
+  s.folds.clear();
+  // Programmatic restores (saved Sandbox projects, lessons, review drafts)
+  // change textarea.value without firing input. Keep the actual visible
+  // highlighting in sync, not only the fold-only preview.
+  if(el.id==='sandbox-code-editor')window.GDScriptHighlighter?.sync('sandbox');
+  else if(el.id==='code-editor')window.GDScriptHighlighter?.sync('exercise');
+ }
  s.source=el.value;
  s.blocks=ranges(el.value);
  for(const key of [...s.folds])if(!s.blocks.has(key))s.folds.delete(key);

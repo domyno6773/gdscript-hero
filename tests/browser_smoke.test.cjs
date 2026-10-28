@@ -84,6 +84,36 @@ async function testGodotEditorExtras(page,selector){
  await page.locator(preview+' .gdh-fold-arrow.collapsed').first().click();
  assert.ok(await page.locator(preview).isHidden());
  assert.equal(await editor.inputValue(),base);
+ // Simula il ripristino da salvataggio: assegnazione .value senza input event.
+ // È il percorso usato da Sandbox e dalle lezioni quando si cambia sezione.
+ const restored='extends Node2D\\n\\nfunc _ready():\\n    print("ok")\\n\\n# Nota indipendente\\nfunc next():\\n    pass\\n\\nvar after = 1'.replaceAll('\\n','\n');
+ await editor.evaluate((el,source)=>{
+   el.value=source;
+   if(el.id==='sandbox-code-editor')App.updateSandboxLineNumbers();
+   else App.updateLineNumbers();
+ },restored);
+ const sourceLayer=selector==='#code-editor'?'#gdscript-syntax-layer':'#sandbox-gdscript-syntax-layer';
+ assert.ok((await page.locator(sourceLayer).textContent()).includes('func _ready():'),
+   'Restored code is missing from the normal visible syntax layer');
+ assert.ok(await page.locator(preview).isHidden(),'Restored code must begin fully expanded');
+ const boundaries=await page.evaluate(code=>[...GDHEditorUX.ranges(code)],restored);
+ assert.deepEqual(boundaries,[[2,3],[6,7]],
+   'Fold boundaries must exclude trailing blank lines and unrelated comments');
+ const foldFirst=page.locator(gutter+' button[aria-label="Comprimi blocco dalla riga 3"]');
+ await foldFirst.click();
+ assert.ok(await page.locator(preview).isVisible());
+ const visible=await page.locator(preview).textContent();
+ assert.ok(visible.includes('func next():'),'The next function was hidden by unrelated fold');
+ assert.ok(visible.includes('# Nota indipendente'),'Dedented comment was hidden by unrelated fold');
+ assert.ok(visible.includes('var after = 1'),'Code after both functions was hidden');
+ assert.ok(!visible.includes('print("ok")'),'Selected function body was not hidden');
+ assert.equal(await page.locator(preview+' .gdh-fold-preview-row').count(),9,
+   'Only one function-body line must disappear from a 10-line script');
+ await page.locator(preview+' .gdh-fold-arrow.collapsed').first().click();
+ assert.ok(await page.locator(preview).isHidden());
+ assert.ok((await page.locator(sourceLayer).textContent()).includes('print("ok")'),
+   'Expanding showed an empty editor after restoring a saved project');
+ assert.equal(await editor.inputValue(),restored,'Folding changed the real GDScript text');
 }
 
 async function testSmartIndent(page,selector) {
