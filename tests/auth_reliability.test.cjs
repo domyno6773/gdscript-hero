@@ -58,7 +58,20 @@ async function run() {
     count++;
 
 
-    // La coda locale invia le richieste con la versione confermata dal server.
+    // L'importazione iniziale ospite deve conservare anche il ritmo scelto.
+    const selectedGoal={week:'2026-10-26',selectedDate:'2026-10-28'};
+    const importedGuest=auth.mergeProgress(
+        {streakMode:'rilassato',streakGoalSelection:null,siteWelcomeSeen:false},
+        {streakMode:'lockin',streakGoalSelection:selectedGoal,siteWelcomeSeen:true}
+    );
+    assert.equal(importedGuest.streakMode,'lockin');
+    assert.equal(JSON.stringify(importedGuest.streakGoalSelection),JSON.stringify(selectedGoal));
+    assert.equal(importedGuest.siteWelcomeSeen,true);
+    const savedBackup=auth.createBackupPayload(importedGuest);
+    assert.equal(savedBackup.data.streakGoalSelection.week,selectedGoal.week);
+    count++;
+
+        // La coda locale invia le richieste con la versione confermata dal server.
     auth.currentUser={id:'u',email:'test@example.com',isGuest:false};
     let db={'test@example.com':{progress:null}};
     auth.getAccountsDB=()=>db;

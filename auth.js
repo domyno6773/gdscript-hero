@@ -873,6 +873,8 @@ const AuthManager = {
                 streak: appState.streak || 1,
                 streakWeeks: appState.streakWeeks || 0,
                 streakMode: appState.streakMode || 'rilassato',
+                streakGoalSelection: appState.streakGoalSelection || null,
+                siteWelcomeSeen: !!appState.siteWelcomeSeen,
                 activeDaysThisWeek: appState.activeDaysThisWeek || [],
                 currentWeekId: appState.currentWeekId || null,
                 lastActiveDate: appState.lastActiveDate || null,
@@ -1004,6 +1006,34 @@ const AuthManager = {
             : (current.rewardsV2 || imported.rewardsV2 || null);
         merged.streak = Math.max(current.streak || 1, imported.streak || 1);
         merged.streakWeeks = Math.max(current.streakWeeks || 0, imported.streakWeeks || 0);
+        // Una nuova registrazione importa anche il ritmo gia' selezionato
+        // dall'ospite. La fusione fra dispositivi conserva invece la scelta
+        // della settimana piu' recente e non ne crea una nuova.
+        const curGoal=current.streakGoalSelection;
+        const impGoal=imported.streakGoalSelection;
+        if(!curGoal && impGoal){
+            merged.streakGoalSelection=impGoal;
+            merged.streakMode=imported.streakMode||current.streakMode||'rilassato';
+        }else if(curGoal && impGoal && typeof impGoal.week==='string' &&
+            typeof curGoal.week==='string' &&
+            (() => {
+                // Anche le vecchie settimane ISO (es. 2026-W44) devono
+                // ordinarsi correttamente rispetto alle nuove date locali.
+                const normalize=key=>{
+                    if(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(key))return key;
+                    const match=/^([0-9]{4})-W([0-9]{2})$/.exec(key);
+                    if(!match)return '';
+                    const jan4=new Date(Date.UTC(Number(match[1]),0,4));
+                    jan4.setUTCDate(jan4.getUTCDate()-(jan4.getUTCDay()+6)%7+
+                        (Number(match[2])-1)*7);
+                    return jan4.toISOString().slice(0,10);
+                };
+                return normalize(impGoal.week)>normalize(curGoal.week);
+            })()){
+            merged.streakGoalSelection=impGoal;
+            merged.streakMode=imported.streakMode||current.streakMode||'rilassato';
+        }
+        merged.siteWelcomeSeen=!!(current.siteWelcomeSeen||imported.siteWelcomeSeen);
 
         const finishedSet = new Set([...(current.finishedLessons || []), ...(imported.finishedLessons || [])]);
         merged.finishedLessons = Array.from(finishedSet).sort((a, b) => a - b);
