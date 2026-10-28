@@ -392,3 +392,9 @@
 }
 #settings-modal #music-volume-setting-row .volume-slider-wrapper { width:min(205px,100%); }
 [data-theme="light"] #settings-modal #music-enabled-setting-row { border-top-color:#d5e0e9; }
+
+/* Quattro controlli audio senza costringere a scorrere sui desktop alti. */
+@media (min-width:621px) {
+  #settings-modal .settings-group { padding-block:10px; }
+  #settings-modal .settings-row { padding-block:7px; }
+}
