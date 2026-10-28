@@ -6021,6 +6021,7 @@ const App = {
             }
         });
 
+        window.addEventListener('online',()=>window.AuthManager?.retryCloudSync?.());
         const syncRetry=document.getElementById('gdh-save-retry');
         if(syncRetry)syncRetry.onclick=()=>window.AuthManager.retryCloudSync();
         const syncResolve=document.getElementById('gdh-save-resolve');

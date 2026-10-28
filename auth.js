@@ -533,6 +533,7 @@ const AuthManager = {
     },
     async fetchFromCloud(){
         if(!this.isCloudActive()||this.isGuest())return null;
+        try{
         const owner=this.currentUser.id;
         const {data:identity,error:identityError}=await this.supabaseClient.auth.getUser();
         if(identityError)throw identityError;
@@ -544,6 +545,10 @@ const AuthManager = {
         this._cloudVersion={userId:owner,revision:data?Number(data.save_revision):-1,blocked:false,remote:null};
         this.setSyncStatus('ready','Cloud verificato');
         return data?.save_data||null;
+        }catch(error){
+            this.setSyncStatus('error','Impossibile leggere il cloud. I progressi locali sono protetti: puoi riprovare.');
+            throw error;
+        }
     },
     downloadConflictCopies(){
         if(this.isGuest())return;
