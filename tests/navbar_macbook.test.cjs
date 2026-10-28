@@ -152,8 +152,69 @@ async function inspect(engine, url) {
       }
     }
   }
+  // L'altezza del pannello sticky delle missioni deve adattarsi al MacBook,
+  // altrimenti l'ultima ricompensa finisce sotto il bordo inferiore della finestra.
+  for(const width of [2048,1728,1512,1440,1366,1280,1200,1100,820,390]) {
+    for(const height of [600,700,768,900,1080]) {
+      await page.setViewportSize({width,height});
+      await page.evaluate(()=>{
+        document.querySelectorAll('.view-container').forEach(el=>
+          el.classList.toggle('hidden',el.id!=='view-roadmap'));
+        if(window.App?.renderSidebarDailyQuests) App.renderSidebarDailyQuests();
+        document.querySelector('#view-roadmap').scrollTop=0;
+      });
+      const result=await page.evaluate(()=>{
+        const box=s=>document.querySelector(s)?.getBoundingClientRect();
+        const card=box('#sidebar-quests-card');
+        const side=box('.roadmap-sidebar-col');
+        const view=box('#view-roadmap');
+        const header=box('#sidebar-quests-toggle');
+        const countdown=box('.sidebar-quests-countdown');
+        const list=document.querySelector('#sidebar-quests-list');
+        const listRect=list.getBoundingClientRect();
+        const beforeScroll=list.scrollHeight-list.clientHeight;
+        list.scrollTop=list.scrollHeight;
+        const last=list.querySelector('.sidebar-quest-item:last-child .sidebar-quest-btn')?.getBoundingClientRect();
+        return {
+          cardBottom:card?.bottom,cardTop:card?.top,cardWidth:card?.width,
+          sideWidth:side?.width,viewBottom:view?.bottom,
+          headerBottom:header?.bottom,countdownBottom:countdown?.bottom,
+          listTop:listRect.top,listBottom:listRect.bottom,
+          scrollable:beforeScroll>2,scrollTop:list.scrollTop,
+          listHeight:list.clientHeight,listContent:list.scrollHeight,
+          listItems:list.querySelectorAll('.sidebar-quest-item').length,
+          accessible:list.getAttribute('tabindex')==='0'&&list.getAttribute('role')==='region',
+          lastButton:last?{top:last.top,bottom:last.bottom}:null,
+          viewport:innerHeight
+        };
+      });
+      const msg=engine.name()+' '+width+'x'+height+': '+JSON.stringify(result);
+      assert.ok(result.listItems===3,'Three missions must remain accessible: '+msg);
+      assert.ok(result.accessible,'Inner scroll must work with a keyboard: '+msg);
+      assert.ok(result.cardWidth<=result.sideWidth+2,'Quest card overflows its column: '+msg);
+      if(width>1200) {
+        assert.ok(result.cardBottom<=height-7,
+          'Sticky daily quests protrude beyond the viewport: '+msg);
+        assert.ok(result.headerBottom<result.countdownBottom&&
+          result.countdownBottom<=result.listTop+2,
+          'Sticky quests header/countdown must remain visible: '+msg);
+        assert.ok(result.listBottom<=result.cardBottom+1,
+          'Quest list leaks outside its card: '+msg);
+        if(result.scrollable){
+          assert.ok(result.scrollTop>0,'Mission list should scroll internally: '+msg);
+          assert.ok(result.lastButton&&result.lastButton.bottom<=result.listBottom+2&&
+            result.lastButton.top>=result.listTop-2,
+            'Final mission reward cannot be reached by scrolling: '+msg);
+        }
+      }
+      if(width===1512&&height===768&&process.env.E2E_SCREENSHOTS==='1'){
+        fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});
+        await page.screenshot({path:path.join(root,'test-artifacts','macbook-daily-quests-'+engine.name()+'.png')});
+      }
+    }
+  }
   await context.close();
-  console.log('PASS: '+engine.name()+' MacBook navbar, all visible controls and profile inside viewport');
+  console.log('PASS: '+engine.name()+' navbar and adaptive daily quests on desktop, MacBook, tablet and mobile');
  } finally {await browser.close();}
 }
 (async()=>{

@@ -226,3 +226,70 @@ body { height:100vh; height:100dvh; min-width:0; }
 }
 /* Il documento non deve scorrere lateralmente quando l'utente usa il trackpad. */
 html, body { overflow-x:clip; }
+
+/* Dashboard / Missioni Giornaliere
+   La colonna e' sticky, quindi il suo contenuto deve rientrare nell'altezza
+   VISIBILE sotto la navbar (60px), non nell'altezza totale della pagina.
+   Con tre missioni e una finestra MacBook bassa, scorre solo l'elenco: titolo,
+   riepilogo e countdown restano sempre leggibili. */
+@media (min-width:1201px) {
+  #view-roadmap .roadmap-sidebar-col {
+    min-width:0;
+    width:clamp(280px,27vw,340px);
+    max-width:100%;
+    align-self:flex-start;
+  }
+  #view-roadmap .daily-quests-sidebar-card {
+    box-sizing:border-box;
+    width:100%;
+    max-height:calc(100vh - 108px);
+    max-height:calc(100dvh - 108px);
+    min-height:0;
+    overflow:hidden;
+  }
+  #view-roadmap .sidebar-card-header { flex:0 0 auto; }
+  #view-roadmap .sidebar-quests-collapsible-body {
+    flex:1 1 auto;
+    min-height:0;
+    overflow:hidden;
+  }
+  #view-roadmap .sidebar-quests-countdown { flex:0 0 auto; }
+  #view-roadmap .sidebar-quests-list {
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+    scrollbar-color:#526d86 transparent;
+    padding-right:3px;
+  }
+  #view-roadmap .sidebar-quests-list:focus-visible {
+    outline:2px solid #6ca9d6;
+    outline-offset:-2px;
+    border-radius:8px;
+  }
+}
+/* Un MacBook con finestra bassa deve mostrare piu' missioni prima di scorrere,
+   mantenendo comunque una dimensione comoda per pulsanti e testo. */
+@media (min-width:1201px) and (max-height:900px) {
+  #view-roadmap .daily-quests-sidebar-card {
+    padding:clamp(10px,1.6vh,16px);
+    gap:clamp(7px,1.15vh,11px);
+  }
+  #view-roadmap .sidebar-card-header { padding-bottom:8px; }
+  #view-roadmap .sidebar-quests-collapsible-body { gap:9px; }
+  #view-roadmap .sidebar-quests-list { gap:8px; }
+  #view-roadmap .sidebar-quest-item {
+    padding:clamp(8px,1.1vh,11px);
+    gap:6px;
+  }
+  #view-roadmap .sidebar-quest-btn {
+    padding-block:7px;
+    min-height:34px;
+  }
+}
+/* Quando le colonne si impilano (tablet / laptop stretto) il contenuto torna
+   nel normale scroll verticale della pagina, senza scroll annidati. */
+@media (max-width:1200px) {
+  #view-roadmap .sidebar-quests-list { overflow:visible; max-height:none; }
+}
