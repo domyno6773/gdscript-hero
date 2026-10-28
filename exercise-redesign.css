@@ -64,6 +64,8 @@
 #view-exercise .hint-content {
     color: #c3d4e8;
     line-height: 1.62;
+    /* Long inline code, paths and comments must not widen the lesson pane. */
+    overflow-wrap: anywhere;
 }
 #view-exercise .theory-body strong,
 #view-exercise .task-body strong { color: #f1f7ff; }
@@ -79,6 +81,26 @@
     background: #151d28;
     border-color: #36465a;
     border-radius: 7px;
+}
+/* All 60 lessons use either .code-preview > pre or pre.code-block.
+   Keep their indentation and syntax colors, but wrap lines that would
+   otherwise cross the sample's border (including long comments/tokens).
+   This rule is scoped to lesson content, never the editable GDScript IDE. */
+#view-exercise .lesson-content .code-preview,
+#view-exercise .lesson-content pre {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+}
+#view-exercise .lesson-content pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    overflow-x: auto;
+    tab-size: 4;
+}
+#view-exercise .lesson-content .code-preview {
+    overflow-wrap: anywhere;
 }
 #view-exercise .task-box {
     border-color: #436585;

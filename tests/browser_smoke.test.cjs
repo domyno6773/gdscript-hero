@@ -188,6 +188,65 @@ async function testGodotEditorExtras(page,selector){
  assert.equal(await editor.inputValue(),restored,'Folding changed the real GDScript text');
 }
 
+async function testAllLessonCodeSamplesFit(page,width){
+ // Check the ACTUAL rendered sample markup in every lesson, not just the
+ // comment example from lesson 2. Keep this read-only for student progress.
+ const result=await page.evaluate(()=>{
+   const previousLesson=App.state.currentLessonId;
+   const previousXP=App.state.xp;
+   const errors=[];
+   let sampleCount=0,lessonCount=0;
+   try{
+     for(const lesson of LESSONS_DATA){
+       App.openLesson(lesson.id);
+       lessonCount++;
+       const blocks=[...document.querySelectorAll(
+         '#view-exercise .lesson-content .code-preview, #view-exercise .lesson-content pre')];
+       for(const block of blocks){
+         sampleCount++;
+         const r=block.getBoundingClientRect(),parent=block.parentElement.getBoundingClientRect();
+         const style=getComputedStyle(block);
+         if(r.width<=0||r.right>parent.right+1.5||r.left<parent.left-1.5||
+           block.scrollWidth>block.clientWidth+2){
+           errors.push({lesson:lesson.id,type:'box',tag:block.tagName,
+             cls:block.className,width:r.width,scrollWidth:block.scrollWidth,
+             clientWidth:block.clientWidth,parentRight:parent.right,right:r.right});
+         }
+         if(block.tagName!=='PRE')continue;
+         if(style.whiteSpace!=='pre-wrap'){
+           errors.push({lesson:lesson.id,type:'white-space',value:style.whiteSpace});
+         }
+         // scrollWidth alone can miss overflowing painted inline spans:
+         // inspect the real rendered text fragments, including comment spans.
+         const range=document.createRange();
+         const walker=document.createTreeWalker(block,NodeFilter.SHOW_TEXT);
+         const limit=r.right-(parseFloat(style.paddingRight)||0)-1;
+         let textNode;
+         while((textNode=walker.nextNode())){
+           if(!textNode.textContent.trim())continue;
+           range.selectNodeContents(textNode);
+           for(const part of range.getClientRects()){
+             if(part.width>0&&part.right>limit+2){
+               errors.push({lesson:lesson.id,type:'text',right:part.right,limit,
+                 text:textNode.textContent.slice(0,75)});
+               break;
+             }
+           }
+         }
+       }
+     }
+   }finally{
+     App.openLesson(previousLesson);
+   }
+   return {lessonCount,sampleCount,errors:errors.slice(0,20),totalErrors:errors.length,
+     xpUnchanged:App.state.xp===previousXP};
+ });
+ assert.equal(result.lessonCount,60,'The visual regression must scan all 60 lessons');
+ assert.ok(result.sampleCount>=38,'Expected both lesson sample types: '+JSON.stringify(result));
+ assert.ok(result.xpUnchanged,'Inspecting samples unexpectedly changed student XP');
+ assert.equal(result.totalErrors,0,'Lesson examples escape their boundaries at '+width+'px: '+JSON.stringify(result));
+}
+
 async function testSmartIndent(page,selector) {
  const editor=page.locator(selector);
  const cases=[
@@ -762,6 +821,7 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#sandbox-scene-tree img').count(),0,'HTML in Sandbox node tree');
  await page.evaluate(()=>App.openLesson(1));
  await viewIs(page,'exercise');
+ await testAllLessonCodeSamplesFit(page,width);
  assert.equal(await page.locator('#view-exercise .exercise-mascot-slot').count(),0,
    'Il vecchio placeholder della mascotte non deve comparire nelle lezioni');
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
