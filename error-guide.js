@@ -204,8 +204,8 @@
       // nello script libero, print("ciao" da' Unexpected identifier prima
       // di arrivare al delimitatore mancante.
       line = missingClose.line;
-      const names={'(': 'parentesi tonda', '[': 'parentesi quadra', '{': 'parentesi graffa'};
-      title='Manca una '+names[missingClose.open]+' di chiusura ('+missingClose.close+')';
+      const names={'(': 'parentesi', '[': 'parentesi quadra', '{': 'parentesi graffa'};
+      title='Manca la '+names[missingClose.open]+' di chiusura: '+missingClose.close;
       why='Alla riga '+missingClose.line+' hai aperto '+missingClose.open+
         ' ma non hai inserito la corrispondente '+missingClose.close+
         '. La chiusura serve a completare la chiamata o l’espressione.';
