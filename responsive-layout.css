@@ -577,3 +577,26 @@ html, body { overflow-x:clip; }
 @media(max-width:820px){
   .mobile-bottom-nav .site-tour-highlight::after {bottom:auto;top:-18px;transform:translateX(-50%) rotate(180deg)}
 }
+
+/* Successo esercizio: dialogo compatto anche quando i breakpoint globali
+   impongono .modal-card {max-width:95%!important}. */
+#success-modal > .modal-card {
+  box-sizing: border-box;
+  width: min(440px, calc(100vw - 32px)) !important;
+  max-width: 440px !important;
+  padding: 26px 24px !important;
+  border-radius: 16px;
+}
+#success-modal .modal-icon-bounce { margin-bottom: 8px; }
+#success-modal .modal-title { margin: 0 0 5px; }
+#success-modal .modal-subtitle { margin: 0 auto 14px; line-height: 1.45; }
+#success-modal .modal-actions-row { gap: 10px; }
+#success-modal .btn-stay-level,
+#success-modal .btn-next-level { padding: 12px 10px; border-radius: 9px; }
+@media (max-width: 480px) {
+  #success-modal > .modal-card {
+    width: calc(100vw - 28px) !important;
+    max-width: 440px !important;
+    padding: 24px 16px !important;
+  }
+}

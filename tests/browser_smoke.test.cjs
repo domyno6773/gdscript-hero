@@ -1112,6 +1112,13 @@ async function smoke(browser,url,width){
  await page.waitForFunction(()=>!!window.App&&!!window.LESSONS_DATA&&!document.getElementById('view-roadmap').classList.contains('hidden'));
  assert.equal(await page.evaluate(()=>LESSONS_DATA.length),111);
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
+ // La modale di successo non deve piu' allargarsi a quasi tutto il viewport.
+ await page.evaluate(()=>document.getElementById('success-modal').classList.remove('hidden'));
+ const compactSuccess=await page.locator('#success-modal > .modal-card').boundingBox();
+ assert.ok(compactSuccess && compactSuccess.width<=445 &&
+   compactSuccess.width<=width-20,
+   'Success dialog too wide: '+JSON.stringify(compactSuccess));
+ await page.evaluate(()=>document.getElementById('success-modal').classList.add('hidden'));
  assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
  assert.equal(await page.locator('#btn-open-settings svg.ui-icon').count(),1,'Settings button must use SVG icon');
  assert.equal((await page.locator('#btn-open-settings').textContent()).trim(),'','Settings button must not contain emoji text');
