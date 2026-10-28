@@ -907,6 +907,10 @@ async function testNavbarProfileAndQuestClaim(page,width) {
       claimedQuestsCount:App.state.claimedQuestsCount,xp:App.state.xp,
       achievements:App.state.unlockedAchievements.slice()
     };
+    // Un traguardo può assegnare XP indipendenti dal premio missione:
+    // lo isoliamo per verificare SOLO il limite settimanale delle missioni.
+    App._testOriginalQuestAchievements=App.checkAchievements;
+    App.checkAchievements=()=>{};
     App.state.dailyQuests={date:App.getTodayISO(),
       progress:{daily_exercise:1,review_success:0,study_variety:0},
       claimed:{daily_exercise:false,review_success:false,study_variety:false}};
@@ -946,6 +950,8 @@ async function testNavbarProfileAndQuestClaim(page,width) {
     App.state.claimedQuestsCount=before.claimedQuestsCount;
     App.state.xp=before.xp;
     App.state.unlockedAchievements=before.achievements;
+    App.checkAchievements=App._testOriginalQuestAchievements;
+    delete App._testOriginalQuestAchievements;
     App.saveStorage({localOnly:true});
     App.updateStatsUI();
     App.updateQuestsBadge();
