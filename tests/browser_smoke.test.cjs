@@ -49,7 +49,8 @@ async function testGodotEditorExtras(page,selector){
      active:editor?.id,editorScroll:editor?.scrollTop,
      editorRect:editor?.getBoundingClientRect().toJSON()};
  },gutter);
- console.log('FOLD_DEBUG '+selector+' '+JSON.stringify(debug));
+ const hostInfo=await editor.evaluate(el=>({hostClass:el.closest('.editor-wrapper')?.className,hostHtml:el.closest('.editor-wrapper')?.outerHTML.slice(-800),globalGutters:document.querySelectorAll('.gdh-fold-gutter').length,inPractice:!!el.closest('#view-practice'),inSandbox:!!el.closest('.sandbox-editor-col')}));
+ console.log('FOLD_DEBUG '+selector+' '+JSON.stringify({debug,hostInfo}));
  assert.ok(debug.buttons>0,'No fold arrows: '+JSON.stringify(debug));
  await page.locator(gutter+' button').first().click();
  const preview=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-preview':
