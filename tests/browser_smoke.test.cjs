@@ -530,7 +530,7 @@ async function testSettingsModalRefresh(page, initialWidth) {
  });
  // Stats and reset must have the same neutral button surface as export/import.
  // Only their icons should indicate admin access vs. destructive action.
- const actionStyles=await page.evaluate(()=>{
+ const actionStyles=await page.evaluate(async()=>{
    const root=document.documentElement,body=document.body;
    const before=[root.getAttribute('data-theme'),body.getAttribute('data-theme')];
    const read=()=>{
@@ -550,6 +550,9 @@ async function testSettingsModalRefresh(page, initialWidth) {
    for(const theme of ['dark','light']){
      root.setAttribute('data-theme',theme);
      body.setAttribute('data-theme',theme);
+     // Allow the normal 150ms button color transition to settle before
+     // comparing computed colors. SVG icon color does not animate.
+     await new Promise(resolve=>setTimeout(resolve,230));
      themes[theme]=read();
    }
    if(before[0]===null)root.removeAttribute('data-theme');
