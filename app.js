@@ -255,6 +255,7 @@ const App = {
         else if(this._saveOwner==='guest')this.loadStorage();
         else this.loadStorage(null);
         this.ensureUnlockedConsistency();
+        SoundFX.bindMusicGesture();
         this.applyTheme(this.state.theme || 'dark');
         this.checkDailyQuestsReset();
         this.bindEvents();
@@ -379,6 +380,16 @@ const App = {
                 if (parsed.soundVolume !== undefined) {
                     SoundFX.setVolume(parsed.soundVolume);
                 }
+                if (typeof parsed.musicEnabled === 'boolean')
+                    SoundFX.musicEnabled = parsed.musicEnabled;
+                if (parsed.musicVolume !== undefined)
+                    SoundFX.musicVolume = SoundFX.clamp(parsed.musicVolume, SoundFX.musicVolume);
+                // Sincronizza il bus senza avviare audio durante il caricamento.
+                if (SoundFX.musicPlaying) {
+                    if (!SoundFX.musicEnabled || !SoundFX.musicVolume) SoundFX.stopMusic();
+                    else SoundFX.musicBus?.gain.setTargetAtTime(
+                        SoundFX.musicVolume * 0.40, SoundFX.ctx.currentTime, 0.08);
+                }
 
                 // P3.1: Telemetria didattica per apprendimento adattivo
                 if (parsed.learningTelemetry && parsed.learningTelemetry.schema_version) {
@@ -487,6 +498,8 @@ const App = {
             lastActiveDate: this.state.lastActiveDate,
             soundEnabled: SoundFX.enabled,
             soundVolume: SoundFX.volume,
+            musicEnabled: SoundFX.musicEnabled,
+            musicVolume: SoundFX.musicVolume,
             userCode: this.state.userCode,
             profile: this.state.profile,
             profileCustomized: this.state.profileCustomized,
@@ -2069,6 +2082,14 @@ const App = {
         const percent = Math.round(SoundFX.volume * 100);
         if (volumeSlider) volumeSlider.value = percent;
         if (volumeLabel) volumeLabel.innerText = `${percent}%`;
+
+        const musicCheckbox = document.getElementById('setting-music-enabled');
+        if (musicCheckbox) musicCheckbox.checked = SoundFX.musicEnabled;
+        const musicSlider = document.getElementById('setting-music-volume-slider');
+        const musicLabel = document.getElementById('music-volume-percent-label');
+        const musicPercent = Math.round(SoundFX.musicVolume * 100);
+        if (musicSlider) musicSlider.value = musicPercent;
+        if (musicLabel) musicLabel.textContent = `${musicPercent}%`;
 
         // Sincronizza stato pulsanti tema
         const btnDark = document.getElementById('btn-theme-dark');
@@ -4649,6 +4670,24 @@ const App = {
                 SoundFX.setVolume(vol);
                 if (volumeLabel) volumeLabel.innerText = `${e.target.value}%`;
                 SoundFX.playClick();
+                this.saveStorage();
+            };
+        }
+
+        const musicCheckbox = document.getElementById('setting-music-enabled');
+        if (musicCheckbox) {
+            musicCheckbox.onchange = (event) => {
+                SoundFX.setMusicEnabled(event.target.checked);
+                this.saveStorage();
+            };
+        }
+        const musicSlider = document.getElementById('setting-music-volume-slider');
+        const musicLabel = document.getElementById('music-volume-percent-label');
+        if (musicSlider) {
+            musicSlider.oninput = (event) => {
+                const percent = Number(event.target.value);
+                SoundFX.setMusicVolume(percent / 100);
+                if (musicLabel) musicLabel.textContent = `${percent}%`;
                 this.saveStorage();
             };
         }

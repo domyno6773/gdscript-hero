@@ -24,6 +24,8 @@ jobs:
         run: node tests/lesson_content_alignment.test.cjs
       - name: Extended curriculum structure and native verification contracts
         run: node tests/curriculum_expansion.test.cjs
+      - name: Offline soundscape, independent music/SFX settings and mobile gesture
+        run: node tests/audio_soundscape.test.cjs
       - name: Lesson 4 comments ignored and real output evaluated
         run: node tests/lesson4_comments_output.test.cjs
       - name: Godot debug messages and reliable line numbers

@@ -383,3 +383,12 @@
   #settings-modal .volume-slider-wrapper {width:100%;}
   #settings-modal .double-confirm-box {padding:13px 11px;gap:10px;}
 }
+
+/* Musica ed effetti: sottosezioni riconoscibili anche sugli schermi piccoli. */
+#settings-modal #music-enabled-setting-row {
+  border-top:1px solid rgba(122,155,187,.26);
+  margin-top:6px;
+  padding-top:16px;
+}
+#settings-modal #music-volume-setting-row .volume-slider-wrapper { width:min(205px,100%); }
+[data-theme="light"] #settings-modal #music-enabled-setting-row { border-top-color:#d5e0e9; }

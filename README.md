@@ -24,8 +24,15 @@ GDScript Hero è una piattaforma didattica **gratuita e in italiano** per impara
 | **Statistiche** | Disponibile | Progressione, autonomia, tentativi e aree da approfondire |
 | **Gamification** | Disponibile | XP, livelli, traguardi, missioni e mappa del percorso |
 | **Salvataggi e account** | Disponibile | Modalità ospite, dati locali, backup e integrazione Supabase |
+| **Audio e musica** | Disponibile | Effetti sonori originali, musica lo-fi generativa e volumi indipendenti in Impostazioni |
 
 La nuova interfaccia è ispirata all'editor di Godot: palette blu-grigio, pannelli ordinati, **evidenziazione reale del codice** e area risultati sempre vicina all'editor. Su mobile sono disponibili schede dedicate a compito e codice. Scena e viewport compaiono quando necessari agli esercizi o attivati dall'utente.
+
+## Audio originale
+
+Gli effetti di navigazione, successo, errore, suggerimenti e completamento utilizzano sintesi Web Audio con un timbro morbido. La musica lo-fi di sottofondo è un arrangiamento **originale e generativo** a 76 BPM, con accordi Rhodes, basso e percussioni leggere; non utilizza brani, campioni o risorse musicali di terzi.
+
+Nelle **Impostazioni → Audio ed effetti sonori** sono presenti interruttori e volumi separati per musica ed effetti. La musica è attiva per impostazione predefinita, ma il browser può iniziarne la riproduzione **solo dopo la prima interazione** (anche su Safari/iPhone). Si arresta quando la scheda diventa inattiva e riprende dopo un nuovo gesto. Le preferenze fanno parte del salvataggio esistente. Nessun servizio audio esterno o infrastruttura a pagamento è richiesto.
 
 ## Corso e apprendimento
 
@@ -105,7 +112,8 @@ Sono presenti workflow GitHub Actions per regressioni, browser e controlli mirat
 
 - `tests/audit_validator_regression.test.cjs` — validatori e casi negativi.
 - `tests/auth_reliability.test.cjs` — salvataggi, backup e affidabilità dell'integrazione.
-- `tests/browser_smoke.test.cjs` — prove funzionali in Chrome desktop e mobile.
+- `tests/browser_smoke.test.cjs` — prove funzionali in Chrome desktop e mobile, compresi i controlli audio.
+- `tests/audio_soundscape.test.cjs` — sintesi locale, gesti di avvio e controlli audio indipendenti.
 - `tests/native_godot/` — confronti mirati con Godot 4.4.1.
 
 I test basati su Node.js possono essere avviati dalla radice della repository:

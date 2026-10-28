@@ -1366,6 +1366,28 @@
                         <span class="volume-icon-max"><svg class="ui-icon settings-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#gdh-icon-settings-volume"></use></svg></span>
                     </div>
                 </div>
+                <div class="settings-row" id="music-enabled-setting-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Musica lo-fi</span>
+                        <span class="settings-item-sub">Sottofondo originale, delicato e continuo. Parte alla prima interazione.</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="setting-music-enabled" aria-label="Musica di sottofondo abilitata" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row" id="music-volume-setting-row">
+                    <div class="settings-label-block">
+                        <span class="settings-item-name">Volume musica</span>
+                        <span class="settings-item-sub" id="music-volume-percent-label">38%</span>
+                    </div>
+                    <div class="volume-slider-wrapper">
+                        <span class="volume-icon-min"><svg class="ui-icon settings-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#gdh-icon-settings-volumeLow"></use></svg></span>
+                        <input type="range" min="0" max="100" value="38" class="volume-slider" id="setting-music-volume-slider" aria-label="Volume musica di sottofondo">
+                        <span class="volume-icon-max"><svg class="ui-icon settings-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#gdh-icon-settings-volume"></use></svg></span>
+                    </div>
+                </div>
             </div>
 
             <!-- Gruppo 3: Account, Backup & Sincronizzazione Dati -->

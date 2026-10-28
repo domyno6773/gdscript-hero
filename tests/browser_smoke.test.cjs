@@ -380,7 +380,7 @@ async function testResponsiveLayout(page,initialWidth) {
 async function testAccessibilityKeyboard(page,width){
   const status=await page.evaluate(()=>{
     const ids=['profile-username-input','profile-tag-select','setting-sound-enabled',
-      'setting-volume-slider','arena-code-editor'];
+      'setting-volume-slider','setting-music-enabled','setting-music-volume-slider','arena-code-editor'];
     const fields=ids.map(id=>{
       const el=document.getElementById(id);
       return {id,hasLabel:!!(el?.labels?.length||el?.getAttribute('aria-label'))};
@@ -823,6 +823,35 @@ async function testLongEmailSettings(page, initialWidth) {
  await page.setViewportSize({width:initialWidth,height:844});
 }
 
+
+async function testAudioSettings(page) {
+  await page.evaluate(()=>App.openSettingsModal());
+  assert.equal(await page.locator('#setting-sound-enabled').isChecked(),true);
+  assert.equal(await page.locator('#setting-music-enabled').isChecked(),true);
+  assert.equal(await page.locator('#setting-music-volume-slider').inputValue(),'38');
+  await page.locator('#setting-music-enabled').uncheck({force:true});
+  assert.equal(await page.evaluate(()=>SoundFX.musicEnabled),false);
+  assert.equal(await page.evaluate(()=>SoundFX.enabled),true,'Disattivare musica non deve disattivare SFX');
+  await page.locator('#setting-music-volume-slider').fill('67');
+  assert.equal(await page.evaluate(()=>SoundFX.musicVolume),0.67);
+  assert.equal((await page.locator('#music-volume-percent-label').textContent()).trim(),'67%');
+  await page.locator('#setting-sound-enabled').uncheck({force:true});
+  assert.equal(await page.evaluate(()=>SoundFX.enabled),false);
+  assert.equal(await page.evaluate(()=>SoundFX.musicEnabled),false);
+  await page.locator('#setting-music-enabled').check({force:true});
+  assert.equal(await page.evaluate(()=>SoundFX.musicEnabled),true);
+  assert.equal(await page.evaluate(()=>SoundFX.enabled),false,'Musica non deve abilitare automaticamente SFX');
+  const state=await page.evaluate(()=>App.getSavePayload());
+  assert.equal(state.musicEnabled,true);
+  assert.equal(state.musicVolume,0.67);
+  await page.evaluate(()=>{
+    SoundFX.setMusicEnabled(false); SoundFX.toggle(true);
+    SoundFX.setMusicVolume(.38); SoundFX.setVolume(.65);
+    App.saveStorage({localOnly:true});
+    App.closeSettingsModal();
+  });
+}
+
 async function testQuizLearningFlow(page) {
  const previous=await page.evaluate(()=>{
    const snapshot={finished:App.state.finishedLessons.slice(),completed:App.state.completedLessons.slice(),
@@ -907,6 +936,7 @@ async function smoke(browser,url,width){
    App.renderSyncStatus({kind:'synced',message:''});
  });
  assert.equal(await page.locator('#gdh-save-notice').isHidden(),true);
+ await testAudioSettings(page);
  await testQuizLearningFlow(page);
  await testAccessibilityKeyboard(page,width);
  await testNonBlockingCloudConflict(page);
