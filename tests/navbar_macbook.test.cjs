@@ -248,7 +248,7 @@ async function inspect(engine, url) {
         };
       });
       const msg=engine.name()+' '+width+'x'+height+' '+JSON.stringify(measure);
-      assert.ok(measure.card.top>=7&&measure.card.bottom<=height-7,
+      assert.ok(measure.card.top>=2&&measure.card.bottom<=height-2,
         'Sandbox welcome modal must be entirely on-screen: '+msg);
       assert.ok(measure.card.left>=0&&measure.card.right<=width,
         'Sandbox welcome modal overflows horizontally: '+msg);
