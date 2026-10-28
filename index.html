@@ -74,52 +74,36 @@
             </button>
         </nav>
 
-        <!-- 3. STATISTICHE PERSONALI & PROFILO (DESTRA) -->
+        <!-- 3. Riepilogo compatto: XP, obiettivo settimanale e identita' -->
         <div class="nav-right">
-            <!-- Gruppo Statistiche Personali -->
             <div class="nav-stats-group">
-                <!-- Streak Flame -->
-                <div class="stat-pill streak-pill clickable" id="btn-streak-modal" title="Gestisci Obiettivo Serie Settimanale" role="button" tabindex="0">
-                    <span class="fire-icon" id="streak-flame"><svg class="ui-icon ui-icon-fill" viewBox="0 0 24 24"><path d="M12 2c-.5 2.5-2 4.5-4 6-2 1.6-3 3.5-3 5.5a7 7 0 1 0 14 0c0-2-1-3.9-3-5.5-2-1.5-3.5-3.5-4-6zm-1 12.5a2.5 2.5 0 0 1 2.5-2.5c0 1.38-.5 2-1 3-1.07 2.14-.22 4.05 2 6 .5-2.5 2-4.9 4-6.5 2-1.6 3-3.5 3-5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 1 2.5 2.5z"/></svg></span>
-                    <span class="stat-value" id="streak-count">0 sett.</span>
-                    <span class="stat-label" id="streak-sub-label">(0/2 gg)</span>
+                <div class="stat-pill streak-pill clickable" id="btn-streak-modal" title="Obiettivo settimanale: giorni di studio" role="button" tabindex="0" aria-label="Apri obiettivo settimanale">
+                    <span class="fire-icon" id="streak-flame"><svg class="ui-icon ui-icon-fill" viewBox="0 0 24 24"><path d="M12 2c-.5 2.5-2 4.5-4 6-2 1.6-3 3.5-3 5.5a7 7 0 1 0 14 0c0-2-1-3.9-3-5.5-2-1.5-3.5-3.5-4-6z"/></svg></span>
+                    <span class="stat-value" id="streak-count">0/2 giorni</span>
+                    <span class="stat-label" id="streak-sub-label" hidden>Questa settimana</span>
                 </div>
-
-                <!-- XP Pill -->
-                <div class="stat-pill xp-pill" title="Punti Esperienza Totali">
+                <div class="stat-pill xp-pill" title="Esperienza totale">
                     <span class="xp-icon"><svg class="ui-icon ui-icon-fill" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
                     <span class="stat-value" id="xp-count">0</span>
                     <span class="stat-label">XP</span>
                 </div>
-
-                <!-- Level Badge con barra progresso integrata -->
-                <div class="stat-pill level-pill" id="level-pill" title="Livello Giocatore">
-                    <span class="trophy-icon"><svg class="ui-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span>
-                    <div class="level-badge-group">
-                        <span id="level-badge">Lv. 1 Recluta</span>
-                        <div class="level-mini-bar" title="Progresso prossimo livello">
-                            <div id="level-mini-fill" class="level-mini-fill" style="width: 0%;"></div>
+            </div>
+            <div class="nav-user-group">
+                <!-- Un piccolo indicatore mostra la connessione, senza ripetere il nome Google -->
+                <div id="btn-open-auth-nav" class="nav-connection clickable" title="Stato account: ospite" role="button" tabindex="0" aria-label="Stato account: ospite">
+                    <span id="nav-auth-icon" class="nav-connection-dot" aria-hidden="true"></span>
+                    <span id="nav-auth-label" class="nav-visually-hidden">Ospite</span>
+                </div>
+                <div class="stat-pill profile-pill clickable" id="btn-open-profile" title="Apri il tuo profilo" role="button" tabindex="0">
+                    <div class="nav-avatar" id="nav-profile-avatar" style="border-color:#478cbf;">🤖</div>
+                    <div class="nav-profile-summary">
+                        <span class="nav-profile-name" id="nav-profile-name">Eroe Godot</span>
+                        <div class="nav-profile-level" id="level-pill" title="Livello giocatore">
+                            <span id="level-badge">Lv. 1</span>
+                            <div class="level-mini-bar" title="Progresso verso il prossimo livello"><div id="level-mini-fill" class="level-mini-fill" style="width:0%;"></div></div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="nav-separator"></div>
-
-            <!-- Gruppo Utente & Impostazioni -->
-            <div class="nav-user-group">
-                <!-- Pillola Stato Account / Login (Ospite o Utente) -->
-                <div class="stat-pill auth-pill clickable" id="btn-open-auth-nav" title="Stato Account & Sincronizzazione" role="button" tabindex="0">
-                    <span id="nav-auth-icon"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-                    <span id="nav-auth-label">Ospite</span>
-                </div>
-
-                <!-- Profilo Giocatore -->
-                <div class="stat-pill profile-pill clickable" id="btn-open-profile" title="Il Tuo Profilo" role="button" tabindex="0">
-                    <div class="nav-avatar" id="nav-profile-avatar" style="border-color: #478cbf;">🤖</div>
-                    <span class="nav-profile-name" id="nav-profile-name">Eroe Godot</span>
-                </div>
-
                 <!-- Settings Button -->
                 <button class="icon-btn" id="btn-open-settings" title="Impostazioni & Audio" aria-label="Impostazioni">
                     <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">

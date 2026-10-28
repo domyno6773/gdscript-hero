@@ -806,6 +806,10 @@ const App = {
             const isCompleted = prog >= quest.target;
             const isClaimed = !!this.state.dailyQuests.claimed[quest.id];
             const percent = Math.round((prog / quest.target) * 100);
+            const rewards = ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp,this.state.dailyQuests);
+            const capReached = rewards.totals.quests >= ProgressionV2.CAPS.quests;
+            const earnedKey = 'quests:daily:' + this.getTodayISO() + ':' + quest.id;
+            const paid = Object.hasOwn(rewards.claims, earnedKey);
 
             if (isCompleted) completedCount++;
             if (isCompleted && !isClaimed) readyCount++;
@@ -817,7 +821,7 @@ const App = {
                     <span class="sidebar-quest-icon">${this.getQuestIconSVG(quest.id)}</span>
                     <div class="sidebar-quest-title-wrap">
                         <span class="sidebar-quest-title" title="${quest.title}">${quest.title}</span>
-                        <span class="sidebar-quest-reward">+${quest.xpReward} XP</span>
+                        <span class="sidebar-quest-reward">${capReached && !paid ? 'Limite XP settimanale' : '+'+quest.xpReward+' XP'}</span>
                     </div>
                 </div>
                 <div class="sidebar-quest-desc">${quest.desc}</div>
@@ -829,7 +833,7 @@ const App = {
                 </div>
                 <div class="sidebar-quest-action">
                     <button class="sidebar-quest-btn ${isClaimed ? 'claimed' : (isCompleted ? 'active' : 'in-progress')}" id="sidebar-btn-quest-${quest.id}">
-                        ${isClaimed ? '✓ Riscattato' : (isCompleted ? 'Riscatta ricompensa' : 'In Corso')}
+                        ${isClaimed ? (paid ? '✓ Riscattato' : '✓ Completata') : (isCompleted ? (capReached ? 'Concludi missione' : 'Riscatta ricompensa') : 'In Corso')}
                     </button>
                 </div>
             `;
@@ -873,6 +877,10 @@ const App = {
             const isCompleted = prog >= quest.target;
             const isClaimed = !!this.state.dailyQuests.claimed[quest.id];
             const percent = Math.round((prog / quest.target) * 100);
+            const rewards = ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp,this.state.dailyQuests);
+            const capReached = rewards.totals.quests >= ProgressionV2.CAPS.quests;
+            const earnedKey = 'quests:daily:' + this.getTodayISO() + ':' + quest.id;
+            const paid = Object.hasOwn(rewards.claims, earnedKey);
 
             const card = document.createElement('div');
             card.className = `quest-card ${isCompleted && !isClaimed ? 'ready-to-claim' : ''}`;
@@ -882,7 +890,7 @@ const App = {
                     <div class="quest-info">
                         <div class="quest-title-row">
                             <span class="quest-title">${quest.title}</span>
-                            <span class="quest-reward-badge">+${quest.xpReward} XP</span>
+                            <span class="quest-reward-badge">${capReached && !paid ? 'Limite XP settimanale' : '+'+quest.xpReward+' XP'}</span>
                         </div>
                         <div class="quest-desc">${quest.desc}</div>
                         <div class="quest-progress-track">
@@ -893,7 +901,7 @@ const App = {
                 <div class="quest-right">
                     <span class="quest-progress-text">${prog}/${quest.target}</span>
                     <button class="btn-claim-quest ${isClaimed ? 'claimed' : (isCompleted ? 'active' : '')}" id="btn-quest-${quest.id}">
-                        ${isClaimed ? '✓ Riscattato' : (isCompleted ? 'Riscatta' : 'In Corso')}
+                        ${isClaimed ? (paid ? '✓ Riscattato' : '✓ Completata') : (isCompleted ? (capReached ? 'Concludi' : 'Riscatta') : 'In Corso')}
                     </button>
                 </div>
             `;
@@ -923,24 +931,34 @@ const App = {
             !Number.isFinite(Number(this.state.dailyQuests.progress?.[questId])) ||
             Number(this.state.dailyQuests.progress[questId]) < quest.target) return false;
         this.state.rewardsV2 = ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp,this.state.dailyQuests);
-        const gain = ProgressionV2.grantRecurring(this.state.rewardsV2,'quests',
-            'daily:'+this.getTodayISO()+':'+questId,quest.xpReward);
-        if (!gain) {
-            this.showToast({tag:'LIMITE SETTIMANALE',title:'Missioni: 40 XP a settimana',
-                desc:'Hai già ottenuto il massimo premio dalle missioni di questa settimana.'});
-            return false;
-        }
+        const sourceId = 'daily:' + this.getTodayISO() + ':' + questId;
+        const ledgerKey = 'quests:' + sourceId;
+        const alreadyPaid = Object.hasOwn(this.state.rewardsV2.claims,ledgerKey);
+        const gain = alreadyPaid ? 0 : ProgressionV2.grantRecurring(
+            this.state.rewardsV2,'quests',sourceId,quest.xpReward);
+        // Un limite XP raggiunto NON deve lasciare il tasto "Riscatta"
+        // bloccato per sempre: la missione resta completabile senza XP.
+        // La voce del registro impedisce inoltre doppi premi se uno stato
+        // cloud obsoleto ripresenta un pulsante già riscattato.
         this.state.dailyQuests.claimed[questId] = true;
-        this.state.xp += gain;
+        if (gain) this.state.xp += gain;
         this.state.claimedQuestsCount++;
         this.saveStorage();
 
-        SoundFX.playFanfare();
-        ConfettiFX.burst();
-        this.showToast({
-            tag: "RICOMPENSA RISCATTATA",
+        if (gain) {
+            SoundFX.playFanfare();
+            ConfettiFX.burst();
+        } else SoundFX.playClick();
+        this.showToast(gain ? {
+            tag: 'RICOMPENSA RISCATTATA',
             title: quest.title,
             desc: `Hai guadagnato +${gain} XP extra!`
+        } : {
+            tag: 'MISSIONE COMPLETATA',
+            title: quest.title,
+            desc: alreadyPaid
+                ? 'Premio già registrato: nessun XP duplicato.'
+                : 'Hai raggiunto il limite di 40 XP settimanali per le missioni. La missione è comunque conclusa.'
         });
         this.checkAchievements({ fromAction: true });
         this.updateStatsUI({ announceLevelUp: true });
@@ -2333,13 +2351,15 @@ const App = {
         }
 
         const scEl = document.getElementById('streak-count');
-        if (scEl) scEl.innerText = `${this.state.streakWeeks}`;
+        if (scEl) scEl.textContent = `${this.state.activeDaysThisWeek.length}/${currentTier.target}`;
         const sslEl = document.getElementById('streak-sub-label');
-        if (sslEl) sslEl.innerText = `(${this.state.activeDaysThisWeek.length}/${currentTier.target}d)`;
+        if (sslEl) sslEl.textContent = 'giorni';
 
         const streakPill = document.getElementById('btn-streak-modal');
         if (streakPill) {
-            streakPill.title = `Serie Settimanale: ${this.state.streakWeeks} settimane (${this.state.activeDaysThisWeek.length} di ${currentTier.target} giorni completati)`;
+            const description = `Obiettivo settimanale: ${this.state.activeDaysThisWeek.length} di ${currentTier.target} giorni studiati · Serie: ${this.state.streakWeeks} settimane`;
+            streakPill.title = description;
+            streakPill.setAttribute('aria-label', description);
         }
 
         const info = this.getCurrentLevelInfo();
@@ -4521,7 +4541,8 @@ const App = {
         // Traguardi
         document.getElementById('btn-open-achievements').onclick = () => this.openAchievementsModal();
         document.getElementById('btn-close-achievements').onclick = () => this.closeAchievementsModal();
-        document.getElementById('level-pill').onclick = () => this.openAchievementsModal();
+        // Il livello fa parte del profilo, senza un secondo pulsante annidato.
+        // I traguardi rimangono raggiungibili da "Traguardi" nella navbar.
 
         // Serie Settimanale (Streak)
         document.getElementById('btn-streak-modal').onclick = () => this.openStreakModal();
@@ -6524,33 +6545,23 @@ const App = {
         const btnNavAuth = document.getElementById('btn-open-auth-nav');
 
         if (btnNavAuth) {
-            if (isGuest) {
-                btnNavAuth.classList.remove('logged-in');
-                btnNavAuth.title = 'Modalità Ospite • Tocca per accedere';
-            } else {
-                btnNavAuth.classList.add('logged-in');
-                btnNavAuth.title = `Connesso: ${user.email} • Tocca per gestire`;
-            }
+            btnNavAuth.classList.toggle('logged-in', !isGuest);
+            btnNavAuth.title = isGuest
+                ? 'Modalità ospite · Accedi per sincronizzare'
+                : 'Account collegato · Gestisci la sincronizzazione';
         }
 
         if (navAuthIcon) {
-            if (isGuest) {
-                navAuthIcon.innerText = '👤';
-            } else if (user.provider === 'google') {
-                navAuthIcon.innerText = '🌐';
-            } else {
-                navAuthIcon.innerText = '🟢';
-            }
+            navAuthIcon.textContent = '';
+            navAuthIcon.classList.toggle('connected', !isGuest);
         }
 
-        if (navAuthLabel) {
-            if (isGuest) {
-                navAuthLabel.innerText = 'Ospite';
-            } else {
-                const shortName = (user.name || 'Utente').split(' ')[0];
-                navAuthLabel.innerText = shortName;
-            }
-        }
+        // Lo username scelto nell'app e' l'unico nome visibile in navbar;
+        // il vero stato dell'account rimane accessibile con tooltip e screen reader.
+        if (navAuthLabel) navAuthLabel.textContent = isGuest ? 'Ospite' : 'Account collegato';
+        if (btnNavAuth) btnNavAuth.setAttribute('aria-label', isGuest
+            ? 'Modalità ospite: accedi per sincronizzare'
+            : 'Account collegato: apri impostazioni di sincronizzazione');
 
         // Aggiorna Sezione Profilo
         const profileBadge = document.getElementById('profile-acc-badge');

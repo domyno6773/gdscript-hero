@@ -41,16 +41,16 @@ const context={window,ProgressionV2:P,console,Date,document:{getElementById:()=>
 vm.runInNewContext(fs.readFileSync(path.join(root,'app.js'),'utf8'),context);
 vm.runInNewContext(fs.readFileSync(path.join(root,'lessons.js'),'utf8'),{window,ProgressionV2:P,console});
 context.DAILY_QUESTS_CONFIG=window.DAILY_QUESTS_CONFIG;
-context.SoundFX={playFanfare(){}};
+context.SoundFX={playFanfare(){},playClick(){}};
 context.ConfettiFX={burst(){}};
 const app=window.App;
 app.state.xp=0;
 app.state.rewardsV2=P.createRewards(0);
 app.state.dailyQuests={date:P.dateKey(),progress:{daily_exercise:0,review_success:0,study_variety:0},
     claimed:{daily_exercise:false,review_success:false,study_variety:false}};
-let saved=0;
-app.saveStorage=()=>{saved++};
-app.showToast=()=>{};
+let saved=0,latestSave=null,latestToast=null;
+app.saveStorage=()=>{saved++;latestSave=JSON.parse(JSON.stringify({dailyQuests:app.state.dailyQuests,xp:app.state.xp,rewardsV2:app.state.rewardsV2}));};
+app.showToast=data=>{latestToast=data};
 app.checkAchievements=()=>{};
 app.updateStatsUI=()=>{};
 app.updateQuestsBadge=()=>{};
@@ -64,4 +64,44 @@ assert.equal(app.claimQuestReward('daily_exercise'),false);
 assert.equal(app.state.xp,10);
 assert.equal(app.state.claimedQuestsCount,1);
 assert.ok(saved>0);
+// Regressione: il limite settimanale prima lasciava il pulsante "Riscatta"
+// attivo per sempre, anche quando il giocatore aveva completato l'obiettivo.
+const capState=P.createRewards(0);
+for(let n=0;n<4;n++)
+    assert.equal(P.grantRecurring(capState,'quests','previous:'+n,10),10);
+app.state.rewardsV2=capState;
+app.state.dailyQuests.progress.review_success=1;
+const beforeCapXp=app.state.xp;
+const beforeCapCount=app.state.claimedQuestsCount;
+assert.equal(app.claimQuestReward('review_success'),true,
+    'Missione completa anche se il budget settimanale XP e' terminato');
+assert.equal(app.state.xp,beforeCapXp,'Il limite XP non viene aggirato');
+assert.equal(app.state.claimedQuestsCount,beforeCapCount+1);
+assert.equal(app.state.dailyQuests.claimed.review_success,true);
+assert.ok(latestToast.desc.includes('limite di 40 XP'));
+assert.equal(app.claimQuestReward('review_success'),false,'Doppio riscatto vietato');
+assert.equal(app.state.claimedQuestsCount,beforeCapCount+1);
+assert.equal(latestSave.dailyQuests.claimed.review_success,true,
+    'Il salvataggio deve mantenere la missione completata');
+app.state.dailyQuests=latestSave.dailyQuests;
+assert.equal(app.claimQuestReward('review_success'),false,
+    'Ricaricare lo stato salvato non deve riproporre il riscatto');
+
+// La fusione con cloud obsoleto non deve cancellare lo stato riscattato.
+vm.runInNewContext(fs.readFileSync(path.join(root,'auth.js'),'utf8'),context);
+const auth=window.AuthManager;
+const dateStr=P.dateKey();
+const local={xp:10,dailyQuests:{date:dateStr,
+  progress:{daily_exercise:1,review_success:1,study_variety:0},
+  claimed:{daily_exercise:true,review_success:true,study_variety:false}}};
+const cloud={xp:10,dailyQuests:{date:dateStr,
+  progress:{daily_exercise:1,review_success:0,study_variety:0},
+  claimed:{daily_exercise:false,review_success:false,study_variety:false}}};
+const mergedCloud=auth.mergeProgress(local,cloud);
+assert.equal(mergedCloud.dailyQuests.claimed.daily_exercise,true);
+assert.equal(mergedCloud.dailyQuests.claimed.review_success,true);
+assert.equal(mergedCloud.dailyQuests.progress.review_success,1);
+const oldDate={...cloud,dailyQuests:{...cloud.dailyQuests,date:'2026-01-01'}};
+assert.equal(auth.mergeProgress(local,oldDate).dailyQuests.date,dateStr,
+    'La giornata vecchia non deve sovrascrivere quella corrente');
 console.log('XP 2.0 and quest claim regression tests passed.');

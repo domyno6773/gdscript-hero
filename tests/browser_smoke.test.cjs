@@ -872,6 +872,88 @@ async function testLongEmailSettings(page, initialWidth) {
 }
 
 
+async function testNavbarProfileAndQuestClaim(page,width) {
+  const profile=await page.evaluate(()=>{
+    const previous={...App.state.profile};
+    App.state.profile={...previous,username:'domyno'};
+    App.applyProfileUI();
+    App.updateAuthUI({id:'test',provider:'google',name:'Gianluca',email:'test@example.com'});
+    const state={
+      displayedName:document.getElementById('nav-profile-name').textContent.trim(),
+      visibleGoogle:getComputedStyle(document.getElementById('nav-auth-label')).position!=='absolute',
+      connected:document.getElementById('btn-open-auth-nav').classList.contains('logged-in'),
+      dot:getComputedStyle(document.getElementById('nav-auth-icon')).backgroundColor,
+      levelInProfile:!!document.querySelector('#btn-open-profile #level-pill'),
+      decorativeMedals:document.querySelectorAll('#level-pill .trophy-icon').length,
+      streak:document.getElementById('streak-count').textContent.trim(),
+      weeklyLabel:document.getElementById('streak-sub-label').textContent.trim()
+    };
+    App.state.profile=previous;App.applyProfileUI();
+    App.updateAuthUI({isGuest:true});
+    return state;
+  });
+  assert.equal(profile.displayedName,'domyno');
+  assert.equal(profile.visibleGoogle,false,'Google account name must not duplicate the username');
+  assert.equal(profile.connected,true);
+  assert.equal(profile.levelInProfile,true);
+  assert.equal(profile.decorativeMedals,0);
+  assert.ok(profile.streak.includes('/'),'Streak needs a readable weekly goal');
+  assert.equal(profile.weeklyLabel,'giorni');
+
+  const before=await page.evaluate(()=>{
+    const data={
+      dailyQuests:JSON.parse(JSON.stringify(App.state.dailyQuests)),
+      rewardsV2:JSON.parse(JSON.stringify(App.state.rewardsV2)),
+      claimedQuestsCount:App.state.claimedQuestsCount,xp:App.state.xp,
+      achievements:App.state.unlockedAchievements.slice()
+    };
+    App.state.dailyQuests={date:App.getTodayISO(),
+      progress:{daily_exercise:1,review_success:0,study_variety:0},
+      claimed:{daily_exercise:false,review_success:false,study_variety:false}};
+    const ledger=ProgressionV2.createRewards(0);
+    for(let n=0;n<4;n++)ProgressionV2.grantRecurring(ledger,'quests','earlier-'+n,10);
+    App.state.rewardsV2=ledger;
+    App.renderSidebarDailyQuests();
+    return data;
+  });
+  const ready=await page.locator('#sidebar-btn-quest-daily_exercise').textContent();
+  assert.ok(ready.includes('Concludi'),'Capped mission must show honest completion CTA');
+  await page.evaluate(()=>document.getElementById('sidebar-btn-quest-daily_exercise').click());
+  const claimed=await page.evaluate(()=>{
+    const element=document.getElementById('sidebar-btn-quest-daily_exercise');
+    const payload=JSON.parse(localStorage.getItem(
+      App.ownerStorageKey(App._saveOwner||'guest')));
+    return {
+      claimed:App.state.dailyQuests.claimed.daily_exercise,
+      button:element.textContent.trim(),
+      buttonReady:element.classList.contains('active'),
+      saved:payload.dailyQuests.claimed.daily_exercise,
+      duplicate:App.claimQuestReward('daily_exercise'),
+      xp:App.state.xp,
+      weeklyTotal:App.state.rewardsV2.totals.quests
+    };
+  });
+  assert.equal(claimed.claimed,true);
+  assert.equal(claimed.saved,true,'Claimed quest must persist immediately');
+  assert.equal(claimed.buttonReady,false,'CTA must disappear after claiming');
+  assert.ok(claimed.button.includes('Completata'));
+  assert.equal(claimed.duplicate,false);
+  assert.equal(claimed.xp,before.xp,'Weekly limit should not award extra XP');
+  assert.equal(claimed.weeklyTotal,40);
+  await page.evaluate(before=>{
+    App.state.dailyQuests=before.dailyQuests;
+    App.state.rewardsV2=before.rewardsV2;
+    App.state.claimedQuestsCount=before.claimedQuestsCount;
+    App.state.xp=before.xp;
+    App.state.unlockedAchievements=before.achievements;
+    App.saveStorage({localOnly:true});
+    App.updateStatsUI();
+    App.updateQuestsBadge();
+    App.renderSidebarDailyQuests();
+    document.getElementById('achievement-toast')?.classList.add('hidden');
+  },before);
+}
+
 async function testAudioSettings(page) {
   await page.evaluate(()=>App.openSettingsModal());
   assert.equal(await page.locator('#setting-sound-enabled').isChecked(),true);
@@ -984,6 +1066,7 @@ async function smoke(browser,url,width){
    App.renderSyncStatus({kind:'synced',message:''});
  });
  assert.equal(await page.locator('#gdh-save-notice').isHidden(),true);
+ await testNavbarProfileAndQuestClaim(page,width);
  await testAudioSettings(page);
  await testQuizLearningFlow(page);
  await testAccessibilityKeyboard(page,width);

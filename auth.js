@@ -940,8 +940,34 @@ const AuthManager = {
             merged.profileCustomized = true;
         }
 
-        if (imported.dailyQuests) {
-            merged.dailyQuests = imported.dailyQuests;
+        // I salvataggi cloud possono arrivare in ritardo rispetto a un clic
+        // di riscatto locale. Non sostituire un claimed=true con false
+        // per la STESSA giornata, altrimenti torna il pulsante "Riscatta".
+        const localQuests = current.dailyQuests;
+        const remoteQuests = imported.dailyQuests;
+        if (localQuests && remoteQuests &&
+            localQuests.date && localQuests.date === remoteQuests.date) {
+            const ids = new Set([
+                ...Object.keys(localQuests.progress || {}),
+                ...Object.keys(remoteQuests.progress || {}),
+                ...Object.keys(localQuests.claimed || {}),
+                ...Object.keys(remoteQuests.claimed || {})
+            ]);
+            const progress = {}, claimed = {};
+            for (const id of ids) {
+                progress[id] = Math.max(
+                    Number(localQuests.progress?.[id]) || 0,
+                    Number(remoteQuests.progress?.[id]) || 0
+                );
+                claimed[id] = !!(localQuests.claimed?.[id] ||
+                    remoteQuests.claimed?.[id]);
+            }
+            merged.dailyQuests = {date:localQuests.date,progress,claimed};
+        } else if (remoteQuests && (!localQuests ||
+            String(remoteQuests.date || '') > String(localQuests.date || ''))) {
+            merged.dailyQuests = remoteQuests;
+        } else if (localQuests) {
+            merged.dailyQuests = localQuests;
         }
         merged.projectInterests = { ...(current.projectInterests || {}), ...(imported.projectInterests || {}) };
         merged.claimedQuestsCount = Math.max(current.claimedQuestsCount || 0, imported.claimedQuestsCount || 0);
