@@ -65,7 +65,20 @@ async function inspect(engine, url) {
           .filter(el=>getComputedStyle(el).display!=='none')
           .map(el=>el.getBoundingClientRect());
         const menuOverlap=items.slice(0,-1).some((r,i)=>r.right>items[i+1].left+1);
-        return {vw,clipped,colliding,labels,menuOverlap,scrollWidth:nav.scrollWidth,clientWidth:nav.clientWidth,
+        const navButtons=[...nav.querySelectorAll('.nav-center .nav-btn')]
+          .filter(el=>getComputedStyle(el).display!=='none');
+        const labelsClipped=navButtons.filter(el=>{
+          const label=el.querySelector('.nav-btn-text');
+          if(!label || getComputedStyle(label).display==='none')return false;
+          const a=el.getBoundingClientRect(),b=label.getBoundingClientRect();
+          return b.left<a.left-1 || b.right>a.right+1;
+        }).map(el=>el.id);
+        const firstButton=navButtons[0]?.getBoundingClientRect();
+        const lastButton=navButtons.at(-1)?.getBoundingClientRect();
+        const whitespaceLeft=firstButton ? firstButton.left-rects[0].right : 0;
+        const whitespaceRight=lastButton ? rects[2].left-lastButton.right : 0;
+        return {vw,clipped,colliding,labels,menuOverlap,labelsClipped,
+          whitespaceLeft,whitespaceRight,scrollWidth:nav.scrollWidth,clientWidth:nav.clientWidth,
           logo:{left:logo.left,right:logo.right,width:logo.width},
           right:rects[2].right,groups:rects.map(r=>({left:r.left,right:r.right,width:r.width})),
           scrollX:window.scrollX,navDisplay:getComputedStyle(nav).display};
@@ -74,6 +87,14 @@ async function inspect(engine, url) {
       assert.equal(result.clipped.length,0,'A navbar action left the viewport: '+msg);
       assert.equal(result.colliding,false,'Navbar sections overlap: '+msg);
       assert.equal(result.menuOverlap,false,'Menu buttons overlap: '+msg);
+      assert.deepEqual(result.labelsClipped,[],'Navigation text overflows its button: '+msg);
+      // Guard against the original 2048px screenshot's 200px+ EMPTY bands
+      // on either side of the central links. Filling the center must be
+      // intentional, not hiding unused space with overflow clipping.
+      if(w>=1600 && w<=2048){
+        assert.ok(result.whitespaceLeft<48 && result.whitespaceRight<48,
+          'Excessive unused horizontal navbar space: '+msg);
+      }
       if (w>=1200) {
         assert.ok(result.labels.length>=7&&result.labels.every(l=>l.display!=='none'&&l.width>6),
           'Desktop must show text labels beside the icons: '+msg);

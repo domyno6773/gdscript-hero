@@ -194,5 +194,35 @@ body { height:100vh; height:100dvh; min-width:0; }
   .navbar #nav-auth-label { display:none; }
   .navbar .nav-stats-group .streak-pill { display:none; }
 }
+/* Barra desktop bilanciata: il menu deve usare lo spazio disponibile,
+   non restare un blocco stretto sospeso fra due grandi zone vuote. Gli spazi
+   diventano aree di clic reali e leggibili, non margini artificiali.
+   Da 1600px in su si espandono i pulsanti senza tagliare le scritte. */
+@media (min-width:1600px) {
+  .navbar > .nav-center {
+    justify-content:space-between;
+    gap:clamp(3px,.3vw,6px);
+  }
+  .navbar .nav-center .nav-btn {
+    flex:1 1 auto;
+    min-width:0;
+    justify-content:center;
+    padding:9px clamp(7px,.65vw,14px);
+    gap:clamp(4px,.3vw,7px);
+    font-size:clamp(.78rem,.75vw,.9rem);
+    line-height:1.15;
+    white-space:nowrap;
+  }
+  .navbar .nav-center .nav-btn-text {
+    display:inline !important;
+    white-space:nowrap;
+  }
+}
+/* Fra 1200 e 1599px distribuiamo anche il poco spazio extra, invece
+   di concentrarlo ai lati. Gli stili di compattezza esistenti restano. */
+@media (min-width:1200px) and (max-width:1599px) {
+  .navbar > .nav-center { justify-content:space-between; }
+  .navbar .nav-center .nav-btn { flex:1 1 auto; justify-content:center; min-width:0; }
+}
 /* Il documento non deve scorrere lateralmente quando l'utente usa il trackpad. */
 html, body { overflow-x:clip; }
