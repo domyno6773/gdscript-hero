@@ -40,3 +40,13 @@
 .gdh-plain-code-shell .gd-token-number,.gdh-plain-code-shell .gd-token-constant{color:#ca9cf4}
 [data-theme="light"] .gdh-plain-code-shell .gdh-plain-syntax-layer{background:#f8fbff;color:#203b55}
 @media(max-width:820px){.gdh-plain-code-shell.gdh-arena-code-shell{min-height:340px}.gdh-fold-preview-row{grid-template-columns:42px minmax(max-content,1fr)}}
+
+/* Sticky overlays could cover the first fold arrow on narrow screens.
+   In the mobile coding view, keep both controls in normal document flow. */
+@media(max-width:820px){
+  #view-exercise .exercise-mobile-tabs,
+  #view-exercise .editor-header {
+    position: static !important;
+    top: auto !important;
+  }
+}
