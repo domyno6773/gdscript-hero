@@ -95,5 +95,19 @@ function deep(v){return JSON.parse(JSON.stringify(v));}
   assert.equal(app.state.xp,42,'Logout did not restore the separate guest save');
   auth.supabaseClient=null;
   await assert.rejects(()=>auth.loginWithGoogle(),/solo con Supabase/);
+  // La riapertura dello stesso account con bozze divergenti non deve
+  // sostituire automaticamente il codice locale con quello del cloud.
+  auth.currentUser=user('bob');
+  app._saveOwner='user:bob';
+  app.state.userCode={1:'print("bozza locale")'};
+  app._cloudHydrationPending=true;
+  auth._cloudVersion={userId:'bob',revision:2,blocked:false,remote:null};
+  const competing={xp:200,userCode:{1:'print("bozza cloud")'},finishedLessons:[1]};
+  await app.integrateCloudSave(competing);
+  assert.equal(auth._cloudVersion.blocked,true);
+  assert.equal(app.state.userCode[1],'print("bozza locale")');
+  assert.equal(auth._cloudVersion.remote.userCode[1],'print("bozza cloud")');
+  assert.equal(auth.getSyncStatus().kind,'conflict');
+  assert.equal(app._cloudHydrationPending,true);
   console.log('PASS: guest, Alice, Bob isolated; pending email and genuine Google OAuth');
 })().catch(e=>{console.error(e);process.exitCode=1;});

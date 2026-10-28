@@ -6030,7 +6030,11 @@ const App = {
             }
         };
         const syncBackup=document.getElementById('gdh-save-backup');
-        if(syncBackup)syncBackup.onclick=()=>window.AuthManager.exportToFile(this.state);
+        if(syncBackup)syncBackup.onclick=()=>{
+            if(window.AuthManager?.getSyncStatus?.().kind==='conflict')
+                window.AuthManager.downloadConflictCopies();
+            else window.AuthManager.exportToFile(this.state);
+        };
         await window.AuthManager.init();
         if(window.AuthManager.isGuest() || !window.AuthManager.isCloudActive()){
             this._cloudHydrationPending=false;
@@ -6793,19 +6797,51 @@ const App = {
     /**
      * Integra i progressi locali dell'Ospite con il salvataggio salvato nel Cloud Supabase
      */
+    hasOverlappingCloudDrafts(local,remote){
+        const overlap=(a,b)=>{
+            if(!a||!b)return false;
+            return Object.keys(a).some(id=>
+                typeof a[id]==='string' && typeof b[id]==='string' &&
+                a[id]!==b[id]);
+        };
+        if(overlap(local.userCode,remote.userCode))return true;
+        if(overlap(local.arenaProject?.userCode,remote.arenaProject?.userCode))return true;
+        const defaultCode=this._blankUserState?.sandbox?.projects?.[0]?.code;
+        const defaultAlternate=this.getDefaultSandboxState?.()?.projects?.[0]?.code;
+        const remoteProjects=new Map((remote.sandbox?.projects||[]).map(p=>[p.id,p]));
+        return (local.sandbox?.projects||[]).some(p=>{
+            const other=remoteProjects.get(p.id);
+            if(!other)return false;
+            if(p.id==='proj_default' && (p.code===defaultCode||p.code===defaultAlternate))return false;
+            return p.code!==other.code || JSON.stringify(p.nodes||[])!==JSON.stringify(other.nodes||[]);
+        });
+    },
     async integrateCloudSave(cloudSave,guestSnapshot=null) {
-        // Lo stato attuale appartiene gia' all'account corrente: i dati ospite
-        // entrano soltanto se il proprietario ha scelto la casella di importazione.
         const merge=(a,b)=>window.AuthManager?.mergeProgress?.(a,b)||{...a,...b};
         let snapshot=this.state;
-        if(cloudSave)snapshot=merge(snapshot,cloudSave);
         if(guestSnapshot)snapshot=merge(snapshot,guestSnapshot);
+        // Prima di unire codice scritto su due dispositivi, verificare se
+        // esistono bozze divergenti. In tal caso chiedere unione esplicita:
+        // nessuna delle due versioni deve sparire silenziosamente.
+        if(cloudSave && this.hasOverlappingCloudDrafts(snapshot,cloudSave)){
+            if(guestSnapshot)this.applyImportedState(snapshot,false);
+            else this.saveStorage({localOnly:true});
+            const state=window.AuthManager?._cloudVersion;
+            if(state && state.userId===window.AuthManager?.currentUser?.id){
+                state.blocked=true;
+                state.remote=cloudSave;
+            }
+            this._cloudHydrationPending=true;
+            window.AuthManager?.setSyncStatus?.('conflict',
+                'Il codice locale e quello cloud sono diversi. Entrambe le versioni sono al sicuro: scegli se unirle.');
+            return;
+        }
+        if(cloudSave)snapshot=merge(snapshot,cloudSave);
         try{
             if(cloudSave || guestSnapshot)this.applyImportedState(snapshot,false);
         }finally{
             this._cloudHydrationPending=false;
         }
-        // In questo punto si puo' salvare: mai prima dell'unione con il cloud.
         this.saveStorage();
     },
 

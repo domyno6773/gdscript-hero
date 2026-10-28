@@ -545,6 +545,27 @@ const AuthManager = {
         this.setSyncStatus('ready','Cloud verificato');
         return data?.save_data||null;
     },
+    downloadConflictCopies(){
+        if(this.isGuest())return;
+        const owner=this.currentUser.id;
+        const local=window.App?.getSavePayload?.()||window.App?.state;
+        let backup=null;
+        try{
+            const prefix='gdh_cloud_conflict_backup:'+owner+':';
+            const keys=Object.keys(localStorage).filter(k=>k.startsWith(prefix)).sort();
+            if(keys.length)backup=JSON.parse(localStorage.getItem(keys[keys.length-1]));
+        }catch(e){}
+        const data=this._cloudVersion?.blocked?
+            {owner,local,cloud:this._cloudVersion.remote,created_at:new Date().toISOString()}:
+            backup;
+        if(!data)return this.exportToFile(local);
+        const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+        const url=URL.createObjectURL(blob);
+        const link=document.createElement('a');
+        link.href=url;link.download='GDScriptHero-conflitto-'+new Date().toISOString().slice(0,10)+'.json';
+        document.body.appendChild(link);link.click();link.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+    },
     async retryCloudSync(){
         if(!this.isCloudActive()||this.isGuest())return;
         if(this._cloudVersion?.blocked){
@@ -577,6 +598,9 @@ const AuthManager = {
         // restano conservate nel backup, incluse le sezioni che divergono.
         const merged=this.mergeProgress(state.remote||{},local);
         state.blocked=false;state.remote=null;
+        // Il login con bozze divergenti lascia volutamente il cloud bloccato.
+        // Sbloccare l'invio solo dopo la copia preventiva di entrambe le versioni.
+        if(window.App)window.App._cloudHydrationPending=false;
         window.App?.applyImportedState?.(merged,false);
         this.setSyncStatus('pending','Versioni archiviate. Invio della fusione in corso.');
         await this.syncUserProgress(window.App?.getSavePayload?.()||merged);

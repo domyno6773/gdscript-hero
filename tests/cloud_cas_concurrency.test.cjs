@@ -80,7 +80,7 @@ const makeDevice=id=>{
     // Connection errors must never be interpreted as an empty remote row.
     const c=makeDevice('c');
     failRead=true;
-    await assert.rejects(()=>c.auth.fetchFromCloud(),/Connection unavailable/);
+    await assert.rejects(()=>c.auth.fetchFromCloud(),err=>err.message==='Connection unavailable');
     assert.equal(c.auth.getSaveRevision(),null);
     const before=rpcCalls;
     await c.auth.syncUserProgress({xp:1});

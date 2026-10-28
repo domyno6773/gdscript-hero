@@ -447,6 +447,21 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
  assert.equal(await page.locator('#btn-open-settings svg.ui-icon').count(),1,'Settings button must use SVG icon');
  assert.equal((await page.locator('#btn-open-settings').textContent()).trim(),'','Settings button must not contain emoji text');
+ // Errori cloud/locali devono essere spiegati e visibili, senza sparire dopo un toast.
+ await page.evaluate(()=>App.renderSyncStatus({kind:'error',message:'Test connessione assente'}));
+ assert.equal(await page.locator('#gdh-save-notice').isVisible(),true,'Missing persistent offline notice');
+ assert.ok((await page.locator('#gdh-save-notice').textContent()).includes('Test connessione assente'));
+ assert.equal(await page.locator('#gdh-save-retry').isVisible(),true);
+ await page.evaluate(()=>App.renderSyncStatus({kind:'conflict',message:'Versioni differenti'}));
+ assert.equal(await page.locator('#gdh-save-resolve').isVisible(),true);
+ assert.equal(await page.locator('#gdh-save-backup').isVisible(),true);
+ await page.evaluate(()=>App.renderLocalSaveError(true));
+ assert.equal(await page.locator('#gdh-save-backup').isVisible(),true,'Missing local save failure backup');
+ await page.evaluate(()=>{
+   App.renderLocalSaveError(false);
+   App.renderSyncStatus({kind:'synced',message:''});
+ });
+ assert.equal(await page.locator('#gdh-save-notice').isHidden(),true);
  await testLongEmailSettings(page,width);
  await testResponsiveLayout(page,width);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
