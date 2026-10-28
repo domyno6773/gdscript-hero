@@ -92,4 +92,47 @@ const invalid=guide.diagnose({source:code,error:'Parse Error: Something went wro
 assert.equal(invalid.line,null);
 assert.equal(guide.diagnose({source:code}),null);
 assert.ok(guide.diagnose({source:code,error:'Runtime error'}));
+
+const unexpectedRootPrint='SCRIPT ERROR: Parse Error: Unexpected identifier "print" in class body.\n'+
+  '   at: GDScript::reload (gdscript://-9223372012494256936.gd:2)';
+const bareOpen=guide.diagnose({
+  source:'print("Ciao"',error:unexpectedRootPrint
+});
+assert.equal(bareOpen.category,'syntax');
+assert.match(bareOpen.title,/parentesi/i);
+assert.match(bareOpen.why,/chiusura/i);
+assert.match(bareOpen.why,/fuori da una funzione/i);
+assert.equal(bareOpen.line,1,'Unmatched bracket belongs to the editor, not Godot prefix');
+assert.equal(bareOpen.raw,unexpectedRootPrint,'Original Godot output must remain accessible');
+assert.ok(bareOpen.steps.length>=2,'Sandbox must give progressive, specific guidance');
+const rootBalanced=guide.diagnose({
+  source:'print("Ciao")',error:unexpectedRootPrint
+});
+assert.match(rootBalanced.title,/fuori da una funzione/i);
+assert.match(rootBalanced.why,/_ready/i);
+assert.doesNotMatch(rootBalanced.title,/parentesi/i);
+const quotedDelimiter=guide.diagnose({
+  source:'extends Node\nfunc _ready():\n    print(")") # (',
+  error:'SCRIPT ERROR: Parse Error: Unexpected token at: gdscript://-123.gd:3'
+});
+assert.doesNotMatch(quotedDelimiter.title,/parentesi di chiusura/i,
+  'Brackets in string/comment are not syntax delimiters');
+const unclosedWithFalseClose=guide.diagnose({
+  source:'extends Node\nfunc _ready():\n    print("Ciao" # ) solo commento',
+  error:'SCRIPT ERROR: Parse Error: Unexpected token at: gdscript://-123.gd:3'
+});
+assert.match(unclosedWithFalseClose.title,/parentesi di chiusura/i,
+  'Comment must not hide a missing bracket');
+const unclosedArray=guide.diagnose({
+  source:'extends Node\nvar loot = [1, 2, 3',
+  error:'SCRIPT ERROR: Parse Error: Unexpected end of file at: gdscript://-123.gd:2'
+});
+assert.match(unclosedArray.title,/quadra/i);
+assert.equal(unclosedArray.line,2);
+const multilineString=guide.diagnose({
+  source:'extends Node\nvar text = """ [ ( { """\n',
+  error:'SCRIPT ERROR: Parse Error: Unexpected token at: gdscript://-123.gd:2'
+});
+assert.doesNotMatch(multilineString.title,/chiusura/i,
+  'Delimiters inside a multiline string must not be parsed as code');
 console.log('PASS: Godot error guide parses exact lines, fallback hints and requirement failures');

@@ -101,6 +101,62 @@
       ]
     }
   ];
+
+  // Scansione lessicale locale, senza AI: evita falsi allarmi per caratteri
+  // contenuti in stringhe, commenti o stringhe multilinea di GDScript.
+  // Serve quando Godot segnala un altro problema prima del delimitatore aperto.
+  function unclosedDelimiter(source) {
+    const text=String(source||'');
+    const closers={'(':')','[':']','{':'}'};
+    const stack=[];
+    let quote='', triple=false,escaped=false,comment=false,line=1;
+    for(let i=0;i<text.length;i++){
+      const ch=text[i];
+      if(ch==='\n'){
+        line++;
+        comment=false;
+        if(quote && !triple)escaped=false;
+        continue;
+      }
+      if(comment)continue;
+      if(quote){
+        if(escaped){escaped=false;continue;}
+        if(ch==='\\'){escaped=true;continue;}
+        if(triple){
+          if(text.slice(i,i+3)===quote.repeat(3)){quote='';triple=false;i+=2;}
+        }else if(ch===quote)quote='';
+        continue;
+      }
+      if(ch==='#'){comment=true;continue;}
+      if(ch==='"'||ch==="'"){
+        triple=text.slice(i,i+3)===ch.repeat(3);
+        quote=ch;
+        if(triple)i+=2;
+        continue;
+      }
+      if(closers[ch])stack.push({open:ch,close:closers[ch],line});
+      else if(ch===')'||ch===']'||ch==='}'){
+        if(stack.at(-1)?.close===ch)stack.pop();
+        else return null; // delimitatori non corrispondenti: lascia giudicare Godot
+      }
+    }
+    if(quote||!stack.length)return null;
+    return stack.at(-1);
+  }
+  function classBodyAdvice(message) {
+    const match=String(message).match(/Unexpected (?:identifier|token) ["']([^"']+)["'] in class body/i);
+    if(!match)return null;
+    const name=match[1];
+    return {
+      title:'Istruzione fuori da una funzione',
+      why:'Godot ha trovato "'+name+'" direttamente nel corpo dello script, ma qui possono stare dichiarazioni come var e func. Le istruzioni eseguibili, per esempio print(...), vanno all’interno di una funzione.',
+      hint:'Hai inserito questa istruzione dentro func _ready(): oppure dentro un’altra funzione?',
+      steps:[
+        'In GDScript le istruzioni vengono eseguite dentro funzioni. All’inizio dello script puoi invece dichiarare variabili, costanti e funzioni.',
+        'Se vuoi eseguire una stampa all’avvio, usa una funzione come _ready() e indenta le istruzioni al suo interno.'
+      ]
+    };
+  }
   function functionAdvice(message) {
     const match = String(message).match(/Function\s+["']([^"']+?)["']\s+not found in base self/i);
     if (!match) return null;
@@ -121,11 +177,12 @@
     if (!raw && !failure) return null;
 
     const engine = Boolean(raw);
-    const line = engine ? lineOf(raw, source) : null;
+    let line = engine ? lineOf(raw, source) : null;
     const infra = engine && /failed to fetch|networkerror|motore godot non disponibile|failed to load.*wasm|webassembly.*failed/i.test(raw);
     const timedOut = engine && !infra && (verdict === 'timeout' || /timed out|timeout|time limit exceeded/i.test(raw));
     const syntax = engine && !infra && !timedOut &&
       /parse error|parser error|syntax error|unexpected token|expected.*(?:colon|:|indent)|not declared in the current scope|function\s+["'][^"']+["']\s+not found in base self/i.test(raw);
+    const missingClose = syntax ? unclosedDelimiter(source) : null;
     const category = infra ? 'system' : timedOut ? 'timeout' :
       !engine ? 'requirement' : syntax ? 'syntax' : 'runtime';
     let title, why, hint, steps;
@@ -142,8 +199,32 @@
         'Un ciclo while continua finché la condizione è vera. Che cosa deve accadere perché diventi falsa?',
         'Segui a mente due o tre iterazioni del ciclo: un valore cambia davvero, oppure rimane sempre uguale?'
       ];
+    } else if (missingClose) {
+      // Non basarsi solo sull'errore che Godot segnala per primo:
+      // nello script libero, print("ciao" da' Unexpected identifier prima
+      // di arrivare al delimitatore mancante.
+      line = missingClose.line;
+      const names={'(': 'parentesi tonda', '[': 'parentesi quadra', '{': 'parentesi graffa'};
+      title='Manca una '+names[missingClose.open]+' di chiusura ('+missingClose.close+')';
+      why='Alla riga '+missingClose.line+' hai aperto '+missingClose.open+
+        ' ma non hai inserito la corrispondente '+missingClose.close+
+        '. La chiusura serve a completare la chiamata o l’espressione.';
+      const isTopLevelPrint=String(source).split(/\r?\n/).some((row,index)=>
+        index+1===missingClose.line && /^print\s*\(/.test(row));
+      if(isTopLevelPrint && /Unexpected identifier ["']print["'] in class body/i.test(raw)){
+        why+=' Godot segnala anche che print(...) è fuori da una funzione: inseriscila in _ready() o in un’altra funzione.';
+      }
+      hint='Cerca la '+missingClose.open+' aperta alla riga '+missingClose.line+
+        ': con quale simbolo va chiusa?';
+      steps=[
+        'Ogni '+missingClose.open+' deve avere una '+missingClose.close+
+          ', anche quando ci sono stringhe o altre parentesi dentro.',
+        isTopLevelPrint
+          ? 'Inoltre, per eseguire print all’avvio in Godot, scrivila dentro func _ready(): e rientra la chiamata.'
+          : 'Rileggi l’istruzione dalla prima apertura e controlla che i delimitatori siano chiusi nell’ordine corretto.'
+      ];
     } else if (engine) {
-      const match = functionAdvice(raw) || rules.find(rule => rule.pattern.test(raw));
+      const match = functionAdvice(raw) || classBodyAdvice(raw) || rules.find(rule => rule.pattern.test(raw));
       if (match) ({title, why, hint, steps} = match);
       else if (syntax) {
         title = 'Godot non riesce a leggere un’istruzione';
