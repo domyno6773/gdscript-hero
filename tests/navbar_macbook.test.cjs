@@ -18,7 +18,7 @@ const server = http.createServer((req, res) => {
 });
 const widths = [2048, 1920, 1800, 1780, 1728, 1680, 1600, 1545, 1512, 1470, 1440, 1366, 1280, 1200, 1120, 1100, 1024, 960, 900, 821, 820, 390];
 async function inspect(engine, url) {
- const browser = await engine.launch({headless:true});
+ const browser = await engine.launch(engine.name()==='chromium' ? {headless:true,channel:'chrome',args:['--no-sandbox']} : {headless:true});
  try {
   const context = await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:2,locale:'it-IT'});
   const page = await context.newPage();
