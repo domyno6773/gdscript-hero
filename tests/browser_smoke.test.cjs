@@ -178,6 +178,8 @@ async function smoke(browser,url,width){
  assert.equal(await page.evaluate(()=>LESSONS_DATA.length),60);
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
  assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
+ assert.equal(await page.locator('#btn-open-settings svg.ui-icon').count(),1,'Settings button must use SVG icon');
+ assert.equal((await page.locator('#btn-open-settings').textContent()).trim(),'','Settings button must not contain emoji text');
  await testResponsiveLayout(page,width);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
  // L'Arena classificata e i progetti Premium sono in pausa, ma il progetto gratuito resta aperto.
