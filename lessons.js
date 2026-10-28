@@ -262,10 +262,6 @@ function hasRealComment(code) {
 }
 
 
-const LESSONS_DATA = [
-    // ==========================================
-    // CAPITOLO 1: INTRODUZIONE
-    // ==========================================
     {
         id: 1,
         conceptId: "syntax_basics",
@@ -762,21 +758,21 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "I giochi di ruolo memorizzano attributi differenti per ciascun personaggio: testo per l'identità, numeri interi per le statistiche come punti salute e forza."
+                        "text": "Questa sfida riguarda tre stringhe: un titolo con virgolette al suo interno, una battuta con apostrofo e un codice che inizia con zero. Il codice della porta deve restare testo, altrimenti perderebbe lo zero iniziale."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Dichiara le variabili richieste (`nome_personaggio`, `classe_ruolo`, `salute_iniziale`, `livello`) una sotto l'altra, quindi stampale ciascuna con la propria etichetta."
+                        "text": "Dentro `_ready()` dichiara `title`, `npc_line` e `door_code`. Scegli le virgolette che permettono di includere i caratteri speciali senza cambiare il contenuto e usa una stringa anche per `door_code`."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var eroe = \"Geralt\"\n    var hp = 100\n    print(\"Eroe:\", eroe)\n    print(\"HP:\", hp)\n```\nIn `print()`, passare argomenti separati da virgola inserisce automaticamente uno spazio."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var titolo = 'La \"mappa\" segreta'\n    var dialogo = \"L'avventura continua!\"\n    var codice = \"0070\"\n    print(titolo, dialogo, codice)\n```\nApplica lo stesso principio alle tre variabili richieste dalla missione."
             }
 ],
         solution: `extends Node\n\nfunc _ready():\n    var title = 'The "Lost" Key'\n    var npc_line = "It's dangerous to go alone!"\n    var door_code = "0420"\n    \n    # Non modificare le righe sotto\n    print("Title: ", title)\n    print("NPC: ", npc_line)\n    print("Door code: ", door_code)\n`,
@@ -1036,21 +1032,21 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "In Godot 4, l'operatore walrus `:=` permette di combinare la sicurezza del tipo statico con la brevità, lasciando che Godot indovini il tipo dal valore assegnato."
+                        "text": "Una scheda RPG può usare tipi dichiarati esplicitamente (`: int`, `: String`) e un tipo dedotto dal valore iniziale (`:=`). Una costante dichiarata con `const` non può essere riassegnata."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa `const NOME := valore` per una costante con tipo inferito, oppure `var nome := valore` per una variabile con tipo inferito."
+                        "text": "Per `MAX_HP` usa una costante globale tipizzata `int`; per `eroe` e `salute` usa `var` con tipo esplicito. Solo `scudo_attivo` deve usare `:=` per l'inferenza del tipo."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nconst LIMITE_LIVELLO := 99\n\nfunc _ready():\n    var attivo := true\n    print(LIMITE_LIVELLO)\n```\n`LIMITE_LIVELLO` riceve automaticamente il tipo `: int` senza doverlo digitare manualmente."
+                        "text": "Esempio analogo:\n```gdscript\nextends Node\nconst LIVELLO_MAX: int = 99\nfunc _ready():\n    var classe: String = \"Mago\"\n    var livello: int = 12\n    var pronto := true\n    print(classe, livello, pronto)\n```\nControlla che ogni dichiarazione rispetti il tipo richiesto."
             }
 ],
         solution: `extends Node\n\nconst MAX_HP: int = 200\n\nfunc _ready():\n    var eroe: String = "Valerius"\n    var salute: int = 150\n    var scudo_attivo := true\n    \n    # Non modificare le righe sotto\n    print("Eroe: ", eroe)\n    print("HP: ", salute, " / ", MAX_HP)\n    print("Scudo: ", scudo_attivo)\n`,
@@ -1121,21 +1117,21 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Il computer valuta prima le moltiplicazioni e divisioni, e solo successivamente addizioni e sottrazioni, esattamente come nelle regole matematiche standard."
+                        "text": "Somma e moltiplicazione sono operazioni diverse: usa `+` per aggiungere due numeri e `*` per moltiplicarli. Memorizza ogni risultato in una variabile prima di stamparlo."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Combina l'addizione `+` e la moltiplicazione `*` in un'unica espressione assegnata alla variabile `xp_totali`."
+                        "text": "Nella funzione `_ready()` crea `somma` con l'operazione `10 + 5` e `prodotto` con `5 * 2`. Poi stampa le due variabili nell'ordine richiesto."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var monete_totali = 100 + 4 * 10\n    print(monete_totali)\n```\n`4 * 10` viene calcolato per primo (40), poi sommato a 100 per un totale di 140."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var totale = 4 + 6\n    var doppio = 3 * 2\n    print(totale)\n    print(doppio)\n```\nUsa i valori e i nomi della consegna, non quelli dell'esempio."
             }
 ],
         solution: `func _ready():\n    var somma = 10 + 5\n    var prodotto = 5 * 2\n    print(somma)\n    print(prodotto)\n`,
@@ -2047,21 +2043,21 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida di padronanza richiede di combinare creazione dell'inventario, aggiunta di nuovi oggetti trovati e verifica della capacità dello zaino."
+                        "text": "Uno zaino può cambiare durante il gioco: `.append()` aggiunge un oggetto, `.erase()` lo rimuove, `.has()` controlla se è presente e `.size()` conta gli oggetti rimasti."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Inizializza l'array con gli oggetti di partenza, usa `.append()` per inserire il nuovo manufatto e infine stampa la dimensione totale con `.size()`."
+                        "text": "Parti dall'array `zaino` già presente nel codice, aggiungi `Arco Elfico`, elimina `Ramo Secco`, verifica la presenza di `Pozione di Vita` in `ha_cura` e salva la dimensione finale in `totale_slot`."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var zaino = [\"Mappa\", \"Torcia\"]\n    zaino.append(\"Bussola\")\n    var capienza = zaino.size()\n    print(\"Capienza:\", capienza)\n```\nVerifica attentamente i nomi esatti degli oggetti richiesti dal testo della sfida."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var borsa = [\"Spago\", \"Mappa\"]\n    borsa.append(\"Torcia\")\n    borsa.erase(\"Spago\")\n    var ha_mappa = borsa.has(\"Mappa\")\n    var quanti = borsa.size()\n    print(ha_mappa, quanti)\n```\nRipeti le quattro operazioni sugli oggetti richiesti nella consegna."
             }
 ],
         solution: `extends Node\n\nfunc _ready():\n    var zaino = ["Spada", "Ramo Secco", "Pozione di Vita"]\n    \n    zaino.append("Arco Elfico")\n    zaino.erase("Ramo Secco")\n    var ha_cura = zaino.has("Pozione di Vita")\n    var totale_slot = zaino.size()\n    \n    # Non modificare le righe sotto\n    print("Zaino: ", zaino)\n    print("Ha pozione: ", ha_cura)\n    print("Totale slot: ", totale_slot)\n`,
@@ -2362,21 +2358,21 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Il pattern dell'accumulatore consiste nel partire da un totale iniziale (pari a zero) e aggiungere progressivamente ogni valore della lista durante il passaggio del ciclo."
+                        "text": "Il ciclo `for` visita ciascun nemico dell'array. Per ogni nemico bisogna mostrare un messaggio di allerta e aggiungere una quantità fissa di XP all'accumulatore."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Inizializza `var somma = 0` prima del ciclo. All'interno del `for n in numeri:`, esegui `somma += n`. Infine, stampa la somma all'esterno del ciclo."
+                        "text": "Usa `for nemico in nemici:`. Dentro il ciclo stampa `\"Allerta: \" + nemico` e aggiorna `xp_totali` con `+= 25`. Dopo il ciclo, il totale deve comprendere tutti i nemici attraversati."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var monete_casse = [10, 20, 30]\n    var totale = 0\n    for m in monete_casse:\n        totale += m\n    print(\"Totale:\", totale) # Stampa 60\n```\nFai attenzione a posizionare il `print` finale NON indentato dentro il ciclo."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var bersagli = [\"A\", \"B\", \"C\"]\n    var punti = 0\n    for bersaglio in bersagli:\n        print(\"Avvistato: \" + bersaglio)\n        punti += 10\n    print(\"Punti: \", punti)\n```\nQui il bonus è fisso per bersaglio, non si sommano i valori dell'array."
             }
 ],
         solution: `extends Node\n\nfunc _ready():\n    var nemici = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali = 0\n    \n    for nemico in nemici:\n        print("Allerta: " + nemico)\n        xp_totali += 25\n        \n    # Non modificare la riga sotto\n    print("XP Totali: ", xp_totali)\n`,
@@ -2892,21 +2888,21 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "I vettori supportano l'aritmetica diretta: sommare due vettori somma le rispettive componenti X e Y contemporaneamente."
+                        "text": "Per muovere un oggetto in diagonale puoi modificare entrambe le coordinate del suo `Vector2`: `.x` controlla lo spostamento orizzontale e `.y` quello verticale."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Calcola la nuova posizione sommando la posizione iniziale e il vettore velocità: `var nuova_posizione = posizione + velocita`."
+                        "text": "Parti da `pos = Vector2(100, 200)`, aumenta `pos.x` di 20 con `+=` e diminuisci `pos.y` di 20 con `-=`. Infine stampa `pos`."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var pos = Vector2(10, 20)\n    var vel = Vector2(5, 5)\n    var arrivo = pos + vel # (15, 25)\n    print(arrivo)\n```\nQuesta operazione simula lo spostamento fisico in un frame di gioco."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var nave = Vector2(30, 80)\n    nave.x += 5\n    nave.y -= 10\n    print(nave)\n```\nAggiorna separatamente i due assi, come richiede la consegna."
             }
 ],
         solution: `func _ready():\n    var pos = Vector2(100, 200)\n    pos.x += 20\n    pos.y -= 20\n    print(pos)\n`,
@@ -2950,21 +2946,21 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Per sapere quanto è lungo un vettore (ad esempio la distanza coperta o la velocità complessiva di un proiettile), Godot offre il metodo matematico nativo `.length()`."
+                        "text": "Il radar rappresenta la sonda e la stazione come `Vector2`. Per verificare l'atterraggio bisogna aggiornare le coordinate `.x` e `.y` della sonda e confrontarle con quelle della stazione."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Chiama `.length()` sul vettore: `var distanza = vettore.length()`. Restituirà un numero float calcolato con il teorema di Pitagora."
+                        "text": "Parti da `posizione = Vector2(100, 200)`, applica `posizione.x += 50` e `posizione.y -= 30`. Crea `stazione = Vector2(150, 170)` e imposta `atterrato` confrontando entrambi gli assi con `and`."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var spostamento = Vector2(3, 4)\n    var lunghezza = spostamento.length() # sqrt(3^2 + 4^2) = 5.0\n    print(lunghezza)\n```\nSe il vettore è `Vector2(300, 400)`, `.length()` restituirà esattamente `500.0`."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var rover = Vector2(10, 40)\n    rover.x += 5\n    rover.y -= 10\n    var base = Vector2(15, 30)\n    var arrivato = rover.x == base.x and rover.y == base.y\n    print(arrivato)\n```\nLa missione verifica le coordinate, non la lunghezza del vettore."
             }
 ],
         solution: `extends Node\n\nfunc _ready():\n    var posizione = Vector2(100, 200)\n    posizione.x += 50\n    posizione.y -= 30\n    var stazione = Vector2(150, 170)\n    var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)\n    \n    # Non modificare le righe sotto\n    print("Posizione finale: ", posizione)\n    print("Stazione raggiunta: ", atterrato)\n`,
@@ -3233,21 +3229,21 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida richiede di strutturare un sistema di equipaggiamento flessibile per slot (testa, corpo, arma) con verifica e aggiornamento dei pezzi."
+                        "text": "Il dizionario `boss` conserva proprietà differenti dello stesso nemico: nome, punti vita e attacco. Con le chiavi puoi aggiungere statistiche, aggiornare la salute e controllare se esiste lo stato di furia."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Inizializza il dizionario, aggiungi o modifica gli slot richiesti e stampa i valori finali verificando che ogni slot abbia l'oggetto corretto."
+                        "text": "Crea `boss` con `nome` e `hp`, aggiungi `attacco`, porta `hp` a 420 e assegna a `in_furia` il risultato di `boss.has(\"furia\")`. Le stampe finali devono leggere questi valori dal dizionario."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var armatura = { \"testa\": \"Elmo\" }\n    armatura[\"torace\"] = \"Corazza\"\n    if armatura.has(\"torace\"):\n        print(\"Protezione:\", armatura[\"torace\"])\n```\nControlla le maiuscole nei nomi degli equipaggiamenti richiesti dal testo."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var mostro = {\"nome\": \"Orco\", \"hp\": 120}\n    mostro[\"attacco\"] = 20\n    mostro[\"hp\"] = 90\n    var ha_scudo = mostro.has(\"scudo\")\n    print(mostro[\"hp\"], ha_scudo)\n```\nUsa le chiavi specificate nella scheda del boss."
             }
 ],
         solution: `extends Node\n\nfunc _ready():\n    var boss = { "nome": "Drago Antico", "hp": 500 }\n    boss["attacco"] = 75\n    boss["hp"] = 420\n    var in_furia = boss.has("furia")\n    \n    # Non modificare le righe sotto\n    print("Boss: ", boss["nome"])\n    print("HP rimanenti: ", boss["hp"])\n    print("Attacco: ", boss["attacco"])\n    print("Furia attiva: ", in_furia)\n`,
@@ -3746,21 +3742,21 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "I metodi sono funzioni definite all'interno di una classe che rappresentano le azioni che quell'oggetto può compiere o subire (es. subire danno, attaccare, curarsi)."
+                        "text": "Un metodo di classe è una funzione che appartiene all'oggetto e può utilizzare i suoi dati. Qui `colpo_caricato()` deve calcolare un danno maggiore leggendo il campo `attacco`."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Definisci la funzione indentata all'interno della classe: `func subisci_danno(quantita):`. All'interno, modifica le proprietà dell'oggetto: `salute -= quantita`."
+                        "text": "Definisci `colpo_caricato()` dentro la classe `Personaggio` e usa `return self.attacco * 2`. Poi crea l'istanza in `_ready()` e stampa il valore restituito dal metodo."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nclass Giocatore:\n    var hp = 100\n    func ferisci(danno):\n        hp -= danno\n\nfunc _ready():\n    var p = Giocatore.new()\n    p.ferisci(20)\n    print(p.hp) # Stampa 80\n```\nInvocare `p.ferisci(20)` modifica direttamente l'istanza `p`."
+                        "text": "Esempio analogo:\n```gdscript\nclass Arma:\n    var potenza = 10\n    func danno_doppio():\n        return potenza * 2\nfunc _ready():\n    var spada = Arma.new()\n    print(spada.danno_doppio())\n```\nIl metodo restituisce un risultato, senza dover modificare la proprietà originale."
             }
 ],
         solution: `extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    func colpo_caricato():\n        return self.attacco * 2\n\nfunc _ready():\n    var eroe = Personaggio.new("Eroe", 25)\n    print("Danno colpo caricato: ", eroe.colpo_caricato())\n`,
@@ -3810,36 +3806,36 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         notice: "Non modificare le righe print(). Il programma stampa:",
         expectedOutput: "Membro 1: Aria (Maga)\nMembro 2: Krag (Guerriero)\nSalute totale party: 200",
         initialCode: `extends Node\n\n# Definisci la classe Avventuriero con _init sotto\n\n\nfunc _ready():\n    # Crea membro1, membro2 e calcola vita_totale sotto\n    \n    # Non modificare le righe sotto\n    print("Membro 1: ", membro1.nome, " (", membro1.ruolo, ")")\n    print("Membro 2: ", membro2.nome, " (", membro2.ruolo, ")")\n    print("Salute totale party: ", vita_totale)\n`,
-        aiExplanation: "Congratulazioni per essere arrivato alla Sfida Finale del Corso! In Godot Engine l'incapsulamento dei dati in classi personalizzate è la base per creare entità complesse, gestire party di gioco, inventari ed elementi della scena in modo pulito ed espandibile.",
+        aiExplanation: "Hai raggiunto la sfida finale del capitolo dedicato alla programmazione a oggetti! In Godot Engine l'incapsulamento dei dati in classi personalizzate è la base per creare entità complesse, gestire party di gioco, inventari ed elementi della scena in modo pulito ed espandibile.",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida culminante dell'OOP richiede di assemblare un'intera entità RPG con attributi, costruttore parametrico e metodi di interazione."
+                        "text": "Questa sfida conclude il capitolo sulle classi: definisci `Avventuriero` con tre proprietà (`nome`, `ruolo` e `vita`) e un costruttore che assegna i valori a ciascuna istanza."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Crea la classe `Personaggio`, implementa `_init(nome_init, hp_init)` e i metodi richiesti (`subisci_danno` e `guarisci`). Poi istanziala in `_ready()`."
+                        "text": "Implementa `_init(n, r, v)` nella classe `Avventuriero`; in `_ready()` crea `membro1` e `membro2` tramite `.new(...)` e calcola `vita_totale` sommando le rispettive proprietà `vita`."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nclass Eroe:\n    var nome = \"\"\n    var hp = 0\n    func _init(n, h):\n        nome = n\n        hp = h\n    func cura(val):\n        hp += val\n\nfunc _ready():\n    var e = Eroe.new(\"Artù\", 100)\n    e.cura(25)\n    print(e.nome, e.hp)\n```\nSegui scrupolosamente i nomi delle variabili e dei metodi specificati nella sfida."
+                        "text": "Esempio analogo:\n```gdscript\nclass Compagno:\n    var nome\n    var hp\n    func _init(n, punti):\n        nome = n\n        hp = punti\nfunc _ready():\n    var a = Compagno.new(\"Mago\", 30)\n    var b = Compagno.new(\"Guerriero\", 50)\n    print(a.hp + b.hp)\n```\nAdatta la struttura alle tre proprietà dell'`Avventuriero`."
             }
 ],
         solution: `extends Node\n\nclass Avventuriero:\n    var nome\n    var ruolo\n    var vita\n    func _init(n, r, v):\n        self.nome = n\n        self.ruolo = r\n        self.vita = v\n\nfunc _ready():\n    var membro1 = Avventuriero.new("Aria", "Maga", 80)\n    var membro2 = Avventuriero.new("Krag", "Guerriero", 120)\n    var vita_totale = membro1.vita + membro2.vita\n    \n    # Non modificare le righe sotto\n    print("Membro 1: ", membro1.nome, " (", membro1.ruolo, ")")\n    print("Membro 2: ", membro2.nome, " (", membro2.ruolo, ")")\n    print("Salute totale party: ", vita_totale)\n`,
         theory: `
             <div class="mastery-banner">
-                <span class="mastery-badge">🏆 SFIDA DI APPRENDIMENTO FINALE • CORSO GODOT 4 COMPLETATO</span>
+                <span class="mastery-badge">🏆 SFIDA DI PADRONANZA • CAPITOLO 12</span>
                 <h3>Creazione Party RPG ad Oggetti</h3>
-                <p>La sfida suprema di GDScript Hero: unisci classi, costruttori, istanze multiple e calcolo di statistiche collettive.</p>
+                <p>La sfida conclusiva del capitolo sulle classi: unisci classi, costruttori, istanze multiple e calcolo di statistiche collettive.</p>
             </div>
         `,
         task: `
@@ -4039,21 +4035,21 @@ $SaluteLabel.text = <span class="s">"HP: 75"</span>
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Quando i nodi hanno nomi con spazi o caratteri speciali, o quando il percorso viene composto dinamicamente, si usa il metodo formale `get_node(...)`."
+                        "text": "La sintassi `$NomeNodo` è una scorciatoia di Godot per accedere a un nodo figlio già presente nella scena. Per una `Label`, la proprietà `.text` determina il messaggio visualizzato."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Chiama `get_node(\"Percorso/Nome\")` passando il nome esatto tra virgolette, rispettando maiuscole e minuscole."
+                        "text": "Accedi direttamente a `$SaluteLabel`, assegna la stringa `\"HP: 75\"` alla proprietà `.text` e stampa il testo aggiornato con il prefisso `\"Nuova salute: \"`."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var moneta = get_node(\"Moneta Speciale\")\n    print(moneta.name)\n```\nIn Godot, i percorsi dei nodi sono sempre case-sensitive (sensibili a maiuscole e minuscole)."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $MessaggioLabel.text = \"Missione completata\"\n    print(\"Messaggio: \", $MessaggioLabel.text)\n```\nPer questa lezione usa la notazione `$` e il nome del nodo presente nella scena."
             }
 ],
         solution: `func _ready():\n    $SaluteLabel.text = "HP: 75"\n    print("Nuova salute: ", $SaluteLabel.text)\n`,
@@ -4335,21 +4331,21 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "In Godot puoi alterare l'aspetto visivo e il colore di qualsiasi nodo 2D o UI modificando la sua proprietà `.modulate` (tinta di colore)."
+                        "text": "Un clicker collega un `Button` a una funzione: ogni pressione incrementa una variabile numerica e aggiorna una `Label` per mostrare il nuovo punteggio."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Assegna una stringa di colore esadecimale o un Color a `.modulate`: `$Riquadro.modulate = \"#10b981\"` (verde smeraldo)."
+                        "text": "In `_ready()` collega `$ClickBtn.pressed` a `al_click`. Dentro `al_click()` aumenta `punti` con `+= 1` e assegna a `$PuntiLabel.text` la stringa `\"Click: \" + str(punti)`."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Pannello.modulate = \"#ef4444\" # Rosso acceso\n```\nUsa il codice esadecimale specificato nella consegna della lezione."
+                        "text": "Esempio analogo:\n```gdscript\nvar monete = 0\nfunc _ready():\n    $RaccogliBtn.pressed.connect(raccogli)\nfunc raccogli():\n    monete += 1\n    $MoneteLabel.text = \"Monete: \" + str(monete)\n```\nPer il clicker usa il pulsante, la funzione e l'etichetta indicati nella consegna."
             }
 ],
         solution: `var punti = 0\n\nfunc _ready():\n    $ClickBtn.pressed.connect(al_click)\n    print("Clicker pronto")\n\nfunc al_click():\n    punti += 1\n    $PuntiLabel.text = "Click: " + str(punti)\n    print($PuntiLabel.text)\n`,
@@ -4409,21 +4405,21 @@ $AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida richiede di collegare interazione e feedback visivo: quando l'utente clicca il pulsante, l'etichetta cambia testo e il pannello cambia colore."
+                        "text": "La plancia ha due pulsanti distinti: ognuno emette `pressed` e richiama la propria funzione. Il testo del nodo `$StatoNave` comunica all'utente quale comando è stato attivato."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Connetti il segnale `.pressed` del pulsante a una funzione callback, e al suo interno aggiorna la proprietà `.text` della Label e il colore di sfondo."
+                        "text": "Collega `$MotoriBtn.pressed` a `attiva_motori` e `$AllarmeBtn.pressed` a `attiva_allarme`. In entrambe le funzioni aggiorna `$StatoNave.text` e stampa il messaggio richiesto."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Bottone.pressed.connect(_on_click)\n\nfunc _on_click():\n    $Stato.text = \"Attivato\"\n    $Sfondo.modulate = \"#10b981\"\n```\nVerifica che tutti i nodi referenziati corrispondano ai nomi nell'albero della scena."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $PortaBtn.pressed.connect(apri_porta)\nfunc apri_porta():\n    $Stato.text = \"Porta aperta\"\n    print(\"Apertura completata\")\n```\nUsa due callback separate per i due comandi della nave; non serve cambiare i colori."
             }
 ],
         solution: `extends Node\n\nfunc _ready():\n    $MotoriBtn.pressed.connect(attiva_motori)\n    $AllarmeBtn.pressed.connect(attiva_allarme)\n    \n    # Non modificare la riga sotto\n    print("Plancia Operativa")\n\nfunc attiva_motori():\n    $StatoNave.text = "Motori a Massima Potenza"\n    print("Velocita Aumentata")\n\nfunc attiva_allarme():\n    $StatoNave.text = "Allarme Rosso Attivo"\n    print("Scudi al 100%")\n`,
@@ -4737,21 +4733,21 @@ $Moneta.<span class="nb">queue_free</span>()</pre>
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "Congratulazioni per essere arrivato alla Sfida Finale! Questa missione integra tutti i concetti appresi nel corso: albero dei nodi, segnali, temporizzazione, modifica delle proprietà e ciclo di vita."
+                        "text": "Il negozio usa un `Button` per avviare l'acquisto, una variabile `monete` per tenere il saldo e due `Label` per mostrare il denaro e l'esito dell'operazione."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Connetti il timer, aggiorna lo stato dei nodi UI all'avvio, gestisci il timeout rimuovendo l'ostacolo con `queue_free()` e colorando l'interfaccia di vittoria."
+                        "text": "In `_ready()` collega `$CompraPozioneBtn.pressed` a `compra_pozione`. Nel callback controlla `monete >= 25`: se bastano, sottrai 25 e aggiorna `$OroLabel.text`; in entrambi i rami dell'`if/else`, aggiorna `$MessaggioLabel.text` con il risultato appropriato."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nfunc _ready():\n    $TimerPartita.timeout.connect(_on_fine_gioco)\n    $TimerPartita.start()\n    $Messaggio.text = \"Partita in corso...\"\n\nfunc _on_fine_gioco():\n    $Ostacolo.queue_free()\n    $Messaggio.text = \"Vittoria!\"\n```\nVerifica tutti i requisiti elencati nella scheda della sfida finale."
+                        "text": "Esempio analogo:\n```gdscript\nvar crediti = 30\nfunc _ready():\n    $AcquistaBtn.pressed.connect(acquista)\nfunc acquista():\n    if crediti >= 10:\n        crediti -= 10\n        $CreditiLabel.text = \"Crediti: \" + str(crediti)\n        $EsitoLabel.text = \"Oggetto acquistato\"\n    else:\n        $EsitoLabel.text = \"Crediti insufficienti\"\n    print($EsitoLabel.text)\n```\nPer la missione usa il prezzo, i nodi e i messaggi del negozio dell'avventuriero."
             }
 ],
         solution: `extends Node\n\nvar monete = 100\n\nfunc _ready():\n    $CompraPozioneBtn.pressed.connect(compra_pozione)\n    \n    # Non modificare la riga sotto\n    print("Bottega Aperta")\n\nfunc compra_pozione():\n    if monete >= 25:\n        monete -= 25\n        $OroLabel.text = "Monete: " + str(monete)\n        $MessaggioLabel.text = "Pozione Acquistata!"\n    else:\n        $MessaggioLabel.text = "Oro Insufficiente!"\n    print($MessaggioLabel.text)\n`,

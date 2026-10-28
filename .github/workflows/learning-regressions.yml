@@ -20,6 +20,8 @@ jobs:
           node-version: '22'
       - name: Learning validators and 29 negative examples
         run: node tests/audit_validator_regression.test.cjs
+      - name: Instructions and progressive hints match lesson objectives
+        run: node tests/lesson_content_alignment.test.cjs
       - name: Lesson 4 comments ignored and real output evaluated
         run: node tests/lesson4_comments_output.test.cjs
       - name: Godot debug messages and reliable line numbers
