@@ -203,6 +203,9 @@ async function testAllLessonCodeSamplesFit(page,width){
        const blocks=[...document.querySelectorAll(
          '#view-exercise .lesson-content .code-preview, #view-exercise .lesson-content pre')];
        for(const block of blocks){
+         // Locked/closed hints have display:none; geometry is undefined until
+         // users expand them, so do not treat them as overflowing examples.
+         if(!block.getClientRects().length)continue;
          sampleCount++;
          const r=block.getBoundingClientRect(),parent=block.parentElement.getBoundingClientRect();
          const style=getComputedStyle(block);
@@ -223,8 +226,12 @@ async function testAllLessonCodeSamplesFit(page,width){
          const limit=r.right-(parseFloat(style.paddingRight)||0)-1;
          let textNode;
          while((textNode=walker.nextNode())){
-           if(!textNode.textContent.trim())continue;
-           range.selectNodeContents(textNode);
+           const visibleText=textNode.textContent.replace(/\\s+$/,'');
+           if(!visibleText.trim())continue;
+           // A Range containing a trailing newline/indent stop includes
+           // invisible whitespace beyond a wrapped line's right edge.
+           range.setStart(textNode,0);
+           range.setEnd(textNode,visibleText.length);
            for(const part of range.getClientRects()){
              if(part.width>0&&part.right>limit+2){
                errors.push({lesson:lesson.id,type:'text',right:part.right,limit,
