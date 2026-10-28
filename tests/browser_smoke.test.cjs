@@ -117,6 +117,48 @@ async function testNavigationPersistence(page,width){
    sessionStorage.removeItem('gdscript_hero_review_draft_v1');
  });
 }
+async function testResponsiveLayout(page,initialWidth) {
+  const presets=[1440,1366,1280,1180,1024,900,820,768,390];
+  const views=[
+    ['roadmap',()=>App.showRoadmap(),'.roadmap-layout-container'],
+    ['exercise',()=>App.openLesson(1),'#view-exercise .workspace-grid'],
+    ['practice',()=>App.openPracticeView(),'#view-practice .sandbox-workspace-grid'],
+    ['projects',()=>App.openProjectsView(),'#view-projects .projects-grid'],
+    ['review',()=>App.showReviewView(),'.review-view-inner'],
+    ['stats',()=>App.showStatsView(),'.stats-view-inner']
+  ];
+  for(const width of presets){
+    await page.setViewportSize({width,height:844});
+    for(const [view,_open,selector] of views){
+      await page.evaluate(name=>{
+        if(name==='roadmap')App.showRoadmap();
+        if(name==='exercise')App.openLesson(1);
+        if(name==='practice')App.openPracticeView();
+        if(name==='projects')App.openProjectsView();
+        if(name==='review')App.showReviewView();
+        if(name==='stats')App.showStatsView();
+      },view);
+      const measures=await page.evaluate(selector=>{
+        const W=document.documentElement.clientWidth;
+        const targets=['.navbar','.navbar .nav-left','.navbar .nav-center',
+          '.navbar .nav-right',selector];
+        const positions=targets.map(s=>{
+          const el=document.querySelector(s);
+          if(!el || getComputedStyle(el).display==='none')return null;
+          const r=el.getBoundingClientRect();
+          return {s,left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width)};
+        }).filter(Boolean);
+        const errors=positions.filter(p=>p.left < -3 || p.right > W+3);
+        return {viewport:W,positions,errors};
+      },selector);
+      assert.deepEqual(measures.errors,[],
+        'Off-screen panel at '+width+'px in '+view+': '+JSON.stringify(measures));
+    }
+  }
+  await page.setViewportSize({width:initialWidth,height:844});
+  await page.evaluate(()=>App.showRoadmap());
+}
+
 async function smoke(browser,url,width){
  const context=await browser.newContext({viewport:{width,height:844},locale:'it-IT'});
  const page=await context.newPage();
@@ -136,6 +178,7 @@ async function smoke(browser,url,width){
  assert.equal(await page.evaluate(()=>LESSONS_DATA.length),60);
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
  assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
+ await testResponsiveLayout(page,width);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
  // L'Arena classificata e i progetti Premium sono in pausa, ma il progetto gratuito resta aperto.
  await page.evaluate(()=>App.openProjectsView());
