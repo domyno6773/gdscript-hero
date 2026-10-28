@@ -940,6 +940,57 @@ async function smoke(browser,url,width){
    return {arena:!!restored.data.arenaProject,sandbox:!!restored.data.sandbox,review:!!restored.data.reviewProgress,denied};
  });
  assert.ok(backup.arena&&backup.sandbox&&backup.review&&backup.denied,'Incomplete backup or integrity failure');
+
+ // Regression: un caricamento, la navigazione o un import cloud non devono
+ // mai produrre una notifica di passaggio livello senza XP guadagnati.
+ await page.evaluate(()=>{
+   const stored=JSON.parse(localStorage.getItem('gdscript_hero_save_v4')||'{}');
+   stored.xp=1259; // Un XP sotto la soglia del livello 10.
+   stored.unlockedAchievements=ACHIEVEMENTS_DATA.map(a=>a.id);
+   localStorage.setItem('gdscript_hero_save_v4',JSON.stringify(stored));
+   sessionStorage.removeItem('gdscript_hero_position_v1');
+ });
+ await page.reload({waitUntil:'load'});
+ await page.waitForFunction(()=>App.state.level===9);
+ assert.notEqual(await page.locator('#achievement-toast').getAttribute('data-kind'),'level',
+   'Reload must not celebrate an existing XP level');
+ await page.evaluate(()=>{App.showStatsView();App.openProjectsView();App.updateStatsUI();});
+ assert.notEqual(await page.locator('#achievement-toast').getAttribute('data-kind'),'level',
+   'Changing sections must not trigger a level-up');
+ await page.evaluate(()=>{
+   App.applyImportedState({xp:1260},false);
+ });
+ assert.notEqual(await page.locator('#achievement-toast').getAttribute('data-kind'),'level',
+   'Cloud/backup hydration must not celebrate XP');
+ await page.evaluate(()=>{
+   App.state.xp=1259;
+   App.updateStatsUI();
+   App.state.xp=1260;
+   App.updateStatsUI({announceLevelUp:true});
+ });
+ assert.equal(await page.locator('#achievement-toast').getAttribute('data-kind'),'level',
+   'A genuine XP threshold crossing should display the level-up toast');
+ assert.equal((await page.locator('#toast-icon svg').count()),1,
+   'Level-up toast must show the SVG trophy');
+ const toastRect=await page.locator('#achievement-toast').boundingBox();
+ assert.ok(toastRect && toastRect.x>=0 && toastRect.x+toastRect.width<=width+1,
+   'Toast must fit inside the viewport');
+ if(process.env.E2E_SCREENSHOTS==='1'){
+   await page.screenshot({path:path.join(root,'test-artifacts','level-toast-'+width+'.png'),fullPage:false});
+ }
+ await page.evaluate(()=>{
+   App.saveStorage();
+   document.getElementById('achievement-toast').classList.add('hidden');
+   App.openProjectsView();
+   App.showStatsView();
+   App.updateStatsUI();
+ });
+ assert.equal(await page.locator('#achievement-toast').isHidden(),true,
+   'Navigation should not show another level-up toast');
+ await page.reload({waitUntil:'load'});
+ await page.waitForFunction(()=>App.state.level===10);
+ assert.notEqual(await page.locator('#achievement-toast').getAttribute('data-kind'),'level',
+   'Refreshing after a real level-up must not replay the toast');
  assert.deepEqual(errors,[],'Unhandled browser exceptions '+errors.join('; '));
  console.log('PASS: Chrome '+width+'px sections/exercise/XSS/reload/backup');
  await context.close();
