@@ -33,20 +33,32 @@
         return '';
     }
     function highlight(source) {
-        let result = '', cursor = 0;
-        token.lastIndex = 0;
-        let match;
-        while ((match = token.exec(source)) !== null) {
-            result += escapeHtml(source.slice(cursor, match.index));
-            const value = match[0], css = kind(value, source.slice(token.lastIndex, token.lastIndex + 8));
-            result += css
-                ? '<span class="gd-token-' + css + '">' + escapeHtml(value) + '</span>'
-                : escapeHtml(value);
-            cursor = token.lastIndex;
+        // A real indent stays four actual spaces. Only the syntax layer displays
+        // a small Godot-style arrow, so the submitted code is never modified.
+        function leadingWhitespace(s) {
+            let result='',i=0;
+            while(i<s.length){
+                if(s[i]==='\t'){result+='<span class="gdh-indent-unit">\t</span>';i++;continue;}
+                if(s.slice(i,i+4)==='    '){result+='<span class="gdh-indent-unit">    </span>';i+=4;continue;}
+                result+=escapeHtml(s[i]);i++;
+            }
+            return result;
         }
-        result += escapeHtml(source.slice(cursor));
-        // Maintain the final blank line and code-block height.
-        return result + (source.endsWith('\n') ? ' ' : '');
+        const lines=String(source).split('\n');
+        const rendered=lines.map(line=>{
+            const lead=line.match(/^[ \t]*/)[0],rest=line.slice(lead.length);
+            let result=leadingWhitespace(lead),cursor=0;
+            token.lastIndex=0;
+            let match;
+            while((match=token.exec(rest))!==null){
+                result+=escapeHtml(rest.slice(cursor,match.index));
+                const value=match[0],css=kind(value,rest.slice(token.lastIndex,token.lastIndex+8));
+                result+=css?'<span class="gd-token-'+css+'">'+escapeHtml(value)+'</span>':escapeHtml(value);
+                cursor=token.lastIndex;
+            }
+            return result+escapeHtml(rest.slice(cursor));
+        });
+        return rendered.join('\n')+(source.endsWith('\n')?' ':'');
     }
     const targets = {
         exercise: ['code-editor','gdscript-syntax-layer','gdscript-highlight'],

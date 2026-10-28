@@ -19,6 +19,41 @@ async function viewIs(page,name){
  const active=await page.evaluate(()=>[...document.querySelectorAll('.view-container:not(.hidden)')].map(e=>e.id));
  assert.deepEqual(active,['view-'+name],'Section '+name+' not active: '+active.join(','));
 }
+async function testGodotEditorExtras(page,selector){
+ const editor=page.locator(selector);
+ await editor.fill('func demo():\n    if true:\n        print("ok")\n\nfunc other():\n    pass');
+ const base=await editor.inputValue();
+ const syntax=selector==='#code-editor'?'#gdscript-highlight':'#sandbox-gdscript-highlight';
+ assert.ok(await page.locator(syntax+' .gdh-indent-unit').count()>=2,
+   'Godot indentation marks missing in '+selector);
+ await editor.evaluate(el=>{el.focus();const p=el.value.indexOf('    if')+4;el.setSelectionRange(p,p)});
+ await editor.press('Backspace');
+ assert.ok((await editor.inputValue()).includes('\nif true:\n'),
+   'Backspace must remove an entire indentation stop in '+selector);
+ await editor.fill('    ');
+ await editor.evaluate(el=>{el.focus();el.setSelectionRange(4,4)});
+ await editor.press('Backspace');
+ assert.equal(await editor.inputValue(),'','Backspace must delete four spaces together');
+ await editor.press('Tab');
+ assert.equal(await editor.inputValue(),'    ','Tab must insert a full indent');
+ await editor.press('Shift+Tab');
+ assert.equal(await editor.inputValue(),'','Shift+Tab must remove one indent');
+ await editor.fill(base);
+ const gutter=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-gutter':
+   '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-gutter';
+ await page.waitForFunction(s=>document.querySelector(s)?.querySelector('button'),gutter);
+ await page.locator(gutter+' button').first().click();
+ const preview=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-preview':
+   '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-preview';
+ assert.ok(await page.locator(preview).isVisible(),'Fold preview must become visible');
+ assert.ok((await page.locator(preview).textContent()).includes('righe nascoste'),
+   'Fold preview needs the hidden line count');
+ assert.equal(await editor.inputValue(),base,'Folding must never change canonical source');
+ await page.locator(preview+' .gdh-fold-arrow.collapsed').first().click();
+ assert.ok(await page.locator(preview).isHidden(),'Expanding must return to editable text');
+ assert.equal(await editor.inputValue(),base);
+}
+
 async function testSmartIndent(page,selector) {
  const editor=page.locator(selector);
  const cases=[
@@ -499,6 +534,7 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#sandbox-code-editor').inputValue(),'print',
    'Sandbox Enter completion failed');
  await testSmartIndent(page,'#sandbox-code-editor');
+ await testGodotEditorExtras(page,'#sandbox-code-editor');
  await page.locator('#sandbox-code-editor').fill('extends Node2D\n\nfunc _ready():\n    print("BROWSER_SANDBOX_OK")');
  await page.locator('#btn-sandbox-run').click({timeout:10000});
  try {
@@ -596,6 +632,7 @@ async function smoke(browser,url,width){
    'Il vecchio placeholder della mascotte non deve comparire nelle lezioni');
  if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
  await testSmartIndent(page,'#code-editor');
+ await testGodotEditorExtras(page,'#code-editor');
  // Il completamento originale delle lezioni rimane operativo.
  await page.locator('#code-editor').fill('pri');
  await page.locator('#autocomplete-popup').waitFor({state:'visible',timeout:4000});

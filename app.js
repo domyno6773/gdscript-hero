@@ -924,11 +924,11 @@ const App = {
             }
             if (e.key === 'Tab') {
                 e.preventDefault();
-                const start = editor.selectionStart;
-                const end = editor.selectionEnd;
-                editor.value = editor.value.substring(0, start) + "    " + editor.value.substring(end);
-                editor.selectionStart = editor.selectionEnd = start + 4;
-                editor.dispatchEvent(new Event('input', { bubbles: true }));
+                window.GDHEditorUX?.indent(editor,e.shiftKey);
+                return;
+            }
+            if (e.key === 'Backspace' && window.GDHEditorUX?.backspace(editor)) {
+                e.preventDefault();
                 return;
             }
             if (e.key === 'Enter' && !e.altKey && !e.isComposing) {
@@ -1089,6 +1089,7 @@ const App = {
             nums += i + '\n';
         }
         linesEl.innerText = nums;
+        window.GDHEditorUX?.refresh(editor);
     },
 
     updateSandboxSyncStatus(status = 'saved') {
@@ -3205,6 +3206,7 @@ const App = {
         editor.selectionStart = newPos;
         editor.selectionEnd = newPos;
         editor.focus();
+        editor.dispatchEvent(new Event('input',{bubbles:true}));
         if (targetId === 'code-editor') {
             this.updateLineNumbers();
         } else if (targetId === 'practice-code-editor') {
@@ -3383,14 +3385,14 @@ const App = {
                 return;
             }
 
-            // Supporto Tab = 4 spazi
+            // Tab / Shift+Tab e Backspace sull'indentazione condivisi con Sandbox.
             if (e.key === 'Tab') {
                 e.preventDefault();
-                const start = editor.selectionStart;
-                const end = editor.selectionEnd;
-                editor.value = editor.value.substring(0, start) + "    " + editor.value.substring(end);
-                editor.selectionStart = editor.selectionEnd = start + 4;
-                this.updateLineNumbers();
+                window.GDHEditorUX?.indent(editor,e.shiftKey);
+                return;
+            }
+            if (e.key === 'Backspace' && window.GDHEditorUX?.backspace(editor)) {
+                e.preventDefault();
                 return;
             }
 
@@ -3592,6 +3594,7 @@ const App = {
         }
         lineNums.innerText = numbers;
         window.GDScriptHighlighter?.sync();
+        window.GDHEditorUX?.refresh(editor);
     },
 
     // ==========================================
