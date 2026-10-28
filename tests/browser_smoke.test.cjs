@@ -42,6 +42,12 @@ async function testGodotEditorExtras(page,selector){
  const gutter=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-gutter':
    '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-gutter';
  await page.waitForFunction(s=>document.querySelector(s)?.querySelector('button'),gutter);
+ // Sul telefono l'header dell'editor e le tab sono sticky: porta prima
+ // il blocco di codice nel centro del viewport, fuori dalle barre fisse.
+ if(selector==='#code-editor' && await page.evaluate(()=>innerWidth<=820)){
+   await page.locator('#view-exercise .editor-wrapper').evaluate(el=>
+     el.scrollIntoView({block:'center',behavior:'instant'}));
+ }
  await page.locator(gutter+' button').first().click();
  const preview=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-preview':
    '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-preview';
