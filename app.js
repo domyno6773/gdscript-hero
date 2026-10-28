@@ -6441,7 +6441,12 @@ const App = {
         const btnSettingsAuth = document.getElementById('btn-settings-auth-action');
 
         if (settingsAccountDesc) {
-            settingsAccountDesc.innerText = isGuest ? 'Modalità Ospite (Dati salvati in locale)' : `Connesso: ${user.email}`;
+            const fullEmail = isGuest ? '' : String(user.email || '');
+            settingsAccountDesc.textContent = isGuest
+                ? 'Modalità Ospite (Dati salvati in locale)'
+                : `Connesso: ${fullEmail}`;
+            // CSS tronca solo la parte visibile, senza alterare l'indirizzo reale.
+            settingsAccountDesc.title = fullEmail;
         }
         if (btnSettingsAuth) {
             btnSettingsAuth.innerText = isGuest ? '🔑 Accedi' : '🚪 Esci';

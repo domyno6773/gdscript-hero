@@ -159,6 +159,56 @@ async function testResponsiveLayout(page,initialWidth) {
   await page.evaluate(()=>App.showRoadmap());
 }
 
+async function testLongEmailSettings(page, initialWidth) {
+ const longEmail = 'studente.' + 'x'.repeat(175) + '@' + 'example'.repeat(9) + '.com';
+ const widths = [1440, 1024, 820, 768, 390, 320];
+ await page.evaluate(email => {
+   App.updateAuthUI({isGuest:false, provider:'email', name:'Studente', email});
+   App.openSettingsModal();
+ }, longEmail);
+ for (const width of widths) {
+   await page.setViewportSize({width,height:844});
+   const geometry = await page.evaluate(() => {
+     const panel=document.querySelector('#settings-modal .modal-card');
+     const row=document.querySelector('#settings-account-desc').closest('.settings-row');
+     const label=document.querySelector('#settings-account-desc');
+     const button=document.querySelector('#btn-settings-auth-action');
+     const rects=[panel,row,label,button].map(el=>{
+       const r=el.getBoundingClientRect();
+       return {left:r.left,right:r.right,width:r.width};
+     });
+     const style=getComputedStyle(label);
+     return {
+       viewport: document.documentElement.clientWidth,
+       rects,
+       truncated:label.scrollWidth>label.clientWidth,
+       overflow:style.overflow,
+       textOverflow:style.textOverflow,
+       whiteSpace:style.whiteSpace,
+       fullEmail:label.title,
+       displayed:label.textContent
+     };
+   });
+   assert.equal(geometry.fullEmail,longEmail,'Full email must remain accessible in title');
+   assert.equal(geometry.displayed,'Connesso: '+longEmail,'Email must not be mutated/truncated in data');
+   assert.equal(geometry.textOverflow,'ellipsis','Long emails must use CSS ellipsis');
+   assert.equal(geometry.whiteSpace,'nowrap','Long email must occupy one line');
+   assert.equal(geometry.overflow,'hidden','Long email must not expand its label');
+   assert.ok(geometry.truncated,'Long email should be clipped inside its available width');
+   assert.ok(geometry.rects.every(r=>r.left>=-1 && r.right<=geometry.viewport+1),
+     'Settings content overflowed at '+width+'px: '+JSON.stringify(geometry));
+   if(process.env.E2E_SCREENSHOTS==='1' && [1440,390].includes(width)){
+     const dir=path.join(root,'test-artifacts');fs.mkdirSync(dir,{recursive:true});
+     await page.screenshot({path:path.join(dir,'settings-long-email-'+width+'.png'),fullPage:false});
+   }
+ }
+ await page.evaluate(()=>{
+   App.closeSettingsModal();
+   App.updateAuthUI({isGuest:true});
+ });
+ await page.setViewportSize({width:initialWidth,height:844});
+}
+
 async function smoke(browser,url,width){
  const context=await browser.newContext({viewport:{width,height:844},locale:'it-IT'});
  const page=await context.newPage();
@@ -180,6 +230,7 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
  assert.equal(await page.locator('#btn-open-settings svg.ui-icon').count(),1,'Settings button must use SVG icon');
  assert.equal((await page.locator('#btn-open-settings').textContent()).trim(),'','Settings button must not contain emoji text');
+ await testLongEmailSettings(page,width);
  await testResponsiveLayout(page,width);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
  // L'Arena classificata e i progetti Premium sono in pausa, ma il progetto gratuito resta aperto.

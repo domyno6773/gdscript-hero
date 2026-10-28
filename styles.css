@@ -2688,6 +2688,8 @@ kbd {
 
 /* IMPOSTAZIONI MODAL, AUDIO & RESET DOPPIA CONFERMA */
 .settings-group {
+    min-width: 0;
+    max-width: 100%;
     background: #0d121f;
     border: 1px solid var(--border);
     border-radius: 14px;
@@ -2713,6 +2715,9 @@ kbd {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    max-width: 100%;
     padding: 10px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
@@ -2724,8 +2729,26 @@ kbd {
 
 .settings-label-block {
     display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
     flex-direction: column;
     gap: 2px;
+}
+
+/* Le email lunghe non possono forzare la larghezza della modale.
+   Il testo completo resta disponibile tramite title e lettori schermo. */
+#settings-account-desc {
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.settings-row > .btn-subtle,
+.settings-row > .btn-danger {
+    flex-shrink: 0;
 }
 
 .settings-item-name {
@@ -5155,6 +5178,10 @@ kbd {
         align-items: flex-start !important;
         gap: 12px !important;
     }
+    .settings-row > .settings-label-block {
+        flex: 0 1 auto;
+        width: 100%;
+    }
 
     .settings-row .theme-switch-container {
         width: 100% !important;
@@ -6891,6 +6918,12 @@ kbd {
     color: var(--text-dim);
     line-height: 1.4;
     margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+/* Nel profilo la mail può andare a capo; nelle Impostazioni usa i puntini. */
+.profile-acc-desc strong {
+    overflow-wrap: anywhere;
 }
 
 .profile-acc-actions {
