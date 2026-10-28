@@ -2219,6 +2219,17 @@ const App = {
         }
     },
 
+    syncLessonXpBadge(lesson) {
+        const badge = document.getElementById('lesson-xp-badge');
+        if (!badge || !lesson) return;
+        const completed = this.state.finishedLessons.includes(lesson.id);
+        badge.innerText = completed ? 'Già completato' : `+${lesson.xp} XP`;
+        badge.title = completed ? 'Premio XP già ottenuto in precedenza'
+            : 'XP ottenibili alla prima soluzione corretta';
+        badge.style.background = completed ? 'rgba(148, 163, 184, .12)' : '';
+        badge.style.color = completed ? 'var(--text-muted)' : '';
+    },
+
     // La modale mostra SOLO gli XP realmente ottenuti per l'attività completata.
     // Se l'attività non assegna XP, il riquadro premio scompare del tutto.
     setSuccessModalReward(earnedXp) {
@@ -2662,7 +2673,7 @@ const App = {
                             <h4 class="mastery-popover-title">Sfida di apprendimento</h4>
                             <p class="mastery-popover-desc">Metti alla prova le conoscenze del capitolo con una sfida pratica!</p>
                             <div class="mastery-popover-reward">
-                                <span>+${lesson.xp} XP</span>
+                                <span>${isFinished ? 'XP già ottenuti' : '+' + lesson.xp + ' XP'}</span>
                                 <span>🏆 Capitolo ${chapter.id}</span>
                             </div>
                             <button class="mastery-popover-btn" onclick="event.stopPropagation(); App.closeAllMasteryPopovers(); App.openLesson(${lesson.id});">
@@ -3068,10 +3079,7 @@ const App = {
             this.bindStandardHintEvents();
         }
 
-        const lessonXpBadge = document.getElementById('lesson-xp-badge');
-        lessonXpBadge.innerText = `+${lesson.xp} XP`;
-        lessonXpBadge.style.background = '';
-        lessonXpBadge.style.color = '';
+        this.syncLessonXpBadge(lesson);
         const backButton = document.getElementById('btn-back-to-roadmap');
         if (backButton) backButton.textContent = '← Torna alla Mappa';
 
@@ -4120,6 +4128,10 @@ const App = {
 
                 SoundFX.playSuccess();
                 ConfettiFX.burst();
+
+                // Dopo la prima soluzione, anche il badge dell'esercizio non deve più
+                // far pensare che il premio iniziale sia ancora ottenibile.
+                this.syncLessonXpBadge(currentLesson);
 
                 // Aggiorna modale vittoria
                 const modalTitle = document.getElementById('modal-success-title');

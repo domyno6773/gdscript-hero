@@ -781,6 +781,8 @@ async function smoke(browser,url,width){
    'First successful completion must show its real XP');
  assert.equal(await page.locator('#modal-xp-card').isVisible(),true,
    'First successful completion must show the XP card');
+ assert.equal(await page.locator('#lesson-xp-badge').textContent(),'Già completato',
+   'Lesson badge must stop advertising the already claimed reward');
  // Ripetere lo stesso esercizio non deve assegnare XP né prometterne nella modale.
  await page.locator('#btn-modal-stay').click({timeout:10000});
  const xpBeforeReplay=await page.evaluate(()=>App.state.xp);
