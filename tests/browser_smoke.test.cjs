@@ -347,13 +347,11 @@ async function testResponsiveLayout(page,initialWidth) {
   // Riproduci le statistiche e l'identità della schermata MacBook: la navbar
   // deve adattarsi anche quando c'è un utente autenticato.
   const navOriginal=await page.evaluate(()=>{
-    const ids=['nav-auth-label','nav-profile-name','xp-count','streak-count','streak-sub-label'];
+    const ids=['nav-auth-label','nav-profile-name','streak-count'];
     const before=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)?.textContent||'']));
     document.getElementById('nav-auth-label').textContent='Gianluca';
     document.getElementById('nav-profile-name').textContent='Gianluca';
-    document.getElementById('xp-count').textContent='885';
     document.getElementById('streak-count').textContent='0';
-    document.getElementById('streak-sub-label').textContent='(0/2d)';
     return before;
   });
   for(const width of presets){
@@ -384,7 +382,7 @@ async function testResponsiveLayout(page,initialWidth) {
         const navEls=[
           '#btn-home','#nav-roadmap-btn','#nav-editor-btn','#nav-practice-btn',
           '#nav-projects-btn','#nav-review-btn','#nav-stats-btn',
-          '#btn-open-achievements','#btn-streak-modal','.xp-pill',
+          '#btn-open-achievements','#btn-streak-modal',
           '.nav-right .level-pill','#btn-open-auth-nav','#btn-open-profile',
           '#btn-open-settings'
         ].map(s=>document.querySelector('.navbar '+s)).filter(Boolean)
@@ -448,14 +446,24 @@ async function testAccessibilityKeyboard(page,width){
   // A click-only navigation DIV must work using Space and restore focus on close.
   const profile=page.locator('#btn-open-profile');
   await profile.focus();await page.keyboard.press('Enter');
-  assert.equal(await page.locator('#profile-modal').isVisible(),true,'Profile not keyboard-accessible');
+  assert.equal(await page.locator('#level-popover').isVisible(),true,'Level panel not keyboard-accessible');
+  assert.equal(await profile.getAttribute('aria-expanded'),'true');
+  assert.equal(await page.evaluate(()=>document.activeElement.closest('#level-popover')!==null),true,
+    'Opening level panel should move keyboard focus inside it');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#level-popover').isHidden(),true,'Escape did not close level panel');
+  assert.equal(await page.evaluate(()=>document.activeElement?.id),'btn-open-profile',
+    'Closing level panel must restore focus to its launcher');
+  await profile.click();
+  await page.locator('#btn-level-full-profile').click();
+  assert.equal(await page.locator('#profile-modal').isVisible(),true,'Existing customization must remain accessible');
   assert.equal(await page.evaluate(()=>document.activeElement.closest('#profile-modal')!==null),true,
-    'Opening a dialog should move keyboard focus inside it');
+    'Opening profile dialog should move focus inside it');
   assert.equal(await page.locator('#btn-close-profile').getAttribute('aria-label'),'Chiudi finestra');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#profile-modal').isHidden(),true,'Escape did not close profile');
   assert.equal(await page.evaluate(()=>document.activeElement?.id),'btn-open-profile',
-    'Close dialog must restore focus to its launcher');
+    'Full profile dialog must restore focus to its visible launcher');
   const streak=page.locator('#btn-streak-modal');
   await streak.focus();await page.keyboard.press('Space');
   assert.equal(await page.locator('#streak-modal').isVisible(),true);
@@ -886,7 +894,7 @@ async function testNavbarProfileAndQuestClaim(page,width) {
       levelInProfile:!!document.querySelector('#btn-open-profile #level-pill'),
       decorativeMedals:document.querySelectorAll('#level-pill .trophy-icon').length,
       streak:document.getElementById('streak-count').textContent.trim(),
-      weeklyLabel:document.getElementById('streak-sub-label').textContent.trim()
+      hasXpPill:!!document.querySelector('.xp-pill')
     };
     App.state.profile=previous;App.applyProfileUI();
     App.updateAuthUI({isGuest:true});
@@ -898,7 +906,37 @@ async function testNavbarProfileAndQuestClaim(page,width) {
   assert.equal(profile.levelInProfile,true);
   assert.equal(profile.decorativeMedals,0);
   assert.ok(profile.streak.includes('/'),'Streak needs a readable weekly goal');
-  assert.equal(profile.weeklyLabel,'giorni');
+  assert.equal(profile.hasXpPill,false,'No XP slot in navbar');
+
+  // Popup sempre sincronizzato alla progressione esistente.
+  await page.locator('#btn-open-profile').click();
+  const levelPanel=await page.evaluate(()=>{
+    const info=ProgressionV2.levelFromXp(App.state.xp);
+    const panel=document.getElementById('level-popover');
+    const bar=document.getElementById('level-popover-progress');
+    const rect=panel.getBoundingClientRect();
+    return {
+      open:!panel.classList.contains('hidden'),
+      title:document.getElementById('level-popover-title').textContent,
+      grade:document.getElementById('level-popover-grade').textContent,
+      total:document.getElementById('level-popover-xp').textContent,
+      remaining:document.getElementById('level-popover-remaining').textContent,
+      progress:bar.getAttribute('aria-valuenow'),
+      fill:document.getElementById('level-popover-fill').style.width,
+      expected:info,xp:App.state.xp,
+      rect:{left:rect.left,right:rect.right},vw:document.documentElement.clientWidth
+    };
+  });
+  assert.equal(levelPanel.open,true);
+  assert.equal(levelPanel.title,'Livello '+levelPanel.expected.tier.level);
+  assert.equal(levelPanel.grade,levelPanel.expected.tier.title);
+  assert.ok(levelPanel.total.includes(String(levelPanel.xp)));
+  assert.ok(levelPanel.remaining.includes(String(levelPanel.expected.xpToNext)));
+  assert.equal(levelPanel.progress,String(levelPanel.expected.percent));
+  assert.equal(levelPanel.fill,levelPanel.expected.percent+'%');
+  assert.ok(levelPanel.rect.left>=-1&&levelPanel.rect.right<=levelPanel.vw+1,
+    'Level panel must fit viewport at '+width+'px');
+  await page.locator('#btn-close-level-popover').click();
 
   const before=await page.evaluate(()=>{
     const data={
@@ -907,8 +945,7 @@ async function testNavbarProfileAndQuestClaim(page,width) {
       claimedQuestsCount:App.state.claimedQuestsCount,xp:App.state.xp,
       achievements:App.state.unlockedAchievements.slice()
     };
-    // Un traguardo può assegnare XP indipendenti dal premio missione:
-    // lo isoliamo per verificare SOLO il limite settimanale delle missioni.
+    // Isoliamo i traguardi: qui verifichiamo solo la ricompensa missione.
     App._testOriginalQuestAchievements=App.checkAchievements;
     App.checkAchievements=()=>{};
     App.state.dailyQuests={date:App.getTodayISO(),
@@ -921,7 +958,7 @@ async function testNavbarProfileAndQuestClaim(page,width) {
     return data;
   });
   const ready=await page.locator('#sidebar-btn-quest-daily_exercise').textContent();
-  assert.ok(ready.includes('Concludi'),'Capped mission must show honest completion CTA');
+  assert.ok(ready.includes('Riscatta'),'A mission above 40 XP must offer the reward');
   await page.evaluate(()=>document.getElementById('sidebar-btn-quest-daily_exercise').click());
   const claimed=await page.evaluate(()=>{
     const element=document.getElementById('sidebar-btn-quest-daily_exercise');
@@ -942,8 +979,8 @@ async function testNavbarProfileAndQuestClaim(page,width) {
   assert.equal(claimed.buttonReady,false,'CTA must disappear after claiming');
   assert.ok(claimed.button.includes('Completata'));
   assert.equal(claimed.duplicate,false);
-  assert.equal(claimed.xp,before.xp,'Weekly limit should not award extra XP');
-  assert.equal(claimed.weeklyTotal,40);
+  assert.equal(claimed.xp,before.xp+10,'Daily quest XP should exceed 40');
+  assert.equal(claimed.weeklyTotal,50);
   await page.evaluate(before=>{
     App.state.dailyQuests=before.dailyQuests;
     App.state.rewardsV2=before.rewardsV2;

@@ -711,6 +711,20 @@ const App = {
                 claimed: {daily_exercise:false,review_success:false,study_variety:false}
             };
             this.saveStorage();
+        } else {
+            // Un registro XP già pagato prevale sul flag di un cloud obsoleto.
+            // Ogni identificativo contiene la data, perciò domani riparte.
+            let reconciled=false;
+            for(const quest of DAILY_QUESTS_CONFIG) {
+                const key='quests:daily:'+today+':'+quest.id;
+                if(Object.hasOwn(this.state.rewardsV2?.claims||{},key) &&
+                    !this.state.dailyQuests.claimed?.[quest.id]) {
+                    this.state.dailyQuests.claimed ??= {};
+                    this.state.dailyQuests.claimed[quest.id]=true;
+                    reconciled=true;
+                }
+            }
+            if(reconciled)this.saveStorage();
         }
     },
 
@@ -807,7 +821,6 @@ const App = {
             const isClaimed = !!this.state.dailyQuests.claimed[quest.id];
             const percent = Math.round((prog / quest.target) * 100);
             const rewards = ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp,this.state.dailyQuests);
-            const capReached = rewards.totals.quests >= ProgressionV2.CAPS.quests;
             const earnedKey = 'quests:daily:' + this.getTodayISO() + ':' + quest.id;
             const paid = Object.hasOwn(rewards.claims, earnedKey);
 
@@ -821,7 +834,7 @@ const App = {
                     <span class="sidebar-quest-icon">${this.getQuestIconSVG(quest.id)}</span>
                     <div class="sidebar-quest-title-wrap">
                         <span class="sidebar-quest-title" title="${quest.title}">${quest.title}</span>
-                        <span class="sidebar-quest-reward">${capReached && !paid ? 'Limite XP settimanale' : '+'+quest.xpReward+' XP'}</span>
+                        <span class="sidebar-quest-reward">${'+'+quest.xpReward+' XP'}</span>
                     </div>
                 </div>
                 <div class="sidebar-quest-desc">${quest.desc}</div>
@@ -833,7 +846,7 @@ const App = {
                 </div>
                 <div class="sidebar-quest-action">
                     <button class="sidebar-quest-btn ${isClaimed ? 'claimed' : (isCompleted ? 'active' : 'in-progress')}" id="sidebar-btn-quest-${quest.id}">
-                        ${isClaimed ? (paid ? '✓ Riscattato' : '✓ Completata') : (isCompleted ? (capReached ? 'Concludi missione' : 'Riscatta ricompensa') : 'In Corso')}
+                        ${isClaimed ? (paid ? '✓ Riscattato' : '✓ Completata') : (isCompleted ? 'Riscatta ricompensa' : 'In Corso')}
                     </button>
                 </div>
             `;
@@ -878,7 +891,6 @@ const App = {
             const isClaimed = !!this.state.dailyQuests.claimed[quest.id];
             const percent = Math.round((prog / quest.target) * 100);
             const rewards = ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp,this.state.dailyQuests);
-            const capReached = rewards.totals.quests >= ProgressionV2.CAPS.quests;
             const earnedKey = 'quests:daily:' + this.getTodayISO() + ':' + quest.id;
             const paid = Object.hasOwn(rewards.claims, earnedKey);
 
@@ -890,7 +902,7 @@ const App = {
                     <div class="quest-info">
                         <div class="quest-title-row">
                             <span class="quest-title">${quest.title}</span>
-                            <span class="quest-reward-badge">${capReached && !paid ? 'Limite XP settimanale' : '+'+quest.xpReward+' XP'}</span>
+                            <span class="quest-reward-badge">${'+'+quest.xpReward+' XP'}</span>
                         </div>
                         <div class="quest-desc">${quest.desc}</div>
                         <div class="quest-progress-track">
@@ -901,7 +913,7 @@ const App = {
                 <div class="quest-right">
                     <span class="quest-progress-text">${prog}/${quest.target}</span>
                     <button class="btn-claim-quest ${isClaimed ? 'claimed' : (isCompleted ? 'active' : '')}" id="btn-quest-${quest.id}">
-                        ${isClaimed ? (paid ? '✓ Riscattato' : '✓ Completata') : (isCompleted ? (capReached ? 'Concludi' : 'Riscatta') : 'In Corso')}
+                        ${isClaimed ? (paid ? '✓ Riscattato' : '✓ Completata') : (isCompleted ? 'Riscatta' : 'In Corso')}
                     </button>
                 </div>
             `;
@@ -936,10 +948,8 @@ const App = {
         const alreadyPaid = Object.hasOwn(this.state.rewardsV2.claims,ledgerKey);
         const gain = alreadyPaid ? 0 : ProgressionV2.grantRecurring(
             this.state.rewardsV2,'quests',sourceId,quest.xpReward);
-        // Un limite XP raggiunto NON deve lasciare il tasto "Riscatta"
-        // bloccato per sempre: la missione resta completabile senza XP.
-        // La voce del registro impedisce inoltre doppi premi se uno stato
-        // cloud obsoleto ripresenta un pulsante già riscattato.
+        // Il registro giornaliero impedisce doppi premi con un cloud obsoleto.
+        // Il budget settimanale non limita le missioni.
         this.state.dailyQuests.claimed[questId] = true;
         if (gain) this.state.xp += gain;
         this.state.claimedQuestsCount++;
@@ -958,7 +968,7 @@ const App = {
             title: quest.title,
             desc: alreadyPaid
                 ? 'Premio già registrato: nessun XP duplicato.'
-                : 'Hai raggiunto il limite di 40 XP settimanali per le missioni. La missione è comunque conclusa.'
+                : 'Missione completata.'
         });
         this.checkAchievements({ fromAction: true });
         this.updateStatsUI({ announceLevelUp: true });
@@ -2198,6 +2208,48 @@ const App = {
         return ProgressionV2.levelFromXp(this.state.xp);
     },
 
+    updateLevelPopover(info=this.getCurrentLevelInfo()) {
+        const setText=(id,value)=>{
+            const el=document.getElementById(id);
+            if(el)el.textContent=value;
+        };
+        const xp=Math.max(0,Number(this.state.xp)||0);
+        const gained=xp-info.tier.minXp;
+        const needed=info.nextXp-info.tier.minXp;
+        setText('level-popover-title','Livello '+info.tier.level);
+        setText('level-popover-grade',info.tier.title);
+        setText('level-popover-xp',xp.toLocaleString('it-IT')+' XP');
+        setText('level-popover-progress-text',gained+' / '+needed+' XP nel livello');
+        setText('level-popover-remaining',info.xpToNext+' XP al prossimo livello');
+        const progress=document.getElementById('level-popover-progress');
+        if(progress)progress.setAttribute('aria-valuenow',String(info.percent));
+        const fill=document.getElementById('level-popover-fill');
+        if(fill)fill.style.width=info.percent+'%';
+    },
+
+    closeLevelPopover(restoreFocus=false) {
+        const panel=document.getElementById('level-popover');
+        const trigger=document.getElementById('btn-open-profile');
+        if(!panel||panel.classList.contains('hidden'))return;
+        panel.classList.add('hidden');
+        trigger?.setAttribute('aria-expanded','false');
+        if(restoreFocus)trigger?.focus();
+    },
+
+    toggleLevelPopover() {
+        const panel=document.getElementById('level-popover');
+        if(!panel)return;
+        if(!panel.classList.contains('hidden')) {
+            this.closeLevelPopover(true);
+            return;
+        }
+        SoundFX.playClick();
+        this.updateLevelPopover();
+        panel.classList.remove('hidden');
+        document.getElementById('btn-open-profile')?.setAttribute('aria-expanded','true');
+        document.getElementById('btn-close-level-popover')?.focus();
+    },
+
     getTodayISO() {
         return ProgressionV2.dateKey();
     },
@@ -2333,9 +2385,6 @@ const App = {
 
     updateStatsUI({ announceLevelUp = false } = {}) {
         this.checkWeekReset();
-        const xpEl = document.getElementById('xp-count');
-        if (xpEl) xpEl.innerText = this.state.xp;
-
         // Gestione Fiamma e Serie Settimanale
         const currentTier = STREAK_TIERS[this.state.streakMode] || STREAK_TIERS.rilassato;
         const todayISO = this.getTodayISO();
@@ -2351,10 +2400,7 @@ const App = {
         }
 
         const scEl = document.getElementById('streak-count');
-        if (scEl) scEl.textContent = `${this.state.activeDaysThisWeek.length}/${currentTier.target}`;
-        const sslEl = document.getElementById('streak-sub-label');
-        if (sslEl) sslEl.textContent = 'giorni';
-
+        if (scEl) scEl.textContent = `${this.state.activeDaysThisWeek.length} / ${currentTier.target}`;
         const streakPill = document.getElementById('btn-streak-modal');
         if (streakPill) {
             const description = `Obiettivo settimanale: ${this.state.activeDaysThisWeek.length} di ${currentTier.target} giorni studiati · Serie: ${this.state.streakWeeks} settimane`;
@@ -2374,6 +2420,7 @@ const App = {
         }
         const fill = document.getElementById('level-mini-fill');
         if (fill) fill.style.width = `${info.percent}%`;
+        this.updateLevelPopover(info);
 
         // Testo nella roadmap
         const xpToNextEl = document.getElementById('xp-to-next-level-tag');
@@ -4469,7 +4516,25 @@ const App = {
         });
 
         // Profilo
-        document.getElementById('btn-open-profile').onclick = () => this.openProfileModal();
+        document.getElementById('btn-open-profile').onclick = () => this.toggleLevelPopover();
+        document.getElementById('btn-close-level-popover').onclick = () => this.closeLevelPopover(true);
+        document.getElementById('btn-level-full-profile').onclick = () => {
+            this.closeLevelPopover();
+            this.openProfileModal();
+        };
+        document.addEventListener('click',event=>{
+            const panel=document.getElementById('level-popover');
+            if(panel?.classList.contains('hidden'))return;
+            if(!event.target.closest('#level-popover, #btn-open-profile'))
+                this.closeLevelPopover();
+        });
+        document.addEventListener('keydown',event=>{
+            if(event.key==='Escape' &&
+                !document.getElementById('level-popover')?.classList.contains('hidden')) {
+                event.preventDefault();
+                this.closeLevelPopover(true);
+            }
+        });
         document.getElementById('btn-close-profile').onclick = () => this.closeProfileModal();
         document.getElementById('btn-save-profile').onclick = () => this.saveProfile();
 

@@ -28,8 +28,6 @@ async function inspect(engine, url) {
   await page.evaluate(() => {
     document.getElementById('nav-auth-label').textContent='Gianluca';
     document.getElementById('nav-profile-name').textContent='Gianluca';
-    document.getElementById('xp-count').textContent='885';
-    document.getElementById('streak-sub-label').textContent='(0/2d)';
   });
   for(const w of widths) {
     await page.setViewportSize({width:w,height:900});
@@ -44,7 +42,7 @@ async function inspect(engine, url) {
         const selectors=[
           '#btn-home','#nav-roadmap-btn','#nav-editor-btn','#nav-practice-btn',
           '#nav-projects-btn','#nav-review-btn','#nav-stats-btn',
-          '#btn-open-achievements','#btn-streak-modal','.xp-pill',
+          '#btn-open-achievements','#btn-streak-modal',
           '.nav-right .level-pill','#btn-open-auth-nav','#btn-open-profile',
           '#btn-open-settings'
         ];
@@ -150,6 +148,25 @@ async function inspect(engine, url) {
         fs.mkdirSync(path.join(root,'test-artifacts'),{recursive:true});
         await page.screenshot({path:path.join(root,'test-artifacts','macbook-navbar-'+engine.name()+'.png')});
       }
+    }
+    if([390,820,1512,2048].includes(w)) {
+      const popover=await page.evaluate(()=>{
+        const opener=document.getElementById('btn-open-profile');
+        opener.click();
+        const panel=document.getElementById('level-popover');
+        const box=panel.getBoundingClientRect();
+        const open=!panel.classList.contains('hidden') &&
+          opener.getAttribute('aria-expanded')==='true';
+        document.getElementById('btn-close-level-popover').click();
+        return {open,left:box.left,right:box.right,
+          width:document.documentElement.clientWidth,
+          closed:panel.classList.contains('hidden') &&
+            opener.getAttribute('aria-expanded')==='false'};
+      });
+      assert.equal(popover.open,true,'Profile panel did not open at '+w);
+      assert.ok(popover.left>=-1 && popover.right<=popover.width+1,
+        'Profile panel clipped at '+w+': '+JSON.stringify(popover));
+      assert.equal(popover.closed,true,'Profile panel did not close at '+w);
     }
   }
   // L'altezza del pannello sticky delle missioni deve adattarsi al MacBook,

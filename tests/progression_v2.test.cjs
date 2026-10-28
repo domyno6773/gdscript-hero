@@ -19,11 +19,20 @@ let state=P.createRewards(100,date);
 assert.equal(P.grantRecurring(state,'quests','daily:2026-10-27:a',10,date),10);
 assert.equal(P.grantRecurring(state,'quests','daily:2026-10-27:a',10,date),0);
 for(let i=0;i<3;i++)assert.equal(P.grantRecurring(state,'quests','other:'+i,10,date),10);
-assert.equal(P.grantRecurring(state,'quests','over',10,date),0);
+assert.equal(P.grantRecurring(state,'quests','over',10,date),10);
+assert.equal(state.totals.quests,50,'Le missioni superano 40 XP in una settimana');
+for(let d=28;d<=31;d++) {
+    const day=new Date('2026-10-'+d+'T12:00:00Z');
+    assert.equal(P.grantRecurring(state,'quests','daily:2026-10-'+d+':a',10,day),10);
+    assert.equal(P.grantRecurring(state,'quests','daily:2026-10-'+d+':a',10,day),0);
+}
+assert.equal(state.totals.quests,90);
+assert.equal(P.normalizeRewards(JSON.parse(JSON.stringify(state)),0,null,new Date('2026-10-31T12:00:00Z')).totals.quests,90,
+    'Il registro illimitato sopravvive a salvataggio e ricaricamento');
 for(let i=0;i<12;i++)assert.equal(P.grantRecurring(state,'reviews','v:'+i,5,date),5);
 assert.equal(P.grantRecurring(state,'reviews','last',5,date),0);
 assert.equal(P.grantRecurring(state,'streak','week',20,date),20);
-assert.equal(state.totals.reviews+state.totals.quests+state.totals.streak,120);
+assert.equal(state.totals.reviews+state.totals.quests+state.totals.streak,170);
 const newer=new Date('2026-11-02T12:00:00Z');
 assert.equal(P.grantRecurring(state,'reviews','v:0',5,newer),5);
 assert.equal(state.totals.reviews,5);
@@ -64,8 +73,7 @@ assert.equal(app.claimQuestReward('daily_exercise'),false);
 assert.equal(app.state.xp,10);
 assert.equal(app.state.claimedQuestsCount,1);
 assert.ok(saved>0);
-// Regressione: il limite settimanale prima lasciava il pulsante "Riscatta"
-// attivo per sempre, anche quando il giocatore aveva completato l'obiettivo.
+// Regressione: oltre 40 XP le missioni continuano a premiare, senza doppi riscatti.
 const capState=P.createRewards(0);
 for(let n=0;n<4;n++)
     assert.equal(P.grantRecurring(capState,'quests','previous:'+n,10),10);
@@ -74,11 +82,11 @@ app.state.dailyQuests.progress.review_success=1;
 const beforeCapXp=app.state.xp;
 const beforeCapCount=app.state.claimedQuestsCount;
 assert.equal(app.claimQuestReward('review_success'),true,
-    'Missione completa anche se il budget settimanale XP è terminato');
-assert.equal(app.state.xp,beforeCapXp,'Il limite XP non viene aggirato');
+    'La missione attribuisce XP dopo i vecchi 40 settimanali');
+assert.equal(app.state.xp,beforeCapXp+10,'La missione attribuisce XP oltre 40');
 assert.equal(app.state.claimedQuestsCount,beforeCapCount+1);
 assert.equal(app.state.dailyQuests.claimed.review_success,true);
-assert.ok(latestToast.desc.includes('limite di 40 XP'));
+assert.ok(latestToast.desc.includes('+10 XP'));
 assert.equal(app.claimQuestReward('review_success'),false,'Doppio riscatto vietato');
 assert.equal(app.state.claimedQuestsCount,beforeCapCount+1);
 assert.equal(latestSave.dailyQuests.claimed.review_success,true,
@@ -100,6 +108,8 @@ const cloud={xp:10,dailyQuests:{date:dateStr,
 const mergedCloud=auth.mergeProgress(local,cloud);
 assert.equal(mergedCloud.dailyQuests.claimed.daily_exercise,true);
 assert.equal(mergedCloud.dailyQuests.claimed.review_success,true);
+assert.equal(P.mergeRewards(state,P.createRewards(0,new Date('2026-10-31T12:00:00Z')),0,new Date('2026-10-31T12:00:00Z')).totals.quests,90,
+    'Cloud obsoleto non azzera il registro giornaliero');
 assert.equal(mergedCloud.dailyQuests.progress.review_success,1);
 const oldDate={...cloud,dailyQuests:{...cloud.dailyQuests,date:'2026-01-01'}};
 assert.equal(auth.mergeProgress(local,oldDate).dailyQuests.date,dateStr,

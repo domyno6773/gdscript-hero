@@ -37,6 +37,7 @@
           const top=topDialog();
           if(top){focusInside(top);return;}
           if(opener?.isConnected&&opener.getClientRects().length)opener.focus();
+          else if(modal.id==='profile-modal')document.getElementById('btn-open-profile')?.focus();
         });
       }
     };
@@ -89,7 +90,7 @@
     },true);
 
     // Legacy clickable divs need keyboard parity with native buttons.
-    ['btn-home','btn-streak-modal','btn-open-auth-nav','btn-open-profile','level-pill']
+    ['btn-home','btn-streak-modal','btn-open-auth-nav','btn-open-profile']
       .forEach(id=>{
         const el=document.getElementById(id);
         if(!el)return;

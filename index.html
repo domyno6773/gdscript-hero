@@ -74,18 +74,12 @@
             </button>
         </nav>
 
-        <!-- 3. Riepilogo compatto: XP, obiettivo settimanale e identita' -->
+        <!-- 3. Obiettivo settimanale e profilo: XP consultabili dal pannello livello -->
         <div class="nav-right">
             <div class="nav-stats-group">
                 <div class="stat-pill streak-pill clickable" id="btn-streak-modal" title="Obiettivo settimanale: giorni di studio" role="button" tabindex="0" aria-label="Apri obiettivo settimanale">
                     <span class="fire-icon" id="streak-flame"><svg class="ui-icon ui-icon-fill" viewBox="0 0 24 24"><path d="M12 2c-.5 2.5-2 4.5-4 6-2 1.6-3 3.5-3 5.5a7 7 0 1 0 14 0c0-2-1-3.9-3-5.5-2-1.5-3.5-3.5-4-6z"/></svg></span>
-                    <span class="stat-value" id="streak-count">0/2 giorni</span>
-                    <span class="stat-label" id="streak-sub-label" hidden>Questa settimana</span>
-                </div>
-                <div class="stat-pill xp-pill" title="Esperienza totale">
-                    <span class="xp-icon"><svg class="ui-icon ui-icon-fill" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
-                    <span class="stat-value" id="xp-count">0</span>
-                    <span class="stat-label">XP</span>
+                    <span class="stat-value" id="streak-count">0 / 2</span>
                 </div>
             </div>
             <div class="nav-user-group">
@@ -94,7 +88,7 @@
                     <span id="nav-auth-icon" class="nav-connection-dot" aria-hidden="true"></span>
                     <span id="nav-auth-label" class="nav-visually-hidden">Ospite</span>
                 </div>
-                <div class="stat-pill profile-pill clickable" id="btn-open-profile" title="Apri il tuo profilo" role="button" tabindex="0">
+                <div class="stat-pill profile-pill clickable" id="btn-open-profile" title="Livello e progressi del profilo" role="button" tabindex="0" aria-label="Mostra livello ed esperienza" aria-controls="level-popover" aria-expanded="false">
                     <div class="nav-avatar" id="nav-profile-avatar" style="border-color:#478cbf;">🤖</div>
                     <div class="nav-profile-summary">
                         <span class="nav-profile-name" id="nav-profile-name">Eroe Godot</span>
@@ -103,6 +97,31 @@
                             <div class="level-mini-bar" title="Progresso verso il prossimo livello"><div id="level-mini-fill" class="level-mini-fill" style="width:0%;"></div></div>
                         </div>
                     </div>
+                </div>
+                <div class="level-popover hidden" id="level-popover" role="region" aria-labelledby="level-popover-title">
+                    <div class="level-popover-header">
+                        <span class="level-popover-eyebrow">IL TUO PERCORSO</span>
+                        <button type="button" id="btn-close-level-popover" class="level-popover-close" aria-label="Chiudi riepilogo livello">
+                            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <h2 id="level-popover-title">Livello 1</h2>
+                    <p id="level-popover-grade" class="level-popover-grade">Apprendista Godot</p>
+                    <div class="level-popover-xp-row">
+                        <span>Esperienza totale</span>
+                        <strong id="level-popover-xp">0 XP</strong>
+                    </div>
+                    <div class="level-popover-track" id="level-popover-progress" role="progressbar" aria-label="Avanzamento nel livello" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div class="level-popover-fill" id="level-popover-fill"></div>
+                    </div>
+                    <div class="level-popover-progress-meta">
+                        <span id="level-popover-progress-text">0 / 60 XP nel livello</span>
+                        <strong id="level-popover-remaining">60 XP al prossimo livello</strong>
+                    </div>
+                    <button class="level-popover-profile-link" type="button" id="btn-level-full-profile">
+                        Apri e personalizza il profilo
+                        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+                    </button>
                 </div>
                 <!-- Settings Button -->
                 <button class="icon-btn" id="btn-open-settings" title="Impostazioni & Audio" aria-label="Impostazioni">

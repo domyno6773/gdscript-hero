@@ -170,7 +170,6 @@ body { height:100vh; height:100dvh; min-width:0; }
   /* Su 13" e con un po' di zoom conserviamo i titoli centrali,
      riducendo invece le informazioni laterali duplicate. */
   .navbar .nav-profile-name,
-  .navbar .nav-stats-group #streak-sub-label { display:none; }
   .navbar #nav-auth-label { max-width:57px; }
   .navbar .nav-center .nav-btn { font-size:.67rem; padding-inline:2px; gap:2px; }
   .navbar .nav-center { gap:0; }
@@ -184,8 +183,7 @@ body { height:100vh; height:100dvh; min-width:0; }
 }
 @media (min-width:821px) and (max-width:1030px) {
   .navbar .nav-stats-group { gap:2px; }
-  .navbar .nav-stats-group .stat-label,
-  .navbar #streak-sub-label { display:none; }
+  .navbar .nav-stats-group .stat-label { display:none; }
   .navbar .logo-text { font-size:.88rem; letter-spacing:-.05em; }
   .navbar .nav-center .nav-btn { padding-inline:4px; }
 }
@@ -377,9 +375,8 @@ html, body { overflow-x:clip; }
   #modal-sandbox-welcome .sandbox-welcome-item { gap:10px; }
 }
 
-/* Navbar: visual hierarchy with only one profile surface.
-   XP and study days are lightweight counters, not boxes nested in a box.
-   Keep one chosen username, one green connected dot, and level beneath it. */
+/* Navbar: one profile surface with on-demand XP details, a compact streak
+   and the chosen username, with a green connection indicator. */
 .navbar .nav-right { gap:clamp(6px,.6vw,12px); }
 .navbar .nav-stats-group {
   background:transparent; border:0; box-shadow:none;
@@ -394,10 +391,6 @@ html, body { overflow-x:clip; }
 }
 .navbar .streak-pill { color:var(--text-main); }
 .navbar .streak-pill .fire-icon { color:var(--neon-amber); }
-.navbar #streak-sub-label {
-  display:inline !important; font-weight:500; font-size:.78em;
-  color:var(--text-muted); margin-left:0;
-}
 .navbar .nav-user-group { gap:7px; }
 .navbar .nav-user-group .nav-connection {
   display:flex; align-items:center; justify-content:center;
@@ -448,7 +441,6 @@ html, body { overflow-x:clip; }
 }
 .navbar .nav-user-group .nav-avatar { flex:0 0 auto; width:30px; height:30px; }
 .navbar .nav-separator { display:none; }
-.navbar .nav-right .xp-pill { color:var(--neon-amber); }
 @media (min-width:821px) and (max-width:1450px) {
   .navbar .nav-user-group .nav-profile-name { max-width:80px; font-size:.73rem; }
   .navbar .nav-user-group #btn-open-profile.profile-pill { gap:5px; padding:4px 6px; }
@@ -458,16 +450,78 @@ html, body { overflow-x:clip; }
 }
 @media (min-width:821px) and (max-width:1100px) {
   .navbar .nav-user-group .nav-profile-name { max-width:50px; }
-  .navbar #streak-sub-label { display:none!important; }
   .navbar .nav-profile-level .level-mini-bar { display:none; }
 }
 @media (max-width:820px) {
   .navbar .nav-stats-group > .stat-pill { padding:3px 2px; font-size:.7rem; }
-  .navbar #streak-sub-label { display:none!important; }
   .navbar .nav-profile-summary { display:none!important; }
   .navbar .nav-user-group #btn-open-profile.profile-pill {
     display:flex!important; padding:2px 3px; border:0; background:transparent;
   }
   .navbar .nav-user-group .nav-avatar { width:27px; height:27px; }
   .navbar .nav-user-group .nav-connection { width:12px; flex-basis:12px; }
+}
+
+/* Profile detail popover, kept outside the nav's layout flow. */
+.navbar .nav-user-group { position:relative; }
+.navbar .streak-pill { gap:7px; border-radius:8px; }
+.navbar #streak-count {
+  font-family:var(--font-ui); font-weight:750; letter-spacing:.025em;
+  font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.navbar .nav-right #btn-open-profile[aria-expanded="true"] {
+  background:rgba(95,134,165,.2);
+  border-color:rgba(114,179,223,.65);
+}
+.navbar .level-popover {
+  position:absolute; z-index:500; top:calc(100% + 12px); right:0;
+  box-sizing:border-box; width:min(316px,calc(100vw - 24px));
+  padding:18px 18px 14px; border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--bg-card); color:var(--text-main);
+  box-shadow:0 16px 42px rgba(0,0,0,.32);
+  font-family:var(--font-ui); text-align:left; white-space:normal;
+  animation:levelPopoverIn .16s ease-out;
+}
+.navbar .level-popover.hidden { display:none!important; }
+.navbar .level-popover-header,
+.navbar .level-popover-xp-row,
+.navbar .level-popover-progress-meta {
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.navbar .level-popover-eyebrow {
+  color:var(--text-muted); font-size:.68rem; font-weight:750; letter-spacing:.1em;
+}
+.navbar .level-popover-close {
+  display:grid; place-items:center; width:27px; height:27px;
+  padding:4px; background:transparent; color:var(--text-muted);
+  border:0; border-radius:6px; cursor:pointer;
+}
+.navbar .level-popover-close:hover { background:var(--bg-elevated); color:var(--text-main); }
+.navbar .level-popover h2 { margin:4px 0 2px; font-size:1.4rem; line-height:1.3; font-weight:800; }
+.navbar .level-popover-grade { margin:0 0 19px; color:var(--accent-primary); font-size:.85rem; font-weight:650; }
+.navbar .level-popover-xp-row { margin-bottom:11px; font-size:.8rem; color:var(--text-muted); }
+.navbar .level-popover-xp-row strong { color:var(--text-main); font-size:.96rem; font-variant-numeric:tabular-nums; }
+.navbar .level-popover-track { height:8px; overflow:hidden; background:var(--bg-elevated); border-radius:999px; }
+.navbar .level-popover-fill { height:100%; width:0; border-radius:inherit; background:var(--accent-primary); transition:width .2s ease; }
+.navbar .level-popover-progress-meta { margin:9px 0 18px; font-size:.69rem; color:var(--text-muted); align-items:flex-start; }
+.navbar .level-popover-progress-meta strong { color:var(--text-main); font-weight:650; text-align:right; }
+.navbar .level-popover-profile-link {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  width:100%; padding:11px 12px; border-radius:8px;
+  background:var(--bg-elevated); border:1px solid var(--border);
+  color:var(--text-main); font:650 .8rem var(--font-ui); cursor:pointer;
+}
+.navbar .level-popover-profile-link:hover { border-color:var(--accent-primary); }
+.navbar .level-popover-profile-link .ui-icon { width:16px; height:16px; flex-shrink:0; }
+.navbar .level-popover :focus-visible,
+.navbar #btn-open-profile:focus-visible,
+.navbar #btn-streak-modal:focus-visible { outline:2px solid var(--accent-primary); outline-offset:3px; }
+@keyframes levelPopoverIn { from {opacity:0;transform:translateY(-5px)} to {opacity:1;transform:translateY(0)} }
+@media (prefers-reduced-motion:reduce) {
+  .navbar .level-popover { animation:none; }
+  .navbar .level-popover-fill { transition:none; }
+}
+@media (max-width:820px) {
+  .navbar .level-popover { right:0; top:calc(100% + 12px); }
 }

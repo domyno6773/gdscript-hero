@@ -9,7 +9,10 @@ const ProgressionV2 = (() => {
         {level:40,title:'Maestro',color:'#dfb555',icon:'crown'},
         {level:50,title:'Leggenda',color:'#d78cbd',icon:'gem'}
     ]);
-    const CAPS = Object.freeze({reviews:60,quests:40,streak:20});
+    // I limiti settimanali valgono solo per ripasso e streak.
+    const CAPS = Object.freeze({reviews:60,streak:20});
+    const TYPES = Object.freeze(['reviews','quests','streak']);
+    const limitFor = type => type === 'quests' ? Infinity : CAPS[type];
     const DAY = 86400000;
     const asDate = value => value instanceof Date ? value : new Date(value);
     const dateKey = (date = new Date()) => asDate(date).toISOString().slice(0,10);
@@ -52,7 +55,7 @@ const ProgressionV2 = (() => {
                 for(const [id,claimed] of Object.entries(dailyQuests.claimed||{})) {
                     if(claimed) next.claims['quests:daily:'+dateKey(date)+':'+id]=10;
                 }
-                next.totals.quests=Math.min(CAPS.quests,Object.values(next.claims).reduce((s,n)=>s+n,0));
+                next.totals.quests=Object.values(next.claims).reduce((s,n)=>s+n,0);
             }
             return next;
         }
@@ -62,24 +65,24 @@ const ProgressionV2 = (() => {
             for(const [key,value] of Object.entries(source.claims||{})) {
                 const type=key.split(':')[0];
                 const amount=Number(value);
-                if(!Object.hasOwn(CAPS,type) || !Number.isFinite(amount) || amount<=0) continue;
-                next.claims[key]=Math.min(amount,CAPS[type]);
+                if(!TYPES.includes(type) || !Number.isFinite(amount) || amount<=0) continue;
+                next.claims[key]=Math.min(amount,limitFor(type));
             }
-            for(const type of Object.keys(CAPS)) {
-                next.totals[type]=Math.min(CAPS[type],Object.entries(next.claims)
+            for(const type of TYPES) {
+                next.totals[type]=Math.min(limitFor(type),Object.entries(next.claims)
                     .filter(([k])=>k.startsWith(type+':')).reduce((sum,[,v])=>sum+v,0));
             }
         }
         return next;
     }
     function grantRecurring(rewards,type,sourceId,amount,date=new Date()) {
-        if(!Object.hasOwn(CAPS,type) || typeof sourceId!=='string' || !sourceId ||
+        if(!TYPES.includes(type) || typeof sourceId!=='string' || !sourceId ||
             !Number.isInteger(amount) || amount<=0) return 0;
         const state=normalizeRewards(rewards,0,null,date);
         Object.assign(rewards,state);
         const key=type+':'+sourceId;
         if(Object.hasOwn(rewards.claims,key)) return 0;
-        const available=CAPS[type]-rewards.totals[type];
+        const available=limitFor(type)-rewards.totals[type];
         if(available < amount) return 0;
         rewards.claims[key]=amount;
         rewards.totals[type]+=amount;
@@ -94,8 +97,8 @@ const ProgressionV2 = (() => {
                 output.claims[key]=Math.max(output.claims[key]||0,value);
             }
         }
-        for(const type of Object.keys(CAPS)) {
-            output.totals[type]=Math.min(CAPS[type],Object.entries(output.claims)
+        for(const type of TYPES) {
+            output.totals[type]=Math.min(limitFor(type),Object.entries(output.claims)
                 .filter(([key])=>key.startsWith(type+':')).reduce((sum,[,val])=>sum+val,0));
         }
         return output;
