@@ -27,6 +27,7 @@ for(let d=28;d<=31;d++) {
     assert.equal(P.grantRecurring(state,'quests','daily:2026-10-'+d+':a',10,day),0);
 }
 assert.equal(state.totals.quests,90);
+const savedQuestWeek=JSON.parse(JSON.stringify(state));
 assert.equal(P.normalizeRewards(JSON.parse(JSON.stringify(state)),0,null,new Date('2026-10-31T12:00:00Z')).totals.quests,90,
     'Il registro illimitato sopravvive a salvataggio e ricaricamento');
 for(let i=0;i<12;i++)assert.equal(P.grantRecurring(state,'reviews','v:'+i,5,date),5);
@@ -108,7 +109,7 @@ const cloud={xp:10,dailyQuests:{date:dateStr,
 const mergedCloud=auth.mergeProgress(local,cloud);
 assert.equal(mergedCloud.dailyQuests.claimed.daily_exercise,true);
 assert.equal(mergedCloud.dailyQuests.claimed.review_success,true);
-assert.equal(P.mergeRewards(state,P.createRewards(0,new Date('2026-10-31T12:00:00Z')),0,new Date('2026-10-31T12:00:00Z')).totals.quests,90,
+assert.equal(P.mergeRewards(savedQuestWeek,P.createRewards(0,new Date('2026-10-31T12:00:00Z')),0,new Date('2026-10-31T12:00:00Z')).totals.quests,90,
     'Cloud obsoleto non azzera il registro giornaliero');
 assert.equal(mergedCloud.dailyQuests.progress.review_success,1);
 const oldDate={...cloud,dailyQuests:{...cloud.dailyQuests,date:'2026-01-01'}};

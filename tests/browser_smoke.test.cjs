@@ -977,7 +977,7 @@ async function testNavbarProfileAndQuestClaim(page,width) {
   assert.equal(claimed.claimed,true);
   assert.equal(claimed.saved,true,'Claimed quest must persist immediately');
   assert.equal(claimed.buttonReady,false,'CTA must disappear after claiming');
-  assert.ok(claimed.button.includes('Completata'));
+  assert.ok(claimed.button.includes('Riscattato'));
   assert.equal(claimed.duplicate,false);
   assert.equal(claimed.xp,before.xp+10,'Daily quest XP should exceed 40');
   assert.equal(claimed.weeklyTotal,50);
