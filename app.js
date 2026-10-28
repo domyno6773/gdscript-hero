@@ -2379,6 +2379,7 @@ const App = {
         this._siteTourStep=0;
         document.getElementById('site-tour')?.classList.remove('hidden');
         this.renderSiteTour();
+        document.getElementById('site-tour-skip')?.focus();
     },
     renderSiteTour(){
         document.querySelectorAll('.site-tour-highlight').forEach(el=>el.classList.remove('site-tour-highlight'));
@@ -2400,6 +2401,8 @@ const App = {
         this.state.siteWelcomeSeen=true;
         this.saveStorage({localOnly:true});
         this.ensureSiteOnboarding();
+        if(!this.state.streakGoalSelection)
+            document.querySelector('#site-goal-gate [data-goal]')?.focus();
     },
     // Modal Streak
     openStreakModal() {
@@ -2435,7 +2438,7 @@ const App = {
                     el.querySelector('.tier-status-tag').innerText = "Attivo";
                 } else {
                     el.classList.remove('selected');
-                    el.querySelector('.tier-status-tag').innerText = "Seleziona";
+                    el.querySelector('.tier-status-tag').innerText = editable ? "Seleziona" : "Bloccato";
                 }
             }
         });
@@ -2450,6 +2453,9 @@ const App = {
 
     setStreakMode(tier){
         if(!Object.hasOwn(STREAK_TIERS,tier)||!this.canChangeStreakGoal())return false;
+        // Toccare il ritmo gia' attivo non costituisce un cambio e non
+        // consuma la singola scelta concessa al lunedi'.
+        if(this.state.streakGoalSelection && this.state.streakMode===tier)return false;
         SoundFX.playClick();
         // Conteggia PRIMA la settimana conclusa col vecchio obiettivo.
         this.checkWeekReset();
