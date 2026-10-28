@@ -64,8 +64,8 @@ async function testGodotEditorExtras(page,selector){
  assert.ok(await page.locator(preview).isVisible(),'Fold preview must become visible');
  assert.ok((await page.locator(preview).textContent()).includes('righe nascoste'),
    'Fold preview needs the hidden line count');
- assert.equal(await page.locator(preview+' .gdh-fold-preview-row').count(),3,
-   'Closing first function should leave its heading, next function and body visible');
+ assert.equal(await page.locator(preview+' .gdh-fold-preview-row').count(),4,
+   'Closing first function must preserve the separator, next function and its body');
  assert.ok((await page.locator(preview).textContent()).includes('func other():'),
    'Adjacent function must remain visible');
  assert.ok(!(await page.locator(preview).textContent()).includes('print("ok")'),
