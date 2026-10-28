@@ -1013,6 +1013,12 @@
   LESSONS_DATA.sort((a,b)=>a.chapterId-b.chapterId ||
     Number(Boolean(a.isMastery))-Number(Boolean(b.isMastery)) ||
     a.id-b.id);
+  // Numerazione mostrata allo studente: progressiva da 1 a 81.
+  // L'ID usato per verifiche, salvataggi e traguardi non viene alterato.
+  LESSONS_DATA.forEach((lesson,index)=>{
+    const text=String(lesson.title||'').replace(/^\d+\.\s*/, '');
+    lesson.title=(index+1)+'. '+text;
+  });
   const records = new Map(EXTRA_LESSONS.map(x=>[x.id,x]));
   const lines = text => String(text||'').trimEnd().split(/\r?\n/).filter(Boolean);
   const clean = code => String(code||'')
