@@ -71,7 +71,9 @@ async function testGodotEditorExtras(page,selector){
    const host=document.getElementById(id).closest('.editor-wrapper');
    const overlay=host.querySelector('.gdh-fold-preview');
    const rect=host.getBoundingClientRect();
-   return {height:rect.height,bottom:rect.bottom,
+   const header=host.previousElementSibling?.getBoundingClientRect();
+   return {height:rect.height,top:rect.top,bottom:rect.bottom,
+     left:rect.left,width:rect.width,headerBottom:header?.bottom,
      previewHeight:overlay?.getBoundingClientRect().height};
  },selector.slice(1));
  const fullSize=await measure();
@@ -100,8 +102,34 @@ async function testGodotEditorExtras(page,selector){
    'Fold mode is drawing two code surfaces: '+JSON.stringify(foldedVisibility));
  const foldedSize=await measure();
  assert.ok(Math.abs(foldedSize.height-fullSize.height)<1.1 &&
+   Math.abs(foldedSize.top-fullSize.top)<1.1 &&
+   Math.abs(foldedSize.bottom-fullSize.bottom)<1.1 &&
+   Math.abs(foldedSize.left-fullSize.left)<1.1 &&
+   Math.abs(foldedSize.width-fullSize.width)<1.1 &&
+   Math.abs(foldedSize.headerBottom-fullSize.headerBottom)<1.1 &&
    Math.abs(foldedSize.previewHeight-fullSize.height)<1.1,
-   'Code panel must never shrink while folding: '+JSON.stringify({fullSize,foldedSize}));
+   'Code panel/header must never move or shrink while folding: '+JSON.stringify({fullSize,foldedSize}));
+ // The folded view has fewer visible lines, but the number-column border
+ // must reach the BOTTOM of the editor (not stop at the final code row).
+ const separator=await page.evaluate(id=>{
+   const host=document.getElementById(id).closest('.editor-wrapper');
+   const overlay=host.querySelector('.gdh-fold-preview');
+   const numberColumn=host.querySelector('.line-numbers');
+   const rule=getComputedStyle(overlay,'::before');
+   const rect=overlay.getBoundingClientRect();
+   const lastRow=[...overlay.querySelectorAll('.gdh-fold-preview-row')].at(-1).getBoundingClientRect();
+   return {display:rule.display,position:rule.position,
+     lineHeight:parseFloat(rule.height),lineX:parseFloat(rule.left),
+     lineColor:rule.backgroundColor,originalColor:getComputedStyle(numberColumn).borderRightColor,
+     numberWidth:numberColumn.getBoundingClientRect().width,
+     viewportHeight:rect.height,unusedSpace:rect.bottom-lastRow.bottom};
+ },selector.slice(1));
+ assert.ok(separator.unusedSpace>15,'Regression needs empty editor space below folded lines: '+JSON.stringify(separator));
+ assert.ok(separator.display!=='none' && separator.position==='absolute' &&
+   Math.abs(separator.lineHeight-separator.viewportHeight)<1.1 &&
+   Math.abs(separator.lineX-(separator.numberWidth-1))<1.1 &&
+   separator.lineColor===separator.originalColor,
+   'Folded line-number separator must fill the viewport and align with the original gutter: '+JSON.stringify(separator));
  assert.ok((await page.locator(preview).textContent()).includes('righe nascoste'),
    'Fold preview needs the hidden line count');
  assert.equal(await page.locator(preview+' .gdh-fold-preview-row').count(),4,

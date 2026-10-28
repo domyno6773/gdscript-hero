@@ -136,6 +136,9 @@ function preview(el,state){
  surface.hidden=false;
  const numberColumn=state.host.querySelector('.line-numbers');
  surface.style.setProperty('--gdh-number-width',(numberColumn?.getBoundingClientRect().width||48)+'px');
+ // Match the native gutter border while the original number column is hidden.
+ // Otherwise the compact rows stop drawing it at the last visible code line.
+ if(numberColumn)surface.style.setProperty('--gdh-number-separator',getComputedStyle(numberColumn).borderRightColor);
  surface.dataset.foldMode='overlay';
  const rows=el.value.split('\n');
  for(let i=0;i<rows.length;){

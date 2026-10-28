@@ -258,3 +258,18 @@
   font-weight:400;
   color:#90a3b7;
 }
+
+/* A collapsed block must not shorten the number-gutter separator. The folded
+   rows can be fewer than the editor viewport, so draw a viewport-height
+   continuation aligned with the original gutter instead of the last row. */
+.editor-wrapper.gdh-is-folded > .gdh-fold-preview::before {
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:calc(var(--gdh-number-width,48px) - 1px);
+  width:1px;
+  background:var(--gdh-number-separator,#34465b);
+  pointer-events:none;
+  z-index:1;
+}
