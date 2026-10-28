@@ -600,31 +600,33 @@
         <!-- SEZIONE 1: CATALOGO PROGETTI -->
         <div id="projects-catalog-section">
             <div class="projects-hero-card">
-                <div class="wip-banner-badge ready-badge">✨ PROGETTI PRATICI DISPONIBILI</div>
-                <h2>🛠️ Progetti Pratici per Godot Engine 4</h2>
+                <div class="wip-banner-badge ready-badge">PROGETTI GUIDATI</div>
+                <h2>Progetti pratici per Godot 4</h2>
                 <p class="projects-subtitle">
                     Metti alla prova le tue competenze programmando mini-giochi e sistemi reali in GDScript 4.<br>
-                    Sviluppa passo dopo passo, testa in tempo reale e scarica il progetto esportato direttamente per Godot Engine!
+                    Comincia con Arena del Gladiatore. Gli altri progetti Premium sono in preparazione.
                 </p>
             </div>
 
 
-            <!-- Arena Classificata 2.0: demo libera, NON la competizione ufficiale. -->
-            <section class="competition-entry" aria-labelledby="competition-entry-title">
-                <div>
-                    <span class="competition-eyebrow">ARENA CLASSIFICATA · ANTEPRIMA GRATUITA</span>
-                    <h3 id="competition-entry-title">Mettiti alla prova con Godot</h3>
-                    <p>Tre esercizi dimostrativi aperti anche agli ospiti. Il codice viene verificato dal vero Godot, ma non vengono assegnati XP o punti in classifica finché il server competitivo non sarà operativo.</p>
-                    <button type="button" id="btn-open-competitive-arena" class="competition-primary">Prova le sfide dimostrative</button>
+            <!-- La competizione e le classifiche sono in pausa; il progetto guidato resta disponibile. -->
+            <section class="gdh-arena-coming-soon" aria-label="Arena classificata: in arrivo">
+                <div class="gdh-coming-soon-preview" aria-hidden="true">
+                    <span class="competition-eyebrow">ARENA CLASSIFICATA</span>
+                    <h3>Arena e classifiche</h3>
+                    <p>Sfide, stagioni, classifiche globali e archivio Premium.</p>
                 </div>
-                <div class="competition-archive-locked" aria-label="Archivio delle stagioni non disponibile">
-                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-                    <strong>Archivio stagioni · Premium</strong>
-                    <span>Sezione chiusa. Sarà accessibile solo con un abbonamento attivo; salva personalmente il codice prima della fine delle stagioni.</span>
+                <div class="gdh-coming-soon-cover">
+                    <svg class="gdh-coming-soon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="16" r="1"/></svg>
+                    <strong>In arrivo</strong>
+                    <span>Le sfide classificate e le classifiche non sono ancora disponibili.</span>
                 </div>
             </section>
 
-            <div class="official-entry"><div><span class="competition-eyebrow">STAGIONI E CLASSIFICHE</span><h3>Arena Classificata ufficiale</h3><p>Una stagione al mese, classifiche mondiale e nazionale, sfide aperte a tutti. I risultati vengono attribuiti solo dopo la verifica di un server Godot.</p></div><button type="button" id="btn-open-official-arena" class="competition-secondary">Controlla stagione e classifiche</button></div>
+            <div class="gdh-projects-collection-label">
+                <h3>Progetti guidati</h3>
+                <p>Arena del Gladiatore è disponibile gratuitamente. Gli altri progetti Premium arriveranno più avanti.</p>
+            </div>
             <div class="projects-grid" id="projects-grid-container">
                 <!-- Popolato dinamicamente da app.js -->
             </div>

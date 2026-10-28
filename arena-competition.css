@@ -67,3 +67,35 @@
 #official-country-confirmed.hidden{display:none}
 @media(max-width:820px){.official-entry{align-items:flex-start;flex-direction:column}
  #official-code{min-height:240px;font-size:12px}}
+
+
+/* Progetti Premium e Arena classificata sospesi: anteprima non interattiva. */
+.gdh-arena-coming-soon, .gdh-project-coming-soon {
+  position:relative; isolation:isolate; overflow:hidden; border-radius:13px;
+  background:var(--bg-card,#252c35); border:1px solid var(--border,#394354);
+}
+.gdh-arena-coming-soon { min-height:210px; margin:20px 0 25px; padding:28px; box-sizing:border-box; }
+.gdh-arena-coming-soon h3 { margin:10px 0; font-size:1.35rem; color:var(--text-main,#e7edf5); }
+.gdh-arena-coming-soon p { max-width:480px; color:var(--text-muted,#a5b2c3); }
+.gdh-projects-collection-label { margin:24px 0 17px; }
+.gdh-projects-collection-label h3 { margin:0 0 5px; color:var(--text-main,#e7edf5); font-size:1.15rem; }
+.gdh-projects-collection-label p { margin:0; color:var(--text-muted,#a5b2c3); line-height:1.55; font-size:.86rem; }
+.gdh-project-coming-soon { min-height:285px; cursor:default; padding:22px; box-sizing:border-box; }
+.gdh-project-coming-soon:hover { transform:none; border-color:var(--border,#394354); box-shadow:none; }
+.gdh-coming-soon-preview { filter:blur(3px); opacity:.33; user-select:none; pointer-events:none; }
+.gdh-coming-soon-cover {
+  position:absolute; inset:0; z-index:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:10px; padding:22px; text-align:center;
+  box-sizing:border-box; background:rgba(17,24,32,.77);
+}
+.gdh-coming-soon-lock { width:39px; height:39px; color:#a9cbe4; flex:none; }
+.gdh-coming-soon-cover strong { color:#f1f5f9; font-size:1.38rem; font-weight:800; letter-spacing:.01em; }
+.gdh-coming-soon-cover span { max-width:300px; color:#c4d1dc; line-height:1.5; font-size:.83rem; }
+[data-theme='light'] .gdh-coming-soon-cover { background:rgba(238,243,247,.87); }
+[data-theme='light'] .gdh-coming-soon-lock { color:#3c6687; }
+[data-theme='light'] .gdh-coming-soon-cover strong { color:#233547; }
+[data-theme='light'] .gdh-coming-soon-cover span { color:#4a6174; }
+@media(max-width:600px){ .gdh-arena-coming-soon { min-height:195px; padding:18px; }
+  .gdh-project-coming-soon { min-height:250px; }
+  .gdh-coming-soon-lock { width:34px; height:34px; }
+}

@@ -137,35 +137,35 @@ async function smoke(browser,url,width){
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
  assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
- // Gli ospiti possono usare il vero Godot nella demo, senza XP o punteggi ufficiali.
+ // L'Arena classificata e i progetti Premium sono in pausa, ma il progetto gratuito resta aperto.
  await page.evaluate(()=>App.openProjectsView());
- await page.locator('#btn-open-competitive-arena').click();
- assert.equal(await page.locator('#competition-workspace').isVisible(),true);
- assert.equal(await page.locator('.competition-demo-tab').count(),3);
- const demoXpBefore=await page.evaluate(()=>App.state.xp);
- await page.locator('#competition-code-editor').fill(
-   'extends Node\n\nfunc raddoppia(valore: int) -> int:\n    return valore * 2'
- );
- await page.locator('#competition-run').click();
- await page.waitForFunction(()=>document.querySelector('.competition-result-summary'),null,{timeout:20000});
- assert.ok((await page.locator('.competition-result-summary').textContent()).includes('100 / 100'));
- assert.equal(await page.evaluate(()=>App.state.xp),demoXpBefore,
-   'Demo must not award unverified XP');
- await page.locator('#btn-close-competitive-arena').click();
+ assert.equal(await page.locator('.gdh-arena-coming-soon .gdh-coming-soon-lock').count(),1);
+ assert.equal((await page.locator('.gdh-arena-coming-soon .gdh-coming-soon-cover strong').textContent()).trim(),'In arrivo');
+ assert.equal(await page.locator('.gdh-project-coming-soon').count(),3);
+ assert.equal(await page.locator('.gdh-project-coming-soon .gdh-coming-soon-lock').count(),3);
+ assert.equal(await page.locator('.gdh-project-coming-soon button').count(),0,'Premium projects must not be clickable');
+ assert.equal(await page.locator('.project-card:not(.gdh-project-coming-soon)').count(),1);
+ assert.equal(await page.locator('#project-preview-modal').isHidden(),true);
+ await page.evaluate(()=>{
+   App.openProjectPreview('project_inventory');
+   App.openCompetitiveArena();
+   App.openOfficialArena();
+ });
+ assert.equal(await page.locator('#projects-catalog-section').isVisible(),true);
  assert.equal(await page.locator('#competition-workspace').isHidden(),true);
- assert.equal(await page.locator('.competition-archive-locked').isVisible(),true);
- // Senza un backend ufficiale configurato, nessun punteggio o classifica inventati.
- await page.locator('#btn-open-official-arena').click();
- assert.equal(await page.locator('#official-arena-workspace').isVisible(),true);
- await page.waitForFunction(()=>document.querySelector('#official-status')?.textContent?.includes('non sono ancora attive'),null,{timeout:10000});
- assert.equal(await page.locator('#official-stage-live').isHidden(),true);
- assert.equal(await page.locator('#official-submit').isVisible(),false);
- assert.equal(await page.evaluate(()=>App.state.xp),demoXpBefore);
- // Persistenza posizione nel sito, anche nella nuova sottosezione ufficiale.
- await page.reload({waitUntil:'load'});
- await page.waitForFunction(()=>document.querySelector('#official-arena-workspace')&&!document.querySelector('#official-arena-workspace').classList.contains('hidden'));
- await page.locator('#btn-back-official').click();
  assert.equal(await page.locator('#official-arena-workspace').isHidden(),true);
+ assert.equal(await page.locator('#project-preview-modal').isHidden(),true);
+ // Una posizione salvata della vecchia Arena non deve ripristinare la sezione sospesa.
+ await page.evaluate(()=>sessionStorage.setItem('gdscript_hero_position_v1',
+   JSON.stringify({version:1,view:'view-projects',projectsTab:'official'})));
+ await page.reload({waitUntil:'load'});
+ await page.waitForFunction(()=>!document.getElementById('view-projects').classList.contains('hidden'));
+ assert.equal(await page.locator('#projects-catalog-section').isVisible(),true);
+ assert.equal(await page.locator('#official-arena-workspace').isHidden(),true);
+ await page.locator('.project-card:not(.gdh-project-coming-soon)').click();
+ assert.equal(await page.locator('#project-arena-workspace').isVisible(),true,'Free Gladiator project must remain available');
+ await page.evaluate(()=>App.openProjectsView());
+ assert.equal(await page.locator('#projects-catalog-section').isVisible(),true);
  await page.evaluate(()=>App.showRoadmap());
  if(width>820 && process.env.E2E_SCREENSHOTS==='1'){
    const dir=path.join(root,'test-artifacts');fs.mkdirSync(dir,{recursive:true});

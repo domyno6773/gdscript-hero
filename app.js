@@ -220,9 +220,8 @@ const App = {
             } else if (view === 'view-practice') {
                 this.openPracticeView();
             } else if (view === 'view-projects') {
-                if (position.projectsTab === 'official') this.openOfficialArena();
-                else if (position.projectsTab === 'demo') this.openCompetitiveArena();
-                else this.openProjectsView();
+                // Anche una sessione salvata prima della pausa torna al catalogo.
+                this.openProjectsView();
             } else if (view === 'view-review') {
                 this.showReviewView();
                 if (position.reviewTab === 'all') this.setReviewTab('all');
@@ -1782,17 +1781,8 @@ const App = {
     },
 
     openCompetitiveArena() {
-        SoundFX.playClick();
-        this.switchView('view-projects');
-        this.hideAutocomplete();
-        document.getElementById('projects-catalog-section')?.classList.add('hidden');
-        document.getElementById('project-arena-workspace')?.classList.add('hidden');
-        document.getElementById('official-arena-workspace')?.classList.add('hidden');
-        document.getElementById('competition-workspace')?.classList.remove('hidden');
-        this.updateNavSelection('projects');
-        CompetitionArena.select(CompetitionArena.activeId);
-        this.saveNavigationPosition();
-        window.scrollTo({top:0,behavior:'smooth'});
+        // Funzionalità sospesa: non aprire la demo nemmeno tramite chiamate dirette.
+        this.openProjectsView();
     },
 
     closeCompetitiveArena() {
@@ -1800,17 +1790,8 @@ const App = {
     },
 
     openOfficialArena() {
-        SoundFX.playClick();
-        this.switchView('view-projects');
-        this.hideAutocomplete();
-        document.getElementById('projects-catalog-section')?.classList.add('hidden');
-        document.getElementById('project-arena-workspace')?.classList.add('hidden');
-        document.getElementById('competition-workspace')?.classList.add('hidden');
-        document.getElementById('official-arena-workspace')?.classList.remove('hidden');
-        this.updateNavSelection('projects');
-        void OfficialArena.open();
-        this.saveNavigationPosition();
-        window.scrollTo({top:0,behavior:'smooth'});
+        // Classifiche e invio ufficiale in pausa; resta visibile il catalogo.
+        this.openProjectsView();
     },
 
     renderProjectsGrid() {
@@ -1821,23 +1802,37 @@ const App = {
         PROJECTS_DATA.forEach(proj => {
             const card = document.createElement('div');
             card.className = "project-card";
-            card.onclick = () => this.openProjectPreview(proj.id);
 
             const pills = proj.topics.map(t => `<span class="topic-pill">${t}</span>`).join('');
 
             const isArena = proj.id === "project_arena";
+            if (!isArena) {
+                card.classList.add("gdh-project-coming-soon");
+                card.setAttribute("aria-label", proj.title + ": progetto Premium in arrivo");
+                card.innerHTML = `
+                    <div class="gdh-coming-soon-preview" aria-hidden="true">
+                        <div class="project-card-top">
+                            <div class="project-card-icon">${this.getProjectIconSVG(proj.id)}</div>
+                            <span class="${proj.badgeClass}">${proj.badge}</span>
+                        </div>
+                        <h3>${proj.title}</h3>
+                        <p>${proj.desc}</p>
+                        <div class="project-topics-pills">${pills}</div>
+                    </div>
+                    <div class="gdh-coming-soon-cover">
+                        <svg class="gdh-coming-soon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="16" r="1"/></svg>
+                        <strong>In arrivo</strong>
+                        <span>Progetto Premium · Non ancora disponibile</span>
+                    </div>`;
+                grid.appendChild(card);
+                return;
+            }
             const completedPhasesCount = (this.state.arenaProject && this.state.arenaProject.completedPhases) ? this.state.arenaProject.completedPhases.length : 0;
             const progressLabel = isArena ? (completedPhasesCount >= 4 ? "✓ Completato (4/4)" : `Avanzamento: ${completedPhasesCount}/4 Fasi`) : `🔒 ${proj.levelReq}`;
             const btnText = isArena ? (completedPhasesCount > 0 ? (completedPhasesCount >= 4 ? "Rivedi Arena ➔" : "Continua Arena ➔") : "Inizia Progetto ➔") : "Anteprima ➔";
             const btnClass = isArena ? "btn-preview-project btn-playable-start" : "btn-preview-project";
 
-            card.onclick = () => {
-                if (isArena) {
-                    this.openArenaWorkspace();
-                } else {
-                    this.openProjectPreview(proj.id);
-                }
-            };
+            card.onclick = () => this.openArenaWorkspace();
 
             card.innerHTML = `
                 <div>
@@ -1861,7 +1856,7 @@ const App = {
     openProjectPreview(projectId) {
         SoundFX.playClick();
         const proj = PROJECTS_DATA.find(p => p.id === projectId);
-        if (!proj) return;
+        if (!proj || proj.id !== 'project_arena') return; // Le anteprime Premium sono sospese.
 
         document.getElementById('project-preview-title').innerText = `${proj.icon} ${proj.title}`;
         document.getElementById('project-preview-badge').innerText = proj.badge;
