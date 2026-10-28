@@ -528,6 +528,48 @@ async function testSettingsModalRefresh(page, initialWidth) {
    App.openSettingsModal();
    document.getElementById('admin-settings-row').classList.remove('hidden');
  });
+ // Stats and reset must have the same neutral button surface as export/import.
+ // Only their icons should indicate admin access vs. destructive action.
+ const actionStyles=await page.evaluate(()=>{
+   const root=document.documentElement,body=document.body;
+   const before=[root.getAttribute('data-theme'),body.getAttribute('data-theme')];
+   const read=()=>{
+     const button=id=>document.getElementById(id);
+     const attrs=el=>{
+       const style=getComputedStyle(el);
+       const rect=el.getBoundingClientRect();
+       return {background:style.backgroundColor,border:style.borderColor,color:style.color,
+         fontSize:style.fontSize,fontWeight:style.fontWeight,radius:style.borderRadius,
+         height:rect.height,icon:getComputedStyle(el.querySelector('svg.settings-icon')).color};
+     };
+     return {normal:attrs(button('btn-settings-export')),
+       admin:attrs(button('btn-settings-open-admin')),
+       reset:attrs(button('btn-start-reset'))};
+   };
+   const themes={};
+   for(const theme of ['dark','light']){
+     root.setAttribute('data-theme',theme);
+     body.setAttribute('data-theme',theme);
+     themes[theme]=read();
+   }
+   if(before[0]===null)root.removeAttribute('data-theme');
+   else root.setAttribute('data-theme',before[0]);
+   if(before[1]===null)body.removeAttribute('data-theme');
+   else body.setAttribute('data-theme',before[1]);
+   return themes;
+ });
+ for(const [theme,buttons] of Object.entries(actionStyles)){
+   for(const name of ['admin','reset']){
+     for(const key of ['background','border','color','fontSize','fontWeight','radius']){
+       assert.equal(buttons[name][key],buttons.normal[key],
+         'Settings '+name+' has outdated '+key+' in '+theme+': '+JSON.stringify(buttons));
+     }
+     assert.ok(Math.abs(buttons[name].height-buttons.normal.height)<=2,
+       'Settings '+name+' sizing differs from normal actions: '+JSON.stringify(buttons));
+   }
+   assert.notEqual(buttons.admin.icon,buttons.reset.icon,
+     'Admin and reset actions need distinct, restrained icon colors');
+ }
  for(const width of widths){
    await page.setViewportSize({width,height:480});
    const geometry=await page.evaluate(()=>{
