@@ -436,6 +436,19 @@ async function testAccessibilityKeyboard(page,width){
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#add-node-modal').isHidden(),true);
 
+  // The active section and exercise split-tab are announced to screen readers.
+  await page.evaluate(()=>App.openLesson(1));
+  assert.equal(await page.locator('#nav-editor-btn').getAttribute('aria-current'),'page');
+  assert.equal(await page.locator('#mob-nav-exercise').getAttribute('aria-current'),'page');
+  await page.evaluate(()=>App.setMobileExerciseTab('code',false));
+  assert.equal(await page.locator('#btn-tab-code').getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('#btn-tab-instructions').getAttribute('aria-pressed'),'false');
+  await page.evaluate(()=>App.setMobileExerciseTab('instructions',false));
+  assert.equal(await page.locator('#btn-tab-instructions').getAttribute('aria-pressed'),'true');
+  await page.evaluate(()=>App.showRoadmap());
+  assert.equal(await page.locator('#nav-roadmap-btn').getAttribute('aria-current'),'page');
+  assert.equal(await page.locator('#nav-editor-btn').getAttribute('aria-current'),null);
+
   await page.emulateMedia({reducedMotion:'reduce'});
   const motion=await page.evaluate(()=>{
     const el=document.createElement('div');

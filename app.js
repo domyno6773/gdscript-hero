@@ -3246,11 +3246,10 @@ const App = {
         ['roadmap', 'editor', 'practice', 'projects', 'review', 'stats'].forEach(key => {
             const btn = document.getElementById(`nav-${key}-btn`);
             if (btn) {
-                if (key === viewName || (key === 'editor' && viewName === 'exercise')) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                const selected=key===viewName||(key==='editor'&&viewName==='exercise');
+                btn.classList.toggle('active',selected);
+                if(selected)btn.setAttribute('aria-current','page');
+                else btn.removeAttribute('aria-current');
             }
         });
 
@@ -3258,11 +3257,10 @@ const App = {
         ['roadmap', 'exercise', 'practice', 'projects', 'review', 'stats'].forEach(key => {
             const mobBtn = document.getElementById(`mob-nav-${key}`);
             if (mobBtn) {
-                if (key === viewName) {
-                    mobBtn.classList.add('active');
-                } else {
-                    mobBtn.classList.remove('active');
-                }
+                const selected=key===viewName;
+                mobBtn.classList.toggle('active',selected);
+                if(selected)mobBtn.setAttribute('aria-current','page');
+                else mobBtn.removeAttribute('aria-current');
             }
         });
     },
@@ -3274,6 +3272,8 @@ const App = {
         const btnTabCode = document.getElementById('btn-tab-code');
         if (!workspaceGrid) return;
 
+        if(btnTabInstructions)btnTabInstructions.setAttribute('aria-pressed',String(tab!=='code'));
+        if(btnTabCode)btnTabCode.setAttribute('aria-pressed',String(tab==='code'));
         if (tab === 'code') {
             workspaceGrid.classList.remove('show-instructions');
             workspaceGrid.classList.add('show-code');

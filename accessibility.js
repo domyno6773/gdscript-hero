@@ -79,7 +79,7 @@
       const items=focusable(modal);
       if(!items.length){event.preventDefault();focusInside(modal);return;}
       const first=items[0],last=items[items.length-1],active=document.activeElement;
-      if(!modal.contains(active)){
+      if(!modal.contains(active)||!items.includes(active)){
         event.preventDefault();(event.shiftKey?last:first).focus();
       }else if(event.shiftKey&&active===first){
         event.preventDefault();last.focus();
