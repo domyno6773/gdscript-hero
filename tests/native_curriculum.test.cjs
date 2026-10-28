@@ -81,7 +81,7 @@ function failures(verdict){
    assert.equal(passed,60);
 
    // Fixture snapshots must stay synchronized with the actual 60 lessons.
-   const snapshots=await page.evaluate(()=>LESSONS_DATA.flatMap(l=>{
+   const snapshots=await page.evaluate(()=>LESSONS_DATA.filter(l=>l.id<=60).flatMap(l=>{
      const f=GDHLessonFixtures.find(x=>x.id===l.id);
      const mismatches=[];
      if(!f){mismatches.push('missing fixture');return [{id:l.id,mismatches}];}
@@ -160,6 +160,28 @@ function failures(verdict){
        'Godot lesson '+item.id+' '+(item.expected?'valid alternative rejected':'invalid source accepted')+': '+JSON.stringify(outcome));
      variants++;
    }
+   // I nuovi esercizi attraversano lo stesso Godot WebAssembly dei precedenti.
+   const extras=await page.evaluate(()=>LESSONS_DATA.filter(l=>l.isSupplemental).map(l=>l.id));
+   assert.equal(extras.length,21,'Sono previsti 21 nuovi esercizi interdisciplinari');
+   let extraPassed=0;
+   for(const id of extras){
+     const outcome=await page.evaluate(async id=>{
+       const lesson=LESSONS_DATA.find(l=>l.id===id);
+       try{
+         const correct=await GDHGodot.verifyLesson(id,lesson.solution);
+         const initial=await GDHGodot.verifyLesson(id,lesson.initialCode);
+         return {correct:correct.accepted,initial:initial.accepted,
+           nativeStatus:correct.execution?.nativeStatus,
+           failed:(correct.feedback?.checks||[]).filter(x=>!x.passed).map(x=>x.desc),
+           error:correct.execution?.error||null};
+       }catch(error){return {correct:false,error:String(error)};}
+     },id);
+     assert.ok(outcome.correct && outcome.nativeStatus==='executed',
+       'Nuovo esercizio '+id+' fallisce in Godot: '+JSON.stringify(outcome));
+     assert.equal(outcome.initial,false,'Starter già superato: '+id);
+     extraPassed++;
+   }
+   console.log('NUOVI ESERCIZI NATIVI: '+extraPassed+'/21 accettati, 21/21 starter respinti.');
    assert.deepEqual(browserErrors,[],'Uncaught browser errors');
    console.log('NATIVE CURRICULUM SUCCESS: '+passed+'/60 official accepted; 60/60 starters rejected; '+
      '60/60 solutions with extra comments accepted; '+variants+

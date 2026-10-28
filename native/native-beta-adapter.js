@@ -121,6 +121,9 @@
     actions:step.actions||lesson.actions||[]
   });
   const verifyLesson=async(id,source)=>{
+    // Nuove lezioni del corso: sempre esecuzione nativa Godot, ID distinti dai ripassi.
+    if(window.GDHCurriculumExtension?.has(id))
+      return window.GDHCurriculumExtension.verify(id,source,raw);
     const [fixtures,validator]=await Promise.all([loadFixtures(),loadValidators()]);
     const lesson=fixtures.find(x=>x.id===id);
     if(!lesson)throw Error('Lezione non disponibile nel motore Godot');

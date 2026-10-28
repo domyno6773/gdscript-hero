@@ -14,7 +14,7 @@ GDScript Hero è una piattaforma didattica **gratuita e in italiano** per impara
 
 | Sezione | Stato | Descrizione |
 | --- | --- | --- |
-| **Corso gratuito** | Disponibile | **60 lezioni in 15 capitoli**, con teoria, esempi, esercizi, suggerimenti e verifiche |
+| **Corso gratuito** | Disponibile | **81 esercizi in 15 capitoli**, con teoria, esempi, esercizi, suggerimenti e verifiche |
 | **Editor GDScript** | Disponibile | Sintassi colorata, numeri di riga, completamento contestuale e comandi rapidi |
 | **Risultati e diagnostica** | Disponibile | Output atteso/ottenuto, errori in evidenza e dettagli dei test |
 | **Sandbox** | Disponibile | Sperimentazione con codice, nodi, scena e viewport 2D |
@@ -29,7 +29,7 @@ La nuova interfaccia è ispirata all'editor di Godot: palette blu-grigio, pannel
 
 ## Corso e apprendimento
 
-Il corso comprende **15 capitoli e 60 lezioni**. Si parte dalle basi (output, variabili, operatori, condizioni) per arrivare a strutture dati, cicli, funzioni e meccaniche tipiche di Godot. Ogni livello offre un obiettivo concreto, test di verifica e aiuti progressivi.
+Il corso comprende **15 capitoli e 81 esercizi**. Si parte dalle basi (output, variabili, operatori, condizioni) per arrivare a strutture dati, cicli, funzioni e meccaniche tipiche di Godot. Ogni livello offre un obiettivo concreto, test di verifica e aiuti progressivi.
 
 **L'obiettivo è mantenere il corso principale gratuito.** Le eventuali funzioni aggiuntive a pagamento non dovranno impedire di completarlo.
 
@@ -78,7 +78,7 @@ Su Windows è presente anche `avvia.bat`, che apre direttamente `index.html`. Pe
 
 ## Architettura
 
-La verifica del **corso principale** usa ora direttamente **Godot Engine 4.4.1 WebAssembly**, eseguito in un iframe isolato. Non esiste più un selettore Beta: il pulsante «Verifica il codice» utilizza il motore Godot per tutte le 60 lezioni. Gli esiti accettati attivano le ricompense XP, lo sblocco dei capitoli, la telemetria e i salvataggi esistenti. Le verifiche inconclusive non attribuiscono XP.
+La verifica del **corso principale** usa ora direttamente **Godot Engine 4.4.1 WebAssembly**, eseguito in un iframe isolato. Non esiste più un selettore Beta: il pulsante «Verifica il codice» utilizza il motore Godot per tutte le 60 lezioni storiche e i nuovi esercizi storiche e i 21 nuovi esercizi. Gli esiti accettati attivano le ricompense XP, lo sblocco dei capitoli, la telemetria e i salvataggi esistenti. Le verifiche inconclusive non attribuiscono XP.
 
 **Anche Sandbox, Ripasso e Arena invocano Godot per eseguire GDScript**, tramite un adattatore che conserva il formato dei risultati usato dall'interfaccia. Alcune funzioni avanzate della vecchia simulazione (ad esempio scene Sandbox dinamiche e interazioni persistenti tra chiamate) non sono ancora equivalenti alle funzionalità native di Godot e richiedono ulteriori rifiniture; il runtime JavaScript viene mantenuto nel repository per le classi di rappresentazione delle scene e per vecchi test, ma non è più usato come interprete del codice nella UI pubblica.
 

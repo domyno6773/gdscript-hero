@@ -230,7 +230,7 @@ async function testAllLessonCodeSamplesFit(page,width){
    return {lessonCount,sampleCount,errors:errors.slice(0,20),totalErrors:errors.length,
      xpUnchanged:App.state.xp===previousXP};
  });
- assert.equal(result.lessonCount,60,'The visual regression must scan all 60 lessons');
+ assert.equal(result.lessonCount,81,'The visual regression must scan all 81 lessons');
  assert.ok(result.sampleCount>=38,'Expected both lesson sample types: '+JSON.stringify(result));
  assert.ok(result.xpUnchanged,'Inspecting samples unexpectedly changed student XP');
  assert.equal(result.totalErrors,0,'Lesson examples escape their boundaries at '+width+'px: '+JSON.stringify(result));
@@ -839,7 +839,7 @@ async function smoke(browser,url,width){
  const response=await page.goto(url,{waitUntil:'load',timeout:30000});
  assert.equal(response.status(),200);
  await page.waitForFunction(()=>!!window.App&&!!window.LESSONS_DATA&&!document.getElementById('view-roadmap').classList.contains('hidden'));
- assert.equal(await page.evaluate(()=>LESSONS_DATA.length),60);
+ assert.equal(await page.evaluate(()=>LESSONS_DATA.length),81);
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
  assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
  assert.equal(await page.locator('#btn-open-settings svg.ui-icon').count(),1,'Settings button must use SVG icon');

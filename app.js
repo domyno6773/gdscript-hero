@@ -2483,37 +2483,14 @@ const App = {
             return;
         }
 
-        // Progressione normale per il sito pubblico online:
-        // Ricalcola lo sblocco effettivo basandosi SOLO sui finishedLessons reali dell'utente
-        const normalUnlocked = [1];
-        CHAPTERS_DATA.forEach(chapter => {
-            const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id);
-            const coreLessons = chapterLessons.filter(l => !l.isMastery);
-            const masteryLesson = chapterLessons.find(l => l.isMastery);
-
-            coreLessons.forEach((core, idx) => {
-                if (this.state.finishedLessons.includes(core.id)) {
-                    if (idx < coreLessons.length - 1) {
-                        const nextCore = coreLessons[idx + 1];
-                        if (!normalUnlocked.includes(nextCore.id)) {
-                            normalUnlocked.push(nextCore.id);
-                        }
-                    } else {
-                        // Ultimo core del capitolo: sblocca la sfida bonus di apprendimento!
-                        if (masteryLesson && !normalUnlocked.includes(masteryLesson.id)) {
-                            normalUnlocked.push(masteryLesson.id);
-                        }
-                        // E sblocca il primo livello core del capitolo successivo!
-                        const nextChapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id + 1 && !l.isMastery);
-                        if (nextChapterLessons.length > 0) {
-                            const nextCore = nextChapterLessons[0];
-                            if (!normalUnlocked.includes(nextCore.id)) {
-                                normalUnlocked.push(nextCore.id);
-                            }
-                        }
-                    }
-                }
-            });
+        // Progressione lineare sulla mappa ordinata: gli esercizi di
+        // consolidamento concludono il capitolo e sono obbligatori.
+        // Gli ID persistenti non indicano più l'ordine del corso.
+        const normalUnlocked = [LESSONS_DATA[0]?.id || 1];
+        LESSONS_DATA.forEach((lesson, index) => {
+            if (!this.state.finishedLessons.includes(lesson.id)) return;
+            const next = LESSONS_DATA[index + 1];
+            if (next && !normalUnlocked.includes(next.id)) normalUnlocked.push(next.id);
         });
         this.state.completedLessons = normalUnlocked;
         this.saveStorage();
@@ -2666,8 +2643,8 @@ const App = {
 
         CHAPTERS_DATA.forEach(chapter => {
             const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id);
-            const coreLessons = chapterLessons.filter(l => !l.isMastery);
-            const masteryLesson = chapterLessons.find(l => l.isMastery);
+            const coreLessons = chapterLessons;
+            const masteryLesson = null;
 
             const chapterFinished = chapterLessons.filter(l => this.state.finishedLessons.includes(l.id)).length;
             const chapterTotal = chapterLessons.length;
@@ -2675,7 +2652,7 @@ const App = {
             // Il capitolo è sbloccato se è il capitolo 1, oppure se contiene livelli già sbloccati, oppure se il capitolo precedente è stato completato
             let isChapterUnlocked = chapter.id === 1 || chapterLessons.some(l => this.state.completedLessons.includes(l.id));
             if (!isChapterUnlocked && chapter.id > 1) {
-                const prevCoreLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id - 1 && !l.isMastery);
+                const prevCoreLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id - 1);
                 const lastPrevCore = prevCoreLessons[prevCoreLessons.length - 1];
                 if (lastPrevCore && this.state.finishedLessons.includes(lastPrevCore.id)) {
                     isChapterUnlocked = true;
@@ -2723,7 +2700,7 @@ const App = {
                 // Determina quale singolo nodo deve avere il tag "CONTINUA" e la pulsazione d'azione
                 let focusId = this.state.currentLessonId;
                 if (!focusId || this.state.finishedLessons.includes(focusId)) {
-                    const firstUnfinishedCore = LESSONS_DATA.find(l => !l.isMastery && this.state.completedLessons.includes(l.id) && !this.state.finishedLessons.includes(l.id));
+                    const firstUnfinishedCore = LESSONS_DATA.find(l => this.state.completedLessons.includes(l.id) && !this.state.finishedLessons.includes(l.id));
                     if (firstUnfinishedCore) focusId = firstUnfinishedCore.id;
                 }
                 const isCurrentFocus = isUnlocked && !isFinished && (lesson.id === focusId);
@@ -2864,8 +2841,8 @@ const App = {
             svg.innerHTML = '';
 
             const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === chapter.id);
-            const coreLessons = chapterLessons.filter(l => !l.isMastery);
-            const masteryLesson = chapterLessons.find(l => l.isMastery);
+            const coreLessons = chapterLessons;
+            const masteryLesson = null;
 
             // 1. Linee del percorso principale tra i nodi Core
             const coreNodeElements = [];
@@ -3105,7 +3082,7 @@ const App = {
         this.updateExerciseToolsVisibility(lesson);
 
         const lessonContent = document.querySelector('.lesson-content');
-        if (lesson.isMastery) {
+        if (lesson.isMastery && !lesson.isConsolidation) {
             // Render del layout dedicato Sfida di Apprendimento in stile Coddy
             lessonContent.innerHTML = `
                 <div class="coddy-challenge-card">
@@ -3222,8 +3199,10 @@ const App = {
 
         const headerNextBtn = document.getElementById('btn-header-next');
         if (headerNextBtn) {
-            const hasNext = lessonId < LESSONS_DATA.length;
-            const isNextUnlocked = hasNext && this.state.completedLessons.includes(lessonId + 1);
+            const position = LESSONS_DATA.findIndex(l => l.id === lessonId);
+            const next = LESSONS_DATA[position + 1];
+            const hasNext = !!next;
+            const isNextUnlocked = hasNext && this.state.completedLessons.includes(next.id);
             if (hasNext && (this.state.finishedLessons.includes(lessonId) || (this.isLocalEnvironment() && isNextUnlocked))) {
                 headerNextBtn.classList.remove('hidden');
             } else {
@@ -3233,7 +3212,7 @@ const App = {
 
         const headerPrevBtn = document.getElementById('btn-header-prev');
         if (headerPrevBtn) {
-            if (lessonId > 1) {
+            if (LESSONS_DATA.findIndex(l => l.id === lessonId) > 0) {
                 headerPrevBtn.classList.remove('hidden');
             } else {
                 headerPrevBtn.classList.add('hidden');
@@ -4209,14 +4188,7 @@ const App = {
                             if (mastery && !this.state.completedLessons.includes(mastery.id)) {
                                 this.state.completedLessons.push(mastery.id);
                             }
-                            // E sblocca SUBITO il primo livello del capitolo successivo!
-                            const nextChapterLessons = LESSONS_DATA.filter(l => l.chapterId === currentLesson.chapterId + 1 && !l.isMastery);
-                            if (nextChapterLessons.length > 0) {
-                                const nextCore = nextChapterLessons[0];
-                                if (!this.state.completedLessons.includes(nextCore.id)) {
-                                    this.state.completedLessons.push(nextCore.id);
-                                }
-                            }
+                            // Il capitolo successivo si sblocca solo dopo il consolidamento.
                         } else {
                             // Livello core intermedio: sblocca il livello core successivo
                             const currentIdx = coreLessons.findIndex(l => l.id === currentLesson.id);
@@ -4275,8 +4247,8 @@ const App = {
                     if (modalTitle) modalTitle.innerText = "ESERCIZIO COMPLETATO!";
                     if (modalSubtitle) modalSubtitle.innerText = "Soluzione corretta. Hai già completato questo esercizio.";
                 } else if (currentLesson.isMastery) {
-                    if (modalTitle) modalTitle.innerText = "⭐ SFIDA DI APPRENDIMENTO SUPERATA!";
-                    if (modalSubtitle) modalSubtitle.innerText = "Incredibile! Hai completato la sfida bonus e dimostrato la tua padronanza!";
+                    if (modalTitle) modalTitle.innerText = "CONSOLIDAMENTO COMPLETATO!";
+                    if (modalSubtitle) modalSubtitle.innerText = "Hai dimostrato di saper combinare le conoscenze del capitolo. Ora puoi proseguire.";
                 } else {
                     const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === currentLesson.chapterId);
                     const coreLessons = chapterLessons.filter(l => !l.isMastery);
@@ -4285,7 +4257,7 @@ const App = {
                     if (modalTitle) modalTitle.innerText = isLastCore ? "CAPITOLO COMPLETATO!" : "MISSIONE COMPIUTA!";
                     if (modalSubtitle) {
                         modalSubtitle.innerText = isLastCore
-                            ? "Ottimo lavoro! Hai sbloccato il capitolo successivo e la ⭐ Sfida di Apprendimento Bonus!"
+                            ? "Ottimo lavoro! Hai sbloccato l'esercizio di consolidamento del capitolo."
                             : "Ottimo lavoro! Il tuo script GDScript funziona alla perfezione.";
                     }
                 }
@@ -4691,8 +4663,8 @@ const App = {
                 this.exitReviewMode();
                 return;
             }
-            const nextId = this.state.currentLessonId + 1;
-            const nextLesson = LESSONS_DATA.find(l => l.id === nextId);
+            const nextLesson = LESSONS_DATA[LESSONS_DATA.findIndex(l => l.id === this.state.currentLessonId) + 1];
+            const nextId = nextLesson?.id;
 
             if (nextLesson) {
                 this.openLesson(nextId);
@@ -4720,8 +4692,8 @@ const App = {
             btnHeaderNext.onclick = () => {
                 SoundFX.playClick();
                 if (this.isReviewMode) return this.exitReviewMode();
-                const nextId = this.state.currentLessonId + 1;
-                const nextLesson = LESSONS_DATA.find(l => l.id === nextId);
+                const nextLesson = LESSONS_DATA[LESSONS_DATA.findIndex(l => l.id === this.state.currentLessonId) + 1];
+                const nextId = nextLesson?.id;
                 if (nextLesson) {
                     this.openLesson(nextId);
                 } else {
@@ -4736,8 +4708,8 @@ const App = {
             btnHeaderPrev.onclick = () => {
                 SoundFX.playClick();
                 if (this.isReviewMode) return this.exitReviewMode();
-                const prevId = this.state.currentLessonId - 1;
-                const prevLesson = LESSONS_DATA.find(l => l.id === prevId);
+                const prevLesson = LESSONS_DATA[LESSONS_DATA.findIndex(l => l.id === this.state.currentLessonId) - 1];
+                const prevId = prevLesson?.id;
                 if (prevLesson) {
                     this.openLesson(prevId);
                 } else {
