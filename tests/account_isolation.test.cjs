@@ -263,5 +263,22 @@ function deep(v){return JSON.parse(JSON.stringify(v));}
   assert.equal(app.state.xp,0,'Importazione rifiutata alla registrazione riabilitata');
   assert.equal(newGuestSave().xp,350,'I progressi ospite devono restare separati');
 
+    // Streak: una scelta gia' registrata nella stessa settimana non si puo'
+  // sovrascrivere (neanche di lunedi). Una nuova identita' parte senza scelta.
+  app.state.streakGoalSelection={week:app.getWeekId(),selectedDate:app.getTodayISO()};
+  assert.equal(app.canChangeStreakGoal(),false);
+  assert.equal(app.state.streakGoalSelection.week,app.getWeekId());
+  app.state.streakGoalSelection=null;
+  assert.equal(app.canChangeStreakGoal(),true);
+  // Le registrazioni legacy sono gia' state accolte al caricamento.
+  const siteHtml=fs.readFileSync(path.join(source,'index.html'),'utf8');
+  for(const id of ['site-welcome','site-start-tour','site-skip-tour','site-tour',
+    'site-tour-next','site-tour-skip','site-goal-gate']){
+    assert.ok(siteHtml.includes('id="'+id+'"'),'Onboarding missing '+id);
+  }
+  assert.ok(siteHtml.includes('data-goal="rilassato"'));
+  assert.ok(siteHtml.includes('data-goal="concentrato"'));
+  assert.ok(siteHtml.includes('data-goal="lockin"'));
+
     console.log('PASS: guest, Alice, Bob isolated; pending email and genuine Google OAuth');
 })().catch(e=>{console.error(e);process.exitCode=1;});

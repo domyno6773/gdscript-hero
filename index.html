@@ -1260,6 +1260,40 @@
         </div>
     </div>
 
+    <!-- Primo ingresso: il tour e' facoltativo, la scelta dell'obiettivo no. -->
+    <div class="modal-overlay hidden site-onboarding-overlay" id="site-welcome">
+        <section class="modal-card site-onboarding-card" role="dialog" aria-modal="true" aria-labelledby="site-welcome-title">
+            <div class="site-onboarding-top"><span class="site-eyebrow">GDSCRIPT HERO</span><button type="button" id="site-skip-tour" class="site-skip">Salta</button></div>
+            <svg class="site-welcome-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 18V6l8-4 8 4v12l-8 4zM4 6l8 5 8-5M12 11v11"/></svg>
+            <h2 id="site-welcome-title">Benvenuto in GDScript Hero</h2>
+            <p>Impara GDScript e Godot 4 passo dopo passo, dalla prima riga di codice fino ai tuoi progetti. Esercitati con Godot reale, sperimenta nella Sandbox, ripassa e segui i progressi.</p>
+            <p class="site-intro-hint">Scopri le sezioni con un breve tour oppure passa direttamente alla scelta del tuo obiettivo settimanale.</p>
+            <button type="button" id="site-start-tour" class="site-primary-action">Avvia tour guidato <span aria-hidden="true">→</span></button>
+        </section>
+    </div>
+    <div class="site-tour-layer hidden" id="site-tour" role="dialog" aria-modal="true" aria-labelledby="site-tour-title">
+        <div class="site-tour-shade"></div>
+        <section class="site-tour-card">
+            <div class="site-onboarding-top"><span class="site-eyebrow">TOUR GUIDATO <span id="site-tour-position">1 / 6</span></span><button type="button" id="site-tour-skip" class="site-skip">Salta</button></div>
+            <h2 id="site-tour-title">Il percorso</h2>
+            <p id="site-tour-description">Scopri le sezioni del sito.</p>
+            <button type="button" id="site-tour-next" class="site-primary-action">Avanti</button>
+        </section>
+    </div>
+    <div class="modal-overlay hidden site-onboarding-overlay" id="site-goal-gate">
+        <section class="modal-card site-onboarding-card" role="dialog" aria-modal="true" aria-labelledby="site-goal-title">
+            <span class="site-eyebrow">ULTIMO PASSO</span>
+            <h2 id="site-goal-title">Scegli il tuo ritmo settimanale</h2>
+            <p>Quanti giorni vuoi dedicare allo studio? La scelta e' obbligatoria. Potrai cambiarla solo il lunedi di una nuova settimana, una sola volta durante quella giornata.</p>
+            <div class="site-goal-options">
+                <button type="button" data-goal="rilassato"><strong>2 giorni</strong><span>Rilassato · Comincia con calma</span></button>
+                <button type="button" data-goal="concentrato"><strong>4 giorni</strong><span>Concentrato · Un ritmo costante</span></button>
+                <button type="button" data-goal="lockin"><strong>6 giorni</strong><span>Lock in · Una sfida intensa</span></button>
+            </div>
+            <p class="site-intro-hint">Se non raggiungi l'obiettivo entro domenica, la tua serie settimanale si azzera.</p>
+        </section>
+    </div>
+
     <!-- MODAL GESTIONE DELLA SERIE SETTIMANALE (STREAK) -->
     <div class="modal-overlay hidden" id="streak-modal">
         <div class="modal-card modal-medium">
@@ -1277,6 +1311,7 @@
             </div>
 
             <div class="streak-selection-section">
+                <p id="streak-change-status" class="site-streak-status" aria-live="polite"></p>
                 <div class="selection-title">Scegli il tuo Ritmo di Studio:</div>
                 <div class="streak-tiers-grid">
                     <div class="streak-tier-card" id="tier-rilassato">

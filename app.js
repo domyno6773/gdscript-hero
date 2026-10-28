@@ -14,6 +14,7 @@ const App = {
         streak: 1,
         level: 1,
         streakMode: "rilassato", // "rilassato" (2), "concentrato" (4), "lockin" (6)
+        streakGoalSelection:null,siteWelcomeSeen:false,
         streakWeeks: 0,
         activeDaysThisWeek: [],  // array di date ISO es. ["2026-10-24"]
         currentWeekId: "",
@@ -295,6 +296,7 @@ const App = {
         // Inizializzazione Autenticazione & Salvataggio Cloud / Backup
         this.initAuthAndSync();
         this.restoreNavigationPosition();
+        queueMicrotask(()=>{if(this._saveOwner==='guest')this.ensureSiteOnboarding();});
 
         window.addEventListener('resize', () => {
             const roadmapView = document.getElementById('view-roadmap');
@@ -322,6 +324,8 @@ const App = {
                 }
                 this.state.unlockedAchievements = parsed.unlockedAchievements || [];
                 this.state.streakMode = parsed.streakMode || "rilassato";
+                this.state.streakGoalSelection=parsed.streakGoalSelection || {week:parsed.currentWeekId||this.getWeekId(),selectedDate:'legacy'};
+                this.state.siteWelcomeSeen=parsed.siteWelcomeSeen!==false;
                 this.state.streakWeeks = parsed.streakWeeks || 0;
                 this.state.activeDaysThisWeek = parsed.activeDaysThisWeek || [];
                 this.state.currentWeekId = parsed.currentWeekId || this.getWeekId();
@@ -494,6 +498,8 @@ const App = {
             devAllUnlocked: this.state.devAllUnlocked,
             unlockedAchievements: this.state.unlockedAchievements,
             streakMode: this.state.streakMode,
+            streakGoalSelection:this.state.streakGoalSelection,
+            siteWelcomeSeen:!!this.state.siteWelcomeSeen,
             streakWeeks: this.state.streakWeeks,
             activeDaysThisWeek: this.state.activeDaysThisWeek,
             currentWeekId: this.state.currentWeekId,
@@ -2336,6 +2342,51 @@ const App = {
         }
     },
 
+    canChangeStreakGoal(){
+        if(!this.state.streakGoalSelection)return true;
+        return new Date().getUTCDay()===1 && this.state.streakGoalSelection.week!==this.getWeekId();
+    },
+    ensureSiteOnboarding(){
+        const welcome=document.getElementById('site-welcome'),gate=document.getElementById('site-goal-gate');
+        if(!welcome||!gate)return;
+        if(!this.state.siteWelcomeSeen)welcome.classList.remove('hidden');
+        else if(!this.state.streakGoalSelection){welcome.classList.add('hidden');gate.classList.remove('hidden');}
+    },
+    siteTourSteps:[
+        {desktop:'#nav-roadmap-btn',mobile:'#mob-nav-roadmap',title:'Il percorso',desc:'La mappa esagonale ti guida dai fondamenti alle sfide avanzate.'},
+        {desktop:'#nav-editor-btn',mobile:'#mob-nav-exercise',title:'Esercizi',desc:'Scrivi GDScript, eseguilo con Godot e usa suggerimenti e debugger.'},
+        {desktop:'#nav-practice-btn',mobile:'#mob-nav-practice',title:'Sandbox',desc:'Sperimenta liberamente con codice, scene e nodi.'},
+        {desktop:'#nav-projects-btn',mobile:'#mob-nav-projects',title:'Progetti',desc:'Metti in pratica le conoscenze costruendo veri progetti.'},
+        {desktop:'#nav-review-btn',mobile:'#mob-nav-review',title:'Ripasso',desc:'Consolida le competenze con il ripasso intelligente.'},
+        {desktop:'#nav-stats-btn',mobile:'#mob-nav-stats',title:'Statistiche',desc:'Consulta progressi, livelli e risultati del tuo percorso.'}
+    ],
+    beginSiteTour(){
+        document.getElementById('site-welcome')?.classList.add('hidden');
+        this._siteTourStep=0;
+        document.getElementById('site-tour')?.classList.remove('hidden');
+        this.renderSiteTour();
+    },
+    renderSiteTour(){
+        document.querySelectorAll('.site-tour-highlight').forEach(el=>el.classList.remove('site-tour-highlight'));
+        const step=this.siteTourSteps[this._siteTourStep];
+        if(!step)return this.finishSiteTour();
+        const selector=innerWidth<=820?step.mobile:step.desktop;
+        const target=document.querySelector(selector);
+        if(target?.getClientRects().length)target.classList.add('site-tour-highlight');
+        document.getElementById('site-tour-title').textContent=step.title;
+        document.getElementById('site-tour-description').textContent=step.desc;
+        document.getElementById('site-tour-position').textContent=(this._siteTourStep+1)+' / '+this.siteTourSteps.length;
+        document.getElementById('site-tour-next').textContent=this._siteTourStep===this.siteTourSteps.length-1?'Termina tour':'Avanti';
+    },
+    advanceSiteTour(){this._siteTourStep++;this.renderSiteTour();},
+    finishSiteTour(){
+        document.querySelectorAll('.site-tour-highlight').forEach(el=>el.classList.remove('site-tour-highlight'));
+        document.getElementById('site-tour')?.classList.add('hidden');
+        document.getElementById('site-welcome')?.classList.add('hidden');
+        this.state.siteWelcomeSeen=true;
+        this.saveStorage({localOnly:true});
+        this.ensureSiteOnboarding();
+    },
     // Modal Streak
     openStreakModal() {
         SoundFX.playClick();
@@ -2357,9 +2408,14 @@ const App = {
             container.appendChild(el);
         });
 
+        const editable=this.canChangeStreakGoal();
+        const status=document.getElementById('streak-change-status');
+        if(status)status.textContent=editable?'Puoi scegliere una volta oggi; dopo la scelta il ritmo resta bloccato.':'Ritmo bloccato: potrai cambiarlo il prossimo lunedi, una sola volta.';
         ["rilassato", "concentrato", "lockin"].forEach(tier => {
             const el = document.getElementById(`tier-${tier}`);
             if (el) {
+                el.classList.toggle('goal-locked',!editable);
+                el.setAttribute('aria-disabled',String(!editable));
                 if (this.state.streakMode === tier) {
                     el.classList.add('selected');
                     el.querySelector('.tier-status-tag').innerText = "Attivo";
@@ -2378,12 +2434,17 @@ const App = {
         document.getElementById('streak-modal').classList.add('hidden');
     },
 
-    setStreakMode(tier) {
+    setStreakMode(tier){
+        if(!Object.hasOwn(STREAK_TIERS,tier)||!this.canChangeStreakGoal())return false;
         SoundFX.playClick();
-        this.state.streakMode = tier;
+        this.state.streakMode=tier;
+        this.state.streakGoalSelection={week:this.getWeekId(),selectedDate:this.getTodayISO()};
+        this.state.siteWelcomeSeen=true;
         this.saveStorage();
         this.updateStatsUI();
-        this.openStreakModal(); // Aggiorna la vista modale
+        document.getElementById('site-goal-gate')?.classList.add('hidden');
+        this.openStreakModal();
+        return true;
     },
 
     updateStatsUI({ announceLevelUp = false } = {}) {
@@ -4612,6 +4673,15 @@ const App = {
         // Il livello fa parte del profilo, senza un secondo pulsante annidato.
         // I traguardi rimangono raggiungibili da "Traguardi" nella navbar.
 
+        // Tour introduttivo; la scelta della streak non e' saltabile.
+        document.getElementById('site-start-tour')?.addEventListener('click',()=>this.beginSiteTour());
+        document.getElementById('site-skip-tour')?.addEventListener('click',()=>this.finishSiteTour());
+        document.getElementById('site-tour-skip')?.addEventListener('click',()=>this.finishSiteTour());
+        document.getElementById('site-tour-next')?.addEventListener('click',()=>this.advanceSiteTour());
+        document.querySelectorAll('#site-goal-gate [data-goal]').forEach(el=>el.onclick=()=>this.setStreakMode(el.dataset.goal));
+        window.addEventListener('resize',()=>{
+            if(!document.getElementById('site-tour')?.classList.contains('hidden'))this.renderSiteTour();
+        });
         // Serie Settimanale (Streak)
         document.getElementById('btn-streak-modal').onclick = () => this.openStreakModal();
         document.getElementById('btn-close-streak').onclick = () => this.closeStreakModal();
@@ -6218,6 +6288,7 @@ const App = {
         await window.AuthManager.init();
         if(window.AuthManager.isGuest() || !window.AuthManager.isCloudActive()){
             this._cloudHydrationPending=false;
+            this.ensureSiteOnboarding();
         }
 
         // 1. Apertura e Chiusura Modal Auth
@@ -7117,6 +7188,7 @@ const App = {
             this._cloudHydrationPending=false;
         }
         this.saveStorage();
+        this.ensureSiteOnboarding();
     },
 
     applyImportedState(data, notify = true) {
@@ -7127,6 +7199,8 @@ const App = {
         if (data.streak !== undefined) this.state.streak = data.streak;
         if (data.streakWeeks !== undefined) this.state.streakWeeks = data.streakWeeks;
         if (data.streakMode) this.state.streakMode = data.streakMode;
+        if(data.streakGoalSelection?.week)this.state.streakGoalSelection=data.streakGoalSelection;
+        if(data.siteWelcomeSeen===true)this.state.siteWelcomeSeen=true;
         if (data.activeDaysThisWeek) this.state.activeDaysThisWeek = data.activeDaysThisWeek;
         if (data.currentWeekId !== undefined) this.state.currentWeekId = data.currentWeekId;
         if (data.lastActiveDate !== undefined) this.state.lastActiveDate = data.lastActiveDate;
