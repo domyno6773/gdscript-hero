@@ -7154,6 +7154,13 @@ const App = {
         let snapshot=this.state;
         const baseline=this.getCloudBaseline();
         const auth=window.AuthManager;
+        // Gli account esistenti senza metadati di onboarding sono legacy:
+        // conservano l'obiettivo corrente e non rivedono la guida.
+        if(cloudSave && !cloudSave.streakGoalSelection) {
+            cloudSave={...cloudSave,streakGoalSelection:{
+                week:cloudSave.currentWeekId||this.getWeekId(),selectedDate:'legacy'
+            },siteWelcomeSeen:true};
+        }
         // Dati ospite solo al primo accesso del nuovo account verificato.
         // Il cloud, se gia' presente, ha sempre la precedenza su questa scelta.
         const firstImport=!this.state.guestOnboardingV1?.complete && auth && !auth.isGuest()

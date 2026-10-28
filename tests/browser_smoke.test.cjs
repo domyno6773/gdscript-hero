@@ -1088,6 +1088,27 @@ async function smoke(browser,url,width){
  await page.route(/^https:\/\//,r=>r.abort('blockedbyclient'));
  const response=await page.goto(url,{waitUntil:'load',timeout:30000});
  assert.equal(response.status(),200);
+ // Primo ingresso: tour facoltativo, obiettivo non saltabile.
+ assert.equal(await page.locator('#site-welcome').isVisible(),true);
+ await page.locator('#site-start-tour').click();
+ assert.equal(await page.locator('#site-tour').isVisible(),true);
+ for(let n=0;n<6;n++){
+   assert.equal((await page.locator('#site-tour-position').textContent()).trim(),(n+1)+' / 6');
+   await page.locator('#site-tour-next').click();
+ }
+ assert.equal(await page.locator('#site-goal-gate').isVisible(),true);
+ await page.reload({waitUntil:'load'});
+ assert.equal(await page.locator('#site-goal-gate').isVisible(),true,
+   'Reload must not bypass the weekly goal');
+ await page.locator('#site-goal-gate [data-goal="concentrato"]').click();
+ assert.equal(await page.locator('#site-goal-gate').isHidden(),true);
+ assert.equal(await page.evaluate(()=>App.state.streakMode),'concentrato');
+ assert.equal(await page.evaluate(()=>App.state.streakGoalSelection.week===App.getWeekId()),true);
+ assert.equal(await page.evaluate(()=>App.setStreakMode('lockin')),false);
+ await page.locator('#btn-close-streak').click();
+ await page.reload({waitUntil:'load'});
+ assert.equal(await page.locator('#site-welcome').isHidden(),true);
+ assert.equal(await page.locator('#site-goal-gate').isHidden(),true);
  await page.waitForFunction(()=>!!window.App&&!!window.LESSONS_DATA&&!document.getElementById('view-roadmap').classList.contains('hidden'));
  assert.equal(await page.evaluate(()=>LESSONS_DATA.length),111);
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
