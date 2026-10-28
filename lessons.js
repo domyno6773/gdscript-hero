@@ -260,6 +260,10 @@ function hasRealComment(code) {
         .replace(/'(?:\\.|[^'\\])*'/g, "''");
     return /#\s*\S+/.test(noStrings);
 }
+const LESSONS_DATA = [
+    // ==========================================
+    // CAPITOLO 1: INTRODUZIONE
+    // ==========================================
 
 
     {
