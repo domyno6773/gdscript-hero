@@ -98,53 +98,70 @@ body { height:100vh; height:100dvh; min-width:0; }
   .navbar .stat-pill { font-size:.69rem; padding:3px 4px; }
 }
 
-/* MacBook 13/14/15/16: la navbar desktop supera la larghezza disponibile
-   già PRIMA del vecchio breakpoint a 1380 px (menu + statistiche + account).
-   Manteniamo ogni funzione accessibile come icona con tooltip: nessun
-   overflow nascosto e nessuna barra/taglio artificiale. */
-@media (min-width:821px) and (max-width:1780px) {
+/* Desktop Mac/Safari: tre colonne che NON possono spingere il logo fuori
+   dallo schermo. Niente tagli con overflow:hidden sui comandi:
+   la parte centrale usa il proprio spazio tra logo e account. */
+@media (min-width:821px) {
   .navbar {
+    display:grid;
+    grid-template-columns:max-content minmax(0,1fr) max-content;
+    justify-content:normal;
+    align-items:center;
     width:100%;
-    padding-inline:clamp(8px,1vw,16px);
-    gap:clamp(4px,.5vw,9px);
+    min-width:0;
+    max-width:100vw;
+    box-sizing:border-box;
+    column-gap:clamp(5px,.85vw,14px);
   }
   .navbar > .nav-left,
-  .navbar > .nav-right { flex:0 0 auto; }
+  .navbar > .nav-center,
+  .navbar > .nav-right { min-width:0; margin:0; }
+  .navbar > .nav-left { justify-self:start; flex-shrink:0; }
   .navbar > .nav-center {
-    flex:0 1 auto;
-    gap:2px;
-    padding-inline:2px;
+    display:flex; width:100%; justify-content:center;
+    gap:2px; padding-inline:2px;
+    flex-shrink:1;
   }
-  .navbar .nav-center .nav-btn {
-    flex:0 0 auto;
-    padding:7px 8px;
-  }
+  .navbar > .nav-right { justify-self:end; flex-shrink:0; }
+  .navbar .nav-center .nav-btn { flex:0 0 auto; }
+}
+/* Con Safari e le impostazioni di zoom i testi del menu possono
+   triplicare la larghezza: pulsanti a icona, con title ed aria-label. */
+@media (min-width:821px) and (max-width:1999px) {
+  .navbar { padding-inline:clamp(8px,1vw,16px); }
   .navbar .nav-center .nav-btn-text { display:none; }
+  .navbar .nav-center .nav-btn { padding:7px clamp(5px,.55vw,9px); }
+  .navbar .nav-stats-group { gap:3px; padding:3px 4px; }
   .navbar .nav-right,
-  .navbar .nav-user-group { gap:5px; }
-  .navbar .nav-stats-group { gap:4px; padding:3px 5px; }
-  .navbar .stat-pill { padding:4px 7px; }
-  .navbar .logo { font-size:1.05rem; }
-  .navbar .nav-profile-name { max-width:70px; }
+  .navbar .nav-user-group { gap:4px; }
+  .navbar .stat-pill { padding:4px 6px; }
   .navbar #nav-auth-label {
-    display:inline-block;
-    max-width:108px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    max-width:100px; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap;
   }
+  .navbar .nav-profile-name { max-width:65px; }
 }
-/* Tra 821 e 1120 px mantenere le azioni ma ridurre il testo ridondante:
-   il profilo resta selezionabile dall'avatar e accessibile dal title. */
-@media (min-width:821px) and (max-width:1120px) {
-  .navbar .nav-center .nav-btn { padding-inline:7px; }
-  .navbar .nav-profile-name { display:none; }
-  .navbar .logo { padding-inline:2px; font-size:.95rem; }
-  .navbar #nav-auth-label { max-width:72px; }
-}
-@media (min-width:821px) and (max-width:960px) {
+/* Scendere sotto 1200 px non deve far scomparire il branding:
+   accorciare i dati secondari, non ridurre/spostare il logo. */
+@media (min-width:821px) and (max-width:1199px) {
+  .navbar { column-gap:5px; }
+  .navbar .logo { font-size:.98rem; padding-inline:3px; }
   .navbar .nav-center .nav-btn { padding-inline:5px; }
+  .navbar .nav-profile-name { display:none; }
+  .navbar #nav-auth-label { max-width:65px; }
+}
+@media (min-width:821px) and (max-width:1030px) {
   .navbar .nav-stats-group { gap:2px; }
   .navbar .nav-stats-group .stat-label,
   .navbar #streak-sub-label { display:none; }
+  .navbar .logo-text { font-size:.88rem; letter-spacing:-.05em; }
+  .navbar .nav-center .nav-btn { padding-inline:4px; }
 }
+@media (min-width:821px) and (max-width:900px) {
+  .navbar .logo-text { display:none; }
+  .navbar #nav-auth-label { display:none; }
+  .navbar .nav-stats-group .streak-pill { display:none; }
+}
+/* Nessuno scroll orizzontale del documento su trackpad Mac. Le aree
+   di codice conservano il proprio scorrimento indipendente. */
+html, body { overflow-x:clip; }
