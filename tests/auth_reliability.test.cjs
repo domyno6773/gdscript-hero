@@ -57,51 +57,54 @@ async function run() {
     assert.equal(merged.reviewProgress.variantHistory.a.last_run.is_autonomous, false);
     count++;
 
-    // Simula due salvataggi quasi simultanei. Il secondo NON deve partire
-    // finché il server non ha completato il primo.
-    auth.currentUser = { id: 'u', email: 'test@example.com', isGuest: false };
-    let db = { 'test@example.com': { progress: null } };
-    auth.getAccountsDB = () => db;
-    auth.saveAccountsDB = next => { db = next; };
-    const writes = [];
-    let releaseFirst;
-    const firstPending = new Promise(resolve => { releaseFirst = resolve; });
-    let inFlight = 0, maxInFlight = 0;
-    auth.supabaseClient = {
-        auth: { getUser: async () => ({ data: { user: { id: 'u', email: 'test@example.com' } } }) },
-        from: () => ({
-            upsert: async payload => {
-                writes.push(JSON.parse(JSON.stringify(payload)));
-                inFlight++;
-                maxInFlight = Math.max(inFlight, maxInFlight);
-                if (payload.xp === 10) await firstPending;
-                inFlight--;
-                return { error: null };
-            }
-        })
-    };
-    const one = auth.syncUserProgress({ xp: 10 });
-    const two = auth.syncUserProgress({ xp: 20 });
-    assert.equal(db['test@example.com'].progress.xp, 20, 'local save is immediate');
-    for (let i = 0; i < 10; i++) await Promise.resolve();
-    assert.equal(writes.length, 1, 'no overlapping writes');
-    releaseFirst();
-    await Promise.all([one, two]);
-    assert.equal(writes[1].xp, 20);
-    assert.equal(maxInFlight, 1);
-    count += 3;
 
-    // La coda deve proseguire anche dopo un errore cloud.
-    let attempts = 0;
-    auth.supabaseClient.from = () => ({
-        upsert: async () => ({ error: ++attempts === 1 ? { message: 'Offline' } : null })
-    });
-    const three = auth.syncUserProgress({ xp: 30 });
-    const four = auth.syncUserProgress({ xp: 40 });
-    await Promise.all([three, four]);
-    assert.equal(attempts, 2);
-    assert.equal(db['test@example.com'].progress.xp, 40);
-    count += 2;
+    // La coda locale invia le richieste con la versione confermata dal server.
+    auth.currentUser={id:'u',email:'test@example.com',isGuest:false};
+    let db={'test@example.com':{progress:null}};
+    auth.getAccountsDB=()=>db;
+    auth.saveAccountsDB=next=>{db=next;};
+    auth._cloudVersion={userId:'u',revision:0,blocked:false,remote:null};
+    let revision=0,inFlight=0,maxInFlight=0;
+    let releaseFirst;
+    const pending=new Promise(resolve=>{releaseFirst=resolve;});
+    const writes=[];
+    auth.supabaseClient={
+        auth:{getUser:async()=>({data:{user:{id:'u',email:'test@example.com'}}})},
+        rpc:async(name,args)=>{
+            assert.equal(name,'gdh_cas_save_progress');
+            inFlight++;maxInFlight=Math.max(maxInFlight,inFlight);
+            writes.push(args);
+            if(args.p_save_data.xp===10)await pending;
+            const result=[{applied:revision===args.p_expected_revision,save_revision:revision+1,save_data:args.p_save_data}];
+            if(result[0].applied)revision++;
+            inFlight--;
+            return {data:result,error:null};
+        }
+    };
+    const one=auth.syncUserProgress({xp:10});
+    const two=auth.syncUserProgress({xp:20});
+    for(let i=0;i<10;i++)await Promise.resolve();
+    assert.equal(writes.length,1,'overlapping requests');
+    releaseFirst();
+    await Promise.all([one,two]);
+    assert.deepEqual(writes.map(x=>x.p_expected_revision),[0,1]);
+    assert.equal(maxInFlight,1);
+    assert.equal(revision,2);
+    assert.equal(auth.getSaveRevision(),2);
+    count+=3;
+    // Un errore di rete conserva i salvataggi locali e permette tentativi futuri.
+    let attempts=0;
+    auth.supabaseClient.rpc=async(_name,args)=>{
+        if(++attempts===1)return {data:null,error:{message:'Offline'}};
+        return {data:[{applied:true,save_revision:3,save_data:args.p_save_data}],error:null};
+    };
+    await auth.syncUserProgress({xp:30});
+    assert.equal(auth.getSyncStatus().kind,'error');
+    assert.equal(db['test@example.com'].progress.xp,30);
+    await auth.syncUserProgress({xp:40});
+    assert.equal(auth.getSyncStatus().kind,'synced');
+    assert.equal(auth.getSaveRevision(),3);
+    count+=2;
     console.log('PASS:', count, 'gruppi di controlli su backup, merge e sincronizzazione');
 }
 run().catch(err => { console.error(err); process.exitCode = 1; });

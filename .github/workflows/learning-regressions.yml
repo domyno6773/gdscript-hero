@@ -28,6 +28,8 @@ jobs:
         run: node tests/code_guide.test.cjs
       - name: Backups and cloud sync
         run: node tests/auth_reliability.test.cjs
+      - name: Concurrent cloud revisions across two devices
+        run: node tests/cloud_cas_concurrency.test.cjs
       - name: Account separation and real authentication
         run: node tests/account_isolation.test.cjs
       - name: XP 2.0, weekly limits and quest claims

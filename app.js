@@ -458,8 +458,8 @@ const App = {
         this.saveStorage({localOnly:true});
     },
 
-    saveStorage(options = {}) {
-        const payload = {
+    getSavePayload() {
+        return {
             theme: this.state.theme,
             xp: this.state.xp,
             rewardsV2: this.state.rewardsV2,
@@ -486,20 +486,49 @@ const App = {
             learningTelemetry: this.state.learningTelemetry,
             reviewProgress: this.state.reviewProgress
         };
-
-        try {
+    },
+    saveStorage(options = {}) {
+        const payload=this.getSavePayload();
+        try{
             const serialized=JSON.stringify(payload);
-            localStorage.setItem('gdscript_hero_save_v4', serialized);
+            // Il salvataggio per identita' e' prioritario rispetto allo specchio legacy.
             localStorage.setItem(this.ownerStorageKey(this._saveOwner||'guest'),serialized);
             localStorage.setItem('gdscript_hero_active_owner_v1',this._saveOwner||'guest');
-        } catch (e) {}
-
-        // Durante la transizione di account e prima del caricamento cloud, non
-        // sovrascrivere MAI i salvataggi remoti con uno stato vuoto o dell'ospite.
-        if (!options.localOnly && !this._cloudHydrationPending &&
-            window.AuthManager && typeof window.AuthManager.syncUserProgress === 'function') {
+            try{localStorage.setItem('gdscript_hero_save_v4',serialized);}
+            catch(error){console.warn('[App] Copia legacy non disponibile:',error);}
+            this.renderLocalSaveError(false);
+        }catch(error){
+            this.renderLocalSaveError(true);
+            console.error('[App] Salvataggio locale non riuscito:',error);
+        }
+        if(!options.localOnly && !this._cloudHydrationPending &&
+            window.AuthManager?.syncUserProgress){
             window.AuthManager.syncUserProgress(payload);
         }
+    },
+    renderLocalSaveError(failed){
+        this._localSaveFailed=failed;
+        this.renderSyncStatus(window.AuthManager?.getSyncStatus?.()||{kind:'idle'});
+    },
+    renderSyncStatus(status={kind:'idle',message:''}){
+        const notice=document.getElementById('gdh-save-notice');
+        if(!notice)return;
+        const text=notice.querySelector('.gdh-save-notice-text');
+        const retry=notice.querySelector('#gdh-save-retry');
+        const resolve=notice.querySelector('#gdh-save-resolve');
+        const backup=notice.querySelector('#gdh-save-backup');
+        if(this._localSaveFailed){
+            notice.classList.remove('hidden');
+            notice.dataset.kind='error';
+            text.textContent='Salvataggio locale non riuscito: libera spazio o esporta un backup.';
+        }else if(['error','conflict','pending'].includes(status.kind)){
+            notice.classList.remove('hidden');
+            notice.dataset.kind=status.kind;
+            text.textContent=status.message||'Progressi salvati localmente, cloud in attesa.';
+        }else notice.classList.add('hidden');
+        retry.hidden=!!this._localSaveFailed||status.kind==='conflict';
+        resolve.hidden=!!this._localSaveFailed||status.kind!=='conflict';
+        backup.hidden=!(this._localSaveFailed||status.kind==='conflict');
     },
 
     // ==========================================
@@ -5992,6 +6021,16 @@ const App = {
             }
         });
 
+        const syncRetry=document.getElementById('gdh-save-retry');
+        if(syncRetry)syncRetry.onclick=()=>window.AuthManager.retryCloudSync();
+        const syncResolve=document.getElementById('gdh-save-resolve');
+        if(syncResolve)syncResolve.onclick=()=>{
+            if(confirm('Unire i progressi di entrambi i dispositivi? Le due versioni verranno archiviate localmente prima della fusione. In caso di codice modificato su entrambi, prevale il codice di questo dispositivo.')){
+                window.AuthManager.resolveCloudConflict();
+            }
+        };
+        const syncBackup=document.getElementById('gdh-save-backup');
+        if(syncBackup)syncBackup.onclick=()=>window.AuthManager.exportToFile(this.state);
         await window.AuthManager.init();
         if(window.AuthManager.isGuest() || !window.AuthManager.isCloudActive()){
             this._cloudHydrationPending=false;

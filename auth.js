@@ -118,11 +118,12 @@ const AuthManager = {
                     }
 
                     // Carica i salvataggi cloud
-                    const cloudSave = await this.fetchFromCloud();
-                    if (window.App && typeof window.App.integrateCloudSave === 'function') {
-                        await window.App.integrateCloudSave(cloudSave);
-                    } else if (cloudSave && window.App && typeof window.App.applyImportedState === 'function') {
-                        window.App.applyImportedState(cloudSave, false);
+                    try{
+                        const cloudSave=await this.fetchFromCloud();
+                        if(window.App?.integrateCloudSave)await window.App.integrateCloudSave(cloudSave);
+                    }catch(error){
+                        this.setSyncStatus('error','Lettura cloud fallita: salvataggio remoto sospeso per sicurezza.');
+                        console.warn('[AuthManager] Lettura cloud fallita:',error);
                     }
                 }
 
@@ -155,7 +156,10 @@ const AuthManager = {
                             this.saveSession(user);
                             const cloudSave=await this.fetchFromCloud();
                             if(this.currentUser?.id===id)await window.App?.integrateCloudSave?.(cloudSave);
-                        }catch(error){console.warn('[AuthManager] Recupero sessione fallito',error);}
+                        }catch(error){
+                            this.setSyncStatus('error','Lettura cloud fallita: salvataggio remoto sospeso.');
+                            console.warn('[AuthManager] Recupero sessione fallito',error);
+                        }
                     },0);
                 });
             } catch (err) {
@@ -462,100 +466,121 @@ const AuthManager = {
         } catch (e) {}
 
         this.currentUser = this.createGuestUser();
+        this._cloudVersion=null;
+        this.setSyncStatus('idle','');
         this.notifyListeners();
     },
 
-    /**
-     * Salva i progressi nel Database Cloud (Supabase) e nel database locale
-     */
-    async syncUserProgress(progressData) {
-        if (this.isGuest() || !this.currentUser?.email || !progressData) return;
-        const email = this.currentUser.email;
-        // Una copia indipendente evita che una modifica successiva alteri il salvataggio in coda.
-        const snapshot = JSON.parse(JSON.stringify(progressData));
 
-        // Prima la copia locale: un errore di rete non deve impedire il salvataggio.
-        const db = this.getAccountsDB();
-        if (db[email]) {
-            db[email].progress = snapshot;
-            db[email].lastSync = new Date().toISOString();
+    // Stato remoto valido solo dopo lettura: un errore non e' un salvataggio vuoto.
+    setSyncStatus(kind,message=''){this._syncStatus={kind,message};window.App?.renderSyncStatus?.(this._syncStatus);},
+    getSyncStatus(){return this._syncStatus||{kind:'idle',message:''};},
+    getSaveRevision(){return this._cloudVersion?.userId===this.currentUser?.id?this._cloudVersion.revision:null;},
+    async syncUserProgress(progressData){
+        if(this.isGuest()||!this.currentUser?.email||!progressData)return;
+        const owner=this.currentUser.id,snapshot=JSON.parse(JSON.stringify(progressData));
+        const db=this.getAccountsDB();
+        if(db[this.currentUser.email]){
+            db[this.currentUser.email].progress=snapshot;
+            db[this.currentUser.email].lastSync=new Date().toISOString();
             this.saveAccountsDB(db);
         }
-
-        if (this.isCloudActive()) {
-            try {
-                await this.syncToCloud(snapshot);
-            } catch (err) {
-                console.warn('[AuthManager] Sync cloud non riuscito; progressi locali mantenuti:', err);
-            }
+        if(!this.isCloudActive())return;
+        if(this._cloudVersion?.userId!==owner){
+            this.setSyncStatus('pending','Salvataggio locale protetto: connessione cloud non verificata.');return;
+        }
+        if(this._cloudVersion.blocked){
+            this.setSyncStatus('conflict','Modifiche su due dispositivi: sincronizzazione sospesa. I dati locali sono conservati.');return;
+        }
+        try{await this.syncToCloud(snapshot);}catch(error){
+            this.setSyncStatus(error.code==='GDH_CONFLICT'?'conflict':'error',
+                error.code==='GDH_CONFLICT'
+                    ?'Due dispositivi hanno modificato i progressi: risolvi il conflitto senza perdere i dati.'
+                    :'Cloud non raggiungibile. Il lavoro e salvato sul dispositivo; puoi riprovare.');
+            console.warn('[AuthManager] Sincronizzazione fallita:',error);
         }
     },
-
-    /**
-     * Serializza gli upsert cloud della scheda corrente nell'ordine richiesto.
-     * La coda evita che una richiesta lenta sovrascriva quella successiva.
-     * Non sostituisce una gestione delle versioni lato server per schede/dispositivi diversi.
-     */
-    async syncToCloud(saveData) {
-        if (!this.isCloudActive() || this.isGuest() || !this.currentUser?.email || !saveData) return;
-        const accountEmail = this.currentUser.email.toLowerCase();
-        const snapshot = JSON.parse(JSON.stringify(saveData));
-        const previous = this._cloudWriteQueue || Promise.resolve();
-        const operation = previous.catch(() => {}).then(async () => {
-            if (!this.isCloudActive() || this.isGuest() ||
-                this.currentUser?.email?.toLowerCase() !== accountEmail) return;
-
-            const { data, error: authError } = await this.supabaseClient.auth.getUser();
-            if (authError) throw authError;
-            const user = data?.user;
-            if (!user || user.email?.toLowerCase() !== accountEmail) return;
-            // Controllo anche dopo l'attesa dell'autenticazione.
-            if (this.isGuest() || this.currentUser?.email?.toLowerCase() !== accountEmail) return;
-
-            const payload = {
-                user_id: user.id,
-                email: user.email,
-                xp: snapshot.xp || 0,
-                level: window.ProgressionV2 ? window.ProgressionV2.levelFromXp(snapshot.xp).tier.level : 1,
-                streak: snapshot.streak || 0,
-                streak_weeks: snapshot.streakWeeks || 0,
-                finished_lessons_count: (snapshot.finishedLessons || []).length,
-                save_data: snapshot,
-                updated_at: new Date().toISOString()
-            };
-
-            const { error } = await this.supabaseClient
-                .from('game_saves')
-                .upsert(payload, { onConflict: 'user_id' });
-            if (error) throw error;
+    async syncToCloud(saveData){
+        if(!this.isCloudActive()||this.isGuest())return;
+        const owner=this.currentUser.id,snapshot=JSON.parse(JSON.stringify(saveData));
+        const previous=this._cloudWriteQueue||Promise.resolve();
+        const operation=previous.catch(()=>{}).then(async()=>{
+            if(this.isGuest()||this.currentUser?.id!==owner||!this.isCloudActive())return;
+            const state=this._cloudVersion;
+            if(!state||state.userId!==owner||state.blocked)return;
+            const {data:identity,error:identityError}=await this.supabaseClient.auth.getUser();
+            if(identityError)throw identityError;
+            if(identity?.user?.id!==owner)throw Error('Identita cloud non valida');
+            if(this.currentUser?.id!==owner)return;
+            this.setSyncStatus('saving','Sincronizzazione in corso…');
+            const level=window.ProgressionV2?.levelFromXp?.(snapshot.xp||0)?.tier?.level||1;
+            const {data,error}=await this.supabaseClient.rpc('gdh_cas_save_progress',{
+                p_expected_revision:state.revision,p_save_data:snapshot,p_level:level
+            });
+            if(error)throw error;
+            if(this.currentUser?.id!==owner)return;
+            const result=Array.isArray(data)?data[0]:data;
+            if(!result||!Number.isSafeInteger(Number(result.save_revision)))throw Error('Risposta cloud non valida');
+            if(!result.applied){
+                state.blocked=true;state.remote=result.save_data;state.revision=Number(result.save_revision);
+                const conflict=Error('Conflitto tra dispositivi');conflict.code='GDH_CONFLICT';throw conflict;
+            }
+            state.revision=Number(result.save_revision);
+            this.setSyncStatus('synced','Progressi sincronizzati');
         });
-
-        // La coda continua anche quando una singola richiesta fallisce.
-        this._cloudWriteQueue = operation.catch(() => {});
+        this._cloudWriteQueue=operation.catch(()=>{});
         return operation;
     },
-    /**
-     * Recupera il salvataggio salvato nel cloud Supabase
-     */
-    async fetchFromCloud() {
-        if (!this.isCloudActive() || this.isGuest()) return null;
-        try {
-            const { data: { user } } = await this.supabaseClient.auth.getUser();
-            if (!user) return null;
-
-            const { data, error } = await this.supabaseClient
-                .from('game_saves')
-                .select('save_data')
-                .eq('user_id', user.id)
-                .single();
-
-            if (error || !data) return null;
-            return data.save_data;
-        } catch (e) {
-            return null;
+    async fetchFromCloud(){
+        if(!this.isCloudActive()||this.isGuest())return null;
+        const owner=this.currentUser.id;
+        const {data:identity,error:identityError}=await this.supabaseClient.auth.getUser();
+        if(identityError)throw identityError;
+        if(identity?.user?.id!==owner)throw Error('Identita cloud non valida');
+        const {data,error}=await this.supabaseClient.from('game_saves')
+            .select('save_data,save_revision').eq('user_id',owner).maybeSingle();
+        if(error)throw error;
+        if(this.currentUser?.id!==owner)throw Error('Account cambiato durante il caricamento');
+        this._cloudVersion={userId:owner,revision:data?Number(data.save_revision):-1,blocked:false,remote:null};
+        this.setSyncStatus('ready','Cloud verificato');
+        return data?.save_data||null;
+    },
+    async retryCloudSync(){
+        if(!this.isCloudActive()||this.isGuest())return;
+        if(this._cloudVersion?.blocked){
+            this.setSyncStatus('conflict','Prima risolvi il conflitto tra dispositivi.');return;
+        }
+        try{
+            if(this._cloudVersion?.userId!==this.currentUser.id){
+                const remote=await this.fetchFromCloud();
+                await window.App?.integrateCloudSave?.(remote);
+            }else await this.syncUserProgress(window.App?.getSavePayload?.()||window.App?.state);
+        }catch(error){
+            this.setSyncStatus('error','Cloud non raggiungibile: dati locali conservati.');
         }
     },
-
+    async resolveCloudConflict(){
+        const state=this._cloudVersion;
+        if(!state?.blocked||state.userId!==this.currentUser?.id)return;
+        const local=window.App?.getSavePayload?.()||window.App?.state;
+        if(!local)return;
+        const suffix=new Date().toISOString().replace(/[:.]/g,'-');
+        try{
+            localStorage.setItem('gdh_cloud_conflict_backup:'+state.userId+':'+suffix,
+                JSON.stringify({type:'GDScript Hero - recovery snapshot',
+                    created_at:new Date().toISOString(),owner:state.userId,local,cloud:state.remote}));
+        }catch(error){
+            this.setSyncStatus('conflict','Spazio insufficiente per archiviare le versioni. Esporta prima un backup.');
+            return;
+        }
+        // Merge esplicito, precedenza del codice locale. Entrambe le versioni
+        // restano conservate nel backup, incluse le sezioni che divergono.
+        const merged=this.mergeProgress(state.remote||{},local);
+        state.blocked=false;state.remote=null;
+        window.App?.applyImportedState?.(merged,false);
+        this.setSyncStatus('pending','Versioni archiviate. Invio della fusione in corso.');
+        await this.syncUserProgress(window.App?.getSavePayload?.()||merged);
+    },
     /**
      * Recupera i progressi salvati (Cloud o Locale)
      */

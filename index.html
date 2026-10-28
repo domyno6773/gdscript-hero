@@ -1999,6 +1999,14 @@
         </button>
     </nav>
 
+    <div id="gdh-save-notice" class="gdh-save-notice hidden" role="status" aria-live="polite">
+        <span class="gdh-save-notice-text"></span>
+        <div class="gdh-save-notice-actions">
+            <button type="button" id="gdh-save-retry">Riprova</button>
+            <button type="button" id="gdh-save-resolve" hidden>Unisci progressi</button>
+            <button type="button" id="gdh-save-backup" hidden>Esporta backup</button>
+        </div>
+    </div>
     <!-- Script inclusi in ordine -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
