@@ -105,7 +105,7 @@ function arrow(line,closed,onClick){
 function gutter(el,state){
  state.gutter.replaceChildren();
  if(state.folds.size)return;
- const rect=el.getBoundingClientRect(),parent=state.host.getBoundingClientRect();
+ const rect=el.getBoundingClientRect(),parent=state.gutter.getBoundingClientRect();
  const height=lh(el),pad=parseFloat(getComputedStyle(el).paddingTop)||0;
  const first=Math.max(0,Math.floor((el.scrollTop-pad)/height));
  const count=el.value.split('\n').length;
@@ -121,16 +121,26 @@ function preview(el,state){
  const surface=state.preview;
  surface.replaceChildren();
  surface.hidden=false;
+ const numberColumn=state.host.querySelector('.line-numbers');
+ surface.style.setProperty('--gdh-number-width',(numberColumn?.getBoundingClientRect().width||48)+'px');
  const rows=el.value.split('\n');
  for(let i=0;i<rows.length;){
   const line=i,closed=state.folds.has(i);
   const row=node('div','gdh-fold-preview-row');
+  row.dataset.sourceLine=String(i+1);
   const num=node('div','gdh-fold-preview-number',String(i+1));
-  const code=node('pre','gdh-fold-preview-code',rows[i]||' ');
+  // Separate column, after the line number, matching Godot's gutter.
+  const foldSlot=node('div','gdh-fold-preview-controls');
   if(state.blocks.has(i)){
-   num.prepend(arrow(i,closed,()=>toggle(el,line)));
-   if(closed)code.append(node('span','gdh-fold-count','  … '+(state.blocks.get(i)-i)+' righe nascoste'));
+   foldSlot.append(arrow(i,closed,()=>toggle(el,line)));
   }
+  const code=node('pre','gdh-fold-preview-code');
+  if(window.GDScriptHighlighter){
+   // The normal editor remains underneath. Preserve syntax colors and indent
+   // marks in the compact view, without inserting markup in saved source.
+   code.innerHTML=window.GDScriptHighlighter.highlight(rows[i]||' ');
+  }else code.textContent=rows[i]||' ';
+  if(closed)code.append(node('span','gdh-fold-count','  … '+(state.blocks.get(i)-i)+' righe nascoste'));
   code.title='Tocca per modificare il codice (riapre i blocchi)';
   code.addEventListener('click',()=>{
    state.folds.clear();refresh(el);
@@ -138,7 +148,8 @@ function preview(el,state){
    el.focus();el.setSelectionRange(cursor,cursor);
    el.scrollTop=Math.max(0,line*lh(el)-3*lh(el));
   });
-  row.append(num,code);surface.append(row);
+  row.append(num,foldSlot,code);surface.append(row);
+  // Skip ONLY this block's own children; adjacent functions stay visible.
   i=closed?state.blocks.get(i)+1:i+1;
  }
 }
@@ -181,7 +192,10 @@ function attach(el){
  const folded=node('div','gdh-fold-preview');
  folded.hidden=true;
  folded.setAttribute('aria-label','Codice compattato. Tocca una riga per aprire il codice e modificarlo.');
- host.append(foldGutter,folded);
+ // The real fold controls belong beside the code, not inside line numbers.
+ // The compact preview spans both the number column and the editor.
+ (core?el.closest('.gdscript-edit-stack'):host).append(foldGutter);
+ host.append(folded);
  const s={host,gutter:foldGutter,preview:folded,folds:new Set(),blocks:new Map(),source:el.value,syntax};
  items.set(el,s);
  el.addEventListener('input',()=>refresh(el));

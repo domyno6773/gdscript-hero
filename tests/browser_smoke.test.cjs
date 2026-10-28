@@ -39,24 +39,50 @@ async function testGodotEditorExtras(page,selector){
  await editor.press('Shift+Tab');
  assert.equal(await editor.inputValue(),'','Shift+Tab must remove one indent');
  await editor.fill(base);
- const gutter=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-gutter':
-   '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-gutter';
+ const gutter=selector==='#code-editor'?'#view-exercise .gdscript-edit-stack > .gdh-fold-gutter':
+   '#view-practice .sandbox-editor-col .gdscript-edit-stack > .gdh-fold-gutter';
  await page.waitForFunction(s=>document.querySelector(s)?.querySelector('button'),gutter);
- // Sul telefono l'header dell'editor e le tab sono sticky: porta prima
- // il blocco di codice nel centro del viewport, fuori dalle barre fisse.
+ // The folding arrow must be to the RIGHT of the number column, never inside it.
+ const gutterPosition=await page.evaluate(id=>{
+   const input=document.getElementById(id);
+   const container=input.closest('.editor-wrapper');
+   const numbers=container.querySelector('.line-numbers').getBoundingClientRect();
+   const controls=container.querySelector('.gdscript-edit-stack > .gdh-fold-gutter').getBoundingClientRect();
+   return {numberRight:numbers.right,controlLeft:controls.left};
+ },selector.slice(1));
+ assert.ok(gutterPosition.controlLeft >= gutterPosition.numberRight - 2,
+   'Fold control overlaps line numbers: '+JSON.stringify(gutterPosition));
  if(selector==='#code-editor' && await page.evaluate(()=>innerWidth<=820)){
    await page.locator('#view-exercise .editor-wrapper').evaluate(el=>
      el.scrollIntoView({block:'center',behavior:'instant'}));
  }
- await page.locator(gutter+' button').first().click();
+ const first=page.locator(gutter+' button[aria-label="Comprimi blocco dalla riga 1"]');
+ assert.equal(await first.getAttribute('aria-expanded'),'true','Open blocks need a DOWN arrow');
+ await first.click();
  const preview=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-preview':
    '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-preview';
  assert.ok(await page.locator(preview).isVisible(),'Fold preview must become visible');
  assert.ok((await page.locator(preview).textContent()).includes('righe nascoste'),
    'Fold preview needs the hidden line count');
+ assert.equal(await page.locator(preview+' .gdh-fold-preview-row').count(),3,
+   'Closing first function should leave its heading, next function and body visible');
+ assert.ok((await page.locator(preview).textContent()).includes('func other():'),
+   'Adjacent function must remain visible');
+ assert.ok(!(await page.locator(preview).textContent()).includes('print("ok")'),
+   'Only selected function body should be hidden');
+ assert.equal(await page.locator(preview+' .gdh-fold-arrow.collapsed').first().getAttribute('aria-expanded'),
+   'false','Closed blocks need a RIGHT arrow');
  assert.equal(await editor.inputValue(),base,'Folding must never change canonical source');
  await page.locator(preview+' .gdh-fold-arrow.collapsed').first().click();
- assert.ok(await page.locator(preview).isHidden(),'Expanding must return to editable text');
+ assert.ok(await page.locator(preview).isHidden(),'Expanding must restore the whole editable view');
+ assert.equal(await editor.inputValue(),base);
+ // Nested if: folding this inner block must retain its parent and next function.
+ await page.locator(gutter+' button[aria-label="Comprimi blocco dalla riga 2"]').click();
+ assert.ok((await page.locator(preview).textContent()).includes('func demo():'));
+ assert.ok((await page.locator(preview).textContent()).includes('func other():'));
+ assert.ok(!(await page.locator(preview).textContent()).includes('print("ok")'));
+ await page.locator(preview+' .gdh-fold-arrow.collapsed').first().click();
+ assert.ok(await page.locator(preview).isHidden());
  assert.equal(await editor.inputValue(),base);
 }
 
