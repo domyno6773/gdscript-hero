@@ -16,7 +16,7 @@ const server = http.createServer((req, res) => {
     res.end(content);
   });
 });
-const widths = [2048, 1920, 1800, 1780, 1728, 1680, 1600, 1545, 1512, 1470, 1440, 1366, 1280, 1200, 1120, 1100, 1024, 960, 900, 821, 820, 390];
+const widths = [2048, 1920, 1915, 1800, 1780, 1728, 1680, 1600, 1545, 1512, 1470, 1440, 1366, 1280, 1200, 1120, 1100, 1024, 960, 900, 821, 820, 390];
 async function inspect(engine, url) {
  const browser = await engine.launch(engine.name()==='chromium' ? {headless:true,channel:'chrome',args:['--no-sandbox']} : {headless:true});
  try {
@@ -58,7 +58,14 @@ async function inspect(engine, url) {
         const clipped=visible.filter(r=>r.left < -1 || r.right > vw+1);
         const colliding=rects.slice(0,-1).some((r,i)=>r.right>rects[i+1].left+1);
         const logo=nav.querySelector('#btn-home').getBoundingClientRect();
-        return {vw,clipped,colliding,scrollWidth:nav.scrollWidth,clientWidth:nav.clientWidth,
+        const labels=Array.from(nav.querySelectorAll('.nav-center .nav-btn-text'))
+          .map(el=>({text:el.textContent.trim(),display:getComputedStyle(el).display,
+            width:el.getBoundingClientRect().width}));
+        const items=Array.from(nav.querySelectorAll('.nav-center .nav-btn'))
+          .filter(el=>getComputedStyle(el).display!=='none')
+          .map(el=>el.getBoundingClientRect());
+        const menuOverlap=items.slice(0,-1).some((r,i)=>r.right>items[i+1].left+1);
+        return {vw,clipped,colliding,labels,menuOverlap,scrollWidth:nav.scrollWidth,clientWidth:nav.clientWidth,
           logo:{left:logo.left,right:logo.right,width:logo.width},
           right:rects[2].right,groups:rects.map(r=>({left:r.left,right:r.right,width:r.width})),
           scrollX:window.scrollX,navDisplay:getComputedStyle(nav).display};
@@ -66,6 +73,11 @@ async function inspect(engine, url) {
       const msg=engine.name()+' '+w+'px '+view+' '+JSON.stringify(result);
       assert.equal(result.clipped.length,0,'A navbar action left the viewport: '+msg);
       assert.equal(result.colliding,false,'Navbar sections overlap: '+msg);
+      assert.equal(result.menuOverlap,false,'Menu buttons overlap: '+msg);
+      if (w>=1200) {
+        assert.ok(result.labels.length>=7&&result.labels.every(l=>l.display!=='none'&&l.width>6),
+          'Desktop must show text labels beside the icons: '+msg);
+      }
       assert.ok(result.logo.left >= 0 && result.logo.right <= result.vw,
         'Brand disappeared at left: '+msg);
       assert.ok(result.right <= result.vw+1,'Profile was clipped: '+msg);
