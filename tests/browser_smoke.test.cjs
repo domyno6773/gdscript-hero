@@ -26,6 +26,17 @@ async function testGodotEditorExtras(page,selector){
  const syntax=selector==='#code-editor'?'#gdscript-highlight':'#sandbox-gdscript-highlight';
  assert.ok(await page.locator(syntax+' .gdh-indent-unit').count()>=2,
    'Godot indentation marks missing in '+selector);
+ // Nested whitespace must render tab-stop markers from the LEFT.
+ const tabMarkers=await page.evaluate(s=>{
+   const marks=[...document.querySelectorAll(s+' .gdh-indent-unit')];
+   const a=marks[1]?.getBoundingClientRect(),b=marks[2]?.getBoundingClientRect();
+   return {count:marks.length,content:marks[1]&&getComputedStyle(marks[1],'::before').content,
+     left:a?.left,next:b?.left,width:a?.width};
+ },syntax);
+ assert.ok(tabMarkers.count>=3 && tabMarkers.content.includes('›|'),
+   'Missing full Godot-style indent markers: '+JSON.stringify(tabMarkers));
+ assert.ok(Math.abs(tabMarkers.next-tabMarkers.left-tabMarkers.width)<2,
+   'Nested markers should be placed at consecutive tab stops: '+JSON.stringify(tabMarkers));
  await editor.evaluate(el=>{el.focus();const p=el.value.indexOf('    if')+4;el.setSelectionRange(p,p)});
  await editor.press('Backspace');
  assert.ok((await editor.inputValue()).includes('\nif true:\n'),
@@ -56,12 +67,24 @@ async function testGodotEditorExtras(page,selector){
    await page.locator('#view-exercise .editor-wrapper').evaluate(el=>
      el.scrollIntoView({block:'center',behavior:'instant'}));
  }
+ const measure=async()=>page.evaluate(id=>{
+   const host=document.getElementById(id).closest('.editor-wrapper');
+   const overlay=host.querySelector('.gdh-fold-preview');
+   const rect=host.getBoundingClientRect();
+   return {height:rect.height,bottom:rect.bottom,
+     previewHeight:overlay?.getBoundingClientRect().height};
+ },selector.slice(1));
+ const fullSize=await measure();
  const first=page.locator(gutter+' button[aria-label="Comprimi blocco dalla riga 1"]');
  assert.equal(await first.getAttribute('aria-expanded'),'true','Open blocks need a DOWN arrow');
  await first.click();
  const preview=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-preview':
    '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-preview';
  assert.ok(await page.locator(preview).isVisible(),'Fold preview must become visible');
+ const foldedSize=await measure();
+ assert.ok(Math.abs(foldedSize.height-fullSize.height)<1.1 &&
+   Math.abs(foldedSize.previewHeight-fullSize.height)<1.1,
+   'Code panel must never shrink while folding: '+JSON.stringify({fullSize,foldedSize}));
  assert.ok((await page.locator(preview).textContent()).includes('righe nascoste'),
    'Fold preview needs the hidden line count');
  assert.equal(await page.locator(preview+' .gdh-fold-preview-row').count(),4,

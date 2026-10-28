@@ -1,7 +1,27 @@
 /* Godot-style indent markers and non-destructive code folding. */
-.gdh-indent-unit{position:relative;white-space:pre}
-.gdh-indent-unit::after{content:"›";position:absolute;right:.25ch;top:0;font:inherit;color:#647b91;opacity:.8;pointer-events:none}
-[data-theme="light"] .gdh-indent-unit::after{color:#8da3b7}
+/* One Godot-style '›|' marker at the START of EACH four-space indent. */
+.gdh-indent-unit {
+  display:inline-block;
+  position:relative;
+  width:4ch;
+  white-space:pre;
+  font:inherit;
+  vertical-align:baseline;
+}
+.gdh-indent-unit::before {
+  content:"›|";
+  position:absolute;
+  left:.2ch;
+  top:0;
+  font:inherit;
+  font-size:.82em;
+  letter-spacing:-.09em;
+  line-height:inherit;
+  color:#72879d;
+  opacity:.85;
+  pointer-events:none;
+}
+[data-theme="light"] .gdh-indent-unit::before{color:#8298ac}
 .gdh-fold-gutter{position:absolute;left:0;top:0;bottom:0;width:19px;z-index:5;pointer-events:none;overflow:hidden}
 .gdh-fold-arrow{position:absolute;left:1px;display:flex;align-items:center;justify-content:center;width:17px;padding:0;border:0;background:transparent;color:#8faecb;cursor:pointer;pointer-events:auto;opacity:.75}
 .gdh-fold-arrow:hover,.gdh-fold-arrow:focus-visible{background:#33475b;color:#e9f5ff;opacity:1;border-radius:3px}
@@ -114,7 +134,7 @@
 [data-theme="light"] .gdh-fold-preview-code .gd-token-constant { color: #814bc0; }
 [data-theme="light"] .gdh-fold-preview-code .gd-token-comment { color: #6a7b8d; }
 .gdh-fold-preview-code .gdh-indent-unit { position: relative; }
-.gdh-fold-preview-code .gdh-indent-unit::after { color: #71889d; }
+.gdh-fold-preview-code .gdh-indent-unit::before { color: #71889d; }
 .gdh-fold-preview-controls .gdh-fold-arrow[aria-expanded="true"] svg {
   transform: rotate(90deg);
 }
@@ -130,3 +150,51 @@
     padding-left: 30px !important;
   }
 }
+
+/* The folding presentation must occupy the SAME editor panel, not reflow it. */
+.editor-wrapper, .gdh-plain-code-shell { overflow-anchor:none; }
+.editor-wrapper > .gdh-fold-preview,
+.gdh-plain-code-shell > .gdh-fold-preview {
+  position:absolute !important;
+  inset:0 !important;
+  display:block;
+  box-sizing:border-box !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:100% !important;
+  max-height:100% !important;
+  margin:0 !important;
+  padding-top:var(--gdh-padding-top,16px);
+  padding-bottom:var(--gdh-padding-bottom,16px);
+  overflow:auto;
+  overflow-anchor:none;
+  overscroll-behavior:contain;
+}
+.editor-wrapper > .gdh-fold-preview[hidden],
+.gdh-plain-code-shell > .gdh-fold-preview[hidden] {display:none!important;}
+.gdh-fold-preview-row {
+  min-height:var(--gdh-row-height,22.4px);
+  height:var(--gdh-row-height,22.4px);
+  align-items:stretch;
+}
+.gdh-fold-preview-number,
+.gdh-fold-preview-controls,
+.gdh-fold-preview-code {
+  height:var(--gdh-row-height,22.4px);
+  min-height:0;
+  line-height:var(--gdh-row-height,22.4px);
+}
+.gdh-fold-preview-code{
+  font:inherit;
+  line-height:var(--gdh-row-height,22.4px);
+  overflow:visible;
+}
+.gdh-fold-preview-controls > .gdh-fold-arrow {height:var(--gdh-row-height,22.4px);}
+#view-practice .editor-wrapper > .gdh-fold-preview {background:#151c27;}
+#view-exercise .editor-wrapper > .gdh-fold-preview {background:#151b22;}
+#view-practice .editor-wrapper > .gdh-fold-preview .gdh-fold-preview-number {background:#1d2836;}
+#view-exercise .editor-wrapper > .gdh-fold-preview .gdh-fold-preview-number {background:#151b22;}
+[data-theme="light"] #view-practice .editor-wrapper > .gdh-fold-preview,
+[data-theme="light"] #view-exercise .editor-wrapper > .gdh-fold-preview {background:#fff;}
+[data-theme="light"] #view-practice .editor-wrapper > .gdh-fold-preview .gdh-fold-preview-number,
+[data-theme="light"] #view-exercise .editor-wrapper > .gdh-fold-preview .gdh-fold-preview-number {background:#e9f0f7;}

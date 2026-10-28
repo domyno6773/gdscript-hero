@@ -122,6 +122,16 @@ function gutter(el,state){
 }
 function preview(el,state){
  const surface=state.preview;
+ // Keep exactly the native editor's height, typography and viewport scroll.
+ const savedTop=surface.scrollTop,savedLeft=surface.scrollLeft;
+ const edStyle=getComputedStyle(el);
+ surface.style.setProperty('--gdh-row-height',lh(el)+'px');
+ surface.style.setProperty('--gdh-padding-top',edStyle.paddingTop);
+ surface.style.setProperty('--gdh-padding-bottom',edStyle.paddingBottom);
+ surface.style.fontFamily=edStyle.fontFamily;
+ surface.style.fontWeight=edStyle.fontWeight;
+ surface.style.fontSize=edStyle.fontSize;
+ surface.style.lineHeight=edStyle.lineHeight;
  surface.replaceChildren();
  surface.hidden=false;
  const numberColumn=state.host.querySelector('.line-numbers');
@@ -155,6 +165,8 @@ function preview(el,state){
   // Skip ONLY this block's own children; adjacent functions stay visible.
   i=closed?state.blocks.get(i)+1:i+1;
  }
+ surface.scrollTop=savedTop;
+ surface.scrollLeft=savedLeft;
 }
 function refresh(el){
  const s=items.get(el);if(!s)return;
