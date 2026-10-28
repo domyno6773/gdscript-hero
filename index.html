@@ -1371,6 +1371,8 @@
                     <button type="button" class="btn-subtle" id="btn-settings-auth-action">🔑 Accedi</button>
                 </div>
 
+                <div class="settings-row hidden" id="settings-sync-conflict-row"><div class="settings-label-block"><span class="settings-item-name">Sincronizzazione in sospeso</span><span class="settings-item-sub" id="settings-sync-conflict-text">I dati locali sono salvati.</span></div><button type="button" class="btn-subtle" id="btn-settings-manage-conflict">Gestisci differenze</button></div>
+
                 <div class="settings-row">
                     <div class="settings-label-block">
                         <span class="settings-item-name">Esporta Dati di Gioco</span>
@@ -2005,7 +2007,7 @@
         <div class="gdh-save-notice-actions">
             <button type="button" id="gdh-save-retry">Riprova</button>
             <button type="button" id="gdh-save-resolve" hidden>Unisci progressi</button>
-            <button type="button" id="gdh-save-backup" hidden>Esporta backup</button>
+            <button type="button" id="gdh-save-backup" hidden>Esporta copie</button><button type="button" id="gdh-save-dismiss" hidden>Non ora</button>
         </div>
     </div>
     <!-- Script inclusi in ordine -->

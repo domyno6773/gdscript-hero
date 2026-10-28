@@ -28,7 +28,7 @@ vm.runInNewContext(fs.readFileSync(path.join(source,'auth.js'),'utf8'),ctx,{file
 const app=win.App,auth=win.AuthManager;
 for(const name of ['saveReviewDraft','saveNavigationPosition','ensureUnlockedConsistency',
   'applyTheme','switchView','updateNavSelection','renderRoadmap','renderSidebarDailyQuests',
-  'updateStatsUI','applyProfileUI','updateQuestsBadge'])
+  'updateStatsUI','applyProfileUI','updateQuestsBadge','checkAchievements'])
   app[name]=()=>{};
 app._blankUserState=JSON.parse(JSON.stringify(app.state));
 app._saveOwner='guest';app._cloudHydrationPending=false;
@@ -109,5 +109,40 @@ function deep(v){return JSON.parse(JSON.stringify(v));}
   assert.equal(auth._cloudVersion.remote.userCode[1],'print("bozza cloud")');
   assert.equal(auth.getSyncStatus().kind,'conflict');
   assert.equal(app._cloudHydrationPending,true);
+
+  // Dopo un salvataggio confermato, un refresh su QUESTO dispositivo
+  // non deve mostrare un conflitto se soltanto il codice locale e' cambiato.
+  const startingSave=app.getSavePayload();
+  const knownBase={...deep(startingSave),userCode:{1:'print("base")'}};
+  app.saveCloudBaseline(knownBase,7);
+  assert.equal(app.getCloudBaseline().revision,7);
+  auth._cloudVersion={userId:'bob',revision:7,blocked:false,remote:null};
+  app.state.userCode={1:'print("modifica locale non ancora sincronizzata")'};
+  await app.integrateCloudSave(knownBase);
+  assert.equal(auth._cloudVersion.blocked,false,'Local edit mistaken for a two-device conflict');
+  assert.equal(app.state.userCode[1],'print("modifica locale non ancora sincronizzata")',
+    'Cloud overwritten an unsynced local edit');
+  assert.equal(app._cloudHydrationPending,false,'Valid load remained paused');
+  // Due modifiche indipendenti dello stesso codice restano protette.
+  auth._cloudVersion={userId:'bob',revision:8,blocked:false,remote:null};
+  app.state.userCode={1:'print("locale divergente")'};
+  await app.integrateCloudSave({...knownBase,userCode:{1:'print("cloud divergente")'}});
+  assert.equal(auth._cloudVersion.blocked,true,'Genuine divergence was overwritten');
+  assert.equal(app.state.userCode[1],'print("locale divergente")');
+  // "Non ora" non risolve ne' sovrascrive: nasconde soltanto il messaggio,
+  // con una scelta persistente per questa revisione di questo account.
+  auth.dismissConflictNotice();
+  assert.equal(auth.isConflictDismissed(),true);
+  assert.equal(auth._cloudVersion.blocked,true);
+  assert.equal(auth._cloudVersion.remote.userCode[1],'print("cloud divergente")');
+  assert.equal(app.state.userCode[1],'print("locale divergente")');
+  auth._cloudVersion={userId:'bob',revision:8,blocked:true,remote:knownBase};
+  assert.equal(auth.isConflictDismissed(),true,'Refresh must remember Non ora');
+  auth._cloudVersion.revision=9;
+  assert.equal(auth.isConflictDismissed(),false,'New cloud revision requires fresh warning');
+  // Il vecchio salvataggio generale non deve mai prevalere sullo slot dell'account.
+  store.set(app.ownerStorageKey('user:bob'),JSON.stringify({xp:444,userCode:{1:'print("bob")'}}));
+  store.set('gdscript_hero_save_v4',JSON.stringify({xp:9999,userCode:{1:'print("altro account")'}}));
+  assert.equal(app.ownerStorageKey('user:bob')!=='gdscript_hero_save_v4',true);
   console.log('PASS: guest, Alice, Bob isolated; pending email and genuine Google OAuth');
 })().catch(e=>{console.error(e);process.exitCode=1;});

@@ -473,8 +473,39 @@ const AuthManager = {
 
 
     // Stato remoto valido solo dopo lettura: un errore non e' un salvataggio vuoto.
-    setSyncStatus(kind,message=''){this._syncStatus={kind,message};window.App?.renderSyncStatus?.(this._syncStatus);},
+    setSyncStatus(kind,message=''){
+        this._syncStatus={kind,message};
+        if(kind==='synced'){
+            try{localStorage.removeItem(this.conflictDismissalKey());}catch(e){}
+        }
+        window.App?.renderSyncStatus?.(this._syncStatus);
+    },
     getSyncStatus(){return this._syncStatus||{kind:'idle',message:''};},
+    conflictDismissalKey(){
+        return 'gdscript_hero_conflict_dismissed_v1:'+(this.currentUser?.id||'guest');
+    },
+    isConflictDismissed(){
+        const state=this._cloudVersion;
+        if(!state?.blocked||state.userId!==this.currentUser?.id)return false;
+        try{return localStorage.getItem(this.conflictDismissalKey())===String(state.revision);}
+        catch(e){return false;}
+    },
+    dismissConflictNotice(){
+        if(this._cloudVersion?.blocked){
+            try{localStorage.setItem(this.conflictDismissalKey(),String(this._cloudVersion.revision));}
+            catch(e){}
+        }
+        if(window.App){
+            window.App._forceShowConflictNotice=false;
+            window.App.renderSyncStatus?.(this.getSyncStatus());
+        }
+    },
+    showConflictNotice(){
+        if(window.App){
+            window.App._forceShowConflictNotice=true;
+            window.App.renderSyncStatus?.(this.getSyncStatus());
+        }
+    },
     getSaveRevision(){return this._cloudVersion?.userId===this.currentUser?.id?this._cloudVersion.revision:null;},
     async syncUserProgress(progressData){
         if(this.isGuest()||!this.currentUser?.email||!progressData)return;
@@ -526,6 +557,8 @@ const AuthManager = {
                 const conflict=Error('Conflitto tra dispositivi');conflict.code='GDH_CONFLICT';throw conflict;
             }
             state.revision=Number(result.save_revision);
+            if(window.App?._saveOwner==='user:'+owner)
+                window.App.saveCloudBaseline?.(snapshot,state.revision);
             this.setSyncStatus('synced','Progressi sincronizzati');
         });
         this._cloudWriteQueue=operation.catch(()=>{});
@@ -601,7 +634,10 @@ const AuthManager = {
         }
         // Merge esplicito, precedenza del codice locale. Entrambe le versioni
         // restano conservate nel backup, incluse le sezioni che divergono.
-        const merged=this.mergeProgress(state.remote||{},local);
+        const cloudSnapshot=state.remote;
+        const merged=this.mergeProgress(cloudSnapshot||{},local);
+        if(window.App?._saveOwner==='user:'+this.currentUser.id)
+            window.App.saveCloudBaseline?.(cloudSnapshot,state.revision);
         state.blocked=false;state.remote=null;
         // Il login con bozze divergenti lascia volutamente il cloud bloccato.
         // Sbloccare l'invio solo dopo la copia preventiva di entrambe le versioni.

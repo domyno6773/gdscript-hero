@@ -242,7 +242,13 @@ const App = {
         this._blankUserState=JSON.parse(JSON.stringify(this.state));
         this._saveOwner=this.initialSaveOwner();
         this._cloudHydrationPending=this._saveOwner!=='guest';
-        this.loadStorage();
+        // La copia legacy non identifica il proprietario. Preferire sempre
+        // il salvataggio legato all'account attivo, se presente.
+        let scopedSave=null;
+        try{scopedSave=localStorage.getItem(this.ownerStorageKey(this._saveOwner));}catch(e){}
+        if(scopedSave!==null)this.loadStorage(scopedSave);
+        else if(this._saveOwner==='guest')this.loadStorage();
+        else this.loadStorage(null);
         this.ensureUnlockedConsistency();
         this.applyTheme(this.state.theme || 'dark');
         this.checkDailyQuestsReset();
@@ -441,6 +447,7 @@ const App = {
         let next=null;
         try{next=localStorage.getItem(this.ownerStorageKey(owner));}catch(e){}
         this._saveOwner=owner;
+        this._forceShowConflictNotice=false;
         this._cloudHydrationPending=owner!=='guest' && !!window.AuthManager?.isCloudActive?.();
         this.state=JSON.parse(JSON.stringify(this._blankUserState));
         this.isReviewMode=false;
@@ -512,23 +519,44 @@ const App = {
     },
     renderSyncStatus(status={kind:'idle',message:''}){
         const notice=document.getElementById('gdh-save-notice');
+        const auth=window.AuthManager;
+        const isConflict=status.kind==='conflict' &&
+            !!auth?._cloudVersion?.blocked;
+        const row=document.getElementById('settings-sync-conflict-row');
+        if(row){
+            row.classList.toggle('hidden',!isConflict);
+            const label=document.getElementById('settings-sync-conflict-text');
+            if(label)label.textContent=isConflict
+                ?'Continua a studiare normalmente. Il salvataggio locale è attivo; il cloud non viene sovrascritto fino alla risoluzione.'
+                :'Sincronizzazione attiva';
+        }
+        const accountPill=document.getElementById('btn-open-auth-nav');
+        if(accountPill){
+            accountPill.setAttribute('data-sync-paused',isConflict?'true':'false');
+            if(isConflict)accountPill.setAttribute('aria-description','Sincronizzazione cloud in sospeso; gestibile dalle Impostazioni');
+            else accountPill.removeAttribute('aria-description');
+        }
         if(!notice)return;
         const text=notice.querySelector('.gdh-save-notice-text');
         const retry=notice.querySelector('#gdh-save-retry');
         const resolve=notice.querySelector('#gdh-save-resolve');
         const backup=notice.querySelector('#gdh-save-backup');
-        if(this._localSaveFailed){
-            notice.classList.remove('hidden');
-            notice.dataset.kind='error';
-            text.textContent='Salvataggio locale non riuscito: libera spazio o esporta un backup.';
-        }else if(['error','conflict','pending'].includes(status.kind)){
-            notice.classList.remove('hidden');
-            notice.dataset.kind=status.kind;
-            text.textContent=status.message||'Progressi salvati localmente, cloud in attesa.';
-        }else notice.classList.add('hidden');
-        retry.hidden=!!this._localSaveFailed||status.kind==='conflict';
-        resolve.hidden=!!this._localSaveFailed||status.kind!=='conflict';
-        backup.hidden=!(this._localSaveFailed||status.kind==='conflict');
+        const dismiss=notice.querySelector('#gdh-save-dismiss');
+        const hiddenConflict=isConflict &&
+            !this._forceShowConflictNotice&&!!auth?.isConflictDismissed?.();
+        const show=this._localSaveFailed||status.kind==='error'||
+            (isConflict&&!hiddenConflict);
+        notice.classList.toggle('hidden',!show);
+        notice.dataset.kind=this._localSaveFailed?'error':status.kind;
+        if(this._localSaveFailed)
+            text.textContent='Non riesco a salvare in questo browser. Libera spazio o esporta i dati per non perderli.';
+        else if(isConflict)
+            text.textContent='Alcune modifiche a questo dispositivo sono diverse da quelle cloud. Puoi continuare normalmente: il codice locale è salvato e il cloud non verrà sovrascritto. Puoi gestire le differenze anche più tardi dalle Impostazioni.';
+        else text.textContent=status.message||'Salvataggio cloud non confermato.';
+        if(retry)retry.hidden=!!this._localSaveFailed||isConflict;
+        if(resolve)resolve.hidden=!!this._localSaveFailed||!isConflict;
+        if(backup)backup.hidden=!(this._localSaveFailed||isConflict);
+        if(dismiss)dismiss.hidden=!!this._localSaveFailed||!isConflict;
     },
 
     // ==========================================
@@ -6022,6 +6050,12 @@ const App = {
         });
 
         window.addEventListener('online',()=>window.AuthManager?.retryCloudSync?.());
+        document.getElementById('gdh-save-dismiss')?.addEventListener('click',()=>
+            window.AuthManager?.dismissConflictNotice?.());
+        document.getElementById('btn-settings-manage-conflict')?.addEventListener('click',()=>{
+            this.closeSettingsModal();
+            window.AuthManager?.showConflictNotice?.();
+        });
         const syncRetry=document.getElementById('gdh-save-retry');
         if(syncRetry)syncRetry.onclick=()=>window.AuthManager.retryCloudSync();
         const syncResolve=document.getElementById('gdh-save-resolve');
@@ -6798,48 +6832,128 @@ const App = {
     /**
      * Integra i progressi locali dell'Ospite con il salvataggio salvato nel Cloud Supabase
      */
-    hasOverlappingCloudDrafts(local,remote){
-        const overlap=(a,b)=>{
-            if(!a||!b)return false;
-            return Object.keys(a).some(id=>
-                typeof a[id]==='string' && typeof b[id]==='string' &&
-                a[id]!==b[id]);
+
+    cloudBaseKey(owner=this._saveOwner){
+        return 'gdscript_hero_cloud_base_v1:'+owner;
+    },
+    getCloudBaseline(){
+        try{
+            const parsed=JSON.parse(localStorage.getItem(this.cloudBaseKey())||'null');
+            return parsed?.owner===this._saveOwner &&
+                Number.isSafeInteger(parsed.revision) && parsed.data &&
+                typeof parsed.data==='object' ? parsed : null;
+        }catch(e){return null;}
+    },
+    saveCloudBaseline(data,revision){
+        if(this._saveOwner==='guest'||!data||
+            typeof revision!=='number'||!Number.isSafeInteger(revision))return;
+        try{
+            localStorage.setItem(this.cloudBaseKey(),JSON.stringify({
+                owner:this._saveOwner,revision:Number(revision),data
+            }));
+        }catch(e){console.warn('[App] Impossibile archiviare la base cloud:',e);}
+    },
+    // Un conflitto reale richiede modifiche divergenti allo STESSO codice,
+    // in entrambi i dispositivi, rispetto all'ultima base cloud confermata.
+    // Il timestamp o la presenza di un codice starter non bastano.
+    hasOverlappingCloudDrafts(local,remote,baseline=null){
+        const base=baseline?.data||null;
+        const meaningfullyEdited=(value,id)=>{
+            if(typeof value!=='string'||!value.trim())return false;
+            const lesson=typeof LESSONS_DATA!=='undefined'?
+                LESSONS_DATA.find(l=>String(l.id)===String(id)):null;
+            return !lesson||value!==lesson.initialCode;
         };
-        if(overlap(local.userCode,remote.userCode))return true;
-        if(overlap(local.arenaProject?.userCode,remote.arenaProject?.userCode))return true;
+        const overlap=(left,right,ancestor,ignoreStarter=false)=>{
+            if(!left||!right)return false;
+            return Object.keys(left).some(id=>{
+                const a=left[id],b=right[id];
+                if(typeof a!=='string'||typeof b!=='string'||a===b)return false;
+                if(ignoreStarter && !meaningfullyEdited(a,id))return false;
+                if(!base)return true; // un primo accesso: conserva entrambi
+                const previous=ancestor?.[id];
+                return a!==previous && b!==previous;
+            });
+        };
+        if(overlap(local.userCode,remote.userCode,base?.userCode,true))return true;
+        if(overlap(local.arenaProject?.userCode,remote.arenaProject?.userCode,
+            base?.arenaProject?.userCode))return true;
+        const localProjects=local.sandbox?.projects||[];
+        const remoteProjects=new Map((remote.sandbox?.projects||[]).map(p=>[p.id,p]));
+        const baseProjects=new Map((base?.sandbox?.projects||[]).map(p=>[p.id,p]));
         const defaultCode=this._blankUserState?.sandbox?.projects?.[0]?.code;
         const defaultAlternate=this.getDefaultSandboxState?.()?.projects?.[0]?.code;
-        const remoteProjects=new Map((remote.sandbox?.projects||[]).map(p=>[p.id,p]));
-        return (local.sandbox?.projects||[]).some(p=>{
+        const data=p=>p&&JSON.stringify({code:p.code||'',nodes:p.nodes||[]});
+        return localProjects.some(p=>{
             const other=remoteProjects.get(p.id);
-            if(!other)return false;
-            if(p.id==='proj_default' && (p.code===defaultCode||p.code===defaultAlternate))return false;
-            return p.code!==other.code || JSON.stringify(p.nodes||[])!==JSON.stringify(other.nodes||[]);
+            if(!other||data(p)===data(other))return false;
+            if(p.id==='proj_default' &&
+                (p.code===defaultCode||p.code===defaultAlternate) &&
+                data(p)===data(this._blankUserState?.sandbox?.projects?.[0]))return false;
+            if(!base)return true;
+            return data(p)!==data(baseProjects.get(p.id)) &&
+                data(other)!==data(baseProjects.get(p.id));
         });
     },
-    async integrateCloudSave(cloudSave,guestSnapshot=null) {
+    mergeCloudWithoutLosingLocalEdits(local,remote,baseline=null){
         const merge=(a,b)=>window.AuthManager?.mergeProgress?.(a,b)||{...a,...b};
+        const result=merge(local,remote);
+        const base=baseline?.data;
+        if(!base)return result;
+        const preserveEdits=(out,localValues,remoteValues,baseValues)=>{
+            for(const [id,value] of Object.entries(localValues||{})){
+                if(typeof value!=='string')continue;
+                if(value!==(baseValues||{})[id] &&
+                    (remoteValues||{})[id]===(baseValues||{})[id]){
+                    out[id]=value;
+                }
+            }
+        };
+        result.userCode={...(result.userCode||{})};
+        preserveEdits(result.userCode,local.userCode,remote.userCode,base.userCode);
+        if(result.arenaProject){
+            result.arenaProject={...result.arenaProject,
+                userCode:{...(result.arenaProject.userCode||{})}};
+            preserveEdits(result.arenaProject.userCode,
+                local.arenaProject?.userCode,remote.arenaProject?.userCode,
+                base.arenaProject?.userCode);
+        }
+        if(result.sandbox){
+            const rp=new Map((remote.sandbox?.projects||[]).map(p=>[p.id,p]));
+            const bp=new Map((base.sandbox?.projects||[]).map(p=>[p.id,p]));
+            const signature=p=>p&&JSON.stringify({code:p.code||'',nodes:p.nodes||[]});
+            const merged=new Map((result.sandbox.projects||[]).map(p=>[p.id,p]));
+            for(const p of local.sandbox?.projects||[]){
+                if(!rp.has(p.id) || (signature(p)!==signature(bp.get(p.id)) &&
+                    signature(rp.get(p.id))===signature(bp.get(p.id))))merged.set(p.id,p);
+            }
+            result.sandbox={...result.sandbox,projects:[...merged.values()]};
+        }
+        return result;
+    },
+    async integrateCloudSave(cloudSave,guestSnapshot=null){
         let snapshot=this.state;
-        if(guestSnapshot)snapshot=merge(snapshot,guestSnapshot);
-        // Prima di unire codice scritto su due dispositivi, verificare se
-        // esistono bozze divergenti. In tal caso chiedere unione esplicita:
-        // nessuna delle due versioni deve sparire silenziosamente.
-        if(cloudSave && this.hasOverlappingCloudDrafts(snapshot,cloudSave)){
+        const baseline=this.getCloudBaseline();
+        if(guestSnapshot)snapshot=window.AuthManager?.mergeProgress?.(snapshot,guestSnapshot)||snapshot;
+        if(cloudSave&&this.hasOverlappingCloudDrafts(snapshot,cloudSave,baseline)){
             if(guestSnapshot)this.applyImportedState(snapshot,false);
             else this.saveStorage({localOnly:true});
             const state=window.AuthManager?._cloudVersion;
-            if(state && state.userId===window.AuthManager?.currentUser?.id){
+            if(state&&state.userId===window.AuthManager?.currentUser?.id){
                 state.blocked=true;
                 state.remote=cloudSave;
             }
             this._cloudHydrationPending=true;
             window.AuthManager?.setSyncStatus?.('conflict',
-                'Il codice locale e quello cloud sono diversi. Entrambe le versioni sono al sicuro: scegli se unirle.');
+                'Ci sono modifiche diverse tra questo dispositivo e il cloud. Puoi continuare a studiare: i dati locali restano salvati. La sincronizzazione è sospesa finché non scegli come gestirle.');
             return;
         }
-        if(cloudSave)snapshot=merge(snapshot,cloudSave);
+        if(cloudSave){
+            snapshot=this.mergeCloudWithoutLosingLocalEdits(snapshot,cloudSave,baseline);
+            this.saveCloudBaseline(cloudSave,window.AuthManager?.getSaveRevision?.());
+        }
         try{
-            if(cloudSave || guestSnapshot)this.applyImportedState(snapshot,false);
+            if(cloudSave||guestSnapshot)this.applyImportedState(snapshot,false);
         }finally{
             this._cloudHydrationPending=false;
         }

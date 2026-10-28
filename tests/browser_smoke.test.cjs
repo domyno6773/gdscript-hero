@@ -465,6 +465,49 @@ async function testAccessibilityKeyboard(page,width){
   console.log('PASS: keyboard, dialogs, field labels, node picker, reduced motion '+width+'px');
 }
 
+
+async function testNonBlockingCloudConflict(page){
+  // Contratto UX: esiste sempre una terza scelta, "Non ora".
+  // E' possibile continuare e gestire il conflitto in Impostazioni.
+  await page.evaluate(()=>{
+    AuthManager.currentUser={id:'test-ux-user',isGuest:false,
+      email:'test@example.invalid'};
+    AuthManager._cloudVersion={userId:'test-ux-user',revision:5,
+      blocked:true,remote:{userCode:{1:'print("cloud")'}}};
+    AuthManager.setSyncStatus('conflict','Differenze cloud');
+  });
+  assert.equal(await page.locator('#gdh-save-notice').isVisible(),true,
+    'First conflict should be actionable');
+  assert.equal(await page.locator('#gdh-save-dismiss').isVisible(),true,
+    'User needs a way to continue without merging or exporting');
+  await page.locator('#gdh-save-dismiss').click();
+  assert.equal(await page.locator('#gdh-save-notice').isHidden(),true,
+    'Not now must dismiss the banner');
+  const snapshot=await page.evaluate(()=>({
+    blocked:AuthManager._cloudVersion.blocked,
+    revision:AuthManager._cloudVersion.revision,
+    dismissed:AuthManager.isConflictDismissed(),
+    local:AuthManager.getSyncStatus().kind
+  }));
+  assert.equal(snapshot.blocked,true);
+  assert.equal(snapshot.dismissed,true);
+  assert.equal(snapshot.local,'conflict');
+  await page.locator('#btn-open-settings').click();
+  assert.equal(await page.locator('#settings-sync-conflict-row').isVisible(),true,
+    'Dismissed conflict must remain manageable in Settings');
+  await page.locator('#btn-settings-manage-conflict').click();
+  assert.equal(await page.locator('#gdh-save-notice').isVisible(),true,
+    'Settings should reopen conflict options');
+  await page.locator('#gdh-save-dismiss').click();
+  const saved=await page.evaluate(()=>
+    localStorage.getItem('gdscript_hero_conflict_dismissed_v1:test-ux-user'));
+  assert.equal(saved,'5');
+  await page.evaluate(()=>{
+    AuthManager._cloudVersion=null;
+    AuthManager.currentUser=AuthManager.createGuestUser();
+    AuthManager.setSyncStatus('idle','');
+  });
+}
 async function testLongEmailSettings(page, initialWidth) {
  const longEmail = 'studente.' + 'x'.repeat(175) + '@' + 'example'.repeat(9) + '.com';
  const widths = [1440, 1024, 820, 768, 390, 320];
@@ -552,6 +595,7 @@ async function smoke(browser,url,width){
  });
  assert.equal(await page.locator('#gdh-save-notice').isHidden(),true);
  await testAccessibilityKeyboard(page,width);
+ await testNonBlockingCloudConflict(page);
  await testLongEmailSettings(page,width);
  await testResponsiveLayout(page,width);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
@@ -1382,7 +1426,9 @@ async function smoke(browser,url,width){
    const stored=JSON.parse(localStorage.getItem('gdscript_hero_save_v4')||'{}');
    stored.xp=1259; // Un XP sotto la soglia del livello 10.
    stored.unlockedAchievements=ACHIEVEMENTS_DATA.map(a=>a.id);
-   localStorage.setItem('gdscript_hero_save_v4',JSON.stringify(stored));
+   // Il vecchio mirror non deve prevalere sul salvataggio associato al proprietario.
+   localStorage.setItem('gdscript_hero_save_v4',JSON.stringify({...stored,xp:1}));
+   localStorage.setItem(App.ownerStorageKey(App._saveOwner),JSON.stringify(stored));
    sessionStorage.removeItem('gdscript_hero_position_v1');
  });
  await page.reload({waitUntil:'load'});
