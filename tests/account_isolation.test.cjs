@@ -84,6 +84,15 @@ function deep(v){return JSON.parse(JSON.stringify(v));}
   // Failed remote signout must not pretend the account was disconnected.
   assert.equal(auth.currentUser.id,'verified');
   auth.currentUser=auth.createGuestUser();
+  // Successful real logout must trigger the normal owner change.
+  app.switchSaveOwner(user('bob'));
+  auth.currentUser=user('bob');
+  auth.onAuthStateChanged(u=>app.switchSaveOwner(u));
+  auth.supabaseClient.auth.signOut=async()=>({error:null});
+  await auth.logout();
+  assert.equal(auth.isGuest(),true);
+  assert.equal(app._saveOwner,'guest');
+  assert.equal(app.state.xp,42,'Logout did not restore the separate guest save');
   auth.supabaseClient=null;
   await assert.rejects(()=>auth.loginWithGoogle(),/solo con Supabase/);
   console.log('PASS: guest, Alice, Bob isolated; pending email and genuine Google OAuth');
