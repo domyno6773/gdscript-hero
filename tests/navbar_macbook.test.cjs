@@ -58,11 +58,14 @@ async function inspect(engine, url) {
           });
         const clipped=visible.filter(r=>r.left < -1 || r.right > vw+1);
         const colliding=rects.slice(0,-1).some((r,i)=>r.right>rects[i+1].left+1);
-        const stableSelectors=['.navbar','.nav-left','.nav-center','.nav-right',
+        // Account, XP, profilo e stats sono popolati asincronamente:
+        // confrontare la loro tipografia prima/dopo la fetch darebbe falsi
+        // positivi. Testiamo solo navbar e controlli di navigazione stabili.
+        // Clipping e overlap verificano comunque TUTTE le azioni.
+        const stableSelectors=['.navbar','.nav-left','.nav-center',
           '#btn-home','#nav-roadmap-btn','#nav-editor-btn','#nav-practice-btn',
           '#nav-projects-btn','#nav-review-btn','#nav-stats-btn',
-          '#btn-open-achievements','.nav-stats-group','#btn-open-auth-nav',
-          '#btn-open-profile','#btn-open-settings'];
+          '#btn-open-achievements'];
         const stableLayout=stableSelectors.map(selector=>{
           const el=document.querySelector('.navbar '+selector) ||
             (selector==='.navbar' ? nav : null);
