@@ -14,7 +14,7 @@ const makeDevice=id=>{
     };
     const win={
         SupabaseConfig:{isConfigured:()=>true},
-        ProgressionV2:{levelFromXp:xp=>({tier:{level:1}})},
+        ProgressionV2:{levelFromXp:xp=>({tier:{level:1}}),mergeRewards:(a,b)=>a||b||null},
         App:{
             state:{xp:0,finishedLessons:[],completedLessons:[1],userCode:{},sandbox:{projects:[]}},
             getSavePayload(){return this.state;},
