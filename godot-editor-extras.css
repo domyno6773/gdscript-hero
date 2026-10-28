@@ -1,5 +1,7 @@
 /* Godot-style indent markers and non-destructive code folding. */
-/* One Godot-style '›|' marker at the START of EACH four-space indent. */
+/* Godot-style indentation glyph: a chevron pointing towards a short
+   vertical tab-stop bar. One independent glyph per 4 actual whitespace chars.
+   SVG mask avoids the font-dependent spacing of the previous "›|" text. */
 .gdh-indent-unit {
   display:inline-block;
   position:relative;
@@ -9,19 +11,26 @@
   vertical-align:baseline;
 }
 .gdh-indent-unit::before {
-  content:"›|";
+  content:"";
   position:absolute;
-  left:.2ch;
-  top:0;
-  font:inherit;
-  font-size:.82em;
-  letter-spacing:-.09em;
-  line-height:inherit;
-  color:#72879d;
-  opacity:.85;
+  left:.08ch;
+  top:50%;
+  transform:translateY(-50%);
+  width:13px;
+  height:14px;
+  background-color:var(--gdh-indent-color,#64778c);
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 16'%3E%3Cpath d='M2.2 4.3 6.2 8 2.2 11.7M8.9 4v8' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 16'%3E%3Cpath d='M2.2 4.3 6.2 8 2.2 11.7M8.9 4v8' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E");
+  -webkit-mask-position:center;
+  mask-position:center;
+  -webkit-mask-repeat:no-repeat;
+  mask-repeat:no-repeat;
+  -webkit-mask-size:contain;
+  mask-size:contain;
   pointer-events:none;
+  opacity:.83;
 }
-[data-theme="light"] .gdh-indent-unit::before{color:#8298ac}
+[data-theme="light"] .gdh-indent-unit { --gdh-indent-color:#8ca0b4; }
 .gdh-fold-gutter{position:absolute;left:0;top:0;bottom:0;width:19px;z-index:5;pointer-events:none;overflow:hidden}
 .gdh-fold-arrow{position:absolute;left:1px;display:flex;align-items:center;justify-content:center;width:17px;padding:0;border:0;background:transparent;color:#8faecb;cursor:pointer;pointer-events:auto;opacity:.75}
 .gdh-fold-arrow:hover,.gdh-fold-arrow:focus-visible{background:#33475b;color:#e9f5ff;opacity:1;border-radius:3px}
@@ -134,7 +143,7 @@
 [data-theme="light"] .gdh-fold-preview-code .gd-token-constant { color: #814bc0; }
 [data-theme="light"] .gdh-fold-preview-code .gd-token-comment { color: #6a7b8d; }
 .gdh-fold-preview-code .gdh-indent-unit { position: relative; }
-.gdh-fold-preview-code .gdh-indent-unit::before { color: #71889d; }
+.gdh-fold-preview-code .gdh-indent-unit { --gdh-indent-color:#71889d; }
 .gdh-fold-preview-controls .gdh-fold-arrow[aria-expanded="true"] svg {
   transform: rotate(90deg);
 }
@@ -198,3 +207,54 @@
 [data-theme="light"] #view-exercise .editor-wrapper > .gdh-fold-preview {background:#fff;}
 [data-theme="light"] #view-practice .editor-wrapper > .gdh-fold-preview .gdh-fold-preview-number,
 [data-theme="light"] #view-exercise .editor-wrapper > .gdh-fold-preview .gdh-fold-preview-number {background:#e9f0f7;}
+
+
+/* When folded, the compact view must be the ONLY visible editor surface.
+   Visibility (not display) keeps the full-size flex children in place,
+   avoiding both phantom line numbers and the apparent vertical squashing. */
+#view-exercise .editor-wrapper.gdh-is-folded > .line-numbers,
+#view-exercise .editor-wrapper.gdh-is-folded > .gdscript-edit-stack,
+#view-practice .editor-wrapper.gdh-is-folded > .line-numbers,
+#view-practice .editor-wrapper.gdh-is-folded > .gdscript-edit-stack {
+  visibility:hidden !important;
+}
+.gdh-plain-code-shell.gdh-is-folded > textarea,
+.gdh-plain-code-shell.gdh-is-folded > .gdh-plain-syntax-layer,
+.gdh-plain-code-shell.gdh-is-folded > .gdh-fold-gutter {
+  visibility:hidden !important;
+}
+.editor-wrapper.gdh-is-folded > .gdh-fold-preview,
+.gdh-plain-code-shell.gdh-is-folded > .gdh-fold-preview {
+  visibility:visible !important;
+  z-index:30 !important;
+  isolation:isolate;
+  background-clip:padding-box;
+}
+#view-practice .editor-wrapper.gdh-is-folded > .gdh-fold-preview {
+  background:linear-gradient(to right,
+    #1d2836 0px,#1d2836 var(--gdh-number-width,48px),
+    #151c27 var(--gdh-number-width,48px),#151c27 100%) !important;
+}
+#view-exercise .editor-wrapper.gdh-is-folded > .gdh-fold-preview {
+  background:#151b22 !important;
+}
+[data-theme="light"] #view-practice .editor-wrapper.gdh-is-folded > .gdh-fold-preview {
+  background:linear-gradient(to right,
+    #e9f0f7 0px,#e9f0f7 var(--gdh-number-width,48px),
+    #fff var(--gdh-number-width,48px),#fff 100%) !important;
+}
+[data-theme="light"] #view-exercise .editor-wrapper.gdh-is-folded > .gdh-fold-preview {
+  background:#fff !important;
+}
+/* The folded view occupies exactly the same width and tab-stop spacing as
+   the live code surface; no content-sized columns that squeeze on laptops. */
+.gdh-fold-preview-row {
+  width:100%;
+  grid-template-columns:var(--gdh-number-width,52px) 22px minmax(0,1fr);
+}
+.gdh-fold-preview-code { min-width:0; overflow:visible; }
+.gdh-fold-preview-number {
+  font-family:'Fira Code','JetBrains Mono',monospace;
+  font-weight:400;
+  color:#90a3b7;
+}

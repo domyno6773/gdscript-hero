@@ -136,6 +136,7 @@ function preview(el,state){
  surface.hidden=false;
  const numberColumn=state.host.querySelector('.line-numbers');
  surface.style.setProperty('--gdh-number-width',(numberColumn?.getBoundingClientRect().width||48)+'px');
+ surface.dataset.foldMode='overlay';
  const rows=el.value.split('\n');
  for(let i=0;i<rows.length;){
   const line=i,closed=state.folds.has(i);
@@ -181,7 +182,15 @@ function refresh(el){
  s.source=el.value;
  s.blocks=ranges(el.value);
  for(const key of [...s.folds])if(!s.blocks.has(key))s.folds.delete(key);
- if(s.folds.size)preview(el,s);else s.preview.hidden=true;
+ if(s.folds.size){
+  preview(el,s);
+  // Preserve the flex layout but never draw two editors on top of each
+  // other. The fold preview is the only visible code and number gutter.
+  s.host.classList.add('gdh-is-folded');
+ }else{
+  s.host.classList.remove('gdh-is-folded');
+  s.preview.hidden=true;
+ }
  gutter(el,s);
  if(s.syntax){
   s.syntax.innerHTML=window.GDScriptHighlighter?

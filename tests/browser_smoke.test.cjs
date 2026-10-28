@@ -33,8 +33,8 @@ async function testGodotEditorExtras(page,selector){
    return {count:marks.length,content:marks[1]&&getComputedStyle(marks[1],'::before').content,
      left:a?.left,next:b?.left,width:a?.width};
  },syntax);
- assert.ok(tabMarkers.count>=3 && tabMarkers.content.includes('›|'),
-   'Missing full Godot-style indent markers: '+JSON.stringify(tabMarkers));
+ assert.ok(tabMarkers.count>=3 && tabMarkers.content==='""',
+   'Indent guides must be SVG rather than font-based text: '+JSON.stringify(tabMarkers));
  assert.ok(Math.abs(tabMarkers.next-tabMarkers.left-tabMarkers.width)<2,
    'Nested markers should be placed at consecutive tab stops: '+JSON.stringify(tabMarkers));
  await editor.evaluate(el=>{el.focus();const p=el.value.indexOf('    if')+4;el.setSelectionRange(p,p)});
@@ -81,6 +81,23 @@ async function testGodotEditorExtras(page,selector){
  const preview=selector==='#code-editor'?'#view-exercise .editor-wrapper .gdh-fold-preview':
    '#view-practice .sandbox-editor-col .editor-wrapper .gdh-fold-preview';
  assert.ok(await page.locator(preview).isVisible(),'Fold preview must become visible');
+ // No underlying line numbers or syntax layer may bleed through the folded
+ // presentation. In particular, a folded 2-line function must not leave
+ // ghost indent symbols in the old editor (reported on desktop/iOS).
+ const foldedVisibility=await page.evaluate(id=>{
+   const host=document.getElementById(id).closest('.editor-wrapper');
+   const oldNumbers=host.querySelector('.line-numbers');
+   const oldEditor=host.querySelector('.gdscript-edit-stack');
+   const overlay=host.querySelector('.gdh-fold-preview');
+   const style=getComputedStyle(overlay);
+   return {foldClass:host.classList.contains('gdh-is-folded'),
+     nums:getComputedStyle(oldNumbers).visibility,
+     editor:getComputedStyle(oldEditor).visibility,
+     overlay:style.visibility,opacity:style.opacity,zIndex:style.zIndex};
+ },selector.slice(1));
+ assert.ok(foldedVisibility.foldClass && foldedVisibility.nums==='hidden' &&
+   foldedVisibility.editor==='hidden' && foldedVisibility.overlay==='visible',
+   'Fold mode is drawing two code surfaces: '+JSON.stringify(foldedVisibility));
  const foldedSize=await measure();
  assert.ok(Math.abs(foldedSize.height-fullSize.height)<1.1 &&
    Math.abs(foldedSize.previewHeight-fullSize.height)<1.1,
@@ -98,6 +115,10 @@ async function testGodotEditorExtras(page,selector){
  assert.equal(await editor.inputValue(),base,'Folding must never change canonical source');
  await page.locator(preview+' .gdh-fold-arrow.collapsed').first().click();
  assert.ok(await page.locator(preview).isHidden(),'Expanding must restore the whole editable view');
+ assert.equal(await page.evaluate(id=>{
+   const host=document.getElementById(id).closest('.editor-wrapper');
+   return getComputedStyle(host.querySelector('.gdscript-edit-stack')).visibility;
+ },selector.slice(1)),'visible','Expanded code must become visible again');
  assert.equal(await editor.inputValue(),base);
  // Nested if: folding this inner block must retain its parent and next function.
  await page.locator(gutter+' button[aria-label="Comprimi blocco dalla riga 2"]').click();
