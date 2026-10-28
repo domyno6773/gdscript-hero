@@ -1721,6 +1721,11 @@
                     </svg>
                     <span>Continua con Google</span>
                 </button>
+                <label class="checkbox-container auth-first-import-choice">
+                    <input type="checkbox" id="auth-google-import-checkbox" checked>
+                    <span class="checkmark"></span>
+                    <span class="check-label">Se Google crea un nuovo account, importa una sola volta i progressi ospite di questo browser.</span>
+                </label>
             </div>
 
             <!-- Separatore -->
@@ -1755,12 +1760,12 @@
                     <input type="password" id="auth-password-input" class="form-input" placeholder="Minimo 6 caratteri" required autocomplete="current-password">
                 </div>
 
-                <!-- Importazione esplicita ospite: disponibile a login e registrazione -->
+                <!-- Importazione ospite consentita SOLO per un account appena registrato -->
                 <div class="form-check-group hidden" id="group-auth-merge">
                     <label class="checkbox-container">
                         <input type="checkbox" id="auth-merge-checkbox">
                         <span class="checkmark"></span>
-                        <span class="check-label">Importa i progressi ospite (XP, codice, progetti e traguardi) nell’account</span>
+                        <span class="check-label">Importa i progressi ospite nel nuovo account (solo questa prima registrazione)</span>
                     </label>
                 </div>
 

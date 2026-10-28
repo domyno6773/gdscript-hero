@@ -10,6 +10,85 @@
 const AuthManager = {
     SESSION_KEY: 'gdscript_hero_auth_session',
     ACCOUNTS_KEY: 'gdscript_hero_accounts_db',
+    ONBOARDING_KEY: 'gdscript_hero_guest_onboarding_v1',
+
+    // L'intenzione vale SOLO per la registrazione realmente iniziata qui,
+    // non per accessi successivi a un account gia' esistente.
+    beginGuestOnboarding(provider,importGuest=true,email='') {
+        if(!this.isGuest() || !['google','email'].includes(provider))return false;
+        const intent={
+            version:1,provider,startedAt:Date.now(),importGuest:!!importGuest,
+            email:provider==='email'?String(email).trim().toLowerCase():''
+        };
+        try{localStorage.setItem(this.ONBOARDING_KEY,JSON.stringify(intent));return true;}
+        catch(error){console.warn('[AuthManager] Impossibile conservare la scelta di importazione:',error);return false;}
+    },
+    readGuestOnboarding() {
+        try{
+            const intent=JSON.parse(localStorage.getItem(this.ONBOARDING_KEY)||'null');
+            if(intent?.version!==1 || !['email','google'].includes(intent.provider) ||
+                !Number.isFinite(intent.startedAt) ||
+                Date.now()-intent.startedAt > 30*86400000 ||
+                intent.startedAt-Date.now() > 60000)return null;
+            return intent;
+        }catch(error){return null;}
+    },
+    clearGuestOnboarding() {
+        try{localStorage.removeItem(this.ONBOARDING_KEY);}catch(error){}
+    },
+    // Solo Supabase puo' confermare che l'utente e' stato creato
+    // DURANTE questa registrazione, non durante un normale login.
+    isNewOnboardingAccount(intent,user=this.currentUser) {
+        if(!intent||!user||user.isGuest)return false;
+        const created=Date.parse(user.createdAt||'');
+        if(!Number.isFinite(created) ||
+            created<intent.startedAt-120000 ||
+            created>intent.startedAt+1800000)return false;
+        if(intent.provider==='email'){
+            return intent.userId===user.id &&
+                intent.email===String(user.email||'').trim().toLowerCase();
+        }
+        return intent.provider==='google' && user.provider==='google' &&
+            Date.now()-intent.startedAt<=30*60000;
+    },
+    completeEmailOnboardingRegistration(user) {
+        const intent=this.readGuestOnboarding();
+        if(!intent||intent.provider!=='email')return;
+        const created=Date.parse(user?.created_at||'');
+        // Non riconoscere come nuova una risposta di signup che indica
+        // un utente gia' registrato; in quel caso niente importazione.
+        if(!user?.id || !Number.isFinite(created) ||
+            created<intent.startedAt-120000 ||
+            created>intent.startedAt+1800000){
+            this.clearGuestOnboarding();
+            return;
+        }
+        intent.userId=user.id;
+        try{localStorage.setItem(this.ONBOARDING_KEY,JSON.stringify(intent));}
+        catch(error){this.clearGuestOnboarding();}
+    },
+    // Chiamare esclusivamente DOPO una lettura cloud autenticata.
+    // Una riga cloud assente NON basta, da sola, a provare la prima registrazione.
+    takeFirstRegistrationGuestSave(cloudSave) {
+        const intent=this.readGuestOnboarding();
+        this.clearGuestOnboarding();
+        const owner=this.currentUser?.id;
+        if(!owner||cloudSave!==null ||
+            (this.isCloudActive() &&
+                (this._cloudVersion?.userId!==owner ||
+                 this._cloudVersion.revision!==-1)) ||
+            !this.isNewOnboardingAccount(intent))return null;
+        if(!intent.importGuest)return null;
+        try{
+            const raw=localStorage.getItem('gdscript_hero_scoped_save_v1:guest');
+            const data=raw?JSON.parse(raw):null;
+            // Conserva anche sandbox, bozze e preferenze se gli XP sono 0.
+            return data&&typeof data==='object'?data:null;
+        }catch(error){
+            console.warn('[AuthManager] Salvataggio ospite non leggibile:',error);
+            return null;
+        }
+    },
 
     currentUser: null,
     supabaseClient: null,
@@ -313,6 +392,7 @@ const AuthManager = {
             }
 
             if(!data?.user)throw new Error('Supabase non ha restituito un utente valido.');
+            this.completeEmailOnboardingRegistration(data.user);
             const sessionUser = {
                 id: data.user.id,
                 isGuest: false,
@@ -350,11 +430,12 @@ const AuthManager = {
             avatar: '🤖',
             createdAt: new Date().toISOString(),
             lastLogin: new Date().toISOString(),
-            progress: currentProgress || null
+            progress: null
         };
 
         db[cleanEmail] = newAccount;
         this.saveAccountsDB(db);
+        this.completeEmailOnboardingRegistration({id:userId,created_at:newAccount.createdAt});
 
         const sessionUser = {
             id: userId,

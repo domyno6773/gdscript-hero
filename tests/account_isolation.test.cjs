@@ -144,5 +144,124 @@ function deep(v){return JSON.parse(JSON.stringify(v));}
   store.set(app.ownerStorageKey('user:bob'),JSON.stringify({xp:444,userCode:{1:'print("bob")'}}));
   store.set('gdscript_hero_save_v4',JSON.stringify({xp:9999,userCode:{1:'print("altro account")'}}));
   assert.equal(app.ownerStorageKey('user:bob')!=='gdscript_hero_save_v4',true);
-  console.log('PASS: guest, Alice, Bob isolated; pending email and genuine Google OAuth');
+  // Importazione ospite: prova di prima registrazione, mai un semplice login.
+  const newGuestSave=()=>JSON.parse(store.get(app.ownerStorageKey('guest')));
+  app.switchSaveOwner(auth.createGuestUser());
+  auth.currentUser=auth.createGuestUser();
+  app.state.xp=85;
+  app.state.userCode={1:'print("ospite prima registrazione")'};
+  app.saveStorage({localOnly:true});
+  const firstGuest=deep(newGuestSave());
+  assert.equal(firstGuest.xp,85);
+  assert.equal(auth.beginGuestOnboarding('google',true),true);
+  const createdNow=new Date().toISOString();
+  const newGoogle={
+    id:'google-first',email:'first@example.test',
+    provider:'google',createdAt:createdNow,isGuest:false
+  };
+  auth.currentUser=newGoogle;
+  app.switchSaveOwner(newGoogle);
+  auth._cloudVersion={userId:newGoogle.id,revision:-1,blocked:false,remote:null};
+  await app.integrateCloudSave(null);
+  assert.equal(app.state.xp,85,'Il nuovo utente Google perde i progressi ospite');
+  assert.equal(app.state.userCode[1],'print("ospite prima registrazione")');
+  assert.equal(app.state.guestOnboardingV1.complete,true);
+  assert.equal(app.state.guestOnboardingV1.imported,true);
+  assert.equal(auth.readGuestOnboarding(),null,'Il consenso non deve restare riutilizzabile');
+
+  // L'ospite continua a studiare dopo il logout; i nuovi progressi non
+  // possono piu' essere aggiunti allo stesso account.
+  app.switchSaveOwner(auth.createGuestUser());
+  auth.currentUser=auth.createGuestUser();
+  app.state.xp=350;
+  app.state.userCode={1:'print("studio successivo come ospite")'};
+  app.saveStorage({localOnly:true});
+  assert.equal(auth.beginGuestOnboarding('google',true),true);
+  auth.currentUser=newGoogle;
+  app.switchSaveOwner(newGoogle);
+  auth._cloudVersion={userId:newGoogle.id,revision:-1,blocked:false,remote:null};
+  await app.integrateCloudSave(null);
+  assert.equal(app.state.xp,85,'Un secondo accesso ha importato i progressi ospite');
+  assert.equal(app.state.userCode[1],'print("ospite prima registrazione")');
+  assert.equal(app.state.guestOnboardingV1.imported,true);
+
+  // Account gia' esistente SENZA salvataggio remoto: non conta come nuovo.
+  app.switchSaveOwner(auth.createGuestUser());
+  auth.currentUser=auth.createGuestUser();
+  const oldGoogle={
+    id:'google-old',email:'old@example.test',provider:'google',
+    createdAt:'2024-01-01T12:00:00Z',isGuest:false
+  };
+  assert.equal(auth.beginGuestOnboarding('google',true),true);
+  auth.currentUser=oldGoogle;
+  app.switchSaveOwner(oldGoogle);
+  auth._cloudVersion={userId:oldGoogle.id,revision:-1,blocked:false,remote:null};
+  await app.integrateCloudSave(null);
+  assert.equal(app.state.xp,0,'Account vecchio e vuoto ha importato un ospite');
+  assert.equal(app.state.guestOnboardingV1.imported,false);
+
+  // Email: serve la risposta di registrazione con lo STESSO user ID;
+  // un altro account non puo' consumare il consenso.
+  app.switchSaveOwner(auth.createGuestUser());
+  auth.currentUser=auth.createGuestUser();
+  assert.equal(auth.beginGuestOnboarding('email',true,'new@example.test'),true);
+  auth.completeEmailOnboardingRegistration({
+    id:'email-new',created_at:new Date().toISOString()
+  });
+  const wrongEmail={
+    id:'email-wrong',email:'new@example.test',provider:'email',
+    createdAt:new Date().toISOString(),isGuest:false
+  };
+  auth.currentUser=wrongEmail;
+  app.switchSaveOwner(wrongEmail);
+  auth._cloudVersion={userId:wrongEmail.id,revision:-1,blocked:false,remote:null};
+  await app.integrateCloudSave(null);
+  assert.equal(app.state.xp,0,'Un account diverso ha ricevuto il salvataggio ospite');
+
+  // Verificare la registrazione email reale confermata.
+  app.switchSaveOwner(auth.createGuestUser());
+  auth.currentUser=auth.createGuestUser();
+  auth.beginGuestOnboarding('email',true,'fresh@example.test');
+  const emailCreated=new Date().toISOString();
+  auth.completeEmailOnboardingRegistration({id:'email-new',created_at:emailCreated});
+  const newEmail={
+    id:'email-new',email:'fresh@example.test',provider:'email',
+    createdAt:emailCreated,isGuest:false
+  };
+  auth.currentUser=newEmail;
+  app.switchSaveOwner(newEmail);
+  auth._cloudVersion={userId:newEmail.id,revision:-1,blocked:false,remote:null};
+  await app.integrateCloudSave(null);
+  assert.equal(app.state.xp,350,'Prima registrazione email non importa XP');
+  assert.equal(app.state.guestOnboardingV1.imported,true);
+
+  // Anche se il nuovo utente rinuncia all'importazione, non puo'
+  // ripensarci a un login successivo dopo aver studiato come ospite.
+  app.switchSaveOwner(auth.createGuestUser());
+  auth.currentUser=auth.createGuestUser();
+  auth.beginGuestOnboarding('email',false,'optout@example.test');
+  const optoutCreated=new Date().toISOString();
+  auth.completeEmailOnboardingRegistration({id:'email-optout',created_at:optoutCreated});
+  const optout={
+    id:'email-optout',email:'optout@example.test',
+    provider:'email',createdAt:optoutCreated,isGuest:false
+  };
+  auth.currentUser=optout;
+  app.switchSaveOwner(optout);
+  auth._cloudVersion={userId:optout.id,revision:-1,blocked:false,remote:null};
+  await app.integrateCloudSave(null);
+  assert.equal(app.state.xp,0);
+  assert.equal(app.state.guestOnboardingV1.imported,false);
+  app.switchSaveOwner(auth.createGuestUser());
+  auth.currentUser=auth.createGuestUser();
+  auth.beginGuestOnboarding('email',true,'optout@example.test');
+  auth.completeEmailOnboardingRegistration({id:'email-optout',created_at:optoutCreated});
+  auth.currentUser=optout;
+  app.switchSaveOwner(optout);
+  auth._cloudVersion={userId:optout.id,revision:-1,blocked:false,remote:null};
+  await app.integrateCloudSave(null);
+  assert.equal(app.state.xp,0,'Importazione rifiutata alla registrazione riabilitata');
+  assert.equal(newGuestSave().xp,350,'I progressi ospite devono restare separati');
+
+    console.log('PASS: guest, Alice, Bob isolated; pending email and genuine Google OAuth');
 })().catch(e=>{console.error(e);process.exitCode=1;});

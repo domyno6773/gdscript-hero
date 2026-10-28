@@ -343,6 +343,8 @@ const App = {
                     this.state.profile = { ...this.state.profile, ...parsed.profile };
                 }
                 this.state.profileCustomized = !!parsed.profileCustomized;
+                this.state.guestOnboardingV1 = parsed.guestOnboardingV1?.complete
+                    ? parsed.guestOnboardingV1 : null;
 
                 if (parsed.dailyQuests) {
                     this.state.dailyQuests = parsed.dailyQuests;
@@ -503,6 +505,7 @@ const App = {
             userCode: this.state.userCode,
             profile: this.state.profile,
             profileCustomized: this.state.profileCustomized,
+            guestOnboardingV1: this.state.guestOnboardingV1 || null,
             dailyQuests: this.state.dailyQuests,
             claimedQuestsCount: this.state.claimedQuestsCount,
             projectInterests: this.state.projectInterests,
@@ -6281,7 +6284,7 @@ const App = {
                 tabLogin.classList.add('active');
                 tabRegister.classList.remove('active');
                 if (groupName) groupName.classList.add('hidden');
-                if (groupMerge) groupMerge.classList.remove('hidden');
+                if (groupMerge) groupMerge.classList.add('hidden');
                 document.getElementById('auth-merge-checkbox').checked=false;
                 if (submitText) submitText.innerText = 'Accedi al Tuo Account';
                 if (authTitle) authTitle.innerText = 'Accedi a GDScript Hero';
@@ -6339,26 +6342,28 @@ const App = {
                 const email = emailInput ? emailInput.value.trim() : '';
                 const password = pwdInput ? pwdInput.value : '';
                 const name = nameInput ? nameInput.value.trim() : '';
-                const shouldMerge = mergeCheckbox ? mergeCheckbox.checked : true;
-
+                const importOnSignup = !!mergeCheckbox?.checked;
 
                 try {
                     this.clearAuthAlert();
-                    // Il merge dell'ospite e' una scelta esplicita, mai implicita.
-                    const guestSnapshot = shouldMerge && this._saveOwner==='guest'
-                        ? JSON.parse(JSON.stringify(this.state)) : null;
                     if (isRegister) {
+                        // L'intenzione e' riservata a questa specifica registrazione;
+                        // al login di un account preesistente non si importa mai l'ospite.
+                        window.AuthManager.beginGuestOnboarding('email',importOnSignup,email);
                         const res = await window.AuthManager.registerWithEmail(name, email, password);
                         if(res.pendingConfirmation){
-                            this.showAuthAlert('Controlla la tua email per confermare la registrazione. I progressi ospite restano salvati in questo browser. Dopo la conferma, accedi e seleziona se importarli.', 'success');
+                            this.showAuthAlert('Controlla la tua email per confermare la registrazione. I dati ospite restano in questo browser; l’importazione scelta avverrà soltanto al primo accesso verificato al nuovo account.', 'success');
                             return;
                         }
-                        await this.integrateCloudSave(null,guestSnapshot);
+                        const remote = window.AuthManager.isCloudActive()
+                            ? await window.AuthManager.fetchFromCloud() : null;
+                        await this.integrateCloudSave(remote);
                         this.showAuthAlert('Account creato con successo! Benvenuto, ' + res.user.name + '!', 'success');
                         SoundFX.playSuccess();
                     } else {
                         const res = await window.AuthManager.loginWithEmail(email, password);
-                        await this.integrateCloudSave(res.account?.progress||null,guestSnapshot);
+                        // Account gia' esistente: mai passare i dati dell'ospite.
+                        await this.integrateCloudSave(res.account?.progress||null);
                         this.showAuthAlert('Accesso effettuato! Bentornato, ' + res.user.name + '!', 'success');
                         SoundFX.playSuccess();
                     }
@@ -6366,6 +6371,10 @@ const App = {
                         this.closeAuthModal();
                     }, 900);
                 } catch (err) {
+                    // Se il server rifiuta la registrazione, non conservare
+                    // un'intenzione pendente associabile ad altri account.
+                    if(isRegister && window.AuthManager.isGuest())
+                        window.AuthManager.clearGuestOnboarding();
                     SoundFX.playError();
                     this.showAuthAlert(err.message, 'error');
                 }
@@ -6382,10 +6391,13 @@ const App = {
                     return;
                 }
                 try{
-                    // OAuth usa esclusivamente il provider Google ufficiale.
-                    // Non esistono accessi Google tramite email inserite a mano.
+                    // Google distingue un account appena creato da uno esistente
+                    // tramite la data di creazione confermata da Supabase.
+                    window.AuthManager.beginGuestOnboarding('google',
+                        !!document.getElementById('auth-google-import-checkbox')?.checked);
                     await window.AuthManager.loginWithGoogle();
                 }catch(err){
+                    window.AuthManager.clearGuestOnboarding();
                     this.showAuthAlert('Impossibile accedere con Google: '+err.message);
                 }
             };
@@ -7067,13 +7079,23 @@ const App = {
         }
         return result;
     },
-    async integrateCloudSave(cloudSave,guestSnapshot=null){
+    async integrateCloudSave(cloudSave){
         let snapshot=this.state;
         const baseline=this.getCloudBaseline();
-        if(guestSnapshot)snapshot=window.AuthManager?.mergeProgress?.(snapshot,guestSnapshot)||snapshot;
+        const auth=window.AuthManager;
+        // Dati ospite solo al primo accesso del nuovo account verificato.
+        // Il cloud, se gia' presente, ha sempre la precedenza su questa scelta.
+        const firstImport=!this.state.guestOnboardingV1?.complete && auth && !auth.isGuest()
+            ? auth.takeFirstRegistrationGuestSave(cloudSave||null) : null;
+        if(firstImport)
+            snapshot=auth.mergeProgress(snapshot,firstImport);
+        if(!cloudSave && auth && !auth.isGuest() && !snapshot.guestOnboardingV1?.complete){
+            snapshot={...snapshot,guestOnboardingV1:{
+                complete:true,imported:!!firstImport
+            }};
+        }
         if(cloudSave&&this.hasOverlappingCloudDrafts(snapshot,cloudSave,baseline)){
-            if(guestSnapshot)this.applyImportedState(snapshot,false);
-            else this.saveStorage({localOnly:true});
+            this.saveStorage({localOnly:true});
             const state=window.AuthManager?._cloudVersion;
             if(state&&state.userId===window.AuthManager?.currentUser?.id){
                 state.blocked=true;
@@ -7089,7 +7111,8 @@ const App = {
             this.saveCloudBaseline(cloudSave,window.AuthManager?.getSaveRevision?.());
         }
         try{
-            if(cloudSave||guestSnapshot)this.applyImportedState(snapshot,false);
+            if(cloudSave||firstImport||snapshot!==this.state)
+                this.applyImportedState(snapshot,false);
         }finally{
             this._cloudHydrationPending=false;
         }
@@ -7116,6 +7139,8 @@ const App = {
         if (data.soundVolume !== undefined) SoundFX.setVolume(data.soundVolume);
         if (data.profile) this.state.profile = { ...this.state.profile, ...data.profile };
         if (data.profileCustomized !== undefined) this.state.profileCustomized = !!data.profileCustomized;
+        if (data.guestOnboardingV1?.complete)
+            this.state.guestOnboardingV1 = data.guestOnboardingV1;
         if (data.dailyQuests) this.state.dailyQuests = data.dailyQuests;
         if (data.claimedQuestsCount !== undefined) this.state.claimedQuestsCount = data.claimedQuestsCount;
         if (data.sandbox) {
