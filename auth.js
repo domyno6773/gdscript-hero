@@ -887,6 +887,7 @@ const AuthManager = {
                 claimedQuestsCount: appState.claimedQuestsCount || 0,
                 projectInterests: appState.projectInterests || {},
                 userCode: appState.userCode || {},
+                lessonTaskProgress: appState.lessonTaskProgress || {},
                 // Questi dati erano già salvati localmente, ma mancavano dal backup.
                 arenaProject: appState.arenaProject ?? null,
                 sandbox: appState.sandbox ?? null,
@@ -1045,6 +1046,10 @@ const AuthManager = {
         merged.unlockedAchievements = Array.from(achSet);
 
         merged.userCode = { ...(current.userCode || {}), ...(imported.userCode || {}) };
+        merged.lessonTaskProgress=window.LessonPractice?.mergeProgress
+            ? window.LessonPractice.mergeProgress(
+                current.lessonTaskProgress||{},imported.lessonTaskProgress||{})
+            : {...(current.lessonTaskProgress||{}),...(imported.lessonTaskProgress||{})};
 
         if (imported.profileCustomized) {
             merged.profile = { ...(current.profile || {}), ...(imported.profile || {}) };

@@ -238,6 +238,18 @@
                     <button class="back-link" id="btn-back-to-roadmap">← Torna alla Mappa</button>
                     <span class="xp-reward-tag" id="lesson-xp-badge">+50 XP</span>
                 </div>
+                <section id="lesson-practice-progress" class="lesson-practice-progress hidden" aria-label="Progressi dei compiti dell'argomento">
+                    <div class="lesson-practice-head">
+                        <span id="lesson-practice-counter" class="lesson-practice-counter">Compito 1 di 4</span>
+                        <span id="lesson-practice-done" class="lesson-practice-done">0/4 completati</span>
+                    </div>
+                    <div id="lesson-practice-segments" class="lesson-practice-segments" aria-hidden="true"></div>
+                    <h3 id="lesson-practice-title" class="lesson-practice-title"></h3>
+                    <div class="lesson-practice-navigation">
+                        <button type="button" id="lesson-practice-prev" class="lesson-practice-nav" disabled>Compito precedente</button>
+                        <button type="button" id="lesson-practice-next" class="lesson-practice-nav" disabled>Compito successivo</button>
+                    </div>
+                </section>
                 <div class="lesson-content">
                     <h2 id="lesson-title">Caricamento...</h2>
                     <div id="lesson-theory" class="theory-body">
@@ -2094,6 +2106,7 @@
     <script src="error-guide.js"></script>
     <script src="progression.js"></script>
     <script src="lessons.js"></script>
+    <script src="lesson_practice.js"></script>
     <script src="curriculum_extension.js"></script>
     <script src="chapter_quizzes.js"></script>
     <script src="code-guide.js"></script>

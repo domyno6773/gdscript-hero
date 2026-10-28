@@ -28,6 +28,8 @@ jobs:
         run: node tests/audio_soundscape.test.cjs
       - name: Lesson 4 comments ignored and real output evaluated
         run: node tests/lesson4_comments_output.test.cjs
+      - name: Chapter 1 multi-task lesson structure and persistence
+        run: node tests/lesson_practice.test.cjs
       - name: Godot debug messages and reliable line numbers
         run: node tests/error_guide.test.cjs
       - name: Code comprehension throughout the course

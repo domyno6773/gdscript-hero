@@ -20,6 +20,7 @@ const App = {
         currentWeekId: "",
         lastActiveDate: null,
         userCode: {},
+        lessonTaskProgress: {},
         hintsRevealed: 0,
         activeHintLevel: 1,
         autocompleteList: [],
@@ -333,6 +334,7 @@ const App = {
                 this.state.currentWeekId = parsed.currentWeekId || this.getWeekId();
                 this.state.lastActiveDate = parsed.lastActiveDate || null;
                 this.state.userCode = parsed.userCode || {};
+                this.state.lessonTaskProgress = parsed.lessonTaskProgress || {};
                 
                 // Pulisce eventuale codice legacy con Node.new salvato in localStorage per le lezioni aggiornate
                 [49, 50, 52, 53, 57, 58].forEach(id => {
@@ -511,6 +513,7 @@ const App = {
             musicEnabled: SoundFX.musicEnabled,
             musicVolume: SoundFX.musicVolume,
             userCode: this.state.userCode,
+            lessonTaskProgress: this.state.lessonTaskProgress || {},
             profile: this.state.profile,
             profileCustomized: this.state.profileCustomized,
             guestOnboardingV1: this.state.guestOnboardingV1 || null,
@@ -3255,10 +3258,96 @@ const App = {
         this.updateExerciseToolsVisibility(lesson);
     },
 
+    // Percorsi multi-compito del Capitolo 1: un argomento rimane un solo
+    // nodo della mappa, con XP e sblocco assegnati SOLO all'ultimo compito.
+    getLessonPracticeRecord(lesson) {
+        if(!window.LessonPractice?.enabled(lesson?.id))return null;
+        this.state.lessonTaskProgress ||= {};
+        const tasks=LessonPractice.tasksFor(lesson);
+        const record=this.state.lessonTaskProgress[lesson.id] ||= {completed:[],codes:{},activeIndex:0};
+        const valid=new Set(tasks.map(t=>t.key));
+        record.completed=[...new Set(record.completed||[])].filter(k=>valid.has(k));
+        record.codes=record.codes&&typeof record.codes==='object'?record.codes:{};
+        // Migrazione: chi aveva già completato l'argomento conserva
+        // ricompensa e sblocco; non deve ripetere retroattivamente i compiti.
+        if(this.state.finishedLessons.includes(lesson.id))
+            record.completed=tasks.map(t=>t.key);
+        const firstPending=tasks.findIndex(t=>!record.completed.includes(t.key));
+        const max=firstPending===-1?tasks.length-1:firstPending;
+        record.activeIndex=Math.max(0,Math.min(max,Number.isInteger(record.activeIndex)?record.activeIndex:0));
+        return record;
+    },
+    getActivePracticeTask(){
+        if(this.isReviewMode)return null;
+        const lesson=LESSONS_DATA.find(l=>l.id===this.state.currentLessonId);
+        if(!lesson||!window.LessonPractice?.enabled(lesson.id))return null;
+        const record=this.getLessonPracticeRecord(lesson);
+        return LessonPractice.tasksFor(lesson)[this.currentPracticeTaskIndex??record.activeIndex]||null;
+    },
+    saveCurrentPracticeCode(){
+        const task=this.getActivePracticeTask();
+        if(!task)return false;
+        const lesson=LESSONS_DATA.find(l=>l.id===this.state.currentLessonId);
+        const record=this.getLessonPracticeRecord(lesson);
+        const code=document.getElementById('code-editor')?.value;
+        if(typeof code!=='string')return false;
+        record.codes[task.key]=code;
+        if(task.nativeOriginal)this.state.userCode[lesson.id]=code;
+        return true;
+    },
+    switchPracticeTask(index){
+        if(this.isValidating)return false;
+        const lesson=LESSONS_DATA.find(l=>l.id===this.state.currentLessonId);
+        if(!lesson||!window.LessonPractice?.enabled(lesson.id))return false;
+        const tasks=LessonPractice.tasksFor(lesson),record=this.getLessonPracticeRecord(lesson);
+        const firstPending=tasks.findIndex(t=>!record.completed.includes(t.key));
+        if(!Number.isInteger(index)||index<0||index>=tasks.length||
+            (firstPending!==-1&&index>firstPending))return false;
+        this.saveCurrentPracticeCode();
+        record.activeIndex=index;
+        this.saveStorage();
+        this.openLesson(lesson.id);
+        return true;
+    },
+    renderPracticeProgress(lesson,task,index){
+        const panel=document.getElementById('lesson-practice-progress');
+        if(!panel)return;
+        if(!task){panel.classList.add('hidden');return;}
+        const tasks=LessonPractice.tasksFor(lesson),record=this.getLessonPracticeRecord(lesson);
+        panel.classList.remove('hidden');
+        document.getElementById('lesson-practice-counter').textContent=
+            'Compito '+(index+1)+' di '+tasks.length;
+        document.getElementById('lesson-practice-done').textContent=
+            record.completed.length+'/'+tasks.length+' completati';
+        document.getElementById('lesson-practice-title').textContent=task.title;
+        const segments=document.getElementById('lesson-practice-segments');
+        segments.replaceChildren();
+        tasks.forEach((item,i)=>{
+            const seg=document.createElement('span');
+            seg.className='lesson-practice-segment'+
+                (record.completed.includes(item.key)?' done':'')+(i===index?' current':'');
+            segments.appendChild(seg);
+        });
+        const prev=document.getElementById('lesson-practice-prev');
+        const next=document.getElementById('lesson-practice-next');
+        prev.disabled=index===0;
+        next.disabled=index===tasks.length-1||!record.completed.includes(task.key);
+        next.textContent=index===tasks.length-1?'Argomento completato':'Compito successivo';
+    },
     openLesson(lessonId) {
-        const lesson = LESSONS_DATA.find(l => l.id === lessonId);
-        if (!lesson) return;
-        if (lesson.isQuiz) return this.openQuiz(lessonId);
+        const baseLesson = LESSONS_DATA.find(l => l.id === lessonId);
+        if (!baseLesson) return;
+        if (baseLesson.isQuiz) return this.openQuiz(lessonId);
+        const tasks=window.LessonPractice?.tasksFor(baseLesson)||[];
+        const record=tasks.length?this.getLessonPracticeRecord(baseLesson):null;
+        const task=record?tasks[record.activeIndex]:null;
+        this.currentPracticeTaskIndex=record?record.activeIndex:null;
+        const lesson=task&&!task.nativeOriginal?{
+            ...baseLesson,task:task.task,initialCode:task.initialCode,
+            solution:task.solution,expectedOutput:task.expectedOutput,hints:task.hints,
+            scenario:task.title,requirements:[task.task],
+            notice:'Output richiesto:',aiExplanation:task.hints?.[0]?.text||''
+        }:baseLesson;
 
         this.isReviewMode = false;
         this.currentReviewVariant = null;
@@ -3390,11 +3479,14 @@ const App = {
             this.bindStandardHintEvents();
         }
 
+        this.renderPracticeProgress(baseLesson,task,this.currentPracticeTaskIndex);
         this.syncLessonXpBadge(lesson);
         const backButton = document.getElementById('btn-back-to-roadmap');
         if (backButton) backButton.textContent = '← Torna alla Mappa';
 
-        const savedCode = this.state.userCode[lessonId] || lesson.initialCode;
+        const savedCode = task
+            ? (record.codes[task.key] ?? (task.nativeOriginal?this.state.userCode[lessonId]:null) ?? lesson.initialCode)
+            : (this.state.userCode[lessonId] || lesson.initialCode);
         const editor = document.getElementById('code-editor');
         editor.value = savedCode;
         this.updateLineNumbers();
@@ -3643,7 +3735,8 @@ const App = {
             this.checkAutocomplete();
             // Un ripasso non deve mai sovrascrivere il codice salvato del corso.
             if (!this.isReviewMode) {
-                this.state.userCode[this.state.currentLessonId] = editor.value;
+                if(!this.saveCurrentPracticeCode())
+                    this.state.userCode[this.state.currentLessonId] = editor.value;
                 this.saveStorage();
             } else {
                 this.saveReviewDraft();
@@ -3875,7 +3968,8 @@ const App = {
             } else {
                 this.updateLineNumbers();
                 if (!this.isReviewMode) {
-                    this.state.userCode[this.state.currentLessonId] = editor.value;
+                    if(!this.saveCurrentPracticeCode())
+                        this.state.userCode[this.state.currentLessonId] = editor.value;
                     this.saveStorage();
                 } else {
                     this.saveReviewDraft();
@@ -4291,6 +4385,8 @@ const App = {
             return;
         }
         const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+        const practiceTask=this.getActivePracticeTask();
+        const practiceIndex=this.currentPracticeTaskIndex;
         if (!currentLesson) {
             this.isValidating = false;
             return;
@@ -4302,9 +4398,12 @@ const App = {
 
          try {
             if (!window.GDHGodot) throw new Error('Motore Godot non disponibile');
-            const native = await window.GDHGodot.verifyLesson(currentLesson.id, code);
-            // Non attribuire a una lezione l'esito di un codice cambiato durante la verifica.
-            if (this.state.currentLessonId !== currentLesson.id || editor.value !== code || this.isReviewMode) return;
+            const native = practiceTask&&!practiceTask.nativeOriginal
+                ? await window.GDHGodot.verifyPracticeTask(currentLesson.id,practiceTask.key,code)
+                : await window.GDHGodot.verifyLesson(currentLesson.id,code);
+            // Non attribuire a un compito l'esito di un codice cambiato durante la verifica.
+            if (this.state.currentLessonId !== currentLesson.id || editor.value !== code ||
+                this.isReviewMode || this.currentPracticeTaskIndex!==practiceIndex) return;
             const result = native.execution;
 
             const realOutputPre = document.getElementById('real-output-pre');
@@ -4320,7 +4419,7 @@ const App = {
             }
 
             const expectedOutputPre = document.getElementById('expected-output-pre');
-            expectedOutputPre.innerText = currentLesson.expectedOutput || "// Nessun output richiesto";
+            expectedOutputPre.innerText = practiceTask?.expectedOutput || currentLesson.expectedOutput || "// Nessun output richiesto";
 
             // Solo il verdetto completo di Godot può attivare gli XP e gli sblocchi.
             const tests = [...(native.feedback.checks || [])];
@@ -4373,6 +4472,35 @@ const App = {
                 badge.innerText = `✓ Superato (${tests.length}/${tests.length})`;
                 badge.style.color = '#10b981';
 
+                if(practiceTask){
+                    const progress=this.getLessonPracticeRecord(currentLesson);
+                    if(!progress.completed.includes(practiceTask.key))
+                        progress.completed.push(practiceTask.key);
+                    progress.codes[practiceTask.key]=code;
+                    const allTasks=LessonPractice.tasksFor(currentLesson);
+                    const hasMore=practiceIndex<allTasks.length-1;
+                    if(hasMore){
+                        progress.activeIndex=practiceIndex+1;
+                        this.saveStorage();
+                        this.renderPracticeProgress(currentLesson,practiceTask,practiceIndex);
+                        this.recordDailyActivity();
+                        SoundFX.playSuccess();
+                        document.getElementById('modal-success-title').textContent='COMPITO COMPLETATO!';
+                        document.getElementById('modal-success-subtitle').textContent=
+                            'Ottimo! Hai completato il compito '+(practiceIndex+1)+' di '+allTasks.length+
+                            '. Continua ad allenarti per concludere l’argomento.';
+                        document.getElementById('btn-modal-next').textContent='Prossimo compito';
+                        this.setSuccessModalReward(0);
+                        setTimeout(()=>{
+                            if(this.state.currentLessonId===currentLesson.id&&
+                                this.currentPracticeTaskIndex===practiceIndex)
+                                document.getElementById('success-modal').classList.remove('hidden');
+                        },300);
+                        return;
+                    }
+                    this.saveStorage({localOnly:true});
+                }
+                document.getElementById('btn-modal-next').textContent='Prossima lezione';
                 const isFirstTime = !this.state.finishedLessons.includes(currentLesson.id);
                 const earnedLessonXp = isFirstTime ? currentLesson.xp : 0;
                 if (isFirstTime) {
@@ -4466,8 +4594,11 @@ const App = {
                 }
                 this.setSuccessModalReward(earnedLessonXp);
 
+                if(practiceTask)this.renderPracticeProgress(currentLesson,practiceTask,practiceIndex);
                 setTimeout(() => {
-                    document.getElementById('success-modal').classList.remove('hidden');
+                    if(this.state.currentLessonId===currentLesson.id&&
+                        this.currentPracticeTaskIndex===practiceIndex)
+                        document.getElementById('success-modal').classList.remove('hidden');
                 }, 300);
 
             } else {
@@ -4724,6 +4855,12 @@ const App = {
 
         // Verifica ed Editor
         document.getElementById('btn-run-code').onclick = () => this.runAndValidate();
+        document.getElementById('lesson-practice-prev')?.addEventListener('click',()=>{
+            this.switchPracticeTask(this.currentPracticeTaskIndex-1);
+        });
+        document.getElementById('lesson-practice-next')?.addEventListener('click',()=>{
+            this.switchPracticeTask(this.currentPracticeTaskIndex+1);
+        });
 
         document.getElementById('btn-reset-code').onclick = () => {
             SoundFX.playClick();
@@ -4733,7 +4870,12 @@ const App = {
                     this.isReviewMode ? currentLesson.starterCode : currentLesson.initialCode;
                 this.updateLineNumbers();
                 if (!this.isReviewMode) {
-                    delete this.state.userCode[this.state.currentLessonId];
+                    const task=this.getActivePracticeTask();
+                    if(task){
+                        const base=LESSONS_DATA.find(l=>l.id===this.state.currentLessonId);
+                        delete this.getLessonPracticeRecord(base).codes[task.key];
+                        if(task.nativeOriginal)delete this.state.userCode[this.state.currentLessonId];
+                    }else delete this.state.userCode[this.state.currentLessonId];
                     this.saveStorage();
                 }
                 if (currentLesson.initialNodes && Array.isArray(currentLesson.initialNodes) && window.GDScriptRuntime) {
@@ -4918,6 +5060,18 @@ const App = {
                 this.exitReviewMode();
                 return;
             }
+            const task=this.getActivePracticeTask();
+            if(task){
+                const lesson=LESSONS_DATA.find(l=>l.id===this.state.currentLessonId);
+                const tasks=LessonPractice.tasksFor(lesson);
+                const progress=this.getLessonPracticeRecord(lesson);
+                if(this.currentPracticeTaskIndex<tasks.length-1 &&
+                    progress.completed.includes(task.key)){
+                    this.switchPracticeTask(this.currentPracticeTaskIndex+1);
+                    return;
+                }
+                if(!this.state.finishedLessons.includes(lesson.id))return;
+            }
             const nextLesson = LESSONS_DATA[LESSONS_DATA.findIndex(l => l.id === this.state.currentLessonId) + 1];
             const nextId = nextLesson?.id;
 
@@ -4933,7 +5087,9 @@ const App = {
             SoundFX.playClick();
             document.getElementById('success-modal').classList.add('hidden');
             const nextBtnHeader = document.getElementById('btn-header-next');
-            if (nextBtnHeader && !this.isReviewMode) nextBtnHeader.classList.remove('hidden');
+            if (nextBtnHeader && !this.isReviewMode &&
+                this.state.finishedLessons.includes(this.state.currentLessonId))
+                nextBtnHeader.classList.remove('hidden');
         };
 
         const btnModalStay = document.getElementById('btn-modal-stay');
@@ -5237,7 +5393,11 @@ const App = {
         if (this.isReviewMode && this.currentReviewVariant) {
             return this.currentReviewVariant;
         }
-        return (typeof LESSONS_DATA !== 'undefined') ? LESSONS_DATA.find(l => l.id === this.state.currentLessonId) : null;
+        const lesson=(typeof LESSONS_DATA !== 'undefined') ?
+            LESSONS_DATA.find(l=>l.id===this.state.currentLessonId):null;
+        const task=this.getActivePracticeTask();
+        return lesson&&task?{...lesson,initialCode:task.initialCode,
+            solution:task.solution,hints:task.hints,task:task.task}:lesson;
     },
 
     async runAndValidateReviewVariant(code, runBtn) {
@@ -6260,7 +6420,7 @@ const App = {
     },
 
     revealChallengeSolution() {
-        const currentLesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+        const currentLesson = this.getCurrentActiveLessonOrVariant();
         if (!currentLesson) return;
         if (confirm("Vuoi visualizzare la soluzione completa per questa sfida?")) {
             SoundFX.playHint();
@@ -7244,6 +7404,7 @@ const App = {
         if (data.completedLessons) this.state.completedLessons = data.completedLessons;
         if (data.unlockedAchievements) this.state.unlockedAchievements = data.unlockedAchievements;
         if (data.userCode) this.state.userCode = data.userCode;
+        if(data.lessonTaskProgress)this.state.lessonTaskProgress=data.lessonTaskProgress;
         if (data.projectInterests) this.state.projectInterests = data.projectInterests;
         if (data.soundEnabled !== undefined) SoundFX.enabled = !!data.soundEnabled;
         if (data.soundVolume !== undefined) SoundFX.setVolume(data.soundVolume);

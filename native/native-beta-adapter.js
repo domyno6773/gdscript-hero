@@ -148,6 +148,32 @@
     };
     return {feedback,execution,original:base,accepted:success};
   };
+  // I compiti aggiuntivi usano lo stesso runner Godot isolato delle lezioni.
+  // La convalida riguarda SOLO il compito richiesto; il completamento del
+  // percorso e gli XP sono gestiti da App dopo l'ultimo compito.
+  const verifyPracticeTask=async(lessonId,taskKey,source)=>{
+    const task=window.LessonPractice?.getTask(lessonId,taskKey);
+    if(!task||task.nativeOriginal)throw Error('Compito non disponibile');
+    const run=await raw(source,{});
+    const valid=run.status==='executed'&&!String(run.stderr||'').trim();
+    const checks=[
+      {desc:'Compilazione ed esecuzione in Godot',passed:run.status==='executed'},
+      {desc:'Nessun errore del motore',passed:!String(run.stderr||'').trim()}
+    ];
+    if(valid)checks.push(...window.LessonPractice.grade(task,source,run.stdout));
+    const passed=valid&&checks.length>2&&checks.every(c=>c.passed);
+    const feedback={
+      verdict:passed?'accepted':valid?'requirements_not_met':'invalid_code',
+      passed,checks,
+      reason:valid?null:String(run.stderr||'Codice non eseguibile in Godot').trim()
+    };
+    const execution={
+      success:valid,code:source,logs:lines(run.stdout),
+      error:valid?null:(String(run.stderr||'Errore di esecuzione').trim()),
+      nativeStatus:run.status,nativeFeedback:feedback
+    };
+    return {feedback,execution,original:run,accepted:passed};
+  };
   // Compatibility result format for Sandbox, Ripasso and Arena. Actual execution
   // is always performed by Godot; no JavaScript transpiler executes student code.
   const rootVariables=source=>[...new Set([...String(source).matchAll(/^var\s+([A-Za-z_]\w*)/gm)]
@@ -231,7 +257,7 @@
       (run.stderr.trim()||String(run.reply?.message||'Azione Godot non riuscita')),
       native:run.reply};
   };
-  const adapter=Object.freeze({verifyLesson,execute:executeCompat,sandboxAction,
+  const adapter=Object.freeze({verifyLesson,verifyPracticeTask,execute:executeCompat,sandboxAction,
     runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.4.1 WebAssembly';}});
   window.GDHGodot=adapter;
   if(window.GDScriptRuntime)window.GDScriptRuntime.execute=(...args)=>executeCompat(...args);

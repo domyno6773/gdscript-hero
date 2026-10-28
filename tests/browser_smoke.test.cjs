@@ -1766,6 +1766,39 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#exercise-debug-area .gdh-debug-panel').count(),0,
    'Editing the code should clear the previous error');
  await page.locator('#btn-run-code').click({timeout:10000});
+ await page.waitForFunction(()=>!App.isValidating &&
+   !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
+ assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),false,
+   'First task must not complete the lesson');
+ assert.equal(await page.locator('#lesson-practice-counter').textContent(),'Compito 1 di 4');
+ assert.equal(await page.locator('#modal-success-title').textContent(),'COMPITO COMPLETATO!');
+ assert.equal(await page.locator('#modal-xp-card').isHidden(),true,
+   'Intermediate tasks must not grant lesson XP');
+ await page.locator('#btn-modal-next').click();
+ for(let index=1;index<4;index++){
+   assert.equal(await page.locator('#lesson-practice-counter').textContent(),
+     'Compito '+(index+1)+' di 4');
+   if(index===1){
+     await page.reload({waitUntil:'load'});
+     await page.evaluate(()=>App.openLesson(1));
+     assert.equal(await page.locator('#lesson-practice-counter').textContent(),'Compito 2 di 4',
+       'Reload must restore current task');
+   }
+   if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
+   const solution=await page.evaluate(i=>{
+     const lesson=LESSONS_DATA.find(l=>l.id===1);
+     return LessonPractice.tasksFor(lesson)[i].solution;
+   },index);
+   await page.locator('#code-editor').fill(solution);
+   await page.locator('#btn-run-code').click({timeout:10000});
+   await page.waitForFunction(()=>!App.isValidating &&
+     !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
+   if(index<3){
+     assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),false);
+     assert.equal(await page.locator('#modal-xp-card').isHidden(),true);
+     await page.locator('#btn-modal-next').click();
+   }
+ }
  try {
    await page.waitForFunction(()=>App.state.finishedLessons.includes(1),null,{timeout:15000});
  } catch(error){
@@ -1808,6 +1841,11 @@ async function smoke(browser,url,width){
  // anche dopo una sfida di apprendimento con layout differente (lezione 4).
  await page.evaluate(()=>{
    App.state.userCode[4]='func _ready():\\n    print("BOZZA_SOLO_CORSO")';
+   App.state.lessonTaskProgress[4]={
+     completed:['p1','p2','p3'],
+     codes:{base:'func _ready():\\n    print("BOZZA_SOLO_CORSO")'},
+     activeIndex:3
+   };
    App.saveStorage();
    App.openLesson(4);
  });

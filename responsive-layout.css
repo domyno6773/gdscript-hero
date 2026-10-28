@@ -600,3 +600,38 @@ html, body { overflow-x:clip; }
     padding: 24px 16px !important;
   }
 }
+
+/* Percorso multi-compito del capitolo 1: progresso visibile, senza riquadri annidati. */
+.lesson-practice-progress {
+  margin: 12px 0 20px;
+  padding: 13px 0 15px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-ui);
+}
+.lesson-practice-progress.hidden { display:none!important; }
+.lesson-practice-head {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  color:var(--text-muted); font-size:.78rem; font-weight:650;
+}
+.lesson-practice-counter {color:var(--accent-primary);font-weight:800}
+.lesson-practice-segments {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:10px 0 12px}
+.lesson-practice-segment {height:5px;border-radius:99px;background:var(--border);transition:background .16s ease}
+.lesson-practice-segment.done {background:#60bca0}
+.lesson-practice-segment.current {background:var(--accent-primary)}
+.lesson-practice-segment.done.current {background:#60bca0;outline:1px solid var(--accent-primary);outline-offset:2px}
+.lesson-practice-title {font-size:.98rem;line-height:1.4;color:var(--text-main);font-weight:800;margin:0 0 12px}
+.lesson-practice-navigation {display:flex;gap:9px;flex-wrap:wrap}
+.lesson-practice-nav {
+  border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-main);
+  font:650 .78rem var(--font-ui);padding:8px 12px;border-radius:8px;cursor:pointer;
+}
+.lesson-practice-nav:disabled {opacity:.42;cursor:not-allowed}
+.lesson-practice-nav:not(:disabled):hover {border-color:var(--accent-primary)}
+.lesson-practice-nav:focus-visible {outline:2px solid var(--accent-primary);outline-offset:2px}
+@media(max-width:480px) {
+  .lesson-practice-progress {margin:8px 0 16px}
+  .lesson-practice-nav {flex:1;min-width:125px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .lesson-practice-segment {transition:none}
+}
