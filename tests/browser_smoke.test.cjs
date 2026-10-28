@@ -585,8 +585,8 @@ async function smoke(browser,url,width){
  assert.ok((await page.locator('#gdh-save-notice').textContent()).includes('Test connessione assente'));
  assert.equal(await page.locator('#gdh-save-retry').isVisible(),true);
  await page.evaluate(()=>App.renderSyncStatus({kind:'conflict',message:'Versioni differenti'}));
- assert.equal(await page.locator('#gdh-save-resolve').isVisible(),true);
- assert.equal(await page.locator('#gdh-save-backup').isVisible(),true);
+ assert.equal(await page.locator('#gdh-save-notice').isHidden(),true,
+   'No mandatory conflict alert without an actual blocked cloud state');
  await page.evaluate(()=>App.renderLocalSaveError(true));
  assert.equal(await page.locator('#gdh-save-backup').isVisible(),true,'Missing local save failure backup');
  await page.evaluate(()=>{
