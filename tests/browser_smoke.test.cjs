@@ -1559,6 +1559,8 @@ async function smoke(browser,url,width){
  // Il controllo del completamento non deve alterare lo starter della lezione 1.
  await page.evaluate(()=>{
    delete App.state.userCode[1];
+   if(App.state.lessonTaskProgress?.[1])
+     delete App.state.lessonTaskProgress[1].codes.base;
    App.saveStorage();
    App.openLesson(1);
  });
@@ -1771,6 +1773,8 @@ async function smoke(browser,url,width){
  assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),false,
    'First task must not complete the lesson');
  assert.equal(await page.locator('#lesson-practice-counter').textContent(),'Compito 1 di 4');
+ assert.equal(await page.evaluate(()=>App.switchPracticeTask(3)),false,
+   'Cannot skip the first three tasks');
  assert.equal(await page.locator('#modal-success-title').textContent(),'COMPITO COMPLETATO!');
  assert.equal(await page.locator('#modal-xp-card').isHidden(),true,
    'Intermediate tasks must not grant lesson XP');
@@ -1779,10 +1783,13 @@ async function smoke(browser,url,width){
    assert.equal(await page.locator('#lesson-practice-counter').textContent(),
      'Compito '+(index+1)+' di 4');
    if(index===1){
+     await page.locator('#code-editor').fill('func _ready():\n    print("Bozza")');
      await page.reload({waitUntil:'load'});
      await page.evaluate(()=>App.openLesson(1));
      assert.equal(await page.locator('#lesson-practice-counter').textContent(),'Compito 2 di 4',
        'Reload must restore current task');
+     assert.ok((await page.locator('#code-editor').inputValue()).includes('Bozza'),
+       'Reload must preserve code of the current task');
    }
    if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
    const solution=await page.evaluate(i=>{

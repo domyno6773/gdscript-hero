@@ -4442,7 +4442,9 @@ const App = {
 
             // Aggiorna Schermo Viewport 2D Godot
             if (this.viewport) {
-                this.viewport.updateFromExecution(result, currentLesson, allPassed);
+                this.viewport.updateFromExecution(result,
+                    practiceTask?{...currentLesson,expectedOutput:practiceTask.expectedOutput}:currentLesson,
+                    allPassed);
             }
 
             const resultsContainer = document.getElementById('test-results-view');
@@ -4608,7 +4610,10 @@ const App = {
 
                 // Costruzione Feedback Didattico Contestuale Avanzato (P3.2)
                 const firstFailedTest = tests.find(t => !t.passed);
-                const feedbackCard = this.buildContextualFeedback(result, currentLesson, firstFailedTest, tests, code);
+                const lessonContext=practiceTask?{...currentLesson,
+                    task:practiceTask.task,expectedOutput:practiceTask.expectedOutput,
+                    initialCode:practiceTask.initialCode,hints:practiceTask.hints}:currentLesson;
+                const feedbackCard = this.buildContextualFeedback(result, lessonContext, firstFailedTest, tests, code);
                 if (feedbackCard) {
                     resultsContainer.appendChild(feedbackCard);
                 }
@@ -7284,6 +7289,14 @@ const App = {
             });
         };
         if(overlap(local.userCode,remote.userCode,base?.userCode,true))return true;
+        // Anche i codici dei singoli compiti sono bozze indipendenti:
+        // due modifiche concorrenti non devono sovrascriversi in silenzio.
+        const taskDrafts=progress=>Object.fromEntries(
+            Object.entries(progress||{}).flatMap(([id,record])=>
+                Object.entries(record?.codes||{}).map(([key,code])=>[id+':'+key,code])));
+        if(overlap(taskDrafts(local.lessonTaskProgress),
+            taskDrafts(remote.lessonTaskProgress),
+            taskDrafts(base?.lessonTaskProgress)))return true;
         if(overlap(local.arenaProject?.userCode,remote.arenaProject?.userCode,
             base?.arenaProject?.userCode))return true;
         const localProjects=local.sandbox?.projects||[];
@@ -7319,6 +7332,16 @@ const App = {
         };
         result.userCode={...(result.userCode||{})};
         preserveEdits(result.userCode,local.userCode,remote.userCode,base.userCode);
+        result.lessonTaskProgress={...(result.lessonTaskProgress||{})};
+        for(const [id,record] of Object.entries(local.lessonTaskProgress||{})){
+            const remoteRecord=remote.lessonTaskProgress?.[id];
+            const baseRecord=base.lessonTaskProgress?.[id];
+            if(!remoteRecord)continue;
+            const mergedRecord=result.lessonTaskProgress[id];
+            if(!mergedRecord)continue;
+            mergedRecord.codes={...(mergedRecord.codes||{})};
+            preserveEdits(mergedRecord.codes,record.codes,remoteRecord.codes,baseRecord?.codes);
+        }
         if(result.arenaProject){
             result.arenaProject={...result.arenaProject,
                 userCode:{...(result.arenaProject.userCode||{})}};
