@@ -111,7 +111,7 @@
       status().dataset.state="warning";
       return;
     }
-    const results=window.GDHChapterQuizzes.grade(item,answers);
+    const results=window.GDHChapterQuizzes.grade(window.GDHChapterQuizzes.get(item.id),answers);
     for(let i=0;i<results.length;i++){
       const result=results[i],q=item.quizQuestions[i];
       const panel=document.getElementById("quiz-feedback-"+i);
