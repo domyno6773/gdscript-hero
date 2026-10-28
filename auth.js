@@ -127,37 +127,36 @@ const AuthManager = {
                 }
 
                 // Ascolta gli eventi di sessione Supabase (OAuth redirect, login, refresh)
-                this.supabaseClient.auth.onAuthStateChange(async (event, session) => {
-                    console.log('[AuthManager] onAuthStateChange event:', event);
-                    if (session && session.user) {
-                        const u = session.user;
-                        const sessionUser = {
-                            id: u.id,
-                            isGuest: false,
-                            provider: u.app_metadata?.provider || (u.email?.includes('gmail') ? 'google' : 'email'),
-                            name: u.user_metadata?.name || u.user_metadata?.full_name || u.email.split('@')[0],
-                            email: u.email,
-                            photoURL: u.user_metadata?.avatar_url || null,
-                            createdAt: u.created_at || new Date().toISOString()
-                        };
-                        this.saveSession(sessionUser);
-
-                        // Pulisce l'URL dai frammenti OAuth se presenti
-                        if (window.location.hash || window.location.search.includes('code=')) {
-                            window.history.replaceState({}, document.title, window.location.pathname);
+                // Non attendere metodi Supabase dentro il callback: possono
+                // andare in deadlock sul lock interno delle sessioni.
+                this.supabaseClient.auth.onAuthStateChange((event, session) => {
+                    if(event==='SIGNED_OUT'){
+                        try{localStorage.removeItem(this.SESSION_KEY);}catch(e){}
+                        if(!this.isGuest()){
+                            this.currentUser=this.createGuestUser();
+                            this.notifyListeners();
                         }
-
-                        // Integra i progressi dell'Ospite con i salvataggi cloud
-                        const cloudSave = await this.fetchFromCloud();
-                        if (window.App && typeof window.App.integrateCloudSave === 'function') {
-                            await window.App.integrateCloudSave(cloudSave);
-                        } else if (cloudSave && window.App && typeof window.App.applyImportedState === 'function') {
-                            window.App.applyImportedState(cloudSave, false);
-                        }
-                    } else if (event === 'SIGNED_OUT') {
-                        this.currentUser = this.createGuestUser();
-                        this.notifyListeners();
+                        return;
                     }
+                    if(!session?.user || !['SIGNED_IN','INITIAL_SESSION'].includes(event))return;
+                    const id=session.user.id;
+                    if(this.currentUser?.id===id)return;
+                    setTimeout(async()=>{
+                        try{
+                            const {data:{session:now}}=await this.supabaseClient.auth.getSession();
+                            if(!now?.user || now.user.id!==id || this.currentUser?.id===id)return;
+                            const u=now.user;
+                            const user={
+                                id:u.id,isGuest:false,
+                                provider:u.app_metadata?.provider||(u.email?.includes('gmail')?'google':'email'),
+                                name:u.user_metadata?.name||u.user_metadata?.full_name||u.email?.split('@')[0]||'Eroe Godot',
+                                email:u.email,photoURL:u.user_metadata?.avatar_url||null,createdAt:u.created_at
+                            };
+                            this.saveSession(user);
+                            const cloudSave=await this.fetchFromCloud();
+                            if(this.currentUser?.id===id)await window.App?.integrateCloudSave?.(cloudSave);
+                        }catch(error){console.warn('[AuthManager] Recupero sessione fallito',error);}
+                    },0);
                 });
             } catch (err) {
                 console.warn('[AuthManager] Errore inizializzazione Supabase:', err);
@@ -166,7 +165,7 @@ const AuthManager = {
         }
 
         // 2. Se Supabase non ha fornito un utente valido, controlla localStorage locale
-        if (!supabaseFoundUser) {
+        if (!supabaseFoundUser && !this.isCloudActive()) {
             try {
                 const rawSession = localStorage.getItem(this.SESSION_KEY);
                 if (rawSession) {
@@ -280,7 +279,7 @@ const AuthManager = {
     /**
      * Registrazione nuovo account con Email e Password (Cloud o Locale)
      */
-    async registerWithEmail(name, email, password, currentProgress = null) {
+    async registerWithEmail(name, email, password) {
         const cleanEmail = email.trim().toLowerCase();
         const cleanName = name.trim() || 'Sviluppatore Godot';
 
@@ -309,6 +308,7 @@ const AuthManager = {
                 throw new Error(error.message);
             }
 
+            if(!data?.user)throw new Error('Supabase non ha restituito un utente valido.');
             const sessionUser = {
                 id: data.user.id,
                 isGuest: false,
@@ -319,13 +319,13 @@ const AuthManager = {
                 createdAt: data.user.created_at || new Date().toISOString()
             };
 
-            this.saveSession(sessionUser);
-
-            if (currentProgress) {
-                await this.syncToCloud(currentProgress);
+            // Confirm Email attivo: Supabase restituisce user ma session=null.
+            // NON trattare tale utente come autenticato e non associare progressi.
+            if(!data.session){
+                return {user:null,account:data.user,pendingConfirmation:true};
             }
-
-            return { user: sessionUser, account: data.user };
+            this.saveSession(sessionUser);
+            return { user: sessionUser, account: data.user,pendingConfirmation:false };
         }
 
         // 2. Fallback autonomo locale
@@ -438,67 +438,14 @@ const AuthManager = {
     /**
      * Accesso Rapido con Account Google (Cloud OAuth o Locale)
      */
-    async loginWithGoogle(customProfile = null, currentProgress = null) {
-        // 1. Se NON è passato un profilo manuale e Supabase è attivo: avvia Google OAuth ufficiale
-        if (!customProfile && this.isCloudActive()) {
-            let redirectUrl = window.location.origin + window.location.pathname;
-            if (!redirectUrl.endsWith('/') && !redirectUrl.endsWith('.html')) {
-                redirectUrl += '/';
-            }
-            const { data, error } = await this.supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: redirectUrl
-                }
-            });
-
-            if (error) {
-                throw new Error(error.message);
-            }
-            return data;
-        }
-
-        // 2. Se è specificato un profilo manuale o fallback autonomo locale
-        const googleName = customProfile?.name || 'Sviluppatore Google';
-        const googleEmail = (customProfile?.email || 'godot.dev@gmail.com').toLowerCase();
-        const googleAvatar = customProfile?.photoURL || 'https://lh3.googleusercontent.com/a/default-user=s96-c';
-
-        const db = this.getAccountsDB();
-        let account = db[googleEmail];
-
-        if (!account) {
-            const userId = 'goog_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-            account = {
-                id: userId,
-                name: googleName,
-                email: googleEmail,
-                provider: 'google',
-                photoURL: googleAvatar,
-                createdAt: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-                progress: currentProgress || null
-            };
-            db[googleEmail] = account;
-        } else {
-            account.lastLogin = new Date().toISOString();
-            if (googleAvatar) account.photoURL = googleAvatar;
-            db[googleEmail] = account;
-        }
-
-        this.saveAccountsDB(db);
-
-        const sessionUser = {
-            id: account.id,
-            isGuest: false,
-            provider: 'google',
-            name: account.name,
-            email: account.email,
-            photoURL: account.photoURL,
-            createdAt: account.createdAt
-        };
-
-        this.saveSession(sessionUser);
-        return { user: sessionUser, account };
+    async loginWithGoogle() {
+        if (!this.isCloudActive())throw new Error('Accesso Google disponibile solo con Supabase.');
+        const redirectUrl=window.location.origin+window.location.pathname;
+        const {data,error}=await this.supabaseClient.auth.signInWithOAuth({
+            provider:'google', options:{redirectTo:redirectUrl}
+        });
+        if(error)throw new Error(error.message);
+        return data;
     },
 
     /**
@@ -506,9 +453,8 @@ const AuthManager = {
      */
     async logout() {
         if (this.isCloudActive()) {
-            try {
-                await this.supabaseClient.auth.signOut();
-            } catch (e) {}
+            const {error}=await this.supabaseClient.auth.signOut();
+            if(error)throw new Error('Disconnessione dal cloud non riuscita: '+error.message);
         }
 
         try {

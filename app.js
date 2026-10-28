@@ -239,6 +239,9 @@ const App = {
     },
 
     init() {
+        this._blankUserState=JSON.parse(JSON.stringify(this.state));
+        this._saveOwner=this.initialSaveOwner();
+        this._cloudHydrationPending=this._saveOwner!=='guest';
         this.loadStorage();
         this.ensureUnlockedConsistency();
         this.applyTheme(this.state.theme || 'dark');
@@ -289,9 +292,9 @@ const App = {
         });
     },
 
-    loadStorage() {
+    loadStorage(savedOverride) {
         try {
-            const saved = localStorage.getItem('gdscript_hero_save_v4');
+            const saved = arguments.length ? savedOverride : localStorage.getItem('gdscript_hero_save_v4');
             if (saved) {
                 const parsed = JSON.parse(saved);
                 this.state.xp = parsed.xp || 0;
@@ -398,7 +401,64 @@ const App = {
         }
     },
 
-    saveStorage() {
+
+    // P1: Un salvataggio per ogni identita'. Il vecchio gdscript_hero_save_v4
+    // resta uno specchio compatibile, ma NON viene mai riutilizzato per un altro account.
+    saveOwnerOf(user) {
+        return user && !user.isGuest && typeof user.id === 'string' && user.id
+            ? 'user:' + user.id : 'guest';
+    },
+    ownerStorageKey(owner) {
+        return 'gdscript_hero_scoped_save_v1:' + owner;
+    },
+    initialSaveOwner() {
+        try {
+            const marker=localStorage.getItem('gdscript_hero_active_owner_v1');
+            if(marker==='guest'||(marker && /^user:[a-zA-Z0-9_-]{3,100}$/.test(marker)))return marker;
+            const raw=localStorage.getItem('gdscript_hero_auth_session');
+            const session=raw?JSON.parse(raw):null;
+            return this.saveOwnerOf(session);
+        }catch(e){return 'guest';}
+    },
+    // Invocata PRIMA di ridisegnare la UI a ogni cambio di account, incluso logout.
+    // NON fonde mai automaticamente dati di due identita' differenti.
+    switchSaveOwner(user) {
+        if(!this._saveOwner)return;
+        const owner=this.saveOwnerOf(user);
+        if(owner===this._saveOwner)return;
+        this.saveReviewDraft();
+        this.saveNavigationPosition();
+        this.saveStorage({localOnly:true}); // backup del proprietario uscente
+        try {
+            for(const key of ['gdscript_hero_review_draft_v1','gdscript_hero_position_v1']){
+                const saved=sessionStorage.getItem(key);
+                if(saved!==null)sessionStorage.setItem(key+':'+this._saveOwner,saved);
+                const restored=sessionStorage.getItem(key+':'+owner);
+                if(restored===null)sessionStorage.removeItem(key);
+                else sessionStorage.setItem(key,restored);
+            }
+        }catch(e){}
+        let next=null;
+        try{next=localStorage.getItem(this.ownerStorageKey(owner));}catch(e){}
+        this._saveOwner=owner;
+        this._cloudHydrationPending=owner!=='guest' && !!window.AuthManager?.isCloudActive?.();
+        this.state=JSON.parse(JSON.stringify(this._blankUserState));
+        this.isReviewMode=false;
+        this.currentReviewVariant=null;
+        this.loadStorage(next);
+        this.ensureUnlockedConsistency();
+        this.applyTheme(this.state.theme||'dark');
+        this.switchView('view-roadmap');
+        this.updateNavSelection('roadmap');
+        this.renderRoadmap();
+        this.renderSidebarDailyQuests();
+        this.updateStatsUI();
+        this.applyProfileUI();
+        this.updateQuestsBadge();
+        this.saveStorage({localOnly:true});
+    },
+
+    saveStorage(options = {}) {
         const payload = {
             theme: this.state.theme,
             xp: this.state.xp,
@@ -428,11 +488,16 @@ const App = {
         };
 
         try {
-            localStorage.setItem('gdscript_hero_save_v4', JSON.stringify(payload));
+            const serialized=JSON.stringify(payload);
+            localStorage.setItem('gdscript_hero_save_v4', serialized);
+            localStorage.setItem(this.ownerStorageKey(this._saveOwner||'guest'),serialized);
+            localStorage.setItem('gdscript_hero_active_owner_v1',this._saveOwner||'guest');
         } catch (e) {}
 
-        // Sincronizza nel database dell'account collegato se autenticato
-        if (window.AuthManager && typeof window.AuthManager.syncUserProgress === 'function') {
+        // Durante la transizione di account e prima del caricamento cloud, non
+        // sovrascrivere MAI i salvataggi remoti con uno stato vuoto o dell'ospite.
+        if (!options.localOnly && !this._cloudHydrationPending &&
+            window.AuthManager && typeof window.AuthManager.syncUserProgress === 'function') {
             window.AuthManager.syncUserProgress(payload);
         }
     },
@@ -5914,6 +5979,8 @@ const App = {
 
         // Listener reattivo al cambio di sessione (Ospite <-> Autenticato)
         window.AuthManager.onAuthStateChanged((user) => {
+            if(!user)return; // prima che AuthManager abbia verificato una sessione reale
+            this.switchSaveOwner(user);
             this.updateAuthUI(user);
             if (hadOAuthTokens && user && !user.isGuest) {
                 this.showToast({
@@ -5926,6 +5993,9 @@ const App = {
         });
 
         await window.AuthManager.init();
+        if(window.AuthManager.isGuest() || !window.AuthManager.isCloudActive()){
+            this._cloudHydrationPending=false;
+        }
 
         // 1. Apertura e Chiusura Modal Auth
         const btnNavAuth = document.getElementById('btn-open-auth-nav');
@@ -5948,11 +6018,8 @@ const App = {
                     this.closeProfileModal();
                     this.openAuthModal('login');
                 } else {
-                    // Se già autenticato, disconnetti tornando a ospite
                     if (confirm('Vuoi davvero disconnetterti e tornare alla modalità Ospite Locale?')) {
-                        window.AuthManager.logout();
-                        this.updateStatsUI();
-                        this.applyProfileUI();
+                        window.AuthManager.logout().catch(e=>this.showToast({title:'Disconnessione non riuscita',desc:e.message,iconName:'alert-triangle'}));
                         SoundFX.playClick();
                     }
                 }
@@ -5968,9 +6035,7 @@ const App = {
                     this.openAuthModal('login');
                 } else {
                     if (confirm('Vuoi davvero disconnetterti e tornare alla modalità Ospite Locale?')) {
-                        window.AuthManager.logout();
-                        this.updateStatsUI();
-                        this.applyProfileUI();
+                        window.AuthManager.logout().catch(e=>this.showToast({title:'Disconnessione non riuscita',desc:e.message,iconName:'alert-triangle'}));
                         SoundFX.playClick();
                     }
                 }
@@ -5996,7 +6061,8 @@ const App = {
                 tabLogin.classList.add('active');
                 tabRegister.classList.remove('active');
                 if (groupName) groupName.classList.add('hidden');
-                if (groupMerge) groupMerge.classList.add('hidden');
+                if (groupMerge) groupMerge.classList.remove('hidden');
+                document.getElementById('auth-merge-checkbox').checked=false;
                 if (submitText) submitText.innerText = 'Accedi al Tuo Account';
                 if (authTitle) authTitle.innerText = 'Accedi a GDScript Hero';
                 this.clearAuthAlert();
@@ -6008,6 +6074,7 @@ const App = {
                 tabLogin.classList.remove('active');
                 if (groupName) groupName.classList.remove('hidden');
                 if (groupMerge) groupMerge.classList.remove('hidden');
+                document.getElementById('auth-merge-checkbox').checked=true;
                 if (submitText) submitText.innerText = 'Crea Account e Salva Progressi';
                 if (authTitle) authTitle.innerText = 'Crea il Tuo Nuovo Account';
                 this.clearAuthAlert();
@@ -6034,8 +6101,8 @@ const App = {
         if (btnGuest) {
             btnGuest.onclick = () => {
                 SoundFX.playClick();
-                window.AuthManager.logout(); // assicura guest
-                this.closeAuthModal();
+                window.AuthManager.logout().then(()=>this.closeAuthModal())
+                    .catch(e=>this.showAuthAlert('Disconnessione non riuscita: '+e.message));
             };
         }
 
@@ -6054,25 +6121,27 @@ const App = {
                 const name = nameInput ? nameInput.value.trim() : '';
                 const shouldMerge = mergeCheckbox ? mergeCheckbox.checked : true;
 
+
                 try {
                     this.clearAuthAlert();
+                    // Il merge dell'ospite e' una scelta esplicita, mai implicita.
+                    const guestSnapshot = shouldMerge && this._saveOwner==='guest'
+                        ? JSON.parse(JSON.stringify(this.state)) : null;
                     if (isRegister) {
-                        const progressToAttach = shouldMerge ? { ...this.state } : null;
-                        const res = await window.AuthManager.registerWithEmail(name, email, password, progressToAttach);
+                        const res = await window.AuthManager.registerWithEmail(name, email, password);
+                        if(res.pendingConfirmation){
+                            this.showAuthAlert('Controlla la tua email per confermare la registrazione. I progressi ospite restano salvati in questo browser. Dopo la conferma, accedi e seleziona se importarli.', 'success');
+                            return;
+                        }
+                        await this.integrateCloudSave(null,guestSnapshot);
                         this.showAuthAlert('Account creato con successo! Benvenuto, ' + res.user.name + '!', 'success');
                         SoundFX.playSuccess();
-                        if (progressToAttach) {
-                            this.saveStorage();
-                        }
                     } else {
                         const res = await window.AuthManager.loginWithEmail(email, password);
+                        await this.integrateCloudSave(res.account?.progress||null,guestSnapshot);
                         this.showAuthAlert('Accesso effettuato! Bentornato, ' + res.user.name + '!', 'success');
                         SoundFX.playSuccess();
-
-                        // Integra i progressi dell'Ospite con i salvataggi dell'account
-                        await this.integrateCloudSave(res.account ? res.account.progress : null);
                     }
-
                     setTimeout(() => {
                         this.closeAuthModal();
                     }, 900);
@@ -6085,65 +6154,20 @@ const App = {
 
         // 4. Accesso Rapido Google
         const btnGoogle = document.getElementById('btn-google-signin');
-        const googlePickerModal = document.getElementById('google-picker-modal');
-        const btnCloseGooglePicker = document.getElementById('btn-close-google-picker');
-
-        if (btnGoogle) {
-            btnGoogle.onclick = async () => {
+        if(btnGoogle){
+            btnGoogle.onclick=async()=>{
                 SoundFX.playClick();
-                // 1. Se Supabase Cloud è attivo, prova ad avviare Google OAuth ufficiale
-                if (window.AuthManager && window.AuthManager.isCloudActive()) {
-                    try {
-                        await window.AuthManager.loginWithGoogle();
-                        return;
-                    } catch (err) {
-                        console.warn('[Google Auth]', err.message);
-                        // Se il provider Google non è ancora configurato su Supabase, apri il dialogo di fallback
-                        if (googlePickerModal) {
-                            googlePickerModal.classList.remove('hidden');
-                        } else {
-                            this.showAuthAlert('Provider Google non ancora abilitato su Supabase: ' + err.message);
-                        }
-                        return;
-                    }
-                }
-
-                // 2. Modalità locale / offline
-                if (googlePickerModal) {
-                    googlePickerModal.classList.remove('hidden');
-                }
-            };
-        }
-
-        if (btnCloseGooglePicker && googlePickerModal) {
-            btnCloseGooglePicker.onclick = () => {
-                SoundFX.playClick();
-                googlePickerModal.classList.add('hidden');
-            };
-        }
-
-        const googleAccPreset = document.getElementById('google-acc-preset');
-        if (googleAccPreset) {
-            googleAccPreset.onclick = async () => {
-                SoundFX.playClick();
-                const email = googleAccPreset.getAttribute('data-email') || 'godot.dev@gmail.com';
-                const name = googleAccPreset.getAttribute('data-name') || 'Sviluppatore Godot';
-                await this.completeGoogleLogin({ email, name });
-            };
-        }
-
-        const btnConfirmCustomGoogle = document.getElementById('btn-confirm-custom-google');
-        const googleCustomEmailInput = document.getElementById('google-custom-email-input');
-        if (btnConfirmCustomGoogle && googleCustomEmailInput) {
-            btnConfirmCustomGoogle.onclick = async () => {
-                const customEmail = googleCustomEmailInput.value.trim();
-                if (!customEmail || !customEmail.includes('@')) {
-                    alert('Inserisci un indirizzo email Google valido.');
+                if(!window.AuthManager?.isCloudActive()){
+                    this.showAuthAlert('Accesso Google non disponibile senza Supabase. Continua come ospite oppure riprova più tardi.');
                     return;
                 }
-                const namePart = customEmail.split('@')[0];
-                const capitalized = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-                await this.completeGoogleLogin({ email: customEmail, name: capitalized });
+                try{
+                    // OAuth usa esclusivamente il provider Google ufficiale.
+                    // Non esistono accessi Google tramite email inserite a mano.
+                    await window.AuthManager.loginWithGoogle();
+                }catch(err){
+                    this.showAuthAlert('Impossibile accedere con Google: '+err.message);
+                }
             };
         }
 
@@ -6359,27 +6383,6 @@ const App = {
         }
     },
 
-    async completeGoogleLogin(profile) {
-        try {
-            const googlePickerModal = document.getElementById('google-picker-modal');
-            if (googlePickerModal) googlePickerModal.classList.add('hidden');
-
-            const res = await window.AuthManager.loginWithGoogle(profile, { ...this.state });
-            SoundFX.playSuccess();
-
-            // Integra i progressi dell'Ospite con i salvataggi dell'account Google
-            await this.integrateCloudSave(res.account ? res.account.progress : null);
-
-            this.showAuthAlert(`Accesso con Google completato! Benvenuto, ${res.user.name}!`, 'success');
-            setTimeout(() => {
-                this.closeAuthModal();
-            }, 900);
-        } catch (e) {
-            SoundFX.playError();
-            this.showAuthAlert('Errore durante l\'accesso con Google: ' + e.message, 'error');
-        }
-    },
-
     updateAuthUI(user) {
         const isGuest = !user || user.isGuest === true;
         const navAuthIcon = document.getElementById('nav-auth-icon');
@@ -6421,7 +6424,8 @@ const App = {
         const btnProfileAuth = document.getElementById('btn-profile-open-auth');
 
         if (profileBadge) {
-            profileBadge.innerText = isGuest ? 'Modalità Ospite (Locale)' : `✓ Cloud Attivo (${user.provider === 'google' ? 'Google' : 'Email'})`;
+            profileBadge.innerText = isGuest ? 'Modalità Ospite (Locale)' :
+                (window.AuthManager?.isCloudActive() ? `✓ Cloud Attivo (${user.provider === 'google' ? 'Google' : 'Email'})` : 'Account locale (solo questo browser)');
             profileBadge.style.color = isGuest ? '#38bdf8' : '#10b981';
             profileBadge.style.borderColor = isGuest ? 'rgba(56, 189, 248, 0.4)' : 'rgba(16, 185, 129, 0.4)';
         }
@@ -6750,21 +6754,20 @@ const App = {
     /**
      * Integra i progressi locali dell'Ospite con il salvataggio salvato nel Cloud Supabase
      */
-    async integrateCloudSave(cloudSave) {
-        if (cloudSave) {
-            // Unione intelligente e deterministica tra lo stato locale dell'Ospite e il Cloud
-            const merged = (window.AuthManager && typeof window.AuthManager.mergeProgress === 'function')
-                ? window.AuthManager.mergeProgress(this.state, cloudSave)
-                : { ...this.state, ...cloudSave };
-            this.applyImportedState(merged, false);
-            // Sincronizza lo stato unito risultante immediatamente nel Cloud
-            if (window.AuthManager && typeof window.AuthManager.syncUserProgress === 'function') {
-                await window.AuthManager.syncUserProgress(this.state);
-            }
-        } else {
-            // Primo accesso al Cloud: trasferisce integralmente i progressi dell'Ospite nel Cloud
-            this.saveStorage();
+    async integrateCloudSave(cloudSave,guestSnapshot=null) {
+        // Lo stato attuale appartiene gia' all'account corrente: i dati ospite
+        // entrano soltanto se il proprietario ha scelto la casella di importazione.
+        const merge=(a,b)=>window.AuthManager?.mergeProgress?.(a,b)||{...a,...b};
+        let snapshot=this.state;
+        if(cloudSave)snapshot=merge(snapshot,cloudSave);
+        if(guestSnapshot)snapshot=merge(snapshot,guestSnapshot);
+        try{
+            if(cloudSave || guestSnapshot)this.applyImportedState(snapshot,false);
+        }finally{
+            this._cloudHydrationPending=false;
         }
+        // In questo punto si puo' salvare: mai prima dell'unione con il cloud.
+        this.saveStorage();
     },
 
     applyImportedState(data, notify = true) {

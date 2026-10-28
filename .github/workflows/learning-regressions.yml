@@ -28,6 +28,8 @@ jobs:
         run: node tests/code_guide.test.cjs
       - name: Backups and cloud sync
         run: node tests/auth_reliability.test.cjs
+      - name: Account separation and real authentication
+        run: node tests/account_isolation.test.cjs
       - name: XP 2.0, weekly limits and quest claims
         run: node tests/progression_v2.test.cjs
       - name: Arena and official leaderboard schema invariants
