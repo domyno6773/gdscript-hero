@@ -18,6 +18,10 @@ La piattaforma dispone già di:
 
 Sono presenti test automatici per validatori, salvataggi, browser e confronti nativi mirati. Questo non significa che tutti i comportamenti di Godot siano supportati dal runtime web.
 
+## Sviluppo competitivo in pausa
+
+Lo sviluppo dell'**Arena classificata**, delle **classifiche ufficiali** e del relativo backend è sospeso. Non sono in programma deploy o lavori sull'infrastruttura server: la priorità torna al corso gratuito, alle lezioni e all'esperienza d'uso. Il progetto didattico **Arena del Gladiatore** resta disponibile e non viene eliminato.
+
 ## Priorità adesso: consolidare, non ampliare
 
 Questa è la fase più importante, prima di aggiungere funzionalità o lanciare un abbonamento.

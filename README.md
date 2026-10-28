@@ -8,6 +8,8 @@ GDScript Hero è una piattaforma didattica **gratuita e in italiano** per impara
 
 > **Stato: ottobre 2026.** Il corso, l'editor, la Sandbox, il ripasso, le statistiche, il primo progetto e tre **sfide dimostrative gratuite con Godot** sono disponibili. L'**Archivio Premium** appare come sezione chiusa, ma non esistono ancora abbonamenti acquistabili o contenuti storici. Le **classifiche ufficiali** non sono attive: lo schema server non è stato ancora distribuito.
 
+> **Sviluppo in pausa:** Arena classificata, classifiche ufficiali e backend competitivo rimangono nel repository come lavoro preparatorio, ma non saranno sviluppati o distribuiti per ora. Il corso e il progetto didattico Arena del Gladiatore restano disponibili.
+
 ## Funzionalità attuali
 
 | Sezione | Stato | Descrizione |
