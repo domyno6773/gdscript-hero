@@ -802,8 +802,8 @@ const App = {
             title: quest.title,
             desc: `Hai guadagnato +${gain} XP extra!`
         });
-        this.checkAchievements();
-        this.updateStatsUI();
+        this.checkAchievements({ fromAction: true });
+        this.updateStatsUI({ announceLevelUp: true });
         this.updateQuestsBadge();
         this.renderSidebarDailyQuests();
         const modal = document.getElementById('quests-modal');
@@ -2086,6 +2086,7 @@ const App = {
                         title: `Streak ${currentTier.label} Conquistata!`,
                         desc: `Hai completato ${daysCount} giorni questa settimana (+${gain} XP).`
                     });
+                    this.updateStatsUI({ announceLevelUp: true });
                 }
             } else if (daysCount < currentTier.target) {
                 this.showToast({
@@ -2150,7 +2151,7 @@ const App = {
         this.openStreakModal(); // Aggiorna la vista modale
     },
 
-    updateStatsUI() {
+    updateStatsUI({ announceLevelUp = false } = {}) {
         this.checkWeekReset();
         const xpEl = document.getElementById('xp-count');
         if (xpEl) xpEl.innerText = this.state.xp;
@@ -2204,15 +2205,16 @@ const App = {
             countBadge.innerText = `${this.state.unlockedAchievements.length}/${ACHIEVEMENTS_DATA.length}`;
         }
 
-        // Se è salito di livello, notifica con fanfare!
-        if (this.state.level > prevLevel && prevLevel > 0) {
+        // Solo un'azione che assegna XP può celebrare il nuovo livello.
+        // Ricariche, navigazione e importazioni cloud aggiornano solo l'interfaccia.
+        if (announceLevelUp && info.tier.level > prevLevel && prevLevel > 0) {
             SoundFX.playFanfare();
             ConfettiFX.burst();
             this.showToast({
-                icon: "🎖️",
-                tag: "LIVELLO SUPERATO!",
-                title: `Sei salito a Livello ${info.tier.level}!`,
-                desc: `Nuovo titolo: ${info.tier.title}`
+                kind: 'level',
+                tag: 'NUOVO LIVELLO',
+                title: `Hai raggiunto il livello ${info.tier.level}`,
+                desc: `Titolo: ${info.tier.title}`
             });
         }
     },
@@ -2241,7 +2243,7 @@ const App = {
 
         if (unlockedAny) {
             this.saveStorage();
-            this.updateStatsUI();
+            this.updateStatsUI({ announceLevelUp: !!(meta.lessonId || meta.fromAction) });
         }
     },
 
@@ -2250,11 +2252,15 @@ const App = {
         if (!toast) return;
 
         const toastIcon = document.getElementById('toast-icon');
-        if (data.iconName) {
+        if (data.kind === 'level') {
+            // Un'unica icona SVG del tema, senza emoji o glow.
+            toastIcon.innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8v4a4 4 0 0 1-8 0V3z"/><path d="M8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 11v5m-4 5h8m-8 0v-3h8v3"/></svg>';
+        } else if (data.iconName) {
             toastIcon.innerHTML = this.sandboxIcon(data.iconName);
         } else {
             toastIcon.textContent = data.icon || '';
         }
+        toast.dataset.kind = data.kind === 'level' ? 'level' : 'default';
         toast.querySelector('.toast-tag').innerText = data.tag;
         document.getElementById('toast-title').innerText = data.title;
         document.getElementById('toast-desc').innerText = data.desc;
@@ -4081,7 +4087,7 @@ const App = {
                     }
 
                     this.saveStorage();
-                    this.updateStatsUI();
+                    this.updateStatsUI({ announceLevelUp: true });
                 }
 
                 // Registra missione quotidiana: esercizio completato
@@ -4927,8 +4933,8 @@ const App = {
                 this.state.xp += gainXp;
                 this.recordDailyQuestProgress('review_success',1);
                 this.saveStorage();
-                this.updateStatsUI();
-                this.checkAchievements();
+                this.updateStatsUI({ announceLevelUp: gainXp > 0 });
+                this.checkAchievements({ fromAction: true });
                 SoundFX.playSuccess();
                 ConfettiFX.burst();
 
@@ -7268,7 +7274,7 @@ const App = {
                     this.state.arenaProject.completedPhases.push(curPhase);
                     this.state.xp += 75; // Ricompensa XP per ogni fase
                     this.saveStorage();
-                    this.updateStatsUI();
+                    this.updateStatsUI({ announceLevelUp: true });
                 }
 
                 if (successBox) {
