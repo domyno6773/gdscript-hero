@@ -149,7 +149,7 @@
     const name=match[1];
     return {
       title:'Istruzione fuori da una funzione',
-      why:'Godot ha trovato "'+name+'" direttamente nel corpo dello script, ma qui possono stare dichiarazioni come var e func. Le istruzioni eseguibili, per esempio print(...), vanno all’interno di una funzione.',
+      why:'Godot ha trovato "'+name+'" direttamente nel corpo dello script, ma qui possono stare dichiarazioni come var e func. Le istruzioni eseguibili, per esempio print(...), vanno dentro una funzione come func _ready(): e devono essere indentate.',
       hint:'Hai inserito questa istruzione dentro func _ready(): oppure dentro un’altra funzione?',
       steps:[
         'In GDScript le istruzioni vengono eseguite dentro funzioni. All’inizio dello script puoi invece dichiarare variabili, costanti e funzioni.',
