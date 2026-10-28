@@ -509,6 +509,80 @@ async function testNonBlockingCloudConflict(page){
   });
 }
 
+async function testSubtleMotion(page, initialWidth) {
+  // Use computed animation properties rather than screenshots or wall-clock guesses.
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.evaluate(()=>App.showRoadmap());
+  await page.evaluate(()=>App.openPracticeView());
+  let motion=await page.evaluate(()=>{
+    const practice=document.getElementById('view-practice');
+    const road=document.getElementById('view-roadmap');
+    const style=getComputedStyle(practice);
+    return {active:practice.classList.contains('gdh-view-enter'),
+      name:style.animationName,duration:parseFloat(style.animationDuration),
+      roadmapHidden:road.classList.contains('hidden')};
+  });
+  assert.equal(motion.active,true,'New section should receive a one-time motion marker');
+  assert.equal(motion.name,'gdh-view-appear');
+  assert.ok(motion.duration>0&&motion.duration<=.25,
+    'Section transition should be subtle and brief: '+JSON.stringify(motion));
+  assert.equal(motion.roadmapHidden,true);
+
+  // Returning to the same section should not restart its animation.
+  await page.waitForTimeout(225);
+  const before=await page.evaluate(()=>({
+    starts:0,
+    current:document.getElementById('view-practice').getAnimations().length
+  }));
+  await page.evaluate(()=>App.openPracticeView());
+  const after=await page.evaluate(()=>({
+    current:document.getElementById('view-practice').getAnimations().length,
+    markers:[...document.querySelectorAll('.view-container.gdh-view-enter')].map(e=>e.id)
+  }));
+  assert.equal(after.current,before.current,
+    'Re-opening current section must not restart its animation');
+  assert.deepEqual(after.markers,['view-practice']);
+  await page.evaluate(()=>App.showRoadmap());
+  assert.equal(await page.locator('#view-practice.gdh-view-enter').count(),0,
+    'Hidden views must not retain active motion markers');
+
+  await page.evaluate(()=>App.openSettingsModal());
+  const dialog=await page.evaluate(()=>{
+    const modal=document.getElementById('settings-modal');
+    const card=modal.querySelector('.settings-modal-card');
+    const backdrop=getComputedStyle(modal),panel=getComputedStyle(card);
+    return {backdrop:backdrop.animationName,card:panel.animationName,
+      duration:parseFloat(panel.animationDuration),
+      modalVisible:!modal.classList.contains('hidden')};
+  });
+  assert.equal(dialog.backdrop,'gdh-dialog-backdrop');
+  assert.equal(dialog.card,'gdh-dialog-card');
+  assert.ok(dialog.duration>0&&dialog.duration<=.25);
+  assert.equal(dialog.modalVisible,true);
+  await page.locator('#btn-close-settings').click();
+  assert.equal(await page.locator('#settings-modal').isHidden(),true);
+
+  // Reduced-motion preference must disable the whole effect, not only
+  // shorten animation durations on keyframes.
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.evaluate(()=>{App.openPracticeView();App.openSettingsModal();});
+  const reduced=await page.evaluate(()=>({
+    section:getComputedStyle(document.getElementById('view-practice')).animationName,
+    modal:getComputedStyle(document.getElementById('settings-modal')).animationName,
+    card:getComputedStyle(document.querySelector('#settings-modal .settings-modal-card')).animationName,
+    transform:getComputedStyle(document.querySelector('#settings-modal .settings-modal-card')).transform
+  }));
+  assert.equal(reduced.section,'none','Reduced motion must disable view entrance');
+  assert.equal(reduced.modal,'none','Reduced motion must disable backdrop entrance');
+  assert.equal(reduced.card,'none','Reduced motion must disable dialog entrance');
+  assert.equal(reduced.transform,'none');
+  await page.locator('#btn-close-settings').click();
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.evaluate(()=>App.showRoadmap());
+  await page.setViewportSize({width:initialWidth,height:844});
+  console.log('PASS: subtle navigation/dialog animations and reduced-motion accessibility');
+}
+
 async function testSettingsModalRefresh(page, initialWidth) {
  const widths=[1440,1024,820,640,600,430,390,320];
  const iconAudit=await page.evaluate(()=>{
@@ -776,6 +850,7 @@ async function smoke(browser,url,width){
  await testNonBlockingCloudConflict(page);
  await testLongEmailSettings(page,width);
  await testSettingsModalRefresh(page,width);
+ await testSubtleMotion(page,width);
  await testResponsiveLayout(page,width);
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
  // L'Arena classificata e i progetti Premium sono in pausa, ma il progetto gratuito resta aperto.

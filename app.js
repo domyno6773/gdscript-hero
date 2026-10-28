@@ -1247,14 +1247,22 @@ const App = {
             'view-review',
             'view-stats'
         ];
+        const current = views.find(id => {
+            const el = document.getElementById(id);
+            return el && !el.classList.contains('hidden');
+        });
+        const changed = current !== activeViewId;
         views.forEach(id => {
             const el = document.getElementById(id);
-            if (el) {
-                if (id === activeViewId) {
-                    el.classList.remove('hidden');
-                } else {
-                    el.classList.add('hidden');
-                }
+            if (!el) return;
+            if (id === activeViewId) {
+                el.classList.remove('hidden');
+                // Only genuine navigation animates; re-rendering an exercise,
+                // revisiting the current tab and typing never restart motion.
+                if (changed) el.classList.add('gdh-view-enter');
+            } else {
+                el.classList.add('hidden');
+                el.classList.remove('gdh-view-enter');
             }
         });
         this.saveNavigationPosition();

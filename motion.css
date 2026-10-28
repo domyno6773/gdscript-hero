@@ -1,0 +1,52 @@
+/* GDScript Hero — subtle, purposeful UI motion.
+   Animate only view changes and opening dialogs, never Godot editors,
+   folding guides, terminal output, or code validation updates. */
+:root {
+  --gdh-motion-enter: 180ms;
+  --gdh-motion-modal: 190ms;
+  --gdh-motion-ease: cubic-bezier(.22, .72, .28, 1);
+}
+
+/* A view animates only when switchView explicitly marks a new section.
+   opacity/transform don't change geometry, height, or scroll positions. */
+.view-container.gdh-view-enter:not(.hidden) {
+  animation: gdh-view-appear var(--gdh-motion-enter) var(--gdh-motion-ease) both;
+}
+@keyframes gdh-view-appear {
+  from {opacity:.5;transform:translate3d(0,5px,0)}
+  to {opacity:1;transform:translate3d(0,0,0)}
+}
+
+/* Avoid the older, bouncy scale animation when opening dialogs. */
+.modal-overlay:not(.hidden) {
+  animation: gdh-dialog-backdrop 155ms ease-out both;
+}
+.modal-overlay:not(.hidden) > .modal-card {
+  animation: gdh-dialog-card var(--gdh-motion-modal) var(--gdh-motion-ease) both;
+}
+@keyframes gdh-dialog-backdrop {
+  from {opacity:0}
+  to {opacity:1}
+}
+@keyframes gdh-dialog-card {
+  from {opacity:.65;transform:translate3d(0,8px,0) scale(.99)}
+  to {opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+
+/* An explicit override for the settings card, which previously disabled
+   all card motion to prevent the legacy bouncy scale animation. */
+#settings-modal:not(.hidden) > .settings-modal-card {
+  animation: gdh-dialog-card var(--gdh-motion-modal) var(--gdh-motion-ease) both;
+}
+
+/* Reduced motion takes priority even though this stylesheet loads last. */
+@media (prefers-reduced-motion: reduce) {
+  .view-container.gdh-view-enter:not(.hidden),
+  .modal-overlay:not(.hidden),
+  .modal-overlay:not(.hidden) > .modal-card,
+  #settings-modal:not(.hidden) > .settings-modal-card {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
