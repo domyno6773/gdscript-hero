@@ -97,3 +97,54 @@ body { height:100vh; height:100dvh; min-width:0; }
   .navbar .nav-stats-group { gap:3px; padding:2px 3px; }
   .navbar .stat-pill { font-size:.69rem; padding:3px 4px; }
 }
+
+/* MacBook 13/14/15/16: la navbar desktop supera la larghezza disponibile
+   già PRIMA del vecchio breakpoint a 1380 px (menu + statistiche + account).
+   Manteniamo ogni funzione accessibile come icona con tooltip: nessun
+   overflow nascosto e nessuna barra/taglio artificiale. */
+@media (min-width:821px) and (max-width:1780px) {
+  .navbar {
+    width:100%;
+    padding-inline:clamp(8px,1vw,16px);
+    gap:clamp(4px,.5vw,9px);
+  }
+  .navbar > .nav-left,
+  .navbar > .nav-right { flex:0 0 auto; }
+  .navbar > .nav-center {
+    flex:0 1 auto;
+    gap:2px;
+    padding-inline:2px;
+  }
+  .navbar .nav-center .nav-btn {
+    flex:0 0 auto;
+    padding:7px 8px;
+  }
+  .navbar .nav-center .nav-btn-text { display:none; }
+  .navbar .nav-right,
+  .navbar .nav-user-group { gap:5px; }
+  .navbar .nav-stats-group { gap:4px; padding:3px 5px; }
+  .navbar .stat-pill { padding:4px 7px; }
+  .navbar .logo { font-size:1.05rem; }
+  .navbar .nav-profile-name { max-width:70px; }
+  .navbar #nav-auth-label {
+    display:inline-block;
+    max-width:108px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+/* Tra 821 e 1120 px mantenere le azioni ma ridurre il testo ridondante:
+   il profilo resta selezionabile dall'avatar e accessibile dal title. */
+@media (min-width:821px) and (max-width:1120px) {
+  .navbar .nav-center .nav-btn { padding-inline:7px; }
+  .navbar .nav-profile-name { display:none; }
+  .navbar .logo { padding-inline:2px; font-size:.95rem; }
+  .navbar #nav-auth-label { max-width:72px; }
+}
+@media (min-width:821px) and (max-width:960px) {
+  .navbar .nav-center .nav-btn { padding-inline:5px; }
+  .navbar .nav-stats-group { gap:2px; }
+  .navbar .nav-stats-group .stat-label,
+  .navbar #streak-sub-label { display:none; }
+}

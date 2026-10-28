@@ -335,7 +335,7 @@ async function testNavigationPersistence(page,width){
  });
 }
 async function testResponsiveLayout(page,initialWidth) {
-  const presets=[1440,1366,1280,1200,1180,1100,1060,1024,901,900,821,820,768,430,414,390,375,360,320];
+  const presets=[1920,1800,1781,1780,1728,1680,1600,1545,1512,1470,1440,1366,1280,1200,1180,1100,1060,1024,960,901,900,821,820,768,430,414,390,375,360,320];
   const views=[
     ['roadmap',()=>App.showRoadmap(),'.roadmap-layout-container'],
     ['exercise',()=>App.openLesson(1),'#view-exercise .workspace-grid'],
@@ -344,6 +344,18 @@ async function testResponsiveLayout(page,initialWidth) {
     ['review',()=>App.showReviewView(),'.review-view-inner'],
     ['stats',()=>App.showStatsView(),'.stats-view-inner']
   ];
+  // Riproduci le statistiche e l'identità della schermata MacBook: la navbar
+  // deve adattarsi anche quando c'è un utente autenticato.
+  const navOriginal=await page.evaluate(()=>{
+    const ids=['nav-auth-label','nav-profile-name','xp-count','streak-count','streak-sub-label'];
+    const before=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)?.textContent||'']));
+    document.getElementById('nav-auth-label').textContent='Gianluca';
+    document.getElementById('nav-profile-name').textContent='Gianluca';
+    document.getElementById('xp-count').textContent='885';
+    document.getElementById('streak-count').textContent='0';
+    document.getElementById('streak-sub-label').textContent='(0/2d)';
+    return before;
+  });
   for(const width of presets){
     await page.setViewportSize({width,height:844});
     for(const [view,_open,selector] of views){
@@ -366,14 +378,50 @@ async function testResponsiveLayout(page,initialWidth) {
           return {s,left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width)};
         }).filter(Boolean);
         const errors=positions.filter(p=>p.left < -3 || p.right > W+3);
-        return {viewport:W,positions,errors};
+        // Controllare i singoli comandi: in precedenza i tre gruppi erano
+        // tecnicamente dentro al viewport, ma i figli uscivano dallo schermo.
+        const nav=document.querySelector('.navbar');
+        const navEls=[
+          '#btn-home','#nav-roadmap-btn','#nav-editor-btn','#nav-practice-btn',
+          '#nav-projects-btn','#nav-review-btn','#nav-stats-btn',
+          '#btn-open-achievements','#btn-streak-modal','.xp-pill',
+          '.nav-right .level-pill','#btn-open-auth-nav','#btn-open-profile',
+          '#btn-open-settings'
+        ].map(s=>document.querySelector('.navbar '+s)).filter(Boolean)
+         .filter(el=>getComputedStyle(el).display!=='none'&&el.getClientRects().length);
+        const navBoxes=navEls.map(el=>{
+          const r=el.getBoundingClientRect();
+          return {id:el.id||el.className,left:r.left,right:r.right,width:r.width};
+        });
+        const navOutside=navBoxes.filter(p=>p.left<-1||p.right>W+1);
+        const groups=['.nav-left','.nav-center','.nav-right'].map(s=>nav.querySelector(s))
+          .map(el=>el.getBoundingClientRect());
+        const collisions=[];
+        for(let i=0;i<groups.length-1;i++){
+          if(groups[i].right>groups[i+1].left+1)
+            collisions.push([i,Math.round(groups[i].right-groups[i+1].left)]);
+        }
+        return {viewport:W,positions,errors,navBoxes,navOutside,collisions,
+          navScrollWidth:nav.scrollWidth,navClientWidth:nav.clientWidth};
       },selector);
       assert.deepEqual(measures.errors,[],
         'Off-screen panel at '+width+'px in '+view+': '+JSON.stringify(measures));
+      assert.deepEqual(measures.navOutside,[],
+        'Navbar item clipped at '+width+'px in '+view+': '+JSON.stringify(measures));
+      assert.deepEqual(measures.collisions,[],
+        'Navbar groups overlap at '+width+'px in '+view+': '+JSON.stringify(measures));
+      assert.ok(measures.navScrollWidth<=measures.navClientWidth+2,
+        'Navbar internally overflows at '+width+'px in '+view+': '+JSON.stringify(measures));
     }
   }
   await page.setViewportSize({width:initialWidth,height:844});
-  await page.evaluate(()=>App.showRoadmap());
+  await page.evaluate(navOriginal=>{
+    for(const [id,value] of Object.entries(navOriginal)){
+      const el=document.getElementById(id);
+      if(el)el.textContent=value;
+    }
+    App.showRoadmap();
+  },navOriginal);
 }
 
 
