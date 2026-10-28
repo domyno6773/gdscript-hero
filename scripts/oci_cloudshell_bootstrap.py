@@ -345,6 +345,17 @@ def federated_config():
             oci.auth.signers.SecurityTokenSigner(rpst, key))
 
 
+def cloudshell_config(sdk, env):
+    # Match OCI CLI's active Cloud Shell file/profile, not the SDK DEFAULT.
+    config = sdk.config.from_file(
+        file_location=env.get("OCI_CLI_CONFIG_FILE") or sdk.config.DEFAULT_LOCATION,
+        profile_name=env.get("OCI_CLI_PROFILE") or "DEFAULT")
+    if env.get("OCI_CLI_REGION"):
+        config["region"] = env["OCI_CLI_REGION"]
+    require(config.get("region") == REGION, "Il profilo Cloud Shell attivo non indica Milano.")
+    return config
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
@@ -361,7 +372,7 @@ def main(argv=None):
         require((action != "create" and not args.authorize_github) or account_confirmed,
                 "Per creare serve confermare l'account Free Tier; nessuna chiamata eseguita.")
         import oci
-        config, signer = federated_config() if args.github else (oci.config.from_file(), None)
+        config, signer = federated_config() if args.github else (cloudshell_config(oci, os.environ), None)
         state = inspect(oci, config, signer=signer)
         print("Piano: Milano; Ubuntu ARM; A1 1 OCPU / 6 GB RAM; boot 50 GB / 10 VPU.")
         print("Rete dedicata; nessuna porta in ingresso; niente NAT, load balancer o Marketplace.")

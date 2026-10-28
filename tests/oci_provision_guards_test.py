@@ -5,7 +5,7 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace as S
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import oci_cloudshell_bootstrap as host
@@ -39,6 +39,16 @@ class Guards(unittest.TestCase):
                         {'display_name': 'Marketplace Ubuntu'}, {'operating_system': 'Paid OS'}):
             with self.subTest(changes=changes), self.assertRaises(host.GuardError):
                 host.validate_image(S(**dict(fields, **changes)), 'test')
+
+    def test_cloudshell_uses_cli_selected_file_and_profile(self):
+        config = S(DEFAULT_LOCATION="default", from_file=Mock(return_value={"region": host.REGION}))
+        sdk = S(config=config)
+        host.cloudshell_config(sdk, {"OCI_CLI_CONFIG_FILE": "/cloud/config", "OCI_CLI_PROFILE": host.REGION})
+        config.from_file.assert_called_once_with(file_location="/cloud/config", profile_name=host.REGION)
+        config.from_file.return_value = {"region": "other-region"}
+        with self.assertRaises(host.GuardError):
+            host.cloudshell_config(sdk, {})
+        self.assertEqual(host.cloudshell_config(sdk, {"OCI_CLI_REGION": host.REGION})["region"], host.REGION)
 
     def test_missing_free_account_confirmation_stops_before_import_or_network(self):
         with patch.object(host, 'inspect') as scan, redirect_stdout(io.StringIO()):
