@@ -613,78 +613,11 @@ body:has(#view-exercise:not(.hidden)) {
     background: #1b1f26;
     color: #eaf2fc;
 }
-body:has(#view-exercise:not(.hidden)) .navbar {
-    background: #252b35 !important;
-    border-bottom: 1px solid #405064 !important;
-    box-shadow: none !important;
-    min-height: 66px;
-    height: 66px;
-}
-body:has(#view-exercise:not(.hidden)) .navbar::before,
-body:has(#view-exercise:not(.hidden)) .navbar::after,
-body:has(#view-exercise:not(.hidden)) .nav-btn::before,
-body:has(#view-exercise:not(.hidden)) .nav-btn::after {
-    box-shadow: none !important;
-    filter: none !important;
-}
-body:has(#view-exercise:not(.hidden)) .logo-text {
-    font-family: 'Silkscreen','Chakra Petch',monospace !important;
-    font-size: 1.00rem !important;
-    letter-spacing: -.045em !important;
-    text-shadow: none !important;
-    text-transform: lowercase;
-    color: #f2f7fd !important;
-}
-body:has(#view-exercise:not(.hidden)) .logo-text .accent,
-body:has(#view-exercise:not(.hidden)) .logo-icon {
-    color: #569dd1 !important;
-    filter: none !important;
-    text-shadow: none !important;
-}
-body:has(#view-exercise:not(.hidden)) .nav-center {
-    background: transparent !important;
-    box-shadow: none !important;
-    border: 0 !important;
-    gap: 2px;
-}
-body:has(#view-exercise:not(.hidden)) .nav-center .nav-btn {
-    color: #a8bdd3 !important;
-    background: transparent !important;
-    border: 1px solid transparent !important;
-    border-radius: 6px !important;
-    box-shadow: none !important;
-    filter: none !important;
-    font: 500 .80rem/1.15 'Inter',sans-serif !important;
-    letter-spacing: 0 !important;
-    text-shadow: none !important;
-    transition: background-color .12s,border-color .12s;
-}
-body:has(#view-exercise:not(.hidden)) .nav-center .nav-btn .icon { color: #699ac0; }
-body:has(#view-exercise:not(.hidden)) .nav-center .nav-btn.active {
-    background: #343e4b !important;
-    border: 1px solid #47596d !important;
-    border-bottom: 2px solid #f2b944 !important;
-    color: #fbfdff !important;
-}
-body:has(#view-exercise:not(.hidden)) .nav-center .nav-btn:hover {
-    background: #303a47 !important;
-    color: #f9fbff !important;
-}
-body:has(#view-exercise:not(.hidden)) .stat-pill,
-body:has(#view-exercise:not(.hidden)) .nav-right .stat-pill,
-body:has(#view-exercise:not(.hidden)) .nav-right .profile-btn,
-body:has(#view-exercise:not(.hidden)) .nav-right .avatar-container {
-    box-shadow: none !important;
-    filter: none !important;
-    text-shadow: none !important;
-}
-body:has(#view-exercise:not(.hidden)) .xp-pill .stat-value,
-body:has(#view-exercise:not(.hidden)) .xp-pill .xp-icon {
-    color: #f3b544 !important;
-}
-body:has(#view-exercise:not(.hidden)) .nav-right .stat-label {
-    color: #a5b8d0 !important;
-}
+/* La barra superiore è condivisa da TUTTE le sezioni.
+   Niente override di altezza, logo, pulsanti o font quando si apre Esercizio:
+   restano quelli di styles.css / godot-theme.css / responsive-layout.css.
+   Il design dedicato di GDScript è limitato al workspace qui sotto. */
+
 #view-exercise {
     --ex-bg: #1b1f26;
     --ex-surface: #252c36;
@@ -1108,10 +1041,6 @@ body:has(#view-exercise:not(.hidden)) .nav-right .stat-label {
     #view-exercise .editor-tools .btn-tool { padding: 6px !important; }
 }
 @media (max-width: 820px) {
-    body:has(#view-exercise:not(.hidden)) .navbar {
-        height: 52px !important;
-        min-height: 52px !important;
-    }
     #view-exercise .workspace-grid {
         display: flex !important;
         flex-direction: column !important;

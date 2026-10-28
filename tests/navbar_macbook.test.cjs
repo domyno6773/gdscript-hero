@@ -33,6 +33,7 @@ async function inspect(engine, url) {
   });
   for(const w of widths) {
     await page.setViewportSize({width:w,height:900});
+    let baseline=null;
     for(const view of ['view-roadmap', 'view-exercise']) {
       await page.evaluate(name=>{
         document.querySelectorAll('.view-container').forEach(el=>el.classList.toggle('hidden',el.id!==name));
@@ -57,6 +58,20 @@ async function inspect(engine, url) {
           });
         const clipped=visible.filter(r=>r.left < -1 || r.right > vw+1);
         const colliding=rects.slice(0,-1).some((r,i)=>r.right>rects[i+1].left+1);
+        const stableSelectors=['.navbar','.nav-left','.nav-center','.nav-right',
+          '#btn-home','#nav-roadmap-btn','#nav-editor-btn','#nav-practice-btn',
+          '#nav-projects-btn','#nav-review-btn','#nav-stats-btn',
+          '#btn-open-achievements','.nav-stats-group','#btn-open-auth-nav',
+          '#btn-open-profile','#btn-open-settings'];
+        const stableLayout=stableSelectors.map(selector=>{
+          const el=document.querySelector('.navbar '+selector) ||
+            (selector==='.navbar' ? nav : null);
+          if(!el)return {selector,missing:true};
+          const r=el.getBoundingClientRect(),style=getComputedStyle(el);
+          return {selector,x:r.x,y:r.y,width:r.width,height:r.height,
+            fontSize:style.fontSize,fontFamily:style.fontFamily,
+            padding:style.padding,display:style.display};
+        });
         const logo=nav.querySelector('#btn-home').getBoundingClientRect();
         const labels=Array.from(nav.querySelectorAll('.nav-center .nav-btn-text'))
           .map(el=>({text:el.textContent.trim(),display:getComputedStyle(el).display,
@@ -77,13 +92,32 @@ async function inspect(engine, url) {
         const lastButton=navButtons.at(-1)?.getBoundingClientRect();
         const whitespaceLeft=firstButton ? firstButton.left-rects[0].right : 0;
         const whitespaceRight=lastButton ? rects[2].left-lastButton.right : 0;
-        return {vw,clipped,colliding,labels,menuOverlap,labelsClipped,
+        return {vw,clipped,colliding,stableLayout,labels,menuOverlap,labelsClipped,
           whitespaceLeft,whitespaceRight,scrollWidth:nav.scrollWidth,clientWidth:nav.clientWidth,
           logo:{left:logo.left,right:logo.right,width:logo.width},
           right:rects[2].right,groups:rects.map(r=>({left:r.left,right:r.right,width:r.width})),
           scrollX:window.scrollX,navDisplay:getComputedStyle(nav).display};
       });
       const msg=engine.name()+' '+w+'px '+view+' '+JSON.stringify(result);
+      // Cruciale: Esercizio non deve cambiare dimensioni e tipografia
+      // della navbar, neppure sui telefoni. Le variazioni da "active"
+      // dei singoli pulsanti sono presenti in entrambi i rilievi.
+      if (view==='view-roadmap') baseline=result.stableLayout;
+      else for(const [i,now] of result.stableLayout.entries()){
+        const prev=baseline[i];
+        assert.equal(now.selector,prev.selector);
+        assert.equal(Boolean(now.missing),Boolean(prev.missing));
+        if(now.missing)continue;
+        for(const metric of ['x','y','width','height'])
+          assert.ok(Math.abs(now[metric]-prev[metric])<0.7,
+            'Exercise resizes navbar '+now.selector+'.'+metric+
+            ' at '+w+'px in '+engine.name()+': before '+prev[metric]+
+            ' after '+now[metric]);
+        for(const metric of ['fontSize','fontFamily','padding','display'])
+          assert.equal(now[metric],prev[metric],
+            'Exercise changes navbar typography or spacing '+now.selector+
+            '.'+metric+' at '+w+'px in '+engine.name());
+      }
       assert.equal(result.clipped.length,0,'A navbar action left the viewport: '+msg);
       assert.equal(result.colliding,false,'Navbar sections overlap: '+msg);
       assert.equal(result.menuOverlap,false,'Menu buttons overlap: '+msg);
