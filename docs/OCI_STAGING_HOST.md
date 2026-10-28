@@ -15,17 +15,19 @@ python3 scripts/oci_cloudshell_bootstrap.py --authorize-github --free-tier-accou
 
 This uses the SDK credentials already configured by Oracle inside Cloud Shell.
 It never asks for a token, exports administrator credentials, or adds GitHub
-secrets. After a native read-only preflight, it creates only:
+secrets. After a native read-only preflight, it prepares:
 
-- the dedicated `gdh-arena-free` compartment;
+- the dedicated `gdh-arena-free` compartment and isolated network objects;
 - `gdh-arena-staging-provision`, a policy for the existing exact domain, immutable
   GitHub repository identity, protected environment, workflow and manual event.
 
 The additional policy allows limited reads for shapes, platform images, limits
-and VCN inventory. Mutations are confined to the dedicated compartment and an
+and network inventory. Initial Cloud Shell authorization also prepares the
+network, so GitHub never needs to mutate a VCN/gateway in another compartment. Mutations are confined to the dedicated compartment and an
 explicit operation list for creating the host and its network. It grants no IAM,
 subscription, upgrade, delete, resize or arbitrary resource permissions. Existing
-objects with different names/tags/configuration are not adopted or overwritten.
+objects are not overwritten. Reusing a parent VCN/gateway only attaches new
+isolated network objects; existing subnets and their policies remain unchanged.
 The existing inventory policy remains necessary and unchanged.
 
 ## Manual GitHub workflow
@@ -58,7 +60,16 @@ boundary.** Required reviewers and main-only deployment restrictions must remain
   capacity and the latter may still be unavailable.
 - A free Canonical Ubuntu 24.04 ARM **platform** image only; no custom or
   Marketplace image. One 50 GB boot volume, explicitly balanced at 10 VPU/GB.
-- One dedicated VCN, internet gateway, routing table, security list and subnet.
+- A dedicated routing table, security list and subnet. If fewer than two VCNs
+  exist, create a dedicated VCN and internet gateway. At the Free Tier two-VCN
+  ceiling, reuse an AVAILABLE VCN with a free private IPv4 /28 and an existing
+  enabled direct internet gateway. Read subnets across compartments to exclude
+  all occupied CIDRs; require the OCI DNS resolver. Never change existing VCNs,
+  gateways, route tables, security lists, subnets or DHCP options. Existing
+  per-gateway ingress routing is not adopted. If no compatible space exists,
+  stop without deleting or changing user networks. Initial cross-compartment
+  attachments occur only through native Cloud Shell; GitHub has read-only access
+  to pre-existing network containers and mutation scope only in the new compartment.
   No NAT gateway, load balancer, reserved public IP, flow logs, monitoring add-on,
   scheduled backup or extra data volume. An ephemeral public IP permits bootstrap
   downloads; the dedicated subnet uses a security list with **no ingress rules**.

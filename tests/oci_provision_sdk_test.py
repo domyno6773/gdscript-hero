@@ -67,6 +67,8 @@ class SDKContracts(unittest.TestCase):
             data = [m.Image(id='ocid1.image.oc1.eu-milan-1.test', compartment_id=None,
                 operating_system='Canonical Ubuntu', operating_system_version='24.04',
                 display_name='Canonical-Ubuntu-24.04-aarch64-2026', lifecycle_state='AVAILABLE', size_in_mbs=48000)]
+        elif resource_path.startswith('/dhcps/'):
+            data = S(options=[S(type='DomainNameServer', server_type='VcnLocalPlusInternet')])
         elif resource_path in ('/volumes', '/bootVolumes', '/volumeBackups', '/bootVolumeBackups'):
             data = []
         else:
@@ -90,9 +92,10 @@ class SDKContracts(unittest.TestCase):
                     data.lifecycle_state = 'AVAILABLE'
                 self.data[kind].append(data)
             elif pp:
-                data = self.data[kind][0]
+                data = next(x for x in self.data[kind] if x.id in pp.values())
             else:
-                data = self.data[kind] if q.get('compartmentId') == self.cid else []
+                data = [x for x in self.data[kind] if x.compartment_id == q.get('compartmentId')
+                        and (not q.get('vcnId') or x.vcn_id == q.get('vcnId'))]
         return oci.response.Response(200, {}, data, S(method=method))
 
     def patched(self):
@@ -134,10 +137,42 @@ class SDKContracts(unittest.TestCase):
             state = host.inspect(oci, self.config)
             host.authorize_github(oci, self.config, state)
             self.assertEqual([(m, p) for m, p, _ in self.calls if m != 'GET'],
-                             [('POST', '/compartments'), ('POST', '/policies')])
+                             [('POST', '/compartments'), ('POST', '/vcns'), ('POST', '/internetGateways'),
+                              ('POST', '/routeTables'), ('POST', '/securityLists'), ('POST', '/subnets'), ('POST', '/policies')])
             state = host.inspect(oci, self.config)
             host.authorize_github(oci, self.config, state)
-            self.assertEqual(sum(m != 'GET' for m, _, _ in self.calls), 2)
+            self.assertEqual(sum(m != 'GET' for m, _, _ in self.calls), 7)
+
+    def test_two_existing_vcns_reuse_only_new_isolated_subnet(self):
+        from contextlib import ExitStack
+        m = oci.core.models
+        for suffix, cidr in (("a", "10.0.0.0/16"), ("b", "10.1.0.0/16")):
+            vcn_id = 'ocid1.vcn.oc1..external' + suffix
+            self.data['vcn'].append(m.Vcn(id=vcn_id, compartment_id=self.root, display_name='existing-' + suffix,
+                lifecycle_state='AVAILABLE', cidr_blocks=[cidr], default_dhcp_options_id='dhcp-' + suffix))
+            self.data['igw'].append(m.InternetGateway(id='ocid1.internetgateway.oc1..' + suffix,
+                compartment_id=self.root, vcn_id=vcn_id, lifecycle_state='AVAILABLE', is_enabled=True))
+            self.data['subnet'].append(m.Subnet(id='ocid1.subnet.oc1..' + suffix,
+                compartment_id=self.root, vcn_id=vcn_id, lifecycle_state='AVAILABLE',
+                cidr_block='10.' + ('0' if suffix == 'a' else '1') + '.0.0/24'))
+        original = copy.deepcopy(self.data)
+        with ExitStack() as stack:
+            for p in self.patched():
+                stack.enter_context(p)
+            state = host.inspect(oci, self.config)
+            self.assertTrue(state['netplan']['reuse'])
+            self.assertEqual(state['netplan']['cidr'], '10.0.1.0/28')
+            host.authorize_github(oci, self.config, state)
+            host.apply(oci, self.config, state, 'a' * 40, '#!/bin/bash\necho __GDH_REPO_COMMIT__', True, signer=self.signer)
+        posts = [p for method, p, _ in self.calls if method == 'POST']
+        self.assertNotIn('/vcns', posts)
+        self.assertNotIn('/internetGateways', posts)
+        self.assertEqual(len(self.data['vcn']), 2)
+        self.assertEqual(self.data['vcn'], original['vcn'])
+        self.assertEqual(self.data['igw'], original['igw'])
+        self.assertEqual(self.data['subnet'][:2], original['subnet'])
+        self.assertFalse(any(method in ('DELETE', 'PUT', 'PATCH') for method, _, _ in self.calls))
+        self.assertEqual(self.data['security'][0].ingress_security_rules, [])
 
     def test_paid_shape_stops_all_creation(self):
         from contextlib import ExitStack

@@ -146,17 +146,68 @@ def inspect(sdk, config, signer=None):
     all_vcns = []
     for cid in [tenancy] + [x.id for x in compartments if x.lifecycle_state == "ACTIVE"]:
         all_vcns.extend(live(pages(sdk, network.list_vcns, cid)))
-    managed_vcn = named([v for v in all_vcns if v.compartment_id == target], NAME) if dedicated else None
-    require(len(all_vcns) + (0 if managed_vcn else 1) <= 2, "Limite Free Tier di due VCN raggiunto.")
-    for vcn in all_vcns:
-        if managed_vcn and vcn.id == managed_vcn.id:
-            continue
-        for cidr in vcn.cidr_blocks or [vcn.cidr_block]:
-            require(not ipaddress.ip_network(cidr).overlaps(ipaddress.ip_network(VCN_CIDR)),
-                    "CIDR gia in uso: nessuna modifica alla rete esistente.")
+    netplan = network_plan(sdk, network, all_vcns, [tenancy] + [x.id for x in compartments if x.lifecycle_state == "ACTIVE"],
+                           target if dedicated else None)
     return dict(identity=identity, compute=compute, network=network,
                 tenancy=tenancy, compartment=dedicated, existing=existing,
-                image=image, ad=existing.availability_domain if existing else candidates[0])
+                image=image, ad=existing.availability_domain if existing else candidates[0], netplan=netplan)
+
+
+def free_subnet(cidr_blocks, occupied):
+    blocks = [ipaddress.ip_network(x) for x in cidr_blocks]
+    used = [ipaddress.ip_network(x) for x in occupied]
+    for block in sorted(blocks, key=lambda x: int(x.network_address)):
+        if block.version != 4 or not block.is_private or block.prefixlen > 28:
+            continue
+        for subnet in block.subnets(new_prefix=28):
+            if not any(subnet.overlaps(x) for x in used):
+                return str(subnet)
+    return None
+
+
+def network_plan(sdk, network, all_vcns, compartment_ids, target):
+    managed_vcn = named([v for v in all_vcns if v.compartment_id == target], NAME) if target else None
+    managed_subnet = named(pages(sdk, network.list_subnets, target), NAME + "-subnet") if target else None
+    if managed_subnet:
+        matches = [v for v in all_vcns if v.id == managed_subnet.vcn_id]
+        require(len(matches) == 1, "VCN della sottorete dedicata non trovata.")
+        vcn = matches[0]
+        if not managed_vcn:
+            require(vcn.lifecycle_state == "AVAILABLE", "VCN riutilizzata non disponibile.")
+            dhcp = network.get_dhcp_options(vcn.default_dhcp_options_id).data
+            dns = [o for o in dhcp.options if o.type == "DomainNameServer"]
+            require(len(dns) == 1 and dns[0].server_type == "VcnLocalPlusInternet",
+                    "DNS della rete riutilizzata modificato: nessuna sovrascrittura.")
+        return dict(vcn=vcn, cidr=managed_subnet.cidr_block, reuse=not bool(managed_vcn))
+    if managed_vcn:
+        return dict(vcn=managed_vcn, cidr=SUBNET_CIDR, reuse=False)
+    if len(all_vcns) < 2:
+        for vcn in all_vcns:
+            for cidr in vcn.cidr_blocks or [vcn.cidr_block]:
+                require(not ipaddress.ip_network(cidr).overlaps(ipaddress.ip_network(VCN_CIDR)),
+                        "CIDR nuovo gia in uso: nessuna modifica alla rete esistente.")
+        return dict(vcn=None, cidr=SUBNET_CIDR, reuse=False)
+    # Reuse only the VCN container and its already-enabled direct internet gateway.
+    # All routing, ingress policy and subnet objects for our host remain new/dedicated.
+    for vcn in sorted(all_vcns, key=lambda v: v.id):
+        if vcn.lifecycle_state != "AVAILABLE":
+            continue
+        gateways, subnets = [], []
+        for cid in compartment_ids:
+            gateways.extend(live(pages(sdk, network.list_internet_gateways, cid, vcn_id=vcn.id)))
+            subnets.extend(live(pages(sdk, network.list_subnets, cid, vcn_id=vcn.id)))
+        if len(gateways) != 1 or not gateways[0].is_enabled or getattr(gateways[0], "route_table_id", None):
+            continue
+        cidr = free_subnet(vcn.cidr_blocks or [vcn.cidr_block], [x.cidr_block for x in subnets])
+        if not cidr:
+            continue
+        # Bootstrap depends on the OCI resolver, never on an existing private DNS server.
+        dhcp = network.get_dhcp_options(vcn.default_dhcp_options_id).data
+        dns = [o for o in dhcp.options if o.type == "DomainNameServer"]
+        if len(dns) != 1 or dns[0].server_type != "VcnLocalPlusInternet":
+            continue
+        return dict(vcn=vcn, gateway=gateways[0], cidr=cidr, reuse=True)
+    raise GuardError("Due VCN presenti, ma nessuna ha spazio libero e gateway/DNS compatibili: nessuna rete modificata.")
 
 
 def retry_token(compartment, role):
@@ -213,37 +264,7 @@ def apply(sdk, config, state, repo_commit, bootstrap, account_confirmed=False, s
         require(state["compartment"] is not None and state["compartment"].id == compartment.id,
                 "Compartment non ancora propagato: attendi prima di riprovare.")
     cid = compartment.id
-    def same(condition):
-        require(condition, "Risorsa gestita modificata: nessuna sovrascrittura automatica.")
-    vcn = ensure(sdk, network, pages(sdk, network.list_vcns, cid), NAME, network.create_vcn,
-        m.CreateVcnDetails(compartment_id=cid, cidr_blocks=[VCN_CIDR], display_name=NAME, freeform_tags=TAGS),
-        lambda r: same((r.cidr_blocks or [r.cidr_block]) == [VCN_CIDR]))
-    igw = ensure(sdk, network, pages(sdk, network.list_internet_gateways, cid, vcn_id=vcn.id), NAME + "-igw",
-        network.create_internet_gateway, m.CreateInternetGatewayDetails(compartment_id=cid,
-            vcn_id=vcn.id, is_enabled=True, display_name=NAME + "-igw", freeform_tags=TAGS),
-        lambda r: same(r.vcn_id == vcn.id and r.is_enabled is True))
-    route_rules = [m.RouteRule(destination="0.0.0.0/0", destination_type="CIDR_BLOCK", network_entity_id=igw.id)]
-    route = ensure(sdk, network, pages(sdk, network.list_route_tables, cid, vcn_id=vcn.id), NAME + "-routes",
-        network.create_route_table, m.CreateRouteTableDetails(compartment_id=cid, vcn_id=vcn.id,
-            route_rules=route_rules, display_name=NAME + "-routes", freeform_tags=TAGS),
-        lambda r: same([(x.destination, x.destination_type, x.network_entity_id) for x in r.route_rules]
-                       == [("0.0.0.0/0", "CIDR_BLOCK", igw.id)]))
-    # No incoming ports, including SSH. Only outbound package downloads and DNS.
-    egress = [m.EgressSecurityRule(destination="0.0.0.0/0", destination_type="CIDR_BLOCK", protocol="6", is_stateless=False,
-              tcp_options=m.TcpOptions(destination_port_range=m.PortRange(min=p, max=p))) for p in (80, 443)]
-    egress += [m.EgressSecurityRule(destination="169.254.169.254/32", destination_type="CIDR_BLOCK", protocol=proto, is_stateless=False,
-               **{options: klass(destination_port_range=m.PortRange(min=53, max=53))})
-               for proto, options, klass in (("6", "tcp_options", m.TcpOptions), ("17", "udp_options", m.UdpOptions))]
-    security = ensure(sdk, network, pages(sdk, network.list_security_lists, cid, vcn_id=vcn.id), NAME + "-closed",
-        network.create_security_list, m.CreateSecurityListDetails(compartment_id=cid, vcn_id=vcn.id,
-            ingress_security_rules=[], egress_security_rules=egress, display_name=NAME + "-closed", freeform_tags=TAGS),
-        lambda r: same(r.ingress_security_rules == [] and canonical_egress(r.egress_security_rules) == canonical_egress(egress)))
-    subnet = ensure(sdk, network, pages(sdk, network.list_subnets, cid, vcn_id=vcn.id), NAME + "-subnet",
-        network.create_subnet, m.CreateSubnetDetails(compartment_id=cid, vcn_id=vcn.id, cidr_block=SUBNET_CIDR,
-            route_table_id=route.id, security_list_ids=[security.id], prohibit_public_ip_on_vnic=False,
-            display_name=NAME + "-subnet", freeform_tags=TAGS),
-        lambda r: same(r.cidr_block == SUBNET_CIDR and r.route_table_id == route.id
-                       and r.security_list_ids == [security.id] and r.prohibit_public_ip_on_vnic is False))
+    subnet = prepare_network(sdk, state)
     # Recheck live tenancy consumption after network setup, immediately before launch.
     state = inspect(sdk, config, signer=signer)
     require(state["existing"] is None, "Una VM e comparsa durante il piano: nessun duplicato creato.")
@@ -263,6 +284,57 @@ def apply(sdk, config, state, repo_commit, bootstrap, account_confirmed=False, s
     print("Il backend resta in staging: mancano credenziali private, HTTPS e verifica end-to-end.")
     return instance
 
+
+def prepare_network(sdk, state):
+    cid = state["compartment"].id
+    network, m = state["network"], sdk.core.models
+    netplan = state["netplan"]
+    def same(condition):
+        require(condition, "Risorsa gestita modificata: nessuna sovrascrittura automatica.")
+    if netplan["reuse"]:
+        vcn = netplan["vcn"]
+        print("Riutilizzo VCN esistente; nuova sottorete isolata, nessuna modifica alle sottoreti attuali.")
+        if "gateway" in netplan:
+            igw = netplan["gateway"]
+        else:
+            gateways = []
+            # Existing dedicated route is the stable binding after initial setup.
+            routes = named(pages(sdk, network.list_route_tables, cid, vcn_id=vcn.id), NAME + "-routes")
+            require(routes is not None and len(routes.route_rules) == 1, "Route dedicata non confermata.")
+            igw = network.get_internet_gateway(routes.route_rules[0].network_entity_id).data
+        require(igw.vcn_id == vcn.id and igw.is_enabled and not getattr(igw, "route_table_id", None),
+                "Gateway esistente modificato: fermato.")
+    else:
+        vcn = ensure(sdk, network, pages(sdk, network.list_vcns, cid), NAME, network.create_vcn,
+            m.CreateVcnDetails(compartment_id=cid, cidr_blocks=[VCN_CIDR], display_name=NAME, freeform_tags=TAGS),
+            lambda r: same((r.cidr_blocks or [r.cidr_block]) == [VCN_CIDR]))
+        igw = ensure(sdk, network, pages(sdk, network.list_internet_gateways, cid, vcn_id=vcn.id), NAME + "-igw",
+            network.create_internet_gateway, m.CreateInternetGatewayDetails(compartment_id=cid,
+                vcn_id=vcn.id, is_enabled=True, display_name=NAME + "-igw", freeform_tags=TAGS),
+            lambda r: same(r.vcn_id == vcn.id and r.is_enabled is True))
+    route_rules = [m.RouteRule(destination="0.0.0.0/0", destination_type="CIDR_BLOCK", network_entity_id=igw.id)]
+    route = ensure(sdk, network, pages(sdk, network.list_route_tables, cid, vcn_id=vcn.id), NAME + "-routes",
+        network.create_route_table, m.CreateRouteTableDetails(compartment_id=cid, vcn_id=vcn.id,
+            route_rules=route_rules, display_name=NAME + "-routes", freeform_tags=TAGS),
+        lambda r: same([(x.destination, x.destination_type, x.network_entity_id) for x in r.route_rules]
+                       == [("0.0.0.0/0", "CIDR_BLOCK", igw.id)]))
+    # No incoming ports, including SSH. Only outbound package downloads and DNS.
+    egress = [m.EgressSecurityRule(destination="0.0.0.0/0", destination_type="CIDR_BLOCK", protocol="6", is_stateless=False,
+              tcp_options=m.TcpOptions(destination_port_range=m.PortRange(min=p, max=p))) for p in (80, 443)]
+    egress += [m.EgressSecurityRule(destination="169.254.169.254/32", destination_type="CIDR_BLOCK", protocol=proto, is_stateless=False,
+               **{options: klass(destination_port_range=m.PortRange(min=53, max=53))})
+               for proto, options, klass in (("6", "tcp_options", m.TcpOptions), ("17", "udp_options", m.UdpOptions))]
+    security = ensure(sdk, network, pages(sdk, network.list_security_lists, cid, vcn_id=vcn.id), NAME + "-closed",
+        network.create_security_list, m.CreateSecurityListDetails(compartment_id=cid, vcn_id=vcn.id,
+            ingress_security_rules=[], egress_security_rules=egress, display_name=NAME + "-closed", freeform_tags=TAGS),
+        lambda r: same(r.ingress_security_rules == [] and canonical_egress(r.egress_security_rules) == canonical_egress(egress)))
+    subnet = ensure(sdk, network, pages(sdk, network.list_subnets, cid, vcn_id=vcn.id), NAME + "-subnet",
+        network.create_subnet, m.CreateSubnetDetails(compartment_id=cid, vcn_id=vcn.id, cidr_block=netplan["cidr"],
+            route_table_id=route.id, security_list_ids=[security.id], prohibit_public_ip_on_vnic=False,
+            display_name=NAME + "-subnet", freeform_tags=TAGS),
+        lambda r: same(r.cidr_block == netplan["cidr"] and r.route_table_id == route.id
+                       and r.security_list_ids == [security.id] and r.prohibit_public_ip_on_vnic is False))
+    return subnet
 
 def canonical_egress(rules):
     def entry(r):
@@ -285,7 +357,10 @@ def github_policy(domain, compartment):
         ("read instances", "tenancy", ["ListShapes"]),
         ("read instance-images", "tenancy", ["ListImages", "GetImage", "LaunchInstance"]),
         ("read resource-availability", "tenancy", ["GetResourceAvailability"]),
-        ("inspect vcns", "tenancy", ["ListVcns"]),
+        ("inspect vcns", "tenancy", ["ListVcns", "GetVcn"]),
+        ("inspect subnets", "tenancy", ["ListSubnets"]),
+        ("inspect internet-gateways", "tenancy", ["ListInternetGateways", "GetInternetGateway"]),
+        ("inspect dhcp-options", "tenancy", ["GetDhcpOptions"]),
         ("manage instances", "compartment id " + compartment, ["LaunchInstance", "GetInstance", "ListInstances"]),
         ("manage volume-family", "compartment id " + compartment, ["LaunchInstance"]),
         ("manage virtual-network-family", "compartment id " + compartment,
@@ -312,6 +387,11 @@ def authorize_github(sdk, config, state):
             opc_retry_token=retry_token(tenancy, "compartment"), retry_strategy=sdk.retry.NoneRetryStrategy()).data
         compartment = sdk.wait_until(identity, identity.get_compartment(compartment.id),
                                      "lifecycle_state", "ACTIVE", max_wait_seconds=120).data
+    # Native Cloud Shell handles cross-compartment network attachments. GitHub
+    # receives no mutation permission on the pre-existing VCN or gateway.
+    state = inspect(sdk, config)
+    require(state["compartment"] is not None, "Compartment non ancora propagato: attendi.")
+    prepare_network(sdk, state)
     statements = github_policy(domain, compartment.id)
     policies = [p for p in live(pages(sdk, identity.list_policies, tenancy)) if p.name == "gdh-arena-staging-provision"]
     require(len(policies) <= 1, "Policy omonime duplicate: fermato.")
@@ -397,7 +477,8 @@ def main(argv=None):
             print("Stato HTTP: " + str(status))
         operation = getattr(exc, "operation_name", "")
         if operation in ("list_shapes", "list_images", "get_resource_availability", "list_vcns", "list_domains",
-                         "create_compartment", "create_policy", "create_vcn", "create_subnet", "launch_instance", "get_instance"):
+                         "create_compartment", "create_policy", "create_vcn", "create_subnet", "launch_instance", "get_instance",
+                         "list_subnets", "list_internet_gateways", "get_dhcp_options", "create_route_table", "create_security_list"):
             print("Operazione: " + operation)
         print("Nessun retry o alternativa a pagamento. Non ripetere se l'esito della creazione e incerto.")
     return 1

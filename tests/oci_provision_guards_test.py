@@ -23,6 +23,11 @@ class Guards(unittest.TestCase):
             with self.subTest(summary=summary, cpu=cpu, ram=ram), self.assertRaises(host.GuardError):
                 host.budget(summary, cpu, ram)
 
+    def test_free_subnet_never_overlaps_existing_ranges(self):
+        self.assertEqual(host.free_subnet(["10.0.0.0/16"], ["10.0.0.0/24"]), "10.0.1.0/28")
+        self.assertIsNone(host.free_subnet(["10.0.0.0/24"], ["10.0.0.0/24"]))
+        self.assertIsNone(host.free_subnet(["8.8.8.0/24"], []))
+
     def test_name_collision_and_duplicate_stop_instead_of_adopting(self):
         with self.assertRaises(host.GuardError):
             host.named([S(display_name=host.NAME, lifecycle_state='AVAILABLE', freeform_tags={})], host.NAME)
@@ -64,7 +69,7 @@ class Guards(unittest.TestCase):
 
     def test_write_policy_has_no_iam_upgrade_delete_or_tenancy_write(self):
         policy = host.github_policy('ocid1.domain.oc1..test', 'ocid1.compartment.oc1..test')
-        self.assertEqual(len(policy), 7)
+        self.assertEqual(len(policy), 10)
         for line in policy:
             self.assertIn("request.principal.type='identityfederateddomainapp'", line)
             self.assertIn('request.principal.domain.id=', line)
