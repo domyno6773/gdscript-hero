@@ -510,6 +510,10 @@ async function testNonBlockingCloudConflict(page){
 }
 
 async function testSubtleMotion(page, initialWidth) {
+  // The Sandbox welcomes first-time visitors with its own modal. Disable
+  // that onboarding for this navigation-only test so it never obscures the
+  // Settings dialog; onboarding itself is covered in the browser smoke suite.
+  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
   // Use computed animation properties rather than screenshots or wall-clock guesses.
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.evaluate(()=>App.showRoadmap());
