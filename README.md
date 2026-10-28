@@ -14,7 +14,7 @@ GDScript Hero è una piattaforma didattica **gratuita e in italiano** per impara
 
 | Sezione | Stato | Descrizione |
 | --- | --- | --- |
-| **Corso gratuito** | Disponibile | **81 esercizi in 15 capitoli**, con teoria, esempi, esercizi, suggerimenti e verifiche |
+| **Corso gratuito** | Disponibile | **81 esercizi pratici e 30 quiz in 15 capitoli**, con teoria, esempi, esercizi, suggerimenti e verifiche |
 | **Editor GDScript** | Disponibile | Sintassi colorata, numeri di riga, completamento contestuale e comandi rapidi |
 | **Risultati e diagnostica** | Disponibile | Output atteso/ottenuto, errori in evidenza e dettagli dei test |
 | **Sandbox** | Disponibile | Sperimentazione con codice, nodi, scena e viewport 2D |
@@ -29,7 +29,7 @@ La nuova interfaccia è ispirata all'editor di Godot: palette blu-grigio, pannel
 
 ## Corso e apprendimento
 
-Il corso comprende **15 capitoli e 81 esercizi**. Si parte dalle basi (output, variabili, operatori, condizioni) per arrivare a strutture dati, cicli, funzioni e meccaniche tipiche di Godot. Ogni livello offre un obiettivo concreto, test di verifica e aiuti progressivi.
+Il corso comprende **15 capitoli, 81 esercizi pratici e 30 quiz di comprensione**. Si parte dalle basi (output, variabili, operatori, condizioni) per arrivare a strutture dati, cicli, funzioni e meccaniche tipiche di Godot. Ogni livello offre un obiettivo concreto, test di verifica e aiuti progressivi.
 
 **L'obiettivo è mantenere il corso principale gratuito.** Le eventuali funzioni aggiuntive a pagamento non dovranno impedire di completarlo.
 

@@ -8,7 +8,7 @@
 
 La piattaforma dispone già di:
 
-- Corso principale gratuito in italiano: **15 capitoli, 81 esercizi**.
+- Corso principale gratuito in italiano: **15 capitoli, 81 esercizi di codice e 30 quiz**.
 - Editor con evidenziazione GDScript, suggerimenti, verifica del codice e diagnostica.
 - Sandbox con vista 2D e strumenti di scena.
 - **Arena del Gladiatore**, primo progetto guidato giocabile ed esportabile.

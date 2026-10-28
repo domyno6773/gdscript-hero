@@ -183,11 +183,16 @@ const App = {
 
         // Non fidarsi di chiavi obsolete o di ID arbitrari nello storage.
         const view = position.view;
-        const allowed = ['view-roadmap','view-exercise','view-practice',
+        const allowed = ['view-roadmap','view-exercise','view-quiz','view-practice',
             'view-projects','view-review','view-stats'];
         if (!allowed.includes(view)) return;
         try {
-            if (view === 'view-exercise') {
+            if (view === 'view-quiz') {
+                const id = Number(position.lessonId);
+                const quiz = LESSONS_DATA.find(l => l.id === id && l.isQuiz);
+                if (quiz && (this.state.devAllUnlocked || this.state.completedLessons.includes(id) ||
+                    this.state.finishedLessons.includes(id))) this.openLesson(id);
+            } else if (view === 'view-exercise') {
                 if (typeof position.reviewVariantId === 'string' &&
                     typeof REVIEW_VARIANTS !== 'undefined' &&
                     REVIEW_VARIANTS.some(v => v.id === position.reviewVariantId)) {
@@ -1242,6 +1247,7 @@ const App = {
         const views = [
             'view-roadmap',
             'view-exercise',
+            'view-quiz',
             'view-practice',
             'view-projects',
             'view-review',
@@ -2111,6 +2117,10 @@ const App = {
         this.state.unlockedAchievements = [];
         this.state.currentLessonId = 1;
         this.state.userCode = {};
+        try {
+            const owner=String(this._saveOwner||'guest');
+            for(let id=201;id<=230;id++)sessionStorage.removeItem('gdh_chapter_quiz_v1:'+owner+':'+id);
+        } catch(e) {}
         this.state.profileCustomized = false;
         this.state.claimedQuestsCount = 0;
         this.state.profile = {
@@ -2553,7 +2563,24 @@ const App = {
     },
 
     // Generatore SVG 3D Hexagon fedele al Concept 1 Indie Game Academy
-    renderHexNodeSVG(isMastery, status) {
+    renderHexNodeSVG(isMastery, status, isQuiz = false) {
+        if (isQuiz) {
+            const colors = {
+                completed: ['#00BFA6','#102E2C','#93F7E2'],
+                current: ['#68B9F3','#1B3446','#D8F1FF'],
+                unlocked: ['#537FA5','#1D2C3E','#B3CDE1'],
+                locked: ['#283444','#111923','#516477']
+            };
+            const [edge,face,mark] = colors[status] || colors.locked;
+            return `<svg class="hex-svg" width="84" height="84" viewBox="0 0 84 84" aria-hidden="true">
+              <path d="M 22 7 L 62 7 L 82 40 L 62 73 L 22 73 L 2 40 Z"
+                    fill="${face}" stroke="${edge}" stroke-width="3"/>
+              <rect x="28" y="27" width="28" height="27" rx="5" fill="none" stroke="${mark}" stroke-width="2"/>
+              <path d="M34 35h16 M34 41h13 M34 47h8" stroke="${mark}" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="55" cy="52" r="9" fill="${face}" stroke="${mark}" stroke-width="2"/>
+              <path d="m51 52 3 3 5-6" fill="none" stroke="${mark}" stroke-width="2" stroke-linecap="round"/>
+            </svg>`;
+        }
         if (isMastery) {
             if (status === 'completed') {
                 return `
@@ -2674,7 +2701,7 @@ const App = {
                         <p>${chapter.desc}</p>
                     </div>
                 </div>
-                <div class="chapter-progress-pill">${chapterFinished}/${chapterTotal} Livelli</div>
+                <div class="chapter-progress-pill">${chapterFinished}/${chapterTotal} Attività</div>
             `;
             section.appendChild(banner);
 
@@ -2715,7 +2742,7 @@ const App = {
                 }
 
                 const node = document.createElement('div');
-                node.className = `node-item ${statusClass} ${isMastery ? 'mastery' : ''}`;
+                node.className = `node-item ${statusClass} ${isMastery ? 'mastery' : ''} ${lesson.isQuiz ? 'quiz-node' : ''}`;
                 node.id = `node-lesson-${lesson.id}`;
                 node.setAttribute('role', 'button');
                 node.setAttribute('tabindex', isUnlocked ? '0' : '-1');
@@ -2766,7 +2793,7 @@ const App = {
                 // Costruisci contenuto del nodo
                 let innerHtml = `
                     <div class="node-button hex-node">
-                        ${this.renderHexNodeSVG(isMastery, statusClass)}
+                        ${this.renderHexNodeSVG(isMastery, statusClass, lesson.isQuiz)}
                         ${(!isMastery && isCurrentFocus) ? '<div class="tag-continua">CONTINUA</div>' : ''}
                     </div>
                     <div class="node-label">${isMastery ? '⭐ Sfida di apprendimento' : lesson.title.replace(/^\d+\.\s*/, '')}</div>
@@ -3056,6 +3083,7 @@ const App = {
     openLesson(lessonId) {
         const lesson = LESSONS_DATA.find(l => l.id === lessonId);
         if (!lesson) return;
+        if (lesson.isQuiz) return this.openQuiz(lessonId);
 
         this.isReviewMode = false;
         this.currentReviewVariant = null;

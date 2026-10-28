@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="settings-refresh.css">
     <link rel="stylesheet" href="scrollbars.css">
     <link rel="stylesheet" href="motion.css">
+    <link rel="stylesheet" href="quiz.css">
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -152,12 +153,12 @@
                     <div class="chapter-card overall-course-card">
                         <div class="chapter-badge">ACCADEMIA INDIE • GDSCRIPT 4</div>
                         <h1>Accademia di Sviluppo Godot</h1>
-                        <p class="subtitle">Percorso completo in 15 Capitoli e 81 Esercizi: dai fondamenti di programmazione ai nodi 2D, segnali, animazioni e architettura ad albero per Godot 4.</p>
+                        <p class="subtitle">Percorso completo in 15 capitoli, 81 esercizi pratici e 30 quiz: dai fondamenti di programmazione ai nodi 2D, segnali, animazioni e architettura ad albero per Godot 4.</p>
                         <div class="overall-progress-bar">
                             <div class="progress-fill" id="overall-progress-fill" style="width: 0%;"></div>
                         </div>
                         <div class="progress-stats">
-                            <span id="completed-count-text">0 di 60 completati (0%)</span>
+                            <span id="completed-count-text">0 di 111 completate (0%)</span>
                             <span class="demo-tag" id="xp-to-next-level-tag">50 XP al prossimo livello</span>
                         </div>
                         <div class="hero-actions">
@@ -451,6 +452,11 @@
                 </div>
             </section>
         </div>
+    </main>
+
+    <!-- Quiz di comprensione: schermata dedicata e accessibile su mobile. -->
+    <main id="view-quiz" class="view-container hidden" aria-label="Quiz di comprensione">
+        <div id="quiz-main" class="gdh-quiz-main"></div>
     </main>
 
     <!-- VISTA 3: SANDBOX & MINI-IDE GODOT 4 (Libera Sperimentazione con Sincronizzazione Account) -->
@@ -2024,6 +2030,7 @@
     <script src="progression.js"></script>
     <script src="lessons.js"></script>
     <script src="curriculum_extension.js"></script>
+    <script src="chapter_quizzes.js"></script>
     <script src="code-guide.js"></script>
     <script src="inline-code-help.js"></script>
     <script src="review_variants.js"></script>
@@ -2036,6 +2043,7 @@
     <script src="arena-competition.js"></script>
     <script src="arena-official.js"></script>
     <script src="app.js"></script>
+    <script src="quiz_engine.js"></script>
     <!-- Il motore Godot WebAssembly e' la verifica standard di tutte le lezioni. -->
     <script src="native/native-beta-adapter.js"></script>
     <script src="accessibility.js"></script>

@@ -197,7 +197,7 @@ async function testAllLessonCodeSamplesFit(page,width){
    const errors=[];
    let sampleCount=0,lessonCount=0;
    try{
-     for(const lesson of LESSONS_DATA){
+     for(const lesson of LESSONS_DATA.filter(l=>!l.isQuiz)){
        App.openLesson(lesson.id);
        lessonCount++;
        const blocks=[...document.querySelectorAll(
@@ -823,6 +823,54 @@ async function testLongEmailSettings(page, initialWidth) {
  await page.setViewportSize({width:initialWidth,height:844});
 }
 
+async function testQuizLearningFlow(page) {
+ const previous=await page.evaluate(()=>{
+   const snapshot={finished:App.state.finishedLessons.slice(),completed:App.state.completedLessons.slice(),
+     xp:App.state.xp,current:App.state.currentLessonId,
+     daily:JSON.parse(JSON.stringify(App.state.dailyQuests))};
+   App.state.finishedLessons=[1,2];
+   App.ensureUnlockedConsistency();
+   App.openLesson(201);
+   return snapshot;
+ });
+ assert.equal(await page.locator('#view-quiz').isVisible(),true,'Quiz non raggiungibile dopo due lezioni');
+ assert.equal(await page.locator('.gdh-quiz-question').count(),3,'Ogni quiz deve avere tre domande');
+ assert.equal(await page.locator('#quiz-question-0 input[type="radio"]').count(),4);
+ assert.equal(await page.locator('#quiz-question-1 input[type="checkbox"]').count(),4);
+ assert.ok((await page.locator('#quiz-question-2 .gdh-quiz-code').textContent()).includes('□□□□'));
+ await page.locator('#chapter-quiz-form button[type="submit"]').click();
+ assert.ok((await page.locator('#quiz-inline-status').textContent()).includes('tutte e tre'),
+   'Risposte mancanti devono impedire il completamento');
+ await page.locator('#quiz-question-0 .gdh-quiz-option').nth(1).click();
+ await page.locator('#quiz-question-1 .gdh-quiz-option').nth(0).click();
+ await page.locator('#quiz-question-1 .gdh-quiz-option').nth(2).click();
+ await page.locator('#quiz-question-2 .gdh-quiz-option').nth(0).click();
+ await page.locator('#chapter-quiz-form button[type="submit"]').click();
+ assert.ok((await page.locator('#quiz-inline-status').textContent()).includes('2 su 3'),
+   'Quiz con risposta errata non deve essere superato');
+ assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(201)),false);
+ await page.locator('#quiz-question-0 .gdh-quiz-option').nth(0).click();
+ await page.locator('#chapter-quiz-form button[type="submit"]').click();
+ assert.ok((await page.locator('#quiz-completion').textContent()).includes('Quiz superato'));
+ assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(201)),true);
+ assert.equal(await page.evaluate(()=>App.state.completedLessons.includes(3)),true,
+   'Quiz superato deve sbloccare il prossimo esercizio');
+ const xp=await page.evaluate(()=>App.state.xp);
+ await page.evaluate(()=>App.gradeCurrentQuiz());
+ assert.equal(await page.evaluate(()=>App.state.xp),xp,'Quiz ripetuto non deve duplicare gli XP');
+ await page.evaluate(previous=>{
+   App.state.finishedLessons=previous.finished;
+   App.state.completedLessons=previous.completed;
+   App.state.xp=previous.xp;
+   App.state.currentLessonId=previous.current;
+   App.state.dailyQuests=previous.daily;
+   sessionStorage.removeItem('gdh_chapter_quiz_v1:'+String(App._saveOwner||'guest')+':201');
+   App.ensureUnlockedConsistency();
+   App.saveStorage({localOnly:true});
+   App.showRoadmap();
+ },previous);
+}
+
 async function smoke(browser,url,width){
  const context=await browser.newContext({viewport:{width,height:844},locale:'it-IT'});
  const page=await context.newPage();
@@ -839,7 +887,7 @@ async function smoke(browser,url,width){
  const response=await page.goto(url,{waitUntil:'load',timeout:30000});
  assert.equal(response.status(),200);
  await page.waitForFunction(()=>!!window.App&&!!window.LESSONS_DATA&&!document.getElementById('view-roadmap').classList.contains('hidden'));
- assert.equal(await page.evaluate(()=>LESSONS_DATA.length),81);
+ assert.equal(await page.evaluate(()=>LESSONS_DATA.length),111);
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
  assert.equal(await page.locator('#gdh-native-verify-toggle').count(),0,'No Beta toggle should remain');
  assert.equal(await page.locator('#btn-open-settings svg.ui-icon').count(),1,'Settings button must use SVG icon');
@@ -859,6 +907,7 @@ async function smoke(browser,url,width){
    App.renderSyncStatus({kind:'synced',message:''});
  });
  assert.equal(await page.locator('#gdh-save-notice').isHidden(),true);
+ await testQuizLearningFlow(page);
  await testAccessibilityKeyboard(page,width);
  await testNonBlockingCloudConflict(page);
  await testLongEmailSettings(page,width);
