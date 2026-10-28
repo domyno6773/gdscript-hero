@@ -857,6 +857,23 @@ async function smoke(browser,url,width){
    'Sandbox must explain an unclosed print parenthesis: '+JSON.stringify(sandboxParenthesis));
  assert.equal(sandboxParenthesis.category,'syntax',
    'Sandbox must classify missing parenthesis as syntax: '+JSON.stringify(sandboxParenthesis));
+ // Caso frequente nella Sandbox libera: print scritto a livello radice.
+ // Godot può segnalare prima la posizione della chiamata e non la parentesi.
+ await page.locator('#sandbox-code-editor').fill('print("Ciao"');
+ await page.locator('#btn-sandbox-run').click({timeout:10000});
+ await page.waitForFunction(()=>
+   !!document.querySelector('#sandbox-debug-area .gdh-debug-panel'),null,{timeout:15000});
+ const bareParenthesis=await page.evaluate(()=>({
+   title:document.querySelector('#sandbox-debug-area .gdh-debug-top strong')?.textContent,
+   why:document.querySelector('#sandbox-debug-area .gdh-debug-explanation')?.textContent,
+   hint:document.querySelector('#sandbox-debug-area .gdh-debug-hint')?.textContent,
+   technical:document.querySelector('#sandbox-debug-area .gdh-debug-technical pre')?.textContent,
+   console:document.querySelector('#sandbox-console-output')?.textContent,
+   category:document.querySelector('#sandbox-debug-area .gdh-debug-panel')?.dataset.category
+ }));
+ assert.match([bareParenthesis.title,bareParenthesis.why,bareParenthesis.hint].join(' '),/parentes/i,
+   'Sandbox root-level print with missing parenthesis needs specific guidance: '+
+     JSON.stringify(bareParenthesis));
  // Sandbox: aggiungi i nodi come farebbe un utente con un nuovo progetto vuoto.
  await page.evaluate(()=>{
    App.addSandboxNode('Label','Label','In attesa');
