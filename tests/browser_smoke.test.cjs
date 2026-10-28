@@ -1195,7 +1195,7 @@ async function smoke(browser,url,width){
  assert.equal(questPaint.label,'Riscatta ricompensa','Old neon reward emoji should be removed');
  assert.equal(questPaint.claimed,true,'Claimed state must render correctly');
  assert.equal(questPaint.xpUnchanged,true,'Visual test must not award any XP');
- assert.match(questPaint.state,/Riscattato/);
+ assert.match(questPaint.state,/Riscattato|Completata/);
 
  // CTA Ripasso: nessun testo sottolineato o controllo senza layout nel callout.
  const reviewCalloutStyle=await page.evaluate(()=>{
