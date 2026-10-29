@@ -30,6 +30,8 @@ jobs:
         run: node tests/lesson4_comments_output.test.cjs
       - name: Chapter 1 multi-task lesson structure and persistence
         run: node tests/lesson_practice.test.cjs
+      - name: Streak and accurate multi-task completion telemetry
+        run: node tests/activity_tracking.test.cjs
       - name: Godot debug messages and reliable line numbers
         run: node tests/error_guide.test.cjs
       - name: Code comprehension throughout the course

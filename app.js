@@ -2320,6 +2320,7 @@ const App = {
             this.state.lastActiveDate = todayISO;
 
             const daysCount = this.state.activeDaysThisWeek.length;
+            let gainedXp = 0;
 
             if (daysCount === currentTier.target) {
                 this.state.streakWeeks += 1;
@@ -2328,13 +2329,13 @@ const App = {
                     'week:'+this.getWeekId(),20);
                 if (gain) {
                     this.state.xp += gain;
+                    gainedXp = gain;
                     SoundFX.playFanfare();
                     this.showToast({
                         tag: "OBIETTIVO SETTIMANALE RAGGIUNTO!",
                         title: `Streak ${currentTier.label} Conquistata!`,
                         desc: `Hai completato ${daysCount} giorni questa settimana (+${gain} XP).`
                     });
-                    this.updateStatsUI({ announceLevelUp: true });
                 }
             } else if (daysCount < currentTier.target) {
                 this.showToast({
@@ -2346,6 +2347,9 @@ const App = {
             }
 
             this.saveStorage();
+            // Aggiorna il contatore della streak anche al primo giorno,
+            // non soltanto quando viene raggiunto l'obiettivo settimanale.
+            this.updateStatsUI({ announceLevelUp: gainedXp > 0 });
         }
     },
 
@@ -4090,6 +4094,56 @@ const App = {
             }
         });
 
+        return this.reconcileLearningTelemetryCompletions(telemetry, finishedLessons);
+    },
+
+    // I vecchi salvataggi possono contenere un "primo successo" attribuito al
+    // primo compito, anche se la lezione a quattro compiti era incompleta.
+    // finishedLessons e' la fonte autorevole per il completamento del corso.
+    reconcileLearningTelemetryCompletions(telemetry, finishedLessons = []) {
+        if (!telemetry || typeof telemetry !== 'object') return telemetry;
+        const finished = new Set((finishedLessons || []).map(Number));
+        const lessons = telemetry.lessons || {};
+        for (const [id, record] of Object.entries(lessons)) {
+            if (!record || finished.has(Number(id)) || !record.first_success_at) continue;
+            lessons[id] = {
+                ...record,
+                first_success_at: null,
+                last_success_at: null,
+                success_count: 0,
+                first_success_without_hints: null,
+                hints_opened_before_first_success: record.max_hint_level_opened || 0,
+                failed_before_first_success: record.history_available === false
+                    ? record.failed_before_first_success : (record.failed_verifications || 0)
+            };
+        }
+
+        // Ricostruisci i soli conteggi dei completamenti dai successi certi.
+        // Tentativi e ripassi giornalieri restano intatti, anche nei salvataggi legacy.
+        const completionsByDay = {};
+        for (const [id, record] of Object.entries(lessons)) {
+            if (!record?.first_success_at || !finished.has(Number(id))) continue;
+            const day = typeof StatsEngine !== 'undefined' && StatsEngine.formatLocalDateKey
+                ? StatsEngine.formatLocalDateKey(record.first_success_at)
+                : String(record.first_success_at).slice(0, 10);
+            if (!day || !/^\d{4}-\d{2}-\d{2}$/.test(day)) continue;
+            const counts = completionsByDay[day] ||= { lessons_completed: 0,
+                autonomous_completed: 0, assisted_completed: 0 };
+            counts.lessons_completed++;
+            if (record.first_success_without_hints === true) counts.autonomous_completed++;
+            else if (record.first_success_without_hints === false) counts.assisted_completed++;
+        }
+        telemetry.daily_activity = Object.fromEntries(
+            Object.entries(telemetry.daily_activity || {}).map(([day, activity]) =>
+                [day, { ...(activity || {}) }]));
+        for (const day of new Set([...Object.keys(telemetry.daily_activity),
+            ...Object.keys(completionsByDay)])) {
+            const activity = telemetry.daily_activity[day] ||= {};
+            const counts = completionsByDay[day];
+            activity.lessons_completed = counts?.lessons_completed || 0;
+            activity.autonomous_completed = counts?.autonomous_completed || 0;
+            activity.assisted_completed = counts?.assisted_completed || 0;
+        }
         return telemetry;
     },
 
@@ -4169,7 +4223,7 @@ const App = {
         return null;
     },
 
-    recordDailyActivity(type, count = 1, options = {}) {
+    recordLearningActivity(type, count = 1, options = {}) {
         if (!this.state.learningTelemetry) {
             this.state.learningTelemetry = { schema_version: 1, lessons: {}, daily_activity: {} };
         }
@@ -4203,7 +4257,7 @@ const App = {
         }
     },
 
-    recordLessonAttempt(lessonId, result, tests, criticalErr, code = '') {
+    recordLessonAttempt(lessonId, result, tests, criticalErr, code = '', options = {}) {
         if (!lessonId) return;
         const record = this.getOrCreateLessonTelemetry(lessonId);
         const nowIso = new Date().toISOString();
@@ -4216,12 +4270,13 @@ const App = {
         record.last_attempt_at = nowIso;
 
         // Registra tentativo nel contatore aggregato giornaliero (P3.4)
-        this.recordDailyActivity('verification', 1);
+        this.recordLearningActivity('verification', 1);
 
         const errType = this.classifyExecutionError(result, tests, criticalErr, code);
 
-        if (errType === null) {
-            // Verifica superata con successo
+        if (errType === null && options.lessonCompleted !== false) {
+            // Successo della lezione solo dopo TUTTI i compiti, non al primo compito.
+            // Le verifiche intermedie contano come tentativi, non come completamenti.
             const isFirstSuccess = !record.first_success_at;
             record.success_count++;
             if (!record.first_success_at) {
@@ -4237,8 +4292,10 @@ const App = {
             record.last_success_at = nowIso;
 
             if (isFirstSuccess) {
-                this.recordDailyActivity('lesson_success', 1, { autonomous: record.first_success_without_hints === true });
+                this.recordLearningActivity('lesson_success', 1, { autonomous: record.first_success_without_hints === true });
             }
+        } else if (errType === null) {
+            // Compito intermedio riuscito: non e' un errore e non conclude la lezione.
         } else if (errType === 'internal') {
             // Errore infrastrutturale / interno: non attribuisce difficoltà didattica allo studente
             record.error_breakdown.internal = (record.error_breakdown.internal || 0) + 1;
@@ -4252,7 +4309,10 @@ const App = {
             record.error_breakdown[errType] = (record.error_breakdown[errType] || 0) + 1;
         }
 
-        this.saveStorage();
+        // Evita un salvataggio cloud temporaneamente incoerente: la lezione
+        // viene aggiunta a finishedLessons pochi istanti dopo, nello stesso flusso.
+        this.saveStorage(errType === null && options.lessonCompleted !== false
+            ? { localOnly: true } : {});
     },
 
     recordHintOpened(lessonId, level) {
@@ -4437,10 +4497,17 @@ const App = {
             this.showExerciseFeedback(result, tests);
             this.updateDidacticDebugger(allPassed ? null : result, allPassed ? [] : tests);
 
-            // Registra telemetria P3.1 del tentativo di verifica
+            // Una verifica corretta conclude la lezione solo quando tutti i
+            // compiti dell'argomento risultano completati.
+            const completedKeys = practiceTask
+                ? this.getLessonPracticeRecord(currentLesson).completed : [];
+            const completesLesson = !practiceTask || (allPassed &&
+                LessonPractice.tasksFor(currentLesson).every(task =>
+                    task.key === practiceTask.key || completedKeys.includes(task.key)));
             this.recordLessonAttempt(currentLesson.id, result, tests,
                 ['inconclusive','timeout'].includes(native.feedback.verdict)
-                    ? new Error(native.feedback.reason || 'Verifica nativa incompleta') : null, code);
+                    ? new Error(native.feedback.reason || 'Verifica nativa incompleta') : null,
+                code, { lessonCompleted: completesLesson });
 
             // Aggiorna Schermo Viewport 2D Godot
             if (this.viewport) {
@@ -5494,6 +5561,9 @@ const App = {
                 }
                 this.state.xp += gainXp;
                 this.recordDailyQuestProgress('review_success',1);
+                // Anche un ripasso superato e' una giornata di studio valida.
+                // Il registro settimanale e' idempotente per data.
+                this.recordDailyActivity();
                 this.saveStorage();
                 this.updateStatsUI({ announceLevelUp: gainXp > 0 });
                 this.checkAchievements({ fromAction: true });
@@ -7452,7 +7522,8 @@ const App = {
             this.state.arenaProject = data.arenaProject;
         }
         if (data.learningTelemetry) {
-            this.state.learningTelemetry = data.learningTelemetry;
+            this.state.learningTelemetry = this.migrateLearningTelemetry(
+                data.learningTelemetry, data.finishedLessons || this.state.finishedLessons);
         }
         if (data.reviewProgress) {
             this.state.reviewProgress = data.reviewProgress;
