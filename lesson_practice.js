@@ -92,6 +92,28 @@
         ['Il rapporto deve avere quattro righe.','Aggiungi le due istruzioni prima della stampa finale.','Esempio: print("Energia: ", 50, "%") usa tre argomenti.'])
     ]
   };
+  // Esercizio 101, aggiunto successivamente nel Capitolo 1: era escluso
+  // dal pilota e non aveva il percorso multi-compito.
+  custom[101]=[
+    mk('p2','L’ordine degli eventi',
+      '<p>Godot esegue le istruzioni di <code>_ready()</code> nell’ordine. Completa il codice con due messaggi distinti: prima <code>Collegamento avviato</code>, poi <code>Collegamento pronto</code>.</p>',
+      'extends Node\n\nfunc _ready():\n    # Scrivi i due passaggi in ordine\n    pass\n',
+      'extends Node\n\nfunc _ready():\n    print("Collegamento avviato")\n    print("Collegamento pronto")\n',
+      'Collegamento avviato\nCollegamento pronto',{minPrints:2},
+      ['_ready() contiene il codice che parte quando il nodo è pronto.','Usa due print() nello stesso blocco.','L’ordine nel codice determina quello della console.']),
+    mk('p3','Ripara l’indentazione',
+      '<p>Lo script contiene una chiamata <code>print()</code> fuori dal blocco della funzione. Spostala dentro <code>_ready()</code> per visualizzare <code>Motore attivo</code>.</p>',
+      'extends Node\n\nfunc _ready():\n    pass\nprint("Motore attivo")\n',
+      'extends Node\n\nfunc _ready():\n    print("Motore attivo")\n',
+      'Motore attivo',{},
+      ['Una istruzione non può trovarsi a livello globale.','Le istruzioni della funzione sono indentate.','Sposta print() dopo la dichiarazione di _ready().']),
+    mk('p4','Sequenza di diagnostica',
+      '<p>Completa la diagnostica con tre righe: <code>Avvio</code>, <code>Controllo</code>, <code>Completato</code>. Usa tre istruzioni di stampa separate in <code>_ready()</code>.</p>',
+      'extends Node\n\nfunc _ready():\n    # Completa la diagnostica\n    pass\n',
+      'extends Node\n\nfunc _ready():\n    print("Avvio")\n    print("Controllo")\n    print("Completato")\n',
+      'Avvio\nControllo\nCompletato',{minPrints:3},
+      ['Ogni print() crea una riga.','Scrivi tre stampe nel blocco di _ready().','Controlla anche l’ordine dei messaggi.'])
+  ];
   const extraFor=lesson=>custom[lesson?.id] ||
     root.GDHPracticeCatalog?.tasksFor(lesson) || [];
   const enabled=id=>Boolean(custom[id]||
