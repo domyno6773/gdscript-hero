@@ -34,9 +34,13 @@ assert.match(lesson19.initialCode,/if punti_vita <= 0:/);
 for(const id of [29,39]){
   const lesson=byId(id),native=fixture(id);
   assert.ok(lesson&&native,'Lezione o fixture mancante: '+id);
-  for(const field of ['initialCode','solution','expectedOutput','title']){
+  for(const field of ['initialCode','solution','expectedOutput']){
     assert.equal(native[field],lesson[field],id+' '+field+' non sincronizzato');
   }
+  // Il sito rinumera i titoli dopo aver inserito 21 esercizi: gli ID restano invariati.
+  const withoutNumber=value=>String(value).replace(/^\d+\.\s*/,'');
+  assert.equal(withoutNumber(native.title),withoutNumber(lesson.title),
+    id+' titolo incoerente (esclusa la numerazione visuale)');
   assert.equal(native.id,id,'L’ID stabile non deve cambiare');
 }
 assert.match(byId(29).title,/funzione/);
