@@ -57,7 +57,7 @@ const banks={
     task('p2','Costo con tassa','Calcola il prezzo di '+(n+2)+' batterie a 6 monete e una tassa fissa di 3 usando le variabili. Stampa il totale.',
       ready('var prezzo = 6\nvar quantita = '+(n+2)+'\nvar tassa = 3\n# Calcola totale\npass'),
       ready('var prezzo = 6\nvar quantita = '+(n+2)+'\nvar tassa = 3\nvar totale = prezzo * quantita + tassa\nprint(totale)'),
-      String(6*(n+2)+3),['\\bprezzo\\s*\\*\\s*quantita\\b','\\bvar\\s+totale\\b'],
+      String(6*(n+2)+3),['(?:\\bprezzo\\s*\\*\\s*quantita\\b|\\bquantita\\s*\\*\\s*prezzo\\b)','\\bvar\\s+totale\\b'],
       ['Prima moltiplica il costo per quantità.','Poi aggiungi la tassa fissa.','Il totale deve usare le tre variabili.']),
     task('p3','Ripara il saldo','Il programma sovrascrive il saldo invece di sottrarre '+(n+4)+' monete. Usa un’assegnazione rapida e stampa il saldo finale.',
       ready('var saldo = 100\nsaldo = '+(n+4)+'\nprint(saldo)'),
@@ -119,7 +119,7 @@ const banks={
     task('p4','Contatore con while','Incrementa un contatore da zero fino a '+(n+2)+' compreso usando un <code>while</code>. Stampa soltanto il valore finale.',
       ready('var contatore = 0\n# Ripeti finché raggiungi l’obiettivo\npass'),
       ready('var contatore = 0\nwhile contatore < '+(n+2)+':\n    contatore += 1\nprint(contatore)'),
-      String(n+2),['\\bwhile\\b','\\bcontatore\\s*\\+='],
+      String(n+2),['\\bwhile\\b','(?:\\bcontatore\\s*\\+=|\\bcontatore\\s*=\\s*contatore\\s*\\+\\s*1)'],
       ['while ripete finché la condizione è vera.','Incrementa il contatore a ogni passo.','Evita un ciclo senza termine.'])
   ],
   8:(n)=>[
@@ -136,7 +136,7 @@ const banks={
     task('p4','Restituisci un calcolo','Crea <code>triplica(numero)</code> che restituisce il triplo del parametro. Richiamala con '+(n+5)+' e stampa il risultato.',
       'extends Node\n\nfunc triplica(numero):\n    pass\n\nfunc _ready():\n    print(triplica('+(n+5)+'))\n',
       'extends Node\n\nfunc triplica(numero):\n    return numero * 3\n\nfunc _ready():\n    print(triplica('+(n+5)+'))\n',
-      String((n+5)*3),['\\breturn\\b','\\bnumero\\s*\\*\\s*3'],
+      String((n+5)*3),['\\breturn\\b','(?:\\bnumero\\s*\\*\\s*3|\\b3\\s*\\*\\s*numero|\\bnumero\\s*\\+\\s*numero\\s*\\+\\s*numero)'],
       ['return consegna un valore al chiamante.','Usa il parametro nel calcolo.','Stampa il risultato della chiamata.'])
   ],
   9:(n)=>[
