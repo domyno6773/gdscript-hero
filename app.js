@@ -3702,8 +3702,10 @@ const App = {
         root.querySelector('.gdh-code-guide-mount')?.remove();
         const mount = document.createElement('div');
         mount.className = 'gdh-code-guide-mount';
-        const before = root.querySelector('.hints-section, .coddy-hints-container');
-        if (before) before.before(mount);
+        // La guida espandibile conclude la spiegazione, non precede l'obiettivo.
+        // Rimane nel DOM anche quando il contenuto della lezione viene ricreato.
+        const theory = root.querySelector('#lesson-theory');
+        if (theory) theory.append(mount);
         else root.append(mount);
         const previous = typeof lesson.id === 'number'
             ? GDHCodeGuide.unseenKeys(lesson.id, LESSONS_DATA) : new Set();
@@ -4815,10 +4817,6 @@ const App = {
         // Profilo
         document.getElementById('btn-open-profile').onclick = () => this.toggleLevelPopover();
         document.getElementById('btn-close-level-popover').onclick = () => this.closeLevelPopover(true);
-        document.getElementById('btn-level-full-profile').onclick = () => {
-            this.closeLevelPopover();
-            this.openProfileModal();
-        };
         document.addEventListener('click',event=>{
             const panel=document.getElementById('level-popover');
             if(panel?.classList.contains('hidden'))return;
