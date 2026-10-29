@@ -258,7 +258,18 @@
       checks.push({desc:'Istruzione di debug conservata come commento',passed:commented});
     }
     for(const n of req.numericPrints||[]){
-      const found=new RegExp('\\bprint\\s*\\(\\s*'+n+'\\s*\\)').test(masked);
+      const literal=new RegExp('\\bprint\\s*\\(\\s*'+n+'\\s*\\)').test(masked);
+      // Anche una variabile int e' una risposta numerica corretta: non
+      // obbligare a scrivere il numero letteralmente dentro print().
+      const declaration=new RegExp('\\b(?:var|const)\\s+([A-Za-z_]\\w*)\\s*(?::\\s*int)?\\s*(?::=|=)\\s*'+n+'\\b','g');
+      let match,byNumber=false;
+      while((match=declaration.exec(inspected.parsed.uncommented))!==null){
+        if(!inspected.available(match.index))continue;
+        const name=match[1];
+        const call=new RegExp('\\bprint\\s*\\(\\s*'+name+'\\s*\\)');
+        if(call.test(masked)){byNumber=true;break;}
+      }
+      const found=literal||byNumber;
       checks.push({desc:'Il valore '+n+' è stampato come numero, non come stringa',passed:found});
     }
     if(req.multiArgs){
