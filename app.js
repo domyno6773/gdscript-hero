@@ -3269,7 +3269,7 @@ const App = {
         this.updateExerciseToolsVisibility(lesson);
     },
 
-    // Percorsi multi-compito del Capitolo 1: un argomento rimane un solo
+    // Percorsi multi-compito in tutti i capitoli: un argomento rimane un
     // nodo della mappa, con XP e sblocco assegnati SOLO all'ultimo compito.
     getLessonPracticeRecord(lesson) {
         if(!window.LessonPractice?.enabled(lesson?.id))return null;
