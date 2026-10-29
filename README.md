@@ -113,6 +113,7 @@ Sono presenti workflow GitHub Actions per regressioni, browser e controlli mirat
 - `tests/audit_validator_regression.test.cjs` — validatori e casi negativi.
 - `tests/supplemental_curriculum_regression.test.cjs` — 21 esercizi aggiuntivi, spiegazioni e indizi specifici, prove con dati alternativi (runner nativo simulato per il test di regressione).
 - `tests/didactic_consistency_regression.test.cjs` — coerenza di consegne, suggerimenti, soluzioni e verificatori delle lezioni 5, 19, 29, 39 e 121.
+- `tests/review_native_parity.test.cjs` — 17 varianti di ripasso, collegamento all'adattatore Godot e gestione dei verdetti nativi (test con motore simulato).
 - `tests/auth_reliability.test.cjs` — salvataggi, backup e affidabilità dell'integrazione.
 - `tests/streak_telemetry_regression.test.cjs` — continuità streak, premio settimanale e completamento dei quattro compiti.
 - `tests/browser_smoke.test.cjs` — prove funzionali in Chrome desktop e mobile, compresi i controlli audio.
@@ -125,6 +126,7 @@ I test basati su Node.js possono essere avviati dalla radice della repository:
 node tests/audit_validator_regression.test.cjs
 node tests/supplemental_curriculum_regression.test.cjs
 node tests/didactic_consistency_regression.test.cjs
+node tests/review_native_parity.test.cjs
 node tests/auth_reliability.test.cjs
 node tests/streak_telemetry_regression.test.cjs
 ```
