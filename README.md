@@ -112,6 +112,7 @@ Sono presenti workflow GitHub Actions per regressioni, browser e controlli mirat
 
 - `tests/audit_validator_regression.test.cjs` — validatori e casi negativi.
 - `tests/auth_reliability.test.cjs` — salvataggi, backup e affidabilità dell'integrazione.
+- `tests/streak_telemetry_regression.test.cjs` — continuità streak, premio settimanale e completamento dei quattro compiti.
 - `tests/browser_smoke.test.cjs` — prove funzionali in Chrome desktop e mobile, compresi i controlli audio.
 - `tests/audio_soundscape.test.cjs` — sintesi locale, gesti di avvio e controlli audio indipendenti.
 - `tests/native_godot/` — confronti mirati con Godot 4.4.1.
@@ -121,6 +122,7 @@ I test basati su Node.js possono essere avviati dalla radice della repository:
 ```bash
 node tests/audit_validator_regression.test.cjs
 node tests/auth_reliability.test.cjs
+node tests/streak_telemetry_regression.test.cjs
 ```
 
 Per avviare i test browser o nativi, consulta [.github/workflows/](.github/workflows/) per strumenti e versioni. I test verificano i comportamenti coperti, **non** la piena compatibilità del runtime con tutte le funzioni di Godot.
