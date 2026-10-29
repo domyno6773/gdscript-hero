@@ -1039,19 +1039,33 @@ async function testQuizLearningFlow(page) {
  assert.equal(await page.locator('.gdh-quiz-question').count(),3,'Ogni quiz deve avere tre domande');
  assert.equal(await page.locator('#quiz-question-0 input[type="radio"]').count(),4);
  assert.equal(await page.locator('#quiz-question-1 input[type="checkbox"]').count(),4);
+ assert.equal(await page.locator('#quiz-question-2 input[type="radio"]').count(),4,
+   'Il completamento codice deve restare una scelta tra quattro opzioni');
  assert.ok((await page.locator('#quiz-question-2 .gdh-quiz-code').textContent()).includes('□□□□'));
+ const orders=await page.evaluate(()=>[0,1,2].map(i=>
+   [...document.querySelectorAll('#quiz-question-'+i+' input[data-question]')].map(input=>Number(input.value))));
+ orders.forEach((order,i)=>assert.deepEqual([...order].sort((a,b)=>a-b),[0,1,2,3],
+   'Risposte perse o duplicate nella domanda '+i));
+ const permutations=await page.evaluate(()=>({
+   identity:GDHQuizEngine.shuffleChoices(4,()=>.999999),
+   moved:GDHQuizEngine.shuffleChoices(4,()=>0)
+ }));
+ assert.deepEqual(permutations.identity,[0,1,2,3]);
+ assert.notDeepEqual(permutations.moved,[0,1,2,3],
+   'La risposta A deve poter apparire in posizioni diverse');
  await page.locator('#chapter-quiz-form button[type="submit"]').click();
  assert.ok((await page.locator('#quiz-inline-status').textContent()).includes('tutte e tre'),
    'Risposte mancanti devono impedire il completamento');
- await page.locator('#quiz-question-0 .gdh-quiz-option').nth(1).click();
- await page.locator('#quiz-question-1 .gdh-quiz-option').nth(0).click();
- await page.locator('#quiz-question-1 .gdh-quiz-option').nth(2).click();
- await page.locator('#quiz-question-2 .gdh-quiz-option').nth(0).click();
+ // Le posizioni sono casuali, mentre value conserva l'indice originale.
+ await page.locator('#quiz-question-0 .gdh-quiz-option:has(input[value="1"])').click();
+ await page.locator('#quiz-question-1 .gdh-quiz-option:has(input[value="0"])').click();
+ await page.locator('#quiz-question-1 .gdh-quiz-option:has(input[value="2"])').click();
+ await page.locator('#quiz-question-2 .gdh-quiz-option:has(input[value="0"])').click();
  await page.locator('#chapter-quiz-form button[type="submit"]').click();
  assert.ok((await page.locator('#quiz-inline-status').textContent()).includes('2 su 3'),
    'Quiz con risposta errata non deve essere superato');
  assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(201)),false);
- await page.locator('#quiz-question-0 .gdh-quiz-option').nth(0).click();
+ await page.locator('#quiz-question-0 .gdh-quiz-option:has(input[value="0"])').click();
  await page.locator('#chapter-quiz-form button[type="submit"]').click();
  assert.ok((await page.locator('#quiz-completion').textContent()).includes('Quiz superato'));
  assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(201)),true);
