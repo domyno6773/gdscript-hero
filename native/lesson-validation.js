@@ -388,9 +388,18 @@
        check(list,'Quattro allerte e XP 100',eq(lines,['Allerta: Slime','Allerta: Scheletro','Allerta: Spettro','Allerta: Boss Drago','XP Totali: 100']));
        check(list,'Solo due nemici generano XP 50',scenarioOk(scenarioResults,'two_enemies',['Allerta: Mago','Allerta: Lupo','XP Totali: 50']));
        check(list,'Un solo nemico genera XP 25',scenarioOk(scenarioResults,'one_enemy',['Allerta: Mago','XP Totali: 25']));break;
-     case 29:
-       check(list,'Funzione _ready() definita',/\bfunc\s+_ready\s*\(\s*\)\s*:/.test(m));
-       check(list,'Messaggio Nodo Inizializzato',eq(lines,['Nodo Inizializzato']));break;
+     case 29:{
+       const initializer=fn(src,'inizializza_nodo');
+       const ready=fn(src,'_ready');
+       check(list,'Funzione personalizzata inizializza_nodo() definita',
+         /\bfunc\s+inizializza_nodo\s*\(\s*\)\s*:/.test(m));
+       check(list,'La funzione personalizzata stampa il messaggio',
+         /\bprint\s*\(\s*["']Nodo Inizializzato["']\s*\)/.test(initializer));
+       check(list,'_ready() richiama inizializza_nodo(), senza duplicare print()',
+         /\binizializza_nodo\s*\(\s*\)/.test(ready)&&!/\bprint\s*\(/.test(ready));
+       check(list,'Output ottenuto chiamando la funzione una sola volta',
+         eq(lines,['Nodo Inizializzato']));break;
+     }
      case 30:
        check(list,'Funzione saluta(nome)',/\bfunc\s+saluta\s*\(\s*nome\s*\)\s*:/.test(m));
        check(list,'_ready invoca saluta("Eroe")',/\bsaluta\s*\(\s*["']Eroe["']\s*\)/.test(noCommentLines(src)));
@@ -471,9 +480,14 @@
        check(list,'Valori booleani ha_oro e ha_chiave',
          loc('ha_oro')===true&&loc('ha_chiave')===false);
        check(list,'Entrambe le variabili calcolate tramite forziere.has',
-         /\bvar\s+ha_oro\s*=\s*forziere\.has\s*\(\s*["']oro["']\s*\)/.test(src)&&
-         /\bvar\s+ha_chiave\s*=\s*forziere\.has\s*\(\s*["']chiave["']\s*\)/.test(src));
-       check(list,'Output delle due condizioni',eq(lines,['Possiede oro: true','Possiede chiave: false']));break;
+         /\bvar\s+ha_oro\s*=\s*forziere\.has\s*\(\s*["']oro["']\s*\)/.test(noCommentLines(src))&&
+         /\bvar\s+ha_chiave\s*=\s*forziere\.has\s*\(\s*["']chiave["']\s*\)/.test(noCommentLines(src)));
+       check(list,'keys() assegna l’elenco reale alla variabile chiavi',
+         /\bvar\s+chiavi\s*=\s*forziere\.keys\s*\(\s*\)/.test(noCommentLines(src)));
+       check(list,'Il numero di chiavi deriva dalla dimensione dell’array',
+         /\bprint\s*\(\s*["']Chiavi nel forziere: ["']\s*,\s*chiavi\.size\s*\(\s*\)\s*\)/.test(noCommentLines(src)));
+       check(list,'Output dei due controlli e del conteggio delle chiavi',
+         eq(lines,['Possiede oro: true','Possiede chiave: false','Chiavi nel forziere: 2']));break;
      case 40:
        check(list,'Boss finale coerente',
          exactDict(loc('boss'),{nome:'Drago Antico',hp:420,attacco:75}));
