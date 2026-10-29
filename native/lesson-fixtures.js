@@ -662,8 +662,7 @@ window.GDHLessonFixtures = [
     "locals": [
       "forziere",
       "ha_oro",
-      "ha_chiave",
-      "chiavi"
+      "ha_chiave"
     ],
     "emissions": [],
     "objectCalls": []
