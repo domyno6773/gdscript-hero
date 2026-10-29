@@ -1582,15 +1582,15 @@ async function smoke(browser,url,width){
    const el=id=>document.getElementById(id).getBoundingClientRect();
    const viewport=document.getElementById('exercise-viewport-col');
    return {
-     feedbackAboveOutput:el('exercise-primary-feedback').top < el('expected-output-pre').top,
-     feedbackBeforeTests:el('exercise-primary-feedback').top < el('exercise-test-details').top,
+     feedbackHidden:document.getElementById('exercise-primary-feedback').classList.contains('hidden'),
+     testsHidden:document.getElementById('exercise-test-details').hidden,
      viewportHidden:getComputedStyle(viewport).display==='none',
      dockBottom:el('exercise-validation-panel').bottom,
      buttonTop:el('btn-run-code').top,
      expectedShown:getComputedStyle(document.getElementById('expected-output-pre')).display!=='none'
    };
  });
- assert.ok(initialGeometry.feedbackAboveOutput&&initialGeometry.feedbackBeforeTests,'First feedback is above outputs and tests');
+ assert.ok(initialGeometry.feedbackHidden&&initialGeometry.testsHidden,'Feedback and test results must stay hidden until verification');
  const outputLayout=await page.evaluate(()=>{
    const el=document.querySelector('#view-exercise .output-comparison-grid');
    const e=el.querySelector('.expected-box').getBoundingClientRect();
