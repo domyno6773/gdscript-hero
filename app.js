@@ -1676,7 +1676,7 @@ const App = {
                     const output = document.getElementById('sandbox-console-output');
                     const project = this.getActiveSandboxProject();
                     if (!this.sandboxNativeSession || this.sandboxNativeSession !== project?.id) {
-                        if (output) output.textContent = '// Premi Esegui Scena prima di interagire con i nodi.';
+                        if (output) output.textContent = 'Premi «Esegui scena» prima di interagire con i nodi.';
                         return;
                     }
                     btn.disabled = true;
@@ -3413,7 +3413,7 @@ const App = {
                             <span>Spiega la sfida</span>
                         </button>
                         <div class="coddy-explain-box hidden" id="coddy-explain-box">
-                            <div class="explain-bubble-header">🤖 Assistente Didattico GDScript:</div>
+                            <div class="explain-bubble-header">Assistente didattico GDScript</div>
                             <div class="explain-bubble-content">${lesson.aiExplanation || 'Applica le conoscenze del capitolo per completare la sfida!'}</div>
                         </div>
                     </div>
@@ -3465,7 +3465,7 @@ const App = {
                 <div class="task-box ${lesson.isDebugging ? 'debugging-task-box' : ''}">
                     <div class="task-header">
                         <span class="target-icon" aria-hidden="true"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span>
-                        <h3>${lesson.isDebugging ? 'Compito di Debugging:' : 'Il Tuo Obiettivo:'}</h3>
+                        <h3>${lesson.isDebugging ? 'Compito di debugging' : 'Il tuo obiettivo'}</h3>
                     </div>
                     <div id="lesson-task" class="task-body">${lesson.task}</div>
                 </div>
@@ -3525,8 +3525,8 @@ const App = {
             }
         }
 
-        document.getElementById('expected-output-pre').innerText = lesson.expectedOutput || "// Nessun output richiesto";
-        document.getElementById('real-output-pre').innerText = '// Clicca su "Verifica Codice" per eseguire';
+        document.getElementById('expected-output-pre').innerText = lesson.expectedOutput || "Nessun output richiesto.";
+        document.getElementById('real-output-pre').innerText = 'Premi «Verifica il codice» per eseguire.';
         document.getElementById('real-output-pre').style.color = '#38bdf8';
         
         document.getElementById('test-results-view').innerHTML = `
@@ -4481,12 +4481,12 @@ const App = {
                 realOutputPre.innerText = `// Errore: ${result.error}`;
                 realOutputPre.style.color = '#f87171';
             } else {
-                realOutputPre.innerText = "// Nessun output stampato a console";
+                realOutputPre.innerText = "Nessun output stampato a console.";
                 realOutputPre.style.color = '#94a3b8';
             }
 
             const expectedOutputPre = document.getElementById('expected-output-pre');
-            expectedOutputPre.innerText = practiceTask?.expectedOutput || currentLesson.expectedOutput || "// Nessun output richiesto";
+            expectedOutputPre.innerText = practiceTask?.expectedOutput || currentLesson.expectedOutput || "Nessun output richiesto.";
 
             // Solo il verdetto completo di Godot può attivare gli XP e gli sblocchi.
             const tests = [...(native.feedback.checks || [])];
@@ -5497,12 +5497,12 @@ const App = {
                 realOutputPre.innerText = `// Errore: ${result.error}`;
                 realOutputPre.style.color = '#f87171';
             } else {
-                realOutputPre.innerText = "// Nessun output stampato a console";
+                realOutputPre.innerText = "Nessun output stampato a console.";
                 realOutputPre.style.color = '#94a3b8';
             }
 
             const expectedOutputPre = document.getElementById('expected-output-pre');
-            expectedOutputPre.textContent = variant.expectedOutput || "// Nessun output richiesto";
+            expectedOutputPre.textContent = variant.expectedOutput || "Nessun output richiesto.";
 
             const tests = [...native.feedback.checks];
             if(native.feedback.verdict === 'inconclusive'){
@@ -5862,7 +5862,7 @@ const App = {
             <div class="task-box">
                 <div class="task-header">
                     <span class="target-icon" aria-hidden="true">◎</span>
-                    <h3>Il Tuo Obiettivo di Ripasso:</h3>
+                    <h3>Il tuo obiettivo di ripasso</h3>
                 </div>
                 <div id="lesson-task" class="task-body">${variant.task}</div>
             </div>
@@ -5910,9 +5910,9 @@ const App = {
         this.saveReviewDraft();
 
         // Resetta console e test results
-        document.getElementById('real-output-pre').innerText = "// Clicca su 'Verifica Codice' per eseguire lo script della variante";
+        document.getElementById('real-output-pre').innerText = "Premi «Verifica il codice» per eseguire lo script.";
         document.getElementById('real-output-pre').style.color = '#94a3b8';
-        document.getElementById('expected-output-pre').textContent = variant.expectedOutput || "// Nessun output richiesto";
+        document.getElementById('expected-output-pre').textContent = variant.expectedOutput || "Nessun output richiesto.";
         document.getElementById('test-results-view').innerHTML = '';
         const badge = document.getElementById('test-status-badge');
         badge.innerText = "In attesa di verifica";
