@@ -250,6 +250,41 @@
     if(typeof options.onLog==='function')result.logs.forEach(options.onLog);
     return result;
   };
+  // Il ripasso passa dallo stesso adapter nativo delle lezioni: nessun
+  // interprete JavaScript e nessuna scena ricreata dal vecchio runtime.
+  // Le scene 61-63 vengono selezionate da executeCompat in base all'ID.
+  const executeReview=async(source,variantId)=>{
+    const variant=window.REVIEW_VARIANTS?.find(v=>v.id===variantId);
+    if(!variant)throw Error('Variante di ripasso non disponibile');
+    return executeCompat(source,{lesson:variant});
+  };
+  const verifyReview=async(variantId,source)=>{
+    const variant=window.REVIEW_VARIANTS?.find(v=>v.id===variantId);
+    if(!variant)throw Error('Variante di ripasso non disponibile');
+    const execution=await executeReview(source,variantId);
+    let tests=[{
+      desc:'Godot 4.4.1 ha eseguito il codice senza errori',
+      passed:execution.success,
+      diff:execution.success?null:(execution.error||'Il motore Godot non ha completato l’esecuzione')
+    }];
+    if(execution.success){
+      const reviewed=await variant.validate(execution);
+      if(!Array.isArray(reviewed)||reviewed.length===0)
+        throw Error('Il validatore del ripasso non ha restituito controlli');
+      tests=tests.concat(reviewed.map(check=>({
+        desc:String(check.desc||'Verifica del ripasso'),
+        passed:check.passed===true,
+        diff:check.diff==null?null:String(check.diff)
+      })));
+    }
+    const accepted=tests.every(check=>check.passed);
+    const feedback={id:variantId,passed:accepted,
+      verdict:accepted?'accepted':execution.success?'requirements_not_met':'invalid_code',
+      checks:tests,
+      reason:accepted?'':(tests.find(check=>!check.passed)?.diff||'Uno o più requisiti non sono soddisfatti'),
+      demoOnly:true};
+    return {feedback,execution,accepted};
+  };
   const sandboxAction=async(name,signal='pressed')=>{
     const run=await raw('',{mode:'sandbox_action',node:name,signal});
     const success=run.status==='executed'&&!String(run.stderr||'').trim();
@@ -257,7 +292,7 @@
       (run.stderr.trim()||String(run.reply?.message||'Azione Godot non riuscita')),
       native:run.reply};
   };
-  const adapter=Object.freeze({verifyLesson,verifyPracticeTask,execute:executeCompat,sandboxAction,
+  const adapter=Object.freeze({verifyLesson,verifyPracticeTask,verifyReview,executeReview,execute:executeCompat,sandboxAction,
     runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.4.1 WebAssembly';}});
   window.GDHGodot=adapter;
   if(window.GDScriptRuntime)window.GDScriptRuntime.execute=(...args)=>executeCompat(...args);
