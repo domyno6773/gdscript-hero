@@ -104,6 +104,6 @@ assert.equal(daily.lessons_completed, 1, 'Rieseguire la lezione non la conta due
 assert.ok(saves > 0, 'Il progresso e la streak vengono salvati');
 
 const appSource = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
-assert.equal((appSource.match(/^\\s*recordDailyActivity\\(\\)\\s*\\{/gm) || []).length, 1,
+assert.equal((appSource.match(/^\s*recordDailyActivity\(\)\s*\{/gm) || []).length, 1,
     'Deve esserci una sola definizione di recordDailyActivity');
 console.log('PASS: streak settimanale, bonus idempotente e telemetria multi-compito.');
