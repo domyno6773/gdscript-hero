@@ -2416,61 +2416,39 @@ const LESSONS_DATA = [
     {
         id: 29,
         conceptId: "functions_scope",
-        conceptTags: ["ready", "lifecycle", "functions"],
+        conceptTags: ["functions", "function_call", "ready"],
         chapterId: 8,
         isMastery: false,
-        title: "29. Il ciclo di vita func _ready()",
+        title: "29. Creare e chiamare una funzione",
         icon: "🎬",
         xp: 50,
         expectedOutput: "Nodo Inizializzato",
-        theory: `
-            <p>Ogni script in Godot è collegato a un <strong>Nodo</strong> nella scena. Quando la scena viene caricata nella memoria dell'engine, Godot esegue in ordine la funzione <code>_ready()</code>.</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="nb">print</span>(<span class="s">"Nodo Inizializzato"</span>)</pre>
-            </div>
-            <p>È il punto ideale dove caricare salvataggi, inizializzare inventari e connettere segnali.</p>
-        `,
-        task: `
-            <ul>
-                <li>All'interno di <code>_ready()</code>, stampa: <code>"Nodo Inizializzato"</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Inizializza il nodo e stampa il messaggio\n    pass\n`,
+        theory: "<p>Hai già incontrato <code>_ready()</code> all'inizio del corso: Godot la richiama automaticamente quando il nodo è pronto. Qui impari a <strong>definire una funzione personalizzata</strong> e a chiamarla.</p><p>Scrivere <code>func mostra_saluto():</code> definisce le istruzioni, ma non le esegue subito. Per attivarle devi scrivere <code>mostra_saluto()</code> dentro un'altra funzione, come <code>_ready()</code>.</p><div class=\"code-preview\"><pre>func mostra_saluto():\n    print(\"Ciao!\")\n\nfunc _ready():\n    mostra_saluto()</pre></div><p>Separare l'avvio dal comportamento permette di riutilizzare una funzione. Nel prossimo esercizio vedrai come aggiungere parametri.</p>",
+        task: "<ul><li>Definisci una funzione senza parametri chiamata <code>inizializza_nodo()</code>, che stampa <code>\"Nodo Inizializzato\"</code>.</li><li>All'interno di <code>_ready()</code>, richiama <code>inizializza_nodo()</code> invece di ripetere direttamente la stampa.</li><li>Verifica che il messaggio compaia una sola volta.</li></ul>",
+        initialCode: "func inizializza_nodo():\n    # Mostra il messaggio di avvio\n    pass\n\nfunc _ready():\n    # Richiama la funzione appena definita\n    pass\n",
         hints: [
-        {
-                "level": 1,
-                "type": "concept",
-                "icon": "💭",
-                "label": "Indizio Concettuale",
-                "text": "Godot richiama automaticamente _ready() quando il nodo entra nella scena ed è pronto. Non serve invocare _ready() manualmente."
-        },
-        {
-                "level": 2,
-                "type": "structure",
-                "icon": "🏗️",
-                "label": "Guida alla Struttura",
-                "text": "Inserisci l'istruzione print() nel blocco indentato di func _ready():. La funzione esiste già nel codice iniziale."
-        },
-        {
-                "level": 3,
-                "type": "example",
-                "icon": "📝",
-                "label": "Esempio Pratico",
-                "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    print(\"Livello caricato\")\n```\nPer questo esercizio sostituisci il testo con il messaggio esatto richiesto dalla consegna."
-        }
-],
-        solution: `func _ready():\n    print("Nodo Inizializzato")\n`,
+            {level: 1, type: "concept", icon: "lightbulb", label: "Ragionamento", text: "Una definizione `func` da sola non esegue il suo contenuto. Quale funzione avvia automaticamente Godot?"},
+            {level: 2, type: "structure", icon: "code-2", label: "Struttura", text: "Inserisci `print()` nel corpo di `inizializza_nodo()`; poi da `_ready()` chiama la funzione usando `inizializza_nodo()`."},
+            {level: 3, type: "example", icon: "book-open", label: "Esempio", text: "Esempio analogo: definisci `func saluta():` con `print(\"Ciao\")` nel corpo e richiama `saluta()` dentro `_ready()`."}
+        ],
+        solution: "func inizializza_nodo():\n    print(\"Nodo Inizializzato\")\n\nfunc _ready():\n    inizializza_nodo()\n",
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasReady = /\bfunc\s+_ready\s*\(/.test(cleanCode);
-    tests.push({ desc: "Funzione 'func _ready():' definita", passed: !!hasReady, diff: hasReady ? null : "Assicurati di definire la funzione 'func _ready():'." });
-    const ok = result.logs.some(l => l.includes("Nodo Inizializzato"));
-    tests.push({ desc: "Console stampa 'Nodo Inizializzato'", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-    return tests;
-}
+            const tests = [formatExecutionCheck(result)];
+            const code = String(result.code || '');
+            const cleaned = stripCommentsAndStrings(code);
+            const methodDefined = /\bfunc\s+inizializza_nodo\s*\(\s*\)\s*:/.test(cleaned);
+            const methodBody = code.split(/\bfunc\s+inizializza_nodo\s*\(\s*\)\s*:/)[1]?.split(/\nfunc\s+/)[0] || '';
+            const readyBody = code.split(/\bfunc\s+_ready\s*\(\s*\)\s*:/)[1]?.split(/\nfunc\s+/)[0] || '';
+            const readyCallsMethod = /\binizializza_nodo\s*\(\s*\)/.test(readyBody);
+            const methodPrints = /\bprint\s*\(/.test(methodBody);
+            const outputOk = (result.logs || []).length === 1 &&
+                (result.logs || [])[0].trim() === 'Nodo Inizializzato';
+            tests.push({desc: "Funzione inizializza_nodo() definita",passed:methodDefined});
+            tests.push({desc: "La funzione contiene print()",passed:methodPrints});
+            tests.push({desc: "_ready() richiama la funzione",passed:readyCallsMethod});
+            tests.push({desc: "Output corretto, una sola volta",passed:outputOk});
+            return tests;
+        }
     },
     {
         id: 30,
