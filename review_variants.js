@@ -7,8 +7,7 @@
 
 async function reviewAuditMutation(result, variantId, alternateCode, expectedLine) {
  if (!alternateCode || alternateCode === result.code) return false;
- const variant = REVIEW_VARIANTS.find(v => v.id === variantId);
- const replay = await GDScriptRuntime.execute(alternateCode, { lesson: variant });
+ const replay = await window.GDHGodot.executeReview(alternateCode, variantId);
  if (!replay.success) return false;
  const target = String(expectedLine).trim();
  return (result.logs || []).some(v => String(v).trim() === target) &&
@@ -362,13 +361,13 @@ func _ready():
  })() && (await (async () => {
    const swapped = (result.code || '').replace(/(\bvar\s+ha_chiave\s*=\s*)true\b/, (_match, prefix) => prefix + 'false');
    if (swapped === result.code) return false;
-   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_01') });
+   const replay = await window.GDHGodot.executeReview(swapped, 'rev_conditions_01');
    return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato") &&
        !(replay.logs || []).some(v => String(v).trim() === "Accesso Concesso"));
   })()) && (await (async () => {
    const swapped = (result.code || '').replace(/(\bvar\s+livello\s*=\s*)12\b/, (_match, prefix) => prefix + '5');
    if (swapped === result.code) return false;
-   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_01') });
+   const replay = await window.GDHGodot.executeReview(swapped, 'rev_conditions_01');
    return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato") &&
        !(replay.logs || []).some(v => String(v).trim() === "Accesso Concesso"));
   })()));
@@ -1256,13 +1255,13 @@ func _ready():
  })() && (await (async () => {
    const swapped = (result.code || '').replace(/(\bvar\s+tessera_valida\s*=\s*)true\b/, (_match, prefix) => prefix + 'false');
    if (swapped === result.code) return false;
-   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_02') });
+   const replay = await window.GDHGodot.executeReview(swapped, 'rev_conditions_02');
    return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato: Quarantena Attiva") &&
        !(replay.logs || []).some(v => String(v).trim() === "Accesso Autorizzato: Nessuna Contaminazione"));
   })()) && (await (async () => {
    const swapped = (result.code || '').replace(/(\bvar\s+livello_radiazioni\s*=\s*)15\b/, (_match, prefix) => prefix + '30');
    if (swapped === result.code) return false;
-   const replay = await GDScriptRuntime.execute(swapped, { lesson: REVIEW_VARIANTS.find(v => v.id === 'rev_conditions_02') });
+   const replay = await window.GDHGodot.executeReview(swapped, 'rev_conditions_02');
    return !!(replay.success && (replay.logs || []).some(v => String(v).trim() === "Accesso Negato: Quarantena Attiva") &&
        !(replay.logs || []).some(v => String(v).trim() === "Accesso Autorizzato: Nessuna Contaminazione"));
   })()));
