@@ -278,10 +278,16 @@
       })));
     }
     const accepted=tests.every(check=>check.passed);
+    const status=String(execution.native?.status||'unknown');
+    const infrastructureFailure=!execution.success &&
+      (['unsupported','rejected','timeout','unavailable','internal_error','engine_error','unknown'].includes(status));
     const feedback={id:variantId,passed:accepted,
-      verdict:accepted?'accepted':execution.success?'requirements_not_met':'invalid_code',
-      checks:tests,
-      reason:accepted?'':(tests.find(check=>!check.passed)?.diff||'Uno o più requisiti non sono soddisfatti'),
+      verdict:accepted?'accepted':infrastructureFailure?'inconclusive':
+        execution.success?'requirements_not_met':'invalid_code',
+      checks,
+      reason:accepted?'':infrastructureFailure?
+        'Il motore Godot non ha potuto completare la verifica: riprova senza perdere progressi.':
+        (tests.find(check=>!check.passed)?.diff||'Uno o più requisiti non sono soddisfatti'),
       demoOnly:true};
     return {feedback,execution,accepted};
   };
