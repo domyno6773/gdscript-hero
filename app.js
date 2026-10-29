@@ -5483,13 +5483,9 @@ const App = {
     async runAndValidateReviewVariant(code, runBtn) {
         const variant = this.currentReviewVariant;
         try {
-            let execScene = null;
-            if (variant.initialNodes && Array.isArray(variant.initialNodes) && window.GDScriptRuntime) {
-                execScene = GDScriptRuntime.buildScene(variant);
-            } else if (this.currentScene) {
-                execScene = this.currentScene;
-            }
-            const result = await GDScriptRuntime.execute(code, { initialScene: execScene, lesson: variant });
+            if (!window.GDHGodot?.verifyReview) throw Error('Motore Godot per il ripasso non disponibile');
+            const native = await window.GDHGodot.verifyReview(variant.id, code);
+            const result = native.execution;
             if (!this.isReviewMode || this.currentReviewVariant !== variant ||
                 document.getElementById('code-editor').value !== code) return;
 
@@ -5508,10 +5504,10 @@ const App = {
             const expectedOutputPre = document.getElementById('expected-output-pre');
             expectedOutputPre.textContent = variant.expectedOutput || "// Nessun output richiesto";
 
-            const tests = await variant.validate(result, GDScriptRuntime);
+            const tests = native.feedback.checks;
             if (!this.isReviewMode || this.currentReviewVariant !== variant ||
                 document.getElementById('code-editor').value !== code) return;
-            const allPassed = tests.length > 0 && tests.every(t => t.passed);
+            const allPassed = native.accepted === true;
             this.showExerciseFeedback(result, tests);
             this.updateDidacticDebugger(allPassed ? null : result, allPassed ? [] : tests);
 
