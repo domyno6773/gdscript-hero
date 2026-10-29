@@ -482,6 +482,7 @@ async function testAccessibilityKeyboard(page,width){
 
   // The native dialog supports keyboard search, creation and cancellation.
   await page.evaluate(()=>App.openPracticeView());
+  if(await page.locator('#modal-sandbox-welcome').isVisible())await page.locator('#btn-close-sandbox-welcome').click();
   await page.locator('#btn-sandbox-add-node').click();
   const picker=page.locator('dialog.scene-create-dialog');
   assert.equal(await picker.isVisible(),true);
