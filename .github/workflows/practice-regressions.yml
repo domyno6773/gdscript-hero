@@ -1,0 +1,43 @@
+name: Practice regression tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lesson_practice.js'
+      - 'practice_catalog.js'
+      - 'lessons.js'
+      - 'curriculum_extension.js'
+      - 'native/native-beta-adapter.js'
+      - 'tests/alternative_solutions_regression.test.cjs'
+      - 'tests/full_course_multitask.test.cjs'
+      - '.github/workflows/practice-regressions.yml'
+  pull_request:
+    paths:
+      - 'lesson_practice.js'
+      - 'practice_catalog.js'
+      - 'lessons.js'
+      - 'curriculum_extension.js'
+      - 'native/native-beta-adapter.js'
+      - 'tests/alternative_solutions_regression.test.cjs'
+      - 'tests/full_course_multitask.test.cjs'
+      - '.github/workflows/practice-regressions.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-practice:
+    name: Validate 324 practice tasks and alternatives
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate full course
+        run: node tests/full_course_multitask.test.cjs
+      - name: Validate alternatives and reject shortcuts
+        run: node tests/alternative_solutions_regression.test.cjs
