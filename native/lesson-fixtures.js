@@ -381,10 +381,10 @@ window.GDHLessonFixtures = [
   {
     "id": 29,
     "chapter": 8,
-    "title": "29. Il ciclo di vita func _ready()",
-    "initialCode": "func _ready():\n    # Inizializza il nodo e stampa il messaggio\n    pass\n",
-    "solution": "func _ready():\n    print(\"Nodo Inizializzato\")\n",
-    "task": "All'interno di _ready() , stampa: \"Nodo Inizializzato\" .",
+    "title": "29. Creare e chiamare una funzione",
+    "initialCode": "func inizializza_nodo():\n    # Mostra il messaggio di avvio\n    pass\n\nfunc _ready():\n    # Richiama la funzione appena definita\n    pass\n",
+    "solution": "func inizializza_nodo():\n    print(\"Nodo Inizializzato\")\n\nfunc _ready():\n    inizializza_nodo()\n",
+    "task": "Definisci una funzione senza parametri chiamata inizializza_nodo() , che stampa \"Nodo Inizializzato\" . All'interno di _ready() , richiama inizializza_nodo() invece di ripetere direttamente la stampa. Verifica che il messaggio compaia una sola volta.",
     "expectedOutput": "Nodo Inizializzato",
     "properties": [],
     "locals": [],
@@ -653,16 +653,17 @@ window.GDHLessonFixtures = [
     "id": 39,
     "chapter": 10,
     "title": "39. Metodi dei Dizionari (has, keys)",
-    "initialCode": "func _ready():\n    var forziere = { \"oro\": 100, \"gemme\": 3 }\n    # Correggi i due accessi: devono verificare se le chiavi esistono.\n    var ha_oro = forziere[\"oro\"]\n    var ha_chiave = forziere[\"chiave\"]\n    print(\"Possiede oro: \", ha_oro)\n    print(\"Possiede chiave: \", ha_chiave)\n",
-    "solution": "func _ready():\n    var forziere = { \"oro\": 100, \"gemme\": 3 }\n    var ha_oro = forziere.has(\"oro\")\n    var ha_chiave = forziere.has(\"chiave\")\n    print(\"Possiede oro: \", ha_oro)\n    print(\"Possiede chiave: \", ha_chiave)\n",
-    "task": "Inizializza var forziere = { \"oro\": 100, \"gemme\": 3 } . Salva in var ha_oro il risultato di forziere.has(\"oro\") . Salva in var ha_chiave il risultato di forziere.has(\"chiave\") . Stampa: print(\"Possiede oro: \", ha_oro) e print(\"Possiede chiave: \", ha_chiave) .",
-    "expectedOutput": "Possiede oro: true\nPossiede chiave: false",
+    "initialCode": "func _ready():\n    var forziere = { \"oro\": 100, \"gemme\": 3 }\n    # BUG: questi accessi leggono valori, anziché verificare le chiavi.\n    var ha_oro = forziere[\"oro\"]\n    var ha_chiave = forziere[\"chiave\"]\n    # Sostituisci anche l'array vuoto con le chiavi del forziere.\n    var chiavi = []\n    print(\"Possiede oro: \", ha_oro)\n    print(\"Possiede chiave: \", ha_chiave)\n    print(\"Chiavi nel forziere: \", chiavi.size())\n",
+    "solution": "func _ready():\n    var forziere = { \"oro\": 100, \"gemme\": 3 }\n    var ha_oro = forziere.has(\"oro\")\n    var ha_chiave = forziere.has(\"chiave\")\n    var chiavi = forziere.keys()\n    print(\"Possiede oro: \", ha_oro)\n    print(\"Possiede chiave: \", ha_chiave)\n    print(\"Chiavi nel forziere: \", chiavi.size())\n",
+    "task": "Il forziere contiene \"oro\": 100 e \"gemme\": 3 . Correggi ha_oro e ha_chiave usando forziere.has() , senza leggere direttamente la chiave mancante. Usa forziere.keys() per assegnare a chiavi l'elenco delle chiavi del dizionario. Stampa gli esiti di entrambi i controlli e il numero di chiavi con chiavi.size() , secondo l'output atteso.",
+    "expectedOutput": "Possiede oro: true\nPossiede chiave: false\nChiavi nel forziere: 2",
     "properties": [],
     "calls": [],
     "locals": [
       "forziere",
       "ha_oro",
-      "ha_chiave"
+      "ha_chiave",
+      "chiavi"
     ],
     "emissions": [],
     "objectCalls": []
