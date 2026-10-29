@@ -63,6 +63,14 @@
         const max = mobile ? 390 : 520;
         view.style.setProperty('--gdh-editor-height', Math.max(min, Math.min(max, rows * 22 + 95)) + 'px');
     }
+    const originalAuthUI = app.updateAuthUI;
+    app.updateAuthUI = function () {
+        const result = originalAuthUI.apply(this, arguments);
+        // L'implementazione esistente azzera textContent: ridisegniamo l'icona SVG.
+        const icon = document.getElementById('nav-auth-icon');
+        if (icon) icon.innerHTML = '<path d="M8 17a5 5 0 0 1 0-10 6 6 0 0 1 11 3 3.5 3.5 0 0 1-1 7H8z"/>';
+        return result;
+    };
     const originalApplyProfile = app.applyProfileUI;
     app.applyProfileUI = function () { const value = originalApplyProfile.apply(this, arguments); paintProfileAvatar(); return value; };
     const originalProfilePreview = app.updateProfilePreviewCard;
@@ -123,6 +131,15 @@
         if (details) details.hidden = true;
         const count = document.getElementById('exercise-test-count');
         if (count) count.textContent = '';
+        return result;
+    };
+    const originalRunAndValidate = app.runAndValidate;
+    app.runAndValidate = async function () {
+        const result = await originalRunAndValidate.apply(this, arguments);
+        document.querySelectorAll('#test-results-view .test-row .test-icon').forEach(el => {
+            const passed = el.closest('.test-row')?.classList.contains('passed');
+            el.innerHTML = passed ? outlineIcon('ok') : '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="m8 8 8 8m0-8-8 8"/></svg>';
+        });
         return result;
     };
     const originalShowFeedback = app.showExerciseFeedback;
