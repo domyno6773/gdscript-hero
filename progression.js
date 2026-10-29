@@ -15,7 +15,7 @@ const ProgressionV2 = (() => {
     const limitFor = type => type === 'quests' ? Infinity : CAPS[type];
     const DAY = 86400000;
     const asDate = value => value instanceof Date ? value : new Date(value);
-    const dateKey = (date = new Date()) => asDate(date).toISOString().slice(0,10);
+    const dateKey = (date = new Date()) => { const d = asDate(date); return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-'); };
     function weekKey(date = new Date()) {
         const input = asDate(date);
         const d = new Date(Date.UTC(input.getUTCFullYear(),input.getUTCMonth(),input.getUTCDate()));
