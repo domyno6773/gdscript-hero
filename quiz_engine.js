@@ -4,6 +4,22 @@
   const html=text=>App.escapeHtml(String(text??""));
   const format=text=>html(text).replace(/`([^`]+)`/g,"<code>$1</code>");
   const nextLesson=id=>window.LESSONS_DATA[window.LESSONS_DATA.findIndex(l=>l.id===id)+1]||null;
+  // Le risposte mantengono gli indici originali per salvataggio e valutazione.
+  // L'ordine visivo cambia per tutti i tipi di domanda, compreso il codice.
+  function shuffleChoices(length,random=Math.random){
+    const order=Array.from({length},(_,i)=>i);
+    for(let i=order.length-1;i>0;i--){
+      const number=Number(random());
+      const j=Math.floor(Math.max(0,Math.min(.999999999,Number.isFinite(number)?number:0))*(i+1));
+      [order[i],order[j]]=[order[j],order[i]];
+    }
+    return order;
+  }
+  function ensureChoiceOrder(app,item){
+    if(app._quizOrderId===item.id&&app._quizChoiceOrder)return;
+    app._quizOrderId=item.id;
+    app._quizChoiceOrder=Object.fromEntries(item.quizQuestions.map(q=>[q.id,shuffleChoices(q.options.length)]));
+  }
   const status=()=>document.getElementById("quiz-inline-status");
   function draftKey(id){return "gdh_chapter_quiz_v1:"+String(App._saveOwner||"guest")+":"+id;}
   function saveDraft(){try{sessionStorage.setItem(draftKey(App.state.currentLessonId),JSON.stringify(App._quizAnswers||{}));}catch(e){}}
@@ -21,6 +37,9 @@
     this.currentReviewVariant=null;
     this.state.currentLessonId=id;
     this._quizAnswers=readDraft(id);
+    // Nuovo ordine ad ogni apertura; il ri-render non rimescola mentre si risponde.
+    this._quizOrderId=null;
+    ensureChoiceOrder(this,item);
     this.switchView("view-quiz");
     this.updateNavSelection("exercise");
     this.renderQuiz();
@@ -29,6 +48,7 @@
     const item=window.LESSONS_DATA.find(l=>l.id===this.state.currentLessonId&&l.isQuiz);
     const main=document.getElementById("quiz-main");
     if(!item||!main)return;
+    ensureChoiceOrder(this,item);
     const done=this.state.finishedLessons.includes(item.id);
     const quizNumber=window.GDHChapterQuizzes.get(item.id)?.part||1;
     main.innerHTML=`
@@ -54,13 +74,15 @@
           <legend><span class="gdh-quiz-index">${i+1}</span><span class="gdh-quiz-kind">${label}</span></legend>
           <p class="gdh-quiz-prompt">${format(q.prompt)}</p>
           ${q.type==="code"?`<pre class="gdh-quiz-code"><code>${html(q.code).replace("□□□□",'<span class="gdh-quiz-blank" aria-label="Codice mancante">□□□□</span>')}</code></pre>`:""}
-          <div class="gdh-quiz-options">${q.options.map((option,j)=>`
+          <div class="gdh-quiz-options">${this._quizChoiceOrder[q.id].map((originalIndex,displayIndex)=>{
+            const option=q.options[originalIndex];
+            return `
             <label class="gdh-quiz-option">
               <input type="${q.type==="multi"?"checkbox":"radio"}" name="quiz-${item.id}-${q.id}"
-                value="${j}" data-question="${q.id}" ${selection.includes(j)?"checked":""}/>
-              <span class="gdh-quiz-option-key" aria-hidden="true">${String.fromCharCode(65+j)}</span>
+                value="${originalIndex}" data-question="${q.id}" ${selection.includes(originalIndex)?"checked":""}/>
+              <span class="gdh-quiz-option-key" aria-hidden="true">${String.fromCharCode(65+displayIndex)}</span>
               <span class="gdh-quiz-option-label">${q.type==="code"?"<code>"+html(option)+"</code>":format(option)}</span>
-            </label>`).join("")}</div>
+            </label>`}).join("")}</div>
           <button type="button" class="gdh-quiz-hint-btn" data-hint="${i}" aria-expanded="false">Mostra un indizio</button>
           <p class="gdh-quiz-hint" id="quiz-hint-${i}" hidden>${html(q.hint)}</p>
           <div class="gdh-quiz-feedback" id="quiz-feedback-${i}" aria-live="polite" hidden></div>
@@ -161,5 +183,5 @@
     document.querySelector("#chapter-quiz-form .gdh-quiz-actions").hidden=true;
     document.getElementById("quiz-back").focus({preventScroll:true});
   };
-  window.GDHQuizEngine=Object.freeze({version:1});
+  window.GDHQuizEngine=Object.freeze({version:2,shuffleChoices});
 })();
