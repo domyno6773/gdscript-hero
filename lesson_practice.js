@@ -133,6 +133,102 @@
     const lesson=(root.LESSONS_DATA||[]).find(l=>l.id===id);
     return tasksFor(lesson).find(t=>t.key===key)||null;
   };
+  // Mantiene gli offset della sorgente mentre neutralizza commenti e stringhe.
+  // Il prefisso di una chiamata come forziere.has("chiave") resta verificabile,
+  // ma "forziere.has()" scritto in una stringa non conta come codice.
+  const sanitizeSource=(value)=>{
+    const src=String(value||'');
+    let uncommented='',masked='',mode='code',quote='',triple=false;
+    for(let i=0;i<src.length;){
+      const c=src[i],lineBreak=c==='\n';
+      if(mode==='comment'){
+        if(lineBreak){mode='code';uncommented+=c;masked+=c;}
+        else {uncommented+=' ';masked+=' ';}
+        i++;continue;
+      }
+      if(mode==='string'){
+        const size=triple?3:1;
+        if(src.slice(i,i+size)===(triple?quote.repeat(3):quote)){
+          uncommented+=src.slice(i,i+size);
+          masked+=' '.repeat(size);i+=size;mode='code';continue;
+        }
+        if(c==='\\' && i+1<src.length){
+          uncommented+=src.slice(i,i+2);masked+='  ';i+=2;continue;
+        }
+        if(lineBreak && !triple)mode='code';
+        uncommented+=c;masked+=lineBreak?'\n':' ';i++;continue;
+      }
+      if(c==='#'){mode='comment';uncommented+=' ';masked+=' ';i++;continue;}
+      if(c==='"'||c==="'"){
+        quote=c;triple=src.slice(i,i+3)===c.repeat(3);
+        const size=triple?3:1;
+        mode='string';uncommented+=c.repeat(size);masked+=' '.repeat(size);i+=size;continue;
+      }
+      uncommented+=c;masked+=c;i++;
+    }
+    return {uncommented,masked};
+  };
+  // Solo le funzioni effettivamente raggiungibili da _ready possono
+  // soddisfare requisiti operativi; class e signal restano dichiarazioni.
+  // Non sostituisce una prova causale in Godot, ma impedisce i bypass semplici
+  // con funzioni inutilizzate o rami esplicitamente impossibili.
+  const activeSource=(source)=>{
+    const text=String(source||'');
+    const parsed=sanitizeSource(text);
+    const lines=text.split('\n');
+    const starts=[],begins=[];
+    let offset=0;
+    for(const line of lines){begins.push(offset);offset+=line.length+1;}
+    for(let i=0;i<lines.length;i++){
+      const m=/^(func\s+([A-Za-z_]\w*)\s*\(|class\s+([A-Za-z_]\w*)\s*:)/.exec(
+        parsed.masked.slice(begins[i],begins[i]+lines[i].length));
+      if(m)starts.push({name:m[2]||m[3],type:m[2]?'func':'class',from:begins[i],line:i});
+    }
+    for(const unit of starts){
+      let last=lines.length;
+      for(let j=unit.line+1;j<lines.length;j++){
+        if(/^[^\s]/.test(parsed.masked.slice(begins[j],begins[j]+lines[j].length))){
+          last=j;break;
+        }
+      }
+      unit.to=last<begins.length?begins[last]:text.length;
+    }
+    const reached=new Set(['_ready']);
+    let newReachable=true;
+    while(newReachable){
+      newReachable=false;
+      const bodies=starts.filter(u=>reached.has(u.name))
+        .map(u=>parsed.masked.slice(u.from,u.to)).join('\n');
+      for(const unit of starts){
+        if(reached.has(unit.name))continue;
+        const referenced=unit.type==='func'?
+          new RegExp('\\b'+unit.name+'\\s*(?:\\(|\\b)').test(bodies):
+          new RegExp('\\b'+unit.name+'\\s*\\.\\s*new\\s*\\(').test(bodies);
+        if(referenced){reached.add(unit.name);newReachable=true;}
+      }
+    }
+    // Righe in 'if false:' non hanno effetto: includerle nei requisiti
+    // renderebbe valido qualsiasi codice morto.
+    const unreachableLines=new Set();
+    const disabled=[];
+    for(let i=0;i<lines.length;i++){
+      const line=parsed.masked.slice(begins[i],begins[i]+lines[i].length);
+      if(!line.trim())continue;
+      const indent=(line.match(/^[ \t]*/)||[''])[0].replace(/\t/g,'    ').length;
+      while(disabled.length && indent<=disabled[disabled.length-1])disabled.pop();
+      if(disabled.length)unreachableLines.add(i);
+      if(/^\s*if\s+(?:false|False)\s*:\s*$/.test(line))disabled.push(indent);
+    }
+    const available=index=>{
+      if(parsed.masked[index]===' ' && !/\s/.test(text[index]))return false;
+      const row=begins.findLastIndex(x=>x<=index);
+      if(unreachableLines.has(row))return false;
+      const unit=starts.find(u=>index>=u.from&&index<u.to);
+      if(unit && !reached.has(unit.name))return false;
+      return true;
+    };
+    return {parsed,available};
+  };
   const grade=(task,code,output)=>{
     const expected=String(task.expectedOutput||'').split('\n');
     const actual=String(output||'').trimEnd().split(/\r?\n/).filter(Boolean);
@@ -142,9 +238,11 @@
         'Atteso:\n'+expected.join('\n')+'\nOttenuto:\n'+(actual.join('\n')||'(nessun output)')}];
     const req=task.requirements||{};
     const source=String(code||'');
-    const ready=source.match(/^\s*func\s+_ready\s*\([^)]*\)\s*:\s*\n((?:[ \t]+[^\n]*(?:\n|$)|\s*\n)*)/m)?.[1]||'';
-    const active=ready.split('\n').filter(line=>!/^\s*#/.test(line)).join('\n');
-    const masked=active.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g,'""');
+    const inspected=activeSource(source);
+    const originalReady=source.match(/^\s*func\s+_ready\s*\([^)]*\)\s*:\s*\n((?:[ \t]+[^\n]*(?:\n|$)|\s*\n)*)/m)?.[1]||'';
+    const ready=originalReady;
+    const active=sanitizeSource(ready).uncommented;
+    const masked=sanitizeSource(ready).masked;
     const count=(masked.match(/\bprint\s*\(/g)||[]).length;
     if(req.minPrints)checks.push({desc:'Numero di chiamate print() richiesto',
       passed:count>=req.minPrints});
@@ -175,11 +273,16 @@
     }
     // Controlla il costrutto didattico nella sorgente originale, togliendo i
     // commenti: un commento che cita "if" o "append" non supera la prova.
-    const executable=source.replace(/#[^\n]*/g,'');
+    const executable=inspected.parsed.uncommented;
     for(const pattern of req.mustUse||[]){
-      const valid=new RegExp(pattern).test(executable);
+      const matcher=new RegExp(pattern,'g');
+      let match,valid=false;
+      while((match=matcher.exec(executable))!==null){
+        if(inspected.available(match.index)){valid=true;break;}
+        if(match[0].length===0)matcher.lastIndex++;
+      }
       checks.push({desc:'Costrutto GDScript previsto dalla consegna',passed:valid,
-        diff:valid?null:'Il codice produce l’output, ma manca un costrutto richiesto: rileggi la consegna e gli indizi.'});
+        diff:valid?null:'Il codice produce l’output, ma il costrutto richiesto non compare nel codice eseguito. Controlla la consegna.'});
     }
     return checks;
   };
