@@ -102,3 +102,27 @@ pre, code, .output-pre { font-family: var(--font-mono) !important; }
   #view-exercise .validation-panel, #view-exercise .validation-panel.console-only { flex:0 0 310px !important; }
 }
 @media(prefers-reduced-motion:reduce) { .gdh-user-menu, .gdh-course-illustration { transition:none !important; animation:none !important; } }
+
+
+/* La descrizione teorica scorre dopo la consegna, senza spostare nodi DOM
+   che app.js rigenera a ogni cambio compito. */
+#view-exercise .panel-lesson { display:flex !important; flex-direction:column !important; gap:12px; align-items:stretch; }
+#view-exercise .lesson-meta { order:0; flex:0 0 auto; }
+#view-exercise .lesson-content { display:contents !important; }
+#view-exercise .lesson-content .lesson-header-row,
+#view-exercise .lesson-content > #lesson-title { order:1; flex:0 0 auto; }
+#view-exercise #lesson-practice-progress { order:2; flex:0 0 auto; }
+#view-exercise .lesson-content .task-box { order:3; flex:0 0 auto; }
+#view-exercise .lesson-content .hints-section { order:4; flex:0 0 auto; }
+#view-exercise .lesson-content .theory-body { order:5; flex:0 0 auto; }
+#view-exercise .lesson-content .coddy-challenge-card { order:3; }
+#view-exercise .lesson-content .btn-mobile-to-code { order:6; }
+#view-exercise .coddy-hint-trigger { width:100%; text-align:left; border:0; background:transparent; color:inherit; font:inherit; cursor:pointer; }
+#view-exercise .hints-toggle-btn { font:inherit; color:inherit; text-align:left; border:0; background:transparent; padding:8px 10px; display:flex; align-items:center; gap:8px; }
+#view-exercise .hints-toggle-btn .arrow { margin-left:auto; }
+#view-exercise .coddy-hint-trigger:focus-visible { outline:3px solid #f5b642; }
+#view-exercise .coddy-bulb-icon svg, #view-exercise .hint-icon svg,
+#view-exercise .hints-header-icon svg, #view-exercise .explain-robot-icon svg { width:20px; height:20px; }
+#profile-avatar-display svg { width:50%; height:50%; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.avatar-option svg { width:25px; height:25px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+@media(max-width:820px) { #view-exercise .panel-lesson { display:flex !important; } }
