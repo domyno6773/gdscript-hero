@@ -1834,63 +1834,6 @@
     ]
   }
 ];
-
-  // I completamenti richiedono una riga/una espressione scritta dallo studente.
-  // Le varianti rappresentano equivalenze specifiche; NON basta indovinare l'indice A.
-  const codeAlternatives={
-    201:["print('Fine')"],
-    202:["print('Controllo completato')"],
-    204:["'Benvenuta ' + nome"],
-    207:["pezzi * prezzo"],
-    209:["if ha_chiave == true:"],
-    211:["zaino.push_back(\"Torcia\")","zaino.push_back('Torcia')"],
-    215:["return 2 * x","return x + x"],
-    217:["posizione.x = posizione.x + 20"],
-    218:["bersaglio.distance_to(posizione)"],
-    223:["nome = n"],
-    224:["return 2 * attacco"],
-    226:["self.add_child(figlio)"],
-    227:["$ClickBtn.connect(\"pressed\", al_click)"],
-    230:["posizione = posizione + 100.0 * delta"]
-  };
-  for(const session of sessions){
-    const codeQuestion=session.questions.find(q=>q.type==='code');
-    if(codeQuestion)codeQuestion.accepted=codeAlternatives[session.id]||[];
-  }
-
-  // Tokenizza una SINGOLA riga GDScript: spazi di formattazione e commenti
-  // finali non incidono, ma identificatori, operatori e contenuto delle stringhe si'.
-  // Non e' un interprete completo: le equivalenze non esplicitate restano da rivedere.
-  const TOKEN=/\s+|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|#[^\r\n]*|[A-Za-z_][A-Za-z_0-9]*|\d+(?:\.\d+)?|==|!=|<=|>=|\+=|-=|\*=|\/=|:=|&&|\|\||->|[^\s]/g;
-  function codeTokens(value){
-    if(typeof value!=='string'||value.length>300||/[\r\n]/.test(value))return null;
-    const raw=value.trim();
-    if(!raw)return null;
-    const chunks=raw.match(TOKEN)||[];
-    const parsed=[];
-    for(const chunk of chunks){
-      if(/^\s+$/.test(chunk))continue;
-      if(chunk.startsWith('#'))break;
-      if(chunk.startsWith('"')||chunk.startsWith("'")){
-        const quote=chunk[0];
-        if(chunk.length<2||chunk.at(-1)!==quote)return null;
-        // Due stili di virgolette sono equivalenti per le stringhe semplici.
-        parsed.push('str:'+chunk.slice(1,-1).replace(/\\(['"])/g,'$1'));
-      }else parsed.push(chunk);
-    }
-    return parsed.length?JSON.stringify(parsed):null;
-  }
-  function shuffleChoices(question,random=Math.random){
-    if(question.type==='code')return [];
-    const order=question.options.map((_,index)=>index);
-    for(let i=order.length-1;i>0;i--){
-      const value=Number(random());
-      const j=Math.max(0,Math.min(i,Math.floor((Number.isFinite(value)?value:0)* (i+1))));
-      [order[i],order[j]]=[order[j],order[i]];
-    }
-    return order;
-  }
-
   const byId=new Map(sessions.map(s=>[s.id,s]));
   const validate=(session)=>{
     if(session.questions.length!==3)throw Error('Quiz senza 3 domande: '+session.id);
@@ -1901,7 +1844,7 @@
         throw Error('Risposte non valide: '+session.id+'/'+q.id);
       if(q.correct.some(i=>!Number.isInteger(i)||i<0||i>=q.options.length))
         throw Error('Indice risposta fuori intervallo: '+session.id+'/'+q.id);
-      if(q.type==='code' && (!q.code.includes('□□□□')||!codeTokens(q.options[q.correct[0]])))
+      if(q.type==='code' && !q.code.includes('□□□□'))
         throw Error('Codice incompleto non valido: '+session.id+'/'+q.id);
     }
   };
@@ -1932,18 +1875,9 @@
   window.GDHChapterQuizzes=Object.freeze({
     sessions:Object.freeze(sessions),
     get:id=>byId.get(id)||null,
-    shuffleChoices,
-    codeTokens,
     grade:(session,answers)=>{
       if(!session||!Array.isArray(session.questions))throw Error('Quiz sconosciuto');
       return session.questions.map(q=>{
-        if(q.type==='code'){
-          const entered=answers?.[q.id];
-          const normalized=codeTokens(entered);
-          const accepted=[q.options[q.correct[0]],...(q.accepted||[])];
-          return {questionId:q.id,correct:!!normalized&&accepted.some(
-            candidate=>codeTokens(candidate)===normalized),selected:typeof entered==='string'?entered:''};
-        }
         const chosen=Array.isArray(answers?.[q.id])?answers[q.id]:[];
         const correct=q.correct;
         return {questionId:q.id,correct:chosen.length===correct.length&&
