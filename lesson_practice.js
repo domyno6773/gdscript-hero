@@ -117,16 +117,18 @@
   const extraFor=lesson=>custom[lesson?.id] ||
     root.GDHPracticeCatalog?.tasksFor(lesson) || [];
   const enabled=id=>Boolean(custom[id]||
-    (root.LESSONS_DATA||[]).some(l=>l.id===id && !l.isQuiz && l.chapterId>=2 && l.chapterId<=15));
+    (root.LESSONS_DATA||[]).some(l=>l.id===id && !l.isQuiz && (l.practiceMode==='focused' || (l.chapterId>=2 && l.chapterId<=15))));
   const tasksFor=lesson=>{
     if(!lesson||!enabled(lesson.id)||lesson.isQuiz)return [];
-    const extra=extraFor(lesson);
-    if(extra.length!==3)throw Error('Compiti didattici mancanti per la lezione '+lesson.id);
+
     const original={
       key:'base',title:lesson.isMastery?'Diagnostica finale':'Prima applicazione',
       task:lesson.task,initialCode:lesson.initialCode,solution:lesson.solution,
       expectedOutput:lesson.expectedOutput,hints:lesson.hints,nativeOriginal:true
     };
+    if(lesson.practiceMode==='focused')return [original];
+    const extra=extraFor(lesson);
+    if(extra.length!==3)throw Error('Compiti didattici mancanti per la lezione '+lesson.id);
     return lesson.isMastery?[...extra,original]:[original,...extra];
   };
   const getTask=(id,key)=>{

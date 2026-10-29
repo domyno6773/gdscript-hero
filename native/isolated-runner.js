@@ -2,6 +2,9 @@
 // Separate runner origin. Not a trusted security enforcement boundary against hostile GDScript
 // within this origin: GDScript can access window and forge responses via JavaScriptBridge.
 (() => {
+  const bootStatus = document.getElementById('boot-status');
+  const showBoot = text => { if (bootStatus) bootStatus.textContent = text; };
+  showBoot('Inizializzazione Godot…');
   const PARENT_ORIGIN = new URL(location.href).origin; // URL origin, iframe DOM origin stays opaque
   const VERSION = 1;
   const session = new URL(location.href).searchParams.get('session');
@@ -13,6 +16,10 @@
   let phase = 'original_compile';
   let diagnostics = {original_compile:'', instrumentation:'', execution:''};
   const notify = m => window.parent.postMessage({v:VERSION,session,...m},PARENT_ORIGIN);
+  notify({type:'progress',stage:'Avvio del motore Godot'});
+  window.addEventListener('keydown',event=>{if(event.key==='F8'){event.preventDefault();notify({type:'stop_requested'});}});
+  window.addEventListener('error',event=>notify({type:'error',message:event.message||'Errore di caricamento del motore'}));
+  window.addEventListener('unhandledrejection',event=>notify({type:'error',message:String(event.reason||'Avvio non riuscito')}));
   // These diagnostic labels are *advisory*, not a security proof. Student GDScript
   // can call JavaScriptBridge from the sandboxed runner origin.
   window.gdhPhase = next => {
@@ -29,7 +36,7 @@
   window.gdhTrace = stage => {
     if(pending!==null)notify({type:'progress',stage:String(stage).slice(0,48)});
   };
-  window.gdhReady = () => { ready = true; notify({type:'ready'}); };
+  window.gdhReady = () => { bootStatus?.remove(); ready = true; notify({type:'ready'}); };
   window.gdhResult = raw => {
     if(!pending)return;
     const id=pending;
@@ -68,14 +75,16 @@
             !/^[A-Za-z_]\w{0,59}$/.test(x.method) || !Array.isArray(x.args) || x.args.length>5 ||
             !x.set || typeof x.set!=='object' || Array.isArray(x.set)))) ||
        (m.scene !== undefined && (!Number.isSafeInteger(m.scene) || m.scene<0 || m.scene>63)) ||
-       (m.mode !== undefined && !['','sandbox_start','sandbox_action'].includes(m.mode)) ||
+       (m.paused !== undefined && typeof m.paused !== 'boolean') ||
+       (m.mode !== undefined && !['','sandbox_start','sandbox_action','sandbox_observe'].includes(m.mode)) ||
+       (m.mode === 'sandbox_observe' && (!Number.isInteger(m.frames) || m.frames<1 || m.frames>120 || !Array.isArray(m.input) || m.input.length>4 || m.input.some(x=>!['ui_left','ui_right','ui_up','ui_down'].includes(x)))) ||
        (m.mode === 'sandbox_action' && (!/^[A-Za-z_]\w{0,39}$/.test(m.node||'') ||
          !['pressed','timeout'].includes(m.signal))) ||
        (m.nodes !== undefined && (!Array.isArray(m.nodes) || m.nodes.length>48 ||
          m.nodes.some(n=>!n || typeof n!=='object' || Array.isArray(n) ||
            typeof n.name!=='string' || !/^[A-Za-z_]\w{0,39}$/.test(n.name) ||
            typeof n.type!=='string' ||
-           !['Node','Node2D','Label','Button','Timer','ColorRect','Sprite2D','CharacterBody2D','ProgressBar'].includes(n.type) ||
+           !['Node','Node2D','Control','Label','Button','Timer','ColorRect','Sprite2D','CharacterBody2D','ProgressBar','StaticBody2D','Area2D','CollisionShape2D'].includes(n.type) ||
            (n.parent!==null && n.parent!==undefined &&
              (typeof n.parent!=='string'|| !/^[A-Za-z_]\w{0,39}$/.test(n.parent))) ||
            (n.text!==undefined && (typeof n.text!=='string' || n.text.length>200))))) ||
@@ -87,13 +96,14 @@
     stdout=''; stderr='';
     phase='original_compile';
     diagnostics={original_compile:'', instrumentation:'', execution:''};
-    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[],emissions:m.emissions||[],objectCalls:m.objectCalls||[],scene:m.scene||0,actions:m.actions||[],mode:m.mode||'',nodes:m.nodes||[],node:m.node||'',signal:m.signal||''})); }
+    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[],emissions:m.emissions||[],objectCalls:m.objectCalls||[],scene:m.scene||0,actions:m.actions||[],mode:m.mode||'',nodes:m.nodes||[],node:m.node||'',signal:m.signal||'',frames:m.frames||1,input:m.input||[],paused:!!m.paused})); }
     catch(e) { append('stderr',String(e));window.gdhResult(JSON.stringify({status:'bridge_error'})); }
   });
   if (typeof Engine !== 'function') { notify({type:'error',message:'Export Godot mancante'}); return; }
   const engine=new Engine({canvas:document.getElementById('canvas'),executable:'godot',mainPack:'godot.pck'});
   engine.startGame({
-    onPrint: (...args)=>{if(pending!==null)append('stdout',args.join(' '));},
-    onPrintError: (...args)=>{if(pending!==null)append('stderr',args.join(' '));}
-  }).catch(e=>notify({type:'error',message:String(e).slice(0,180)}));
+    onProgress: (current,total)=>notify({type:"progress",stage:total?"Download Godot "+Math.round(current/total*100)+"%":"Caricamento Godot"}),
+    onPrint: (...args)=>{if(pending!==null)append('stdout',args.join(' '));else notify({type:'live_output',text:args.join(' ').slice(0,4000)});},
+    onPrintError: (...args)=>{if(pending!==null)append('stderr',args.join(' '));else notify({type:'live_output',text:args.join(' ').slice(0,4000),error:true});}
+  }).catch(e=>{showBoot(String(e).slice(0,180));notify({type:'error',message:String(e).slice(0,180)});});
 })();

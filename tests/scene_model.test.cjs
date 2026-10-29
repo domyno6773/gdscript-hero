@@ -1,0 +1,18 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+require('../scene-model.js');const M=global.GDHSceneModel;
+const tree=M.normalize([{name:'Root',type:'Node2D',parent:null},{name:'Panel',type:'Control',parent:'Root'},{name:'Caption',type:'Label',parent:'Panel',text:'Test "quotes"\nnext',position:{x:12.5,y:20}},{name:'Child',type:'Node',parent:'Caption'}]);
+assert.equal(M.path(tree,'Caption'),'Panel/Caption');
+assert.equal(M.path(tree,'Root'),'.');
+assert.equal(M.remove(tree,'Panel').length,1,'Deletion must remove every descendant');
+assert.throws(()=>M.reparent(tree,'Panel','Child'),/discendente/);
+assert.throws(()=>M.rename(tree,'Panel','Root'),/univoci/);
+assert.throws(()=>M.normalize([...tree,{name:'Other',type:'Node',parent:null}]),/radice/);
+assert.equal(M.path(M.rename(tree,'Panel','HUD'),'Caption'),'HUD/Caption');
+const files=M.exportProject({nodes:tree,code:'extends Node2D\n',name:'Test'});
+assert.match(files['main.tscn'],/parent="Panel"/);
+assert.match(files['main.tscn'],/offset_left = 12.5\n/);
+assert.match(files['main.tscn'],/text = "Test \\"quotes\\"\\nnext"/);
+assert.throws(()=>M.exportProject({nodes:tree,code:'extends CharacterBody2D\n'}),/compatibili/);
+assert.match(files['project.godot'],/run\/main_scene="res:\/\/main.tscn"/);
+(async()=>{fs.mkdirSync('/tmp/gdh-export-check',{recursive:true});for(const [name,content] of Object.entries(files))fs.writeFileSync('/tmp/gdh-export-check/'+name,content);fs.writeFileSync('/tmp/gdh-export-check/project.zip',Buffer.from(await M.zip(files).arrayBuffer()));console.log('PASS scene model: hierarchy, cycles, recursive removal, properties, export and ZIP');})();

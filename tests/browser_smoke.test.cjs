@@ -230,7 +230,7 @@ async function testAllLessonCodeSamplesFit(page,width){
    return {lessonCount,sampleCount,errors:errors.slice(0,20),totalErrors:errors.length,
      xpUnchanged:App.state.xp===previousXP};
  });
- assert.equal(result.lessonCount,81,'The visual regression must scan all 81 lessons');
+ assert.equal(result.lessonCount,85,'The visual regression must scan all 85 lessons');
  assert.ok(result.sampleCount>=38,'Expected both lesson sample types: '+JSON.stringify(result));
  assert.ok(result.xpUnchanged,'Inspecting samples unexpectedly changed student XP');
  assert.equal(result.totalErrors,0,'Lesson examples escape their boundaries at '+width+'px: '+JSON.stringify(result));
@@ -1124,7 +1124,7 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#site-welcome').isHidden(),true);
  assert.equal(await page.locator('#site-goal-gate').isHidden(),true);
  await page.waitForFunction(()=>!!window.App&&!!window.LESSONS_DATA&&!document.getElementById('view-roadmap').classList.contains('hidden'));
- assert.equal(await page.evaluate(()=>LESSONS_DATA.length),111);
+ assert.equal(await page.evaluate(()=>LESSONS_DATA.length),115);
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
  // La modale di successo non deve piu' allargarsi a quasi tutto il viewport.
  await page.evaluate(()=>document.getElementById('success-modal').classList.remove('hidden'));
@@ -1446,6 +1446,7 @@ async function smoke(browser,url,width){
  // Stesso errore reale sia negli esercizi sia nella Sandbox:
  // la guida deve spiegare la parentesi mancante, non dire solo "ricontrolla".
  const missingParenthesis='func _ready():\\n    print("Ciao"'.replace('\\n','\n');
+ await page.locator('#scene-stop').click();
  await page.locator('#sandbox-code-editor').fill(missingParenthesis);
  await page.locator('#btn-sandbox-run').click({timeout:10000});
  await page.waitForFunction(()=>
@@ -1486,7 +1487,7 @@ async function smoke(browser,url,width){
    App.addSandboxNode('Button','Button','Clicca');
  });
  // Sandbox: figli effettivamente istanziati, proprietà native e click persistenti.
- const sampleCode='extends Node2D\nvar clicks = 0\nfunc _ready():\n    $Label.text = "Nativo pronto"\n    print("SANDBOX_NODES_READY")\nfunc _on_button_pressed():\n    clicks += 1\n    $Label.text = "Click " + str(clicks)\n    print("SANDBOX_CLICK " + str(clicks))';
+ const sampleCode='extends Node2D\nvar clicks = 0\nfunc _ready():\n    $Label.text = "Nativo pronto"\n    print("SANDBOX_NODES_READY")\n    $Button.pressed.connect(_on_button_pressed)\nfunc _on_button_pressed():\n    clicks += 1\n    $Label.text = "Click " + str(clicks)\n    print("SANDBOX_CLICK " + str(clicks))';
  await page.locator('#sandbox-code-editor').fill(sampleCode);
  await page.locator('#btn-sandbox-run').click({timeout:10000});
  try {
@@ -1502,25 +1503,20 @@ async function smoke(browser,url,width){
    }));
    throw Error('Sandbox scene diagnostic: '+JSON.stringify(info));
  }
- const sceneStart=await page.evaluate(()=>{
-   const s=App.sandboxScene;
-   const label=s.children.find(x=>x.name==='Label');
-   const native=App.sandboxNativeSession;
-   const project=App.getActiveSandboxProject();
-   return {label:label?.text,native:!!native,projectLabel:project.nodes.find(x=>x.name==='Label')?.text,
-     scene:document.getElementById('sandbox-ui-overlay')?.textContent};
- });
- assert.equal(sceneStart.label,'Nativo pronto','Godot _ready must update native Label');
+ const sceneStart=await page.evaluate(()=>({
+   native:!!App.sandboxNativeSession,
+   projectLabel:App.getActiveSandboxProject().nodes.find(x=>x.name==='Label')?.text
+ }));
  assert.ok(sceneStart.native,'Godot persistent session missing');
- assert.ok(sceneStart.scene.includes('Nativo pronto'),'Viewport not synced with Godot');
+ assert.equal(await page.locator('#gdh-native-runner').isVisible(),true,'Native canvas host is visible');
  for(let click=1;click<=2;click++){
-   await page.locator('#sandbox-ui-overlay .godot-ui-btn').click({timeout:10000});
-   await page.waitForFunction(i=>document.getElementById('sandbox-console-output').textContent.includes('SANDBOX_CLICK '+i),click,{timeout:8000});
-   assert.equal(await page.evaluate(()=>App.sandboxScene.children.find(x=>x.name==='Label').text),
-     'Click '+click,'Godot instance did not persist click state');
+   const result=await page.evaluate(()=>GDHGodot.sandboxAction('Button'));
+   assert.ok(result.success);
+   assert.equal(result.native.scene.Label.text,'Click '+click,'Native signal did not retain state');
  }
  assert.equal(await page.evaluate(()=>App.getActiveSandboxProject().nodes.find(x=>x.name==='Label').text),
    sceneStart.projectLabel,'Runtime properties must not overwrite saved scene definition');
+ await page.locator('#scene-stop').click();
  // Contrasto del testo: tema scuro e tema chiaro.
  const contrast=await page.evaluate(()=>{
    const syntax=document.getElementById('sandbox-gdscript-highlight');
@@ -1784,43 +1780,10 @@ async function smoke(browser,url,width){
  await page.locator('#btn-run-code').click({timeout:10000});
  await page.waitForFunction(()=>!App.isValidating &&
    !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
- assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),false,
-   'First task must not complete the lesson');
- assert.equal(await page.locator('#lesson-practice-counter').textContent(),'Compito 1 di 4');
- assert.equal(await page.evaluate(()=>App.switchPracticeTask(3)),false,
-   'Cannot skip the first three tasks');
- assert.equal(await page.locator('#modal-success-title').textContent(),'COMPITO COMPLETATO!');
- assert.equal(await page.locator('#modal-xp-card').isHidden(),true,
-   'Intermediate tasks must not grant lesson XP');
- await page.locator('#btn-modal-next').click();
- for(let index=1;index<4;index++){
-   assert.equal(await page.locator('#lesson-practice-counter').textContent(),
-     'Compito '+(index+1)+' di 4');
-   if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
-   if(index===1){
-     await page.locator('#code-editor').fill('func _ready():\n    print("Bozza")');
-     await page.reload({waitUntil:'load'});
-     await page.evaluate(()=>App.openLesson(1));
-     if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
-     assert.equal(await page.locator('#lesson-practice-counter').textContent(),'Compito 2 di 4',
-       'Reload must restore current task');
-     assert.ok((await page.locator('#code-editor').inputValue()).includes('Bozza'),
-       'Reload must preserve code of the current task');
-   }
-   const solution=await page.evaluate(i=>{
-     const lesson=LESSONS_DATA.find(l=>l.id===1);
-     return LessonPractice.tasksFor(lesson)[i].solution;
-   },index);
-   await page.locator('#code-editor').fill(solution);
-   await page.locator('#btn-run-code').click({timeout:10000});
-   await page.waitForFunction(()=>!App.isValidating &&
-     !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
-   if(index<3){
-     assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),false);
-     assert.equal(await page.locator('#modal-xp-card').isHidden(),true);
-     await page.locator('#btn-modal-next').click();
-   }
- }
+ assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),true,
+   'The focused exercise must complete after its own assessment');
+ assert.equal(await page.locator('#lesson-practice-progress').isHidden(),true,
+   'A single assessment must not show redundant task navigation');
  try {
    await page.waitForFunction(()=>App.state.finishedLessons.includes(1),null,{timeout:15000});
  } catch(error){

@@ -73,10 +73,14 @@ func _on_js_request(args: Array) -> void:
     if not (request is Dictionary):
         return
     var reply: Dictionary
-    if str(request.get("mode", "")) == "sandbox_action":
+    if str(request.get("mode", "")) == "sandbox_observe":
+        reply = await observe_sandbox(int(request.get("frames", 1)), request.get("input", []))
+    elif str(request.get("mode", "")) == "sandbox_action":
         reply = _sandbox_action(str(request.get("node", "")), str(request.get("signal", "")))
     else:
         reply = run_candidate(str(request.get("code", "")), request.get("inspect", []), request.get("locals", []), request.get("calls", []), request.get("emissions", []), request.get("objectCalls", []), request.get("scene", null), request.get("actions", []), request.get("nodes", []), str(request.get("mode", "")) == "sandbox_start")
+    if bool(request.get("paused", false)) and is_instance_valid(_sandbox_instance):
+        _sandbox_instance.process_mode = Node.PROCESS_MODE_DISABLED
     reply["id"] = request.get("id", null)
     var browser := JavaScriptBridge.get_interface("window")
     browser.gdhResult(JSON.stringify(reply))
@@ -196,7 +200,7 @@ func _build_sandbox_scene(instance: Node, specs: Array) -> void:
         return
     var valid := RegEx.new()
     valid.compile("^[A-Za-z_][A-Za-z0-9_]{0,39}$")
-    var allowed := ["Node", "Node2D", "Label", "Button", "Timer", "ColorRect", "Sprite2D", "CharacterBody2D", "ProgressBar"]
+    var allowed := ["Node", "Node2D", "Control", "Label", "Button", "Timer", "ColorRect", "Sprite2D", "CharacterBody2D", "ProgressBar", "StaticBody2D", "Area2D", "CollisionShape2D"]
     var created: Dictionary = {}
     for entry in specs:
         if not (entry is Dictionary):
@@ -206,21 +210,11 @@ func _build_sandbox_scene(instance: Node, specs: Array) -> void:
         var parent := "" if entry.get("parent", null) == null else str(entry.get("parent"))
         if valid.search(name) == null or not allowed.has(type_name) or created.has(name):
             continue
-        if parent.is_empty():
-            instance.name = name
-            created[name] = instance
-            continue
-        var child := ClassDB.instantiate(type_name) as Node
+        var child: Node = instance if parent.is_empty() else ClassDB.instantiate(type_name) as Node
         if child == null:
             continue
         child.name = name
-        if child is Label or child is Button:
-            child.text = str(entry.get("text", "")).substr(0, 200)
-        if child is Timer:
-            child.wait_time = clampf(float(entry.get("wait_time", 1.0)), 0.05, 120.0)
-        if child is ColorRect:
-            child.color = Color("#438eff")
-            child.size = Vector2(100, 30)
+        _apply_scene_properties(child, entry)
         created[name] = child
     # Consenti anche gerarchie annidate senza che l'ordine dei figli influisca.
     for _pass in range(12):
@@ -241,21 +235,42 @@ func _build_sandbox_scene(instance: Node, specs: Array) -> void:
                     moved = true
         if not moved:
             break
-# In _ready() gli script collegano normalmente i propri segnali.
-# Le callback nominate come quelle dell'editor Godot vengono collegate
-# solo dopo _ready e solo quando manca una connessione esplicita.
-func _connect_sandbox_callbacks(instance: Node, specs: Array) -> void:
-    for entry in specs:
-        if not (entry is Dictionary):
-            continue
-        var child: Node = instance.find_child(str(entry.get("name", "")), true, false)
-        if child is Button and child.is_inside_tree():
-            if child.get_signal_connection_list("pressed").is_empty():
-                var button_name := str(entry.get("name", ""))
-                for callback in ["_on_" + button_name.to_lower() + "_pressed", "_on_" + button_name + "_pressed"]:
-                    if instance.has_method(callback):
-                        child.pressed.connect(Callable(instance, callback))
-                        break
+# Only explicit signal connections are supported, exactly as in Godot scripts.
+func _apply_scene_properties(child: Node, entry: Dictionary) -> void:
+    if child is Node2D or child is Control:
+        var pos: Dictionary = entry.get("position", {})
+        child.position = Vector2(float(pos.get("x", 0)), float(pos.get("y", 0)))
+    if child is CanvasItem:
+        child.visible = bool(entry.get("visible", true))
+    if child is Control:
+        var dimensions: Dictionary = entry.get("size", {})
+        child.size = Vector2(float(dimensions.get("x", 180)), float(dimensions.get("y", 36)))
+    if child is Label or child is Button:
+        child.text = str(entry.get("text", "")).substr(0, 200)
+    if child is Button:
+        child.disabled = bool(entry.get("disabled", false))
+    if child is ColorRect:
+        child.color = Color(str(entry.get("color", "#478cbf")))
+    if child is Timer:
+        child.wait_time = clampf(float(entry.get("wait_time", 1.0)), 0.05, 120.0)
+        child.one_shot = bool(entry.get("one_shot", false))
+        child.autostart = bool(entry.get("autostart", false))
+    if child is ProgressBar:
+        child.min_value = float(entry.get("min_value", 0))
+        child.max_value = float(entry.get("max_value", 100))
+        child.value = float(entry.get("value", 0))
+    if child is CollisionObject2D:
+        child.collision_layer = int(entry.get("collision_layer", 1))
+        child.collision_mask = int(entry.get("collision_mask", 1))
+    if child is CollisionShape2D:
+        var dimensions: Dictionary = entry.get("shape_size", {})
+        var shape := RectangleShape2D.new()
+        shape.size = Vector2(float(dimensions.get("x", 32)), float(dimensions.get("y", 32)))
+        child.shape = shape
+    if child is Sprite2D:
+        var graphic := Image.new()
+        graphic.load_svg_from_string('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect x="1" y="1" width="30" height="30" rx="4" fill="#478cbf" stroke="#b6dbed"/><path d="M8 12h4m8 0h4M10 22h12" stroke="#fff" stroke-width="3"/></svg>')
+        child.texture = ImageTexture.create_from_image(graphic)
 
 func _sandbox_snapshot() -> Dictionary:
     var output: Dictionary = {}
@@ -295,13 +310,41 @@ func _sandbox_snapshot() -> Dictionary:
         output[name] = state
     return output
 
+# Advance actual physics frames; never call a student's process function manually.
+# The scene is frozen between observations, with input always released afterward.
+func observe_sandbox(frames: int, actions: Array = []) -> Dictionary:
+    if not is_instance_valid(_sandbox_instance):
+        return {"status": "missing_session"}
+    var instance := _sandbox_instance
+    var allowed := ["ui_left", "ui_right", "ui_up", "ui_down"]
+    for action in allowed:
+        Input.action_release(action)
+    for action in actions:
+        if allowed.has(action):
+            Input.action_press(action)
+    instance.process_mode = Node.PROCESS_MODE_INHERIT
+    for frame_index in range(clampi(frames, 1, 120)):
+        await get_tree().physics_frame
+    # physics_frame fires before node callbacks; wait until the frame finishes.
+    await get_tree().process_frame
+    for action in allowed:
+        Input.action_release(action)
+    if not is_instance_valid(instance) or instance != _sandbox_instance:
+        return {"status": "missing_session"}
+    instance.process_mode = Node.PROCESS_MODE_DISABLED
+    var properties := {}
+    for property in instance.get_property_list():
+        if int(property.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE and properties.size() < 20:
+            properties[str(property.name)] = __gdh_normalize(instance.get(property.name))
+    return {"status": "executed", "scene": _sandbox_snapshot(), "properties": properties}
+
 func _sandbox_action(node_name: String, signal_name: String) -> Dictionary:
     if not is_instance_valid(_sandbox_instance):
         return {"status": "missing_session", "message": "Esegui prima la scena Sandbox"}
     var selected := _sandbox_instance.find_child(node_name, true, false)
     if selected == null or selected.is_queued_for_deletion():
         return {"status": "missing_node", "message": "Nodo non disponibile"}
-    if signal_name == "pressed" and selected is Button:
+    if signal_name == "pressed" and selected is Button and not selected.disabled:
         selected.pressed.emit()
     elif signal_name == "timeout" and selected is Timer:
         selected.timeout.emit()
@@ -357,7 +400,20 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
     # Only diagnostics emitted during ORIGINAL compilation or execution belong to
     # the student's error stream. Diagnostics from instrumentation stay separate.
     __gdh_phase("execution")
-    var instance := candidate.new() as Node
+    var instance: Node
+    if sandbox_live and scene_nodes is Array and not scene_nodes.is_empty():
+        var root_type := "Node"
+        for spec in scene_nodes:
+            if spec is Dictionary and spec.get("parent", null) == null:
+                root_type = str(spec.get("type", "Node"))
+                break
+        var base_type := candidate.get_instance_base_type()
+        if root_type != base_type and not ClassDB.is_parent_class(root_type, base_type):
+            return {"status": "invalid_scene", "message": "Lo script estende " + base_type + ", ma la radice è " + root_type}
+        instance = ClassDB.instantiate(root_type) as Node
+        instance.set_script(candidate)
+    else:
+        instance = candidate.new() as Node
     if instance == null:
         return {"status": "unsupported", "message": "Impossibile creare il nodo Godot"}
     var active_scene := 0
@@ -373,8 +429,6 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
     add_child(instance)
     if sandbox_live:
         _sandbox_trace("after_ready")
-    if sandbox_live and scene_nodes is Array:
-        _connect_sandbox_callbacks(instance, _sandbox_specs)
     var observed := {}
     if inspect is Array:
         var declared := {}

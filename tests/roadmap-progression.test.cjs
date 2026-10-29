@@ -8,7 +8,7 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const source=name=>fs.readFileSync(path.join(root,name),'utf8');
 const all=new Function('window',
-  ['lessons.js','curriculum_extension.js','chapter_quizzes.js']
+  ['lessons.js','curriculum_extension.js','chapter_quizzes.js','gameplay_lessons.js','curriculum_restructure.js']
     .map(source).join('\n;\n')+
   '\nreturn LESSONS_DATA.map(x=>({id:x.id,isQuiz:!!x.isQuiz,chapterId:x.chapterId}));'
 )({});
@@ -25,7 +25,7 @@ const create=(finished=[],unlocked=[],dev=false,local=false)=>({
 });
 const check=app=>{methods.ensureUnlockedConsistency.call(app);return methods.getRoadmapContinueId.call(app)};
 
-test('Tutti i 111 punti della sequenza sbloccano solo il prossimo elemento',()=>{
+test('Tutti i punti della sequenza sbloccano solo il prossimo elemento',()=>{
   for(let n=0;n<=all.length;n++){
     const app=create(all.slice(0,n).map(x=>x.id));
     const focus=check(app);

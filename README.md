@@ -14,7 +14,7 @@ GDScript Hero è una piattaforma didattica **gratuita e in italiano** per impara
 
 | Sezione | Stato | Descrizione |
 | --- | --- | --- |
-| **Corso gratuito** | Disponibile | **81 lezioni pratiche con 4 compiti ciascuna (324 compiti) e 30 quiz in 15 capitoli**, con teoria, esempi, indizi e verifiche tramite Godot |
+| **Corso gratuito** | Disponibile | **85 esercizi pratici e 30 quiz in 16 capitoli**, con teoria, esempi, indizi e verifiche tramite Godot |
 | **Editor GDScript** | Disponibile | Sintassi colorata, numeri di riga, completamento contestuale e comandi rapidi |
 | **Risultati e diagnostica** | Disponibile | Output atteso/ottenuto, errori in evidenza e dettagli dei test |
 | **Sandbox** | Disponibile | Sperimentazione con codice, nodi, scena e viewport 2D |
@@ -36,7 +36,11 @@ Nelle **Impostazioni → Audio ed effetti sonori** sono presenti interruttori e 
 
 ## Corso e apprendimento
 
-Il corso comprende **15 capitoli, 81 esercizi pratici e 30 quiz di comprensione**. Si parte dalle basi (output, variabili, operatori, condizioni) per arrivare a strutture dati, cicli, funzioni e meccaniche tipiche di Godot. Ogni livello offre un obiettivo concreto, test di verifica e aiuti progressivi.
+Il corso comprende **16 capitoli, 85 esercizi pratici e 30 quiz di comprensione**. Si parte dalle basi (output, variabili, operatori, condizioni) per arrivare a strutture dati, cicli, funzioni e meccaniche tipiche di Godot. Ogni livello offre un obiettivo concreto, test di verifica e aiuti progressivi.
+
+Nodi e Label arrivano nel terzo capitolo. Le ripetizioni generate per interi capitoli non sono più obbligatorie: ogni esercizio del percorso ha un obiettivo proprio. Gli ID storici e le ricompense già ottenute restano invariati.
+
+Il capitolo sul gameplay verifica `_physics_process(delta)`, input, `move_and_slide()`, collisioni e `Area2D` facendo avanzare realmente la simulazione. Le scene possono essere copiate nel laboratorio e scaricate in ZIP come progetti Godot completi. I primi esercizi visivi separano teoria, obiettivo e soluzione negli indizi; i controlli ammettono sintassi equivalenti dove conta il comportamento.
 
 **L'obiettivo è mantenere il corso principale gratuito.** Le eventuali funzioni aggiuntive a pagamento non dovranno impedire di completarlo.
 
@@ -85,9 +89,9 @@ Su Windows è presente anche `avvia.bat`, che apre direttamente `index.html`. Pe
 
 ## Architettura
 
-La verifica del **corso principale** usa ora direttamente **Godot Engine 4.4.1 WebAssembly**, eseguito in un iframe isolato. Non esiste più un selettore Beta: il pulsante «Verifica il codice» utilizza il motore Godot per tutte le 60 lezioni storiche e i nuovi esercizi storiche e i 21 nuovi esercizi. Gli esiti accettati attivano le ricompense XP, lo sblocco dei capitoli, la telemetria e i salvataggi esistenti. Le verifiche inconclusive non attribuiscono XP.
+La verifica del **corso principale** usa ora direttamente **Godot Engine 4.4.1 WebAssembly**, eseguito in un iframe isolato. Non esiste più un selettore Beta: il pulsante «Verifica il codice» utilizza il motore Godot per le 60 lezioni storiche, 21 approfondimenti e 4 esercizi di gameplay in tempo reale. Gli esiti accettati attivano le ricompense XP, lo sblocco dei capitoli, la telemetria e i salvataggi esistenti. Le verifiche inconclusive non attribuiscono XP.
 
-**Anche Sandbox, Ripasso e Arena invocano Godot per eseguire GDScript**, tramite un adattatore che conserva il formato dei risultati usato dall'interfaccia. Alcune funzioni avanzate della vecchia simulazione (ad esempio scene Sandbox dinamiche e interazioni persistenti tra chiamate) non sono ancora equivalenti alle funzionalità native di Godot e richiedono ulteriori rifiniture; il runtime JavaScript viene mantenuto nel repository per le classi di rappresentazione delle scene e per vecchi test, ma non è più usato come interprete del codice nella UI pubblica.
+**Anche Sandbox, Ripasso e Arena invocano Godot per eseguire GDScript**, tramite un adattatore che conserva il formato dei risultati usato dall'interfaccia. Il laboratorio conserva la scena nativa fra gli aggiornamenti e mostra il canvas di Godot. L’editor supporta un sottoinsieme di 13 tipi di nodo, forme rettangolari e uno script sulla radice; non replica ancora l’intero editor Godot, gli script multipli o l’importazione di asset arbitrari; il runtime JavaScript viene mantenuto nel repository per le classi di rappresentazione delle scene e per vecchi test, ma non è più usato come interprete del codice nella UI pubblica.
 
 **Limite di sicurezza:** XP e salvataggi attuali sono gestiti dal client, come già avveniva prima. Un risultato Godot nel browser **non** è una certificazione server-side: un utente malintenzionato può alterare il client e i suoi messaggi. Non usare questi dati per classifiche competitive affidabili o autorizzazioni Premium senza verifica sul server.
 
@@ -162,3 +166,17 @@ L'interfaccia dell'Arena ufficiale legge le stagioni da Supabase e prevede le cl
 Sono ancora necessari: migrazione del database in staging, deployment protetto del valutatore Godot 4.4.1 con test privati, verifica integrata anti-abuso, pubblicazione delle prime 12 sfide stagionali effettive, integrazione del ledger XP ufficiale nel profilo e abbonamenti Premium con gestione dei pagamenti e verifica dell'accesso lato server.
 
 Per monitorare il lavoro senza interpretare le parti preparatorie come già operative: [registro di avanzamento](docs/GDScript_Hero_2_0_implementazione.md) e [deployment del backend](server/arena/README.md).
+
+## Verifiche della revisione del corso
+
+Con Godot 4.4.1 disponibile in `GODOT_BIN`:
+
+```bash
+node tests/scene_model.test.cjs
+node --test tests/roadmap-progression.test.cjs
+node tests/curriculum_restructure.test.cjs
+GODOT_BIN=/percorso/godot node tests/native_headless_curriculum.test.cjs
+GODOT_BIN=/percorso/godot node tests/native_headless_gameplay.test.cjs
+```
+
+Le suite headless verificano comportamento nativo, non il caricamento WASM o il layout del browser. Questi ultimi hanno verifiche dedicate in CI.

@@ -435,8 +435,7 @@
          pr(m,'posizione')&&eq(lines,['(100.0, 200.0)']));break;
      case 34:
        check(list,'posizione finale Vector2(150,200)',vec(loc('posizione'),150,200));
-       check(list,'velocita e aggiornamento posizione.x',
-         loc('velocita')===50&&/\bposizione\s*\.\s*x\s*\+=\s*velocita\b/.test(m));
+       check(list,'Lo spostamento iniziale è 50',loc('velocita')===50);
        check(list,'Output vettore finale',pr(m,'posizione')&&eq(lines,['(150.0, 200.0)']));
        check(list,'Con velocita 70 ottiene (170,200)',
          scenarioOk(scenarioResults,'speed70',['(170.0, 200.0)']));break;

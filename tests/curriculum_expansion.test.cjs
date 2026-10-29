@@ -6,7 +6,9 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const context=vm.createContext({window:{},console});
 for(const file of ['lessons.js','curriculum_extension.js','chapter_quizzes.js']){
-  vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file});
+  let source=fs.readFileSync(path.join(root,file),'utf8');
+  if(file==='curriculum_extension.js')source=source.replace('window.GDHCurriculumExtension=Object.freeze({has:', 'window.__testScenarios=scenarios;window.GDHCurriculumExtension=Object.freeze({has:');
+  vm.runInContext(source,context,{filename:file});
 }
 const lessons=context.window.LESSONS_DATA;
 const extension=context.window.GDHCurriculumExtension;
@@ -57,8 +59,9 @@ for(const session of quizzes.sessions){
   assert.equal(lesson.hints.length,3);
   assert.ok(lesson.theory.length>75&&lesson.task.length>75);
   assert.ok(lesson.solution&&lesson.initialCode&&lesson.expectedOutput);
+  const expected=new Map([[lesson.solution,lesson.expectedOutput],...context.window.__testScenarios(lesson.id,lesson.solution,lesson.expectedOutput).map(s=>[s.code,s.expected])]);
   const fake=async code=>({status:'executed',
-   stdout:code===lesson.solution?lesson.expectedOutput:'',
+   stdout:expected.get(code)||'',
    stderr:'',reply:{status:'executed'}});
   const solution=await extension.verify(lesson.id,lesson.solution,fake);
   assert.ok(solution.accepted,'Soluzione ufficiale nuova respinta '+lesson.id+': '+JSON.stringify(solution.feedback.checks));
