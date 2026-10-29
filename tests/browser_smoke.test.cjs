@@ -488,8 +488,9 @@ async function testAccessibilityKeyboard(page,width){
   assert.equal(await picker.isVisible(),true);
   await page.locator('.scene-node-search').fill('CollisionShape2D');
   assert.equal(await picker.locator('.scene-type-list button').count(),1);
+  await page.locator('.scene-node-search').fill('');
   await page.keyboard.press('Escape');
-  assert.equal(await picker.count(),0);
+  await picker.waitFor({state:'detached'});
 
   // The active section and exercise split-tab are announced to screen readers.
   await page.evaluate(()=>App.openLesson(1));
@@ -1331,7 +1332,8 @@ async function smoke(browser,url,width){
 
  await testNavigationPersistence(page,width);
  for(const section of ['roadmap','practice','projects','review','stats']){
-   const selector=width<821?'#mob-nav-'+section:'#nav-'+section+'-btn';
+   if(section==='stats')await page.locator('#btn-open-user-menu').click();
+   const selector=section==='stats'?'#nav-stats-btn':width<821?'#mob-nav-'+section:'#nav-'+section+'-btn';
    await page.locator(selector).click({timeout:15000});
    await viewIs(page,section);
  }
@@ -1359,8 +1361,7 @@ async function smoke(browser,url,width){
  assert.deepEqual(iconAudit.pictographs,[],'Emoji remain in Sandbox: '+JSON.stringify(iconAudit));
  for(const [open,modal,close] of [
    ['#btn-sandbox-help','#modal-sandbox-welcome','#btn-close-sandbox-welcome'],
-   ['#btn-sandbox-new-project','#modal-sandbox-new-project','#btn-cancel-sandbox-new'],
-   ['#btn-sandbox-add-node','#add-node-modal','#btn-cancel-add-node']
+   ['#btn-sandbox-new-project','#modal-sandbox-new-project','#btn-cancel-sandbox-new']
  ]){
    await page.locator(open).click({timeout:10000});
    await page.locator(modal).waitFor({state:'visible'});
