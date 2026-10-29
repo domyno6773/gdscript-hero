@@ -119,7 +119,7 @@ pre, code, .output-pre { font-family: var(--font-mono) !important; }
   #view-exercise .editor-wrapper { min-height:230px !important; height:var(--gdh-editor-height,255px) !important; max-height:390px !important; }
   #view-exercise .validation-panel, #view-exercise .validation-panel.console-only { flex:0 0 310px !important; }
 }
-@media(prefers-reduced-motion:reduce) { .gdh-user-menu, .gdh-course-illustration { transition:none !important; animation:none !important; } }
+@media(prefers-reduced-motion:reduce) { .gdh-user-menu { transition:none !important; animation:none !important; } }
 
 
 /* La descrizione teorica scorre dopo la consegna, senza spostare nodi DOM
