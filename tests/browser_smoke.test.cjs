@@ -1106,8 +1106,10 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#site-welcome').isVisible(),true);
  await page.locator('#site-start-tour').click();
  assert.equal(await page.locator('#site-tour').isVisible(),true);
- for(let n=0;n<6;n++){
-   assert.equal((await page.locator('#site-tour-position').textContent()).trim(),(n+1)+' / 6');
+ const tourLength=await page.evaluate(()=>App.siteTourSteps.length);
+ assert.equal(tourLength,4);
+ for(let n=0;n<tourLength;n++){
+   assert.equal((await page.locator('#site-tour-position').textContent()).trim(),(n+1)+' / '+tourLength);
    await page.locator('#site-tour-next').click();
  }
  assert.equal(await page.locator('#site-goal-gate').isVisible(),true);

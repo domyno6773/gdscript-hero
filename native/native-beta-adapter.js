@@ -128,7 +128,16 @@
     actions:step.actions||lesson.actions||[]
   });
   const verifyLesson=async(id,source)=>{
-    if(window.GDHGameplayLessons?.has(id))return window.GDHGameplayLessons.verify(id,source,raw);
+    if(window.GDHGameplayLessons?.has(id)){
+      // Chromium throttles animation frames in transparent/offscreen iframes.
+      // Physics assessments need the real engine loop, so show the running scene.
+      await start();
+      const activeFrame=frame, previousStyle=activeFrame.style.cssText;
+      activeFrame.style.cssText='position:fixed;right:12px;bottom:12px;width:min(320px, calc(100vw - 24px));height:180px;border:2px solid #478cbf;z-index:10000;background:#202b37;pointer-events:none';
+      activeFrame.title='Verifica della scena con la fisica di Godot';
+      try{return await window.GDHGameplayLessons.verify(id,source,raw);}
+      finally{if(frame===activeFrame){activeFrame.style.cssText=previousStyle;activeFrame.title='Motore Godot isolato';}}
+    }
     // Nuove lezioni del corso: sempre esecuzione nativa Godot, ID distinti dai ripassi.
     if(window.GDHCurriculumExtension?.has(id))
       return window.GDHCurriculumExtension.verify(id,source,raw);
