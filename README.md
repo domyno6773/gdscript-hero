@@ -115,6 +115,7 @@ Sono presenti workflow GitHub Actions per regressioni, browser e controlli mirat
 - `tests/didactic_consistency_regression.test.cjs` — coerenza di consegne, suggerimenti, soluzioni e verificatori delle lezioni 5, 19, 29, 39 e 121.
 - `tests/review_native_parity.test.cjs` — 17 varianti di ripasso, collegamento all'adattatore Godot e gestione dei verdetti nativi (test con motore simulato).
 - `tests/full_course_multitask.test.cjs` — verifica tutti gli 81 percorsi da quattro compiti, gli indizi, i requisiti GDScript e la compatibilità dei progressi (test statico; Godot WebAssembly da verificare separatamente).
+- `tests/alternative_solutions_regression.test.cjs` — 243 soluzioni ufficiali, alternative equivalenti, output errati e scorciatoie con codice non raggiungibile. Include test di commenti, stringhe e tipi numerici. Il controllo simula l'output: non dimostra l'esecuzione Godot.
 - `tests/auth_reliability.test.cjs` — salvataggi, backup e affidabilità dell'integrazione.
 - `tests/streak_telemetry_regression.test.cjs` — continuità streak, premio settimanale e completamento dei quattro compiti.
 - `tests/browser_smoke.test.cjs` — prove funzionali in Chrome desktop e mobile, compresi i controlli audio.
@@ -129,9 +130,12 @@ node tests/supplemental_curriculum_regression.test.cjs
 node tests/didactic_consistency_regression.test.cjs
 node tests/review_native_parity.test.cjs
 node tests/full_course_multitask.test.cjs
+node tests/alternative_solutions_regression.test.cjs
 node tests/auth_reliability.test.cjs
 node tests/streak_telemetry_regression.test.cjs
 ```
+
+Il workflow `.github/workflows/practice-regressions.yml` esegue automaticamente i due test sul percorso multi-compito nelle modifiche pertinenti (push, pull request o avvio manuale). La verifica end-to-end con Godot WebAssembly resta separata.
 
 Per avviare i test browser o nativi, consulta [.github/workflows/](.github/workflows/) per strumenti e versioni. I test verificano i comportamenti coperti, **non** la piena compatibilità del runtime con tutte le funzioni di Godot.
 
