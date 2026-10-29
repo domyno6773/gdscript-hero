@@ -17,9 +17,10 @@
     <link rel="stylesheet" href="scrollbars.css">
     <link rel="stylesheet" href="motion.css">
     <link rel="stylesheet" href="quiz.css">
+    <link rel="stylesheet" href="ui-refinement.css">
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Sprite SVG locale: un unico stile per le icone della Sandbox. -->
@@ -156,7 +157,8 @@
                 </div>
                 <div class="roadmap-header">
                     <div class="chapter-card overall-course-card">
-                        <div class="chapter-badge">ACCADEMIA INDIE • GDSCRIPT 4</div>
+                        <div class="gdh-course-copy">
+<div class="chapter-badge">Corso GDScript 4 · Godot</div>
                         <h1>Accademia di Sviluppo Godot</h1>
                         <p class="subtitle">Percorso completo in 15 capitoli, 81 esercizi pratici e 30 quiz: dai fondamenti di programmazione ai nodi 2D, segnali, animazioni e architettura ad albero per Godot 4.</p>
                         <div class="overall-progress-bar">
@@ -171,6 +173,21 @@
                                 <span>Continua ad Imparare</span>
                                 <span class="hero-btn-arrow"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
                             </button>
+                        </div>
+                        </div>
+                        <div class="gdh-course-illustration" aria-hidden="true">
+                            <svg viewBox="0 0 360 210" role="presentation" preserveAspectRatio="xMidYMid meet">
+                                <path fill="#182d41" d="M0 0h360v210H0z"/><circle cx="272" cy="50" r="24" fill="#eeb958"/>
+                                <g fill="#d9e5ec"><circle cx="53" cy="33" r="2"/><circle cx="105" cy="61" r="2.1"/><circle cx="181" cy="26" r="1.8"/><circle cx="330" cy="91" r="1.7"/><circle cx="229" cy="103" r="1.5"/></g>
+                                <path fill="#345b64" d="M0 156Q50 113 103 158T210 148T360 144V210H0Z"/>
+                                <path fill="#274b57" d="M0 174Q95 133 166 179T360 158V210H0Z"/>
+                                <ellipse cx="180" cy="190" rx="69" ry="10" fill="#17323e"/>
+                                <ellipse cx="179" cy="146" rx="46" ry="46" fill="#f1e8d6"/>
+                                <path d="M177 103Q163 86 169 71Q190 76 177 103M179 103Q190 86 203 85Q197 103 179 103" fill="#73a47f"/>
+                                <ellipse cx="163" cy="144" rx="4" ry="5" fill="#293b48"/><ellipse cx="193" cy="144" rx="4" ry="5" fill="#293b48"/>
+                                <path d="M173 159Q179 164 184 159" fill="none" stroke="#293b48" stroke-width="3" stroke-linecap="round"/>
+                                <ellipse cx="143" cy="162" rx="10" ry="6" fill="#e5b7a3" opacity=".65"/><ellipse cx="211" cy="162" rx="10" ry="6" fill="#e5b7a3" opacity=".65"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
@@ -200,7 +217,7 @@
 
                     <div class="sidebar-quests-collapsible-body" id="sidebar-quests-body">
                         <div class="sidebar-quests-countdown">
-                            <span>⏳ Reset a mezzanotte</span>
+                            <span>Reset a mezzanotte</span>
                             <span class="sidebar-today-label" id="sidebar-today-date">Oggi</span>
                         </div>
 
@@ -261,7 +278,7 @@
                     <div class="task-box">
                         <div class="task-header">
                             <span class="target-icon"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
-                            <h3>Il Tuo Obiettivo:</h3>
+                            <h3>Il tuo obiettivo</h3>
                         </div>
                         <div id="lesson-task" class="task-body">
                             <!-- Obiettivo -->
@@ -288,7 +305,7 @@
 
                     <!-- Pulsante Rapido Mobile per passare subito all'editor -->
                     <button type="button" class="btn-mobile-to-code" id="btn-mobile-to-code">
-                        <span>💻 Vai all'Editor di Codice ➔</span>
+                        <span>Vai all'editor di codice</span>
                     </button>
                 </div>
             </section>
@@ -366,7 +383,7 @@
                                     <span class="vtab-status" id="test-status-badge">• Non verificato</span>
                                 </div>
                                 <div class="validation-col-content">
-                                    <div class="exercise-primary-feedback" id="exercise-primary-feedback" role="status" aria-live="polite" data-state="idle">
+                                    <div class="exercise-primary-feedback hidden" id="exercise-primary-feedback" role="status" aria-live="polite" data-state="idle">
                                         <span class="exercise-feedback-icon" aria-hidden="true">ⓘ</span>
                                         <div class="exercise-feedback-copy">
                                             <strong id="exercise-feedback-title">In attesa di verifica</strong>
@@ -378,21 +395,21 @@
                                         <div class="output-box expected-box">
                                             <div class="output-box-header">
                                                 <span class="output-icon" aria-hidden="true"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
-                                                <span class="output-label">OUTPUT PREVISTO:</span>
+                                                <span class="output-label">Output previsto</span>
                                             </div>
-                                            <pre class="output-pre" id="expected-output-pre">// In attesa di verifica...</pre>
+                                            <pre class="output-pre" id="expected-output-pre">Il risultato atteso apparirà qui.</pre>
                                         </div>
                                         <div class="output-box real-box">
                                             <div class="output-box-header">
                                                 <span class="output-icon" aria-hidden="true"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M1 21h22"/></svg></span>
-                                                <span class="output-label">OUTPUT DEL TUO CODICE:</span>
+                                                <span class="output-label">Output del tuo codice</span>
                                             </div>
-                                            <pre class="output-pre" id="real-output-pre">// Clicca su "Verifica Codice" per eseguire</pre>
+                                            <pre class="output-pre" id="real-output-pre">Premi «Verifica il codice» per eseguire.</pre>
                                         </div>
                                     </div>
 
                                     <details class="exercise-test-details" id="exercise-test-details">
-                                        <summary>Dettaglio dei test <span id="exercise-test-count">Non ancora verificato</span></summary>
+                                        <summary>Dettaglio dei test <span id="exercise-test-count"></span></summary>
                                         <div class="test-results" id="test-results-view">
                                             <div class="empty-state">In attesa della verifica...</div>
                                         </div>
@@ -642,20 +659,7 @@
 
 
             <!-- La competizione e le classifiche sono in pausa; il progetto guidato resta disponibile. -->
-            <section class="gdh-arena-coming-soon" aria-label="Arena classificata: in arrivo">
-                <div class="gdh-coming-soon-preview" aria-hidden="true">
-                    <span class="competition-eyebrow">ARENA CLASSIFICATA</span>
-                    <h3>Arena e classifiche</h3>
-                    <p>Sfide, stagioni, classifiche globali e archivio Premium.</p>
-                </div>
-                <div class="gdh-coming-soon-cover">
-                    <svg class="gdh-coming-soon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="11" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="16" r="1"/></svg>
-                    <strong>In arrivo</strong>
-                    <span>Le sfide classificate e le classifiche non sono ancora disponibili.</span>
-                </div>
-            </section>
-
-            <div class="gdh-projects-collection-label">
+<div class="gdh-projects-collection-label">
                 <h3>Progetti guidati</h3>
                 <p>Arena del Gladiatore è disponibile gratuitamente. Gli altri progetti Premium arriveranno più avanti.</p>
             </div>
@@ -2118,5 +2122,6 @@
     <!-- Il motore Godot WebAssembly e' la verifica standard di tutte le lezioni. -->
     <script src="native/native-beta-adapter.js"></script>
     <script src="accessibility.js"></script>
+    <script src="ui-refinement.js"></script>
 </body>
 </html>
