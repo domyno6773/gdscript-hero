@@ -1277,6 +1277,8 @@ async function smoke(browser,url,width){
  assert.equal(questPaint.xpUnchanged,true,'Visual test must not award any XP');
  assert.match(questPaint.state,/Riscattato|Completata/);
 
+ // Measure the final layout, after the roadmap's entrance transform settles.
+ await page.locator('#view-roadmap').evaluate(el=>Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{}))));
  // CTA Ripasso: nessun testo sottolineato o controllo senza layout nel callout.
  const reviewCalloutStyle=await page.evaluate(()=>{
    const panel=document.getElementById('roadmap-review-callout');
@@ -1313,7 +1315,7 @@ async function smoke(browser,url,width){
  assert.equal(reviewCalloutStyle.dark.secondary.radius,'8px');
  assert.equal(reviewCalloutStyle.dark.primary.decoration,'none');
  assert.equal(reviewCalloutStyle.dark.primary.shadow,'none');
- assert.ok(reviewCalloutStyle.dark.primary.height>=39);
+ assert.ok(reviewCalloutStyle.dark.primary.height>=39,JSON.stringify(reviewCalloutStyle));
  assert.ok(reviewCalloutStyle.dark.secondary.height>=39);
  const primaryPadding=parseFloat(reviewCalloutStyle.dark.primary.padding);
  assert.ok(primaryPadding>=10,'CTA missing horizontal padding');
