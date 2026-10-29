@@ -574,14 +574,14 @@ const LESSONS_DATA = [
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "In GDScript si crea una variabile con la parola chiave `var`, seguita dal nome della variabile, dall'operatore `=` e dal valore numerico iniziale."
+                        "text": "In GDScript si crea una variabile con la parola chiave `var`, seguita dal nome della variabile, dall'operatore `=` e dal valore iniziale. Qui devi inserire una stringa, quindi il testo va racchiuso tra virgolette."
             },
             {
                         "level": 3,
                         "type": "example",
                         "icon": "📝",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var monete = 25\n    print(monete)\n```\nNota che quando stampi la variabile non devi usare le virgolette, altrimenti stamperesti il testo del nome e non il suo contenuto numerico."
+                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var personaggio = \"Lia\"\n    print(personaggio)\n```\nNota che quando stampi la variabile non devi usare le virgolette, altrimenti stamperesti il testo del nome e non il valore testuale che contiene."
             }
 ],
         solution: `func _ready():\n    var nome = "Eroe"\n    print(nome)\n`,
@@ -1563,7 +1563,7 @@ const LESSONS_DATA = [
                         "type": "concept",
                         "icon": "💭",
                         "label": "Indizio Concettuale",
-                        "text": "La clausola `else` definisce cosa deve accadere quando la condizione dell'`if` NON è verificata (il piano B del tuo programma, ad esempio quando i punti vita arrivano a zero)."
+                        "text": "La clausola `else` definisce cosa deve accadere quando la condizione dell'`if` NON è verificata (in questo esercizio, quando il personaggio ha ancora punti vita: `punti_vita > 0`). Con `punti_vita <= 0` entra invece nel primo ramo e stampa `Game Over`."
             },
             {
                         "level": 2,
