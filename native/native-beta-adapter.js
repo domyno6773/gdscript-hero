@@ -284,7 +284,7 @@
     const feedback={id:variantId,passed:accepted,
       verdict:accepted?'accepted':infrastructureFailure?'inconclusive':
         execution.success?'requirements_not_met':'invalid_code',
-      checks,
+      checks:tests,
       reason:accepted?'':infrastructureFailure?
         'Il motore Godot non ha potuto completare la verifica: riprova senza perdere progressi.':
         (tests.find(check=>!check.passed)?.diff||'Uno o più requisiti non sono soddisfatti'),
