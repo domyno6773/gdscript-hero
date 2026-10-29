@@ -5504,7 +5504,11 @@ const App = {
             const expectedOutputPre = document.getElementById('expected-output-pre');
             expectedOutputPre.textContent = variant.expectedOutput || "// Nessun output richiesto";
 
-            const tests = native.feedback.checks;
+            const tests = [...native.feedback.checks];
+            if(native.feedback.verdict === 'inconclusive'){
+                const failure=tests.find(test=>!test.passed);
+                if(failure)failure.diff=native.feedback.reason;
+            }
             if (!this.isReviewMode || this.currentReviewVariant !== variant ||
                 document.getElementById('code-editor').value !== code) return;
             const allPassed = native.accepted === true;
@@ -5514,7 +5518,7 @@ const App = {
             const isFirstTime = !(this.state.reviewProgress && Array.isArray(this.state.reviewProgress.completedVariants) && this.state.reviewProgress.completedVariants.includes(variant.id));
 
             // Registra esito del tentativo di ripasso (ReviewEngine gestisce in modo esclusivo daily_activity e telemetria varianti)
-            if (typeof ReviewEngine !== 'undefined') {
+            if (typeof ReviewEngine !== 'undefined' && native.feedback.verdict !== 'inconclusive') {
                 ReviewEngine.recordVariantAttempt(variant.id, allPassed, this.state.hintsRevealed, this.state);
             }
 
