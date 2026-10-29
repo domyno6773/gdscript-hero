@@ -1019,6 +1019,124 @@
     const text=String(lesson.title||'').replace(/^\d+\.\s*/, '');
     lesson.title=(index+1)+'. '+text;
   });
+
+  // Test comportamentali separati dall'esempio visibile. Le varianti cambiano
+  // solo dati d'ingresso o aggiungono una piccola chiamata-prova dentro _ready.
+  // Nessuna soluzione e' valutata tramite un interprete JavaScript.
+  const RULE_LABELS={
+    101:["Lo script deve estendere Node","L'avvio deve essere gestito da _ready()"],
+    102:["Converti il numero con str()","Conserva il messaggio in una variabile rapporto"],
+    103:["Dichiara energia con inferenza di tipo (:=)","Dichiara acceso con inferenza di tipo (:=)"],
+    104:["Calcola il risultato nella variabile totale","Usa la moltiplicazione nel calcolo","Somma anche la tassa"],
+    105:["Usa elif per la soglia intermedia","Gestisci tutti gli altri punteggi con else"],
+    106:["Nega lo stato dell'allarme con not","Combina i requisiti con and","Utilizza una condizione if"],
+    107:["Controlla la presenza della chiave con has()","Rimuovi la chiave con erase()","Leggi il numero di elementi con size()"],
+    108:["Dichiara un Array[int]","Aggiungi il punteggio con append()"],
+    109:["Scorri i controlli con un ciclo for","Controlla quando trovi un guasto con if","Interrompi la scansione con break"],
+    110:["Salta soltanto l'iterazione non valida con continue","Scorri tutti i premi con for","Individua i premi da ignorare con if"],
+    111:["Definisci la funzione calcola_danno()","Restituisci il risultato con return","Usa max() per impedire danni negativi"],
+    112:["Definisci applica_sconto()","Restituisci la variabile locale prezzo_finale"],
+    113:["Misura la distanza tra due vettori con distance_to()","Utilizza coordinate Vector2"],
+    114:["Normalizza il vettore con normalized()","Misura la lunghezza del vettore risultante"],
+    115:["Leggi le chiavi facoltative con get()","Conserva il risultato in scudo"],
+    116:["Dichiara il segnale pericolo(livello)","Collega il segnale alla callback","Emetti il segnale con un parametro"],
+    117:["Dichiara la classe Arma","Definisci il metodo danno_totale()","Restituisci un valore dal metodo"],
+    118:["Dichiara la classe Contatore","Crea istanze distinte con new()","Definisci il metodo aggiungi()"],
+    119:["Crea un nodo con Node.new()","Aggiungi il nodo all'albero con add_child()","Verifica la presenza con has_node()"],
+    120:["Crea un pulsante con Button.new()","Collega il segnale pressed","Emetti il segnale pressed"],
+    121:["Definisci la funzione aggiorna()","Usa il parametro delta","Scala il movimento moltiplicando per delta"]
+  };
+  function replaceInput(source,replacement,label,pattern,expected){
+    let changed=false;
+    const code=source.replace(pattern,(whole,prefix,...rest)=>{
+      changed=true;
+      return typeof replacement==='function'?replacement(whole,prefix,...rest):prefix+replacement;
+    });
+    return {label,code,expected,ready:changed};
+  }
+  const entry=(label,code,expected,ready=true)=>({label,code,expected,ready});
+  function mutate(source,pattern,value,label,expected){
+    let changed=false;
+    const code=source.replace(pattern,(full,prefix)=>{
+      changed=true;return prefix+value;
+    });
+    return entry(label,code,expected,changed);
+  }
+  // Aggiunge nuove osservazioni dopo le istruzioni di _ready() per interrogare
+  // funzioni e nodi con dati non presenti nell'esempio mostrato allo studente.
+  function probeReady(source,body,label,expected){
+    const head=/^func[ \t]+_ready[ \t]*\([^)]*\)[ \t]*(?:->[ \t]*void[ \t]*)?:[^\n]*$/m.exec(source);
+    if(!head)return entry(label,source,expected,false);
+    const begin=head.index+head[0].length;
+    let end=source.length, match;
+    const top=/^([A-Za-z_][^\n]*)$/gm;
+    top.lastIndex=begin;
+    while((match=top.exec(source))){
+      if(match.index>begin){end=match.index;break;}
+    }
+    const prefix=source.slice(0,end).replace(/[ \t]*$/,'').replace(/\n+$/,'');
+    const suffix=source.slice(end);
+    const extra=body.split('\n').map(line=>line?'    '+line:'').join('\n');
+    return entry(label,prefix+'\n'+extra+'\n\n'+suffix,expected,true);
+  }
+  function scenarios(id,source,expected){
+    const input=(name,value,output,regex)=>mutate(source,regex,value,name,output);
+    const literal=(name,regex,value,output)=>{
+      let done=false;
+      const code=source.replace(regex,()=>{done=true;return value;});
+      return entry(name,code,output,done);
+    };
+    switch(id){
+      case 101: return []; // La sequenza dei due print e' gia' osservata.
+      case 102: return [input('Crediti alternativi','47','Crediti: 47',/(^\s*var\s+crediti\s*(?::\s*int)?\s*(?::=|=)\s*)25\b/m)];
+      case 103: return [
+        input('Energia alternativa','31','Energia: 31\nAcceso: true',/(^\s*var\s+energia\s*:=\s*)75\b/m),
+        input('Generatore spento','false','Energia: 75\nAcceso: false',/(^\s*var\s+acceso\s*:=\s*)true\b/m)
+      ];
+      case 104:{
+        let count=0;
+        const code=source.replace(/(^\s*var\s+(costo_kit|quantita|tassa)\s*=\s*)(12|3|4)\b/gm,
+          (full,prefix,key)=>{
+            count++;return prefix+({costo_kit:8,quantita:5,tassa:7}[key]);
+          });
+        return [entry('Costi e quantita diversi',code,'Totale: 47',count===3)];
+      }
+      case 105:return [
+        input('Rango alto','95','Rango: A',/(^\s*var\s+punti\s*=\s*)72\b/m),
+        input('Rango basso','35','Rango: C',/(^\s*var\s+punti\s*=\s*)72\b/m)
+      ];
+      case 106:return [
+        input('Allarme attivo','true','Accesso negato',/(^\s*var\s+allarme_attivo\s*=\s*)false\b/m),
+        input('Lasciapassare assente','false','Accesso negato',/(^\s*var\s+ha_pass\s*=\s*)true\b/m)
+      ];
+      case 107:return [
+        input('Chiave mancante','["Torcia", "Mappa"]','Oggetti rimasti: 2',/(^\s*var\s+zaino\s*=\s*)\[[^\n]*\]/m),
+        input('Zaino piu grande','["Torcia", "Chiave", "Mappa", "Pozione"]','Oggetti rimasti: 3',/(^\s*var\s+zaino\s*=\s*)\[[^\n]*\]/m)
+      ];
+      case 108:return [literal('Nuovo punteggio',/\.append\s*\(\s*30\s*\)/,'.append(45)','Ultimo punteggio: 45')];
+      case 109:return [
+        input('Due guasti consecutivi','["OK", "GUASTO", "GUASTO"]','Guasto individuato',/(^\s*var\s+controlli\s*=\s*)\[[^\n]*\]/m),
+        input('Nessun guasto','["OK", "OK"]','',/(^\s*var\s+controlli\s*=\s*)\[[^\n]*\]/m)
+      ];
+      case 110:return [
+        input('Premi differenti','[6, -4, 18, 2]','Ricompense: 26',/(^\s*var\s+premi\s*=\s*)\[[^\n]*\]/m),
+        input('Solo premi non validi','[-2, -5]','Ricompense: 0',/(^\s*var\s+premi\s*=\s*)\[[^\n]*\]/m)
+      ];
+      case 111:return [probeReady(source,'print("GDH verifica: ", calcola_danno(7, 12), ";", calcola_danno(9))','Danno con altri argomenti',expected+'\nGDH verifica: 0;9')];
+      case 112:return [probeReady(source,'print("GDH verifica: ", applica_sconto(95, 17))','Sconto con altri argomenti',expected+'\nGDH verifica: 78')];
+      case 113:return [input('Stazione piu lontana','Vector2(10, 3)','Attracco possibile: false',/(^\s*var\s+stazione\s*=\s*)Vector2\s*\(\s*3\s*,\s*4\s*\)/m)];
+      case 114:return [literal('Vettore nullo',/Vector2\s*\(\s*3\s*,\s*4\s*\)/,'Vector2(0, 0)','Direzione unitaria: false')];
+      case 115:return [input('Nemico con scudo','{"nome": "Slime", "hp": 20, "scudo": 18}','Scudo: 18',/(^\s*var\s+nemico\s*=\s*)\{[^\n]*\}/m)];
+      case 116:return [literal('Segnale di livello diverso',/pericolo\.emit\s*\(\s*3\s*\)/,'pericolo.emit(7)','Allarme: 7')];
+      case 117:return [probeReady(source,'var arma_verifica = Arma.new()\narma_verifica.base = 5\narma_verifica.bonus = 8\nprint("GDH verifica: ", arma_verifica.danno_totale())','Danno di un\'altra arma',expected+'\nGDH verifica: 13')];
+      case 118:return [probeReady(source,'var altro_contatore = Contatore.new()\naltro_contatore.aggiungi()\nprint("GDH verifica: ", altro_contatore.valore)','Terza istanza indipendente',expected+'\nGDH verifica: 1')];
+      case 119:return [probeReady(source,'print("GDH verifica: ", has_node("Compagno"))','Verifica del nodo reale',expected+'\nGDH verifica: true')];
+      case 120:return [probeReady(source,'for pulsante_verifica in get_children():\n    if pulsante_verifica is Button:\n        pulsante_verifica.pressed.emit()','Seconda pressione reale',expected+'\n'+expected)];
+      case 121:return [probeReady(source,'aggiorna(0.2)\nprint("GDH verifica: ", posizione)','Aggiornamento con delta differente',expected+'\nGDH verifica: 12.0')];
+      default:return [];
+    }
+  }
+
   const records = new Map(EXTRA_LESSONS.map(x=>[x.id,x]));
   const lines = text => String(text||'').trimEnd().split(/\r?\n/).filter(Boolean);
   const clean = code => String(code||'')
@@ -1031,16 +1149,39 @@
     const executed=raw.status==='executed' && !String(raw.stderr||'').trim();
     const checks=[
       {desc:'Godot ha compilato ed eseguito lo script senza errori',passed:executed},
-      {desc:'Output e sequenza corretti',passed:executed && JSON.stringify(lines(raw.stdout))===JSON.stringify(lines(lesson.expectedOutput))}
+      {desc:'Output e sequenza corretti',passed:executed &&
+        JSON.stringify(lines(raw.stdout))===JSON.stringify(lines(lesson.expectedOutput))}
     ];
     const logicalSource=clean(code);
-    for(const rule of lesson.rules){
-      const found=new RegExp(rule).test(logicalSource);
-      checks.push({desc:'Costrutto richiesto: '+rule,passed:found});
+    for(let i=0;i<lesson.rules.length;i++){
+      const found=new RegExp(lesson.rules[i]).test(logicalSource);
+      checks.push({desc:RULE_LABELS[id]?.[i]||'Utilizza il costrutto richiesto',passed:found});
+    }
+    if(id===104){
+      checks.push({desc:'Raggruppa almeno una moltiplicazione tra parentesi',
+        passed:/\([^()\n]*\*[^()\n]*\)/.test(logicalSource)});
+    }
+    // Se il codice non supera gia' i controlli visibili, evita esecuzioni
+    // extra lente e usa il debugger nativo per spiegare l'errore originale.
+    if(checks.every(check=>check.passed)){
+      for(const scenario of scenarios(id,code,lesson.expectedOutput)){
+        if(!scenario.ready){
+          checks.push({desc:scenario.label+' · mantieni i dati di partenza come nella consegna',
+            passed:false,diff:'Impossibile applicare il caso alternativo: verifica dichiarazioni e chiamate richieste.'});
+          continue;
+        }
+        const response=await runNative(scenario.code);
+        const ok=response.status==='executed'&&!String(response.stderr||'').trim()
+          &&JSON.stringify(lines(response.stdout))===JSON.stringify(lines(scenario.expected));
+        checks.push({desc:scenario.label+' · corretto anche con dati differenti',
+          passed:ok,diff:ok?'':'Il programma non produce il risultato atteso nel caso di prova. Evita valori scritti direttamente nell’output.'});
+      }
     }
     const accepted=checks.every(x=>x.passed);
+    const reason=!executed?(raw.stderr||'Il motore non ha eseguito lo script'):
+      accepted?'':(checks.find(x=>!x.passed)?.diff||'Rivedi il requisito evidenziato e riprova.');
     const feedback={id,passed:accepted,verdict:!executed?'invalid_code':accepted?'accepted':'requirements_not_met',
-      checks,reason:!executed?(raw.stderr||'Il motore non ha eseguito lo script'):'',demoOnly:true};
+      checks,reason,demoOnly:true};
     const execution={success:executed,code,logs:lines(raw.stdout),
       error:executed?null:(String(raw.stderr||'Impossibile eseguire lo script')),nativeStatus:raw.status,nativeFeedback:feedback};
     return {feedback,execution,original:raw,accepted};
