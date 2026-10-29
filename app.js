@@ -2659,40 +2659,57 @@ const App = {
     // ==========================================
     // Garantisce che i livelli completati sblocchino coerentemente sia il percorso principale che i bonus
     ensureUnlockedConsistency() {
-        if (!this.state.completedLessons || !Array.isArray(this.state.completedLessons)) {
-            this.state.completedLessons = [1];
-        }
-        if (!this.state.completedLessons.includes(1)) {
-            this.state.completedLessons.unshift(1);
+        // La sequenza reale è LESSONS_DATA, non l'ID numerico: nuovi quiz e
+        // argomenti possono essere inseriti tra lezioni già presenti.
+        const ordered = LESSONS_DATA;
+        const indexById = new Map(ordered.map((lesson,index)=>[lesson.id,index]));
+        const finished = Array.isArray(this.state.finishedLessons)
+            ? this.state.finishedLessons.filter(id=>indexById.has(id)) : [];
+        if (!Array.isArray(this.state.finishedLessons) ||
+            finished.length!==this.state.finishedLessons.length) {
+            this.state.finishedLessons=[...new Set(finished)];
         }
 
-        // Se siamo sul sito online pubblico, la modalità devAllUnlocked è disattivata categoricamente
-        if (!this.isLocalEnvironment()) {
-            this.state.devAllUnlocked = false;
-        }
+        // Lo sblocco totale è riservato allo sviluppo locale.
+        if (!this.isLocalEnvironment()) this.state.devAllUnlocked=false;
 
-        // Se la modalità sblocco totale è attiva (SOLO ed esclusivamente in locale)
+        // La progressione va sempre in avanti. Un'attività già completata,
+        // anche in un salvataggio creato prima dell'inserimento dei quiz,
+        // dimostra che tutte le tappe precedenti devono essere ACCESSIBILI.
+        // Non le segniamo come superate e non attribuiamo XP fittizi.
+        let lastReached=0;
         if (this.state.devAllUnlocked) {
-            LESSONS_DATA.forEach(lesson => {
-                if (!this.state.completedLessons.includes(lesson.id)) {
-                    this.state.completedLessons.push(lesson.id);
-                }
-            });
-            this.saveStorage();
-            return;
+            lastReached=ordered.length-1;
+        } else {
+            for (const id of finished) {
+                const position=indexById.get(id);
+                lastReached=Math.max(lastReached,Math.min(position+1,ordered.length-1));
+            }
         }
+        const reachable=ordered.slice(0,lastReached+1).map(lesson=>lesson.id);
+        const previous=Array.isArray(this.state.completedLessons)
+            ? this.state.completedLessons : [];
+        const changed=previous.length!==reachable.length ||
+            previous.some((id,index)=>id!==reachable[index]);
+        if (changed) {
+            this.state.completedLessons=reachable;
+            // Evita una nuova sincronizzazione a ogni render della mappa.
+            this.saveStorage();
+        }
+    },
 
-        // Progressione lineare sulla mappa ordinata: gli esercizi di
-        // consolidamento concludono il capitolo e sono obbligatori.
-        // Gli ID persistenti non indicano più l'ordine del corso.
-        const normalUnlocked = [LESSONS_DATA[0]?.id || 1];
-        LESSONS_DATA.forEach((lesson, index) => {
-            if (!this.state.finishedLessons.includes(lesson.id)) return;
-            const next = LESSONS_DATA[index + 1];
-            if (next && !normalUnlocked.includes(next.id)) normalUnlocked.push(next.id);
+    getRoadmapContinueId() {
+        const finished=new Set(this.state.finishedLessons||[]);
+        const available=new Set(this.state.completedLessons||[]);
+        // Il tag CONTINUA punta alla prossima tappa dopo il livello più
+        // avanzato completato, non a currentLessonId rimasto su una lezione
+        // che l'utente ha riaperto per rivederla.
+        let lastFinished=-1;
+        LESSONS_DATA.forEach((lesson,index)=>{
+            if(finished.has(lesson.id))lastFinished=index;
         });
-        this.state.completedLessons = normalUnlocked;
-        this.saveStorage();
+        return LESSONS_DATA.slice(lastFinished+1)
+            .find(lesson=>available.has(lesson.id)&&!finished.has(lesson.id))?.id ?? null;
     },
 
     unlockAllLessons(notify = false) {
@@ -2841,6 +2858,7 @@ const App = {
         container.innerHTML = '';
 
         this.ensureUnlockedConsistency();
+        const continueId=this.getRoadmapContinueId();
 
         // P3.3: Aggiorna indicatori, badge e callout della Palestra di Ripasso
         this.updateReviewIndicators();
@@ -2913,13 +2931,9 @@ const App = {
                 const isFinished = this.state.finishedLessons.includes(lesson.id);
                 const isUnlocked = this.state.completedLessons.includes(lesson.id);
 
-                // Determina quale singolo nodo deve avere il tag "CONTINUA" e la pulsazione d'azione
-                let focusId = this.state.currentLessonId;
-                if (!focusId || this.state.finishedLessons.includes(focusId)) {
-                    const firstUnfinishedCore = LESSONS_DATA.find(l => this.state.completedLessons.includes(l.id) && !this.state.finishedLessons.includes(l.id));
-                    if (firstUnfinishedCore) focusId = firstUnfinishedCore.id;
-                }
-                const isCurrentFocus = isUnlocked && !isFinished && (lesson.id === focusId);
+                // Il segnaposto di avanzamento dipende dalla sequenza dei completamenti,
+                // non dall'ultima lezione visitata.
+                const isCurrentFocus = isUnlocked && !isFinished && lesson.id===continueId;
 
                 let statusClass = 'locked';
                 if (isFinished) {
