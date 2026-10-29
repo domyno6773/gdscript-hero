@@ -37,11 +37,32 @@ pre, code, .output-pre { font-family: var(--font-mono) !important; }
 .navbar .gdh-user-menu .badge-count { margin-left:auto; font-size:.7rem; }
 #nav-editor-btn[hidden], #mob-nav-exercise[hidden] { display:none !important; }
 @media (min-width:821px) {
-  .navbar { display:flex !important; justify-content:flex-start !important; gap:15px !important; }
-  .navbar>.nav-left { flex:0 0 auto; }
-  .navbar>.nav-center { flex:0 1 auto !important; width:auto !important; justify-content:flex-start !important; gap:4px !important; margin-right:auto !important; }
-  .navbar>.nav-right { flex:0 0 auto; margin-left:auto; }
+  /* Tre colonne simmetriche: le quattro sezioni sono centrate rispetto all'intera finestra. */
+  .navbar {
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) max-content minmax(0,1fr) !important;
+    align-items:center;
+    justify-content:normal !important;
+    gap:clamp(4px,.9vw,16px) !important;
+  }
+  .navbar>.nav-left { justify-self:start !important; flex:initial; }
+  .navbar>.nav-center {
+    justify-self:center !important;
+    justify-content:center !important;
+    margin:0 !important;
+    width:max-content !important;
+    max-width:100% !important;
+    gap:4px !important;
+    flex:initial !important;
+  }
+  .navbar>.nav-right { justify-self:end !important; margin:0 !important; flex:initial; }
   .navbar .nav-center .nav-btn-text { display:inline !important; }
+}
+@media (min-width:821px) and (max-width:980px) {
+  /* Su laptop stretti, manteniamo l'allineamento centrale senza far sovrapporre i controlli. */
+  .navbar .nav-center .nav-btn-text { display:none !important; }
+  .navbar .nav-center .nav-btn { min-width:44px; justify-content:center; }
+  .navbar>.nav-center { gap:1px !important; }
 }
 @media (max-width:1050px) and (min-width:821px) {
   .navbar { gap:6px !important; padding-inline:8px !important; }
@@ -59,17 +80,14 @@ pre, code, .output-pre { font-family: var(--font-mono) !important; }
   #mobile-bottom-nav .mob-nav-item { min-width:0; min-height:53px; }
 }
 /* Only the HOME banner, never the chapter/node roadmap cards. */
-#view-roadmap .overall-course-card { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(205px,38%); align-items:center; gap:24px; border:1px solid #55677a !important; background:#273543 !important; box-shadow:5px 6px 0 #15212e !important; padding:22px 26px !important; }
+#view-roadmap .overall-course-card { display:block !important; border:1px solid #55677a !important; background:#273543 !important; box-shadow:5px 6px 0 #15212e !important; padding:22px 26px !important; }
 #view-roadmap .overall-course-card::before, #view-roadmap .overall-course-card::after { display:none !important; }
 #view-roadmap .overall-course-card .chapter-badge { font:500 .8rem var(--font-ui) !important; letter-spacing:0 !important; text-transform:none !important; color:#b9cfe1 !important; border:0 !important; background:transparent !important; padding:0 !important; margin:0 0 8px !important; }
 #view-roadmap .overall-course-card h1 { font:700 clamp(1.4rem,2vw,1.9rem)/1.2 var(--font-ui) !important; text-transform:none !important; letter-spacing:0 !important; }
 #view-roadmap .overall-course-card .progress-stats, #view-roadmap .overall-course-card .progress-stats span { font:400 .79rem/1.5 var(--font-ui) !important; text-transform:none !important; letter-spacing:0 !important; color:#b6c9da !important; }
 #view-roadmap .overall-course-card .demo-tag { background:none !important; border:0 !important; padding:0 !important; }
-#view-roadmap .gdh-course-copy { min-width:0; }
-#view-roadmap .gdh-course-illustration { display:flex; align-items:center; justify-content:center; overflow:hidden; height:210px; max-width:100%; border:1px solid #3a5568; border-radius:6px; background:#182d41; }
-#view-roadmap .gdh-course-illustration svg { width:100%; height:100%; display:block; }
 #view-roadmap .sidebar-quests-countdown { font:400 .78rem var(--font-ui) !important; color:#b9cce1 !important; letter-spacing:0 !important; text-transform:none !important; }
-@media (max-width:760px) { #view-roadmap .overall-course-card { grid-template-columns:minmax(0,1fr) !important; padding:18px !important; gap:16px; } #view-roadmap .gdh-course-illustration { height:170px; } }
+@media (max-width:760px) { #view-roadmap .overall-course-card { padding:18px !important; } }
 /* Lessons: priority is title, progress, objective, hints, THEN scrollable theory. */
 #view-exercise .workspace-grid { grid-template-columns:minmax(300px,2fr) minmax(0,3fr) !important; }
 #view-exercise .lesson-content { display:flex; flex-direction:column; gap:12px; }
@@ -126,3 +144,89 @@ pre, code, .output-pre { font-family: var(--font-mono) !important; }
 #profile-avatar-display svg { width:50%; height:50%; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .avatar-option svg { width:25px; height:25px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 @media(max-width:820px) { #view-exercise .panel-lesson { display:flex !important; } }
+
+
+/* Verifica: console e output in primo piano, debugger sotto; il contenuto determina l'altezza. */
+#view-exercise .panel-code {
+  min-height:0;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  scrollbar-color:#516b82 transparent;
+}
+#view-exercise .validation-panel,
+#view-exercise .validation-panel.console-only {
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  flex:0 0 auto !important;
+  overflow:visible !important;
+  padding:0 !important;
+}
+#view-exercise .validation-body {
+  flex:0 0 auto !important;
+  height:auto !important;
+  min-height:0 !important;
+  overflow:visible !important;
+  padding:0 !important;
+  display:block !important;
+}
+#view-exercise .validation-split-grid,
+#view-exercise .validation-split-grid.console-only {
+  display:grid !important;
+  height:auto !important;
+  min-height:0 !important;
+  overflow:visible !important;
+  align-items:start;
+}
+#view-exercise .validation-console-col {
+  min-width:0 !important;
+  min-height:0 !important;
+  height:auto !important;
+  overflow:visible !important;
+}
+#view-exercise .validation-col-content {
+  min-height:0 !important;
+  height:auto !important;
+  flex:0 0 auto !important;
+  overflow:visible !important;
+  padding-bottom:15px !important;
+}
+#view-exercise .gdh-debug-host {
+  min-width:0;
+  width:100%;
+  flex:0 0 auto;
+}
+#view-exercise .gdh-debug-panel {
+  box-sizing:border-box;
+  width:100%;
+  max-height:none !important;
+  overflow:visible !important;
+  margin:8px 0 0;
+}
+#view-exercise .exercise-feedback-copy p {
+  max-height:none !important;
+  overflow:visible !important;
+}
+#view-exercise .validation-viewport-col:not(.hidden) {
+  align-self:start;
+  height:300px !important;
+  min-height:240px !important;
+}
+#view-exercise .gdh-code-guide-mount {
+  margin:20px 0 5px;
+  width:100%;
+  max-width:100%;
+}
+/* Non bloccare la griglia su mobile: il debugger viene dopo gli output, senza scrollbar interne. */
+@media (max-width:820px) {
+  #view-exercise .panel-code { overflow-y:visible !important; }
+  #view-exercise .validation-split-grid,
+  #view-exercise .validation-split-grid.console-only {
+    display:flex !important;
+    flex-direction:column !important;
+    overflow:visible !important;
+  }
+  #view-exercise .validation-console-col { flex:0 0 auto !important; width:100%; }
+  #view-exercise .validation-viewport-col:not(.hidden) { flex:0 0 240px !important; height:240px !important; width:100%; }
+  #view-exercise .gdh-debug-panel { overflow-wrap:anywhere; }
+}
