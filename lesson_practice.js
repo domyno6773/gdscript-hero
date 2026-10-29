@@ -1,5 +1,5 @@
-/* Percorsi multi-compito: pilota Capitolo 1. Nessun JS esegue GDScript:
-   ogni verifica passa dal motore Godot WebAssembly isolato. */
+/* Percorsi multi-compito in tutti i 15 capitoli. Le verifiche eseguono
+   soltanto Godot WebAssembly isolato: JavaScript controlla output e requisiti. */
 (function(root){
   'use strict';
   const mk=(key,title,task,initialCode,solution,expectedOutput,requirements={},hints=[])=>({
@@ -92,15 +92,20 @@
         ['Il rapporto deve avere quattro righe.','Aggiungi le due istruzioni prima della stampa finale.','Esempio: print("Energia: ", 50, "%") usa tre argomenti.'])
     ]
   };
-  const enabled=id=>Object.prototype.hasOwnProperty.call(custom,id);
+  const extraFor=lesson=>custom[lesson?.id] ||
+    root.GDHPracticeCatalog?.tasksFor(lesson) || [];
+  const enabled=id=>Boolean(custom[id]||
+    (root.LESSONS_DATA||[]).some(l=>l.id===id && !l.isQuiz && l.chapterId>=2 && l.chapterId<=15));
   const tasksFor=lesson=>{
-    if(!lesson||!enabled(lesson.id))return [];
+    if(!lesson||!enabled(lesson.id)||lesson.isQuiz)return [];
+    const extra=extraFor(lesson);
+    if(extra.length!==3)throw Error('Compiti didattici mancanti per la lezione '+lesson.id);
     const original={
       key:'base',title:lesson.isMastery?'Diagnostica finale':'Prima applicazione',
       task:lesson.task,initialCode:lesson.initialCode,solution:lesson.solution,
       expectedOutput:lesson.expectedOutput,hints:lesson.hints,nativeOriginal:true
     };
-    return lesson.isMastery?[...custom[lesson.id],original]:[original,...custom[lesson.id]];
+    return lesson.isMastery?[...extra,original]:[original,...extra];
   };
   const getTask=(id,key)=>{
     const lesson=(root.LESSONS_DATA||[]).find(l=>l.id===id);
@@ -145,6 +150,14 @@
       const calls=active.match(/\bprint\s*\([^\n)]*\)/g)||[];
       const numeric=calls.some(call=>new RegExp(',\\s*'+req.numericArgument+'\\s*,').test(call));
       checks.push({desc:'Numero '+req.numericArgument+' passato come argomento numerico',passed:numeric});
+    }
+    // Controlla il costrutto didattico nella sorgente originale, togliendo i
+    // commenti: un commento che cita "if" o "append" non supera la prova.
+    const executable=source.replace(/#[^\n]*/g,'');
+    for(const pattern of req.mustUse||[]){
+      const valid=new RegExp(pattern).test(executable);
+      checks.push({desc:'Costrutto GDScript previsto dalla consegna',passed:valid,
+        diff:valid?null:'Il codice produce l’output, ma manca un costrutto richiesto: rileggi la consegna e gli indizi.'});
     }
     return checks;
   };
