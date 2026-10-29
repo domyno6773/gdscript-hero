@@ -14,7 +14,7 @@ GDScript Hero è una piattaforma didattica **gratuita e in italiano** per impara
 
 | Sezione | Stato | Descrizione |
 | --- | --- | --- |
-| **Corso gratuito** | Disponibile | **81 esercizi pratici e 30 quiz in 15 capitoli**, con teoria, esempi, esercizi, suggerimenti e verifiche |
+| **Corso gratuito** | Disponibile | **81 lezioni pratiche con 4 compiti ciascuna (324 compiti) e 30 quiz in 15 capitoli**, con teoria, esempi, indizi e verifiche tramite Godot |
 | **Editor GDScript** | Disponibile | Sintassi colorata, numeri di riga, completamento contestuale e comandi rapidi |
 | **Risultati e diagnostica** | Disponibile | Output atteso/ottenuto, errori in evidenza e dettagli dei test |
 | **Sandbox** | Disponibile | Sperimentazione con codice, nodi, scena e viewport 2D |
@@ -114,6 +114,7 @@ Sono presenti workflow GitHub Actions per regressioni, browser e controlli mirat
 - `tests/supplemental_curriculum_regression.test.cjs` — 21 esercizi aggiuntivi, spiegazioni e indizi specifici, prove con dati alternativi (runner nativo simulato per il test di regressione).
 - `tests/didactic_consistency_regression.test.cjs` — coerenza di consegne, suggerimenti, soluzioni e verificatori delle lezioni 5, 19, 29, 39 e 121.
 - `tests/review_native_parity.test.cjs` — 17 varianti di ripasso, collegamento all'adattatore Godot e gestione dei verdetti nativi (test con motore simulato).
+- `tests/full_course_multitask.test.cjs` — verifica tutti gli 81 percorsi da quattro compiti, gli indizi, i requisiti GDScript e la compatibilità dei progressi (test statico; Godot WebAssembly da verificare separatamente).
 - `tests/auth_reliability.test.cjs` — salvataggi, backup e affidabilità dell'integrazione.
 - `tests/streak_telemetry_regression.test.cjs` — continuità streak, premio settimanale e completamento dei quattro compiti.
 - `tests/browser_smoke.test.cjs` — prove funzionali in Chrome desktop e mobile, compresi i controlli audio.
@@ -127,6 +128,7 @@ node tests/audit_validator_regression.test.cjs
 node tests/supplemental_curriculum_regression.test.cjs
 node tests/didactic_consistency_regression.test.cjs
 node tests/review_native_parity.test.cjs
+node tests/full_course_multitask.test.cjs
 node tests/auth_reliability.test.cjs
 node tests/streak_telemetry_regression.test.cjs
 ```
