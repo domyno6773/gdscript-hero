@@ -454,15 +454,15 @@ async function testAccessibilityKeyboard(page,width){
   assert.equal(await page.locator('#level-popover').isHidden(),true,'Escape did not close level panel');
   assert.equal(await page.evaluate(()=>document.activeElement?.id),'btn-open-profile',
     'Closing level panel must restore focus to its launcher');
-  await profile.click();
-  await page.locator('#btn-level-full-profile').click();
+  await page.locator('#btn-open-user-menu').click();
+  await page.locator('#btn-menu-profile').click();
   assert.equal(await page.locator('#profile-modal').isVisible(),true,'Existing customization must remain accessible');
   assert.equal(await page.evaluate(()=>document.activeElement.closest('#profile-modal')!==null),true,
     'Opening profile dialog should move focus inside it');
   assert.equal(await page.locator('#btn-close-profile').getAttribute('aria-label'),'Chiudi finestra');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#profile-modal').isHidden(),true,'Escape did not close profile');
-  assert.equal(await page.evaluate(()=>document.activeElement?.id),'btn-open-profile',
+  assert.equal(await page.evaluate(()=>document.activeElement?.id),'btn-open-user-menu',
     'Full profile dialog must restore focus to its visible launcher');
   const streak=page.locator('#btn-streak-modal');
   await streak.focus();await page.keyboard.press('Space');
@@ -480,22 +480,20 @@ async function testAccessibilityKeyboard(page,width){
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#settings-modal').isHidden(),true);
 
-  // Godot's custom node picker must expose radio semantics and arrow keys.
-  await page.evaluate(()=>document.getElementById('add-node-modal').classList.remove('hidden'));
-  const picker=page.locator('#node-type-selector-grid');
-  assert.equal(await picker.getAttribute('role'),'radiogroup');
-  const selected=picker.locator('.node-type-option.selected');
-  assert.equal(await selected.getAttribute('aria-checked'),'true');
-  await selected.focus();await page.keyboard.press('ArrowRight');
-  assert.equal(await picker.locator('.node-type-option.selected').getAttribute('data-node-type'),'Label');
-  assert.equal(await picker.locator('.node-type-option.selected').getAttribute('aria-checked'),'true');
+  // The native dialog supports keyboard search, creation and cancellation.
+  await page.evaluate(()=>App.openPracticeView());
+  await page.locator('#btn-sandbox-add-node').click();
+  const picker=page.locator('dialog.scene-create-dialog');
+  assert.equal(await picker.isVisible(),true);
+  await page.locator('.scene-node-search').fill('CollisionShape2D');
+  assert.equal(await picker.locator('.scene-type-list button').count(),1);
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('#add-node-modal').isHidden(),true);
+  assert.equal(await picker.count(),0);
 
   // The active section and exercise split-tab are announced to screen readers.
   await page.evaluate(()=>App.openLesson(1));
-  assert.equal(await page.locator('#nav-editor-btn').getAttribute('aria-current'),'page');
-  assert.equal(await page.locator('#mob-nav-exercise').getAttribute('aria-current'),'page');
+  assert.equal(await page.locator('#nav-roadmap-btn').getAttribute('aria-current'),'page');
+  assert.equal(await page.locator('#mob-nav-roadmap').getAttribute('aria-current'),'page');
   await page.evaluate(()=>App.setMobileExerciseTab('code',false));
   assert.equal(await page.locator('#btn-tab-code').getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('#btn-tab-instructions').getAttribute('aria-pressed'),'false');

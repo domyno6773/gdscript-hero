@@ -37,7 +37,7 @@
           const top=topDialog();
           if(top){focusInside(top);return;}
           if(opener?.isConnected&&opener.getClientRects().length)opener.focus();
-          else if(modal.id==='profile-modal')document.getElementById('btn-open-profile')?.focus();
+          else if(modal.id==='profile-modal')document.getElementById('btn-open-user-menu')?.focus();
         });
       }
     };
