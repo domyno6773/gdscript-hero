@@ -865,11 +865,11 @@
     "isSupplemental": true,
     "isConsolidation": false,
     "xp": 60,
-    "title": "121. Una funzione di aggiornamento per ogni frame",
+    "title": "121. Simulare aggiornamenti di gioco con delta",
     "icon": "code-2",
     "expectedOutput": "Posizione finale: 10.0",
     "theory": "<p><code>delta</code> misura quanti secondi sono trascorsi tra aggiornamenti. Per un movimento a velocità costante la formula è <code>incremento = velocità * delta</code>.</p><p>Qui simuli due aggiornamenti da mezzo secondo chiamando <code>aggiorna(0.5)</code> due volte; non stai ancora collegando la funzione a <code>_process(delta)</code>. Il metodo deve funzionare anche con intervalli differenti, non soltanto con due chiamate da 0,5.</p>",
-    "task": "<p>Simula due aggiornamenti di gioco passando un delta in secondi; distingui il tempo trascorso dal numero di frame.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Completa la funzione <code>aggiorna(delta)</code> per spostare il personaggio a 10 unità al secondo: ogni chiamata deve aumentare <code>posizione</code> di <code>10.0 * delta</code>.</p><p>In questo esercizio <code>_ready()</code> richiama manualmente <code>aggiorna(0.5)</code> due volte per simulare due intervalli di mezzo secondo. Non è ancora un ciclo automatico <code>_process(delta)</code>. Il metodo deve funzionare anche con intervalli diversi.</p>",
     "initialCode": "extends Node\nvar posizione = 0.0\n\nfunc aggiorna(delta: float) -> void:\n    # Aggiorna posizione con velocità 10.0 per secondo\n    pass\n\nfunc _ready():\n    aggiorna(0.5)\n    aggiorna(0.5)\n    print(\"Posizione finale: \", posizione)\n",
     "solution": "extends Node\nvar posizione = 0.0\n\nfunc aggiorna(delta: float) -> void:\n    posizione += 10.0 * delta\n\nfunc _ready():\n    aggiorna(0.5)\n    aggiorna(0.5)\n    print(\"Posizione finale: \", posizione)\n",
     "rules": [
