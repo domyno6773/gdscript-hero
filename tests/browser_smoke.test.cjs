@@ -1165,8 +1165,7 @@ async function smoke(browser,url,width){
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
  // L'Arena classificata e i progetti Premium sono in pausa, ma il progetto gratuito resta aperto.
  await page.evaluate(()=>App.openProjectsView());
- assert.equal(await page.locator('.gdh-arena-coming-soon .gdh-coming-soon-lock').count(),1);
- assert.equal((await page.locator('.gdh-arena-coming-soon .gdh-coming-soon-cover strong').textContent()).trim(),'In arrivo');
+ assert.equal(await page.locator('.gdh-arena-coming-soon').count(),0,'The paused competitive Arena has no catalog card');
  assert.equal(await page.locator('.gdh-project-coming-soon').count(),3);
  assert.equal(await page.locator('.gdh-project-coming-soon .gdh-coming-soon-lock').count(),3);
  assert.equal(await page.locator('.gdh-project-coming-soon button').count(),0,'Premium projects must not be clickable');
