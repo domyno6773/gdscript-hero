@@ -2299,10 +2299,15 @@ const App = {
         if (this.state.currentWeekId !== currentWeek) {
             const currentTier = STREAK_TIERS[this.state.streakMode] || STREAK_TIERS.rilassato;
             const metGoal = this.state.activeDaysThisWeek.length >= currentTier.target;
+            // Il conteggio e' una SERIE di settimane consecutive: aver
+            // raggiunto l'obiettivo in una settimana piu' vecchia non
+            // conserva la streak dopo una o piu' settimane saltate.
+            const lastWeek = this.getWeekId(new Date(Date.now() - 7 * 86400000));
+            const isConsecutive = this.state.currentWeekId === lastWeek;
 
-            // La settimana è già stata conteggiata al raggiungimento
-            // dell'obiettivo: non incrementarla una seconda volta al reset.
-            if (!metGoal) this.state.streakWeeks = 0;
+            // La settimana raggiunta e' gia' stata conteggiata quando
+            // l'obiettivo e' stato completato; non aggiungere altre settimane.
+            if (!metGoal || !isConsecutive) this.state.streakWeeks = 0;
 
             this.state.activeDaysThisWeek = [];
             this.state.currentWeekId = currentWeek;
