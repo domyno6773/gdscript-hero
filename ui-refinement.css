@@ -1,0 +1,104 @@
+/* GDScript Hero — rifiniture UI mirate, nessuna modifica alla mappa esagonale. */
+:root { --font-ui: 'Inter', system-ui, sans-serif; --font-display: 'Inter', system-ui, sans-serif; --font-mono: 'JetBrains Mono', monospace; }
+body, button, input, select, textarea { font-family: var(--font-ui); }
+#code-editor, #sandbox-code-editor, .gdscript-edit-stack, .gdscript-highlight, .line-numbers,
+pre, code, .output-pre { font-family: var(--font-mono) !important; }
+.logo-text { font-family: 'Silkscreen', monospace !important; letter-spacing: -.025em !important; text-transform:none !important; }
+.navbar button, .gdh-user-menu button { cursor: pointer; font-family:var(--font-ui) !important; }
+.navbar button:focus-visible, .gdh-user-menu button:focus-visible, #view-exercise button:focus-visible,
+#view-roadmap button:focus-visible { outline: 3px solid #f5b642 !important; outline-offset: 3px; }
+.navbar .logo { border:0; background:transparent; display:flex; align-items:center; gap:8px; padding:4px; color:inherit; }
+.navbar .nav-center { border:0; background:transparent; border-radius:0; }
+.navbar .nav-center .nav-btn { min-height:44px; }
+.navbar .nav-center .nav-btn.active { box-shadow:inset 0 -2px #e9b455 !important; }
+.navbar #btn-open-auth-nav { background:transparent; border:0; display:inline-flex; align-items:center; justify-content:center; min-width:35px; min-height:44px; color:#b8cce1; }
+.navbar .nav-connection-icon { width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linejoin:round; }
+.navbar .nav-connection-icon.connected { color:#d7e7f5; }
+.navbar .gdh-profile-controls { display:flex !important; flex-direction:row !important; align-items:center; gap:0 !important; padding:0 !important; border:1px solid #46586c; border-radius:9px; background:#253241; box-shadow:none !important; }
+.navbar .gdh-profile-controls .gdh-user-menu-trigger, .navbar .gdh-profile-controls .gdh-level-trigger {
+  background:none; border:0; color:#e8f1f9; display:inline-flex; align-items:center; justify-content:center;
+  gap:7px; min-height:44px; padding:6px 10px; line-height:1.2;
+}
+.navbar .gdh-profile-controls .gdh-user-menu-trigger { border-right:1px solid #485b6e; }
+.navbar .gdh-user-chevron { width:14px; height:14px; stroke:currentColor; fill:none; }
+.navbar .gdh-profile-controls .nav-profile-name { max-width:120px; font-size:.8rem; font-weight:650; letter-spacing:0; }
+.navbar .gdh-profile-controls .nav-avatar { display:flex !important; flex:0 0 29px; width:29px; height:29px; align-items:center; justify-content:center; border-radius:7px; font-weight:700; font-size:.8rem; background:#34495b; box-shadow:none !important; }
+.navbar .gdh-profile-controls .nav-avatar svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.navbar .gdh-level-trigger .nav-profile-level { display:flex !important; flex-direction:row; gap:6px; white-space:nowrap; font-size:.77rem; }
+.navbar .gdh-level-trigger .level-mini-bar { width:36px; height:4px; }
+.navbar .gdh-user-menu { position:absolute; top:calc(100% + 9px); right:48px; z-index:500; display:flex; flex-direction:column; gap:3px; width:230px; background:#253241; border:1px solid #61758a; border-radius:9px; box-shadow:4px 5px 0 #121c28; padding:7px; }
+.navbar .gdh-user-menu.hidden { display:none !important; }
+.navbar .gdh-user-menu .gdh-user-menu-item { display:flex !important; justify-content:flex-start; width:100%; align-items:center; min-height:44px; padding:9px 12px; gap:11px; border:0; background:transparent; color:#edf3fa; border-radius:5px; text-align:left; letter-spacing:0 !important; text-transform:none !important; box-shadow:none !important; font-size:.86rem; }
+.navbar .gdh-user-menu .gdh-user-menu-item:hover, .navbar .gdh-user-menu .gdh-user-menu-item:focus-visible { background:#384f66; }
+.navbar .gdh-user-menu .gdh-user-menu-item::after, .navbar .gdh-user-menu .gdh-user-menu-item::before { display:none !important; }
+.navbar .gdh-user-menu .gdh-user-menu-item .icon { display:inline-flex; }
+.navbar .gdh-user-menu .gdh-user-menu-item svg { width:18px; height:18px; }
+.navbar .gdh-user-menu .gdh-user-menu-item .nav-btn-text { display:inline !important; }
+.navbar .gdh-user-menu .badge-count { margin-left:auto; font-size:.7rem; }
+#nav-editor-btn[hidden], #mob-nav-exercise[hidden] { display:none !important; }
+@media (min-width:821px) {
+  .navbar { display:flex !important; justify-content:flex-start !important; gap:15px !important; }
+  .navbar>.nav-left { flex:0 0 auto; }
+  .navbar>.nav-center { flex:0 1 auto !important; width:auto !important; justify-content:flex-start !important; gap:4px !important; margin-right:auto !important; }
+  .navbar>.nav-right { flex:0 0 auto; margin-left:auto; }
+  .navbar .nav-center .nav-btn-text { display:inline !important; }
+}
+@media (max-width:1050px) and (min-width:821px) {
+  .navbar { gap:6px !important; padding-inline:8px !important; }
+  .navbar .nav-center .nav-btn { padding-inline:5px !important; }
+  .navbar .gdh-profile-controls .nav-profile-name { max-width:75px; }
+  .navbar .gdh-level-trigger .level-mini-bar { display:none; }
+}
+@media (max-width:820px) {
+  .navbar .gdh-profile-controls .gdh-user-menu-trigger { min-height:44px; min-width:44px; padding:5px; border:0; }
+  .navbar .gdh-profile-controls .nav-profile-name, .navbar .gdh-profile-controls .gdh-user-chevron { display:none !important; }
+  .navbar .gdh-profile-controls .gdh-level-trigger { padding:5px 6px; min-height:44px; }
+  .navbar .gdh-profile-controls .nav-profile-level { display:flex !important; font-size:.67rem; }
+  .navbar .gdh-profile-controls .nav-avatar { width:26px; height:26px; flex-basis:26px; }
+  .navbar .gdh-user-menu { right:0; top:calc(100% + 5px); width:min(244px,calc(100vw - 20px)); }
+  #mobile-bottom-nav .mob-nav-item { min-width:0; min-height:53px; }
+}
+/* Only the HOME banner, never the chapter/node roadmap cards. */
+#view-roadmap .overall-course-card { display:grid !important; grid-template-columns:minmax(0,1fr) minmax(205px,38%); align-items:center; gap:24px; border:1px solid #55677a !important; background:#273543 !important; box-shadow:5px 6px 0 #15212e !important; padding:22px 26px !important; }
+#view-roadmap .overall-course-card::before, #view-roadmap .overall-course-card::after { display:none !important; }
+#view-roadmap .overall-course-card .chapter-badge { font:500 .8rem var(--font-ui) !important; letter-spacing:0 !important; text-transform:none !important; color:#b9cfe1 !important; border:0 !important; background:transparent !important; padding:0 !important; margin:0 0 8px !important; }
+#view-roadmap .overall-course-card h1 { font:700 clamp(1.4rem,2vw,1.9rem)/1.2 var(--font-ui) !important; text-transform:none !important; letter-spacing:0 !important; }
+#view-roadmap .overall-course-card .progress-stats, #view-roadmap .overall-course-card .progress-stats span { font:400 .79rem/1.5 var(--font-ui) !important; text-transform:none !important; letter-spacing:0 !important; color:#b6c9da !important; }
+#view-roadmap .overall-course-card .demo-tag { background:none !important; border:0 !important; padding:0 !important; }
+#view-roadmap .gdh-course-copy { min-width:0; }
+#view-roadmap .gdh-course-illustration { display:flex; align-items:center; justify-content:center; overflow:hidden; height:210px; max-width:100%; border:1px solid #3a5568; border-radius:6px; background:#182d41; }
+#view-roadmap .gdh-course-illustration svg { width:100%; height:100%; display:block; }
+#view-roadmap .sidebar-quests-countdown { font:400 .78rem var(--font-ui) !important; color:#b9cce1 !important; letter-spacing:0 !important; text-transform:none !important; }
+@media (max-width:760px) { #view-roadmap .overall-course-card { grid-template-columns:minmax(0,1fr) !important; padding:18px !important; gap:16px; } #view-roadmap .gdh-course-illustration { height:170px; } }
+/* Lessons: priority is title, progress, objective, hints, THEN scrollable theory. */
+#view-exercise .workspace-grid { grid-template-columns:minmax(300px,2fr) minmax(0,3fr) !important; }
+#view-exercise .lesson-content { display:flex; flex-direction:column; gap:12px; }
+#view-exercise .lesson-content .lesson-header-row { order:0; margin:0; }
+#view-exercise .lesson-content #lesson-practice-progress { order:1; flex:0 0 auto; }
+#view-exercise .lesson-content .task-box { order:2; margin:0 !important; flex:0 0 auto; border:1px solid #637b91 !important; border-left:1px solid #637b91 !important; box-shadow:none !important; }
+#view-exercise .lesson-content .hints-section { order:3; flex:0 0 auto; }
+#view-exercise .lesson-content .theory-body { order:4; flex:0 0 auto; margin-top:10px; }
+#view-exercise .lesson-content .btn-mobile-to-code { order:5; }
+#view-exercise .lesson-content h2, #view-exercise .lesson-content h3, #view-exercise .vtab-title-tag,
+#view-exercise .output-label, #view-exercise .lesson-practice-title { font-family:var(--font-ui) !important; text-transform:none !important; letter-spacing:0 !important; }
+#view-exercise .task-box h3 { font-size:.97rem !important; font-weight:650; }
+#view-exercise .panel-code { min-height:0; }
+#view-exercise .editor-wrapper { flex:0 0 auto !important; height:var(--gdh-editor-height,280px) !important; min-height:280px !important; max-height:520px !important; }
+#view-exercise .validation-panel, #view-exercise .validation-panel.console-only { flex:0 0 300px !important; }
+#view-exercise #exercise-primary-feedback.hidden { display:none !important; }
+#view-exercise #exercise-test-details[hidden] { display:none !important; }
+#view-exercise .vtab-status { color:#c5d4e3 !important; font-size:.77rem !important; }
+#view-exercise .lesson-meta, #view-exercise .task-body, #view-exercise .lesson-content p,
+#view-exercise .hint-box, #view-exercise .exercise-test-details summary { color:#d3e0ec !important; }
+#view-exercise button:disabled { color:#acbdce !important; opacity:.75 !important; cursor:not-allowed; }
+#view-exercise #lesson-practice-next:not(.hidden):not(:disabled) { background:#e6b255 !important; color:#1d2833 !important; border-color:#e6b255 !important; font-weight:700 !important; }
+#view-exercise #lesson-practice-next.hidden { display:none !important; }
+#view-exercise .hints-toggle-btn { min-height:44px; width:100%; cursor:pointer; }
+#view-exercise .output-pre { color:#d2e0eb !important; }
+#view-exercise .test-icon svg { width:17px; height:17px; stroke:currentColor; fill:none; }
+@media(max-width:820px) {
+  #view-exercise .workspace-grid { display:flex !important; }
+  #view-exercise .editor-wrapper { min-height:230px !important; height:var(--gdh-editor-height,255px) !important; max-height:390px !important; }
+  #view-exercise .validation-panel, #view-exercise .validation-panel.console-only { flex:0 0 310px !important; }
+}
+@media(prefers-reduced-motion:reduce) { .gdh-user-menu, .gdh-course-illustration { transition:none !important; animation:none !important; } }
