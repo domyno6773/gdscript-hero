@@ -3111,77 +3111,36 @@ equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <s
         conceptId: "dictionaries",
         conceptTags: ["has", "keys", "values", "dict_methods", "debugging"],
         isDebugging: true,
-        debugType: "Controllo Sicurezza Chiave (.has)",
+        debugType: "Controllo sicurezza chiavi e metodi del Dictionary",
         chapterId: 10,
         isMastery: false,
         title: "39. Metodi dei Dizionari (has, keys)",
         icon: "🔍",
         xp: 50,
-        expectedOutput: "Possiede oro: true\nPossiede chiave: false",
-        theory: `
-            <p>GDScript offre metodi integrati per verificare e ispezionare i dati di un dizionario:</p>
-            <ul>
-                <li><code>dizionario.has("chiave")</code>: restituisce <code>true</code> se la chiave esiste, altrimenti <code>false</code>.</li>
-                <li><code>dizionario.keys()</code>: restituisce un array contenente tutte le chiavi.</li>
-            </ul>
-        `,
-        task: `
-            <ul>
-                <li>Inizializza <code>var forziere = { "oro": 100, "gemme": 3 }</code>.</li>
-                <li>Salva in <code>var ha_oro</code> il risultato di <code>forziere.has("oro")</code>.</li>
-                <li>Salva in <code>var ha_chiave</code> il risultato di <code>forziere.has("chiave")</code>.</li>
-                <li>Stampa: <code>print("Possiede oro: ", ha_oro)</code> e <code>print("Possiede chiave: ", ha_chiave)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():
-    var forziere = { "oro": 100, "gemme": 3 }
-    # Correggi i due accessi: devono verificare se le chiavi esistono.
-    var ha_oro = forziere["oro"]
-    var ha_chiave = forziere["chiave"]
-    print("Possiede oro: ", ha_oro)
-    print("Possiede chiave: ", ha_chiave)
-`,
+        expectedOutput: "Possiede oro: true\nPossiede chiave: false\nChiavi nel forziere: 2",
+        theory: "<p>GDScript consente di verificare e ispezionare le informazioni contenute in un dizionario senza conoscere tutte le chiavi in anticipo.</p><ul><li><code>forziere.has(\"oro\")</code> restituisce un booleano che indica se la chiave esiste, senza tentare di leggerla.</li><li><code>forziere.keys()</code> restituisce un <code>Array</code> contenente tutte le chiavi; puoi contarle con <code>.size()</code>.</li></ul><p>Se la chiave <code>\"chiave\"</code> non esiste, leggere <code>forziere[\"chiave\"]</code> è rischioso. Prima correggi gli accessi, poi conta le chiavi realmente presenti.</p>",
+        task: "<ul><li>Il forziere contiene <code>\"oro\": 100</code> e <code>\"gemme\": 3</code>.</li><li>Correggi <code>ha_oro</code> e <code>ha_chiave</code> usando <code>forziere.has()</code>, senza leggere direttamente la chiave mancante.</li><li>Usa <code>forziere.keys()</code> per assegnare a <code>chiavi</code> l'elenco delle chiavi del dizionario.</li><li>Stampa gli esiti di entrambi i controlli e il numero di chiavi con <code>chiavi.size()</code>, secondo l'output atteso.</li></ul>",
+        initialCode: "func _ready():\n    var forziere = { \"oro\": 100, \"gemme\": 3 }\n    # BUG: questi accessi leggono valori, anziché verificare le chiavi.\n    var ha_oro = forziere[\"oro\"]\n    var ha_chiave = forziere[\"chiave\"]\n    # Sostituisci anche l'array vuoto con le chiavi del forziere.\n    var chiavi = []\n    print(\"Possiede oro: \", ha_oro)\n    print(\"Possiede chiave: \", ha_chiave)\n    print(\"Chiavi nel forziere: \", chiavi.size())\n",
         hints: [
-            {
-                        "level": 1,
-                        "type": "concept",
-                        "icon": "💭",
-                        "label": "Indizio Concettuale",
-                        "text": "Tentare di leggere una chiave che non esiste in un dizionario può causare errori a runtime. Il metodo `.has()` permette di verificare in anticipo l'esistenza della chiave."
-            },
-            {
-                        "level": 2,
-                        "type": "structure",
-                        "icon": "🏗️",
-                        "label": "Guida alla Struttura",
-                        "text": "Assegna il risultato booleano di `forziere.has(\"oro\")` e `forziere.has(\"chiave\")` a due variabili, senza leggere direttamente chiavi mancanti."
-            },
-            {
-                        "level": 3,
-                        "type": "example",
-                        "icon": "📝",
-                        "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var inventario = { \"spada\": 1 }\n    var ha_pozione = inventario.has(\"pozione\")\n    print(\"Pozione trovata: \", ha_pozione)\n```\n`.has()` restituisce un booleano (`true` o `false`)."
-            }
-],
-        solution: `func _ready():\n    var forziere = { "oro": 100, "gemme": 3 }\n    var ha_oro = forziere.has("oro")\n    var ha_chiave = forziere.has("chiave")\n    print("Possiede oro: ", ha_oro)\n    print("Possiede chiave: ", ha_chiave)\n`,
+            {level: 1,type: "concept",icon: "lightbulb",label: "Ragionamento",text: "Leggere il valore di una chiave e controllare la sua esistenza sono operazioni diverse. `.has()` restituisce un `bool`; `.keys()` un array."},
+            {level: 2,type: "structure",icon: "code-2",label: "Struttura",text: "Assegna `forziere.has(\"oro\")` e `forziere.has(\"chiave\")` alle due variabili booleane. Poi assegna `forziere.keys()` alla variabile `chiavi`."},
+            {level: 3,type: "example",icon: "book-open",label: "Esempio",text: "Esempio analogo: `var dati = {\"hp\": 10, \"mana\": 5}`. `dati.has(\"hp\")` è `true`, mentre `dati.keys().size()` vale `2`."}
+        ],
+        solution: "func _ready():\n    var forziere = { \"oro\": 100, \"gemme\": 3 }\n    var ha_oro = forziere.has(\"oro\")\n    var ha_chiave = forziere.has(\"chiave\")\n    var chiavi = forziere.keys()\n    print(\"Possiede oro: \", ha_oro)\n    print(\"Possiede chiave: \", ha_chiave)\n    print(\"Chiavi nel forziere: \", chiavi.size())\n",
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const goldOk = s.ha_oro === true;
-    const keyOk = s.ha_chiave === false;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasMethod = /\.has\s*\(/.test(cleanCode);
-    tests.push({ desc: "Metodo forziere.has(...) utilizzato", passed: !!hasMethod, diff: hasMethod ? null : "Usa forziere.has('oro') e forziere.has('chiave')." });
-    tests.push({ desc: "Verifica ha_oro (true) e ha_chiave (false)", passed: goldOk && keyOk, diff: (goldOk && keyOk) ? null : `ha_oro=${s.ha_oro}, ha_chiave=${s.ha_chiave}` });
-    const logs = result.logs || [];
-    const hasGoldLog = logs.some(l => /^Possiede oro\s*:\s*true$/i.test(String(l).trim()));
-    const hasKeyLog = logs.some(l => /^Possiede chiave\s*:\s*false$/i.test(String(l).trim()));
-    const logsOk = hasGoldLog && hasKeyLog;
-    tests.push({ desc: "Esiti dei controlli 'Possiede oro' e 'Possiede chiave' stampati a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+            const tests = [formatExecutionCheck(result)];
+            const s = result.scope || {};
+            const code = result.code || '';
+            const hasBoth = /\bvar\s+ha_oro\s*=\s*forziere\.has\s*\(\s*["']oro["']\s*\)/.test(code) &&
+                /\bvar\s+ha_chiave\s*=\s*forziere\.has\s*\(\s*["']chiave["']\s*\)/.test(code);
+            const hasKeys = /\bvar\s+chiavi\s*=\s*forziere\.keys\s*\(\s*\)/.test(code);
+            const logs = (result.logs || []).map(l => String(l).trim());
+            tests.push({desc: "Entrambe le chiavi controllate con .has()",passed:hasBoth});
+            tests.push({desc: "Array delle chiavi ottenuto con .keys()",passed:hasKeys});
+            tests.push({desc: "Tre risultati corretti in console",passed:
+                JSON.stringify(logs) === JSON.stringify(["Possiede oro: true","Possiede chiave: false","Chiavi nel forziere: 2"])});
+            return tests;
+        }
     },
     {
         id: 40,
