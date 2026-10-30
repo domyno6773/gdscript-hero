@@ -2125,12 +2125,67 @@ async function smoke(browser,url,width){
  console.log('PASS: Chrome '+width+'px sections/exercise/XSS/reload/backup');
  await context.close();
 }
+// Riproduce una mappa con consolidamento verde e attivita' precedenti senza spunta.
+async function testHistoricalProgressRepair(browser,url){
+ const context=await browser.newContext({viewport:{width:1000,height:800},locale:'it-IT'});
+ const page=await context.newPage();
+ try{
+   await page.goto(url,{waitUntil:'load'});
+   await page.evaluate(()=>{
+     const saved={
+       theme:'dark',xp:115,finishedLessons:[201,4],
+       completedLessons:[1,2,201,3,101,202,4],devAllUnlocked:false,
+       siteWelcomeSeen:true,streakGoalSelection:{week:'2026-10-26',selectedDate:'legacy'},
+       lessonTaskProgress:{'3':{completed:['base'],activeIndex:1,codes:{base:'bozza da conservare'}}}
+     };
+     localStorage.setItem('gdscript_hero_scoped_save_v1:guest',JSON.stringify(saved));
+     localStorage.setItem('gdscript_hero_active_owner_v1','guest');
+     localStorage.setItem('gdscript_hero_save_v4',JSON.stringify(saved));
+     sessionStorage.removeItem('gdscript_hero_position_v1');
+   });
+   for(let attempt=0;attempt<2;attempt++){
+     await page.reload({waitUntil:'load'});
+     await page.waitForFunction(()=>window.App?.state?.finishedLessons?.includes(4));
+     const observed=await page.evaluate(()=>{
+       App.renderRoadmap();
+       const ids=[201,3,101,202,4];
+       return {
+         xp:App.state.xp,
+         finished:ids.map(id=>App.state.finishedLessons.includes(id)),
+         map:ids.map(id=>document.getElementById('node-lesson-'+id)?.classList.contains('completed')),
+         continueId:App.getRoadmapContinueId(),
+         stored:JSON.parse(localStorage.getItem(App.ownerStorageKey('guest'))),
+         originalDraft:App.state.lessonTaskProgress['3']?.codes?.base
+       };
+     });
+     assert.deepEqual(observed.finished,[true,true,true,true,true],
+       'Non perdere spunte tra quiz e consolidamento al reload '+attempt);
+     assert.deepEqual(observed.map,[true,true,true,true,true],
+       'La mappa deve mostrare completamenti al reload '+attempt);
+     assert.equal(observed.xp,115,'Nessun XP non guadagnato');
+     assert.equal(observed.stored.xp,115);
+     assert.equal(observed.continueId,5);
+     assert.equal(observed.originalDraft,'bozza da conservare');
+     for(const id of [201,3,101,202,4])
+       assert.ok(observed.stored.finishedLessons.includes(id),
+         'La riparazione deve persistere nel salvataggio: '+id);
+   }
+   const fourTasks=await page.evaluate(()=>{
+     const lesson=LESSONS_DATA.find(x=>x.id===3);
+     return App.getLessonPracticeRecord(lesson).completed.length;
+   });
+   assert.equal(fourTasks,4,'Le quattro prove gia superate devono restare completate');
+   console.log('PASS: old progress repaired across reloads; XP, drafts and task status preserved');
+ }finally{await context.close();}
+}
+
 (async()=>{
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  let browser;
  try{
    browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox']});
    const url='http://127.0.0.1:'+server.address().port;
+   await testHistoricalProgressRepair(browser,url);
    for(const width of [1440,390])await smoke(browser,url,width);
    console.log('SUCCESS: desktop and mobile browser smoke completed.');
  } finally {
