@@ -91,6 +91,8 @@
   running=true;p.code=editor.value;p.updatedAt=new Date().toISOString();app.saveStorage();
   const code=p.code,nodes=JSON.parse(JSON.stringify(p.nodes)),captured=snapshot(code,nodes);
   const status=document.getElementById('capstone-assessment-status'),details=document.getElementById('capstone-assessment-results');
+  const disclosure=document.getElementById('capstone-assessment-details');
+  disclosure.hidden=true;disclosure.open=false;
   details.replaceChildren();render();status.textContent='Verifica in corso: movimento, raccolta, inventario e vittoria…';
   app.sandboxNativeSession=null;
   if(root.GDHSceneWorkspace)root.GDHSceneWorkspace.stop();else root.GDHGodot.stopPreview();
@@ -109,6 +111,9 @@
    root.GDHGodot.stopPreview();running=false;if(runButton)runButton.disabled=false;render();
   }
   for(const c of result.checks){const li=document.createElement('li');li.textContent=(c.passed?'✓ ':'Da rivedere: ')+c.desc;details.append(li);}
+  disclosure.hidden=result.checks.length===0;
+  const failed=result.checks.filter(c=>!c.passed).length;
+  document.getElementById('capstone-assessment-summary').textContent=failed?failed+' controlli da rivedere':'Tutti i '+result.checks.length+' controlli superati';
   status.textContent=result.error|| (result.passed?'Progetto finale verificato: tutte le prove superate.':'Progetto non ancora verificato: correggi i punti indicati e riprova.');
   return result;
  }
@@ -117,6 +122,6 @@
  const load=app.loadActiveSandboxProject;
  app.loadActiveSandboxProject=function(...args){const result=load.apply(this,args);render();return result;};
  document.getElementById('btn-verify-capstone')?.addEventListener('click',assessProject);
- document.getElementById('sandbox-code-editor')?.addEventListener('input',()=>{render();document.getElementById('capstone-assessment-results')?.replaceChildren();});
+ document.getElementById('sandbox-code-editor')?.addEventListener('input',()=>{render();document.getElementById('capstone-assessment-results')?.replaceChildren();document.getElementById('capstone-assessment-details').hidden=true;});
  render();
 })();

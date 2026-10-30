@@ -536,7 +536,10 @@
         <section id="capstone-assessment" class="course-capstone" hidden aria-label="Verifica finale delle competenze">
             <button type="button" id="btn-verify-capstone" class="btn-primary">Verifica il progetto finale</button>
             <p id="capstone-assessment-status" role="status" aria-live="polite"></p>
-            <ul id="capstone-assessment-results"></ul>
+            <details id="capstone-assessment-details" hidden>
+                <summary id="capstone-assessment-summary">Risultati della verifica</summary>
+                <ul id="capstone-assessment-results"></ul>
+            </details>
         </section>
         <div class="sandbox-workspace-grid">
             <!-- COLONNA 1: SCENE TREE DOCK -->
