@@ -302,19 +302,40 @@
     }
     return checks;
   };
+  // Un record creato per gli esercizi vecchi non può completare le nuove
+  // prove p2/p3 durante sync cloud o import di un backup precedente.
   const mergeProgress=(left,right)=>{
-    const merged={...left};
+    const merged={...(left||{})};
     for(const [id,incoming] of Object.entries(right||{})){
       if(!enabled(Number(id))||!incoming||typeof incoming!=='object')continue;
       const existing=merged[id]||{};
       const lesson=(root.LESSONS_DATA||[]).find(l=>l.id===Number(id));
+      const isV2=!!root.GDHIndividualPractice?.ids.includes(Number(id));
       const keys=new Set(tasksFor(lesson).map(t=>t.key));
-      const completed=[...new Set([...(existing.completed||[]),...(incoming.completed||[])])]
+      const normalize=record=>{
+        const modern=!isV2||record.drillVersion===2;
+        const code=record.codes&&typeof record.codes==='object'?record.codes:{};
+        const history={...(record.legacyCodes||{})};
+        if(!modern)for(const key of ['p2','p3','p4']){
+          if(typeof code[key]==='string'&&!Object.hasOwn(history,key))
+            history[key]=code[key];
+        }
+        return {
+          completed:(record.completed||[]).filter(key=>modern||key==='base'),
+          codes:modern?code:(typeof code.base==='string'?{base:code.base}:{}),
+          history
+        };
+      };
+      const old=normalize(existing),fresh=normalize(incoming);
+      const completed=[...new Set([...old.completed,...fresh.completed])]
         .filter(key=>keys.has(key));
-      const codes={...(existing.codes||{}),...(incoming.codes||{})};
+      const codes={...old.codes,...fresh.codes};
       const next=tasksFor(lesson).findIndex(t=>!completed.includes(t.key));
       const activeIndex=next===-1?tasksFor(lesson).length-1:next;
-      merged[id]={completed,codes,activeIndex};
+      merged[id]=isV2?{
+        completed,codes,activeIndex,drillVersion:2,
+        legacyCodes:{...old.history,...fresh.history}
+      }:{completed,codes,activeIndex};
     }
     return merged;
   };
