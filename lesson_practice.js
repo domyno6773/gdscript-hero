@@ -115,7 +115,7 @@
       ['Ogni print() crea una riga.','Scrivi tre stampe nel blocco di _ready().','Controlla anche l’ordine dei messaggi.'])
   ];
   const extraFor=lesson=>custom[lesson?.id] ||
-    root.GDHGameplayLessons?.practiceTasks?.(lesson) ||
+    (root.GDHGameplayLessons?.has(lesson?.id) ? root.GDHGameplayLessons.practiceTasks(lesson) : null) ||
     root.GDHPracticeCatalog?.tasksFor(lesson) || [];
   const enabled=id=>Boolean(custom[id]||
     (root.LESSONS_DATA||[]).some(l=>l.id===id && !l.isQuiz && (l.practiceMode==='focused' || l.practiceMode==='progressive' || (l.chapterId>=2 && l.chapterId<=15))));
