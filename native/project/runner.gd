@@ -170,6 +170,56 @@ func _build_scene(instance: Node, lesson_id: int) -> void:
             child.wait_time = 1.0
         instance.add_child(child)
 
+# Scena reale DOPO _ready() e dopo le azioni testate: include anche
+# nodi creati a runtime, nodi annidati e queue_free() ancora differiti.
+# Questa è un'osservazione del motore, non una ricostruzione JavaScript.
+func _lesson_scene_tree(instance: Node) -> Array:
+    var result: Array = []
+    _lesson_scene_visit(instance, result, "", 0)
+    return result
+
+func _lesson_scene_visit(node: Node, result: Array, parent: String, depth: int) -> void:
+    if result.size() >= 48 or depth > 12 or not is_instance_valid(node):
+        return
+    var label := str(node.name).substr(0, 64)
+    var path := label if parent.is_empty() else parent + "/" + label
+    var state: Dictionary = {
+        "name": label,
+        "path": path,
+        "parent": parent,
+        "class": node.get_class(),
+        "queued": node.is_queued_for_deletion(),
+        "childCount": node.get_child_count(),
+        "depth": depth
+    }
+    if node is CanvasItem:
+        state["visible"] = node.is_visible_in_tree()
+    if node is Control:
+        state["position"] = {"x": node.position.x, "y": node.position.y}
+        state["size"] = {"x": node.size.x, "y": node.size.y}
+    elif node is Node2D:
+        state["position"] = {"x": node.position.x, "y": node.position.y}
+    if node is Label or node is Button:
+        state["text"] = node.text.substr(0, 200)
+    if node is Button:
+        state["disabled"] = node.disabled
+        state["pressed_connections"] = node.get_signal_connection_list("pressed").size()
+    if node is Timer:
+        state["wait_time"] = node.wait_time
+        state["one_shot"] = node.one_shot
+        state["stopped"] = node.is_stopped()
+        state["timeout_connections"] = node.get_signal_connection_list("timeout").size()
+    if node is ColorRect:
+        state["color"] = "#" + node.color.to_html(false)
+    if node is ProgressBar:
+        state["value"] = node.value
+        state["min_value"] = node.min_value
+        state["max_value"] = node.max_value
+    result.append(state)
+    for child in node.get_children():
+        if child is Node and result.size() < 48:
+            _lesson_scene_visit(child, result, path, depth + 1)
+
 func _scene_snapshot(instance: Node, lesson_id: int) -> Dictionary:
     var result: Dictionary = {}
     for name in _scene_spec(lesson_id).keys():
@@ -559,8 +609,9 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
     if sandbox_live:
         _sandbox_trace("before_snapshot")
     var final_scene := _sandbox_snapshot() if sandbox_live else _scene_snapshot(instance, active_scene)
+    var lesson_scene := _lesson_scene_tree(instance)
     if sandbox_live:
         _sandbox_trace("after_snapshot")
     if not sandbox_live:
         instance.queue_free()
-    return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state, "localCaptureReason": local_reason, "methodCalls": method_results, "signalEmissions": signal_results, "objectCalls": object_results, "scene": final_scene, "sceneBeforeActions": initial_scene, "sceneActions": action_results}
+    return {"status": "executed", "properties": observed, "locals": _captured_locals.duplicate(true), "localCapture": local_state, "localCaptureReason": local_reason, "methodCalls": method_results, "signalEmissions": signal_results, "objectCalls": object_results, "scene": final_scene, "lessonScene": lesson_scene, "sceneBeforeActions": initial_scene, "sceneActions": action_results}
