@@ -5,13 +5,14 @@ const ROWS={"5":[["Registra un oggetto","Dichiara oggetto dal nome e stampa la v
 const indent=s=>String(s).split('\n').map(line=>line?'    '+line:'').join('\n');
 const wrap=(declaration,body,header='')=>
  'extends Node\n\n'+(header?header.trim()+'\n\n':'')+'func _ready():\n'+indent(declaration+'\n'+body)+'\n';
+const REQUIREMENTS={"5":["\\bvar\\s+"],"6":["\\bprint\\s*\\("],"7":["\\+"],"8":["\\+"],"9":["\\b(?:float|bool)\\b"],"10":["\\b(?:int|String)\\b"],"11":["\\bconst\\b"],"12":["\\bconst\\b"],"13":["(?:\\*|%)"],"14":["(?:\\+=|-=)"],"15":["(?:\\*|-)"],"16":["(?:-=|%)"],"17":["(?:>=|!=)"],"18":["\\b(?:and|or)\\b"],"19":["\\bif\\b","\\belse\\s*:"],"20":["\\bif\\b"],"21":["\\bvar\\s+\\w+\\s*=\\s*\\["],"22":["\\[\\s*\\d+\\s*\\]"],"23":["\\.append\\s*\\("],"24":["\\.erase\\s*\\("],"25":["\\brange\\s*\\("],"26":["\\bfor\\b"],"27":["\\bwhile\\b"],"28":["\\bfor\\b"],"29":["\\bfunc\\s+"],"30":["\\bfunc\\s+"],"31":["\\breturn\\b"],"32":["\\breturn\\b"],"33":["\\bVector2\\s*\\("],"34":["\\bVector2\\s*\\("],"35":["\\bVector2\\s*\\("],"36":["\\bVector2\\s*\\("],"37":["\\bvar\\s+\\w+\\s*=\\s*\\{"],"38":["\\]\\s*="],"39":["\\.(?:has|keys)\\s*\\("],"40":["\\bvar\\s+boss\\s*=\\s*\\{"],"41":["\\bsignal\\s+"],"42":["\\.connect\\s*\\("],"43":["\\.emit\\s*\\("],"44":["\\.emit\\s*\\("],"45":["\\bclass\\s+","\\.new\\s*\\("],"46":["\\.new\\s*\\("],"47":["\\bfunc\\s+","\\.new\\s*\\("],"48":["\\bclass\\s+"],"49":["\\b(?:get_class|is_inside_tree)\\s*\\("],"50":["\\bLabel\\.new\\s*\\("],"51":["(?:\\$Stato|\\bget_node\\s*\\()"],"52":["\\bLabel\\.new\\s*\\("],"53":["\\bButton\\.new\\s*\\("],"54":["\\.pressed\\.connect\\s*\\("],"55":["\\.pressed\\.connect\\s*\\("],"56":["\\.pressed\\.connect\\s*\\("],"57":["\\bTimer\\.new\\s*\\("],"58":["\\bColorRect\\.new\\s*\\("],"59":["\\.queue_free\\s*\\("],"60":["\\.pressed\\.connect\\s*\\("],"102":["\\bstr\\s*\\("],"103":[":="],"104":["(?:\\*|-)"],"105":["\\belif\\b"],"106":["\\bnot\\b"],"107":["\\.erase\\s*\\("],"108":["Array\\s*\\[\\s*int\\s*\\]"],"109":["\\bbreak\\b"],"110":["\\bcontinue\\b"],"111":["\\breturn\\b"],"112":["\\breturn\\b"],"113":["\\.distance_to\\s*\\("],"114":["\\.normalized\\s*\\("],"115":["\\.get\\s*\\("],"116":["\\.emit\\s*\\("],"117":["->\\s*int"],"118":["\\.new\\s*\\("],"119":["\\badd_child\\s*\\("],"120":["\\bButton\\.new\\s*\\("],"121":["\\*\\s*delta\\b"]};
 const make=(id,i,r)=>{
  const [title,desc,variable,initial,body,out,next,header='',starterHeader='']=r;
  const declaration='var '+variable+' = '+initial;
  const solution=wrap(declaration,body,header);
  const initialCode=wrap(declaration,'# '+desc.slice(0,95)+'\npass',starterHeader||header);
  return {key:i===0?'p2':'p3',title,task:'<p>'+desc+'</p>',initialCode,solution,
-  expectedOutput:out,requirements:{},
+  expectedOutput:out,requirements:{mustUse:REQUIREMENTS[id]||[]},
   behaviorInputs:[{kind:'var',name:variable,value:next}],
   hints:[
     {level:1,type:'concept',label:'Ragiona',text:desc},
