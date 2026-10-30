@@ -53,7 +53,7 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.evaluate(()=>App.state.xp),before.xp);
    assert.equal(await page.evaluate(()=>JSON.stringify(App.state.finishedLessons)),before.finished);
    await page.reload();await page.waitForFunction(()=>window.App&&window.GDHCourseCapstoneVerifier);
-   await page.evaluate(()=>{App.openPracticeView();for(const el of document.querySelectorAll('#site-welcome,#site-tour'))el.remove();});
+   await page.evaluate(()=>{localStorage.setItem('sandbox_welcome_seen','1');App.openPracticeView();for(const el of document.querySelectorAll('#site-welcome,#site-tour'))el.remove();});
    assert.match(await page.locator('#capstone-assessment-status').textContent(),/Progetto finale verificato/);
    await page.locator('#sandbox-code-editor').fill(solution+'\n# cambiato');
    assert.match(await page.locator('#capstone-assessment-status').textContent(),/verifica di nuovo/);
