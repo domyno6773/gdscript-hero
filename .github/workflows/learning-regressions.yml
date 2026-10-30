@@ -18,6 +18,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Stable course contracts and prerequisites for all 90 questions
+        run: node tests/curriculum_stable_v4.test.cjs
+      - name: Didactic and native fixture consistency
+        run: node tests/didactic_consistency_regression.test.cjs
       - name: Learning validators and 29 negative examples
         run: node tests/audit_validator_regression.test.cjs
       - name: Instructions and progressive hints match lesson objectives

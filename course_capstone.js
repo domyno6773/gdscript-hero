@@ -53,11 +53,18 @@ func _raccogli(body: Node2D) -> void:
 
 func _usa_pozione() -> void:
     # TODO 4: riduci boss["hp"] di 10 senza scendere sotto zero.
-    # TODO 5: aggiorna StatoLabel usando il valore effettivo di boss["hp"].
+    # TODO 5: chiama _aggiorna_stato() dopo aver modificato gli HP.
     pass
 
 func _aggiorna_hud(totale: int) -> void:
     $PuntiLabel.text = "Tesori: " + str(totale)
+    _aggiorna_stato()
+
+func _aggiorna_stato() -> void:
+    if monete > 0 and boss["hp"] == 0:
+        $StatoLabel.text = "Vittoria!"
+    else:
+        $StatoLabel.text = "Tesori: " + str(monete) + " | Boss HP: " + str(boss["hp"])
 `;
  const content='<section class="course-capstone" aria-label="Progetto finale">'+
   '<h3>Progetto finale facoltativo: un piccolo gioco completo</h3>'+
@@ -65,7 +72,8 @@ func _aggiorna_hud(totale: int) -> void:
   'Non e un quiz aggiuntivo e non modifica i progressi del corso.</p>'+
   '<ol><li>Premi Avvia progetto per creare una <strong>nuova copia</strong> nella Sandbox; i tuoi progetti precedenti restano intatti.</li>'+
   '<li>Completa i TODO nella funzione _raccogli: usa Zaino.aggiungi, aumenta monete, emetti tesoro_raccolto e rimuovi Coin.</li>'+
-  '<li>Completa _usa_pozione: aggiorna il Dictionary boss e il testo StatoLabel.</li>'+
+  '<li>Completa _usa_pozione: sottrai 10 da boss["hp"], riporta a zero un eventuale valore negativo con if, poi chiama _aggiorna_stato().</li>'+
+  '<li>Controlla il risultato: una raccolta mostra Tesori: 1; ogni pressione riduce gli HP da 30 a 20, 10 e 0. Con il tesoro raccolto e il boss a zero deve apparire Vittoria!, in qualsiasi ordine tu svolga le due azioni.</li>'+
   '<li>Premi Esegui in Sandbox, raccogli la moneta con le frecce e prova il pulsante. Esporta il progetto Godot se vuoi ampliarlo.</li></ol>'+
   '<button type="button" id="gdh-start-final-project" class="btn-primary">Crea il progetto finale nella Sandbox</button>'+
   '</section>';

@@ -65,5 +65,35 @@
   explanation:'La posizione 1 individua il secondo elemento della lista.',
   hint:'La numerazione inizia da zero.'
  });
- window.GDHCurriculumQuizAlignment=Object.freeze({version:1,corrected:[205,207,209,215,211]});
+ fix(203,'q2',{
+  options:['var hp = 100','var nome = "Lia"','var livello = 3','var 3vite = 10'],
+  explanation:'I primi tre esempi dichiarano numeri interi o testo. Un nome non può iniziare con una cifra.'
+ });
+ fix(225,'q2',{
+  options:['Leggerne il nome','Accedere a un figlio','Modificare il testo di una Label','Usarlo sempre senza un parent nell\'albero'],
+  explanation:'Hai già usato nomi, percorsi e proprietà. Aggiungere nuovi figli sarà il passo successivo.'
+ });
+ fix(226,'q2',{
+  options:['Controllare il percorso rispetto al nodo corrente','Considerare che il nome potrebbe essere errato','Rispettare i nomi dei nodi mostrati nell\'albero','Supporre che $QualsiasiNome esista sempre'],
+  explanation:'Per raggiungere un nodo, il percorso e i nomi devono corrispondere alla gerarchia reale.'
+ });
+ fix(209,'q3',{
+  prompt:'Completa il confronto: la porta richiede almeno 10 punti di energia.',
+  code:'func _ready():\n    var energia = 12\n    print(□□□□)',
+  options:['energia >= 10','energia < 10','energia == 10','energia != 12'],
+  explanation:'>= include sia la soglia 10 sia i valori superiori. Il blocco if sarà introdotto nella prossima lezione.',
+  hint:'Serve un confronto vero per 10, 11, 12 e i valori successivi.'
+ });
+ fix(213,'q2',{
+  prompt:'Quali affermazioni descrivono i cicli for già studiati?',
+  options:['for può attraversare gli elementi di un Array','range(3) produce 0, 1 e 2','Il blocco indentato si esegue per ogni elemento','range(3) include anche il valore 3'],
+  explanation:'for visita gli elementi in ordine; il limite finale di range è escluso.',
+  hint:'Distingui quanti valori vengono prodotti dal valore finale escluso.'
+ });
+ fix(219,'q2',{
+  options:['eroe["nome"] legge il nome','eroe["vita"] legge la salute','eroe["vita"] = 80 aggiorna la salute','eroe[0] restituisce sempre "Lia"'],
+  explanation:'Le chiavi dichiarate sono stringhe. Con le parentesi quadre puoi leggere o assegnare il valore associato.',
+  hint:'Usa le chiavi effettivamente presenti nel dizionario.'
+ });
+ window.GDHCurriculumQuizAlignment=Object.freeze({version:2,corrected:[203,205,207,209,211,213,215,219,225,226]});
 })();

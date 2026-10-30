@@ -56,7 +56,7 @@
    lesson.learningPrerequisites=prerequisites;
    lesson.learningProject=project;
    const context='<div class="course-learning-objective"><strong>Obiettivo della lezione</strong><span>'+
-      goal+'</span><small>Nel percorso: '+project+'.</small></div>';
+      goal+'</span><small>Prima di iniziare: '+prerequisites+'. Nel percorso: '+project+'.</small></div>';
    lesson.theory=context+(lesson.theory||'');
   }
  }

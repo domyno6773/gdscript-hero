@@ -42,8 +42,9 @@ usare la scena reale quando si insegna movimento, UI, segnali di nodi e fisica.
 2. I 152 compiti individuali hanno due dati: un valore visibile allo studente
    e un altro valore con cui Godot esegue una verifica comportamentale.
 3. I quiz intermedi devono coprire **solo argomenti gia affrontati**. In
-   particolare i quiz 205, 207, 209, 211 e 215 non anticipano rispettivamente
-   `:=`, precedenza, `elif`, metodi Array e `return`.
+   particolare i quiz 203, 205, 207, 209, 211, 213, 215, 219, 225 e 226
+   non anticipano booleani, inferenza, precedenza, blocchi condizionali,
+   metodi Array, while/break, return, Dictionary.get o metodi dei nodi.
 4. Il motore reale Godot esegue script, input e scene; una preview JavaScript
    non sostituisce la verifica nativa.
 5. Uno starter incompleto non viene accettato; spiegazioni e commenti aggiunti
@@ -79,6 +80,27 @@ giustificano la sostituzione di esercizi corretti.
 - Prove su variazione degli input e rifiuto di soluzioni hard-coded.
 - Test di scena, UI e fisica, su desktop e mobile.
 - Test regressione di bozze, progressi, XP e sincronizzazione.
+
+## Verifiche riproducibili della versione finale
+
+`node tests/curriculum_stable_v4.test.cjs` carica i file nello stesso ordine
+di index.html, controlla i prerequisiti nelle 90 domande e confronta tutti
+i 264 contratti dei compiti con la versione precedente: chiavi, starter,
+soluzioni, risultati, requisiti e input variabili. Le 152 consegne individuali
+devono specificare dati iniziali, risultato e dipendenza dal dato ricevuto.
+Il test protegge anche gli indici delle risposte e la creazione di copie
+indipendenti del progetto finale.
+
+`node tests/capstone_browser.test.cjs` usa Chrome a 1280 e 390 pixel, preme
+il pulsante reale, verifica che le bozze precedenti restino intatte ed esegue
+starter e completamento nel Godot WASM. Controlla segnali reali, inventario,
+raccolta, HP mai negativi e vittoria in entrambi gli ordini delle azioni.
+Il progetto finale resta facoltativo e non assegna XP automaticamente.
+
+Questi controlli sono obbligatori nelle workflow di regressione e browser.
+Un vecchio test che pretendeva _process(delta) nella consegna 121 e stato
+allineato all'esercizio effettivo: due chiamate manuali ad aggiorna(delta),
+senza animazione continua. Codice e verifica della lezione non cambiano.
 
 **Nota sulle garanzie:** i test automatici rilevano regressioni definite,
 non dimostrano che ogni persona comprendera ogni testo. Le attivita didattiche
