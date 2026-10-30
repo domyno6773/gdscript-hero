@@ -96,6 +96,23 @@ function failures(verdict){
      assert.ok(result.good&&!result.bad,'Gameplay verification: '+id+' '+JSON.stringify(result));
    }
 
+   // Ogni nuovo compito di gameplay deve superare una verifica fisica reale.
+   // Non basta confrontare testi o eseguire codice JavaScript illustrativo.
+   for(const id of [301,302,303,304]){
+     for(const key of ['p2','p3','p4']){
+       const result=await page.evaluate(async ({id,key})=>{
+         const task=LessonPractice.getTask(id,key);
+         try {
+           const verified=await GDHGodot.verifyPracticeTask(id,key,task.solution);
+           return {accepted:verified.accepted,status:verified.execution?.nativeStatus,
+             failed:(verified.feedback?.checks||[]).filter(x=>!x.passed),error:verified.execution?.error};
+         }catch(error){return {accepted:false,error:String(error)};}
+       },{id,key});
+       assert.ok(result.accepted&&result.status==='executed',
+         'La soluzione fisica deve funzionare su Godot '+id+'/'+key+': '+JSON.stringify(result));
+     }
+   }
+
    // Fixture snapshots must stay synchronized with the actual 60 lessons.
    const snapshots=await page.evaluate(()=>LESSONS_DATA.filter(l=>l.id<=60).flatMap(l=>{
      const f=GDHLessonFixtures.find(x=>x.id===l.id);
