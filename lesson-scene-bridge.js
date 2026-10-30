@@ -71,6 +71,40 @@ function render(){
    const row=el('div','exercise-native-property');
    row.append(el('span','',key),el('code','',value));inspector.append(row);
   }
+  if(verified&&status==='verified'&&n.class==='Button'&&!n.disabled&&!n.queued){
+   const press=el('button','exercise-native-action','Premi il pulsante in Godot');
+   press.type='button';
+   press.onclick=async()=>{
+    if(!root.GDHGodot?.sandboxAction)return;
+    press.disabled=true;
+    try{
+     const reply=await root.GDHGodot.sandboxAction(n.name,'pressed');
+     if(reply.success){
+      const output=$('real-output-pre');
+      if(output&&reply.logs?.length)
+       output.textContent=(output.textContent+'\n'+reply.logs.join('\n')).trim();
+      if(Array.isArray(reply.native?.lessonScene))applyNative(reply.native.lessonScene,true);
+     }else{press.title=reply.error||'Il pulsante non è disponibile';}
+    }catch(e){press.title=String(e?.message||e);}
+    finally{press.disabled=false;}
+   };
+   inspector.append(press);
+  }
+  if(verified&&status==='verified'&&root.GDHGodot?.runNative){
+   const refresh=el('button','exercise-native-action exercise-native-refresh','Aggiorna Inspector da Godot');
+   refresh.type='button';
+   refresh.onclick=async()=>{
+    refresh.disabled=true;
+    try{
+     const run=await root.GDHGodot.runNative('',{mode:'sandbox_observe',frames:1});
+     if(run.status==='executed'&&Array.isArray(run.reply?.lessonScene))
+      applyNative(run.reply.lessonScene,true);
+    }catch(e){refresh.title=String(e?.message||e);}
+    finally{refresh.disabled=false;}
+   };
+   inspector.append(refresh);
+  }
+
   if(!verified)inspector.append(el('small','', 'Dati previsti: non ancora osservati nel motore.'));
  }
  for(const n of items){
