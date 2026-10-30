@@ -1,10 +1,16 @@
-name: Phase 3 - build Godot browser pack
+name: Godot Web pack reproducibility
 
 on:
-  push:
-    branches: [fix/phase3-native-lesson-visuals]
+  pull_request:
     paths:
-      - 'native/project/runner.gd'
+      - 'native/project/**'
+      - 'native/godot.pck'
+      - '.github/workflows/phase3-pack.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'native/project/**'
+      - 'native/godot.pck'
       - '.github/workflows/phase3-pack.yml'
   workflow_dispatch:
 
@@ -28,8 +34,7 @@ jobs:
           /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path native/project --export-pack "Web" "$PWD/native/godot-phase3.pck"
           test -s native/godot-phase3.pck
           echo "PACK_SIZE=$(wc -c < native/godot-phase3.pck)"
-      - name: Emit pack in recoverable text chunks for review and installation
+      - name: Check generated Godot Web pack
         run: |
-          echo 'PHASE3_PACK_BASE64_BEGIN'
-          base64 -w0 native/godot-phase3.pck | fold -w 120
-          echo 'PHASE3_PACK_BASE64_END'
+          test -s native/godot-phase3.pck
+          echo "Compiled Godot Web pack ($(wc -c < native/godot-phase3.pck) bytes)"
