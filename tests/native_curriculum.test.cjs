@@ -251,6 +251,28 @@ function failures(verdict){
    assert.ok(classroom.resetToExpected);
    console.log('PHASE 3 REAL SCENES PASS: Node, Label, Button, ColorRect, queue_free, no fabricated nodes, lesson inspector and 8 contextual layouts.');
 
+   const liveButton=await page.evaluate(async ()=>{
+     const lesson=LESSONS_DATA.find(l=>l.id===54);
+     const started=await GDHGodot.runNative(lesson.solution,
+       {mode:'sandbox_start',scene:54,nodes:[]});
+     const initial=started.reply?.lessonScene?.find(n=>n.name==='AttaccaBtn');
+     const action=await GDHGodot.sandboxAction('AttaccaBtn','pressed');
+     const observed=await GDHGodot.runNative('',
+       {mode:'sandbox_observe',frames:1});
+     return {status:started.status,initial,actionSuccess:action.success,
+       clicked:action.logs,actionTree:action.native?.lessonScene,
+       observedStatus:observed.status,observedTree:observed.reply?.lessonScene};
+   });
+   assert.equal(liveButton.status,'executed');
+   assert.equal(liveButton.initial?.pressed_connections,1);
+   assert.equal(liveButton.actionSuccess,true);
+   assert.ok(liveButton.clicked.some(x=>x.includes('Colpo sferrato con successo!')),
+     'Live Godot Button did not invoke its pressed callback: '+JSON.stringify(liveButton.clicked));
+   assert.ok(liveButton.actionTree.some(x=>x.name==='AttaccaBtn'&&x.pressed_connections===1));
+   assert.equal(liveButton.observedStatus,'executed');
+   assert.ok(liveButton.observedTree.some(x=>x.name==='AttaccaBtn'));
+   console.log('PHASE 3 LIVE GODOT PASS: real pressed callback, observation and tree refresh.');
+
    // Fixture snapshots must stay synchronized with the actual 60 lessons.
    const snapshots=await page.evaluate(()=>LESSONS_DATA.filter(l=>l.id<=60).flatMap(l=>{
      const f=GDHLessonFixtures.find(x=>x.id===l.id);
