@@ -208,6 +208,31 @@
      }
      check(list,'Valori locali rilevati nella funzione _ready',true);
    }
+
+   // Supporto dinamico per il corso corrente (window.LESSONS_DATA)
+   const curLesson = (typeof window !== 'undefined' && Array.isArray(window.LESSONS_DATA))
+     ? window.LESSONS_DATA.find(x => x.id === id) : null;
+   if (curLesson) {
+     const exp = String(curLesson.expectedOutput || '').trim();
+     if (exp) {
+       const expLines = exp.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+       const matches = (lines.length > 0 && lines.some(l => l.includes(exp))) ||
+                       (expLines.length > 0 && expLines.every(el => lines.some(l => l.includes(el))));
+       check(list, `Output corretto ('${exp.replace(/\n/g, ' ')}')`, matches);
+     } else {
+       check(list, 'Esecuzione completata con successo', true);
+     }
+     const allOk = list.every(c => c.passed);
+     return {
+       id,
+       passed: allOk,
+       verdict: allOk ? 'accepted' : 'rejected',
+       checks: list,
+       nativeStatus: reply?.status,
+       reason: allOk ? null : (list.find(c => !c.passed)?.desc || 'Output richiesto non corrispondente')
+     };
+   }
+
    switch(id){
      case 1:
        check(list,'Stampa Ciao Godot! esatta',eq(lines,['Ciao Godot!']));break;

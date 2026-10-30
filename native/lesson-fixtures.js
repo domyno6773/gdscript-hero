@@ -1092,3 +1092,18 @@ window.GDHLessonFixtures = [
     ]
   }
 ];
+
+// Sincronizzazione dinamica con il corso attivo (92 lezioni)
+if (typeof window !== 'undefined' && Array.isArray(window.LESSONS_DATA)) {
+  window.GDHLessonFixtures = window.LESSONS_DATA.map(l => ({
+    id: l.id,
+    chapter: l.chapterId,
+    title: l.title,
+    initialCode: l.initialCode,
+    solution: l.solution,
+    task: l.task,
+    expectedOutput: l.expectedOutput,
+    locals: [],
+    properties: []
+  }));
+}

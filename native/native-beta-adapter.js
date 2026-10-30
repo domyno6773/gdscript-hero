@@ -128,6 +128,62 @@
     actions:step.actions||lesson.actions||[]
   });
   const verifyLesson=async(id,source)=>{
+    // Supporto dinamico universale per le lezioni del corso (window.LESSONS_DATA)
+    const lessonData = (typeof window !== 'undefined' && Array.isArray(window.LESSONS_DATA))
+      ? window.LESSONS_DATA.find(x => x.id === id) : null;
+
+    if (lessonData && typeof lessonData.validate === 'function') {
+      let base;
+      try {
+        const r = await raw(source, { scene: 0, actions: [] });
+        base = { reply: r.reply, stdout: r.stdout, stderr: r.stderr, status: r.status };
+      } catch (rawErr) {
+        // Fallback a GDScriptRuntime client-side se il runner Godot non risponde
+        if (window.GDScriptRuntime) {
+          const runRes = await window.GDScriptRuntime.execute(source, { lesson: lessonData });
+          base = {
+            reply: { status: runRes.success ? 'executed' : 'error', scope: runRes.scope || {} },
+            stdout: (runRes.logs || []).join('\n'),
+            stderr: runRes.error || '',
+            status: runRes.success ? 'executed' : 'error'
+          };
+        } else {
+          throw rawErr;
+        }
+      }
+
+      const execution = {
+        success: base.reply?.status === 'executed' && !String(base.stderr || '').trim(),
+        code: source,
+        logs: lines(base.stdout),
+        error: base.reply?.status === 'executed' && !base.stderr?.trim() ? null :
+          (base.stderr?.trim() || 'Godot non è riuscito a eseguire il codice'),
+        nativeStatus: base.reply?.status,
+        scope: (base.reply && base.reply.scope) ? Object.assign({}, base.reply.scope) : {}
+      };
+
+      // Arricchisce scope tramite GDScriptRuntime per validare variabili locali/globali
+      if (window.GDScriptRuntime) {
+        try {
+          const localEval = await window.GDScriptRuntime.execute(source, { lesson: lessonData });
+          if (localEval && localEval.scope) {
+            execution.scope = Object.assign({}, localEval.scope, execution.scope);
+          }
+        } catch(e) {}
+      }
+
+      const checks = await lessonData.validate(execution);
+      const passed = Array.isArray(checks) && checks.length > 0 && checks.every(c => c.passed);
+      const feedback = {
+        verdict: passed ? 'accepted' : 'rejected',
+        passed: passed,
+        checks: checks,
+        reason: passed ? null : (checks.find(c => !c.passed)?.diff || 'Almeno un controllo non è stato superato')
+      };
+      execution.nativeFeedback = feedback;
+      return { feedback, execution, original: base, accepted: passed };
+    }
+
     if(window.GDHGameplayLessons?.has(id)){
       // Chromium throttles animation frames in transparent/offscreen iframes.
       // Physics assessments need the real engine loop, so show the running scene.
