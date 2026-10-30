@@ -14,3 +14,8 @@
 .exercise-native-inspector small{line-height:1.4;opacity:.75}
 #exercise-ui-overlay:empty{display:none!important}
 @media(max-width:760px){#exercise-scene-tree .exercise-native-node{min-height:40px;font-size:13px}.exercise-native-property{font-size:12px}}
+
+.exercise-native-action{border:1px solid rgba(71,140,191,.55);border-radius:6px;background:rgba(71,140,191,.12);color:inherit;min-height:33px;text-align:left;padding:7px 10px;cursor:pointer;font-size:11px;margin-top:4px}
+.exercise-native-action:hover{background:rgba(71,140,191,.22)}
+.exercise-native-action:disabled{opacity:.5;cursor:wait}
+.exercise-native-refresh{border-color:rgba(140,150,160,.3);background:transparent}
