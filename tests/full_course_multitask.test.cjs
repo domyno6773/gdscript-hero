@@ -1,8 +1,6 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const root=path.resolve(__dirname,'..'),w={},ctx=vm.createContext({window:w,console,Date});
-for(const f of ['lessons.js','lesson_practice.js','curriculum_extension.js','practice_catalog.js','curriculum_drills_v2.js','chapter_quizzes.js','gameplay_lessons.js','curriculum_restructure.js'])
- vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f});
+const root=path.resolve(__dirname,'..'),{w}=require('./helpers/load_course.cjs')();
 const ls=w.LESSONS_DATA.filter(l=>!l.isQuiz),catalog=w.LessonPractice,ids=w.GDHIndividualPractice.ids;
 assert.equal(ls.length,85);assert.equal(ids.length,76);
 let total=0,personalized=0;

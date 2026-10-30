@@ -29,6 +29,7 @@ function field(parent,label,value,onChange,kind='text',options=[]){
  row.append(caption,input);parent.append(row);return input;
 }
 function refresh(){
+ window.GDHCourseCapstoneVerifier?.render();
  let nodes;try{nodes=getNodes();}catch(e){status(e.message);return;}
  const p=project();
  if(projectId!==p.id){projectId=p.id;history=[];future=[];selected=nodes[0].name;collapsed=new Set();}

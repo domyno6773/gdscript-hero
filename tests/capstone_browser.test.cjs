@@ -1,6 +1,8 @@
 'use strict';
 const assert=require('node:assert/strict'),http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 const {chromium}=require('playwright');
+const {w}=require('./helpers/load_course.cjs')();
+const solution=require('./helpers/capstone_solution.cjs')(w.GDHCourseCapstone.starter);
 const root=path.resolve(__dirname,'..');
 const mime={'.html':'text/html','.js':'application/javascript','.css':'text/css','.wasm':'application/wasm','.pck':'application/octet-stream','.svg':'image/svg+xml'};
 const server=http.createServer((req,res)=>{
@@ -15,42 +17,96 @@ const server=http.createServer((req,res)=>{
   browser=await chromium.launch({channel:'chrome',headless:true});
   for(const width of [1280,390]){
    const context=await browser.newContext({viewport:{width,height:844}}),page=await context.newPage();
+   page.setDefaultTimeout(90000);
    const errors=[];page.on('pageerror',e=>errors.push(String(e)));
    await page.route(/^https:\/\//,r=>r.abort());
-   await page.goto('http://127.0.0.1:'+server.address().port);
-   await page.waitForFunction(()=>window.App&&window.GDHCourseCapstone&&window.GDHGodot);
+   const url='http://127.0.0.1:'+server.address().port;
+   await page.goto(url);
+   await page.waitForFunction(()=>window.App&&window.GDHCourseCapstoneVerifier&&window.GDHGodot);
    const before=await page.evaluate(()=>{
     App.createSandboxProject('Bozza da conservare');
     App.getActiveSandboxProject().code='extends Node2D\n# La mia bozza\n';App.saveStorage();
     const saved=JSON.stringify(App.state.sandbox.projects);
     App.openLesson(48);
-    // Remove welcome layers for direct access to the already-tested lesson screen.
     for(const el of document.querySelectorAll('#site-welcome,#site-tour'))el.remove();
-    return {saved,count:App.state.sandbox.projects.length};
+    return {saved,count:App.state.sandbox.projects.length,xp:App.state.xp,finished:JSON.stringify(App.state.finishedLessons)};
    });
-   await page.locator('#gdh-start-final-project').click({force:true});
+   await page.locator('#gdh-start-final-project').click();
    const created=await page.evaluate(()=>({project:App.getActiveSandboxProject(),projects:App.state.sandbox.projects}));
    assert.equal(created.projects.length,before.count+1);
    assert.equal(JSON.stringify(created.projects.slice(0,-1)),before.saved);
-   assert.match(created.project.code,/TODO 1/);
-   // Real native scene, real connections, collection and victory in both orders.
-   const native=await page.evaluate(async()=>{
-    const cap=GDHCourseCapstone;
-    const starter=await GDHGodot.runNative(cap.starter,{mode:'sandbox_start',nodes:cap.nodes});
-    let solution=cap.starter.replace('    # TODO 1:', '    zaino.aggiungi("Moneta")\n    monete += 1\n    tesoro_raccolto.emit(monete)\n    $Coin.queue_free()\n    # TODO 1:')
-     .replace('    # TODO 4:', '    boss["hp"] -= 10\n    if boss["hp"] < 0:\n        boss["hp"] = 0\n    _aggiorna_stato()\n    # TODO 4:');
-    solution+='\nfunc __test_finale(prima_moneta):\n    if prima_moneta:\n        $Coin.body_entered.emit($Player)\n    $UsaPozione.pressed.emit()\n    $UsaPozione.pressed.emit()\n    $UsaPozione.pressed.emit()\n    $UsaPozione.pressed.emit()\n    if not prima_moneta:\n        $Coin.body_entered.emit($Player)\n    return [monete, boss["hp"], zaino.oggetti.size(), $PuntiLabel.text, $StatoLabel.text, $Coin.is_queued_for_deletion()]\n';
-    const outcomes=[];
-    for(const first of [true,false])outcomes.push(await GDHGodot.runNative(solution,{mode:'sandbox_start',nodes:cap.nodes,calls:[{method:'__test_finale',args:[first]}]}));
-    return {starter,outcomes};
-   });
-   assert.equal(native.starter.status,'executed',JSON.stringify(native.starter));
-   for(const run of native.outcomes){
-    assert.equal(run.status,'executed',JSON.stringify(run));assert.equal(run.stderr,'');
-    assert.deepEqual(run.reply.methodCalls[0].value,[1,0,1,'Tesori: 1','Vittoria!',true]);
+   assert.match(created.project.code,/TODO A/);
+   async function assess(){
+    await page.locator('#btn-verify-capstone').click();
+    await page.waitForFunction(()=>!document.getElementById('btn-verify-capstone').disabled);
+    return page.evaluate(()=>App.getActiveSandboxProject().finalAssessment);
    }
+   const starter=await assess();assert.equal(starter.passed,false,'Incomplete starter accepted');
+   await page.locator('#sandbox-code-editor').fill(solution);
+   await page.locator('#btn-sandbox-run').click();
+   await page.waitForFunction(()=>GDHSceneWorkspace.running&&App.sandboxNativeSession!==null);
+   const completed=await assess();assert.ok(completed?.passed,JSON.stringify({checks:completed?.checks,error:completed?.error}));
+   assert.equal(await page.evaluate(()=>GDHSceneWorkspace.running),false);
+   assert.equal(await page.locator('#sandbox-code-editor').getAttribute('readonly'),null);
+   assert.ok(completed.checks.every(c=>c.passed));
+   assert.match(await page.locator('#capstone-assessment-status').textContent(),/Progetto finale verificato/);
+   assert.equal(await page.evaluate(()=>App.state.xp),before.xp);
+   assert.equal(await page.evaluate(()=>JSON.stringify(App.state.finishedLessons)),before.finished);
+   await page.reload();await page.waitForFunction(()=>window.App&&window.GDHCourseCapstoneVerifier);
+   await page.evaluate(()=>{App.openPracticeView();for(const el of document.querySelectorAll('#site-welcome,#site-tour'))el.remove();});
+   const sandboxWelcome=page.locator('#modal-sandbox-welcome');
+   if(await sandboxWelcome.isVisible()){
+    await page.locator('#btn-start-sandbox-welcome').click();
+    assert.equal(await sandboxWelcome.isVisible(),false,'Sandbox welcome did not close via its primary button');
+    assert.equal(await page.evaluate(()=>localStorage.getItem('sandbox_welcome_seen')),'true');
+   }
+   assert.match(await page.locator('#capstone-assessment-status').textContent(),/Progetto finale verificato/);
+   await page.locator('#sandbox-code-editor').fill(solution+'\n# cambiato');
+   assert.match(await page.locator('#capstone-assessment-status').textContent(),/verifica di nuovo/);
+   await page.locator('#sandbox-code-editor').fill(solution);
+   assert.match(await page.locator('#capstone-assessment-status').textContent(),/Progetto finale verificato/);
+   await page.evaluate(()=>{App.getActiveSandboxProject().nodes[1].position.x=80;App.renderSandboxSceneDock();});
+   assert.match(await page.locator('#capstone-assessment-status').textContent(),/verifica di nuovo/);
+   await page.evaluate(()=>{App.getActiveSandboxProject().nodes[1].position.x=60;App.renderSandboxSceneDock();});
+   if(width===1280){
+    const negatives=[
+     ['missing movement',solution.replace('$Player.move_and_slide()','pass')],
+     ['missing vertical controls',solution.replace('Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")','Vector2(Input.get_axis("ui_left", "ui_right"), 0)')],
+     ['faster diagonal',solution.replace('Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")','Vector2(Input.get_axis("ui_left", "ui_right"), Input.get_axis("ui_up", "ui_down"))')],
+     ['no physical collection',solution.replace('$Coin.body_entered.connect(_raccogli)','pass')],
+     ['no inventory method',solution.replace('oggetti.append(nome)','pass')],
+     ['no custom signal listener',solution.replace('tesoro_raccolto.connect(_aggiorna_hud)','pass')],
+     ['no custom signal emission',solution.replace('tesoro_raccolto.emit(monete)','_aggiorna_hud(monete)')],
+     ['no removal',solution.replace('$Coin.queue_free()','pass')],
+     ['negative HP',solution.replace('        boss["hp"] = 0','        pass')],
+     ['premature victory',solution.replace('monete > 0 and boss["hp"] == 0','boss["hp"] == 0')],
+     ['hardcoded startup reward',solution.replace('_aggiorna_hud(monete)','monete = 1\n    zaino.aggiungi("Moneta")\n    _aggiorna_hud(monete)')],
+     ['syntax error','extends Node2D\nfunc broken(:\n']
+    ];
+    for(const [name,code] of negatives){
+     const result=await page.evaluate(code=>GDHCourseCapstoneVerifier.verify(code,GDHCourseCapstone.nodes),code);
+     assert.equal(result.passed,false,'Accepted '+name);console.log('REJECTED '+name);
+    }
+    const alt=solution.replaceAll('_raccogli','prendi_tesoro').replace('monete += 1','monete = monete + 1');
+    const accepted=await page.evaluate(code=>GDHCourseCapstoneVerifier.verify(code,GDHCourseCapstone.nodes),alt);
+    assert.ok(accepted.passed,'Alternative solution rejected: '+JSON.stringify(accepted));
+    const legacy=await page.evaluate(code=>{
+     const nodes=JSON.parse(JSON.stringify(GDHCourseCapstone.nodes));nodes.find(n=>n.name==='AttaccaBtn').name='UsaPozione';
+     return GDHCourseCapstoneVerifier.verify(code.replaceAll('AttaccaBtn','UsaPozione'),nodes);
+    },solution);assert.ok(legacy.passed,'Saved v1 project incompatible: '+JSON.stringify(legacy));
+    const failed=await page.evaluate(()=>GDHCourseCapstoneVerifier.verify('',GDHCourseCapstone.nodes,async()=>{throw Error('Unavailable');}));
+    assert.equal(failed.passed,false);assert.equal(failed.error,'Unavailable');
+    const noShape=await page.evaluate(code=>GDHCourseCapstoneVerifier.verify(code,GDHCourseCapstone.nodes.filter(n=>n.name!=='CoinShape')),solution);
+    assert.equal(noShape.passed,false,'Collection accepted without a collision shape');
+    await page.locator('#btn-verify-capstone').click();
+    await page.locator('#sandbox-code-editor').fill(solution+'\n# cambiato durante la prova');
+    await page.waitForFunction(()=>!document.getElementById('btn-verify-capstone').disabled);
+    assert.match(await page.locator('#capstone-assessment-status').textContent(),/cambiato durante la verifica/);
+   }
+   await page.evaluate(()=>App.createSandboxProject('Progetto libero'));
+   assert.equal(await page.locator('#capstone-assessment').isVisible(),false);
    assert.deepEqual(errors,[]);await context.close();
-   console.log('PASS capstone '+width+'px: actual launch button, preserved drafts, native starter, inventory, real signals, HP floor and victory in both orders.');
+   console.log('PASS capstone '+width+'px: physical collection in two layouts and both orders, saved evidence, invalidation, preserved XP and drafts.');
   }
  }finally{await browser?.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
