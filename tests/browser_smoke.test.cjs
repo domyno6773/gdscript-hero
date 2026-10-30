@@ -536,6 +536,30 @@ async function testAccessibilityKeyboard(page,width){
         'Introduzione non chiudibile con '+button+': '+JSON.stringify(state));
     }
   }
+  // Regressione: un esercizio solo console non deve aprire un viewport
+  // WebAssembly vuoto, nemmeno dopo che un altro esercizio lo usava.
+  const visuals=await page.evaluate(()=>{
+    App.state.manualToolsOverride=null;
+    App.openLesson(50);
+    const visual={
+      panelHidden:document.getElementById('exercise-viewport-col').classList.contains('hidden'),
+      toggleHidden:document.getElementById('btn-toggle-extra-tools').classList.contains('hidden')
+    };
+    App.openLesson(101);
+    const scriptOnly={
+      panelHidden:document.getElementById('exercise-viewport-col').classList.contains('hidden'),
+      toggleHidden:document.getElementById('btn-toggle-extra-tools').classList.contains('hidden'),
+      task:document.getElementById('lesson-task')?.textContent||'',
+      expected:document.getElementById('expected-output-pre')?.textContent||''
+    };
+    return {visual,scriptOnly};
+  });
+  assert.equal(visuals.visual.panelHidden,false,'La lezione sui nodi deve mostrare gli strumenti visivi');
+  assert.equal(visuals.scriptOnly.panelHidden,true,'Una lezione console non deve avere la viewport 2D');
+  assert.equal(visuals.scriptOnly.toggleHidden,true,'Non offrire strumenti 2D per una lezione senza grafica');
+  assert.match(visuals.scriptOnly.task,/Avvio: OK/,'La consegna deve indicare il primo messaggio');
+  assert.match(visuals.scriptOnly.task,/Controllo: OK/,'La consegna deve indicare il secondo messaggio');
+  assert.match(visuals.scriptOnly.expected,/Avvio: OK\s*Controllo: OK/);
   await page.evaluate(()=>{App.state.manualToolsOverride=null;App.openLesson(1);});
   await page.evaluate(()=>App.showRoadmap());
   assert.equal(await page.locator('#nav-roadmap-btn').getAttribute('aria-current'),'page');
