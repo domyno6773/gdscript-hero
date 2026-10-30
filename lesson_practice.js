@@ -115,6 +115,7 @@
       ['Ogni print() crea una riga.','Scrivi tre stampe nel blocco di _ready().','Controlla anche l’ordine dei messaggi.'])
   ];
   const extraFor=lesson=>custom[lesson?.id] ||
+    (root.GDHIndividualPractice?.tasksFor(lesson)?.length ? root.GDHIndividualPractice.tasksFor(lesson) : null) ||
     (root.GDHGameplayLessons?.has(lesson?.id) ? root.GDHGameplayLessons.practiceTasks(lesson) : null) ||
     root.GDHPracticeCatalog?.tasksFor(lesson) || [];
   const enabled=id=>Boolean(custom[id]||
@@ -129,7 +130,8 @@
     };
     if(lesson.practiceMode==='focused')return [original];
     const extra=extraFor(lesson);
-    if(extra.length!==3)throw Error('Compiti didattici mancanti per la lezione '+lesson.id);
+    if(extra.length!==(root.GDHIndividualPractice?.ids.includes(lesson.id)?2:3))
+      throw Error('Compiti didattici mancanti per la lezione '+lesson.id);
     return lesson.isMastery?[...extra,original]:[original,...extra];
   };
   const getTask=(id,key)=>{
