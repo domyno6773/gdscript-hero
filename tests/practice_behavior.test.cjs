@@ -16,7 +16,7 @@ for(const id of w.GDHIndividualPractice.ids){
  }
 }
 const l=w.LESSONS_DATA.find(x=>x.id===17),t=w.LessonPractice.getTask(17,'p2');
-const cheating=t.solution.replace(/print\(livello >= 7\)/,"print(true)");
+const cheating=t.solution.replace(/print\(livello >= 7\)/,"var controllo = livello >= 7\n    print(true)");
 const c=w.GDHPracticeBehavior.createProbes(l,t,cheating);
 assert.equal(c.length,1);
 assert.notEqual(c[0].reference,c[0].student);
