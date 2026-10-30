@@ -49,7 +49,7 @@ assert.equal(validated,243,'Le soluzioni dei compiti aggiuntivi vanno controllat
 // Regressione: le lezioni riordinate devono utilizzare i template dei capitoli originali.
 const oldChapter=lessons.find(l=>l.id===5);
 assert.equal(oldChapter.legacyChapterId,2);
-assert.deepEqual(practice.tasksFor(oldChapter).map(t=>t.key),['base','p2','p3','p4']);
+assert.equal(JSON.stringify(practice.tasksFor(oldChapter).map(t=>t.key)),JSON.stringify(['base','p2','p3','p4']));
 // Il completamento di un compito non assegna automaticamente XP.
 assert.equal(practice.tasksFor(lessons.find(l=>l.id===1)).length,4);
 console.log('PASS: current course',lessons.length,'lessons,',total,
