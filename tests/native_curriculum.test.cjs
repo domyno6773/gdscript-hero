@@ -145,7 +145,7 @@ function failures(verdict){
    assert.ok(discriminating>=100,'Too few discriminating output scenarios: '+discriminating);
    const cheat=await page.evaluate(async ()=>{
      const task=LessonPractice.getTask(17,'p2');
-     const hardcoded=task.solution.replace(/if livello >= 7:[\s\S]+$/,"print('Livello sufficiente')\n");
+     const hardcoded=task.solution.replace(/print\(livello >= 7\)/,"print(true)");
      const result=await GDHGodot.verifyPracticeTask(17,'p2',hardcoded);
      return {accepted:result.accepted,checks:result.feedback.checks};
    });
