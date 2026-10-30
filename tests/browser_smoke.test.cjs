@@ -1821,8 +1821,8 @@ async function smoke(browser,url,width){
    !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
  assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),false,
    'Non assegnare XP dopo il primo dei quattro compiti');
- assert.equal(await page.locator('#lesson-practice-progress').isVisible(),true,
-   'Il contatore dei quattro compiti deve essere visibile');
+ assert.equal(await page.locator('#lesson-practice-progress').evaluate(el=>!el.classList.contains('hidden')),true,
+   'Il contatore dei quattro compiti deve essere attivo anche nella scheda Codice');
  for(let index=1;index<4;index++){
    await page.locator('#btn-modal-next').click();
    const nextTask=await page.evaluate(()=>({
@@ -1830,6 +1830,7 @@ async function smoke(browser,url,width){
      index:App.currentPracticeTaskIndex
    }));
    assert.equal(nextTask.index,index,'Avanzamento compiti non corretto');
+   if(width<=820)await page.locator('#btn-tab-code').click();
    await page.locator('#code-editor').fill(nextTask.task.solution);
    await page.locator('#btn-run-code').click();
    await page.waitForFunction(()=>!App.isValidating &&
