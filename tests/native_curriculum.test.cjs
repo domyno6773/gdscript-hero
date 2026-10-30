@@ -142,7 +142,7 @@ function failures(verdict){
    }
    // Not every exercise has different visible output under its alternate input:
    // count true behavioral tests separately from task execution and failures.
-   assert.ok(discriminating>=100,'Too few discriminating output scenarios: '+discriminating);
+   assert.equal(discriminating,152,'Every individual drill must react correctly to changed input');
    const cheat=await page.evaluate(async ()=>{
      const task=LessonPractice.getTask(17,'p2');
      const hardcoded=task.solution.replace(/print\(livello >= 7\)/,"print(true)");
