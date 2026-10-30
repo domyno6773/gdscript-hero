@@ -74,7 +74,8 @@ function refresh(){
    const ref=path==='.'?'self':'$'+path,method='_on_'+n.name.replace(/([a-z])([A-Z])/g,'$1_$2').toLowerCase()+'_'+signal;
    details.append(el('pre','scene-signal-example',ref+'.'+signal+'.connect('+method+')'));
  }
- const remove=$('btn-sandbox-remove-node');remove.classList.toggle('hidden',n.parent===null);remove.disabled=running;
+ const remove=$('btn-sandbox-remove-node');remove.classList.toggle('hidden',n.parent===null);remove.disabled=running || n.parent===null;
+ remove.title=running?'Premi «Ferma» prima di eliminare nodi.':'Elimina il nodo selezionato e i suoi figli';
  $('btn-sandbox-add-node').disabled=running;
  for(const [id,disabled] of [['scene-undo',!history.length||running],['scene-redo',!future.length||running]])if($(id))$(id).disabled=disabled;
  if(!running)renderEditor(nodes);
@@ -115,13 +116,14 @@ function stop(){
  clearInterval(progressTimer);generation++;running=false;A.sandboxNativeSession=null;window.GDHGodot?.stopPreview();
  $('scene-game-host')?.replaceChildren();$('scene-game-host')?.classList.add('hidden');$('sandbox-ui-overlay')?.classList.remove('hidden');
  $('sandbox-code-editor').readOnly=false;$('scene-stop').disabled=true;$('btn-sandbox-run').disabled=false;
+ $('scene-stop').textContent='■ Ferma';
  $('sandbox-status-tag').textContent='Locale · scena ferma';refresh();
 }
 async function run(){
  stop();const ticket=++generation,p=project(),editor=$('sandbox-code-editor');
  try{
    p.code=editor.value;p.nodes=getNodes();M.exportProject(p);A.saveStorage();
-   running=true;editor.readOnly=true;$('scene-stop').disabled=false;$('btn-sandbox-run').disabled=true;refresh();
+   running=true;editor.readOnly=true;$('scene-stop').disabled=false;$('scene-stop').textContent='■ Ferma · per modificare';$('btn-sandbox-run').disabled=true;refresh();status('Scena attiva: premi «Ferma» per modificare o eliminare i nodi.');
    const host=$('scene-game-host');host.classList.remove('hidden');$('sandbox-ui-overlay').classList.add('hidden');
    const output=$('sandbox-console-output');output.textContent='';$('sandbox-status-tag').textContent='Avvio Godot…';
    let count=0;const append=(line,error)=>{if(ticket!==generation)return;if(++count>500)return;output.textContent=(output.textContent+'\n'+(error?'Errore: ':'')+line).slice(-20000);output.scrollTop=output.scrollHeight;};
@@ -130,7 +132,7 @@ async function run(){
    const result=await window.GDHGodot.execute(p.code,{sandboxNodes:p.nodes});if(ticket!==generation)return;
    result.logs?.forEach(l=>append(l,false));A.updateDidacticDebugger(result,[],'sandbox');
    if(!result.success)throw Error(result.error||result.native?.message||'La scena non è stata avviata.');
-   clearInterval(progressTimer);A.sandboxNativeSession=p.id;$('sandbox-status-tag').textContent='In esecuzione · Godot 4.4.1';status('Clicca nella scena per usare la tastiera. Ferma per tornare a modificare.');
+   clearInterval(progressTimer);A.sandboxNativeSession=p.id;$('sandbox-status-tag').textContent='In esecuzione · Godot 4.4.1';status('La scena è in esecuzione. Premi «Ferma» per aggiungere, eliminare o modificare i nodi.');
  }catch(e){if(ticket!==generation)return;stop();$('sandbox-console-output').textContent=e.message;status(e.message);}
 }
 const originalLoad=A.loadActiveSandboxProject.bind(A);
