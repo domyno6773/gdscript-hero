@@ -14,11 +14,11 @@
     "isSupplemental": true,
     "isConsolidation": false,
     "xp": 60,
-    "title": "101. Script e sequenza di esecuzione",
+    "title": "101. Ordine delle istruzioni in _ready()",
     "icon": "code-2",
     "expectedOutput": "Avvio: OK\nControllo: OK",
     "theory": "<p><code>extends Node</code> indica la classe di base dello script: non è un'istruzione da ripetere a ogni avvio. Godot invoca <code>_ready()</code> quando il nodo entra nell'albero ed è pronto; le istruzioni in quel blocco vengono eseguite in ordine.</p><p>Due chiamate a <code>print()</code> producono due righe distinte. La prima riga del file descrive il nodo, mentre il contenuto di <code>_ready()</code> descrive cosa deve fare.</p>",
-    "task": "<p>Distingui la dichiarazione dello script dalle istruzioni eseguite quando il nodo è pronto.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p><strong>Il registro di avvio.</strong> Quando Godot prepara il nodo, esegue le istruzioni contenute in <code>_ready()</code>, dall'alto verso il basso.</p><p><strong>Cosa devi fare:</strong> sostituisci <code>pass</code> con due chiamate a <code>print()</code> dentro <code>_ready()</code>. La prima deve stampare <code>Avvio: OK</code>, la seconda <code>Controllo: OK</code>, ciascuna su una riga. Lascia <code>extends Node</code> fuori dalla funzione: descrive il tipo dello script, non stampa niente.</p>",
     "initialCode": "extends Node\n\nfunc _ready():\n    # Completa il registro di avvio su due righe\n    pass\n",
     "solution": "extends Node\n\nfunc _ready():\n    print(\"Avvio: OK\")\n    print(\"Controllo: OK\")\n",
     "rules": [
@@ -31,21 +31,21 @@
         "type": "concept",
         "icon": "lightbulb",
         "label": "Ragionamento",
-        "text": "Individua il punto di ingresso: che differenza c'è tra dichiarare `extends Node` e scrivere istruzioni dentro `_ready()`?"
+        "text": "`extends Node` è la dichiarazione del tipo di nodo. I comandi eseguiti quando il nodo è pronto vanno invece dentro `_ready()`, uno dopo l'altro."
       },
       {
         "level": 2,
         "type": "structure",
         "icon": "code-2",
         "label": "Struttura",
-        "text": "Mantieni `extends Node` fuori dalle funzioni e inserisci due istruzioni di output, ciascuna su una riga indentata dentro `_ready()`."
+        "text": "Sostituisci `pass` con due righe `print()`, entrambe indentate sotto `func _ready():`. La prima stampa `Avvio: OK`, la seconda `Controllo: OK`."
       },
       {
         "level": 3,
         "type": "example",
         "icon": "book-open",
         "label": "Verifica",
-        "text": "Per ottenere due righe in console servono due chiamate distinte a `print()`: prima il messaggio di avvio, poi quello di controllo."
+        "text": "Puoi scrivere `print(\"Avvio: OK\")` e subito sotto `print(\"Controllo: OK\")`. `extends Node` resta all'inizio dello script."
       }
     ]
   },
@@ -60,7 +60,7 @@
     "icon": "code-2",
     "expectedOutput": "Crediti: 25",
     "theory": "<p>In GDScript <code>\"Crediti: \"</code> è una stringa, mentre <code>crediti</code> contiene un numero. Per unirli con <code>+</code> devi convertire il numero in testo usando <code>str(crediti)</code>.</p><p>Assegnare il risultato a una variabile come <code>rapporto</code> permette di riutilizzare la frase prima di mostrarla. È importante riferirsi alla variabile, non scrivere direttamente il numero atteso.</p>",
-    "task": "<p>Mostra quanti crediti possiede il giocatore concatenando una stringa con un numero intero.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Il giocatore possiede <strong>25 crediti</strong>, già salvati nella variabile <code>crediti</code>.</p><p>Dentro <code>_ready()</code> crea una variabile <code>rapporto</code> unendo il testo <code>Crediti: </code> al valore numerico con <code>str(crediti)</code>. Stampa <code>rapporto</code>, così la console mostra <code>Crediti: 25</code>. Non scrivere 25 direttamente nella stringa: usa il dato della variabile.</p>",
     "initialCode": "func _ready():\n    var crediti = 25\n    # Prepara la frase usando str() e stampala\n    pass\n",
     "solution": "func _ready():\n    var crediti = 25\n    var rapporto = \"Crediti: \" + str(crediti)\n    print(rapporto)\n",
     "rules": [
@@ -102,7 +102,7 @@
     "icon": "code-2",
     "expectedOutput": "Energia: 75\nAcceso: true",
     "theory": "<p>Con <code>var energia := 75</code> Godot deduce che il tipo è <code>int</code>; in seguito non potrai assegnare a quella variabile un valore di un tipo incompatibile. Un <code>bool</code> ha solo i valori <code>true</code> e <code>false</code>.</p><p>L'inferenza <code>:=</code> non è una normale assegnazione <code>=</code>: dichiara una variabile il cui tipo viene fissato a partire dal valore iniziale. Usala sia per il numero sia per lo stato acceso/spento.</p>",
-    "task": "<p>Dichiara una quantità di energia usando l'inferenza statica e una variabile booleana che indica se il generatore è acceso.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>All'avvio del generatore devi registrare due valori: <code>energia</code> uguale a <code>75</code> e <code>acceso</code> uguale a <code>true</code>.</p><p>Crea le due variabili con <code>:=</code> (inferenza del tipo), poi stampa su righe separate <code>Energia: 75</code> e <code>Acceso: true</code> utilizzando le variabili.</p>",
     "initialCode": "func _ready():\n    # Crea energia e acceso con inferenza statica, poi stampali\n    pass\n",
     "solution": "func _ready():\n    var energia := 75\n    var acceso := true\n    print(\"Energia: \", energia)\n    print(\"Acceso: \", acceso)\n",
     "rules": [
@@ -144,7 +144,7 @@
     "icon": "code-2",
     "expectedOutput": "Totale: 40",
     "theory": "<p>La moltiplicazione ha precedenza sull'addizione, ma usare parentesi rende evidente il gruppo di operazioni che rappresenta il costo dei kit. La formula è <code>(costo_kit * quantita) + tassa</code>.</p><p>Le parentesi non devono servire solo a decorare il codice: devono racchiudere effettivamente una parte del calcolo. Il totale deve cambiare quando cambiano quantità, costo o tassa, quindi non scrivere direttamente 40.</p>",
-    "task": "<p>Calcola il costo di tre kit da 12 monete più una tassa fissa di 4: applica le parentesi per rendere esplicito il ragionamento.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Devi comprare <strong>3 kit da 12 monete</strong> ciascuno, più <strong>4 monete di tassa</strong>. Questi valori sono già disponibili nel codice.</p><p>Calcola una variabile <code>totale</code> con <code>(costo_kit * quantita) + tassa</code>, poi stampa <code>Totale: 40</code> usando il risultato del calcolo.</p>",
     "initialCode": "func _ready():\n    var costo_kit = 12\n    var quantita = 3\n    var tassa = 4\n    # Calcola totale e stampa \"Totale: ...\"\n    pass\n",
     "solution": "func _ready():\n    var costo_kit = 12\n    var quantita = 3\n    var tassa = 4\n    var totale = (costo_kit * quantita) + tassa\n    print(\"Totale: \", totale)\n",
     "rules": [
@@ -187,7 +187,7 @@
     "icon": "code-2",
     "expectedOutput": "Rango: B",
     "theory": "<p>In una catena <code>if / elif / else</code>, Godot sceglie il primo ramo la cui condizione è vera. Per i ranghi, conviene controllare prima la soglia più alta: almeno 90 per A, altrimenti almeno 60 per B, altrimenti C.</p><p><code>elif</code> non è un secondo <code>if</code> indipendente: viene valutato solo quando il controllo precedente non è passato. Controlla anche i valori ai confini delle soglie.</p>",
-    "task": "<p>Un personaggio con 72 punti viene classificato come rango A, B o C. Assegna il rango usando tre rami condizionali.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Il personaggio ha <strong>72 punti</strong>. Il rango è <code>A</code> da 90 punti in su, <code>B</code> da 60 a 89 e <code>C</code> sotto 60.</p><p>Completa il codice con <code>if</code>, <code>elif</code> ed <code>else</code> per assegnare la stringa giusta alla variabile <code>rango</code>; alla fine stampa <code>Rango: B</code>.</p>",
     "initialCode": "func _ready():\n    var punti = 72\n    var rango = \"\"\n    # Determina rango A (>=90), B (>=60) o C\n    pass\n",
     "solution": "func _ready():\n    var punti = 72\n    var rango = \"\"\n    if punti >= 90:\n        rango = \"A\"\n    elif punti >= 60:\n        rango = \"B\"\n    else:\n        rango = \"C\"\n    print(\"Rango: \", rango)\n",
     "rules": [
@@ -229,7 +229,7 @@
     "icon": "code-2",
     "expectedOutput": "Portone aperto",
     "theory": "<p>L'operatore <code>not</code> inverte un valore booleano: <code>not false</code> è <code>true</code>. L'operatore <code>and</code> richiede che entrambe le condizioni siano vere.</p><p>Il portone può aprirsi soltanto se l'allarme è disattivato <em>e</em> il giocatore ha il lasciapassare. Un solo requisito non basta; il ramo <code>else</code> deve gestire tutti i casi negati.</p>",
-    "task": "<p>Un portone deve aprirsi soltanto quando l'allarme non è attivo e il giocatore possiede il lasciapassare.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Il portone si apre soltanto se <strong>l'allarme è disattivato</strong> e il giocatore <strong>possiede il pass</strong>. Le variabili <code>allarme_attivo</code> e <code>ha_pass</code> sono già definite.</p><p>Usa <code>if</code> con <code>not</code> e <code>and</code>: quando entrambe le condizioni sono soddisfatte stampa <code>Portone aperto</code>, altrimenti <code>Accesso negato</code>. Con i dati iniziali deve aprirsi.</p>",
     "initialCode": "func _ready():\n    var allarme_attivo = false\n    var ha_pass = true\n    # Valuta l'accesso usando not, and, if/else\n    pass\n",
     "solution": "func _ready():\n    var allarme_attivo = false\n    var ha_pass = true\n    if not allarme_attivo and ha_pass:\n        print(\"Portone aperto\")\n    else:\n        print(\"Accesso negato\")\n",
     "rules": [
@@ -272,7 +272,7 @@
     "icon": "code-2",
     "expectedOutput": "Oggetti rimasti: 2",
     "theory": "<p><code>Array.has(valore)</code> cerca un elemento e restituisce un booleano; <code>Array.erase(valore)</code> ne rimuove la prima occorrenza; <code>Array.size()</code> restituisce il numero di elementi rimasti.</p><p>Controllare la presenza prima della rimozione evita di assumere che la chiave esista sempre. La dimensione va letta dall'array dopo l'operazione, non impostata con un numero fisso.</p>",
-    "task": "<p>Prima di rimuovere una chiave dall'inventario, verifica che sia presente. Mostra poi quanti oggetti rimangono.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Lo zaino contiene <code>Torcia</code>, <code>Chiave</code> e <code>Mappa</code>.</p><p>Controlla con <code>has(\"Chiave\")</code> se la chiave esiste. Soltanto in quel caso rimuovila con <code>erase()</code>. Infine stampa il numero di elementi ancora presenti usando <code>size()</code>, ottenendo <code>Oggetti rimasti: 2</code>.</p>",
     "initialCode": "func _ready():\n    var zaino = [\"Torcia\", \"Chiave\", \"Mappa\"]\n    # Controlla la chiave, rimuovila e stampa la dimensione\n    pass\n",
     "solution": "func _ready():\n    var zaino = [\"Torcia\", \"Chiave\", \"Mappa\"]\n    if zaino.has(\"Chiave\"):\n        zaino.erase(\"Chiave\")\n    print(\"Oggetti rimasti: \", zaino.size())\n",
     "rules": [
@@ -315,7 +315,7 @@
     "icon": "code-2",
     "expectedOutput": "Ultimo punteggio: 30",
     "theory": "<p><code>Array[int]</code> è un array tipizzato: Godot controlla che i valori inseriti siano interi. Non è la stessa cosa di un array generico che inizialmente contiene numeri.</p><p>Con <code>append()</code> aggiungi un elemento in coda; puoi accedere all'ultimo tramite l'indice o, se preferisci, <code>back()</code>. Il valore mostrato deve provenire davvero dall'array.</p>",
-    "task": "<p>Crea una lista di punteggi che possa contenere solo interi, aggiungi un punteggio e stampa il valore finale.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Stai preparando un elenco di punteggi che deve accettare <strong>solo numeri interi</strong>.</p><p>Crea <code>punteggi: Array[int]</code> con i valori <code>10</code> e <code>20</code>, aggiungi <code>30</code> usando <code>append()</code>, poi stampa l'elemento di indice <code>2</code>: <code>Ultimo punteggio: 30</code>.</p>",
     "initialCode": "func _ready():\n    # Definisci punteggi come Array[int] e aggiungi 30\n    pass\n",
     "solution": "func _ready():\n    var punteggi: Array[int] = [10, 20]\n    punteggi.append(30)\n    print(\"Ultimo punteggio: \", punteggi[2])\n",
     "rules": [
@@ -357,7 +357,7 @@
     "icon": "code-2",
     "expectedOutput": "Guasto individuato",
     "theory": "<p>Un ciclo <code>for</code> visita gli elementi uno alla volta. Quando trovi il primo elemento uguale a <code>\"GUASTO\"</code>, puoi registrare il problema e interrompere immediatamente il ciclo con <code>break</code>.</p><p><code>break</code> esce dall'intero ciclo, non soltanto dal blocco <code>if</code>. Senza <code>break</code>, più guasti potrebbero causare segnalazioni duplicate; se non ci sono guasti, non va segnalato nulla.</p>",
-    "task": "<p>Scorri un elenco di controlli e interrompi la ricerca quando incontri il primo guasto.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>I controlli dell'impianto sono <code>[\"OK\", \"OK\", \"GUASTO\", \"OK\"]</code>.</p><p>Scorri l'array con <code>for</code>. Quando incontri <code>GUASTO</code> stampa <code>Guasto individuato</code> e usa <code>break</code> per interrompere subito la ricerca. Il messaggio deve comparire una volta sola.</p>",
     "initialCode": "func _ready():\n    var controlli = [\"OK\", \"OK\", \"GUASTO\", \"OK\"]\n    # Cerca il primo GUASTO e interrompi il ciclo\n    pass\n",
     "solution": "func _ready():\n    var controlli = [\"OK\", \"OK\", \"GUASTO\", \"OK\"]\n    for controllo in controlli:\n        if controllo == \"GUASTO\":\n            print(\"Guasto individuato\")\n            break\n",
     "rules": [
@@ -400,7 +400,7 @@
     "icon": "code-2",
     "expectedOutput": "Ricompense: 35",
     "theory": "<p><code>continue</code> interrompe soltanto l'iterazione corrente di un ciclo: l'elemento successivo viene comunque elaborato. È diverso da <code>break</code>, che termina l'intero ciclo.</p><p>Qui i valori negativi rappresentano ricompense non valide. Devi saltarli prima della somma, mentre tutti gli altri premi contribuiscono al totale; funziona anche se i premi validi sono più di due.</p>",
-    "task": "<p>Somma i punti di tre ricompense, ignorando quella contrassegnata come non valida.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Le ricompense ottenute sono <code>10</code>, <code>-1</code> e <code>25</code> punti. Un valore negativo indica una ricompensa non valida.</p><p>Scorri <code>premi</code> con <code>for</code>, usa <code>continue</code> per saltare i valori negativi e somma gli altri nella variabile <code>totale</code>. Stampa <code>Ricompense: 35</code>.</p>",
     "initialCode": "func _ready():\n    var premi = [10, -1, 25]\n    var totale = 0\n    # Ignora premi negativi con continue e stampa il totale\n    pass\n",
     "solution": "func _ready():\n    var premi = [10, -1, 25]\n    var totale = 0\n    for premio in premi:\n        if premio < 0:\n            continue\n        totale += premio\n    print(\"Ricompense: \", totale)\n",
     "rules": [
@@ -443,7 +443,7 @@
     "icon": "code-2",
     "expectedOutput": "Senza difesa: 20\nCon difesa: 15",
     "theory": "<p>Un parametro predefinito come <code>difesa: int = 0</code> consente di chiamare <code>calcola_danno(20)</code> senza specificare la difesa. In una seconda chiamata puoi passare un valore esplicito, per esempio <code>calcola_danno(20, 5)</code>.</p><p>La funzione deve restituire un intero tramite <code>return</code>. Se la difesa supera l'attacco, usa <code>max(0, ...)</code> per evitare un danno negativo. Non calcolare soltanto i due casi mostrati.</p>",
-    "task": "<p>Implementa una funzione che calcola il danno dopo una difesa opzionale. Deve funzionare sia con un solo argomento sia con due.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>La funzione <code>calcola_danno(attacco, difesa=0)</code> è già dichiarata, ma non restituisce ancora il danno.</p><p>Completa il corpo della funzione restituendo <code>attacco - difesa</code>, senza scendere sotto zero (puoi usare <code>max()</code>). Le due chiamate presenti in <code>_ready()</code> devono produrre <code>Senza difesa: 20</code> e <code>Con difesa: 15</code>.</p>",
     "initialCode": "func calcola_danno(attacco: int, difesa: int = 0) -> int:\n    # Restituisci il danno evitando valori negativi\n    pass\n\nfunc _ready():\n    print(\"Senza difesa: \", calcola_danno(20))\n    print(\"Con difesa: \", calcola_danno(20, 5))\n",
     "solution": "func calcola_danno(attacco: int, difesa: int = 0) -> int:\n    return max(0, attacco - difesa)\n\nfunc _ready():\n    print(\"Senza difesa: \", calcola_danno(20))\n    print(\"Con difesa: \", calcola_danno(20, 5))\n",
     "rules": [
@@ -486,7 +486,7 @@
     "icon": "code-2",
     "expectedOutput": "Da pagare: 38",
     "theory": "<p>Una variabile locale, come <code>prezzo_finale</code>, esiste soltanto nel corpo della funzione che la dichiara. Con <code>return</code> puoi consegnare il valore calcolato al codice chiamante.</p><p><code>print()</code> mostra un risultato, ma non lo restituisce alla funzione che ha effettuato la chiamata. Calcola il prezzo a partire dai parametri, in modo che la stessa funzione lavori anche con prezzi e sconti diversi.</p>",
-    "task": "<p>Costruisci una funzione che calcola il prezzo finale applicando uno sconto; il risultato deve essere restituito al chiamante.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Devi calcolare il prezzo dopo uno sconto. La funzione <code>applica_sconto(prezzo, sconto)</code> riceve già i due valori.</p><p>Al suo interno crea una variabile locale <code>prezzo_finale</code> sottraendo lo sconto, quindi restituiscila con <code>return</code>. Il codice in <code>_ready()</code> deve ottenere e stampare <code>Da pagare: 38</code>.</p>",
     "initialCode": "func applica_sconto(prezzo: int, sconto: int) -> int:\n    # Calcola prezzo_finale e restituiscilo\n    pass\n\nfunc _ready():\n    var risultato = applica_sconto(50, 12)\n    print(\"Da pagare: \", risultato)\n",
     "solution": "func applica_sconto(prezzo: int, sconto: int) -> int:\n    var prezzo_finale = prezzo - sconto\n    return prezzo_finale\n\nfunc _ready():\n    var risultato = applica_sconto(50, 12)\n    print(\"Da pagare: \", risultato)\n",
     "rules": [
@@ -528,7 +528,7 @@
     "icon": "code-2",
     "expectedOutput": "Attracco possibile: true",
     "theory": "<p>Un <code>Vector2</code> descrive un punto tramite le sue coordinate X e Y. Il metodo <code>distance_to()</code> misura la distanza geometrica tra due vettori, non solo la differenza su un asse.</p><p>Per verificare la possibilità di attracco, confronta la distanza con il limite di 5 unità. I punti (0, 0) e (3, 4) distano esattamente 5, quindi il controllo deve includere anche il valore limite.</p>",
-    "task": "<p>Verifica se una navicella è entro cinque unità dalla stazione, usando la distanza effettiva tra le coordinate.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>La nave si trova in <code>Vector2(0, 0)</code> e la stazione in <code>Vector2(3, 4)</code>.</p><p>Calcola con <code>distance_to()</code> se la distanza è <strong>minore o uguale a 5</strong>, salva il risultato booleano in <code>vicino</code> e stampa <code>Attracco possibile: true</code>. Non confrontare separatamente le due coordinate.</p>",
     "initialCode": "func _ready():\n    var nave = Vector2(0, 0)\n    var stazione = Vector2(3, 4)\n    # Controlla la distanza con distance_to e stampa il risultato\n    pass\n",
     "solution": "func _ready():\n    var nave = Vector2(0, 0)\n    var stazione = Vector2(3, 4)\n    var vicino = nave.distance_to(stazione) <= 5.0\n    print(\"Attracco possibile: \", vicino)\n",
     "rules": [
@@ -570,7 +570,7 @@
     "icon": "code-2",
     "expectedOutput": "Direzione unitaria: true",
     "theory": "<p><code>Vector2.normalized()</code> restituisce un vettore con la stessa direzione e lunghezza 1, quando la lunghezza originale è diversa da zero. È utile per applicare velocità costanti indipendentemente dalla distanza.</p><p>Con i numeri decimali, confronta le misure con <code>is_equal_approx()</code> perché gli arrotondamenti possono rendere poco affidabile <code>==</code>. Il vettore nullo resta nullo dopo la normalizzazione.</p>",
-    "task": "<p>Ottieni la direzione dalla navicella all'obiettivo e verifica che il vettore risultante abbia lunghezza unitaria.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Hai un vettore di direzione <code>Vector2(3, 4)</code>, che inizialmente ha lunghezza 5.</p><p>Usa <code>normalized()</code> per creare un vettore di lunghezza 1, verifica la lunghezza con <code>length()</code> e <code>is_equal_approx()</code> e stampa <code>Direzione unitaria: true</code>.</p>",
     "initialCode": "func _ready():\n    # Normalizza Vector2(3,4) e verifica la sua lunghezza\n    pass\n",
     "solution": "func _ready():\n    var direzione = Vector2(3, 4).normalized()\n    var corretta = is_equal_approx(direzione.length(), 1.0)\n    print(\"Direzione unitaria: \", corretta)\n",
     "rules": [
@@ -612,7 +612,7 @@
     "icon": "code-2",
     "expectedOutput": "Scudo: 0",
     "theory": "<p>Un dizionario associa chiavi a valori. Accedere direttamente a una chiave assente può causare problemi; <code>get(\"scudo\", 0)</code> restituisce il valore se presente, altrimenti 0.</p><p>Il secondo argomento di <code>get()</code> è il valore predefinito, non un valore da scrivere nel dizionario. Il codice deve funzionare sia quando il nemico non ha uno scudo sia quando dispone di uno scudo diverso da zero.</p>",
-    "task": "<p>Leggi in sicurezza una statistica opzionale dal dizionario di un nemico, fornendo un valore predefinito se non esiste.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Il dizionario <code>nemico</code> contiene nome e punti vita, ma <strong>non contiene</strong> la proprietà <code>scudo</code>.</p><p>Leggi <code>scudo</code> con <code>get(\"scudo\", 0)</code> per utilizzare il valore <code>0</code> quando la chiave manca. Conserva il risultato in una variabile <code>scudo</code> e stampa <code>Scudo: 0</code>.</p>",
     "initialCode": "func _ready():\n    var nemico = {\"nome\": \"Slime\", \"hp\": 20}\n    # Ricava scudo con get e stampa il valore\n    pass\n",
     "solution": "func _ready():\n    var nemico = {\"nome\": \"Slime\", \"hp\": 20}\n    var scudo = nemico.get(\"scudo\", 0)\n    print(\"Scudo: \", scudo)\n",
     "rules": [
@@ -654,7 +654,7 @@
     "icon": "code-2",
     "expectedOutput": "Allarme: 3",
     "theory": "<p>Un segnale comunica che un evento è avvenuto senza obbligare il mittente a chiamare direttamente il ricevente. <code>connect()</code> registra la funzione da richiamare, mentre <code>emit()</code> invia l'evento.</p><p>Il parametro del segnale viene passato alla funzione collegata. La callback deve utilizzare quel parametro: se emetti un livello 7 anziché 3, anche il testo dell'allarme deve aggiornarsi.</p>",
-    "task": "<p>Un avviso di battaglia deve essere ascoltato da una funzione che registra il livello di pericolo.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Lo script dichiara già il segnale <code>pericolo(livello)</code> e una funzione <code>registra_allarme(livello)</code>.</p><p>Completa la funzione affinché stampi il livello ricevuto; poi, dentro <code>_ready()</code>, collega il segnale con <code>connect()</code> alla funzione ed emetti il valore <code>3</code>. La console deve mostrare <code>Allarme: 3</code>.</p>",
     "initialCode": "extends Node\nsignal pericolo(livello)\n\nfunc registra_allarme(livello):\n    # Stampa \"Allarme: \" e il livello\n    pass\n\nfunc _ready():\n    # Collega il segnale alla funzione e invia il livello 3\n    pass\n",
     "solution": "extends Node\nsignal pericolo(livello)\n\nfunc registra_allarme(livello):\n    print(\"Allarme: \", livello)\n\nfunc _ready():\n    pericolo.connect(registra_allarme)\n    pericolo.emit(3)\n",
     "rules": [
@@ -697,7 +697,7 @@
     "icon": "code-2",
     "expectedOutput": "Danno: 15",
     "theory": "<p>Una classe riunisce dati e metodi. La classe <code>Arma</code> conserva due attributi numerici e può esporre un metodo <code>danno_totale() -> int</code> per calcolare la loro somma.</p><p>Il metodo deve leggere lo stato dell'istanza su cui viene chiamato e restituire il risultato senza modificare <code>base</code> e <code>bonus</code>. Un'altra arma con valori diversi deve produrre un altro danno.</p>",
-    "task": "<p>Crea una classe statistica con un metodo che restituisca il danno totale senza modificare gli attributi originali.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>La classe <code>Arma</code> contiene già due attributi: <code>base = 12</code> e <code>bonus = 3</code>.</p><p>Aggiungi alla classe il metodo <code>danno_totale() -> int</code> che restituisce la somma degli attributi senza modificarli. Il codice già presente in <code>_ready()</code> deve stampare <code>Danno: 15</code>.</p>",
     "initialCode": "extends Node\nclass Arma:\n    var base: int = 12\n    var bonus: int = 3\n\n    # Aggiungi un metodo tipizzato danno_totale()\n\nfunc _ready():\n    var arma = Arma.new()\n    print(\"Danno: \", arma.danno_totale())\n",
     "solution": "extends Node\nclass Arma:\n    var base: int = 12\n    var bonus: int = 3\n\n    func danno_totale() -> int:\n        return base + bonus\n\nfunc _ready():\n    var arma = Arma.new()\n    print(\"Danno: \", arma.danno_totale())\n",
     "rules": [
@@ -740,7 +740,7 @@
     "icon": "code-2",
     "expectedOutput": "A: 2\nB: 0",
     "theory": "<p>Le istanze di una classe hanno stato indipendente: due oggetti <code>Contatore.new()</code> non condividono automaticamente il campo <code>valore</code>. Un metodo può modificare il campo dell'istanza su cui viene invocato.</p><p>Il metodo <code>aggiungi()</code> deve incrementare <code>valore</code> di una unità a ogni chiamata. Eseguire due chiamate su <code>a</code> non deve cambiare <code>b</code>.</p>",
-    "task": "<p>Crea due contatori indipendenti: modificare il primo non deve cambiare il secondo.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>La classe <code>Contatore</code> contiene una proprietà <code>valore</code> inizializzata a zero; in <code>_ready()</code> vengono create due istanze distinte, <code>a</code> e <code>b</code>.</p><p>Completa <code>aggiungi()</code> affinché aumenti di uno il valore <em>dell'istanza corrente</em>. Due chiamate su <code>a</code> devono produrre <code>A: 2</code>, lasciando <code>B: 0</code>.</p>",
     "initialCode": "extends Node\nclass Contatore:\n    var valore: int = 0\n\n    func aggiungi() -> void:\n        # Incrementa il valore di questa istanza\n        pass\n\nfunc _ready():\n    var a = Contatore.new()\n    var b = Contatore.new()\n    a.aggiungi()\n    a.aggiungi()\n    print(\"A: \", a.valore)\n    print(\"B: \", b.valore)\n",
     "solution": "extends Node\nclass Contatore:\n    var valore: int = 0\n\n    func aggiungi() -> void:\n        valore += 1\n\nfunc _ready():\n    var a = Contatore.new()\n    var b = Contatore.new()\n    a.aggiungi()\n    a.aggiungi()\n    print(\"A: \", a.valore)\n    print(\"B: \", b.valore)\n",
     "rules": [
@@ -783,7 +783,7 @@
     "icon": "code-2",
     "expectedOutput": "Compagno presente: true",
     "theory": "<p>Un nodo creato con <code>Node.new()</code> esiste in memoria, ma non appartiene automaticamente all'albero della scena. <code>add_child()</code> lo inserisce tra i figli del nodo corrente.</p><p>Per cercarlo tramite <code>has_node(\"Compagno\")</code>, prima assegna al nodo il nome desiderato. Il controllo deve riflettere la presenza reale del figlio, non limitarsi a stampare il testo <code>true</code>.</p>",
-    "task": "<p>Crea da codice un nodo figlio e controlla la sua presenza nell'albero della scena prima di accedervi.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Vuoi aggiungere alla scena un nuovo nodo figlio chiamato <code>Compagno</code>.</p><p>Dentro <code>_ready()</code> crea un <code>Node</code> con <code>Node.new()</code>, assegnagli il nome, aggiungilo con <code>add_child()</code> e controlla con <code>has_node(\"Compagno\")</code> che esista. Stampa <code>Compagno presente: true</code>.</p>",
     "initialCode": "extends Node\n\nfunc _ready():\n    # Crea il nodo Compagno, aggiungilo come figlio e verificane la presenza\n    pass\n",
     "solution": "extends Node\n\nfunc _ready():\n    var compagno = Node.new()\n    compagno.name = \"Compagno\"\n    add_child(compagno)\n    print(\"Compagno presente: \", has_node(\"Compagno\"))\n",
     "rules": [
@@ -826,7 +826,7 @@
     "icon": "code-2",
     "expectedOutput": "Avvio confermato",
     "theory": "<p><code>Button</code> è un tipo di nodo interfaccia che emette il segnale <code>pressed</code> quando viene premuto. Collegando <code>pressed</code> a una funzione puoi separare la logica del clic dal codice che costruisce l'interfaccia.</p><p>In questo esercizio simuli la pressione usando <code>pressed.emit()</code>. Per ottenere il messaggio, il pulsante deve essere creato, aggiunto alla scena e correttamente collegato alla callback.</p>",
-    "task": "<p>Crea un pulsante Godot, collega il suo segnale pressed e simula una pressione che invia un messaggio.</p><p>Scrivi il codice per ottenere il comportamento richiesto, non limitarti a stampare una risposta preconfezionata.</p>",
+    "task": "<p>Devi creare da codice un pulsante e far reagire lo script alla sua pressione.</p><p>In <code>_ready()</code> crea un <code>Button</code> con <code>Button.new()</code>, aggiungilo come figlio con <code>add_child()</code>, collega il segnale <code>pressed</code> alla funzione <code>pulsante_premuto</code> già presente ed emetti il segnale per provarlo. Il risultato richiesto è <code>Avvio confermato</code>.</p>",
     "initialCode": "extends Node\n\nfunc pulsante_premuto():\n    print(\"Avvio confermato\")\n\nfunc _ready():\n    # Crea Button, collega pressed e simula l'evento\n    pass\n",
     "solution": "extends Node\n\nfunc pulsante_premuto():\n    print(\"Avvio confermato\")\n\nfunc _ready():\n    var pulsante = Button.new()\n    add_child(pulsante)\n    pulsante.pressed.connect(pulsante_premuto)\n    pulsante.pressed.emit()\n",
     "rules": [
@@ -869,7 +869,7 @@
     "icon": "code-2",
     "expectedOutput": "Posizione finale: 10.0",
     "theory": "<p><code>delta</code> misura quanti secondi sono trascorsi tra aggiornamenti. Per un movimento a velocità costante la formula è <code>incremento = velocità * delta</code>.</p><p>Qui simuli due aggiornamenti da mezzo secondo chiamando <code>aggiorna(0.5)</code> due volte; non stai ancora collegando la funzione a <code>_process(delta)</code>. Il metodo deve funzionare anche con intervalli differenti, non soltanto con due chiamate da 0,5.</p>",
-    "task": "<p>Completa la funzione <code>aggiorna(delta)</code> per spostare il personaggio a 10 unità al secondo: ogni chiamata deve aumentare <code>posizione</code> di <code>10.0 * delta</code>.</p><p>In questo esercizio <code>_ready()</code> richiama manualmente <code>aggiorna(0.5)</code> due volte per simulare due intervalli di mezzo secondo. Non è ancora un ciclo automatico <code>_process(delta)</code>. Il metodo deve funzionare anche con intervalli diversi.</p>",
+    "task": "<p>Simula due aggiornamenti della posizione, ciascuno della durata di <strong>0,5 secondi</strong>, con una velocità di <strong>10 unità al secondo</strong>.</p><p>Completa <code>aggiorna(delta)</code> affinché aggiunga a <code>posizione</code> il valore <code>10.0 * delta</code>. Le due chiamate già presenti in <code>_ready()</code> devono stampare <code>Posizione finale: 10.0</code>. Questo esercizio simula manualmente gli intervalli, senza animazione continua.</p>",
     "initialCode": "extends Node\nvar posizione = 0.0\n\nfunc aggiorna(delta: float) -> void:\n    # Aggiorna posizione con velocità 10.0 per secondo\n    pass\n\nfunc _ready():\n    aggiorna(0.5)\n    aggiorna(0.5)\n    print(\"Posizione finale: \", posizione)\n",
     "solution": "extends Node\nvar posizione = 0.0\n\nfunc aggiorna(delta: float) -> void:\n    posizione += 10.0 * delta\n\nfunc _ready():\n    aggiorna(0.5)\n    aggiorna(0.5)\n    print(\"Posizione finale: \", posizione)\n",
     "rules": [
