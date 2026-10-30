@@ -33,6 +33,6 @@ for(const l of ls){
 assert.equal(personalized,152);
 assert.equal(total,264);
 const old=fs.readFileSync(path.join(root,'index.html'),'utf8');
-assert.ok(old.indexOf('practice_catalog.js')<old.indexOf('curriculum_drills_v2.js'));
-assert.ok(old.indexOf('curriculum_drills_v2.js')<old.indexOf('app.js'));
+assert.ok(old.indexOf('src="practice_catalog.js"')<old.indexOf('src="curriculum_drills_v2.js"'));
+assert.ok(old.indexOf('src="curriculum_drills_v2.js"')<old.indexOf('src="app.js"'));
 console.log('PASS: 85 lessons, 152 individualized drills, 264 tasks, unique titles and valid source checks.');
