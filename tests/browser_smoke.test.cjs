@@ -1783,10 +1783,24 @@ async function smoke(browser,url,width){
  await page.locator('#btn-run-code').click({timeout:10000});
  await page.waitForFunction(()=>!App.isValidating &&
    !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
+ assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),false,
+   'Non assegnare XP dopo il primo dei quattro compiti');
+ assert.equal(await page.locator('#lesson-practice-progress').isVisible(),true,
+   'Il contatore dei quattro compiti deve essere visibile');
+ for(let index=1;index<4;index++){
+   await page.locator('#btn-modal-next').click();
+   const nextTask=await page.evaluate(()=>({
+     task:LessonPractice.tasksFor(LESSONS_DATA.find(l=>l.id===1))[App.currentPracticeTaskIndex],
+     index:App.currentPracticeTaskIndex
+   }));
+   assert.equal(nextTask.index,index,'Avanzamento compiti non corretto');
+   await page.locator('#code-editor').fill(nextTask.task.solution);
+   await page.locator('#btn-run-code').click();
+   await page.waitForFunction(()=>!App.isValidating &&
+     !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
+ }
  assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),true,
-   'The focused exercise must complete after its own assessment');
- assert.equal(await page.locator('#lesson-practice-progress').isHidden(),true,
-   'A single assessment must not show redundant task navigation');
+   'La lezione si conclude solo dopo il quarto compito');
  try {
    await page.waitForFunction(()=>App.state.finishedLessons.includes(1),null,{timeout:15000});
  } catch(error){
