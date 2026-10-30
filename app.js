@@ -2660,44 +2660,66 @@ const App = {
     // MAPPA A NODI E CAPITOLI
     // ==========================================
     // Garantisce che i livelli completati sblocchino coerentemente sia il percorso principale che i bonus
-    ensureUnlockedConsistency() {
-        // La sequenza reale è LESSONS_DATA, non l'ID numerico: nuovi quiz e
-        // argomenti possono essere inseriti tra lezioni già presenti.
-        const ordered = LESSONS_DATA;
-        const indexById = new Map(ordered.map((lesson,index)=>[lesson.id,index]));
-        const finished = Array.isArray(this.state.finishedLessons)
-            ? this.state.finishedLessons.filter(id=>indexById.has(id)) : [];
-        if (!Array.isArray(this.state.finishedLessons) ||
-            finished.length!==this.state.finishedLessons.length) {
-            this.state.finishedLessons=[...new Set(finished)];
-        }
+    ensureUnlockedConsistency(options = {}) {
+        // Un solo ordine autorevole, indipendente dagli ID storici. Una spunta
+        // ottenuta non puo' scomparire dopo un riordino, un nuovo quiz o un
+        // merge cloud. completedLessons e' SOLO la lista degli sblocchi.
+        const ordered=LESSONS_DATA;
+        const indexById=new Map(ordered.map((lesson,index)=>[lesson.id,index]));
+        const previousFinished=Array.isArray(this.state.finishedLessons)
+            ? this.state.finishedLessons : [];
+        const finishedSet=new Set(previousFinished.map(Number)
+            .filter(id=>Number.isInteger(id)&&indexById.has(id)));
 
-        // Lo sblocco totale è riservato allo sviluppo locale.
-        if (!this.isLocalEnvironment()) this.state.devAllUnlocked=false;
-
-        // La progressione va sempre in avanti. Un'attività già completata,
-        // anche in un salvataggio creato prima dell'inserimento dei quiz,
-        // dimostra che tutte le tappe precedenti devono essere ACCESSIBILI.
-        // Non le segniamo come superate e non attribuiamo XP fittizi.
-        let lastReached=0;
-        if (this.state.devAllUnlocked) {
-            lastReached=ordered.length-1;
-        } else {
-            for (const id of finished) {
-                const position=indexById.get(id);
-                lastReached=Math.max(lastReached,Math.min(position+1,ordered.length-1));
+        // Recupero crash: il quarto compito puo' essere stato salvato prima
+        // della spunta finale. Non sprecare le quattro verifiche gia' superate.
+        const practice=typeof window!=='undefined'?window.LessonPractice:null;
+        const stored=this.state.lessonTaskProgress||{};
+        if(practice){
+            for(const lesson of ordered){
+                if(lesson.isQuiz||finishedSet.has(lesson.id)||!practice.enabled(lesson.id))
+                    continue;
+                const keys=practice.tasksFor(lesson).map(task=>task.key);
+                const done=stored[lesson.id]?.completed;
+                if(keys.length>0&&Array.isArray(done)&&
+                    keys.every(key=>done.includes(key)))finishedSet.add(lesson.id);
             }
         }
-        const reachable=ordered.slice(0,lastReached+1).map(lesson=>lesson.id);
+
+        // Un completamento piu' avanti prova che il salvataggio aveva gia'
+        // raggiunto le tappe precedenti. Lezioni/quiz inseriti a posteriori
+        // sono riconosciuti per compatibilita', senza attribuire XP, streak,
+        // verifiche fittizie o sovrascrivere le bozze.
+        // Lo sviluppo con sblocco globale non e' prova di completamento.
+        if(!this.isLocalEnvironment())this.state.devAllUnlocked=false;
+        let furthest=-1;
+        for(const id of finishedSet)furthest=Math.max(furthest,indexById.get(id));
+        if(!this.state.devAllUnlocked&&furthest>=0)
+            for(let index=0;index<=furthest;index++)
+                finishedSet.add(ordered[index].id);
+
+        const normalizedFinished=ordered.filter(lesson=>finishedSet.has(lesson.id))
+            .map(lesson=>lesson.id);
+        const finishedChanged=previousFinished.length!==normalizedFinished.length||
+            previousFinished.some((id,i)=>id!==normalizedFinished[i]);
+        if(finishedChanged)this.state.finishedLessons=normalizedFinished;
+
+        // Se l'ultima tappa superata e' k, l'attivita' k+1 dev'essere
+        // disponibile. Questo vale per i quiz e per le lezioni ordinarie.
+        const reached=this.state.devAllUnlocked?ordered.length-1:
+            Math.min(furthest+1,ordered.length-1);
+        const reachable=ordered.slice(0,Math.max(1,reached+1))
+            .map(lesson=>lesson.id);
         const previous=Array.isArray(this.state.completedLessons)
             ? this.state.completedLessons : [];
-        const changed=previous.length!==reachable.length ||
+        const unlockChanged=previous.length!==reachable.length||
             previous.some((id,index)=>id!==reachable[index]);
-        if (changed) {
-            this.state.completedLessons=reachable;
-            // Evita una nuova sincronizzazione a ogni render della mappa.
+        if(unlockChanged)this.state.completedLessons=reachable;
+
+        // Un unico salvataggio idempotente: mai XP o premi aggiunti dalla
+        // riparazione, mai riscritture perpetue ad ogni render della mappa.
+        if((finishedChanged||unlockChanged)&&options.persist!==false)
             this.saveStorage();
-        }
     },
 
     getRoadmapContinueId() {
@@ -7623,6 +7645,9 @@ const App = {
             this.applyTheme(data.theme);
         }
 
+        // Normalizza PRIMA del primo salvataggio/import cloud: non esportare
+        // mai una mappa con buchi nelle spunte di completamento.
+        this.ensureUnlockedConsistency({persist:false});
         this.saveStorage();
         this.updateStatsUI();
         this.applyProfileUI();
