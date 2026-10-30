@@ -80,12 +80,14 @@ function failures(verdict){
    assert.equal(failed,0,'Godot WASM rejected '+failed+' of 60 official solutions');
    assert.equal(passed,60);
 
-   // Ogni lezione conserva il verificatore nativo e tre attività progressive.
+   // Le lezioni individuali contengono l'originale e due attività uniche.
+   // Introduzione e gameplay mantengono quattro prove.
    const progressive=await page.evaluate(()=>LESSONS_DATA.filter(l=>!l.isQuiz).every(l=>{
      const tasks=LessonPractice.tasksFor(l);
-     return tasks.length===4&&tasks.filter(t=>t.nativeOriginal).length===1;
+     const count=l.chapterId===1||l.chapterId===10?4:3;
+     return tasks.length===count&&tasks.filter(t=>t.nativeOriginal).length===1;
    }));
-   assert.ok(progressive,'Il percorso pubblicato ha perso i quattro compiti');
+   assert.ok(progressive,'Il percorso deve avere tre o quattro attività coerenti');
    for(const id of [301,302,303,304]){
      const result=await page.evaluate(async id=>{
        const l=LESSONS_DATA.find(l=>l.id===id);
