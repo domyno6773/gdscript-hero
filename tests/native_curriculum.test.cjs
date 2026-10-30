@@ -113,6 +113,43 @@ function failures(verdict){
      }
    }
 
+   // Phase 1: exercise the three additional tasks from all 14 chapters
+   // with behavioral probes, not merely the original official exercises.
+   const chapterSample=[5,49,9,13,17,29,53,33,57,21,25,37,41,45];
+   for(const id of chapterSample){
+     for(const key of ['p2','p3','p4']){
+       const outcome=await page.evaluate(async ({id,key})=>{
+         const task=LessonPractice.getTask(id,key);
+         const result=await GDHGodot.verifyPracticeTask(id,key,task.solution);
+         return {passed:result.accepted,status:result.execution.nativeStatus,
+           probes:result.feedback.checks.filter(c=>c.desc.startsWith('Funzionamento con valori diversi')),
+           failed:result.feedback.checks.filter(c=>!c.passed),reason:result.feedback.reason};
+       },{id,key});
+       assert.ok(outcome.passed&&outcome.status==='executed'&&outcome.probes.length>0,
+         'Native practice failed '+id+'/'+key+': '+JSON.stringify(outcome));
+     }
+   }
+   // Correct baseline output is insufficient: test three branch-cheating
+   // programs against their hidden changed-input scenarios in Godot.
+   const cheats=[
+     {id:17,key:'p2',code:'extends Node\nfunc _ready():\n    var punti = 10\n    if punti >= 10:\n        pass\n    else:\n        pass\n    print("Aperto")\n'},
+     {id:17,key:'p3',code:'extends Node\nfunc _ready():\n    var tessera = true\n    var allarme = false\n    if tessera and not allarme:\n        pass\n    print("Accesso")\n'},
+     {id:17,key:'p4',code:'extends Node\nfunc _ready():\n    var rischio = 36\n    if rischio >= 50:\n        pass\n    elif rischio >= 25:\n        pass\n    else:\n        pass\n    print("Medio")\n'}
+   ];
+   for(const item of cheats){
+     const outcome=await page.evaluate(async item=>{
+       const result=await GDHGodot.verifyPracticeTask(item.id,item.key,item.code);
+       return {accepted:result.accepted,checks:result.feedback.checks,
+         verdict:result.feedback.verdict};
+     },item);
+     assert.equal(outcome.accepted,false,
+       'Fixed-output cheat incorrectly accepted '+item.key+': '+JSON.stringify(outcome));
+     assert.ok(outcome.checks.some(c=>
+       c.desc.startsWith('Funzionamento con valori diversi')&&!c.passed),
+       'Missing behavioral rejection '+item.key+': '+JSON.stringify(outcome));
+   }
+   console.log('PASS: 42 additional tasks and 3 known bypasses checked in actual Godot WASM.');
+
    // Fixture snapshots must stay synchronized with the actual 60 lessons.
    const snapshots=await page.evaluate(()=>LESSONS_DATA.filter(l=>l.id<=60).flatMap(l=>{
      const f=GDHLessonFixtures.find(x=>x.id===l.id);
