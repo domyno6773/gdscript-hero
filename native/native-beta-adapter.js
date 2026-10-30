@@ -172,6 +172,15 @@
   const verifyPracticeTask=async(lessonId,taskKey,source)=>{
     const task=window.LessonPractice?.getTask(lessonId,taskKey);
     if(!task||task.nativeOriginal)throw Error('Compito non disponibile');
+    if(task.nativeGameplay){
+      // Esercizi di movimento/collisione: controlli su veri frame fisici,
+      // non sulla stringa stampata in console.
+      await start();
+      const activeFrame=frame,oldStyle=activeFrame.style.cssText;
+      if(!previewHost)activeFrame.style.cssText='position:fixed;right:12px;bottom:12px;width:min(320px, calc(100vw - 24px));height:180px;border:2px solid #478cbf;z-index:10000;background:#202b37;pointer-events:none';
+      try{return await window.GDHGameplayLessons.verifyPractice(lessonId,taskKey,source,raw);}
+      finally{if(frame===activeFrame)activeFrame.style.cssText=oldStyle;}
+    }
     const run=await raw(source,{});
     const valid=run.status==='executed'&&!String(run.stderr||'').trim();
     const checks=[
