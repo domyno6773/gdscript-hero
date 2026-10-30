@@ -286,12 +286,10 @@ const App = {
 
         // Inizializzazione Viewport 2D Godot Engine
         if (window.GodotViewport) {
-            this.viewport = new GodotViewport('exercise-viewport-canvas');
+            // Render degli esercizi affidato esclusivamente a Godot WebAssembly.
+            this.viewport = null;
             this.practiceViewport = new GodotViewport('sandbox-viewport-canvas');
-            if (this.state.theme) {
-                this.viewport.setTheme(this.state.theme);
-                this.practiceViewport.setTheme(this.state.theme);
-            }
+            if (this.state.theme) this.practiceViewport.setTheme(this.state.theme);
         }
 
         // Inizializzazione Autenticazione & Salvataggio Cloud / Backup
@@ -1313,6 +1311,10 @@ const App = {
             return el && !el.classList.contains('hidden');
         });
         const changed = current !== activeViewId;
+        if (activeViewId !== 'view-exercise' && this._nativeExercisePreview) {
+            window.GDHGodot?.stopPreview();
+            this._nativeExercisePreview = false;
+        }
         views.forEach(id => {
             const el = document.getElementById(id);
             if (!el) return;
@@ -3360,6 +3362,15 @@ const App = {
         next.textContent=index===tasks.length-1?'Argomento completato':'Compito successivo';
     },
     openLesson(lessonId) {
+        if (this._nativeExercisePreview) {
+            window.GDHGodot?.stopPreview();
+            this._nativeExercisePreview = false;
+        }
+        const previewMessage = document.getElementById('exercise-native-preview-message');
+        if (previewMessage) {
+            previewMessage.hidden = false;
+            previewMessage.textContent = 'Premi «Verifica il codice» per avviare la scena nel motore Godot.';
+        }
         const baseLesson = LESSONS_DATA.find(l => l.id === lessonId);
         if (!baseLesson) return;
         if (baseLesson.isQuiz) return this.openQuiz(lessonId);
@@ -4481,6 +4492,18 @@ const App = {
 
          try {
             if (!window.GDHGodot) throw new Error('Motore Godot non disponibile');
+            const nativeHost = document.getElementById('exercise-native-preview');
+            const nativeMessage = document.getElementById('exercise-native-preview-message');
+            const viewportWrapper = document.getElementById('exercise-viewport-wrapper');
+            const showNative = !!(nativeHost && viewportWrapper &&
+                viewportWrapper.style.display !== 'none' &&
+                !document.getElementById('exercise-viewport-col')?.classList.contains('hidden') &&
+                !this.isReviewMode);
+            if (showNative) {
+                window.GDHGodot.beginPreview(nativeHost, () => {});
+                this._nativeExercisePreview = true;
+                if (nativeMessage) nativeMessage.hidden = true;
+            }
             const native = practiceTask&&!practiceTask.nativeOriginal
                 ? await window.GDHGodot.verifyPracticeTask(currentLesson.id,practiceTask.key,code)
                 : await window.GDHGodot.verifyLesson(currentLesson.id,code);
@@ -4530,11 +4553,10 @@ const App = {
                     ? new Error(native.feedback.reason || 'Verifica nativa incompleta') : null,
                 code, { lessonCompleted: completesLesson });
 
-            // Aggiorna Schermo Viewport 2D Godot
-            if (this.viewport) {
-                this.viewport.updateFromExecution(result,
-                    practiceTask?{...currentLesson,expectedOutput:practiceTask.expectedOutput}:currentLesson,
-                    allPassed);
+            // Il framebuffer visibile appartiene al runner WebAssembly Godot.
+            if (showNative && !result.success && nativeMessage) {
+                nativeMessage.textContent = 'La scena non è partita: correggi gli errori indicati e riprova.';
+                nativeMessage.hidden = false;
             }
 
             const resultsContainer = document.getElementById('test-results-view');
@@ -4996,9 +5018,33 @@ const App = {
         // Pulsanti Riavvia Simulazione Viewport 2D
         const btnRestartViewport = document.getElementById('btn-restart-viewport');
         if (btnRestartViewport) {
-            btnRestartViewport.onclick = () => {
+            btnRestartViewport.onclick = async () => {
+                if (this.isValidating || this.isReviewMode) return;
                 SoundFX.playClick();
-                if (this.viewport) this.viewport.replay();
+                const lesson = LESSONS_DATA.find(l => l.id === this.state.currentLessonId);
+                const task = this.getActivePracticeTask();
+                const host = document.getElementById('exercise-native-preview');
+                const message = document.getElementById('exercise-native-preview-message');
+                if (!lesson || !host || !window.GDHGodot) return;
+                const code = document.getElementById('code-editor')?.value || '';
+                btnRestartViewport.disabled = true;
+                try {
+                    window.GDHGodot.beginPreview(host, () => {});
+                    this._nativeExercisePreview = true;
+                    if (message) message.hidden = true;
+                    const result = task && !task.nativeOriginal
+                        ? await window.GDHGodot.verifyPracticeTask(lesson.id, task.key, code)
+                        : await window.GDHGodot.verifyLesson(lesson.id, code);
+                    if (!result.execution.success && message) {
+                        message.textContent = 'Impossibile avviare la scena. Controlla il codice e premi Verifica.';
+                        message.hidden = false;
+                    }
+                } catch (error) {
+                    if (message) {
+                        message.textContent = 'Anteprima non disponibile: ' + String(error.message || error);
+                        message.hidden = false;
+                    }
+                } finally { btnRestartViewport.disabled = false; }
             };
         }
 
