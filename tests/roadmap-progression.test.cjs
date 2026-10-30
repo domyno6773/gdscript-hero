@@ -46,14 +46,20 @@ test('Salvataggio precedente ai quiz: nessun blocco prima di un consolidamento c
       assert.ok(app.state.completedLessons.includes(item.id), 'Bloccato: '+item.id);
     }
     assert.equal(app.state.completedLessons.includes(all[finalIndex+1]?.id),!!all[finalIndex+1]);
-    assert.deepEqual(app.state.finishedLessons,[last.id],'Nessun completamento fittizio');
+    // Un consolidamento già passato certifica le tappe precedenti del
+    // salvataggio storico: non mostrare mai nuove croci o triangoli a ritroso.
+    assert.deepEqual(app.state.finishedLessons,all.slice(0,finalIndex+1).map(l=>l.id),
+      'I prerequisiti legacy vanno riconosciuti come completati');
   }
 });
-test('Quiz del capitolo 1 dopo la lezione 101 rimane accessibile se il consolidamento 4 è finito',()=>{
+test('Ristrutturazione: il consolidamento già superato riconosce i nuovi quiz e lezioni intermedie',()=>{
   const app=create([1,2,3,4],[1,2,3,4]);
+  const xp=150;app.state.xp=xp;
   assert.equal(check(app),5);
-  assert.ok(app.state.completedLessons.includes(202));
-  assert.ok(!app.state.finishedLessons.includes(202));
+  for(const id of [201,3,101,202,4])
+    assert.ok(app.state.finishedLessons.includes(id),'Spunta persa: '+id);
+  assert.ok(app.state.completedLessons.includes(5));
+  assert.equal(app.state.xp,xp,'Nessun XP attribuito per migrazioni retroattive');
 });
 test('Sblocco completo solo su localhost, non sul sito pubblico',()=>{
   const local=create([],[],true,true);
@@ -63,4 +69,41 @@ test('Sblocco completo solo su localhost, non sul sito pubblico',()=>{
   check(online);
   assert.deepEqual(online.state.completedLessons,[all[0].id]);
   assert.equal(online.state.devAllUnlocked,false);
+});
+
+test('Screenshot reale: quiz 201 e consolidamento 4 conclusi, esercizi 3/101/202 non devono restare incompleti',()=>{
+  const app=create([201,4],[1,2,201,3,101,202,4]);
+  app.state.xp=145;
+  const focus=check(app);
+  const end=all.findIndex(x=>x.id===4);
+  assert.equal(focus,5);
+  assert.deepEqual(app.state.finishedLessons,all.slice(0,end+1).map(x=>x.id));
+  assert.equal(app.state.xp,145);
+  const writes=app.saves;
+  check(app);
+  assert.equal(app.saves,writes,'Nessun salvataggio ripetuto dopo la riparazione');
+});
+
+test('Se la quarta attività è salvata ma la spunta manca, recupera il completamento senza XP duplicati',()=>{
+  const mockPractice={
+    enabled:id=>id===1,
+    tasksFor:()=>[{key:'base'},{key:'p2'},{key:'p3'},{key:'p4'}]
+  };
+  const localMethods=new Function('LESSONS_DATA','window',
+    'return {'+appSource.slice(start,end)+'};')(all,{LessonPractice:mockPractice});
+  const app=create();
+  app.state.lessonTaskProgress={'1':{completed:['base','p2','p3','p4'],codes:{base:'bozza originale'}}};
+  app.state.xp=30;
+  localMethods.ensureUnlockedConsistency.call(app);
+  assert.ok(app.state.finishedLessons.includes(1));
+  assert.ok(app.state.completedLessons.includes(2));
+  assert.equal(app.state.xp,30);
+  assert.equal(app.state.lessonTaskProgress['1'].codes.base,'bozza originale');
+});
+
+test('La modalita sviluppatore puo aprire lezioni future senza completarle automaticamente',()=>{
+  const app=create([4],[],true,true);
+  check(app);
+  assert.deepEqual(app.state.finishedLessons,[4]);
+  assert.equal(app.state.completedLessons.length,all.length);
 });
