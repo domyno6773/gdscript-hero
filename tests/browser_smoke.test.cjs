@@ -2134,6 +2134,7 @@ async function testHistoricalProgressRepair(browser,url){
    await page.evaluate(()=>{
      const saved={
        theme:'dark',xp:115,finishedLessons:[201,4],
+       unlockedAchievements:ACHIEVEMENTS_DATA.map(a=>a.id),
        completedLessons:[1,2,201,3,101,202,4],devAllUnlocked:false,
        siteWelcomeSeen:true,streakGoalSelection:{week:'2026-10-26',selectedDate:'legacy'},
        lessonTaskProgress:{'3':{completed:['base'],activeIndex:1,codes:{base:'bozza da conservare'}}}
