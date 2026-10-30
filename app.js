@@ -3465,12 +3465,12 @@ const App = {
                                 return `
                                     <div class="coddy-hint-item" id="coddy-hint-item-${idx}">
                                         <div class="coddy-hint-trigger" onclick="App.toggleCoddyHint(${idx})">
-                                            <span class="coddy-hint-title-text"><span class="hint-item-icon">${hObj.icon || '💡'}</span> Livello ${hObj.level}: ${App.escapeHtml(hObj.label)}</span>
+                                            <span class="coddy-hint-title-text"><span class="hint-item-icon">${App.renderLessonHintIcon(hObj.icon)}</span> Livello ${hObj.level}: ${App.escapeHtml(hObj.label)}</span>
                                             <span class="coddy-hint-arrow" id="coddy-hint-arrow-${idx}">›</span>
                                         </div>
                                         <div class="coddy-hint-text hidden" id="coddy-hint-text-${idx}">
                                             <div class="hint-level-badge level-${hObj.level}">
-                                                <span class="badge-icon">${hObj.icon || '💡'}</span>
+                                                <span class="badge-icon">${App.renderLessonHintIcon(hObj.icon)}</span>
                                                 <span class="badge-title">Livello ${hObj.level} — ${App.escapeHtml(hObj.label)}</span>
                                             </div>
                                             <div class="hint-body-formatted">${App.formatHintContent(hObj.text)}</div>
@@ -5336,6 +5336,18 @@ const App = {
         return parts.join('');
     },
 
+    // Le icone degli indizi sono simboli SVG, non stringhe da mostrare.
+    renderLessonHintIcon(icon) {
+        const symbols = {
+            'lightbulb': 'gdh-icon-bulb',
+            'code-2': 'gdh-icon-file',
+            'book-open': 'gdh-icon-help',
+            'lock': 'gdh-icon-settings-lock'
+        };
+        const id = symbols[icon] || 'gdh-icon-bulb';
+        return '<svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#' + id + '"></use></svg>';
+    },
+
     renderHintBox(lesson) {
         if (!lesson || !lesson.hints) return;
         const totalHints = lesson.hints.length;
@@ -5363,14 +5375,14 @@ const App = {
                 if (isUnlocked) {
                     return `
                         <button type="button" class="hint-tab-btn ${isActive ? 'active' : ''}" onclick="App.selectHintLevel(${lvl})">
-                            <span class="tab-icon">${icon}</span>
+                            <span class="tab-icon">${this.renderLessonHintIcon(icon)}</span>
                             <span class="tab-label">Liv. ${lvl}: ${this.escapeHtml(label)}</span>
                         </button>
                     `;
                 } else {
                     return `
                         <button type="button" class="hint-tab-btn locked" onclick="App.unlockNextHintLevel()" title="Clicca per sbloccare il livello ${lvl}">
-                            <span class="tab-icon">🔒</span>
+                            <span class="tab-icon">${this.renderLessonHintIcon('lock')}</span>
                             <span class="tab-label">Liv. ${lvl}: ${this.escapeHtml(label)}</span>
                         </button>
                     `;
@@ -5391,7 +5403,7 @@ const App = {
 
             hintContent.innerHTML = `
                 <div class="hint-level-badge level-${hObj.level}">
-                    <span class="badge-icon">${hObj.icon || '💡'}</span>
+                    <span class="badge-icon">${this.renderLessonHintIcon(hObj.icon)}</span>
                     <span class="badge-title">Livello ${hObj.level} — ${this.escapeHtml(hObj.label)}</span>
                 </div>
                 <div class="hint-body-formatted">
