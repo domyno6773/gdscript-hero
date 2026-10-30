@@ -261,11 +261,12 @@ const banks={
 };
 const cache=new Map();
 function tasksFor(lesson){
-  if(!lesson || !Number.isInteger(lesson.id) || !banks[lesson.chapterId])return [];
+  const chapter=lesson?.legacyChapterId ?? lesson?.chapterId;
+  if(!lesson || !Number.isInteger(lesson.id) || !banks[chapter])return [];
   if(cache.has(lesson.id))return cache.get(lesson.id);
   // Seme stabile per ogni argomento: le attività non cambiano al refresh.
   const seed=(lesson.id%5)+1;
-  const tasks=banks[lesson.chapterId](seed);
+  const tasks=banks[chapter](seed);
   if(tasks.length!==3||new Set(tasks.map(x=>x.key)).size!==3)
     throw Error('Catalogo multi-compito incompleto: '+lesson.id);
   cache.set(lesson.id,tasks);
