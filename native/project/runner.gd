@@ -389,7 +389,7 @@ func observe_sandbox(frames: int, actions: Array = []) -> Dictionary:
     for property in instance.get_property_list():
         if int(property.get("usage", 0)) & PROPERTY_USAGE_SCRIPT_VARIABLE and properties.size() < 20:
             properties[str(property.name)] = __gdh_normalize(instance.get(property.name))
-    return {"status": "executed", "scene": _sandbox_snapshot(), "properties": properties}
+    return {"status": "executed", "scene": _sandbox_snapshot(), "lessonScene": _lesson_scene_tree(instance), "properties": properties}
 
 func _sandbox_action(node_name: String, signal_name: String) -> Dictionary:
     if not is_instance_valid(_sandbox_instance):
@@ -403,7 +403,7 @@ func _sandbox_action(node_name: String, signal_name: String) -> Dictionary:
         selected.timeout.emit()
     else:
         return {"status": "invalid_action", "message": "Azione non supportata per questo nodo"}
-    return {"status": "executed", "scene": _sandbox_snapshot()}
+    return {"status": "executed", "scene": _sandbox_snapshot(), "lessonScene": _lesson_scene_tree(_sandbox_instance)}
 
 func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = [], method_calls: Variant = [], signal_emissions: Variant = [], object_calls: Variant = [], scene_lesson: Variant = null, scene_actions: Variant = [], scene_nodes: Variant = [], sandbox_live: bool = false) -> Dictionary:
     if source.length() > 10000:
