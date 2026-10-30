@@ -73,7 +73,8 @@ assert.equal(verifyNative(39,hardcodedKeys,lesson39.expectedOutput).passed,false
 
 const lesson121=byId(121);
 assert.match(lesson121.title,/Simulare aggiornamenti/);
-assert.match(lesson121.task,/_process\(delta\)/);
+assert.match(lesson121.task,/aggiorna\(delta\)/);
+assert.match(lesson121.task,/senza animazione continua/);
 assert.match(lesson121.solution,/aggiorna\(0\.5\)/);
 assert.equal(win.GDHCurriculumExtension.has(121),true);
 console.log('PASS: coerenza lezioni 5, 19, 29, 39, 121 e verificatori nativi.');

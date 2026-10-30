@@ -1,0 +1,14 @@
+/* Curriculum final: clear learning goals and one optional cumulative lab. */
+.course-learning-objective{display:flex;flex-direction:column;gap:6px;margin:0 0 18px;padding:13px 16px;background:var(--bg-secondary,rgba(71,140,191,.07));border-left:3px solid #478cbf;border-radius:6px;line-height:1.45}
+.course-learning-objective strong{font-size:12px;color:var(--text-primary,#d9e3ed)}
+.course-learning-objective span{font-size:14px}
+.course-learning-objective small{font-size:12px;color:var(--text-muted,#8795a5)}
+.course-capstone{margin:20px 0;padding:18px;border:1px solid var(--border-color,rgba(132,151,172,.3));border-radius:10px;background:var(--bg-secondary,rgba(71,140,191,.05))}
+.course-capstone h3{font-size:17px;margin:0 0 10px}
+.course-capstone p{font-size:13px;line-height:1.6}
+.course-capstone ol{margin:12px 0 16px;padding-left:20px;font-size:13px;line-height:1.6}
+.course-capstone li{margin:6px 0}
+.course-capstone button{display:inline-flex;align-items:center;justify-content:center;max-width:100%;padding:10px 15px;background:#478cbf;color:white;border:none;border-radius:7px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.course-capstone button:hover{background:#3677ad}
+.course-capstone button:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media(max-width:650px){.course-learning-objective{padding:11px 12px}.course-capstone{padding:14px}.course-capstone button{width:100%;min-height:44px}}
