@@ -37,7 +37,7 @@
   guidance:['La moneta deve reagire all’ingresso di un corpo, non al passare del tempo.','Collega body_entered a una funzione con un parametro. Controlla il corpo ricevuto, aggiorna punti e Label, quindi elimina l’Area.']}
  ];
  for(const lesson of entries){
-  Object.assign(lesson,{chapterId:'gameplay',xp:lesson.isMastery?100:60,icon:'gamepad-2',practiceMode:'focused',hasNodeTree:true,has2DViewport:false,expectedOutput:''});
+  Object.assign(lesson,{chapterId:'gameplay',xp:lesson.isMastery?100:60,icon:'gamepad-2',practiceMode:'progressive',hasNodeTree:true,has2DViewport:true,expectedOutput:''});
   lesson.hints=[...lesson.guidance.map((text,i)=>({level:i+1,type:i?'structure':'concept',label:i?'Organizza':'Ragiona',text})),{level:3,type:'example',label:'Confronta una soluzione',text:lesson.solution}];
  }
  const sceneNodes=lesson=>[{name:'Main',type:'Node2D',parent:null},...lesson.initialNodes.map(n=>({...n,parent:n.parent||'Main'}))];
@@ -62,5 +62,118 @@
   const feedback={verdict:accepted?'accepted':valid?'requirements_not_met':'invalid_code',passed:accepted,checks,reason:error||null};
   return {accepted,feedback,original:runs[0],execution:{success:valid,code:source,logs:[],error:error||(!valid?'La scena non è stata eseguita.':null),nativeStatus:start.status,nativeFeedback:feedback}};
  };
- window.GDHGameplayLessons=Object.freeze({entries,sceneNodes,has:id=>entries.some(l=>l.id===id),verify});
+
+ // Esercizi aggiuntivi specifici per gameplay: stessa scena fisica delle
+ // lezioni, movimenti e obiettivi distinti verificati per frame da Godot.
+ const movement=(x,y)=>'extends Node2D\n\nfunc _physics_process(delta):\n    $Player.position += Vector2('+x+', '+y+') * delta\n';
+ const inputMovement=(speed,axis='both')=>{
+   const direction=axis==='horizontal'?'Vector2(Input.get_axis("ui_left","ui_right"),0)':
+     axis==='vertical'?'Vector2(0,Input.get_axis("ui_up","ui_down"))':
+     'Input.get_vector("ui_left","ui_right","ui_up","ui_down")';
+   return 'extends Node2D\n\nfunc _physics_process(_delta):\n    $Player.velocity = '+direction+' * '+speed+'.0\n    $Player.move_and_slide()\n';
+ };
+ const pickup=(updateState,remove)=>{
+   return 'extends Node2D\n\nvar punti = 0\n\nfunc _ready():\n    $Coin.body_entered.connect(raccogli)\n\n'+
+     'func _physics_process(_delta):\n'+move+'\nfunc raccogli(body):\n'+
+     '    if body != $Player:\n        return\n    punti += 1\n'+
+     '    $PuntiLabel.text = "Punti: " + str(punti)\n'+
+     (updateState?'    $StatoLabel.text = "'+updateState+'"\n':'')+
+     (remove?'    $Coin.queue_free()\n':'');
+ };
+ const drill=(key,title,task,starter,solution)=>({
+   key,title,task:'<p>'+task+'</p>',initialCode:starter,solution,expectedOutput:'',
+   nativeGameplay:true,
+   hints:[
+     {level:1,type:'concept',label:'Ragiona',text:'Osserva i nodi della scena e individua il comportamento richiesto.'},
+     {level:2,type:'structure',label:'Struttura',text:'Rispetta _physics_process, il segnale del nodo e i tempi del motore Godot.'},
+     {level:3,type:'example',label:'Soluzione commentabile',text:solution}
+   ]
+ });
+ const practice={
+   301:[
+     drill('p2','Velocità verso sinistra','Sposta Player verso sinistra a 80 pixel al secondo usando delta, senza cambiare Y.',entries[0].initialCode,movement(-80,0)),
+     drill('p3','Caduta controllata','Sposta Player in basso a 60 pixel al secondo tramite _physics_process(delta). X resta invariata.',entries[0].initialCode,movement(0,60)),
+     drill('p4','Movimento su due assi','Sposta Player di 60 pixel al secondo su X e 80 su Y. Il passo deve rispettare delta.',entries[0].initialCode,movement(60,80))
+   ],
+   302:[
+     drill('p2','Controllo orizzontale','Usa solo le frecce destra e sinistra: velocità di 120 pixel al secondo con CharacterBody2D e move_and_slide().',entries[1].initialCode,inputMovement(120,'horizontal')),
+     drill('p3','Controllo verticale','Usa solo su e giù a 100 pixel al secondo; le frecce orizzontali non devono spostare Player.',entries[1].initialCode,inputMovement(100,'vertical')),
+     drill('p4','Controllo diagonale veloce','Permetti tutte e quattro le direzioni a 180 pixel al secondo, senza aumentare la velocità in diagonale.',entries[1].initialCode,inputMovement(180))
+   ],
+   303:[
+     drill('p2','Ripara un urto lento','Conserva la parete e usa move_and_slide() con una velocità di 80 pixel al secondo. Il corpo deve poter tornare indietro.',entries[2].initialCode,inputMovement(80)),
+     drill('p3','Collisione a velocità media','Controlla Player in quattro direzioni a 140 pixel al secondo: urta il muro ma può allontanarsene.',entries[2].initialCode,inputMovement(140)),
+     drill('p4','Collisione a velocità alta','Risolvi correttamente le collisioni anche a 200 pixel al secondo, senza muovere direttamente position.',entries[2].initialCode,inputMovement(200))
+   ],
+   304:[
+     drill('p2','Rileva la moneta','Collega body_entered, controlla che il corpo sia Player, assegna un punto e aggiorna PuntiLabel. Per ora non eliminare Coin.',entries[3].initialCode,pickup('',false)),
+     drill('p3','Raccogli una sola volta','Quando Player raccoglie Coin, aggiorna i punti, mostra Punti: 1 ed elimina Coin con queue_free().',entries[3].initialCode,pickup('',true)),
+     drill('p4','Messaggio di vittoria alternativo','Dopo la raccolta mostra Obiettivo raggiunto! in StatoLabel, aggiorna i punti e rimuovi Coin.',entries[3].initialCode,pickup('Obiettivo raggiunto!',true))
+   ]
+ };
+ const practiceTasks=lesson=>practice[lesson?.id]||[];
+ const verifyPractice=async(id,key,source,raw)=>{
+   const lesson=entries.find(l=>l.id===id),task=practiceTasks(lesson).find(t=>t.key===key);
+   if(!lesson||!task)throw Error('Compito gameplay non disponibile');
+   const runs=[],checks=[];
+   const run=async(code,options)=>{const r=await raw(code,options);runs.push(r);return r.reply;};
+   const start=await run(source,{mode:'sandbox_start',nodes:sceneNodes(lesson),inspect:['punti'],paused:true});
+   const validStart=start.status==='executed'&&!runs[0].stderr?.trim();
+   const check=(description,passed)=>checks.push({desc:description,passed:!!passed});
+   const observe=(frames,input=[])=>run('',{mode:'sandbox_observe',frames,input});
+   if(validStart){
+     if(id===301){
+       const target={p2:{x:-80,y:0},p3:{x:0,y:60},p4:{x:60,y:80}}[key];
+       const after=await observe(60),twice=await observe(60);
+       check('Movimento reale a velocità costante su X',near(pos(after).x-pos(start).x,target.x));
+       check('Movimento reale a velocità costante su Y',near(pos(after).y-pos(start).y,target.y));
+       check('Il secondo intervallo produce lo stesso spostamento',near(pos(twice).x-pos(after).x,target.x)&&near(pos(twice).y-pos(after).y,target.y));
+     }
+     if(id===302){
+       if(key==='p2'){
+         const right=await observe(30,['ui_right']),up=await observe(30,['ui_up']),stop=await observe(12);
+         check('Destra sposta Player di circa 60 pixel',near(pos(right).x-pos(start).x,60));
+         check('Il controllo solo orizzontale ignora su',near(pos(up).x,pos(right).x,.2)&&near(pos(up).y,pos(right).y,.2));
+         check('Senza tasti Player resta fermo',near(pos(stop).x,pos(up).x,.2));
+       }else if(key==='p3'){
+         const right=await observe(30,['ui_right']),down=await observe(30,['ui_down']),stop=await observe(12);
+         check('Destra non muove Player',near(pos(right).x,60,.2)&&near(pos(right).y,180,.2));
+         check('Giù sposta Player di circa 50 pixel',near(pos(down).y-pos(right).y,50));
+         check('Senza tasti il movimento si arresta',near(pos(stop).y,pos(down).y,.2));
+       }else{
+         const right=await observe(30,['ui_right']),diag=await observe(30,['ui_right','ui_up']),stop=await observe(12);
+         check('Destra percorre circa 90 pixel',near(pos(right).x-pos(start).x,90));
+         check('La diagonale non supera i 180 pixel/s',near(Math.hypot(pos(diag).x-pos(right).x,pos(diag).y-pos(right).y),90));
+         check('L\'input rilasciato arresta il corpo',near(pos(stop).x,pos(diag).x,.2)&&near(pos(stop).y,pos(diag).y,.2));
+       }
+     }
+     if(id===303){
+       const speed={p2:80,p3:140,p4:200}[key];
+       const wall=await observe(180,['ui_right']),back=await observe(30,['ui_left']);
+       check('Il corpo non attraversa la parete',pos(wall).x>=155&&pos(wall).x<=160.1);
+       check('Può allontanarsi dal muro alla velocità richiesta',near(pos(back).x-pos(wall).x,-speed/2));
+       check('Nessun cambiamento verticale inatteso',near(pos(wall).y,180,.2));
+     }
+     if(id===304){
+       const away=await observe(12,['ui_left']),collected=await observe(70,['ui_right']);
+       check('Lontano da Coin non si ricevono punti',start.properties?.punti===0&&away.properties?.punti===0);
+       check('body_entered assegna esattamente un punto',collected.properties?.punti===1);
+       check('L\'interfaccia mostra Punti: 1',collected.scene?.PuntiLabel?.text==='Punti: 1');
+       check(key==='p2'?'Coin rimane per l\'esercizio di rilevamento':'Coin viene rimossa dopo la raccolta',
+         collected.scene?.Coin?.exists===(key==='p2'));
+       if(key==='p4')check('Il messaggio di vittoria viene aggiornato',collected.scene?.StatoLabel?.text==='Obiettivo raggiunto!');
+     }
+   }
+   const error=runs.map(r=>r.stderr||'').filter(s=>s.trim()).join('\n');
+   const valid=runs.every(r=>r.status==='executed')&&!error;
+   checks.unshift({desc:'Esecuzione nel motore fisico Godot',passed:valid});
+   const accepted=valid&&checks.length>1&&checks.every(c=>c.passed);
+   const feedback={verdict:accepted?'accepted':valid?'requirements_not_met':'invalid_code',
+     passed:accepted,checks,reason:error||null};
+   return {accepted,feedback,original:runs[0],
+     execution:{success:valid,code:source,logs:[],error:error||(!valid?'Scena non eseguita':null),
+       nativeStatus:start.status,nativeFeedback:feedback}};
+ };
+
+ window.GDHGameplayLessons=Object.freeze({entries,sceneNodes,has:id=>entries.some(l=>l.id===id),verify,practiceTasks,verifyPractice});
 })();
