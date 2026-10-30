@@ -409,9 +409,9 @@
                                         <span class="tool-intro-badge">NUOVO STRUMENTO</span>
                                         <button type="button" class="tool-intro-close" id="btn-close-intro-viewport2d" title="Chiudi introduzione">&times;</button>
                                     </div>
-                                    <h4 class="tool-intro-title">Schermo 2D Godot (Live Viewport)</h4>
+                                    <h4 class="tool-intro-title">Anteprima della scena Godot</h4>
                                     <p class="tool-intro-text">
-                                        Dalla console di testo al gioco visivo! Questa è la finestra di gioco in tempo reale di Godot: qui vedrai comparire elementi grafici, testo a schermo (<strong>Label</strong>), pulsanti interattivi e forme creati dal tuo script.
+                                        Dopo aver premuto <strong>Verifica</strong>, qui vedrai la scena eseguita dal vero motore Godot WebAssembly, non una simulazione JavaScript. Per modificare i nodi e provare un progetto autonomo, apri una copia nel laboratorio.
                                     </p>
                                     <button type="button" class="btn-tool-intro-dismiss" id="btn-dismiss-intro-viewport2d">Perfetto, andiamo a schermo ➔</button>
                                 </div>
@@ -420,7 +420,7 @@
                                     <div class="vtabs-right">
                                         <span class="vtab-icon"><svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 12h4m-2-2v4m8-2h.01m2-2h.01"/></svg></span>
                                         <span class="vtab-title-tag">Schermo 2D Godot</span>
-                                        <span class="vtab-live-badge">Live Viewport</span>
+                                        <span class="vtab-live-badge">Godot WebAssembly</span>
                                     </div>
                                     <button type="button" class="vtab-action-btn" id="btn-restart-viewport" title="Riavvia simulazione 2D">
                                         <svg class="ui-icon ui-icon-sm" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
@@ -428,8 +428,10 @@
                                     </button>
                                 </div>
                                 <div class="viewport-canvas-wrapper" id="exercise-viewport-wrapper">
-                                    <canvas id="exercise-viewport-canvas"></canvas>
-                                    <div class="viewport-ui-overlay" id="exercise-ui-overlay"></div>
+                                    <canvas id="exercise-viewport-canvas" aria-hidden="true"></canvas>
+                                    <div class="viewport-ui-overlay" id="exercise-ui-overlay" aria-hidden="true"></div>
+                                    <div class="exercise-native-preview" id="exercise-native-preview" aria-label="Anteprima reale Godot"></div>
+                                    <p class="exercise-native-preview-message" id="exercise-native-preview-message" role="status">Premi «Verifica il codice» per avviare la scena nel motore Godot.</p>
                                 </div>
                                 <!-- Mini Scene Dock di Godot Engine -->
                                 <div class="godot-scene-dock" id="exercise-scene-dock">
@@ -448,7 +450,7 @@
                                     <div class="scene-dock-header">
                                         <div class="scene-dock-title">
                                             <span class="scene-dock-icon"><svg class="ui-icon sandbox-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#gdh-icon-network"></use></svg></span>
-                                            <span>Scena Godot</span>
+                                            <span>Struttura iniziale della scena (sola lettura)</span>
                                             <span class="scene-node-count" id="scene-node-count">1 nodo</span>
                                         </div>
                                         <div class="scene-dock-actions">
