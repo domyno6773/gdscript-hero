@@ -133,7 +133,8 @@
       // Physics assessments need the real engine loop, so show the running scene.
       await start();
       const activeFrame=frame, previousStyle=activeFrame.style.cssText;
-      activeFrame.style.cssText='position:fixed;right:12px;bottom:12px;width:min(320px, calc(100vw - 24px));height:180px;border:2px solid #478cbf;z-index:10000;background:#202b37;pointer-events:none';
+      // Lezioni: mostra il vero Godot nel viewport. Solo i test senza host usano il riquadro temporaneo.
+      if(!previewHost)activeFrame.style.cssText='position:fixed;right:12px;bottom:12px;width:min(320px, calc(100vw - 24px));height:180px;border:2px solid #478cbf;z-index:10000;background:#202b37;pointer-events:none';
       activeFrame.title='Verifica della scena con la fisica di Godot';
       try{return await window.GDHGameplayLessons.verify(id,source,raw);}
       finally{if(frame===activeFrame){activeFrame.style.cssText=previousStyle;activeFrame.title='Motore Godot isolato';}}
