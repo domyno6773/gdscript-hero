@@ -3,6 +3,8 @@ extends SceneTree
 func _initialize() -> void:
     # --script SceneTree does not activate the physics server automatically.
     PhysicsServer2D.set_active(true)
+    # Several physics ticks per render frame must not extend an observation.
+    Engine.max_fps = 15
     call_deferred("run_cases")
 
 func run_cases() -> void:
