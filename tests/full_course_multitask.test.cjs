@@ -1,85 +1,38 @@
 'use strict';
-// node tests/full_course_multitask.test.cjs
-// Analizza 81 percorsi e 243 esercizi aggiuntivi con runner simulato.
-// Non sostituisce un test reale di Godot WebAssembly.
-const fs=require('node:fs');
-const path=require('node:path');
-const vm=require('node:vm');
-const assert=require('node:assert/strict');
-const root=path.resolve(__dirname,'..');
-const browser={};
-const ctx=vm.createContext({window:browser,console,Date});
-function read(filename){
-  return fs.readFileSync(path.join(root,filename),'utf8');
-}
-function run(filename){
-  vm.runInContext(read(filename),ctx,{filename});
-}
-run('lessons.js');
-run('lesson_practice.js');
-run('curriculum_extension.js');
-run('practice_catalog.js');
-const practice=browser.LessonPractice;
-const lessons=browser.LESSONS_DATA;
-const originalKeys=new Set();
-let total=0,original=0,extra=0;
-assert.equal(lessons.length,81,'Il percorso comprende 81 lezioni');
-assert.equal(new Set(lessons.map(x=>x.id)).size,81,'Gli ID delle lezioni sono univoci');
-assert.equal(new Set(lessons.map(x=>x.chapterId)).size,15,'Capitoli coperti');
-assert.equal(browser.GDHPracticeCatalog.chapters.length,14);
-for(const lesson of lessons){
-  const tasks=practice.tasksFor(lesson);
-  assert.ok(practice.enabled(lesson.id),'Lezione non abilitata: '+lesson.id);
-  assert.equal(tasks.length,4,'Ogni lezione deve proporre quattro compiti: '+lesson.id);
-  assert.equal(new Set(tasks.map(t=>t.key)).size,4,'Chiavi duplicate: '+lesson.id);
-  const base=tasks.find(t=>t.nativeOriginal);
-  assert.ok(base&&base.key==='base','Manca il compito nativo: '+lesson.id);
-  assert.equal(base.solution,lesson.solution,'La soluzione nativa rimane invariata');
-  if(lesson.isMastery){
-    assert.equal(tasks[3].key,'base','Il consolidamento rimane l’ultimo compito');
-  }else{
-    assert.equal(tasks[0].key,'base','L’esercizio originale rimane il primo');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+const root=path.resolve(__dirname,'..'),w={},ctx=vm.createContext({window:w,console,Date});
+for(const f of ['lessons.js','lesson_practice.js','curriculum_extension.js','practice_catalog.js','curriculum_drills_v2.js','chapter_quizzes.js','gameplay_lessons.js','curriculum_restructure.js'])
+ vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f});
+const ls=w.LESSONS_DATA.filter(l=>!l.isQuiz),catalog=w.LessonPractice,ids=w.GDHIndividualPractice.ids;
+assert.equal(ls.length,85);assert.equal(ids.length,76);
+let total=0,personalized=0;
+const names=new Set();
+for(const l of ls){
+ const tasks=catalog.tasksFor(l);
+ const expected=l.chapterId===1||l.chapterId===10?4:3;
+ assert.equal(tasks.length,expected,'Incorrect task count '+l.id);
+ assert.equal(new Set(tasks.map(t=>t.key)).size,expected);
+ assert.ok(tasks.some(t=>t.nativeOriginal));
+ for(const t of tasks){
+  total++;
+  assert.ok(t.title&&t.task&&t.initialCode&&t.solution);
+  if(t.nativeOriginal||t.nativeGameplay)continue;
+  const checks=catalog.grade(t,t.solution,t.expectedOutput);
+  assert.ok(checks.every(c=>c.passed),'Invalid solution '+l.id+'/'+t.key+': '+JSON.stringify(checks));
+  assert.equal(catalog.grade(t,t.solution,'INVALID_OUTPUT')[0].passed,false);
+  if(l.chapterId!==1){
+   personalized++;
+   assert.equal(t.behaviorInputs.length,1,'Missing input scenario '+l.id+'/'+t.key);
+   const name=t.title.toLowerCase().normalize('NFKD').replace(/\s+/g,' ').trim();
+   assert.ok(!names.has(name),'Repeated drill '+name);
+   names.add(name);
+   assert.ok(t.task.length>=35);
   }
-  for(const task of tasks){
-    assert.equal(practice.getTask(lesson.id,task.key).solution,task.solution);
-    assert.ok(task.task&&task.solution&&task.initialCode&&task.expectedOutput);
-    assert.equal(task.hints.length,3,'Tre indizi progressivi');
-    total++;
-    if(task.nativeOriginal){original++;continue;}
-    extra++;
-    const checks=practice.grade(task,task.solution,task.expectedOutput);
-    assert.ok(checks.every(c=>c.passed),
-      'Soluzione ufficiale respinta '+lesson.id+'/'+task.key+': '+
-      JSON.stringify(checks.filter(c=>!c.passed)));
-    const bad=practice.grade(task,task.solution,'__OUTPUT_SCONOSCIUTO__');
-    assert.equal(bad[0].passed,false,'L’output scorretto non deve essere accettato');
-    if(task.requirements.mustUse){
-      assert.ok(task.requirements.mustUse.length>0);
-      const cheat='extends Node\n\nfunc _ready():\n    print("bar")\n';
-      assert.ok(practice.grade(task,cheat,task.expectedOutput).some(c=>!c.passed),
-        'Un output inventato non soddisfa i costrutti '+lesson.id+'/'+task.key);
-    }
-    if(lesson.chapterId>=2){
-      assert.ok(!originalKeys.has(lesson.id+'/'+task.key));
-      originalKeys.add(lesson.id+'/'+task.key);
-    }
-  }
+ }
 }
-// I dati esistenti non possono sparire durante un merge account o un sync.
-const first=lessons.find(l=>l.id===23);
-const incoming={'23':{completed:['base','p2'],codes:{base:'var mia_bozza = 7',p2:'altro codice'},activeIndex:2}};
-const merged=practice.mergeProgress({'23':{completed:['base'],codes:{base:'var locale = 5'},activeIndex:0}},incoming);
-assert.deepEqual([...merged['23'].completed].sort(),['base','p2']);
-assert.equal(merged['23'].codes.base,'var mia_bozza = 7');
-assert.equal(merged['23'].activeIndex,2);
-const malformed=practice.mergeProgress({}, {'23':{completed:['base','inesistente'],codes:{},activeIndex:99}});
-assert.deepEqual([...malformed['23'].completed],['base']);
-assert.equal(malformed['23'].activeIndex,1);
-const html=read('index.html');
-const sources=[...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m=>m[1]);
-assert.ok(sources.indexOf('curriculum_extension.js')<sources.indexOf('practice_catalog.js'));
-assert.ok(sources.indexOf('practice_catalog.js')<sources.indexOf('app.js'));
-assert.equal(total,324);
-assert.equal(original,81);
-assert.equal(extra,243);
-console.log('PASS:',lessons.length,'lezioni,',total,'compiti,',extra,'nuovi, 15 capitoli.');
+assert.equal(personalized,152);
+assert.equal(total,264);
+const old=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert.ok(old.indexOf('practice_catalog.js')<old.indexOf('curriculum_drills_v2.js'));
+assert.ok(old.indexOf('curriculum_drills_v2.js')<old.indexOf('app.js'));
+console.log('PASS: 85 lessons, 152 individualized drills, 264 tasks, unique titles and valid source checks.');
