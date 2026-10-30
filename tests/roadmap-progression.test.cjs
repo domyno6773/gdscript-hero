@@ -13,7 +13,7 @@ const all=new Function('window',
   '\nreturn LESSONS_DATA.map(x=>({id:x.id,isQuiz:!!x.isQuiz,chapterId:x.chapterId}));'
 )({});
 const appSource=source('app.js');
-const start=appSource.indexOf('    ensureUnlockedConsistency() {');
+const start=appSource.indexOf('    ensureUnlockedConsistency(');
 const end=appSource.indexOf('\n    unlockAllLessons(',start);
 assert.ok(start>=0&&end>start,'Metodi di progressione non trovati');
 const methods=new Function('LESSONS_DATA',
