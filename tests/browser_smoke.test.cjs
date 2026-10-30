@@ -499,8 +499,44 @@ async function testAccessibilityKeyboard(page,width){
   await page.evaluate(()=>App.setMobileExerciseTab('code',false));
   assert.equal(await page.locator('#btn-tab-code').getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('#btn-tab-instructions').getAttribute('aria-pressed'),'false');
+  if(width<=820){
+    const panels=await page.evaluate(()=>({
+      theory:getComputedStyle(document.querySelector('#view-exercise .panel-lesson')).display,
+      code:getComputedStyle(document.querySelector('#view-exercise .panel-code')).display
+    }));
+    assert.equal(panels.theory,'none','Su mobile la consegna deve scomparire quando selezioni Codice');
+    assert.notEqual(panels.code,'none','Su mobile il pannello Codice deve diventare visibile');
+  }
   await page.evaluate(()=>App.setMobileExerciseTab('instructions',false));
   assert.equal(await page.locator('#btn-tab-instructions').getAttribute('aria-pressed'),'true');
+  if(width<=820){
+    const panels=await page.evaluate(()=>({
+      theory:getComputedStyle(document.querySelector('#view-exercise .panel-lesson')).display,
+      code:getComputedStyle(document.querySelector('#view-exercise .panel-code')).display
+    }));
+    assert.notEqual(panels.theory,'none','La consegna deve ricomparire');
+    assert.equal(panels.code,'none','Il pannello Codice deve nascondersi nella scheda Consegna');
+  }
+  // Entrambe le modalità di chiusura devono funzionare per entrambe le introduzioni.
+  for(const [key,card,buttons] of [
+    ['seen_intro_viewport2d','intro-card-viewport2d',['btn-close-intro-viewport2d','btn-dismiss-intro-viewport2d']],
+    ['seen_intro_nodetree','intro-card-nodetree',['btn-close-intro-nodetree','btn-dismiss-intro-nodetree']]
+  ]){
+    for(const button of buttons){
+      const state=await page.evaluate(({key,card,button})=>{
+        localStorage.removeItem(key);
+        App.state.manualToolsOverride='visible';
+        App.openLesson(50);
+        const before=!document.getElementById(card).classList.contains('hidden');
+        document.getElementById(button).click();
+        const after=document.getElementById(card).classList.contains('hidden');
+        return {before,after,saved:localStorage.getItem(key)};
+      },{key,card,button});
+      assert.ok(state.before&&state.after&&state.saved==='true',
+        'Introduzione non chiudibile con '+button+': '+JSON.stringify(state));
+    }
+  }
+  await page.evaluate(()=>{App.state.manualToolsOverride=null;App.openLesson(1);});
   await page.evaluate(()=>App.showRoadmap());
   assert.equal(await page.locator('#nav-roadmap-btn').getAttribute('aria-current'),'page');
   assert.equal(await page.locator('#nav-editor-btn').getAttribute('aria-current'),null);
