@@ -25,3 +25,6 @@ coverage/
 
 # Godot editor cache
 .godot/
+ 
+backup_course_v1/
+*.png

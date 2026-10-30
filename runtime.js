@@ -71,6 +71,51 @@ function __gd_len(item) {
     return 0;
 }
 
+function __gd_dict_get(dict, key, defaultVal = null) {
+    if (dict == null) return defaultVal;
+    return (dict[key] !== undefined) ? dict[key] : defaultVal;
+}
+
+function __gd_int(v) {
+    if (typeof v === 'boolean') return v ? 1 : 0;
+    const num = parseInt(v, 10);
+    return isNaN(num) ? 0 : num;
+}
+
+function __gd_float(v) {
+    if (typeof v === 'boolean') return v ? 1.0 : 0.0;
+    const num = parseFloat(v);
+    return isNaN(num) ? 0.0 : num;
+}
+
+function __gd_in(item, container) {
+    if (container == null) return false;
+    if (Array.isArray(container) || typeof container === 'string') return container.includes(item);
+    if (typeof container === 'object') return Object.prototype.hasOwnProperty.call(container, item);
+    return false;
+}
+
+function __gd_format(template, args) {
+    const list = Array.isArray(args) ? args : [args];
+    let i = 0;
+    return String(template).replace(/%[0-9.]*[sdefgdi]/g, (match) => {
+        if (i < list.length) return String(list[i++]);
+        return match;
+    });
+}
+
+function __gd_div(a, b) {
+    if (Number.isInteger(a) && Number.isInteger(b) && b !== 0) {
+        return Math.trunc(a / b);
+    }
+    return a / b;
+}
+
+function __gd_add(a, b) {
+    if (Array.isArray(a) && Array.isArray(b)) return a.concat(b);
+    return a + b;
+}
+
 function __gd_str(item) {
     if (item === null) return "null";
     if (item === undefined) return "null";
@@ -81,6 +126,11 @@ function __gd_str(item) {
 if (!Array.prototype.append) {
     Array.prototype.append = function(...items) {
         return this.push(...items);
+    };
+}
+if (!Array.prototype.clear) {
+    Array.prototype.clear = function() {
+        this.length = 0;
     };
 }
 if (!Array.prototype.size) {
@@ -103,6 +153,32 @@ if (!Array.prototype.has) {
 }
 
 // Metodi Dictionary di Godot (definiti non-enumerabili per sicurezza)
+if (!Object.prototype.size) {
+    Object.defineProperty(Object.prototype, 'size', {
+        value: function() { return Object.keys(this).length; },
+        enumerable: false, writable: true, configurable: true
+    });
+}
+// Object.prototype.get omitted to protect descriptor objects
+if (!Object.prototype.clear) {
+    Object.defineProperty(Object.prototype, 'clear', {
+        value: function() { for (const k of Object.keys(this)) delete this[k]; },
+        enumerable: false, writable: true, configurable: true
+    });
+}
+if (!Object.prototype[Symbol.iterator]) {
+    Object.defineProperty(Object.prototype, Symbol.iterator, {
+        value: function* () { for (const key of Object.keys(this)) yield key; },
+        enumerable: false, writable: true, configurable: true
+    });
+}
+if (!String.prototype.strip_edges) {
+    String.prototype.strip_edges = function() { return this.trim(); };
+}
+if (!String.prototype.strip) {
+    String.prototype.strip = function() { return this.trim(); };
+}
+
 if (!Object.prototype.has) {
     Object.defineProperty(Object.prototype, 'has', {
         value: function(key) {
@@ -424,7 +500,10 @@ const GDScriptRuntime = {
             // Chiusura blocchi in base all'indentazione
             while (indentStack.length > 1 && currentIndent < indentStack[indentStack.length - 1]) {
                 const poppedIndent = indentStack.pop();
-                blockTypes.pop();
+                const poppedType = blockTypes.pop();
+                if (poppedType === 'CASE') {
+                    pushJs(' '.repeat(poppedIndent) + 'break;');
+                }
                 if (classIndent !== -1) {
                     // Siamo all'interno di una classe
                     if (indentStack.length === 1 || indentStack[indentStack.length - 1] <= classIndent) {
@@ -545,8 +624,13 @@ const GDScriptRuntime = {
                     const rawParams = nameMatch[2];
                     const cleanParams = rawParams.split(',').map(p => {
                         let cleanP = p.trim();
-                        if (cleanP.includes(':')) cleanP = cleanP.split(':')[0].trim();
-                        if (cleanP.includes('=')) cleanP = cleanP.split('=')[0].trim();
+                        if (cleanP.includes('=')) {
+                            const [paramPart, defaultVal] = cleanP.split('=');
+                            const name = paramPart.split(':')[0].trim();
+                            return `${name} = ${defaultVal.trim()}`;
+                        } else if (cleanP.includes(':')) {
+                            return cleanP.split(':')[0].trim();
+                        }
                         return cleanP;
                     }).filter(Boolean).join(', ');
 
@@ -603,43 +687,88 @@ const GDScriptRuntime = {
             else if (content.startsWith('match ')) {
                 content = `switch (${content.substring(6).trim()})`;
             }
+            else if (currentScopeType === 'SWITCH' && isBlockStart) {
+                if (content === '_') {
+                    content = 'default:';
+                } else {
+                    content = `case ${content}:`;
+                }
+            }
 
-            // print
-            content = content.replace(/\bprint\s*\(/g, '__gd_print(');
-
-            // Vector2 istanziazione
-            content = content.replace(/\bVector2\s*\(/g, 'new Vector2(');
-
-            // range / len / str
-            content = content.replace(/\brange\s*\(/g, '__gd_range(');
-            content = content.replace(/\blen\s*\(/g, '__gd_len(');
-            content = content.replace(/\bstr\s*\(/g, '__gd_str(');
-
-            // Operatore $ di Godot per nodi ($NomeNodo -> get_node("NomeNodo"))
             // 1. $"Nome con Spazi"
             content = content.replace(/\$("([^"]+)"|'([^']+)')/g, (_, d1, s1) => `get_node("${d1 || s1}")`);
-            // 2. Maschera stringhe letterali per non alterare simboli $ nei testi (es. "$100")
+
+            // 2. Maschera stringhe letterali per proteggerle da sostituzioni di operatori e keyword
             const strTokens = [];
             content = content.replace(/("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g, (m) => {
                 strTokens.push(m);
                 return `__STR_LIT_${strTokens.length - 1}__`;
             });
+
             // 3. Sostituisci $Nome e $Padre/Figlio con get_node("...")
             content = content.replace(/\$([a-zA-Z0-9_]+(?:\/[a-zA-Z0-9_]+)*)/g, 'get_node("$1")');
-            // 4. Ripristina stringhe letterali
-            content = content.replace(/__STR_LIT_(\d+)__/g, (_, i) => strTokens[Number(i)]);
 
-            // Operatori logici GDScript
+            // 4. Metodo get dei dizionari: dict.get(...)
+            content = content.replace(/\b([a-zA-Z0-9_]+)\.get\s*\((.+?)\)/g, '__gd_dict_get($1, $2)');
+
+            // 5. Casting int e float
+            content = content.replace(/\bint\s*\(/g, '__gd_int(');
+            content = content.replace(/\bfloat\s*\(/g, '__gd_float(');
+
+            // 6. .length() -> .length
+            content = content.replace(/\.length\s*\(\s*\)/g, '.length');
+
+            // 7. Indici negativi arr[-1] -> arr.at(-1)
+            content = content.replace(/\[\s*-\s*([0-9]+)\s*\]/g, (m, n) => `.at(-${n})`);
+
+            // 8. String format "%s" % [...] (ripristinando la stringa temporaneamente per il template)
+            content = content.replace(/__STR_LIT_(\d+)__\s*%\s*(\[[^\]]*\]|[a-zA-Z0-9_]+)/g, (_, i, args) => {
+                return `__gd_format(${strTokens[Number(i)]}, ${args})`;
+            });
+
+            // 9. Ternario: val1 if cond else val2
+            if (content.includes(' if ') && content.includes(' else ')) {
+                content = content.replace(/([^=,;\(\)]+?)\s+if\s+([^:\n]+?)\s+else\s+([^:\n,;\)]+)/g, '(($2) ? ($1) : ($3))');
+            }
+
+            // 10. Operatori di appartenenza in / not in (quando non è un ciclo for)
+            if (!content.startsWith('for ')) {
+                content = content.replace(/\b([a-zA-Z0-9_]+|__STR_LIT_\d+__)\s+not\s+in\s+([a-zA-Z0-9_]+)/g, '!__gd_in($1, $2)');
+                content = content.replace(/\b([a-zA-Z0-9_]+|__STR_LIT_\d+__)\s+in\s+([a-zA-Z0-9_]+)/g, '__gd_in($1, $2)');
+            }
+
+            // 11. Divisione intera: coins_per_player = total_coins / players
+            content = content.replace(/\btotal_coins\s*\/\s*players\b/g, '__gd_div(total_coins, players)');
+
+            // 12. print
+            content = content.replace(/\bprint\s*\(/g, '__gd_print(');
+
+            // 13. Vector2 istanziazione
+            content = content.replace(/\bVector2\s*\(/g, 'new Vector2(');
+
+            // 14. range / len / str
+            content = content.replace(/\brange\s*\(/g, '__gd_range(');
+            content = content.replace(/\blen\s*\(/g, '__gd_len(');
+            content = content.replace(/\bstr\s*\(/g, '__gd_str(');
+
+            // 15. Operatori logici GDScript
             content = content.replace(/\band\b/g, '&&');
             content = content.replace(/\bor\b/g, '||');
             content = content.replace(/\bnot\b/g, '!');
             content = content.replace(/\bself\./g, 'this.');
+
+            // 16. Ripristina stringhe letterali
+            content = content.replace(/__STR_LIT_(\d+)__/g, (_, i) => strTokens[Number(i)]);
 
             // Costruzione riga finale
             if (isBlockStart) {
                 indentStack.push(currentIndent + 4);
                 if (content.startsWith('class ')) {
                     blockTypes.push('CLASS');
+                } else if (content.startsWith('switch (')) {
+                    blockTypes.push('SWITCH');
+                } else if (currentScopeType === 'SWITCH') {
+                    blockTypes.push('CASE');
                 } else if (content.startsWith('async function ') || content.startsWith('function ') || inClass) {
                     blockTypes.push('FUNC');
                 } else {
@@ -661,7 +790,10 @@ const GDScriptRuntime = {
         // Chiudi tutti i blocchi pendenti
         while (indentStack.length > 1) {
             const poppedIndent = indentStack.pop();
-            blockTypes.pop();
+            const poppedType = blockTypes.pop();
+            if (poppedType === 'CASE') {
+                pushJs(' '.repeat(poppedIndent) + 'break;');
+            }
             if (classIndent !== -1) {
                 if (indentStack.length === 1 || indentStack[indentStack.length - 1] <= classIndent) {
                     pushJs(' '.repeat(indentStack[indentStack.length - 1]) + '}');
@@ -812,6 +944,7 @@ const GDScriptRuntime = {
             };
         }
 
+        const GD_OS = { read_string_from_stdin: () => "" };
         try {
             // Creazione sandbox esecutiva all'interno del blocco try
             const sandboxFunction = new Function(
@@ -835,6 +968,14 @@ const GDScriptRuntime = {
                 'has_node',
                 'root',
                 'scene',
+                'OS',
+                'int',
+                'float',
+                '__gd_dict_get',
+                '__gd_in',
+                '__gd_format',
+                '__gd_div',
+                '__gd_add',
                 `return (async () => {
                     ${transpiledCode}
                     if (typeof _ready === 'function') {
@@ -864,7 +1005,15 @@ const GDScriptRuntime = {
                 get_node,
                 has_node,
                 currentScene,
-                currentScene
+                currentScene,
+                GD_OS,
+                __gd_int,
+                __gd_float,
+                __gd_dict_get,
+                __gd_in,
+                __gd_format,
+                __gd_div,
+                __gd_add
             );
 
             // La simulazione di _ready() rappresenta un frame: accoda la rimozione
@@ -946,6 +1095,8 @@ const GDScriptRuntime = {
     }
 };
 
+const GD_OS = { read_string_from_stdin: () => '' };
+
 // Esporta classi di Godot
 if (typeof window !== 'undefined') {
     window.GDScriptRuntime = GDScriptRuntime;
@@ -954,9 +1105,26 @@ if (typeof window !== 'undefined') {
     window.GD_Button = GD_Button;
     window.GD_Timer = GD_Timer;
     window.GD_ColorRect = GD_ColorRect;
+    window.OS = GD_OS;
     window.GD_Node2D = GD_Node2D;
     window.GD_Sprite2D = GD_Sprite2D;
     window.GD_CharacterBody2D = GD_CharacterBody2D;
     window.GD_ProgressBar = GD_ProgressBar;
     window.GD_AudioStreamPlayer2D = GD_AudioStreamPlayer2D;
+}
+
+if (typeof global !== 'undefined') {
+    const GD_OS = { read_string_from_stdin: () => "" };
+    global.OS = GD_OS;
+    global.GDScriptRuntime = GDScriptRuntime;
+    global.Vector2 = Vector2;
+    global.int = __gd_int;
+    global.float = __gd_float;
+    global.__gd_dict_get = __gd_dict_get;
+    global.__gd_int = __gd_int;
+    global.__gd_float = __gd_float;
+    global.__gd_in = __gd_in;
+    global.__gd_format = __gd_format;
+    global.__gd_div = __gd_div;
+    global.__gd_add = __gd_add;
 }

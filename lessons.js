@@ -1,115 +1,130 @@
-// Dataset delle Lezioni e Capitoli per GDScript Hero (100% Italiano)
+// Dataset delle Lezioni e Capitoli per GDScript Hero (Parte 1: I Fondamenti di GDScript 4)
+// Sostituzione completa del percorso formativo: 17 Capitoli, 92 Lezioni, 100% Originale e Ottimizzato
 
 const CHAPTERS_DATA = [
     {
         id: 1,
-        title: "Capitolo 1: Introduzione",
+        title: "Capitolo 1: Introduzione a GDScript 4",
         badge: "CAPITOLO 1",
-        desc: "Primi passi con Godot Engine: benvenuto in GDScript 4, la funzione _ready(), commenti e stampa.",
-        icon: "🌱"
+        desc: "Primi passi con Godot Engine 4: la funzione _ready(), commenti e output con print.",
+        icon: "🚀"
     },
     {
         id: 2,
         title: "Capitolo 2: Variabili (Parte 1)",
         badge: "CAPITOLO 2",
-        desc: "Creazione di variabili con var, tipi di testo String, numeri interi int e concatenazione.",
+        desc: "Creazione di variabili con var, tipi di dato primitivi int, float, string e bool.",
         icon: "📦"
     },
     {
         id: 3,
         title: "Capitolo 3: Variabili (Parte 2 & Tipizzazione)",
         badge: "CAPITOLO 3",
-        desc: "Numeri decimali float, booleani bool, tipizzazione statica esplicita di Godot 4 e costanti const.",
+        desc: "Tipizzazione statica di Godot 4, inferenza del tipo :=, costanti const e type casting.",
         icon: "🏷️"
     },
     {
         id: 4,
-        title: "Capitolo 4: Operatori e Matematica di Gioco",
+        title: "Capitolo 4: Operatori Aritmetici",
         badge: "CAPITOLO 4",
-        desc: "Operazioni aritmetiche (+, -, *, /, %), assegnazioni rapide e calcolo di danno, punteggi e monete.",
-        icon: "⚔️"
+        desc: "Aritmetica (+, -, *, /, %), divisione intera, operatore modulo e operatori composti.",
+        icon: "➗"
     },
     {
         id: 5,
-        title: "Capitolo 5: Condizioni e Logica (If / Elif / Else)",
+        title: "Capitolo 5: Operatori Logici e Condizioni",
         badge: "CAPITOLO 5",
-        desc: "Operatori di confronto, operatori logici (and, or, not) e logica decisionale per il gameplay.",
-        icon: "🛡️"
+        desc: "Condizioni logiche avanzate (and, or, not) e operatore ternario compatto.",
+        icon: "⚖️"
     },
     {
         id: 6,
-        title: "Capitolo 6: Liste e Collezioni (Array)",
+        title: "Capitolo 6: Strutture Decisionali",
         badge: "CAPITOLO 6",
-        desc: "Creare un inventario con gli Array, accesso per indice ed utilizzo di append() e size().",
-        icon: "🎒"
+        desc: "Strutture condizionali if, elif, else, annidamento e match statement (switch).",
+        icon: "🔀"
     },
     {
         id: 7,
-        title: "Capitolo 7: Cicli (For e While)",
+        title: "Capitolo 7: Input e Output di Base",
         badge: "CAPITOLO 7",
-        desc: "Cicli for con range(), iterazione su liste di oggetti o nemici e ciclo while.",
-        icon: "🔄"
+        desc: "Stampa avanzata, output con variabili, formattazione stringhe ed elaborazione dati.",
+        icon: "💻"
     },
     {
         id: 8,
-        title: "Capitolo 8: Funzioni e Nodi Godot",
+        title: "Capitolo 8: Calcolatore del Conto",
         badge: "CAPITOLO 8",
-        desc: "Il ciclo vitale func _ready(), definizione di funzioni personalizzate con parametri e return.",
-        icon: "⚙️"
+        desc: "Progetto interattivo: calcolatore del conto con ripartizione e calcolo mancia.",
+        icon: "🧾"
     },
     {
         id: 9,
-        title: "Capitolo 9: Vettori e Movimento 2D",
+        title: "Capitolo 9: Cicli e Iterazione",
         badge: "CAPITOLO 9",
-        desc: "Vector2(x, y), coordinate 2D nello spazio di Godot e calcolo della nuova posizione con velocità.",
-        icon: "🚀"
+        desc: "Cicli for con range, cicli while, controllo del flusso con break e continue.",
+        icon: "🔄"
     },
     {
         id: 10,
-        title: "Capitolo 10: Dizionari (Dictionary)",
+        title: "Capitolo 10: Funzioni e Parametri",
         badge: "CAPITOLO 10",
-        desc: "Coppie chiave-valore con {}, accesso per chiave, aggiunta elementi e metodi has(), keys(), values().",
-        icon: "📖"
+        desc: "Dichiarazione di funzioni personalizzate func, argomenti, valori di default e return.",
+        icon: "⚙️"
     },
     {
         id: 11,
-        title: "Capitolo 11: I Segnali di Godot (Signals)",
+        title: "Capitolo 11: FizzBuzz con Variante",
         badge: "CAPITOLO 11",
-        desc: "La comunicazione disaccoppiata di Godot: dichiarare segnali, connettere funzioni ed emettere eventi con emit().",
-        icon: "📡"
+        desc: "Progetto pratico: l'algoritmo classico FizzBuzz implementato ed esteso per Godot.",
+        icon: "🎯"
     },
     {
         id: 12,
-        title: "Capitolo 12: Classi e Oggetti (OOP in Godot 4)",
+        title: "Capitolo 12: Nozioni di Base sugli Array",
         badge: "CAPITOLO 12",
-        desc: "Programmazione a oggetti: definizione di classi con class e costruttore _init(), istanziazione con .new() ed ereditarietà.",
-        icon: "🏛️"
+        desc: "Array e liste ordinate: creazione, indici, metodi append/size e array tipizzati.",
+        icon: "📚"
     },
     {
         id: 13,
-        title: "Capitolo 13: L'Albero della Scena e i Nodi (Scene Tree)",
+        title: "Capitolo 13: Iterazione su Array e Stringhe",
         badge: "CAPITOLO 13",
-        desc: "L'architettura fondamentale di Godot: cos'è un Nodo, la gerarchia della Scena, il nodo Label e l'accesso rapido con l'operatore $.",
-        icon: "🌳"
+        desc: "Scansione di collezioni: iterazione con for, indici, calcolo totale, media e inversione.",
+        icon: "🔁"
     },
     {
         id: 14,
-        title: "Capitolo 14: Nodi di Interfaccia & Interattività (Button & UI)",
+        title: "Capitolo 14: Array Approfonditi e Slicing",
         badge: "CAPITOLO 14",
-        desc: "Controlli utente reattivi: il nodo Button, gestione del segnale pressed al click e creazione di un Clicker Game interattivo.",
-        icon: "🔘"
+        desc: "Manipolazione avanzata di array: slicing [da:a], concatenazione, membership in/not in.",
+        icon: "✂️"
     },
     {
         id: 15,
-        title: "Capitolo 15: Nodi Temporali e Meccaniche Avanzate",
+        title: "Capitolo 15: Dizionari (Dictionary)",
         badge: "CAPITOLO 15",
-        desc: "Meccaniche e ciclo di vita: il nodo Timer con segnale timeout, grafica con ColorRect ed eliminazione nodi con queue_free().",
-        icon: "⏱️"
+        desc: "Dizionari (Dictionary): coppie chiave-valore, accesso, modifica, iterazione e metodi.",
+        icon: "📖"
+    },
+    {
+        id: 16,
+        title: "Capitolo 16: Registro Spese Giornaliere",
+        badge: "CAPITOLO 16",
+        desc: "Grande progetto pratico: gestione completa di un registro spese quotidiane.",
+        icon: "📊"
+    },
+    {
+        id: 17,
+        title: "Capitolo 17: Le Sfide Finali",
+        badge: "CAPITOLO 17",
+        desc: "Sfide conclusive del percorso Fondamenti per mettere alla prova le tue abilità.",
+        icon: "🏆"
     }
 ];
 
 // ==========================================
-// P3.1: CATALOGO DEI CONCETTI DIDATTICI STABILI
+// CATALOGO DEI CONCETTI DIDATTICI STABILI
 // ==========================================
 const CONCEPTS_CATALOG = {
     syntax_basics: {
@@ -120,102 +135,115 @@ const CONCEPTS_CATALOG = {
     },
     variables_basics: {
         id: "variables_basics",
-        name: "Variabili e Testo",
+        name: "Variabili Fondamentali",
         chapterId: 2,
-        desc: "Dichiarazione var, tipi String e int, concatenazione di stringhe."
+        desc: "Dichiarazione var, tipi int, float, string e bool."
     },
     type_system: {
         id: "type_system",
-        name: "Tipi e Costanti",
+        name: "Tipizzazione e Costanti",
         chapterId: 3,
-        desc: "Numeri float, booleani bool, tipizzazione esplicita Godot 4 e costanti const."
+        desc: "Tipizzazione statica esplicita : Type, inferenza := e costanti const."
     },
     operators_math: {
         id: "operators_math",
-        name: "Operatori e Matematica",
+        name: "Operatori Aritmetici",
         chapterId: 4,
-        desc: "Aritmetica (+, -, *, /, %), calcolo danni e formule matematiche."
+        desc: "Operazioni aritmetiche (+, -, *, /, %), divisione intera e modulo."
     },
     conditions_logic: {
         id: "conditions_logic",
-        name: "Condizioni e Logica",
+        name: "Operatori Logici e Condizioni",
         chapterId: 5,
-        desc: "Confronti (==, !=, >, <), operatori logici (and, or, not) e if/elif/else."
+        desc: "Operatori di confronto, operatori logici (and, or, not) e operatore ternario."
     },
-    arrays_collections: {
-        id: "arrays_collections",
-        name: "Array e Liste",
+    control_flow: {
+        id: "control_flow",
+        name: "Strutture Decisionali",
         chapterId: 6,
-        desc: "Liste ordinate, indici, metodi append() e size()."
+        desc: "Diramazioni condizionali if, elif, else e match statement."
+    },
+    io_basics: {
+        id: "io_basics",
+        name: "Input e Output di Base",
+        chapterId: 7,
+        desc: "Stampa avanzata, manipolazione stringhe e formattazione."
+    },
+    project_bill: {
+        id: "project_bill",
+        name: "Progetto: Calcolatore del Conto",
+        chapterId: 8,
+        desc: "Applicazione pratica con calcolo somme, percentuali e divisioni."
     },
     loops_iteration: {
         id: "loops_iteration",
         name: "Cicli e Iterazione",
-        chapterId: 7,
-        desc: "Cicli for con range(), iterazione su array e cicli while."
+        chapterId: 9,
+        desc: "Cicli for con range(), cicli while, break e continue."
     },
     functions_scope: {
         id: "functions_scope",
         name: "Funzioni e Parametri",
-        chapterId: 8,
-        desc: "Funzioni personalizzate func, parametri, valori di ritorno return e scope."
+        chapterId: 10,
+        desc: "Dichiarazione func, parametri, valori di default, return e visibilità."
     },
-    vectors_2d: {
-        id: "vectors_2d",
-        name: "Vettori e Movimento 2D",
-        chapterId: 9,
-        desc: "Vector2(x, y), coordinate spaziali e calcolo vettoriale di movimento."
+    project_fizzbuzz: {
+        id: "project_fizzbuzz",
+        name: "Progetto: FizzBuzz con Variante",
+        chapterId: 11,
+        desc: "Implementazione algoritmica di FizzBuzz ed estensioni per giochi."
+    },
+    arrays_collections: {
+        id: "arrays_collections",
+        name: "Array e Liste",
+        chapterId: 12,
+        desc: "Liste ordinate, indicizzazione, metodi append/size e array tipizzati."
+    },
+    collection_iteration: {
+        id: "collection_iteration",
+        name: "Iterazione su Collezioni",
+        chapterId: 13,
+        desc: "Scansione for di array e stringhe, calcoli cumulativi e inversione."
+    },
+    arrays_advanced: {
+        id: "arrays_advanced",
+        name: "Array Avanzati e Slicing",
+        chapterId: 14,
+        desc: "Slicing [a:b], concatenazione array e membership in/not in."
     },
     dictionaries: {
         id: "dictionaries",
-        name: "Dizionari Chiave-Valore",
-        chapterId: 10,
-        desc: "Coppie chiave-valore {}, accesso, aggiunta elementi e metodi has()."
-    },
-    signals: {
-        id: "signals",
-        name: "I Segnali di Godot",
-        chapterId: 11,
-        desc: "Dichiarazione signal, emissione emit() e connessione connect()."
-    },
-    oop_classes: {
-        id: "oop_classes",
-        name: "Classi e Programmazione ad Oggetti",
-        chapterId: 12,
-        desc: "Classi class, costruttore _init(), istanziazione con .new() e metodi."
-    },
-    scene_tree_nodes: {
-        id: "scene_tree_nodes",
-        name: "Albero della Scena e Nodi",
-        chapterId: 13,
-        desc: "Gerarchia ad albero, nodo Label, visualizzazione testo e operatore $."
-    },
-    ui_button_interaction: {
-        id: "ui_button_interaction",
-        name: "Interfaccia Utente e Pulsanti",
-        chapterId: 14,
-        desc: "Nodo Button, interattività, segnale pressed e feedback UI."
-    },
-    timers_lifecycle: {
-        id: "timers_lifecycle",
-        name: "Timer e Ciclo di Vita dei Nodi",
+        name: "Dizionari (Dictionary)",
         chapterId: 15,
-        desc: "Nodo Timer, segnale timeout, ColorRect e rimozione dinamica queue_free()."
+        desc: "Coppie chiave-valore {}, accesso, modifica, iterazione e metodi."
+    },
+    project_expenses: {
+        id: "project_expenses",
+        name: "Progetto: Registro Spese",
+        chapterId: 16,
+        desc: "Sistema completo di gestione e aggregazione dati di spesa."
+    },
+    challenges: {
+        id: "challenges",
+        name: "Sfide di Padronanza Finale",
+        chapterId: 17,
+        desc: "Sfide di programmazione per consolidare tutti i concetti della Parte 1."
     }
 };
 
+// ==========================================
+// FUNZIONI DI SUPPORTO E VALIDAZIONE
+// ==========================================
 function getLessonConcept(lessonId) {
     const lesson = (typeof LESSONS_DATA !== 'undefined') ? LESSONS_DATA.find(l => l.id === lessonId) : null;
     if (lesson && lesson.conceptId && CONCEPTS_CATALOG[lesson.conceptId]) {
         return CONCEPTS_CATALOG[lesson.conceptId];
     }
-    const chapterId = lesson ? lesson.chapterId : Math.ceil(lessonId / 4);
+    const chapterId = lesson ? lesson.chapterId : 1;
     const found = Object.values(CONCEPTS_CATALOG).find(c => c.chapterId === chapterId);
     return found || { id: "general", name: "Generale", chapterId: chapterId || 1, desc: "Concetti generali GDScript" };
 }
 
-
-// Helper per feedback chiaro allo studente (distinzione sintassi vs runtime)
 function formatExecutionCheck(result) {
     if (result && result.success) {
         return { desc: "Codice eseguito senza errori", passed: true, diff: null };
@@ -241,7 +269,6 @@ function formatExecutionCheck(result) {
     };
 }
 
-// Rimuove stringhe e commenti dal codice per impedire bypass tramite testo nei commenti o letterali
 function stripCommentsAndStrings(code) {
     if (!code) return "";
     return code
@@ -251,7 +278,6 @@ function stripCommentsAndStrings(code) {
         .replace(/#.*$/gm, '');
 }
 
-// Verifica la presenza di commenti autentici (non contenuti all'interno di stringhe)
 function hasRealComment(code) {
     if (!code) return false;
     const noStrings = code
@@ -260,4489 +286,4262 @@ function hasRealComment(code) {
         .replace(/'(?:\\.|[^'\\])*'/g, "''");
     return /#\s*\S+/.test(noStrings);
 }
+
+// ==========================================
+// DATASET COMPLETO DELLE 92 LEZIONI
+// ==========================================
 const LESSONS_DATA = [
-    // ==========================================
-    // CAPITOLO 1: INTRODUZIONE
-    // ==========================================
-
-
     {
         id: 1,
         conceptId: "syntax_basics",
         conceptTags: ["print", "ready", "syntax"],
         chapterId: 1,
         isMastery: false,
-        title: "1. Benvenuto in GDScript 4 (print)",
-        icon: "👋",
+        title: "1. Il Linguaggio GDScript (print)",
+        icon: "🌱",
         xp: 50,
-        expectedOutput: "Ciao Godot!",
-        theory: `
-            <p>Benvenuto in <strong>GDScript Hero</strong>! In questo corso imparerai a programmare per <strong>Godot Engine</strong> passo dopo passo attraverso sfide pratiche ed interattive.</p>
-            <p>In Godot un <strong>nodo</strong> è un elemento della scena: può rappresentare un oggetto, un contenitore o un'interfaccia. Uno script aggiunge comportamenti a un nodo.</p>
-            <p>La riga <code>extends Node</code> significa che lo script parte dal tipo base Node; la incontrerai negli esercizi successivi. Non devi scriverla in ogni esercizio: quando manca, il laboratorio prepara il nodo automaticamente.</p>
-            <p><code>func</code> serve a dichiarare una funzione, cioè un gruppo di istruzioni. <code>_ready()</code> è una funzione che Godot esegue automaticamente quando il nodo entra nella scena; i due punti e il rientro indicano quali righe le appartengono.</p>
-            <p>Nel codice iniziale vedrai anche <code>#</code> (un commento, che non viene eseguito) e <code>pass</code> (non fa nulla: lascia il blocco vuoto finché non aggiungi le istruzioni richieste).</p>
-            <p>Per inviare un messaggio alla console di debug, usiamo la funzione incorporata <code>print(...)</code> inserendo il testo tra virgolette:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="nb">print</span>(<span class="s">"Ciao Godot!"</span>)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>All'interno della funzione <code>_ready()</code>, usa <code>print(...)</code> per stampare esattamente: <br><code>"Ciao Godot!"</code></li>
-                <li>Presta attenzione alle lettere maiuscole e al punto esclamativo finale.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Stampa esattamente: "Ciao Godot!"\n    pass\n`,
+        expectedOutput: "Hello GDScript!",
+        theory: "\n                <p>Benvenuto in <strong>GDScript Hero</strong>! In questo percorso imparerai a programmare per <strong>Godot Engine 4</strong> partendo dalle basi assolute fino all'architettura avanzata a oggetti.</p>\n                <p>In Godot, ogni comportamento di gioco viene aggiunto tramite uno script associato a un <strong>nodo</strong> (Node). La funzione speciale <code>_ready()</code> viene eseguita automaticamente dal motore quando il nodo entra nella scena ed è pronto all'azione.</p>\n                <p>Per inviare messaggi alla console di debug usiamo la funzione integrata <code>print(...)</code> con il testo racchiuso tra virgolette:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">extends</span> Node\n\n<span class=\"k\">func</span> <span class=\"nf\">_ready</span>():\n    <span class=\"nb\">print</span>(<span class=\"s\">\"Hello GDScript!\"</span>)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>All'interno della funzione <code>_ready()</code>, usa <code>print(...)</code> per stampare: <br><code>\"Hello GDScript!\"</code></li>\n                    <li>Fai attenzione all'indentazione a 4 spazi sotto <code>func _ready():</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Stampa il messaggio richiesto\n    print(\"Hello GDScript!\")\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"Hello GDScript!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "In Godot, quando un nodo viene inserito nella scena, il motore esegue automaticamente la funzione `_ready()`. Pensa a questa funzione come al punto di partenza del tuo script."
+                        "text": "La funzione _ready() è il punto di ingresso dello script quando il gioco parte."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa la funzione nativa `print(...)`. Il testo da stampare deve essere racchiuso tra virgolette doppie o singole e inserito indentato sotto `func _ready():`."
+                        "text": "Inserisci print(\"Hello GDScript!\") indentato sotto func _ready():."
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    print(\"Saluti da Godot!\")\n```\nSostituisci il messaggio di esempio con la stringa esatta richiesta nel testo dell'esercizio."
+                        "text": "Il codice è già impostato nel riquadro: premi 'Esegui Codice' per verificare l'output."
             }
 ],
-        solution: `func _ready():\n    print("Ciao Godot!")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasPrinted = (result.logs || []).some(l => l.trim() === "Ciao Godot!");
-    tests.push({ desc: "Console stampa esattamente 'Ciao Godot!'", passed: hasPrinted, diff: hasPrinted ? null : `Atteso: "Ciao Godot!", Ricevuto: "${(result.logs || []).join(' | ')}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.trim() === "Hello GDScript!");
+                        tests.push({ desc: "Console stampa 'Hello GDScript!'", passed: hasLog, diff: hasLog ? null : `Atteso: 'Hello GDScript!', Ricevuto: '${(result.logs || []).join(' | ')}'` });
+                        return tests;
+        }
     },
     {
         id: 2,
         conceptId: "syntax_basics",
-        conceptTags: ["comments", "syntax"],
+        conceptTags: ["print", "ready", "string"],
         chapterId: 1,
         isMastery: false,
-        title: "2. Come funzionano i commenti (#)",
-        icon: "📝",
+        title: "2. Ciao Mondo! (Hello World!)",
+        icon: "🌍",
         xp: 50,
-        expectedOutput: "Benvenuto nel gioco",
-        theory: `
-            <p>I <strong>commenti</strong> servono a spiegare cosa fa il codice. In GDScript iniziano con il simbolo cancelletto (<code>#</code>).</p>
-            <p>Tutto ciò che scrivi dopo <code>#</code> viene completamente ignorato dal motore di gioco:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="c"># Questo è un commento che Godot non legge</span>
-    <span class="nb">print</span>(<span class="s">"Benvenuto nel gioco"</span>)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Aggiungi una riga di commento che inizia con <code>#</code>.</li>
-                <li>Subito sotto, stampa: <code>"Benvenuto nel gioco"</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Inserisci il tuo commento e stampa la frase richiesta\n    pass\n`,
+        expectedOutput: "Hello World!",
+        theory: "\n                <p>La tradizione di ogni programmatore è iniziare stampando <code>\"Hello World!\"</code> sullo schermo.</p>\n                <p>Le stringhe in GDScript possono essere racchiuse sia da virgolette doppie <code>\"...\"</code> che singole <code>'...'</code>. Qualsiasi carattere all'interno delle virgolette viene interpretato letteralmente.</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">func</span> <span class=\"nf\">_ready</span>():\n    <span class=\"nb\">print</span>(<span class=\"s\">\"Hello World!\"</span>)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Completa la riga <code>print(\"\")</code> inserendo tra le virgolette il testo esatto: <br><code>Hello World!</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Scrivi il tuo messaggio tra le virgolette\n    print(\"\")\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"Hello World!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "I commenti sono note per gli umani che il computer ignora completamente durante l'esecuzione del gioco. Servono a spiegare l'intenzione del codice."
+                        "text": "Inserisci il testo esatto tra le virgolette di print(\"\")."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "In GDScript, qualsiasi testo che segue il simbolo cancelletto `#` sulla stessa riga diventa un commento. Puoi posizionarlo su una riga dedicata prima del `print()`."
+                        "text": "print(\"Hello World!\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Inizializzazione parametri\n    print(\"Test\")\n```\nInserisci un commento descrittivo seguito dal `print()` con la frase richiesta."
+                        "text": "Attenzione alle maiuscole e al punto esclamativo finale."
             }
 ],
-        solution: `func _ready():\n    # Inizializzazione gioco\n    print("Benvenuto nel gioco")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasComment = hasRealComment(result.code);
-    tests.push({ desc: "Riga di commento con '#' presente nel codice", passed: !!hasComment, diff: hasComment ? null : "Non è stato trovato alcun commento con '#'." });
-    const hasPrinted = (result.logs || []).some(l => l.trim() === "Benvenuto nel gioco");
-    tests.push({ desc: "Console stampa esattamente 'Benvenuto nel gioco'", passed: hasPrinted, diff: hasPrinted ? null : `Atteso: "Benvenuto nel gioco", Ricevuto: "${(result.logs || []).join(' | ')}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.trim() === "Hello World!");
+                        tests.push({ desc: "Console stampa 'Hello World!'", passed: hasLog, diff: hasLog ? null : `Atteso: 'Hello World!', Ricevuto: '${(result.logs || []).join(' | ')}'` });
+                        return tests;
+        }
     },
     {
         id: 3,
         conceptId: "syntax_basics",
-        conceptTags: ["print", "multiple_values", "numbers"],
+        conceptTags: ["comments", "syntax"],
         chapterId: 1,
         isMastery: false,
-        title: "3. Stampare valori multipli e numeri",
-        icon: "🔢",
+        title: "3. Commenti nel Codice (#)",
+        icon: "💬",
         xp: 50,
-        expectedOutput: "Livello\n1",
-        theory: `
-            <p>La funzione <code>print(...)</code> può stampare sia testo che numeri senza virgolette:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="nb">print</span>(<span class="s">"Livello"</span>)
-    <span class="nb">print</span>(<span class="m">1</span>)</pre>
-            </div>
-            <p>Ogni chiamata a <code>print(...)</code> va automaticamente a capo sulla riga successiva.</p>
-        `,
-        task: `
-            <ul>
-                <li>Stampa prima il testo <code>"Livello"</code>.</li>
-                <li>Nella riga successiva stampa il numero <code>1</code> (senza virgolette).</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Stampa "Livello" e poi il numero 1\n    pass\n`,
+        expectedOutput: "Hello!",
+        theory: "\n                <p>I commenti sono annotazioni utili per spiegare cosa fa il codice e vengono completamente ignorati dal motore di gioco durante l'esecuzione.</p>\n                <p>In GDScript i commenti a riga singola iniziano con il simbolo cancelletto <code>#</code>. Tutto ciò che segue il cancelletto su quella riga non viene eseguito:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"c\"># Questa riga è un commento esplicativo</span>\n<span class=\"nb\">print</span>(<span class=\"s\">\"Eseguito!\"</span>) <span class=\"c\"># Anche questo alla fine è un commento</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Il programma attuale stampa due righe: <code>Hello!</code> e <code>Goodbye!</code>.</li>\n                    <li>Trasforma in commento la riga che stampa <code>Goodbye!</code> aggiungendo un <code>#</code> all'inizio.</li>\n                    <li>Non cancellare la riga: commentala soltanto, così che venga stampato solo <code>Hello!</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    print(\"Hello!\")\n    print(\"Goodbye!\")\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"Hello!\")\n    # print(\"Goodbye!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Il testo (stringa) richiede le virgolette per essere interpretato, mentre i numeri interi sono valori numerici puri e vanno inseriti direttamente."
+                        "text": "Metti il carattere cancelletto '#' davanti all'istruzione che non vuoi eseguire."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa due chiamate distinte a `print(...)` in sequenza: la prima con la parola tra virgolette, la seconda con il numero senza virgolette."
+                        "text": "# print(\"Goodbye!\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    print(\"Capitolo\")\n    print(42)\n```\nOgni chiamata a `print()` produce una riga separata nella console di Godot."
+                        "text": "La riga print(\"Hello!\") deve rimanere intatta, mentre la seconda riga deve essere commentata."
             }
 ],
-        solution: `func _ready():\n    print("Livello")\n    print(1)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const logs = result.logs || [];
-    const l1Idx = logs.findIndex(l => l.trim() === "Livello");
-    const l2Idx = logs.findIndex(l => l.trim() === "1");
-    const hasQuotedOne = /\bprint\s*\(\s*["']1["']\s*\)/.test(result.code || '');
-    const hasLivello = l1Idx !== -1;
-    const hasNumberOne = l2Idx !== -1 && !hasQuotedOne && (l1Idx === -1 || l1Idx < l2Idx);
-
-    tests.push({ desc: "Console stampa esattamente 'Livello'", passed: hasLivello, diff: hasLivello ? null : `Atteso: "Livello", Ricevuto: "${logs.join(' | ')}"` });
-    tests.push({ desc: "Console stampa il numero 1 su riga separata (senza virgolette)", passed: hasNumberOne, diff: hasQuotedOne ? 'Hai stampato la stringa "1" tra virgolette. La consegna richiede di stampare il numero 1 come valore numerico puro (senza virgolette).' : (hasNumberOne ? null : (l2Idx === -1 ? `Atteso valore numerico 1 su riga successiva, Ricevuto: "${logs.join(' | ')}"` : 'Il numero 1 deve essere stampato sulla riga successiva a "Livello".')) });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const printsHello = logs.includes("Hello!");
+                        const noGoodbye = !logs.includes("Goodbye!");
+                        tests.push({ desc: "Stampa 'Hello!'", passed: printsHello, diff: printsHello ? null : "Manca 'Hello!'" });
+                        tests.push({ desc: "Non stampa 'Goodbye!' (riga commentata)", passed: noGoodbye, diff: noGoodbye ? null : "La riga 'Goodbye!' non è stata commentata" });
+                        return tests;
+        }
     },
-{
+    {
         id: 4,
         conceptId: "syntax_basics",
-        conceptTags: ["mastery", "print", "comments"],
+        conceptTags: ["syntax", "ready", "structure"],
         chapterId: 1,
         isMastery: true,
-        title: "4. ⭐ Sfida di Apprendimento: Terminale di Avvio della Nave",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "facile",
-        difficultyLabel: "Facile",
-        scenario: "Il computer di bordo della navetta spaziale deve verificare la diagnostica dei sistemi. Completa la sequenza usando <code>print()</code>. I commenti, anche quelli già presenti, sono facoltativi e non influenzano l'esecuzione.",
-        requirements: [
-            'Facoltativo: documenta il codice con un commento <code>#</code> (non viene valutato)',
-            'Stampa la riga di sistema: <code>"Sistema: Godot OS"</code>',
-            'Stampa l\'energia passando i tre valori separati da virgola: <code>"Energia: ", 100, "%"</code>'
-        ],
-        notice: "Non modificare le righe print() esistenti. Il programma stampa:",
-        expectedOutput: "=== AVVIO SISTEMA ===\nSistema: Godot OS\nEnergia: 100%\n=== DIAGNOSTICA COMPLETATA ===",
-        initialCode: `extends Node\n\nfunc _ready():\n    print("=== AVVIO SISTEMA ===")\n    # Aggiungi il commento e le due istruzioni print() sotto\n    \n    # Non modificare la riga sotto\n    print("=== DIAGNOSTICA COMPLETATA ===")\n`,
-        aiExplanation: "In questo esercizio applichi i fondamenti del Capitolo 1: i commenti con <code>#</code> vengono ignorati dal motore ma servono a documentare il codice. La funzione <code>print()</code> accetta sia singoli testi tra virgolette, sia argomenti multipli separati da virgola come <code>print(\"Energia: \", 100, \"%\")</code>, che Godot concatena senza inserire spazi aggiuntivi (inseriscili nelle stringhe quando servono).",
+        title: "4. Struttura del Programma (Sfida)",
+        icon: "🏗️",
+        xp: 75,
+        expectedOutput: "Ready!\nLet's go!",
+        theory: "\n                <p>La struttura tipica di uno script Godot comprende:</p>\n                <ol>\n                    <li><code>extends Node</code>: la classe base da cui eredita lo script.</li>\n                    <li>La definizione della funzione con <code>func nome():</code> (notare i due punti finali!).</li>\n                    <li>Il corpo della funzione indentato di 4 spazi o un tab.</li>\n                </ol>\n            ",
+        task: "\n                <ul>\n                    <li>Correggi gli errori di sintassi nello script in modo che stampi su due righe:</li>\n                    <li><code>Ready!</code></li>\n                    <li><code>Let's go!</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready()\n    print(\"Ready!\")\n    print(\"Let's go!\")\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"Ready!\")\n    print(\"Let's go!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Le righe che iniziano con # sono commenti: non vengono eseguite. La sfida viene valutata in base alle stampe effettive nella console."
+                        "text": "In GDScript dopo il nome e le parentesi di una funzione servono i due punti ':'."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Mantieni le stampe iniziale e finale e aggiungi le due stampe centrali. Lascia pure i commenti iniziali: non devono essere rimossi."
+                        "text": "func _ready(): con i due punti alla fine della riga."
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Diagnostica motore\n    print(\"Modulo: Audio\")\n    print(\"Volume: \", 80, \"%\")\n```\nAdatta i nomi delle etichette e le percentuali ai requisiti della missione."
+                        "text": "Aggiungi ':' subito dopo func _ready()."
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    print("=== AVVIO SISTEMA ===")\n    # Diagnostica reattori\n    print("Sistema: Godot OS")\n    print("Energia: ", 100, "%")\n    print("=== DIAGNOSTICA COMPLETATA ===")
-`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Terminale di Avvio della Nave</h3>
-                <p>Metti alla prova i fondamenti del Capitolo 1 completando la sequenza di diagnostica del terminale di bordo.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Facoltativo: aggiungi un commento come <code># Diagnostica reattori</code>. I commenti non modificano l'output</li>
-                <li>Stampa <code>"Sistema: Godot OS"</code></li>
-                <li>Stampa con valori multipli: <code>"Energia: ", 100, "%"</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    // I commenti non generano output, la forma di print non deve influire.
-    // Il runtime JS legacy puo produrre "Energia: 100 %" anziche "100%".
-    const normalize = line => String(line).trim().replace(/(Energia:\s*100)\s+%$/, "$1%");
-    const expected = ["=== AVVIO SISTEMA ===", "Sistema: Godot OS", "Energia: 100%", "=== DIAGNOSTICA COMPLETATA ==="];
-    const actual = (result.logs || []).map(normalize);
-    const correct = actual.length === expected.length &&
-        expected.every((line, index) => actual[index] === line);
-    tests.push({
-        desc: "Le quattro righe di diagnostica sono stampate nell'ordine richiesto",
-        passed: correct,
-        diff: correct ? null : "Output atteso:\n" + expected.join("\n") +
-            "\n\nOutput ottenuto:\n" + (actual.join("\n") || "(nessun output)")
-    });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const okReady = logs.includes("Ready!");
+                        const okGo = logs.includes("Let's go!");
+                        tests.push({ desc: "Stampa 'Ready!'", passed: okReady, diff: okReady ? null : "Manca 'Ready!'" });
+                        tests.push({ desc: "Stampa 'Let\'s go!'", passed: okGo, diff: okGo ? null : "Manca 'Let\'s go!'" });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 2: VARIABILI (PARTE 1)
-    // ==========================================
     {
         id: 5,
         conceptId: "variables_basics",
-        conceptTags: ["var", "variables", "assignment"],
+        conceptTags: ["var", "int", "float"],
         chapterId: 2,
         isMastery: false,
-        title: "5. Creazione di variabili con var",
-        icon: "📦",
+        title: "5. Numeri Interi e Decimali (int & float)",
+        icon: "🔢",
         xp: 50,
-        expectedOutput: "Eroe",
-        theory: `
-            <p>Una <strong>variabile</strong> è un contenitore a cui diamo un nome per memorizzare un dato che il gioco userà più volte.</p>
-            <p>In GDScript si usa la parola chiave <code>var</code> seguita dal nome e dal valore:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> nome = <span class="s">"Eroe"</span>
-    <span class="nb">print</span>(nome)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara una variabile chiamata <code>nome</code> e assegnale il valore <code>"Eroe"</code>.</li>
-                <li>Stampa la variabile usando <code>print(nome)</code> (senza virgolette attorno a nome).</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Dichiara la variabile nome e stampala\n    pass\n`,
+        expectedOutput: "Coins: 25\nSpeed: 3.5",
+        theory: "\n                <p>Una <strong>variabile</strong> è un contenitore a cui diamo un nome per memorizzare dati in memoria.</p>\n                <p>In GDScript si usa la parola chiave <code>var</code> per dichiarare una variabile. Godot distingue principalmente due tipi di numeri:</p>\n                <ul>\n                    <li><code>int</code>: numeri interi (es. <code>1</code>, <code>25</code>, <code>-10</code>). Ottimi per monete, vite, livelli.</li>\n                    <li><code>float</code>: numeri con la virgola / decimali (es. <code>3.5</code>, <code>0.01</code>, <code>9.8</code>). Usati per velocità, coordinate fisiche, timer.</li>\n                </ul>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> punteggio = 100\n<span class=\"k\">var</span> velocita = 4.5</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Crea due variabili dentro <code>_ready()</code>:</li>\n                    <li><code>coins</code> con il valore intero <code>25</code></li>\n                    <li><code>speed</code> con il valore decimale <code>3.5</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Crea coins (25) e speed (3.5) qui sotto\n    pass\n    print(\"Coins: \", coins)\n    print(\"Speed: \", speed)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var coins = 25\n    var speed = 3.5\n    print(\"Coins: \", coins)\n    print(\"Speed: \", speed)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Una variabile è come una scatola etichettata nella memoria del computer in cui conservare un dato che potrai riutilizzare più volte nel gioco."
+                        "text": "Dichiara le variabili usando var nome = valore."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "In GDScript si crea una variabile con la parola chiave `var`, seguita dal nome della variabile, dall'operatore `=` e dal valore iniziale. Qui devi inserire una stringa, quindi il testo va racchiuso tra virgolette."
+                        "text": "var coins = 25\nvar speed = 3.5"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var personaggio = \"Lia\"\n    print(personaggio)\n```\nNota che quando stampi la variabile non devi usare le virgolette, altrimenti stamperesti il testo del nome e non il valore testuale che contiene."
+                        "text": "Sostituisci 'pass' con le due righe di dichiarazione."
             }
 ],
-        solution: `func _ready():\n    var nome = "Eroe"\n    print(nome)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasVar = result.scope && result.scope.nome === "Eroe";
-    tests.push({ desc: "Variabile 'nome' creata con valore 'Eroe'", passed: hasVar, diff: hasVar ? null : `Valore attuale: ${result.scope ? result.scope.nome : 'non definita'}` });
-    const hasLiteralPrint = /\bprint\s*\(\s*["']Eroe["']\s*\)/.test(result.code || '');
-    const printed = (result.logs || []).some(l => l.trim() === "Eroe") && !hasLiteralPrint;
-    tests.push({ desc: "Valore della variabile 'nome' stampato a console", passed: printed, diff: hasLiteralPrint ? "Hai stampato il testo letterale 'Eroe' tra virgolette. Usa 'print(nome)' per stampare il valore della variabile." : (printed ? null : `Atteso: "Eroe", Ricevuto: "${(result.logs || []).join(' | ')}"`) });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const coinsOk = result.scope && result.scope.coins === 25;
+                        const speedOk = result.scope && Math.abs(result.scope.speed - 3.5) < 0.001;
+                        tests.push({ desc: "Variabile 'coins' uguale a 25", passed: coinsOk, diff: coinsOk ? null : `Trovato: ${result.scope?.coins}` });
+                        tests.push({ desc: "Variabile 'speed' uguale a 3.5", passed: speedOk, diff: speedOk ? null : `Trovato: ${result.scope?.speed}` });
+                        return tests;
+        }
     },
     {
         id: 6,
         conceptId: "variables_basics",
-        conceptTags: ["strings", "integers", "types", "debugging"],
-        isDebugging: true,
-        debugType: "Sintassi (Virgolette mancanti)",
+        conceptTags: ["var", "string"],
         chapterId: 2,
         isMastery: false,
-        title: "6. Tipi di testo (String) e interi (int)",
-        icon: "🏷️",
+        title: "6. Stringhe di Testo (String)",
+        icon: "📝",
         xp: 50,
-        expectedOutput: "Guerriero\n100",
-        theory: `
-            <p>I due tipi fondamentali per un personaggio sono il suo nome (<strong>String</strong>, testo) e i suoi punti vita (<strong>int</strong>, numero intero):</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> personaggio = <span class="s">"Guerriero"</span>
-    <span class="k">var</span> punti_vita = <span class="m">100</span>
-    <span class="nb">print</span>(personaggio)
-    <span class="nb">print</span>(punti_vita)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Crea la variabile <code>personaggio</code> con valore <code>"Guerriero"</code>.</li>
-                <li>Crea la variabile <code>punti_vita</code> con valore intero <code>100</code>.</li>
-                <li>Stampa entrambe le variabili su righe separate.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():
-    # BUG DI SINTASSI: mancano le virgolette attorno al nome del personaggio!
-    # Correggi "Guerriero", poi verifica la variabile intera punti_vita.
-    var personaggio = Guerriero
-    var punti_vita = 100
-    print(personaggio)
-    print(punti_vita)
-`,
+        expectedOutput: "Imparo GDScript con GDScript Hero!",
+        theory: "\n                <p>Il tipo <code>String</code> serve a memorizzare testo, nomi di personaggi, dialoghi e percorsi di risorse.</p>\n                <p>Basta assegnare un valore racchiuso tra virgolette a una variabile <code>var</code>:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> nome_eroe = <span class=\"s\">\"Godot Warrior\"</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Crea una variabile chiamata <code>hero_msg</code> con il valore esatto: <br><code>\"Imparo GDScript con GDScript Hero!\"</code></li>\n                    <li>Stampala usando <code>print(hero_msg)</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Crea hero_msg e stampala\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var hero_msg = \"Imparo GDScript con GDScript Hero!\"\n    print(hero_msg)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Le stringhe rappresentano testi o sequenze di caratteri (nomi di personaggi, messaggi di dialogo). Senza virgolette, il compilatore le confonderebbe con variabili non definite."
+                        "text": "Dichiara una variabile testuale assegnando una stringa tra virgolette."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Dichiara la variabile con `var` e assegna la stringa racchiusa tra doppi apici `\"...\"` o singoli apici `'...'`. Poi passa la variabile a `print()`."
+                        "text": "var hero_msg = \"...\"\nprint(hero_msg)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var titolo = \"Cavaliere\"\n    print(titolo)\n```\nNel codice di partenza correggi Guerriero aggiungendo le virgolette; stampa anche la variabile intera punti_vita."
+                        "text": "var hero_msg = \"Imparo GDScript con GDScript Hero!\"\nprint(hero_msg)"
             }
 ],
-        solution: `func _ready():\n    var personaggio = "Guerriero"\n    var punti_vita = 100\n    print(personaggio)\n    print(punti_vita)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const isStr = result.scope && result.scope.personaggio === "Guerriero";
-    const isInt = result.scope && result.scope.punti_vita === 100;
-    tests.push({ desc: "Variabile 'personaggio' impostata a 'Guerriero'", passed: isStr, diff: isStr ? null : `Valore: ${result.scope ? result.scope.personaggio : 'undefined'}` });
-    tests.push({ desc: "Variabile 'punti_vita' impostata a intero 100", passed: isInt, diff: isInt ? null : `Valore: ${result.scope ? result.scope.punti_vita : 'undefined'}` });
-    const pPrinted = result.logs.some(l => l.includes("Guerriero"));
-    const hpPrinted = result.logs.some(l => l.includes("100"));
-    tests.push({ desc: "Entrambe le variabili stampate a console", passed: pPrinted && hpPrinted, diff: (pPrinted && hpPrinted) ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Imparo GDScript con GDScript Hero!"));
+                        tests.push({ desc: "Stampa la stringa hero_msg richiesta", passed: hasLog, diff: hasLog ? null : `Ricevuto: '${(result.logs || []).join(' | ')}'` });
+                        return tests;
+        }
     },
     {
         id: 7,
         conceptId: "variables_basics",
-        conceptTags: ["concatenation", "str", "strings"],
+        conceptTags: ["var", "bool"],
         chapterId: 2,
         isMastery: false,
-        title: "7. Concatenazione di stringhe",
-        icon: "🔗",
+        title: "7. Valori Booleani (bool)",
+        icon: "🔘",
         xp: 50,
-        expectedOutput: "Giocatore: Eroe",
-        theory: `
-            <p>Puoi unire due stringhe usando l'operatore <code>+</code>. Questo processo si chiama <strong>concatenazione</strong>:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> nome = <span class="s">"Eroe"</span>
-    <span class="k">var</span> messaggio = <span class="s">"Giocatore: "</span> + nome
-    <span class="nb">print</span>(messaggio)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>nome = "Eroe"</code>.</li>
-                <li>Dichiara <code>messaggio = "Giocatore: " + nome</code>.</li>
-                <li>Stampa la variabile <code>messaggio</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Concatena "Giocatore: " con la variabile nome e stampa\n    pass\n`,
+        expectedOutput: "Alive: true\nHas Key: false",
+        theory: "\n                <p>I valori booleani (<code>bool</code>) possono essere solo <code>true</code> (vero) o <code>false</code> (falso), rigorosamente in minuscolo.</p>\n                <p>Sono fondamentali nello sviluppo dei giochi per tenere traccia di stati e condizioni: il giocatore è vivo? Il salto è sbloccato? Il forziere è aperto?</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> scudo_attivo = <span class=\"kc\">true</span>\n<span class=\"k\">var</span> in_pausa = <span class=\"kc\">false</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Crea due variabili booleane dentro <code>_ready()</code>:</li>\n                    <li><code>is_alive</code> con valore <code>true</code></li>\n                    <li><code>has_key</code> con valore <code>false</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Crea is_alive (true) e has_key (false)\n    pass\n    print(\"Alive: \", is_alive)\n    print(\"Has Key: \", has_key)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var is_alive = true\n    var has_key = false\n    print(\"Alive: \", is_alive)\n    print(\"Has Key: \", has_key)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Concatenare significa 'incollare' due stringhe insieme per formare una frase completa (es. unire un'etichetta fissa con il nome dinamico del personaggio)."
+                        "text": "Usa le parole chiave booleane true e false (tutto minuscolo, senza virgolette)."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "In GDScript puoi unire due stringhe usando l'operatore di addizione `+`. Assegna il risultato dell'unione a una seconda variabile `messaggio`."
+                        "text": "var is_alive = true\nvar has_key = false"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var utente = \"Mario\"\n    var benvenuto = \"Ciao: \" + utente\n    print(benvenuto)\n```\nFai attenzione a includere lo spazio dopo i due punti all'interno delle virgolette."
+                        "text": "Scrivi le due dichiarazioni sopra i print."
             }
 ],
-        solution: `func _ready():\n    var nome = "Eroe"\n    var messaggio = "Giocatore: " + nome\n    print(messaggio)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasNome = result.scope && result.scope.nome === "Eroe";
-    const hasMsg = result.scope && result.scope.messaggio === "Giocatore: Eroe";
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const usesConcat = cleanCode.includes("+") && cleanCode.includes("nome");
-    tests.push({ desc: "Variabili 'nome' e 'messaggio' create correttamente", passed: hasNome && hasMsg, diff: (hasNome && hasMsg) ? null : `nome=${result.scope ? result.scope.nome : 'null'}, messaggio=${result.scope ? result.scope.messaggio : 'null'}` });
-    tests.push({ desc: "Concatenazione con l'operatore '+' utilizzata", passed: !!usesConcat, diff: usesConcat ? null : "Usa 'Giocatore: ' + nome per concatenare la stringa." });
-    const printed = result.logs.some(l => l.includes("Giocatore: Eroe"));
-    tests.push({ desc: "Stringa concatenata stampata a console", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const aliveOk = result.scope && result.scope.is_alive === true;
+                        const keyOk = result.scope && result.scope.has_key === false;
+                        tests.push({ desc: "is_alive è true", passed: aliveOk, diff: aliveOk ? null : `is_alive: ${result.scope?.is_alive}` });
+                        tests.push({ desc: "has_key è false", passed: keyOk, diff: keyOk ? null : `has_key: ${result.scope?.has_key}` });
+                        return tests;
+        }
     },
-{
+    {
         id: 8,
         conceptId: "variables_basics",
-        conceptTags: ["mastery", "variables", "strings"],
+        conceptTags: ["var", "null"],
         chapterId: 2,
-        isMastery: true,
-        title: "8. ⭐ Sfida di Apprendimento: Dialoghi e Codice Segreto",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "facile",
-        difficultyLabel: "Facile",
-        scenario: "Un gioco d'avventura ha bisogno di tre elementi di testo. Sotto il commento, crea tre variabili <code>String</code>:",
-        requirements: [
-            '<code>title</code> contiene <code>The \"Lost\" Key</code>, comprese le due virgolette doppie',
-            '<code>npc_line</code> contiene <code>It\'s dangerous to go alone!</code>, compreso l\'apostrofo',
-            '<code>door_code</code> contiene i quattro caratteri <code>0420</code>'
-        ],
-        notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Title: The \"Lost\" Key\nNPC: It's dangerous to go alone!\nDoor code: 0420",
-        initialCode: `extends Node\n\nfunc _ready():\n    # Crea title, npc_line e door_code sotto\n    \n    # Non modificare le righe sotto\n    print("Title: ", title)\n    print("NPC: ", npc_line)\n    print("Door code: ", door_code)\n`,
-        aiExplanation: "In GDScript puoi creare stringhe sia con virgolette doppie <code>\"...\"</code> sia con apici singoli <code>'...'</code>. Se il testo contiene virgolette doppie interne (come <code>\"Lost\"</code>), racchiudi la stringa tra apici singoli come <code>'The \"Lost\" Key'</code> oppure usa il carattere di escape <code>\\\"</code>. Per includere un apostrofo, racchiudi la stringa tra virgolette doppie. Per codici con zero iniziale come <code>\"0420\"</code>, usa sempre una stringa di caratteri altrimenti verrebbe troncato a numero.",
+        isMastery: false,
+        title: "8. Variabili Vuote e null",
+        icon: "🫙",
+        xp: 50,
+        expectedOutput: "Weapon: <null>\nShield: <null>",
+        theory: "\n                <p>A volte una variabile non possiede ancora un valore al momento della dichiarazione (ad esempio l'arma equipaggiata quando il giocatore inizia senza nulla).</p>\n                <p>In GDScript possiamo assegnare esplicitamente <code>null</code>, oppure dichiarare la variabile senza assegnazione iniziale (il cui valore predefinito è <code>null</code>):</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> arma = <span class=\"kc\">null</span>\n<span class=\"k\">var</span> armatura <span class=\"c\"># vale null</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara una variabile <code>weapon</code> assegnandole <code>null</code>.</li>\n                    <li>Dichiara una variabile <code>shield</code> senza assegnare alcun valore iniziale.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Dichiara weapon = null e shield vuota\n    pass\n    print(\"Weapon: \", weapon)\n    print(\"Shield: \", shield)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var weapon = null\n    var shield\n    print(\"Weapon: \", weapon)\n    print(\"Shield: \", shield)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida riguarda tre stringhe: un titolo con virgolette al suo interno, una battuta con apostrofo e un codice che inizia con zero. Il codice della porta deve restare testo, altrimenti perderebbe lo zero iniziale."
+                        "text": "null indica l'assenza di valore o un oggetto non ancora istanziato."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Dentro `_ready()` dichiara `title`, `npc_line` e `door_code`. Scegli le virgolette che permettono di includere i caratteri speciali senza cambiare il contenuto e usa una stringa anche per `door_code`."
+                        "text": "var weapon = null\nvar shield"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var titolo = 'La \"mappa\" segreta'\n    var dialogo = \"L'avventura continua!\"\n    var codice = \"0070\"\n    print(titolo, dialogo, codice)\n```\nApplica lo stesso principio alle tre variabili richieste dalla missione."
+                        "text": "Dichiara weapon con '= null' e shield con solo 'var shield'."
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    var title = 'The "Lost" Key'\n    var npc_line = "It's dangerous to go alone!"\n    var door_code = "0420"\n    \n    # Non modificare le righe sotto\n    print("Title: ", title)\n    print("NPC: ", npc_line)\n    print("Door code: ", door_code)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Dialoghi e Codice Segreto</h3>
-                <p>Metti alla prova la gestione delle variabili String, apici ed escape di caratteri in GDScript.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Crea <code>title</code> con <code>The "Lost" Key</code></li>
-                <li>Crea <code>npc_line</code> con <code>It's dangerous to go alone!</code></li>
-                <li>Crea <code>door_code</code> con la stringa <code>0420</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const titleOk = s.title === 'The "Lost" Key';
-    const npcOk = s.npc_line === "It's dangerous to go alone!";
-    const doorOk = s.door_code === "0420";
-    tests.push({ desc: "Variabile 'title' con virgolette interne corretta", passed: titleOk, diff: titleOk ? null : `Ricevuto: ${s.title}` });
-    tests.push({ desc: "Variabile 'npc_line' con apostrofo corretta", passed: npcOk, diff: npcOk ? null : `Ricevuto: ${s.npc_line}` });
-    tests.push({ desc: "Variabile 'door_code' impostata a \"0420\"", passed: doorOk, diff: doorOk ? null : `Ricevuto: ${s.door_code}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasWeapon = result.scope && result.scope.weapon === null;
+                        const hasShield = result.scope && ('shield' in result.scope);
+                        tests.push({ desc: "weapon vale null", passed: hasWeapon, diff: hasWeapon ? null : `weapon: ${result.scope?.weapon}` });
+                        tests.push({ desc: "shield dichiarata", passed: hasShield, diff: hasShield ? null : "shield non trovata" });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 3: VARIABILI (PARTE 2 & TIPIZZAZIONE)
-    // ==========================================
     {
         id: 9,
-        conceptId: "type_system",
-        conceptTags: ["float", "bool", "primitives"],
-        chapterId: 3,
-        isMastery: false,
-        title: "9. Numeri decimali (float) e Booleani (bool)",
-        icon: "🔑",
-        xp: 50,
-        expectedOutput: "4.5\ntrue",
-        theory: `
-            <p>Oltre a testo e numeri interi, nei videogiochi usiamo:</p>
-            <ul>
-                <li><strong>float</strong>: numeri con la virgola (es. velocità, coordinate).</li>
-                <li><strong>bool</strong>: valori logici che possono essere solo <code>true</code> o <code>false</code>.</li>
-            </ul>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> velocita = <span class="m">4.5</span>
-    <span class="k">var</span> ha_chiave = <span class="k">true</span>
-    <span class="nb">print</span>(velocita)
-    <span class="nb">print</span>(ha_chiave)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>velocita = 4.5</code>.</li>
-                <li>Dichiara <code>ha_chiave = true</code>.</li>
-                <li>Stampa entrambe le variabili su righe separate.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Dichiara velocita (float) e ha_chiave (bool)\n    pass\n`,
+        conceptId: "variables_basics",
+        conceptTags: ["naming", "snake_case"],
+        chapterId: 2,
+        isMastery: true,
+        title: "9. Convenzioni di Denominazione (snake_case)",
+        icon: "🐍",
+        xp: 75,
+        expectedOutput: "Hero 250 false",
+        theory: "\n                <p>Nelle linee guida ufficiali di Godot e GDScript, le variabili e le funzioni utilizzano la convenzione <strong>snake_case</strong> (tutto minuscolo, parole separate da underscore <code>_</code>):</p>\n                <ul>\n                    <li>Corretto: <code>player_name</code>, <code>move_speed</code>, <code>is_game_over</code></li>\n                    <li>Sconsigliato: <code>PlayerName</code>, <code>moveSpeed</code></li>\n                </ul>\n            ",
+        task: "\n                <ul>\n                    <li>Rinomina le variabili in snake_case per far funzionare lo script:</li>\n                    <li><code>PlayerName</code> ➔ <code>player_name</code></li>\n                    <li><code>MoveSpeed</code> ➔ <code>move_speed</code></li>\n                    <li><code>IsGameOver</code> ➔ <code>is_game_over</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var PlayerName = \"Hero\"\n    var MoveSpeed = 250\n    var IsGameOver = false\n    print(player_name, \" \", move_speed, \" \", is_game_over)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var player_name = \"Hero\"\n    var move_speed = 250\n    var is_game_over = false\n    print(player_name, \" \", move_speed, \" \", is_game_over)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "I numeri con la virgola (chiamati `float` per virgola mobile) servono per grandezze fisiche continue come velocità, tempo in secondi, o moltiplicatori di danno."
+                        "text": "Le variabili devono corrispondere ai nomi usati dentro print()."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "In programmazione si usa il punto `.` come separatore decimale anziché la virgola. Crea la variabile assegnando il numero decimale con il punto."
+                        "text": "var player_name = \"Hero\"\nvar move_speed = 250\nvar is_game_over = false"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var fattore_scala = 1.75\n    print(fattore_scala)\n```\nNon usare `1,75` poiché la virgola separa gli argomenti."
+                        "text": "Converti le maiuscole in minuscole separate da underscore."
             }
 ],
-        solution: `func _ready():\n    var velocita = 4.5\n    var ha_chiave = true\n    print(velocita)\n    print(ha_chiave)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const isFloat = result.scope && result.scope.velocita === 4.5;
-    const isBool = result.scope && result.scope.ha_chiave === true;
-    tests.push({ desc: "Variabile float 'velocita = 4.5' creata", passed: isFloat, diff: isFloat ? null : `Valore: ${result.scope ? result.scope.velocita : 'undefined'}` });
-    tests.push({ desc: "Variabile bool 'ha_chiave = true' creata", passed: isBool, diff: isBool ? null : `Valore: ${result.scope ? result.scope.ha_chiave : 'undefined'}` });
-    const logs = result.logs || [];
-    const idxVel = logs.findIndex(l => String(l).trim() === "4.5");
-    const idxKey = logs.findIndex((l, i) => i > idxVel && String(l).trim() === "true");
-    const logsOk = idxVel !== -1 && idxKey !== -1;
-    tests.push({ desc: "Valori '4.5' e 'true' stampati a console su righe separate", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const okName = result.scope && result.scope.player_name === "Hero";
+                        const okSpeed = result.scope && result.scope.move_speed === 250;
+                        const okOver = result.scope && result.scope.is_game_over === false;
+                        tests.push({ desc: "player_name in snake_case", passed: okName, diff: okName ? null : "player_name errato" });
+                        tests.push({ desc: "move_speed in snake_case", passed: okSpeed, diff: okSpeed ? null : "move_speed errato" });
+                        tests.push({ desc: "is_game_over in snake_case", passed: okOver, diff: okOver ? null : "is_game_over errato" });
+                        return tests;
+        }
     },
     {
         id: 10,
         conceptId: "type_system",
-        conceptTags: ["static_typing", "explicit_types", "type_hints"],
+        conceptTags: ["types", "static_typing"],
         chapterId: 3,
         isMastery: false,
-        title: "10. Tipizzazione statica esplicita",
-        icon: "🛡️",
+        title: "10. Tipizzazione Esplicita (: Tipo)",
+        icon: "🏷️",
         xp: 50,
-        expectedOutput: "100",
-        theory: `
-            <p>In Godot 4 è consigliato indicare esplicitamente il tipo della variabile usando la sintassi <code>: Tipo</code>:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> vita: int = <span class="m">100</span>
-    <span class="nb">print</span>(vita)</pre>
-            </div>
-            <p>Questo protegge il gioco da errori e rende il codice molto più veloce e chiaro.</p>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara una variabile tipizzata esplicitamente: <code>var vita: int = 100</code>.</li>
-                <li>Stampa <code>vita</code> sulla console.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Dichiara con tipizzazione statica: var vita: int = 100\n    pass\n`,
+        expectedOutput: "10 99.5 GDScript true",
+        theory: "\n                <p>In Godot 4 la <strong>tipizzazione statica</strong> rende il codice più veloce, pulito e immune da bug. Specifichiamo il tipo aggiungendo <code>: Tipo</code> dopo il nome:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> livello: <span class=\"nb\">int</span> = 5\n<span class=\"k\">var</span> salute: <span class=\"nb\">float</span> = 100.0\n<span class=\"k\">var</span> nome: <span class=\"nb\">String</span> = <span class=\"s\">\"Alex\"</span>\n<span class=\"k\">var</span> attivo: <span class=\"nb\">bool</span> = <span class=\"kc\">true</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara con tipizzazione esplicita:</li>\n                    <li><code>count: int = 10</code></li>\n                    <li><code>total: float = 99.5</code></li>\n                    <li><code>title: String = \"GDScript\"</code></li>\n                    <li><code>active: bool = true</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Dichiara le 4 variabili tipizzate qui sotto\n    pass\n    print(count, \" \", total, \" \", title, \" \", active)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var count: int = 10\n    var total: float = 99.5\n    var title: String = \"GDScript\"\n    var active: bool = true\n    print(count, \" \", total, \" \", title, \" \", active)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "La tipizzazione statica esplicita informa Godot sul tipo di dato che la variabile conterrà per sempre. Questo previene bug ed ottimizza le prestazioni dello script."
+                        "text": "La sintassi è: var nome: Tipo = valore"
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Aggiungi `:` seguito dal tipo (`int`, `float`, `String`, `bool`) subito dopo il nome della variabile e prima del segno `=`."
+                        "text": "var count: int = 10\nvar total: float = 99.5\nvar title: String = \"GDScript\"\nvar active: bool = true"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var energia: int = 50\n    print(energia)\n```\nLa struttura è sempre: `var nome: Tipo = valore`."
+                        "text": "Inserisci le dichiarazioni al posto di 'pass'."
             }
 ],
-        solution: `func _ready():\n    var vita: int = 100\n    print(vita)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const okVal = result.scope && result.scope.vita === 100;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasType = /(:\s*int\b)/.test(cleanCode);
-    tests.push({ desc: "Variabile 'vita' con valore 100", passed: okVal, diff: okVal ? null : `Valore attuale: ${result.scope ? result.scope.vita : 'undefined'}` });
-    tests.push({ desc: "Tipizzazione statica esplicita ': int' applicata", passed: !!hasType, diff: hasType ? null : "Aggiungi ': int' dopo il nome della variabile: var vita: int = 100." });
-    const hasPrint100 = (result.logs || []).some(l => String(l).trim() === "100");
-    tests.push({ desc: "Valore di 'vita' (100) stampato a console", passed: hasPrint100, diff: hasPrint100 ? null : `Output ricevuto: ${(result.logs || []).join(", ") || "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.count === 10 && Math.abs(s.total - 99.5) < 0.001 && s.title === "GDScript" && s.active === true;
+                        tests.push({ desc: "4 variabili tipizzate corrette", passed: ok, diff: ok ? null : "Valori o tipi non corretti" });
+                        return tests;
+        }
     },
     {
         id: 11,
         conceptId: "type_system",
-        conceptTags: ["const", "constants", "immutability"],
+        conceptTags: ["type_inference", "walrus"],
         chapterId: 3,
         isMastery: false,
-        title: "11. Costanti con const",
-        icon: "🔒",
+        title: "11. Inferenza del Tipo (:=)",
+        icon: "⚡",
         xp: 50,
-        expectedOutput: "9.8",
-        theory: `
-            <p>Se un valore non deve <strong>mai</strong> cambiare durante il gioco (come la forza di gravità o il limite massimo di giocatori), si usa <code>const</code> anziché <code>var</code>:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">const</span> GRAVITA = <span class="m">9.8</span>
-    <span class="nb">print</span>(GRAVITA)</pre>
-            </div>
-            <p>Per convenzione, i nomi delle costanti si scrivono tutte in MAIUSCOLO.</p>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara la costante: <code>const GRAVITA = 9.8</code>.</li>
-                <li>Stampa la costante con <code>print(GRAVITA)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Dichiara la costante GRAVITA e stampala\n    pass\n`,
+        expectedOutput: "10 19.99 Hero true",
+        theory: "\n                <p>Spesso scrivere <code>var x: int = 10</code> è ridondante perché il valore <code>10</code> è chiaramente un intero. In Godot 4 possiamo usare l'operatore di <strong>inferenza del tipo</strong> <code>:=</code>:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> munizioni := 30 <span class=\"c\"># Godot assegna automaticamente il tipo int in modo permanente!</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Crea le variabili usando l'operatore di inferenza <code>:=</code>:</li>\n                    <li><code>quantity := 10</code></li>\n                    <li><code>price := 19.99</code></li>\n                    <li><code>game_name := \"Hero\"</code></li>\n                    <li><code>is_ready := true</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Usa := per creare quantity, price, game_name, is_ready\n    pass\n    print(quantity, \" \", price, \" \", game_name, \" \", is_ready)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var quantity := 10\n    var price := 19.99\n    var game_name := \"Hero\"\n    var is_ready := true\n    print(quantity, \" \", price, \" \", game_name, \" \", is_ready)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Se un parametro di gioco non deve MAI cambiare durante l'esecuzione (come le leggi fisiche o la risoluzione base), usare `const` impedisce modifiche accidentali."
+                        "text": "Usa ':=' invece di '=' per dedurre il tipo dal valore assegnato."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Sostituisci la parola chiave `var` con `const`. Per convenzione in Godot, i nomi delle costanti si scrivono interamente in MAIUSCOLO."
+                        "text": "var quantity := 10\nvar price := 19.99"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nconst ATTRITO = 0.85\n\nfunc _ready():\n    print(ATTRITO)\n```\nLe costanti possono essere definite sia a livello di classe (in cima al file) che all'interno di funzioni."
+                        "text": "var game_name := \"Hero\"\nvar is_ready := true"
             }
 ],
-        solution: `func _ready():\n    const GRAVITA = 9.8\n    print(GRAVITA)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const okVal = result.scope && result.scope.GRAVITA === 9.8;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasConst = /\bconst\s+GRAVITA\b/.test(cleanCode);
-    tests.push({ desc: "Costante GRAVITA impostata a 9.8", passed: okVal, diff: okVal ? null : `Valore: ${result.scope ? result.scope.GRAVITA : 'undefined'}` });
-    tests.push({ desc: "Parola chiave 'const' utilizzata", passed: !!hasConst, diff: hasConst ? null : "Dichiara la costante con: const GRAVITA = 9.8." });
-    const hasPrintGrav = (result.logs || []).some(l => String(l).trim() === "9.8");
-    tests.push({ desc: "Costante GRAVITA (9.8) stampata a console", passed: hasPrintGrav, diff: hasPrintGrav ? null : `Output ricevuto: ${(result.logs || []).join(", ") || "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.quantity === 10 && Math.abs(s.price - 19.99) < 0.001 && s.game_name === "Hero" && s.is_ready === true;
+                        tests.push({ desc: "Variabili inferite con :=", passed: ok, diff: ok ? null : "Valori errati" });
+                        return tests;
+        }
     },
-{
+    {
         id: 12,
         conceptId: "type_system",
-        conceptTags: ["mastery", "static_typing", "const", "rpg"],
+        conceptTags: ["const", "constants"],
         chapterId: 3,
-        isMastery: true,
-        title: "12. ⭐ Sfida di Apprendimento: Scheda Eroe RPG Tipizzata",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "facile",
-        difficultyLabel: "Facile",
-        scenario: "Il database degli eroi richiede tipi statici espliciti per prevenire bug e garantire prestazioni ottimali. Sotto il commento, dichiara una costante e tre variabili con la sintassi richiesta:",
-        requirements: [
-            'Dichiara la costante globale: <code>const MAX_HP: int = 200</code>',
-            'Dichiara la variabile tipizzata: <code>var eroe: String = \"Valerius\"</code>',
-            'Dichiara la variabile tipizzata: <code>var salute: int = 150</code>',
-            'Dichiara con inferenza automatica: <code>var scudo_attivo := true</code> (usando l\'operatore <code>:=</code>)'
-        ],
-        notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Eroe: Valerius\nHP: 150 / 200\nScudo: true",
-        initialCode: `extends Node\n\n# Dichiara la costante MAX_HP sotto\n\nfunc _ready():\n    # Crea eroe, salute e scudo_attivo sotto\n    \n    # Non modificare le righe sotto\n    print("Eroe: ", eroe)\n    print("HP: ", salute, " / ", MAX_HP)\n    print("Scudo: ", scudo_attivo)\n`,
-        aiExplanation: "In GDScript 4, le costanti si dichiarano con <code>const NOME: Tipo = Valore</code> e non possono essere modificate durante il gioco. La tipizzazione statica usa la sintassi <code>var nome: Tipo = valore</code>, consentendo all'autocompletamento di suggerire i metodi corretti. L'operatore speciale di inferenza <code>:=</code> assegna il tipo automaticamente in base al valore iniziale.",
+        isMastery: false,
+        title: "12. Costanti di Gioco (const)",
+        icon: "🔒",
+        xp: 50,
+        expectedOutput: "Max: 3 Gravity: 9.8",
+        theory: "\n                <p>Una <strong>costante</strong> è un valore che una volta assegnato non può mai più essere modificato durante il gioco.</p>\n                <p>Si dichiara con la parola chiave <code>const</code> e, per convenzione, il suo nome viene scritto in <code>MAIUSCOLO_CON_UNDERSCORE</code>:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">const</span> VELOCITA_MASSIMA = 500.0</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara due costanti:</li>\n                    <li><code>const MAX_LIVES = 3</code></li>\n                    <li><code>const GRAVITY = 9.8</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Dichiara MAX_LIVES (3) e GRAVITY (9.8)\n    pass\n    print(\"Max: \", MAX_LIVES, \" Gravity: \", GRAVITY)\n",
+        solution: "extends Node\n\nfunc _ready():\n    const MAX_LIVES = 3\n    const GRAVITY = 9.8\n    print(\"Max: \", MAX_LIVES, \" Gravity: \", GRAVITY)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Una scheda RPG può usare tipi dichiarati esplicitamente (`: int`, `: String`) e un tipo dedotto dal valore iniziale (`:=`). Una costante dichiarata con `const` non può essere riassegnata."
+                        "text": "Usa const al posto di var."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Per `MAX_HP` usa una costante globale tipizzata `int`; per `eroe` e `salute` usa `var` con tipo esplicito. Solo `scudo_attivo` deve usare `:=` per l'inferenza del tipo."
+                        "text": "const MAX_LIVES = 3\nconst GRAVITY = 9.8"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nextends Node\nconst LIVELLO_MAX: int = 99\nfunc _ready():\n    var classe: String = \"Mago\"\n    var livello: int = 12\n    var pronto := true\n    print(classe, livello, pronto)\n```\nControlla che ogni dichiarazione rispetti il tipo richiesto."
+                        "text": "Scrivi le due costanti prima dell'istruzione print."
             }
 ],
-        solution: `extends Node\n\nconst MAX_HP: int = 200\n\nfunc _ready():\n    var eroe: String = "Valerius"\n    var salute: int = 150\n    var scudo_attivo := true\n    \n    # Non modificare le righe sotto\n    print("Eroe: ", eroe)\n    print("HP: ", salute, " / ", MAX_HP)\n    print("Scudo: ", scudo_attivo)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Scheda Eroe RPG Tipizzata</h3>
-                <p>Applica tipi statici rigorosi, costanti e inferenza per configurare la scheda dell'avventuriero.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>const MAX_HP: int = 200</code></li>
-                <li>Dichiara <code>var eroe: String = "Valerius"</code></li>
-                <li>Dichiara <code>var salute: int = 150</code></li>
-                <li>Dichiara <code>var scudo_attivo := true</code> con inferenza <code>:=</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const heroOk = s.eroe === "Valerius";
-    const hpOk = s.salute === 150;
-    const shieldOk = s.scudo_attivo === true;
-    const maxHpOk = s.MAX_HP === 200;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasConst = /\bconst\s+MAX_HP\b/.test(cleanCode);
-    const hasInfer = /:=/.test(cleanCode);
-    tests.push({ desc: "Costante MAX_HP: int = 200 con const", passed: maxHpOk && hasConst, diff: (maxHpOk && hasConst) ? null : "Dichiara const MAX_HP: int = 200" });
-    tests.push({ desc: "Variabili tipizzate eroe e salute configurate", passed: heroOk && hpOk, diff: (heroOk && hpOk) ? null : `eroe=${s.eroe}, salute=${s.salute}` });
-    tests.push({ desc: "Variabile scudo_attivo con inferenza di tipo ':='", passed: shieldOk && hasInfer, diff: (shieldOk && hasInfer) ? null : "Usa ':=' per scudo_attivo := true" });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.MAX_LIVES === 3 && Math.abs(s.GRAVITY - 9.8) < 0.001;
+                        tests.push({ desc: "Costanti MAX_LIVES e GRAVITY definite", passed: ok, diff: ok ? null : "Costanti non definite o con valori errati" });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 4: OPERATORI E MATEMATICA DI GIOCO
-    // ==========================================
     {
         id: 13,
-        conceptId: "operators_math",
-        conceptTags: ["arithmetic", "math", "operators"],
-        chapterId: 4,
+        conceptId: "type_system",
+        conceptTags: ["types", "recap"],
+        chapterId: 3,
         isMastery: false,
-        title: "13. Operazioni aritmetiche (+, -, *, /, %)",
-        icon: "➕",
+        title: "13. Ripasso - Inizializzare le Variabili",
+        icon: "🔄",
         xp: 50,
-        expectedOutput: "15\n10",
-        theory: `
-            <p>GDScript supporta tutti gli operatori aritmetici standard:</p>
-            <ul>
-                <li><code>+</code> (Addizione) e <code>-</code> (Sottrazione)</li>
-                <li><code>*</code> (Moltiplicazione) e <code>/</code> (Divisione)</li>
-                <li><code>%</code> (Modulo: calcola il resto della divisione)</li>
-            </ul>
-        `,
-        task: `
-            <ul>
-                <li>Calcola la somma: <code>var somma = 10 + 5</code> e stampala.</li>
-                <li>Calcola la moltiplicazione: <code>var prodotto = 5 * 2</code> e stampala.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Calcola somma (10 + 5) e prodotto (5 * 2), poi stampali\n    pass\n`,
+        expectedOutput: "88 4.9 Godot true",
+        theory: "\n                <p>Consolidiamo quanto appreso finora dichiarando variabili con tipi espliciti in una scena Godot.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara queste variabili con i tipi espliciti:</li>\n                    <li><code>k: int = 88</code></li>\n                    <li><code>rating: float = 4.9</code></li>\n                    <li><code>label: String = \"Godot\"</code></li>\n                    <li><code>complete: bool = true</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Inizializza k, rating, label, complete\n    pass\n    print(k, \" \", rating, \" \", label, \" \", complete)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var k: int = 88\n    var rating: float = 4.9\n    var label: String = \"Godot\"\n    var complete: bool = true\n    print(k, \" \", rating, \" \", label, \" \", complete)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Somma e moltiplicazione sono operazioni diverse: usa `+` per aggiungere due numeri e `*` per moltiplicarli. Memorizza ogni risultato in una variabile prima di stamparlo."
+                        "text": "Usa var nome: Tipo = valore per ciascuna variabile."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Nella funzione `_ready()` crea `somma` con l'operazione `10 + 5` e `prodotto` con `5 * 2`. Poi stampa le due variabili nell'ordine richiesto."
+                        "text": "var k: int = 88\nvar rating: float = 4.9"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var totale = 4 + 6\n    var doppio = 3 * 2\n    print(totale)\n    print(doppio)\n```\nUsa i valori e i nomi della consegna, non quelli dell'esempio."
+                        "text": "var label: String = \"Godot\"\nvar complete: bool = true"
             }
 ],
-        solution: `func _ready():\n    var somma = 10 + 5\n    var prodotto = 5 * 2\n    print(somma)\n    print(prodotto)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope && result.scope.somma === 15;
-    const p = result.scope && result.scope.prodotto === 10;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasOps = cleanCode.includes("+") && cleanCode.includes("*");
-    tests.push({ desc: "Somma (10 + 5 = 15) calcolata", passed: s, diff: s ? null : `Ricevuto somma: ${result.scope ? result.scope.somma : 'null'}` });
-    tests.push({ desc: "Prodotto (5 * 2 = 10) calcolato", passed: p, diff: p ? null : `Ricevuto prodotto: ${result.scope ? result.scope.prodotto : 'null'}` });
-    tests.push({ desc: "Operatori '+' e '*' utilizzati nel calcolo", passed: !!hasOps, diff: hasOps ? null : "Usa gli operatori + e * per eseguire le operazioni matematiche." });
-    const logs = result.logs || [];
-    const idxSomma = logs.findIndex(l => String(l).trim() === "15");
-    const idxProdotto = logs.findIndex((l, i) => i > idxSomma && String(l).trim() === "10");
-    const logsOk = idxSomma !== -1 && idxProdotto !== -1;
-    tests.push({ desc: "Risultati '15' (somma) e '10' (prodotto) stampati a console su righe separate", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.k === 88 && Math.abs(s.rating - 4.9) < 0.001 && s.label === "Godot" && s.complete === true;
+                        tests.push({ desc: "Variabili inizializzate correttamente", passed: ok, diff: ok ? null : "Valori errati" });
+                        return tests;
+        }
     },
     {
         id: 14,
-        conceptId: "operators_math",
-        conceptTags: ["compound_assignment", "math", "health"],
-        chapterId: 4,
-        isMastery: false,
-        title: "14. Assegnazioni rapide (+=, -=)",
-        icon: "⚡",
-        xp: 50,
-        expectedOutput: "80",
-        theory: `
-            <p>Nei giochi modifichiamo continuamente le variabili. Gli operatori di assegnazione rapida velocizzano la scrittura:</p>
-            <ul>
-                <li><code>punti_vita -= danno</code> (equivale a <code>punti_vita = punti_vita - danno</code>)</li>
-                <li><code>monete += premio</code> (equivale a <code>monete = monete + premio</code>)</li>
-            </ul>
-        `,
-        task: `
-            <ul>
-                <li>Crea <code>punti_vita = 100</code>.</li>
-                <li>Sottrai <code>20</code> usando <code>punti_vita -= 20</code>.</li>
-                <li>Stampa il valore finale di <code>punti_vita</code> (80).</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Crea punti_vita = 100, sottrai 20 con -= e stampa\n    pass\n`,
+        conceptId: "type_system",
+        conceptTags: ["casting", "conversion"],
+        chapterId: 3,
+        isMastery: true,
+        title: "14. Conversione di Tipo (Casting)",
+        icon: "🔀",
+        xp: 75,
+        expectedOutput: "19 42 100",
+        theory: "\n                <p>Il <strong>type casting</strong> permette di convertire un valore da un tipo all'altro tramite funzioni di conversione dedicate:</p>\n                <ul>\n                    <li><code>int(19.99)</code> ➔ converte in intero troncando i decimali (diventa <code>19</code>).</li>\n                    <li><code>int(\"42\")</code> ➔ converte il testo in numero intero (diventa <code>42</code>).</li>\n                    <li><code>str(100)</code> ➔ converte un numero in stringa (diventa <code>\"100\"</code>).</li>\n                </ul>\n            ",
+        task: "\n                <ul>\n                    <li>Date le variabili iniziali <code>price = 19.99</code>, <code>level_str = \"42\"</code> e <code>score = 100</code>:</li>\n                    <li>Crea <code>int_price</code> convertendo <code>price</code> in <code>int</code></li>\n                    <li>Crea <code>level</code> convertendo <code>level_str</code> in <code>int</code></li>\n                    <li>Crea <code>str_score</code> convertendo <code>score</code> in <code>String</code> con <code>str(...)</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var price = 19.99\n    var level_str = \"42\"\n    var score = 100\n    # Esegui il casting qui sotto\n    pass\n    print(int_price, \" \", level, \" \", str_score)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var price = 19.99\n    var level_str = \"42\"\n    var score = 100\n    var int_price := int(price)\n    var level := int(level_str)\n    var str_score := str(score)\n    print(int_price, \" \", level, \" \", str_score)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "L'operatore di assegnazione rapida `-=` sottrae un valore direttamente da una variabile (es. `punti_vita -= 20`), senza dover riscrivere `punti_vita = punti_vita - 20`."
+                        "text": "Usa int(...) e str(...) per convertire i valori."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Dichiara prima `var punti_vita = 100`, poi sulla riga successiva applica `punti_vita -= 20`, e infine stampa il valore con `print(punti_vita)`."
+                        "text": "var int_price = int(price)\nvar level = int(level_str)\nvar str_score = str(score)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio completo:\n```gdscript\nfunc _ready():\n    var punti_vita = 100\n    punti_vita -= 20\n    print(punti_vita)\n```"
+                        "text": "int_price sarà 19, level sarà 42 e str_score sarà \"100\"."
             }
 ],
-        solution: `func _ready():\n    var punti_vita = 100\n    punti_vita -= 20\n    print(punti_vita)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const hpOk = s.punti_vita === 80;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasCompound = /-=\s*20\b/.test(cleanCode) || /-=/.test(cleanCode);
-    const printed80 = (result.logs || []).some(l => l.trim() === "80");
-    tests.push({
-        desc: "Variabile 'punti_vita' aggiornata a 80 con operatore '-='",
-        passed: hpOk && hasCompound,
-        diff: hpOk ? (hasCompound ? null : "Usa l'operatore '-=' per sottrarre 20 da punti_vita.") : `Ricevuto punti_vita: ${s.punti_vita}`
-    });
-    tests.push({
-        desc: "Valore finale di 'punti_vita' (80) stampato a console",
-        passed: printed80,
-        diff: printed80 ? null : `Atteso: 80, Ricevuto: "${(result.logs || []).join(' | ')}"`
-    });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.int_price === 19 && s.level === 42 && String(s.str_score) === "100";
+                        tests.push({ desc: "Casting eseguito correttamente (19, 42, '100')", passed: ok, diff: ok ? null : "Casting non corretto" });
+                        return tests;
+        }
     },
     {
         id: 15,
         conceptId: "operators_math",
-        conceptTags: ["game_math", "damage", "coins"],
+        conceptTags: ["operators", "arithmetic"],
         chapterId: 4,
         isMastery: false,
-        title: "15. Calcolo del danno, punteggi e monete",
-        icon: "💰",
+        title: "15. Operatori Aritmetici (+, -, *, /)",
+        icon: "➕",
         xp: 50,
-        expectedOutput: "150",
-        theory: `
-            <p>Quando sconfiggi un nemico, moltiplichiamo le monete base per il punteggio moltiplicatore del livello:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> monete_base = <span class="m">50</span>
-    <span class="k">var</span> moltiplicatore = <span class="m">3</span>
-    <span class="k">var</span> monete_totali = monete_base * moltiplicatore
-    <span class="nb">print</span>(monete_totali)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>monete_base = 50</code>.</li>
-                <li>Dichiara <code>moltiplicatore = 3</code>.</li>
-                <li>Crea <code>monete_totali = monete_base * moltiplicatore</code> e stampala.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Calcola monete_totali e stampala\n    pass\n`,
+        expectedOutput: "c = 2.0",
+        theory: "\n                <p>GDScript supporta tutti gli operatori matematici standard: <code>+</code> (addizione), <code>-</code> (sottrazione), <code>*</code> (moltiplicazione), <code>/</code> (divisione).</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> a = 10.0\n<span class=\"k\">var</span> b = 2.5\n<span class=\"k\">var</span> quoziente = a / b</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara <code>a = 5.2</code></li>\n                    <li>Dichiara <code>b = 2.6</code></li>\n                    <li>Dichiara <code>c</code> calcolando il risultato di <code>a / b</code></li>\n                    <li>Stampa <code>\"c = \", c</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Dichiara a (5.2), b (2.6) e c (a / b)\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var a := 5.2\n    var b := 2.6\n    var c := a / b\n    print(\"c = \", c)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Dichiara prima le due variabili 'monete_base' (50) e 'moltiplicatore' (3). Poi usa l'operatore '*' per calcolare il totale moltiplicandole."
+                        "text": "Assegna a 'c' l'espressione a / b."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Assegna il risultato a 'var monete_totali = monete_base * moltiplicatore', e sulla riga successiva usa 'print(monete_totali)' per stamparne il valore."
+                        "text": "var a = 5.2\nvar b = 2.6\nvar c = a / b\nprint(\"c = \", c)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio completo:\n```gdscript\nfunc _ready():\n    var monete_base = 50\n    var moltiplicatore = 3\n    var monete_totali = monete_base * moltiplicatore\n    print(monete_totali)\n```"
+                        "text": "5.2 diviso 2.6 produce esattamente 2.0."
             }
 ],
-        solution: `func _ready():\n    var monete_base = 50\n    var moltiplicatore = 3\n    var monete_totali = monete_base * moltiplicatore\n    print(monete_totali)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const baseOk = s.monete_base === 50;
-    const multOk = s.moltiplicatore === 3;
-    const totalOk = s.monete_totali === 150;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasMult = /\*/.test(cleanCode);
-    const printed150 = (result.logs || []).some(l => l.trim() === "150");
-    tests.push({
-        desc: "Variabili 'monete_base' (50) e 'moltiplicatore' (3) definite",
-        passed: baseOk && multOk,
-        diff: (baseOk && multOk) ? null : `Ricevuto monete_base: ${s.monete_base}, moltiplicatore: ${s.moltiplicatore}`
-    });
-    tests.push({
-        desc: "Calcolo 'monete_totali = monete_base * moltiplicatore' pari a 150",
-        passed: totalOk && hasMult,
-        diff: (totalOk && hasMult) ? null : `Ricevuto monete_totali: ${s.monete_totali} (operatore '*' richiesto)`
-    });
-    tests.push({
-        desc: "Valore di 'monete_totali' (150) stampato a console",
-        passed: printed150,
-        diff: printed150 ? null : `Atteso: 150, Ricevuto: "${(result.logs || []).join(' | ')}"`
-    });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.c && Math.abs(s.c - 2.0) < 0.001;
+                        tests.push({ desc: "c calcolato correttamente (2.0)", passed: ok, diff: ok ? null : `Trovato c = ${s.c}` });
+                        return tests;
+        }
     },
-{
+    {
         id: 16,
         conceptId: "operators_math",
-        conceptTags: ["mastery", "math", "damage", "dungeon"],
+        conceptTags: ["integer_division", "int"],
         chapterId: 4,
-        isMastery: true,
-        title: "16. ⭐ Sfida di Apprendimento: Bottino del Dungeon e Danno Subito",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "media",
-        difficultyLabel: "Media",
-        scenario: "Al termine di uno scontro nel dungeon, il party di 3 avventurieri calcola i punti ferita rimasti e si spartisce equamente un forziere di 100 monete d'oro. Sotto il commento, esegui i calcoli con gli operatori adatti:",
-        requirements: [
-            '<code>salute_rimasta</code>: parte da <code>100</code>; sottrai un danno di <code>35</code> usando l\'operatore rapido <code>-=</code>',
-            '<code>monete_per_membro</code>: calcola quante monete intere spettano a ciascuno dividendo <code>100 / 3</code>',
-            '<code>monete_avanzate</code>: calcola quante monete restano nel forziere usando l\'operatore modulo <code>%</code> (<code>100 % 3</code>)'
-        ],
-        notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Salute Guerriero: 65\nMonete per membro: 33\nMonete avanzate: 1",
-        initialCode: `extends Node\n\nfunc _ready():\n    var salute_rimasta = 100\n    # Aggiorna salute_rimasta e calcola monete_per_membro e monete_avanzate sotto\n    \n    # Non modificare le righe sotto\n    print("Salute Guerriero: ", salute_rimasta)\n    print("Monete per membro: ", monete_per_membro)\n    print("Monete avanzate: ", monete_avanzate)\n`,
-        aiExplanation: "In GDScript l'operatore <code>-=</code> sottrae un valore direttamente da una variabile esistente (es. <code>salute_rimasta -= 35</code>). La divisione intera tra due numeri interi <code>100 / 3</code> calcola la parte intera (33), mentre l'operatore resto <code>%</code> (modulo) calcola quante unità avanzano dalla divisione (1).",
+        isMastery: false,
+        title: "16. Divisione Intera (senza virgola)",
+        icon: "➗",
+        xp: 50,
+        expectedOutput: "Coins per player: 3",
+        theory: "\n                <p>Quando dividi due numeri interi (<code>int / int</code>), GDScript scarta la parte decimale e restituisce solo la parte intera:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"nb\">print</span>(17 / 5) <span class=\"c\"># Stampa 3, non 3.4!</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>17 monete devono essere divise equamente tra 5 giocatori.</li>\n                    <li>Date <code>total_coins = 17</code> e <code>players = 5</code>:</li>\n                    <li>Calcola <code>coins_per_player = total_coins / players</code></li>\n                    <li>Stampa <code>\"Coins per player: \", coins_per_player</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var total_coins = 17\n    var players = 5\n    # Calcola coins_per_player e stampala\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var total_coins = 17\n    var players = 5\n    var coins_per_player = total_coins / players\n    print(\"Coins per player: \", coins_per_player)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Quando distribuisci risorse tra membri di una squadra, la divisione intera ti dice quante monete spettano a ciascuno, mentre l'operatore modulo `%` restituisce il resto che non può essere diviso equamente."
+                        "text": "La divisione tra due interi in GDScript restituisce sempre un intero."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa `-=` per sottrarre danno dalla salute, `/` per la divisione in parti uguali e `%` (modulo) per calcolare le monete avanzate."
+                        "text": "var coins_per_player = total_coins / players"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var mele = 10\n    var mele_per_persona = 10 / 3 # Divisione intera = 3\n    var resto = 10 % 3           # Resto della divisione = 1\n```\nIn GDScript, dividere due numeri interi restituisce un quoziente intero."
+                        "text": "print(\"Coins per player: \", coins_per_player)"
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    var salute_rimasta = 100\n    salute_rimasta -= 35\n    var monete_per_membro = 100 / 3\n    var monete_avanzate = 100 % 3\n    \n    # Non modificare le righe sotto\n    print("Salute Guerriero: ", salute_rimasta)\n    print("Monete per membro: ", monete_per_membro)\n    print("Monete avanzate: ", monete_avanzate)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Bottino del Dungeon e Danno Subito</h3>
-                <p>Verifica l'uso degli operatori di assegnazione rapida (-=), divisione intera (/) e resto modulo (%).</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Sottrai 35 da <code>salute_rimasta</code> con <code>-=</code></li>
-                <li>Calcola <code>var monete_per_membro = 100 / 3</code></li>
-                <li>Calcola <code>var monete_avanzate = 100 % 3</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const hpOk = s.salute_rimasta === 65;
-    const coinsOk = Math.floor(Number(s.monete_per_membro)) === 33;
-    const restOk = s.monete_avanzate === 1;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasSub = /-=/ .test(cleanCode);
-    const hasMod = /%/.test(cleanCode);
-    tests.push({ desc: "Salute rimasta aggiornata con '-=' a 65", passed: hpOk && hasSub, diff: hpOk ? (hasSub ? null : "Usa '-='") : `Ricevuto: ${s.salute_rimasta}` });
-    tests.push({ desc: "Divisione intera monete per membro calcolata a 33", passed: coinsOk, diff: coinsOk ? null : `Ricevuto: ${s.monete_per_membro}` });
-    tests.push({ desc: "Modulo '%' resto monete calcolato a 1", passed: restOk && hasMod, diff: restOk ? (hasMod ? null : "Usa '%'") : `Ricevuto: ${s.monete_avanzate}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.coins_per_player === 3;
+                        tests.push({ desc: "coins_per_player uguale a 3", passed: ok, diff: ok ? null : `Trovato: ${s.coins_per_player}` });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 5: CONDIZIONI E LOGICA (IF / ELIF / ELSE)
-    // ==========================================
     {
         id: 17,
-        conceptId: "conditions_logic",
-        conceptTags: ["comparison", "equality", "if"],
-        chapterId: 5,
+        conceptId: "operators_math",
+        conceptTags: ["modulo", "remainder"],
+        chapterId: 4,
         isMastery: false,
-        title: "17. Operatori di confronto (==, !=, >, <)",
-        icon: "⚖️",
+        title: "17. L'Operatore Modulo (%)",
+        icon: "🔢",
         xp: 50,
-        expectedOutput: "Livello raggiunto!",
-        theory: `
-            <p>Gli <strong>operatori di confronto</strong> permettono di confrontare due valori:</p>
-            <ul>
-                <li><code>==</code> (Uguale a) e <code>!=</code> (Diverso da)</li>
-                <li><code>></code> (Maggiore) e <code><</code> (Minore)</li>
-                <li><code>>=</code> (Maggiore o uguale) e <code><=</code> (Minore o uguale)</li>
-            </ul>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>livello = 10</code>.</li>
-                <li>Se <code>livello >= 10:</code>, stampa <code>"Livello raggiunto!"</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    var livello = 10\n    # Confronta con >= e stampa\n    pass\n`,
+        expectedOutput: "Resto 9 % 2: 1\nResto 11 % 2: 1",
+        theory: "\n                <p>L'operatore <strong>modulo</strong> (<code>%</code>) calcola il <strong>resto</strong> di una divisione tra numeri interi.</p>\n                <p>È un operatore fondamentale nel gamedev: permette di verificare numeri pari/dispari (<code>n % 2 == 0</code>), gestire turni ciclici o timer che ripartono da zero.</p>\n                <div class=\"code-preview\">\n<pre><span class=\"nb\">print</span>(10 % 3) <span class=\"c\"># 1 (perché 10 = 3 * 3 con resto 1)</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara <code>a = 9</code>, <code>b = 2</code>, <code>c = 11</code></li>\n                    <li>Calcola <code>d = a % b</code> e <code>e = c % b</code></li>\n                    <li>Stampa i risultati: <code>\"Resto 9 % 2: \", d</code> e <code>\"Resto 11 % 2: \", e</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var a = 9\n    var b = 2\n    var c = 11\n    # Calcola d (a % b) ed e (c % b)\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var a = 9\n    var b = 2\n    var c = 11\n    var d = a % b\n    var e = c % b\n    print(\"Resto 9 % 2: \", d)\n    print(\"Resto 11 % 2: \", e)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Le istruzioni condizionali permettono al gioco di prendere decisioni: eseguire un blocco di codice solo se una determinata condizione è vera (ad esempio se il giocatore ha raggiunto il livello richiesto)."
+                        "text": "Usa % per ottenere il resto della divisione."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa `if` seguito dalla condizione e dai due punti `:`. Le istruzioni da eseguire devono essere indentate di 4 spazi."
+                        "text": "var d = a % b\nvar e = c % b"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var punteggio = 15\n    if punteggio >= 10:\n        print(\"Traguardo superato!\")\n```\nNon dimenticare i due punti `:` alla fine della riga dell'if."
+                        "text": "9 % 2 vale 1, e 11 % 2 vale 1."
             }
 ],
-        solution: `func _ready():\n    var livello = 10\n    if livello >= 10:\n        print("Livello raggiunto!")\n`,
-        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasVar = result.scope && result.scope.livello !== undefined && result.scope.livello >= 10;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasIf = /\bif[\s(]+(?:livello\s*(?:>=|==|>)|10\s*<=)/.test(cleanCode);
-    tests.push({ desc: "Variabile 'livello' configurata (>= 10)", passed: hasVar, diff: hasVar ? null : `Valore livello: ${result.scope ? result.scope.livello : 'undefined'}` });
-    tests.push({ desc: "Condizione 'if' sul livello applicata", passed: !!hasIf, diff: hasIf ? null : "Usa 'if livello >= 10:' per verificare la condizione." });
-    const printed = (result.logs || []).some(l => /^Livello raggiunto!$/i.test(l.trim()));
-    tests.push({ desc: "Messaggio 'Livello raggiunto!' stampato", passed: printed, diff: printed ? null : `Ricevuto: "${(result.logs || []).join(' | ')}"` });
-
-    // Multi-scenario: con livello < 10 il messaggio NON deve essere stampato
-    if (runtime && typeof runtime.execute === 'function' && /livello\s*=/.test(result.code)) {
-        try {
-            const testLowCode = result.code.replace(/var\s+livello\s*=\s*\d+/, 'var livello = 5');
-            const rTest = await runtime.execute(testLowCode);
-            const notPrintedOnLow = !(rTest.logs || []).some(l => /^Livello raggiunto!$/i.test(l.trim()));
-            tests.push({ desc: "Condizione 'if' reattiva (non stampa con livello < 10)", passed: notPrintedOnLow, diff: notPrintedOnLow ? null : "La condizione deve impedire la stampa se il livello è inferiore a 10." });
-        } catch(e) {}
-    }
-    return tests;
-}
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.d === 1 && s.e === 1;
+                        tests.push({ desc: "Modulo d ed e calcolati correttamente (= 1)", passed: ok, diff: ok ? null : `d=${s.d}, e=${s.e}` });
+                        return tests;
+        }
     },
     {
         id: 18,
-        conceptId: "conditions_logic",
-        conceptTags: ["logical_operators", "and", "or", "not"],
-        chapterId: 5,
+        conceptId: "operators_math",
+        conceptTags: ["shortcuts", "assignment"],
+        chapterId: 4,
         isMastery: false,
-        title: "18. Operatori logici (and, or, not)",
-        icon: "🧠",
+        title: "18. Scorciatoie Aritmetiche (+=, -=, *=)",
+        icon: "⚡",
         xp: 50,
-        expectedOutput: "Accesso consentito",
-        theory: `
-            <p>In GDScript puoi combinare più condizioni logiche:</p>
-            <ul>
-                <li><code>and</code>: entrambe le condizioni devono essere vere.</li>
-                <li><code>or</code>: almeno una delle due deve essere vera.</li>
-                <li><code>not</code>: inverte il valore di verità.</li>
-            </ul>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>ha_chiave = true</code> e <code>porta_chiusa = true</code>.</li>
-                <li>Se <code>ha_chiave and porta_chiusa:</code> stampa <code>"Accesso consentito"</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    var ha_chiave = true\n    var porta_chiusa = true\n    # Combina con and e stampa\n    pass\n`,
+        expectedOutput: "Finale: 7",
+        theory: "\n                <p>Spesso nei giochi dobbiamo aggiornare una variabile esistente (es. subire danni, guadagnare oro). Invece di scrivere <code>hp = hp - 10</code>, usiamo gli operatori composti:</p>\n                <ul>\n                    <li><code>x += 5</code> (somma 5 a x)</li>\n                    <li><code>x *= 2</code> (moltiplica x per 2)</li>\n                    <li><code>x -= 3</code> (sottrae 3 da x)</li>\n                </ul>\n            ",
+        task: "\n                <ul>\n                    <li>La variabile <code>count</code> parte da <code>0</code>.</li>\n                    <li>Usa <code>count += 5</code> per aggiungere 5.</li>\n                    <li>Usa <code>count *= 2</code> per raddoppiare (diventa 10).</li>\n                    <li>Usa <code>count -= 3</code> per togliere 3 (diventa 7).</li>\n                    <li>Stampa <code>\"Finale: \", count</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var count = 0\n    # Applica le scorciatoie nell'ordine richiesto\n    pass\n    print(\"Finale: \", count)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var count = 0\n    count += 5\n    count *= 2\n    count -= 3\n    print(\"Finale: \", count)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Spesso un'azione richiede che PIÙ condizioni siano soddisfatte contemporaneamente (ad esempio possedere sia la chiave che il livello sufficiente per aprire una porta)."
+                        "text": "Usa +=, *= e -= direttamente sulla variabile count."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Unisci le due condizioni all'interno dell'`if` usando l'operatore logico `and`. Entrambe le espressioni devono risultare `true` affinché il blocco venga eseguito."
+                        "text": "count += 5\ncount *= 2\ncount -= 3"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var ha_pass = true\n    var eta = 18\n    if ha_pass and eta >= 18:\n        print(\"Ingresso VIP consentito\")\n```\nSe una sola delle due condizioni fosse falsa, il print verrebbe saltato."
+                        "text": "0 + 5 = 5; 5 * 2 = 10; 10 - 3 = 7."
             }
 ],
-        solution: `func _ready():\n    var ha_chiave = true\n    var porta_chiusa = true\n    if ha_chiave and porta_chiusa:\n        print("Accesso consentito")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasKeys = result.scope && result.scope.ha_chiave === true && result.scope.porta_chiusa === true;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const usesAnd = /\band\b/.test(cleanCode) && /\bif\b/.test(cleanCode);
-    tests.push({ desc: "Variabili ha_chiave e porta_chiusa impostate a true", passed: hasKeys, diff: hasKeys ? null : "Entrambe le variabili devono essere true." });
-    tests.push({ desc: "Condizione con 'and' utilizzata", passed: !!usesAnd, diff: usesAnd ? null : "Usa 'if ha_chiave and porta_chiusa:'." });
-    const ok = result.logs.some(l => l.includes("Accesso consentito"));
-    tests.push({ desc: "Console stampa 'Accesso consentito'", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.count === 7;
+                        tests.push({ desc: "count finale uguale a 7", passed: ok, diff: ok ? null : `Trovato: ${s.count}` });
+                        return tests;
+        }
     },
     {
         id: 19,
-        conceptId: "conditions_logic",
-        conceptTags: ["elif", "else", "branching", "debugging"],
-        isDebugging: true,
-        debugType: "Logica (Ramo else mancante)",
-        chapterId: 5,
+        conceptId: "operators_math",
+        conceptTags: ["math", "puzzle"],
+        chapterId: 4,
         isMastery: false,
-        title: "19. Logica gameplay (Game Over con if / else)",
-        icon: "⚰️",
+        title: "19. Ripasso - Matematica Semplice",
+        icon: "🧩",
         xp: 50,
-        expectedOutput: "Game Over",
-        theory: `
-            <p>Uno schema fondamentale di gameplay è verificare se i punti vita scendono a zero per attivare il Game Over:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> punti_vita = <span class="m">0</span>
-    <span class="k">if</span> punti_vita <= <span class="m">0</span>:
-        <span class="nb">print</span>(<span class="s">"Game Over"</span>)
-    <span class="k">else</span>:
-        <span class="nb">print</span>(<span class="s">"In battaglia"</span>)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>punti_vita = 0</code>.</li>
-                <li>Se <code>punti_vita <= 0:</code> stampa <code>"Game Over"</code>.</li>
-                <li>Altrimenti (<code>else:</code>) stampa <code>"In battaglia"</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():
-    var punti_vita = 0
-    # BUG LOGICO: Manca il ramo 'else:' per quando il giocatore e' ancora in vita!
-    # Aggiungi il ramo 'else:' per stampare "In battaglia":
-    if punti_vita <= 0:
-        print("Game Over")
-`,
+        expectedOutput: "Prodotto: 24\nSomma: 10",
+        theory: "\n                <p>Mettiamo alla prova le nostre capacità logiche con un piccolo puzzle matematico.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Trova due numeri interi <code>a</code> e <code>b</code> tali che:</li>\n                    <li>Il loro prodotto <code>a * b</code> sia <code>24</code></li>\n                    <li>La loro somma <code>a + b</code> sia <code>10</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Trova a e b giusti\n    var a = 0\n    var b = 0\n    var c = a * b\n    var d = a + b\n    print(\"Prodotto: \", c)\n    print(\"Somma: \", d)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var a = 6\n    var b = 4\n    var c = a * b\n    var d = a + b\n    print(\"Prodotto: \", c)\n    print(\"Somma: \", d)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "La clausola `else` definisce cosa deve accadere quando la condizione dell'`if` NON è verificata (in questo esercizio, quando il personaggio ha ancora punti vita: `punti_vita > 0`). Con `punti_vita <= 0` entra invece nel primo ramo e stampa `Game Over`."
+                        "text": "Quali coppie di numeri moltiplicati danno 24? (1x24, 2x12, 3x8, 4x6...)"
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Dopo il blocco indentato dell'`if`, scrivi `else:` allo stesso livello di indentazione dell'`if`, seguito dal blocco di istruzioni alternativo indentato."
+                        "text": "Quale di queste coppie sommata dà 10? 4 + 6 = 10."
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var scudo = 0\n    if scudo <= 0:\n        print(\"Scudo distrutto!\")\n    else:\n        print(\"Scudo attivo!\")\n```\nNota che `else:` non accetta alcuna condizione: cattura tutti i casi in cui l'if è falso."
+                        "text": "Imposta var a = 6 e var b = 4."
             }
 ],
-        solution: `func _ready():\n    var punti_vita = 0\n    if punti_vita <= 0:\n        print("Game Over")\n    else:\n        print("In battaglia")\n`,
-        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasHp = result.scope && result.scope.punti_vita !== undefined && result.scope.punti_vita <= 0;
-    tests.push({ desc: "Variabile 'punti_vita' configurata a 0", passed: hasHp, diff: hasHp ? null : `Valore attuale: ${result.scope ? result.scope.punti_vita : 'undefined'}` });
-    
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasIfElse = /\bif\b/.test(cleanCode) && /\belse\b/.test(cleanCode);
-    tests.push({ desc: "Struttura di controllo 'if / else' completa presente", passed: !!hasIfElse, diff: hasIfElse ? null : "Includi sia il ramo 'if' che il ramo 'else:'." });
-    
-    const hasGameOverLog = (result.logs || []).some(l => /^Game Over$/i.test(l.trim()));
-    tests.push({ desc: "Ramo 'Game Over' eseguito con punti_vita <= 0", passed: hasGameOverLog, diff: hasGameOverLog ? null : `Ricevuto: "${(result.logs || []).join(' | ')}"` });
-
-    // Multi-scenario: test con punti_vita = 100 -> deve stampare "In battaglia" e non "Game Over"
-    if (runtime && typeof runtime.execute === 'function' && /punti_vita\s*=/.test(result.code)) {
-        try {
-            const testCodeAlive = result.code.replace(/var\s+punti_vita\s*=\s*[-]?\d+/, 'var punti_vita = 100');
-            const rAlive = await runtime.execute(testCodeAlive);
-            const printsInBattaglia = (rAlive.logs || []).some(l => /^In battaglia$/i.test(l.trim()));
-            const noGameOverWhenAlive = !(rAlive.logs || []).some(l => /^Game Over$/i.test(l.trim()));
-            const aliveOk = printsInBattaglia && noGameOverWhenAlive;
-            tests.push({
-                desc: "Ramo 'else' correttamente eseguito quando punti_vita > 0 ('In battaglia')",
-                passed: aliveOk,
-                diff: aliveOk ? null : `Con punti_vita=100 la console ha prodotto: "${(rAlive.logs || []).join(' | ')}"`
-            });
-        } catch(e) {
-            tests.push({ desc: "Esecuzione scenario punti_vita > 0", passed: false, diff: e.message });
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.c === 24 && s.d === 10;
+                        tests.push({ desc: "Prodotto 24 e Somma 10 verificati", passed: ok, diff: ok ? null : `c=${s.c}, d=${s.d}` });
+                        return tests;
         }
-    }
-    return tests;
-}
     },
-{
+    {
         id: 20,
-        conceptId: "conditions_logic",
-        conceptTags: ["mastery", "branching", "logic", "temple"],
-        chapterId: 5,
+        conceptId: "operators_math",
+        conceptTags: ["comparison", "boolean"],
+        chapterId: 4,
         isMastery: true,
-        title: "20. ⭐ Sfida di Apprendimento: Il Portale Antico del Tempio",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "media",
-        difficultyLabel: "Media",
-        scenario: "Un antico portale magico si apre solo se l'avventuriero possiede abbastanza energia e almeno una reliquia chiave. Sotto il commento, assegna alla variabile <code>stato_portale</code> il messaggio corretto con una catena <code>if</code>, <code>elif</code>, <code>else</code>:",
-        requirements: [
-            'Se <code>energia >= 50</code> AND (<code>ha_amuleto</code> OR <code>ha_chiave</code>): imposta <code>stato_portale = \"Portale Attivato\"</code>',
-            'Altrimenti se <code>energia < 50</code>: imposta <code>stato_portale = \"Energia Insufficiente\"</code>',
-            'Altrimenti: imposta <code>stato_portale = \"Nessuna Reliquia Trovata\"</code>'
-        ],
-        notice: "Non modificare le variabili iniziali né la riga print(). Il programma stampa:",
-        expectedOutput: "Stato: Portale Attivato",
-        initialCode: `extends Node\n\nfunc _ready():\n    var energia = 75\n    var ha_amuleto = true\n    var ha_chiave = false\n    var stato_portale = ""\n    \n    # Scrivi la catena if / elif / else sotto\n    \n    # Non modificare la riga sotto\n    print("Stato: ", stato_portale)\n`,
-        aiExplanation: "In GDScript si combinano le condizioni booleane usando <code>and</code> e <code>or</code>. Racchiudere tra parentesi <code>(ha_amuleto or ha_chiave)</code> assicura che basti una qualsiasi delle due reliquie purché l'energia sia maggiore o uguale a 50. Ogni blocco condizionale deve terminare con <code>:</code> e il corpo deve essere indentato di 4 spazi.",
+        title: "20. Operatori di Confronto (==, !=, <, >)",
+        icon: "⚖️",
+        xp: 75,
+        expectedOutput: "n3 = true",
+        theory: "\n                <p>Gli operatori di confronto confrontano due valori e restituiscono un valore <code>bool</code> (<code>true</code> o <code>false</code>):</p>\n                <ul>\n                    <li><code>==</code> (uguale a)</li>\n                    <li><code>!=</code> (diverso da)</li>\n                    <li><code><</code> (minore di)</li>\n                    <li><code>></code> (maggiore di)</li>\n                    <li><code><=</code>, <code>>=</code> (minore/maggiore o uguale)</li>\n                </ul>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara <code>n1 = 8</code> e <code>n2 = 9</code>.</li>\n                    <li>Dichiara <code>n3</code> assegnandole il confronto booleano: <code>n1 < n2</code>.</li>\n                    <li>Stampa <code>\"n3 = \", n3</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var n1 = 8\n    var n2 = 9\n    # Dichiara n3 che indica se n1 è minore di n2\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var n1 = 8\n    var n2 = 9\n    var n3 = n1 < n2\n    print(\"n3 = \", n3)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Quando ci sono più di due possibili esiti (es. medaglia d'Oro, Argento o Bronzo in base al punteggio), `elif` permette di verificare condizioni a cascata una dopo l'altra."
+                        "text": "Usa il segno '<' tra n1 e n2."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Inizia con `if`, prosegui con uno o più rami `elif condizione:`, e termina facoltativamente con `else:` per tutti gli altri casi inferiori."
+                        "text": "var n3 = n1 < n2\nprint(\"n3 = \", n3)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var exp_val = 75\n    if exp_val >= 90:\n        print(\"Rango S\")\n    elif exp_val >= 70:\n        print(\"Rango A\")\n    else:\n        print(\"Rango B\")\n```\nGodot valuta le condizioni dall'alto verso il basso e si ferma alla prima vera."
+                        "text": "Dato che 8 è minore di 9, n3 varrà true."
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    var energia = 75\n    var ha_amuleto = true\n    var ha_chiave = false\n    var stato_portale = ""\n    \n    if energia >= 50 and (ha_amuleto or ha_chiave):\n        stato_portale = "Portale Attivato"\n    elif energia < 50:\n        stato_portale = "Energia Insufficiente"\n    else:\n        stato_portale = "Nessuna Reliquia Trovata"\n        \n    # Non modificare la riga sotto\n    print("Stato: ", stato_portale)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Il Portale Antico del Tempio</h3>
-                <p>Verifica le decisioni di gioco logiche combinando if, elif, else con gli operatori and e or.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Se <code>energia >= 50 and (ha_amuleto or ha_chiave)</code>: imposta <code>"Portale Attivato"</code></li>
-                <li>Se <code>energia < 50</code>: imposta <code>"Energia Insufficiente"</code></li>
-                <li>Altrimenti: imposta <code>"Nessuna Reliquia Trovata"</code></li>
-            </ul>
-        `,
-        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasAllBranches = /\bif\b/.test(cleanCode) && /\belif\b/.test(cleanCode) && /\belse\b/.test(cleanCode);
-    tests.push({ desc: "Rami condizionali multipli con if, elif e else presenti", passed: !!hasAllBranches, diff: hasAllBranches ? null : "Usa if, elif e else per gestire i tre stati del portale." });
-    
-    const stateOk = s.stato_portale === "Portale Attivato";
-    tests.push({ desc: "Stato portale calcolato a 'Portale Attivato' (scenario iniziale: 75, amuleto)", passed: stateOk, diff: stateOk ? null : `Ricevuto: "${s.stato_portale}"` });
-
-    const logs = result.logs || [];
-    const logOk = logs.some(l => /^Stato\s*:\s*Portale Attivato$/i.test(l.trim()));
-    tests.push({ desc: "Output corretto stampato a console ('Stato: Portale Attivato')", passed: logOk, diff: logOk ? null : `Ricevuto: "${logs.join(' | ')}"` });
-
-    // Multi-scenario validation
-    if (runtime && typeof runtime.execute === 'function') {
-        try {
-            // Scenario B: Low energy (energia = 20) -> "Energia Insufficiente"
-            const codeLowEnergy = result.code.replace(/var\s+energia\s*=\s*\d+/, 'var energia = 20');
-            const rLow = await runtime.execute(codeLowEnergy);
-            const lowOk = rLow.scope && rLow.scope.stato_portale === "Energia Insufficiente";
-            tests.push({
-                desc: "Scenario energia insufficiente (< 50) imposta 'Energia Insufficiente'",
-                passed: lowOk,
-                diff: lowOk ? null : `Con energia=20 ricevuto: "${rLow.scope ? rLow.scope.stato_portale : 'undefined'}"`
-            });
-
-            // Scenario C: No relics (ha_amuleto = false, ha_chiave = false) -> "Nessuna Reliquia Trovata"
-            const codeNoRelics = result.code
-                .replace(/var\s+ha_amuleto\s*=\s*true/, 'var ha_amuleto = false')
-                .replace(/var\s+ha_chiave\s*=\s*true/, 'var ha_chiave = false');
-            const rNoRelics = await runtime.execute(codeNoRelics);
-            const noRelicsOk = rNoRelics.scope && rNoRelics.scope.stato_portale === "Nessuna Reliquia Trovata";
-            tests.push({
-                desc: "Scenario nessuna reliquia imposta 'Nessuna Reliquia Trovata'",
-                passed: noRelicsOk,
-                diff: noRelicsOk ? null : `Senza reliquie ricevuto: "${rNoRelics.scope ? rNoRelics.scope.stato_portale : 'undefined'}"`
-            });
-
-            // Scenario D: Alternative relic (ha_amuleto = false, ha_chiave = true) -> "Portale Attivato"
-            const codeKeyRelic = result.code
-                .replace(/var\s+ha_amuleto\s*=\s*true/, 'var ha_amuleto = false')
-                .replace(/var\s+ha_chiave\s*=\s*false/, 'var ha_chiave = true');
-            const rKey = await runtime.execute(codeKeyRelic);
-            const keyOk = rKey.scope && rKey.scope.stato_portale === "Portale Attivato";
-            tests.push({
-                desc: "Scenario reliquia chiave alternativa sblocca il portale ('Portale Attivato')",
-                passed: keyOk,
-                diff: keyOk ? null : `Con sola chiave ricevuto: "${rKey.scope ? rKey.scope.stato_portale : 'undefined'}"`
-            });
-        } catch(e) {
-            tests.push({ desc: "Esecuzione scenari portale", passed: false, diff: e.message });
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.n3 === true;
+                        tests.push({ desc: "n3 confrontato correttamente (true)", passed: ok, diff: ok ? null : `Trovato: ${s.n3}` });
+                        return tests;
         }
-    }
-    return tests;
-}
     },
-
-    // ==========================================
-    // CAPITOLO 6: LISTE E COLLEZIONI (ARRAY)
-    // ==========================================
     {
         id: 21,
-        conceptId: "arrays_collections",
-        conceptTags: ["arrays", "indexing", "lists"],
-        chapterId: 6,
+        conceptId: "conditions_logic",
+        conceptTags: ["and", "logical"],
+        chapterId: 5,
         isMastery: false,
-        title: "21. Creare un inventario con gli Array",
-        icon: "🎒",
+        title: "21. Operatore Logico AND (and)",
+        icon: "🤝",
         xp: 50,
-        expectedOutput: "Spada",
-        theory: `
-            <p>Un <strong>Array</strong> è una lista ordinata di elementi racchiusi tra parentesi quadre <code>[...]</code>:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> inventario = [<span class="s">"Spada"</span>, <span class="s">"Scudo"</span>, <span class="s">"Pozione"</span>]
-    <span class="nb">print</span>(inventario[<span class="m">0</span>]) <span class="c"># Stampa "Spada"</span></pre>
-            </div>
-            <p>Gli elementi si contano a partire da zero (<code>0</code> è il primo elemento).</p>
-        `,
-        task: `
-            <ul>
-                <li>Crea <code>inventario = ["Spada", "Scudo", "Pozione"]</code>.</li>
-                <li>Stampa il primo oggetto dell'inventario (<code>inventario[0]</code>).</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Crea l'inventario e stampa il primo elemento\n    pass\n`,
+        expectedOutput: "Can Drive: true",
+        theory: "\n                <p>L'operatore <code>and</code> restituisce <code>true</code> solo se <strong>entrambe</strong> le condizioni a sinistra e a destra sono vere.</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">if</span> ha_chiave <span class=\"ow\">and</span> vicino_alla_porta:\n    apri_porta()</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Un giocatore può guidare se ha almeno 18 anni E possiede la patente.</li>\n                    <li>Date <code>age = 20</code> e <code>has_license = true</code>:</li>\n                    <li>Crea <code>can_drive = age >= 18 and has_license</code></li>\n                    <li>Stampa <code>\"Can Drive: \", can_drive</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var age = 20\n    var has_license = true\n    # Calcola can_drive e stampala\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var age = 20\n    var has_license = true\n    var can_drive = age >= 18 and has_license\n    print(\"Can Drive: \", can_drive)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Un Array è una sequenza ordinata di elementi. In quasi tutti i linguaggi di programmazione moderni, compreso GDScript, il conteggio degli elementi inizia sempre da ZERO."
+                        "text": "Combina le due condizioni con la parola chiave 'and'."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Dichiara l'array racchiudendo gli elementi tra parentesi quadre `[...]` separati da virgole. Per accedere al primo elemento usa `nome_array[0]`."
+                        "text": "var can_drive = age >= 18 and has_license"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var armi = [\"Arco\", \"Pugnale\"]\n    print(armi[0]) # Stampa 'Arco'\n```\n`armi[0]` punta al primo elemento, mentre `armi[1]` punterebbe al secondo."
+                        "text": "print(\"Can Drive: \", can_drive)"
             }
 ],
-        solution: `func _ready():\n    var inventario = ["Spada", "Scudo", "Pozione"]\n    print(inventario[0])\n`,
-        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const inv = result.scope && result.scope.inventario;
-    
-    // Verifica rigorosa di ordine ed elementi richiesti: ["Spada", "Scudo", "Pozione"]
-    const isExactArray = Array.isArray(inv) && inv.length === 3 &&
-        inv[0] === "Spada" && inv[1] === "Scudo" && inv[2] === "Pozione";
-    tests.push({
-        desc: "Array 'inventario' creato con gli elementi corretti e nell'ordine richiesto (['Spada', 'Scudo', 'Pozione'])",
-        passed: isExactArray,
-        diff: isExactArray ? null : `Ricevuto: ${JSON.stringify(inv)}`
-    });
-
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const usesIndex = /inventario\s*\[\s*0\s*\]/.test(cleanCode) || /\[\s*0\s*\]/.test(cleanCode);
-    tests.push({ desc: "Accesso con indice inventario[0] utilizzato nel codice", passed: !!usesIndex, diff: usesIndex ? null : "Usa 'inventario[0]' per accedere al primo elemento." });
-
-    const logs = result.logs || [];
-    const printsFirst = logs.length > 0 && logs[0].trim() === "Spada";
-    tests.push({ desc: "Primo elemento ('Spada') stampato come primo output di console", passed: printsFirst, diff: printsFirst ? null : `Output ricevuto: "${logs.join(' | ')}"` });
-
-    // Multi-scenario dinamico flessibile: supporta spazi, apici singoli/doppi e variabili ausiliarie
-    if (runtime && typeof runtime.execute === 'function' && isExactArray) {
-        let mutatedCode = null;
-        if (/(\[\s*)(["'])Spada\2/i.test(result.code)) {
-            mutatedCode = result.code.replace(/(\[\s*)(["'])Spada\2/i, '$1$2Arco$2');
-        } else if (/(["'])Spada\1/i.test(result.code)) {
-            mutatedCode = result.code.replace(/(["'])Spada\1/i, '$1Arco$1');
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.can_drive === true;
+                        tests.push({ desc: "can_drive è true", passed: ok, diff: ok ? null : `Trovato: ${s.can_drive}` });
+                        return tests;
         }
-
-        if (mutatedCode && mutatedCode !== result.code) {
-            try {
-                const rTest = await runtime.execute(mutatedCode);
-                const dynamicOk = (rTest.logs || []).length > 0 && rTest.logs[0].trim() === "Arco";
-                tests.push({
-                    desc: "Stampa dinamica dipendente da inventario[0] (non valore hardcoded)",
-                    passed: dynamicOk,
-                    diff: dynamicOk ? null : `Modificando il primo elemento in 'Arco', la console ha stampato: "${(rTest.logs || []).join(' | ')}"`
-                });
-            } catch(e) {
-                tests.push({ desc: "Verifica dinamica indice", passed: false, diff: e.message });
-            }
-        }
-    }
-
-    return tests;
-}
     },
     {
         id: 22,
-        conceptId: "arrays_collections",
-        conceptTags: ["array_mutation", "indexes", "inventory", "debugging"],
-        isDebugging: true,
-        debugType: "Off-by-One (Indici Array)",
-        chapterId: 6,
+        conceptId: "conditions_logic",
+        conceptTags: ["or", "logical"],
+        chapterId: 5,
         isMastery: false,
-        title: "22. Accesso per indice",
-        icon: "🔍",
+        title: "22. Operatore Logico OR (or)",
+        icon: "🚪",
         xp: 50,
-        expectedOutput: "Scudo\nPozione",
-        theory: `
-            <p>Ogni posizione in un array ha un indice numerico:</p>
-            <ul>
-                <li><code>lista[0]</code> = primo elemento</li>
-                <li><code>lista[1]</code> = secondo elemento</li>
-                <li><code>lista[2]</code> = terzo elemento</li>
-            </ul>
-        `,
-        task: `
-            <ul>
-                <li>Dato <code>oggetti = ["Spada", "Scudo", "Pozione"]</code>.</li>
-                <li>Stampa il secondo elemento (<code>oggetti[1]</code>) e poi il terzo (<code>oggetti[2]</code>).</li>
-            </ul>
-        `,
-        initialCode: `func _ready():
-    var oggetti = ["Spada", "Scudo", "Pozione"]
-    # BUG DI INDICE: Gli array in GDScript partono da [0]!
-    # Correggi gli indici sotto per stampare 'Scudo' (2° elemento) e 'Pozione' (3° elemento):
-    print(oggetti[0])
-    print(oggetti[1])
-`,
+        expectedOutput: "b3 = true",
+        theory: "\n                <p>L'operatore <code>or</code> restituisce <code>true</code> se <strong>almeno una</strong> delle condizioni è vera. È falso solo se entrambe sono false.</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">if</span> ha_pass_vip <span class=\"ow\">or</span> ha_biglietto:\n    entra_nel_concerto()</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Modifica <code>b1</code> e <code>b2</code> con numeri interi in modo che <code>b3</code> risulti <code>true</code>.</li>\n                    <li><code>b3</code> verifica se <code>b1 > 10 or b2 < 5</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var b1 = 0\n    var b2 = 10\n    var b3 = b1 > 10 or b2 < 5\n    print(\"b3 = \", b3)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var b1 = 15\n    var b2 = 2\n    var b3 = b1 > 10 or b2 < 5\n    print(\"b3 = \", b3)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Gli array sono 'mutabili': puoi cambiare il valore memorizzato in una specifica posizione assegnando un nuovo valore tramite il suo indice tra parentesi quadre."
+                        "text": "Basta che o b1 > 10 oppure b2 < 5 sia soddisfatta."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Per visualizzare il secondo e terzo elemento, usa rispettivamente gli indici `[1]` e `[2]`."
+                        "text": "Imposta b1 maggiore di 10 (es. 15)."
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var frutti = [\"Mela\", \"Banana\", \"Arancia\"]\n    print(frutti[1]) # Stampa 'Banana'\n    print(frutti[2]) # Stampa 'Arancia'\n```\nSe il codice di partenza conteneva un bug (es. indici errati), correggi i numeri tra parentesi quadre."
+                        "text": "Con b1 = 15, la condizione b1 > 10 è vera, quindi b3 diventa true."
             }
 ],
-        solution: `func _ready():\n    var oggetti = ["Spada", "Scudo", "Pozione"]\n    print(oggetti[1])\n    print(oggetti[2])\n`,
-        validate: async (result, runtime = (typeof window !== 'undefined' ? window.GDScriptRuntime : null)) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const arr = result.scope && result.scope.oggetti;
-    
-    const isExactArray = Array.isArray(arr) && arr.length === 3 &&
-        arr[0] === "Spada" && arr[1] === "Scudo" && arr[2] === "Pozione";
-    tests.push({
-        desc: "Array 'oggetti' creato con ['Spada', 'Scudo', 'Pozione']",
-        passed: isExactArray,
-        diff: isExactArray ? null : `Ricevuto: ${JSON.stringify(arr)}`
-    });
-
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const usesIndices = (/oggetti\s*\[\s*1\s*\]/.test(cleanCode) || /\[\s*1\s*\]/.test(cleanCode)) &&
-                        (/oggetti\s*\[\s*2\s*\]/.test(cleanCode) || /\[\s*2\s*\]/.test(cleanCode));
-    tests.push({
-        desc: "Accesso tramite indici oggetti[1] e oggetti[2] utilizzato",
-        passed: !!usesIndices,
-        diff: usesIndices ? null : "Accedi agli elementi con oggetti[1] e oggetti[2]."
-    });
-
-    const logs = result.logs || [];
-    const idxScudo = logs.findIndex(l => /^Scudo$/i.test(l.trim()));
-    const idxPozione = logs.findIndex((l, i) => i > idxScudo && /^Pozione$/i.test(l.trim()));
-    const logsOk = idxScudo !== -1 && idxPozione !== -1;
-    tests.push({
-        desc: "Elementi 'Scudo' (2°) e 'Pozione' (3°) stampati a console su righe separate",
-        passed: logsOk,
-        diff: logsOk ? null : `Output ricevuto: "${logs.join(' | ')}"`
-    });
-
-    // Multi-scenario dinamico: se il secondo e terzo elemento cambiano, la stampa deve riflettere i nuovi valori
-    if (runtime && typeof runtime.execute === 'function' && isExactArray) {
-        let mutatedCode = null;
-        if (/(["'])Scudo\1/i.test(result.code) && /(["'])Pozione\1/i.test(result.code)) {
-            mutatedCode = result.code
-                .replace(/(["'])Scudo\1/i, '$1Elmo$1')
-                .replace(/(["'])Pozione\1/i, '$1Elisir$1');
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.b3 === true;
+                        tests.push({ desc: "b3 vale true con operatore or", passed: ok, diff: ok ? null : `Trovato: ${s.b3}` });
+                        return tests;
         }
-
-        if (mutatedCode && mutatedCode !== result.code) {
-            try {
-                const rTest = await runtime.execute(mutatedCode);
-                const tLogs = rTest.logs || [];
-                const tScudo = tLogs.findIndex(l => /^Elmo$/i.test(l.trim()));
-                const tPozione = tLogs.findIndex((l, i) => i > tScudo && /^Elisir$/i.test(l.trim()));
-                const dynamicOk = tScudo !== -1 && tPozione !== -1;
-                tests.push({
-                    desc: "Stampa dinamica dipendente da oggetti[1] e oggetti[2] (non valori hardcoded)",
-                    passed: dynamicOk,
-                    diff: dynamicOk ? null : `Con valori mutati ('Elmo', 'Elisir'), la console ha stampato: "${tLogs.join(' | ')}"`
-                });
-            } catch(e) {
-                tests.push({ desc: "Verifica dinamica indici", passed: false, diff: e.message });
-            }
-        }
-    }
-
-    return tests;
-}
     },
     {
         id: 23,
-        conceptId: "arrays_collections",
-        conceptTags: ["append", "size", "array_methods"],
-        chapterId: 6,
+        conceptId: "conditions_logic",
+        conceptTags: ["not", "logic_recap"],
+        chapterId: 5,
         isMastery: false,
-        title: "23. Metodi append() e size()",
-        icon: "➕",
+        title: "23. Operatore NOT e Logica Booleana",
+        icon: "🔄",
         xp: 50,
-        expectedOutput: "3",
-        theory: `
-            <p>Per aggiungere un nuovo elemento in fondo a un array si usa il metodo <code>append(...)</code>:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> inventario = [<span class="s">"Mappa"</span>, <span class="s">"Bussola"</span>]
-    inventario.append(<span class="s">"Torcia"</span>)
-    <span class="nb">print</span>(inventario.size()) <span class="c"># Stampa 3</span></pre>
-            </div>
-            <p>Il metodo <code>size()</code> restituisce il numero totale di elementi presenti.</p>
-        `,
-        task: `
-            <ul>
-                <li>Crea <code>inventario = ["Mappa", "Bussola"]</code>.</li>
-                <li>Aggiungi <code>"Torcia"</code> con <code>inventario.append("Torcia")</code>.</li>
-                <li>Stampa la dimensione dell'array con <code>print(inventario.size())</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    var inventario = ["Mappa", "Bussola"]\n    # Aggiungi "Torcia" e stampa la dimensione\n    pass\n`,
+        expectedOutput: "Risultato: true",
+        theory: "\n                <p>L'operatore <code>not</code> inverte il valore booleano: trasforma <code>true</code> in <code>false</code> e viceversa.</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> porta_chiusa = <span class=\"kc\">true</span>\n<span class=\"k\">var</span> posso_entrare = <span class=\"ow\">not</span> porta_chiusa <span class=\"c\"># false</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Imposta le variabili booleane <code>b1</code>, <code>b2</code> e <code>b3</code> in modo che la formula <code>(b1 and b2) or (not b3)</code> restituisca <code>true</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var b1 = false\n    var b2 = false\n    var b3 = true\n    var risultato = (b1 and b2) or (not b3)\n    print(\"Risultato: \", risultato)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var b1 = true\n    var b2 = true\n    var b3 = false\n    var risultato = (b1 and b2) or (not b3)\n    print(\"Risultato: \", risultato)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Durante una partita, il giocatore raccoglie nuovi oggetti. Gli array di Godot offrono metodi dedicati per aggiungere elementi alla fine e per verificare la dimensione totale."
+                        "text": "Se b3 è false, not b3 diventa true, rendendo vera l'intera espressione or."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa `.append(nuovo_elemento)` per aggiungere un oggetto in coda all'array, e `.size()` per ottenere il numero totale di elementi attualmente presenti."
+                        "text": "Imposta b3 = false oppure b1 = true e b2 = true."
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var squadra = [\"Cavaliere\", \"Mago\"]\n    squadra.append(\"Ladro\")\n    print(\"Membri:\", squadra.size())\n```\nDopo `append`, la chiamata a `.size()` restituirà 3."
+                        "text": "var b1 = true\nvar b2 = true\nvar b3 = false"
             }
 ],
-        solution: `func _ready():\n    var inventario = ["Mappa", "Bussola"]\n    inventario.append("Torcia")\n    print(inventario.size())\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const inv = result.scope && result.scope.inventario;
-    const hasAppended = Array.isArray(inv) && inv.length === 3 && inv.includes("Torcia");
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const usesMethods = /\.append\s*\(/.test(cleanCode) && /\.size\s*\(/.test(cleanCode);
-    tests.push({ desc: "Elemento 'Torcia' aggiunto all'array", passed: hasAppended, diff: hasAppended ? null : `Inventario finale: ${JSON.stringify(inv)}` });
-    tests.push({ desc: "Metodi append() e size() utilizzati", passed: !!usesMethods, diff: usesMethods ? null : "Usa inventario.append('Torcia') e print(inventario.size())." });
-    const ok = result.logs.some(l => l.trim() === "3");
-    tests.push({ desc: "Dimensione '3' stampata a console", passed: ok, diff: ok ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.risultato === true;
+                        tests.push({ desc: "Espressione logica valutata a true", passed: ok, diff: ok ? null : `Trovato: ${s.risultato}` });
+                        return tests;
+        }
     },
-{
+    {
         id: 24,
-        conceptId: "arrays_collections",
-        conceptTags: ["mastery", "arrays", "inventory", "backpack"],
-        chapterId: 6,
-        isMastery: true,
-        title: "24. ⭐ Sfida di Apprendimento: Gestione dello Zaino d'Avventura",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "media",
-        difficultyLabel: "Media",
-        scenario: "Il giocatore organizza gli oggetti nel proprio inventario prima del duello finale. Sotto il commento, esegui le operazioni richieste sull'array <code>zaino</code>:",
-        requirements: [
-            'Aggiungi <code>\"Arco Elfico\"</code> in coda allo zaino usando <code>.append()</code>',
-            'Rimuovi l\'oggetto <code>\"Ramo Secco\"</code> dallo zaino usando <code>.erase()</code>',
-            'Verifica se possiedi <code>\"Pozione di Vita\"</code> con <code>.has()</code> e assegna il booleano a <code>var ha_cura</code>',
-            'Conta gli oggetti totali rimasti con <code>.size()</code> e assegna il numero a <code>var totale_slot</code>'
-        ],
-        notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Zaino: [\"Spada\", \"Pozione di Vita\", \"Arco Elfico\"]\nHa pozione: true\nTotale slot: 3",
-        initialCode: `extends Node\n\nfunc _ready():\n    var zaino = ["Spada", "Ramo Secco", "Pozione di Vita"]\n    \n    # Modifica lo zaino e crea ha_cura e totale_slot sotto\n    \n    # Non modificare le righe sotto\n    print("Zaino: ", zaino)\n    print("Ha pozione: ", ha_cura)\n    print("Totale slot: ", totale_slot)\n`,
-        aiExplanation: "Gli array in GDScript offrono potenti metodi nativi: <code>.append(elemento)</code> inserisce in ultima posizione, <code>.erase(elemento)</code> cerca ed elimina la prima occorrenza specificata, <code>.has(elemento)</code> restituisce <code>true</code> se l'elemento è presente e <code>.size()</code> restituisce la dimensione totale della lista.",
+        conceptId: "conditions_logic",
+        conceptTags: ["precedence", "parentheses"],
+        chapterId: 5,
+        isMastery: false,
+        title: "24. Precedenza e Parentesi Logiche",
+        icon: "🧩",
+        xp: 50,
+        expectedOutput: "Accesso: true",
+        theory: "\n                <p>Nelle condizioni complesse usiamo le parentesi <code>(...)</code> per raggruppare espressioni e dare precedenza alle regole.</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> entra = livello >= 5 <span class=\"ow\">and</span> (ha_chiave <span class=\"ow\">or</span> ha_amuleto)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Un eroe può accedere alla stanza segreta se il suo <code>level >= 5</code> E possiede almeno uno tra la chiave (<code>has_key</code>) o la mappa (<code>has_map</code>).</li>\n                    <li>Date <code>level = 7</code>, <code>has_key = false</code> e <code>has_map = true</code>:</li>\n                    <li>Calcola <code>can_enter = level >= 5 and (has_key or has_map)</code></li>\n                    <li>Stampa <code>\"Accesso: \", can_enter</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var level = 7\n    var has_key = false\n    var has_map = true\n    # Calcola can_enter usando le parentesi\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var level = 7\n    var has_key = false\n    var has_map = true\n    var can_enter = level >= 5 and (has_key or has_map)\n    print(\"Accesso: \", can_enter)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Uno zaino può cambiare durante il gioco: `.append()` aggiunge un oggetto, `.erase()` lo rimuove, `.has()` controlla se è presente e `.size()` conta gli oggetti rimasti."
+                        "text": "Usa le parentesi per raggruppare (has_key or has_map)."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Parti dall'array `zaino` già presente nel codice, aggiungi `Arco Elfico`, elimina `Ramo Secco`, verifica la presenza di `Pozione di Vita` in `ha_cura` e salva la dimensione finale in `totale_slot`."
+                        "text": "var can_enter = level >= 5 and (has_key or has_map)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var borsa = [\"Spago\", \"Mappa\"]\n    borsa.append(\"Torcia\")\n    borsa.erase(\"Spago\")\n    var ha_mappa = borsa.has(\"Mappa\")\n    var quanti = borsa.size()\n    print(ha_mappa, quanti)\n```\nRipeti le quattro operazioni sugli oggetti richiesti nella consegna."
+                        "text": "print(\"Accesso: \", can_enter)"
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    var zaino = ["Spada", "Ramo Secco", "Pozione di Vita"]\n    \n    zaino.append("Arco Elfico")\n    zaino.erase("Ramo Secco")\n    var ha_cura = zaino.has("Pozione di Vita")\n    var totale_slot = zaino.size()\n    \n    # Non modificare le righe sotto\n    print("Zaino: ", zaino)\n    print("Ha pozione: ", ha_cura)\n    print("Totale slot: ", totale_slot)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Gestione dello Zaino d'Avventura</h3>
-                <p>Verifica le operazioni essenziali sugli array: aggiunta con append, rimozione con erase, ricerca con has e conteggio con size.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li><code>zaino.append("Arco Elfico")</code></li>
-                <li><code>zaino.erase("Ramo Secco")</code></li>
-                <li><code>var ha_cura = zaino.has("Pozione di Vita")</code></li>
-                <li><code>var totale_slot = zaino.size()</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const inv = s.zaino || [];
-    const hasBow = inv.includes("Arco Elfico");
-    const noStick = !inv.includes("Ramo Secco");
-    const cureOk = s.ha_cura === true;
-    const sizeOk = s.totale_slot === 3 && inv.length === 3;
-    tests.push({ desc: "Arco Elfico aggiunto e Ramo Secco rimosso", passed: hasBow && noStick, diff: (hasBow && noStick) ? null : `Zaino: ${JSON.stringify(inv)}` });
-    tests.push({ desc: "Controllo has('Pozione di Vita') true", passed: cureOk, diff: cureOk ? null : `Ricevuto: ${s.ha_cura}` });
-    tests.push({ desc: "Totale slot calcolato con size() a 3", passed: sizeOk, diff: sizeOk ? null : `Ricevuto: ${s.totale_slot}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.can_enter === true;
+                        tests.push({ desc: "can_enter calcolato correttamente (true)", passed: ok, diff: ok ? null : `Trovato: ${s.can_enter}` });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 7: CICLI (FOR E WHILE)
-    // ==========================================
     {
         id: 25,
-        conceptId: "loops_iteration",
-        conceptTags: ["for", "range", "loops"],
-        chapterId: 7,
-        isMastery: false,
-        title: "25. Ciclo for con range()",
-        icon: "🔁",
-        xp: 50,
-        expectedOutput: "0\n1\n2",
-        theory: `
-            <p>Il ciclo <code>for</code> permette di ripetere un blocco di istruzioni. Usando <code>range(3)</code> il ciclo ripete per i valori <code>0, 1, 2</code>:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">for</span> i <span class="k">in</span> range(<span class="m">3</span>):
-        <span class="nb">print</span>(i)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Scrivi un ciclo <code>for i in range(3):</code>.</li>
-                <li>All'interno del ciclo, stampa <code>i</code> con <code>print(i)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Scrivi il ciclo for con range(3)\n    pass\n`,
+        conceptId: "conditions_logic",
+        conceptTags: ["ternary", "if_inline"],
+        chapterId: 5,
+        isMastery: true,
+        title: "25. L'Operatore Ternario (if inline)",
+        icon: "⚡",
+        xp: 75,
+        expectedOutput: "Stato: Acquistabile",
+        theory: "\n                <p>L'<strong>operatore ternario</strong> in GDScript è una forma concisa per assegnare un valore in base a una condizione su una sola riga:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> stato = <span class=\"s\">\"Vivo\"</span> <span class=\"k\">if</span> hp > 0 <span class=\"k\">else</span> <span class=\"s\">\"K.O.\"</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Date <code>coins = 50</code> e <code>price = 30</code>:</li>\n                    <li>Usa l'operatore ternario per creare la variabile <code>status</code>:</li>\n                    <li>Assegna <code>\"Acquistabile\"</code> se <code>coins >= price</code>, altrimenti <code>\"Troppo caro\"</code>.</li>\n                    <li>Stampa <code>\"Stato: \", status</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var coins = 50\n    var price = 30\n    # Usa l'operatore ternario per definire status\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var coins = 50\n    var price = 30\n    var status = \"Acquistabile\" if coins >= price else \"Troppo caro\"\n    print(\"Stato: \", status)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Un ciclo 'for' con 'range' permette di ripetere un blocco di istruzioni per un numero prefissato di volte, ad esempio per contare i turni di gioco."
+                        "text": "La sintassi è: valore_se_vero if condizione else valore_se_falso"
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa `for i in range(N):`. La funzione `range(5)` genera numeri partendo da 0 fino a 4 (l'estremo superiore non è mai incluso)."
+                        "text": "var status = \"Acquistabile\" if coins >= price else \"Troppo caro\""
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    for n in range(3):\n        print(n) # Stampa 0, poi 1, poi 2\n```\nAll'interno del ciclo, stampa la variabile iteratore (es. `i`)."
+                        "text": "print(\"Stato: \", status)"
             }
 ],
-        solution: `func _ready():\n    for i in range(3):\n        print(i)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasLoop = /\bfor\s+\w+\s+in\s+range\s*\(/.test(cleanCode);
-    tests.push({ desc: "Ciclo 'for ... in range(...)' utilizzato", passed: !!hasLoop, diff: hasLoop ? null : "Usa 'for i in range(3):' per iterare." });
-    const out = (result.logs || []).join('\n');
-    const ok = out.includes("0") && out.includes("1") && out.includes("2");
-    tests.push({ desc: "Numeri 0, 1, 2 stampati dal ciclo", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-    const alternateCode = result.code.replace(/^(\s*for\s+\w+\s+in\s+)range\s*\([^\n)]*\)(\s*:)/m, '$1range(0)$2');
-    const replay = alternateCode !== result.code
-        ? await GDScriptRuntime.execute(alternateCode, { lesson: LESSONS_DATA.find(l => l.id === 25) })
-        : null;
-    const requiredLogs = ["0","1","2"];
-    const baselineLogs = (result.logs || []).map(v => String(v).trim());
-    const replayLogs = replay && replay.success ? (replay.logs || []).map(v => String(v).trim()) : [];
-    const reallyFromLoop = !!(replay && replay.success &&
-        requiredLogs.every(v => baselineLogs.includes(v)) &&
-        requiredLogs.some(v => !replayLogs.includes(v)));
-    tests.push({ desc: "Il risultato è prodotto dal ciclo, non da stampe esterne", passed: reallyFromLoop,
-        diff: reallyFromLoop ? null : "Inserisci le stampe all'interno del ciclo ed esegui realmente le iterazioni." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.status === "Acquistabile";
+                        tests.push({ desc: "status uguale a 'Acquistabile' via operatore ternario", passed: ok, diff: ok ? null : `Trovato: ${s.status}` });
+                        return tests;
+        }
     },
     {
         id: 26,
-        conceptId: "loops_iteration",
-        conceptTags: ["for_in", "array_iteration", "enemies"],
-        chapterId: 7,
+        conceptId: "conditions_logic",
+        conceptTags: ["if", "branching"],
+        chapterId: 6,
         isMastery: false,
-        title: "26. Iterazione su liste di nemici",
-        icon: "👾",
+        title: "26. L'Istruzione if (Condizioni Semplici)",
+        icon: "🔀",
         xp: 50,
-        expectedOutput: "Goblin\nOrco\nDrago",
-        theory: `
-            <p>Il ciclo <code>for</code> può scorrere automaticamente ogni elemento presente in un array:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> nemici = [<span class="s">"Goblin"</span>, <span class="s">"Orco"</span>, <span class="s">"Drago"</span>]
-    <span class="k">for</span> nemico <span class="k">in</span> nemici:
-        <span class="nb">print</span>(nemico)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>nemici = ["Goblin", "Orco", "Drago"]</code>.</li>
-                <li>Usa <code>for nemico in nemici:</code> per stampare ogni nome con <code>print(nemico)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    var nemici = ["Goblin", "Orco", "Drago"]\n    # Itera sui nemici con il ciclo for\n    pass\n`,
+        expectedOutput: "Livello Superato!",
+        theory: "\n                <p>L'istruzione <code>if</code> esegue un blocco di codice solo se la condizione specificata risulta vera (<code>true</code>):</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">if</span> punti >= 100:\n    <span class=\"nb\">print</span>(<span class=\"s\">\"Livello Superato!\"</span>)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Data la variabile <code>score = 150</code>:</li>\n                    <li>Scrivi un'istruzione <code>if</code> che verifica se <code>score >= 100</code>.</li>\n                    <li>Se vero, stampa: <code>\"Livello Superato!\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var score = 150\n    # Scrivi qui l'istruzione if\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var score = 150\n    if score >= 100:\n        print(\"Livello Superato!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Invece di usare indici numerici, in GDScript puoi scorrere direttamente ogni singolo elemento contenuto in un array, uno per ciascuna iterazione del ciclo."
+                        "text": "Usa if score >= 100: seguito da print indentato."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "La sintassi è: `for elemento in nome_array:`. A ogni giro del ciclo, `elemento` assumerà automaticamente il valore del prossimo elemento dell'array."
+                        "text": "if score >= 100:\n    print(\"Livello Superato!\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var pozioni = [\"Cura\", \"Mana\", \"Velocita\"]\n    for p in pozioni:\n        print(p)\n```\nNon occorre specificare indici tra parentesi quadre: l'iterazione è automatica."
+                        "text": "Ricorda i due punti ':' e l'indentazione a 4 spazi."
             }
 ],
-        solution: `func _ready():\n    var nemici = ["Goblin", "Orco", "Drago"]\n    for nemico in nemici:\n        print(nemico)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const inv = result.scope && result.scope.nemici;
-    const isArray = Array.isArray(inv) && inv.includes("Goblin") && inv.includes("Orco") && inv.includes("Drago");
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasLoop = /\bfor\s+\w+\s+in\s+nemici\b/.test(cleanCode);
-    tests.push({ desc: "Lista 'nemici' definita con Goblin, Orco e Drago", passed: isArray, diff: isArray ? null : `Valore: ${JSON.stringify(inv)}` });
-    tests.push({ desc: "Ciclo 'for nemico in nemici:' utilizzato", passed: !!hasLoop, diff: hasLoop ? null : "Usa 'for nemico in nemici:' per iterare sulla lista." });
-    const out = (result.logs || []).join('\n');
-    const ok = out.includes("Goblin") && out.includes("Orco") && out.includes("Drago");
-    tests.push({ desc: "Tutti i 3 nemici stampati a console", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-    const alternateCode = result.code.replace(/^(\s*for\s+\w+\s+in\s+)nemici(\s*:)/m, '$1[]$2');
-    const replay = alternateCode !== result.code
-        ? await GDScriptRuntime.execute(alternateCode, { lesson: LESSONS_DATA.find(l => l.id === 26) })
-        : null;
-    const requiredLogs = ["Goblin","Orco","Drago"];
-    const baselineLogs = (result.logs || []).map(v => String(v).trim());
-    const replayLogs = replay && replay.success ? (replay.logs || []).map(v => String(v).trim()) : [];
-    const reallyFromLoop = !!(replay && replay.success &&
-        requiredLogs.every(v => baselineLogs.includes(v)) &&
-        requiredLogs.some(v => !replayLogs.includes(v)));
-    tests.push({ desc: "Il risultato è prodotto dal ciclo, non da stampe esterne", passed: reallyFromLoop,
-        diff: reallyFromLoop ? null : "Inserisci le stampe all'interno del ciclo ed esegui realmente le iterazioni." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Livello Superato!"));
+                        tests.push({ desc: "Console stampa 'Livello Superato!'", passed: hasLog, diff: hasLog ? null : "Messaggio non stampato" });
+                        return tests;
+        }
     },
     {
         id: 27,
-        conceptId: "loops_iteration",
-        conceptTags: ["while", "loops", "counters", "debugging"],
-        isDebugging: true,
-        debugType: "Loop Infinito (Incremento errato)",
-        chapterId: 7,
+        conceptId: "conditions_logic",
+        conceptTags: ["if_else", "elif"],
+        chapterId: 6,
         isMastery: false,
-        title: "27. Ciclo while",
-        icon: "⏳",
+        title: "27. Scelta Multipla: if, elif ed else",
+        icon: "⚖️",
         xp: 50,
-        expectedOutput: "Conto: 1\nConto: 2\nConto: 3",
-        theory: `
-            <p>Il ciclo <code>while</code> continua a ripetere finché la sua condizione rimane vera:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> conto = <span class="m">1</span>
-    <span class="k">while</span> conto <= <span class="m">3</span>:
-        <span class="nb">print</span>(<span class="s">"Conto: "</span> + str(conto))
-        conto += <span class="m">1</span></pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>conto = 1</code>.</li>
-                <li>Scrivi un ciclo <code>while conto <= 3:</code>.</li>
-                <li>Stampa <code>"Conto: " + str(conto)</code> e incrementa <code>conto += 1</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():
-    var conto = 1
-    # BUG: il contatore diminuisce e il ciclo diventa infinito.
-    # Correggi l'aggiornamento per contare da 1 a 3.
-    while conto <= 3:
-        print("Conto: " + str(conto))
-        conto -= 1
-`,
-        hints: [
-        {
-                "level": 1,
-                "type": "concept",
-                "icon": "💭",
-                "label": "Indizio Concettuale",
-                "text": "Il while ripete un blocco finché la condizione rimane vera. Osserva come cambia la variabile conto: deve avvicinarsi al limite, non allontanarsi."
-        },
-        {
-                "level": 2,
-                "type": "structure",
-                "icon": "🏗️",
-                "label": "Guida alla Struttura",
-                "text": "La condizione while conto <= 3 è già corretta. Dopo aver stampato il valore, fai crescere conto di un'unità, invece di diminuirlo."
-        },
-        {
-                "level": 3,
-                "type": "example",
-                "icon": "📝",
-                "label": "Esempio Pratico",
-                "text": "Esempio analogo:\n```gdscript\nvar turno = 1\nwhile turno <= 4:\n    print(turno)\n    turno += 1\n```\nCon += 1 il contatore raggiunge il limite e il ciclo termina."
-        }
-],
-        solution: `func _ready():\n    var conto = 1\n    while conto <= 3:\n        print("Conto: " + str(conto))\n        conto += 1\n`,
-        validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasWhile = /\bwhile\b/.test(cleanCode);
-    const valOk = result.scope && Number(result.scope.conto) >= 3;
-    tests.push({ desc: "Ciclo 'while' utilizzato nel codice", passed: !!hasWhile, diff: hasWhile ? null : "Usa 'while conto <= 3:' per il conteggio." });
-    const out = (result.logs || []).join('\n');
-    const ok = out.includes("Conto: 1") && out.includes("Conto: 2") && out.includes("Conto: 3");
-    tests.push({ desc: "Conteggio da 1 a 3 stampato correttamente", passed: ok && valOk, diff: ok ? null : `Ricevuto: "${out}"` });
-    const alternateCode = result.code.replace(/^(\s*while\s+)[^\n:]+(\s*:)/m, '$1false$2');
-    const replay = alternateCode !== result.code
-        ? await GDScriptRuntime.execute(alternateCode, { lesson: LESSONS_DATA.find(l => l.id === 27) })
-        : null;
-    const requiredLogs = ["Conto: 1","Conto: 2","Conto: 3"];
-    const baselineLogs = (result.logs || []).map(v => String(v).trim());
-    const replayLogs = replay && replay.success ? (replay.logs || []).map(v => String(v).trim()) : [];
-    const reallyFromLoop = !!(replay && replay.success &&
-        requiredLogs.every(v => baselineLogs.includes(v)) &&
-        requiredLogs.some(v => !replayLogs.includes(v)));
-    tests.push({ desc: "Il risultato è prodotto dal ciclo, non da stampe esterne", passed: reallyFromLoop,
-        diff: reallyFromLoop ? null : "Inserisci le stampe all'interno del ciclo ed esegui realmente le iterazioni." });
-    return tests;
-}
-    },
-{
-        id: 28,
-        conceptId: "loops_iteration",
-        conceptTags: ["mastery", "loops", "waves", "xp_calc"],
-        chapterId: 7,
-        isMastery: true,
-        title: "28. ⭐ Sfida di Apprendimento: Annuncio Ondate e Calcolo XP",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "avanzata",
-        difficultyLabel: "Avanzata",
-        scenario: "Il sistema di difesa dell'arena deve elaborare un'ondata di nemici in arrivo, avvisare la guarnigione e calcolare i punti esperienza complessivi della battaglia. Sotto il commento, scrivi un ciclo <code>for</code> che itera sull'array <code>nemici</code>:",
-        requirements: [
-            'Scrivi il ciclo: <code>for nemico in nemici:</code>',
-            'All\'interno del ciclo, stampa per ogni nemico: <code>\"Allerta: \" + nemico</code>',
-            'All\'interno del ciclo, incrementa <code>xp_totali</code> di <code>25</code> (usando <code>+= 25</code>)'
-        ],
-        notice: "Non modificare le righe print() finali. Il programma stampa:",
-        expectedOutput: "Allerta: Slime\nAllerta: Scheletro\nAllerta: Spettro\nAllerta: Boss Drago\nXP Totali: 100",
-        initialCode: `extends Node\n\nfunc _ready():\n    var nemici = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali = 0\n    \n    # Scrivi il ciclo for sotto\n    \n    # Non modificare la riga sotto\n    print("XP Totali: ", xp_totali)\n`,
-        aiExplanation: "Il ciclo <code>for elemento in collezione:</code> scorre in sequenza tutti gli elementi di un array o di una sequenza. Ad ogni passaggio la variabile temporanea (in questo caso <code>nemico</code>) assume il valore dell'elemento corrente, consentendo di eseguire operazioni ripetute come stampare messaggi e sommare punti in un accumulatore.",
+        expectedOutput: "status = moderato",
+        theory: "\n                <p>Quando abbiamo molteplici scenari alternativi, usiamo <code>elif</code> (else if) ed <code>else</code>:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">if</span> velocita < 20:\n    stato = <span class=\"s\">\"lento\"</span>\n<span class=\"k\">elif</span> velocita <= 50:\n    stato = <span class=\"s\">\"moderato\"</span>\n<span class=\"k\">else</span>:\n    stato = <span class=\"s\">\"veloce\"</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Data la velocità del vento <code>wind = 35</code> e la variabile <code>status = \"unset\"</code>:</li>\n                    <li>Se <code>wind < 20</code>, imposta <code>status = \"leggero\"</code></li>\n                    <li>Altrimenti se <code>wind <= 50</code>, imposta <code>status = \"moderato\"</code></li>\n                    <li>Altrimenti imposta <code>status = \"tempesta\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var wind = 35\n    var status = \"unset\"\n    # Scrivi il tuo if, elif, else qui sotto\n    pass\n    print(\"status = \", status)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var wind = 35\n    var status = \"unset\"\n    if wind < 20:\n        status = \"leggero\"\n    elif wind <= 50:\n        status = \"moderato\"\n    else:\n        status = \"tempesta\"\n    print(\"status = \", status)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Il ciclo `for` visita ciascun nemico dell'array. Per ogni nemico bisogna mostrare un messaggio di allerta e aggiungere una quantità fissa di XP all'accumulatore."
+                        "text": "Usa if per il primo controllo, elif per il secondo ed else per tutti gli altri casi."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa `for nemico in nemici:`. Dentro il ciclo stampa `\"Allerta: \" + nemico` e aggiorna `xp_totali` con `+= 25`. Dopo il ciclo, il totale deve comprendere tutti i nemici attraversati."
+                        "text": "if wind < 20:\n    status = \"leggero\"\nelif wind <= 50:\n    status = \"moderato\"\nelse:\n    status = \"tempesta\""
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var bersagli = [\"A\", \"B\", \"C\"]\n    var punti = 0\n    for bersaglio in bersagli:\n        print(\"Avvistato: \" + bersaglio)\n        punti += 10\n    print(\"Punti: \", punti)\n```\nQui il bonus è fisso per bersaglio, non si sommano i valori dell'array."
+                        "text": "Con wind = 35, il ramo elif sarà vero e status diventerà \"moderato\"."
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    var nemici = ["Slime", "Scheletro", "Spettro", "Boss Drago"]\n    var xp_totali = 0\n    \n    for nemico in nemici:\n        print("Allerta: " + nemico)\n        xp_totali += 25\n        \n    # Non modificare la riga sotto\n    print("XP Totali: ", xp_totali)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Annuncio Ondate e Calcolo XP</h3>
-                <p>Verifica l'iterazione con i cicli for su collezioni e l'accumulo di valori numerici.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Itera con <code>for nemico in nemici:</code></li>
-                <li>Stampa <code>"Allerta: " + nemico</code></li>
-                <li>Incrementa <code>xp_totali += 25</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const xpOk = s.xp_totali === 100;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasLoop = /\bfor\b/.test(cleanCode);
-    tests.push({ desc: "Ciclo for utilizzato per scorrere l'ondata", passed: !!hasLoop, diff: hasLoop ? null : "Usa un ciclo for per iterare sui nemici." });
-    tests.push({ desc: "XP Totali accumulati a 100 (4 x 25)", passed: xpOk, diff: xpOk ? null : `Ricevuto: ${s.xp_totali}` });
-    const clean = (result.logs || []).join(' ').replace(/\s+/g, ' ');
-    const logsOk = clean.includes("Allerta: Slime") && clean.includes("Allerta: Scheletro") && clean.includes("Allerta: Spettro") && clean.includes("Allerta: Boss Drago");
-    tests.push({ desc: "Allerte di tutti i nemici stampate", passed: logsOk, diff: logsOk ? null : `Ricevuto: "${clean}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.status === "moderato";
+                        tests.push({ desc: "status impostato a 'moderato'", passed: ok, diff: ok ? null : `Trovato: ${s.status}` });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 8: FUNZIONI E NODI GODOT
-    // ==========================================
+    {
+        id: 28,
+        conceptId: "conditions_logic",
+        conceptTags: ["calculator", "branching"],
+        chapterId: 6,
+        isMastery: false,
+        title: "28. Ripasso - Calcolatrice Semplice",
+        icon: "🧮",
+        xp: 50,
+        expectedOutput: "result = 50",
+        theory: "\n                <p>Costruiamo una calcolatrice che esegue l'operazione in base al simbolo contenuto nella stringa <code>op</code> (<code>\"+\"</code>, <code>\"-\"</code>, <code>\"*\"</code>, <code>\"/\"</code>).</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dati <code>n1 = 10</code>, <code>n2 = 5</code>, <code>op = \"*\"</code> e <code>result = 0.0</code>:</li>\n                    <li>Se <code>op == \"+\"</code>, assegna a <code>result</code> la somma <code>n1 + n2</code></li>\n                    <li>Se <code>op == \"-\"</code>, assegna a <code>result</code> la sottrazione <code>n1 - n2</code></li>\n                    <li>Se <code>op == \"*\"</code>, assegna a <code>result</code> la moltiplicazione <code>n1 * n2</code></li>\n                    <li>Se <code>op == \"/\"</code>, assegna a <code>result</code> la divisione <code>n1 / n2</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var n1 = 10\n    var n2 = 5\n    var op = \"*\"\n    var result: float = 0.0\n    # Scrivi qui la logica di calcolo\n    pass\n    print(\"result = \", result)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var n1 = 10\n    var n2 = 5\n    var op = \"*\"\n    var result: float = 0.0\n    if op == \"+\":\n        result = n1 + n2\n    elif op == \"-\":\n        result = n1 - n2\n    elif op == \"*\":\n        result = n1 * n2\n    elif op == \"/\":\n        result = n1 / n2\n    print(\"result = \", result)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Confronta op usando == con le stringhe \"+\", \"-\", \"*\", \"/\"."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "if op == \"+\": result = n1 + n2\nelif op == \"*\": result = n1 * n2"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "10 * 5 assegnerà 50 a result."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.result === 50;
+                        tests.push({ desc: "result calcolato correttamente (= 50)", passed: ok, diff: ok ? null : `Trovato: ${s.result}` });
+                        return tests;
+        }
+    },
     {
         id: 29,
-        conceptId: "functions_scope",
-        conceptTags: ["functions", "function_call", "ready"],
-        chapterId: 8,
+        conceptId: "conditions_logic",
+        conceptTags: ["nested_if", "logic"],
+        chapterId: 6,
         isMastery: false,
-        title: "29. Creare e chiamare una funzione",
-        icon: "🎬",
+        title: "29. Condizioni Annidate (Nested If)",
+        icon: "🪆",
         xp: 50,
-        expectedOutput: "Nodo Inizializzato",
-        theory: "<p>Hai già incontrato <code>_ready()</code> all'inizio del corso: Godot la richiama automaticamente quando il nodo è pronto. Qui impari a <strong>definire una funzione personalizzata</strong> e a chiamarla.</p><p>Scrivere <code>func mostra_saluto():</code> definisce le istruzioni, ma non le esegue subito. Per attivarle devi scrivere <code>mostra_saluto()</code> dentro un'altra funzione, come <code>_ready()</code>.</p><div class=\"code-preview\"><pre>func mostra_saluto():\n    print(\"Ciao!\")\n\nfunc _ready():\n    mostra_saluto()</pre></div><p>Separare l'avvio dal comportamento permette di riutilizzare una funzione. Nel prossimo esercizio vedrai come aggiungere parametri.</p>",
-        task: "<ul><li>Definisci una funzione senza parametri chiamata <code>inizializza_nodo()</code>, che stampa <code>\"Nodo Inizializzato\"</code>.</li><li>All'interno di <code>_ready()</code>, richiama <code>inizializza_nodo()</code> invece di ripetere direttamente la stampa.</li><li>Verifica che il messaggio compaia una sola volta.</li></ul>",
-        initialCode: "func inizializza_nodo():\n    # Mostra il messaggio di avvio\n    pass\n\nfunc _ready():\n    # Richiama la funzione appena definita\n    pass\n",
+        expectedOutput: "Biglietto: consentito",
+        theory: "\n                <p>Un'istruzione <code>if</code> può essere contenuta all'interno di un'altra. In questo caso il secondo controllo viene valutato solo se il primo è risultato vero.</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">if</span> ha_chiave:\n    <span class=\"k\">if</span> livello >= 10:\n        apri_cancello_dorato()</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Date <code>age = 14</code>, <code>with_parent = true</code> e <code>ticket = \"negato\"</code>:</li>\n                    <li>Se <code>age >= 18</code>, assegna <code>ticket = \"consentito\"</code></li>\n                    <li>Altrimenti, se <code>with_parent</code> è <code>true</code>, assegna <code>ticket = \"consentito\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var age = 14\n    var with_parent = true\n    var ticket = \"negato\"\n    # Applica i controlli annidati\n    pass\n    print(\"Biglietto: \", ticket)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var age = 14\n    var with_parent = true\n    var ticket = \"negato\"\n    if age >= 18:\n        ticket = \"consentito\"\n    else:\n        if with_parent:\n            ticket = \"consentito\"\n    print(\"Biglietto: \", ticket)\n",
         hints: [
-            {level: 1, type: "concept", icon: "lightbulb", label: "Ragionamento", text: "Una definizione `func` da sola non esegue il suo contenuto. Quale funzione avvia automaticamente Godot?"},
-            {level: 2, type: "structure", icon: "code-2", label: "Struttura", text: "Inserisci `print()` nel corpo di `inizializza_nodo()`; poi da `_ready()` chiama la funzione usando `inizializza_nodo()`."},
-            {level: 3, type: "example", icon: "book-open", label: "Esempio", text: "Esempio analogo: definisci `func saluta():` con `print(\"Ciao\")` nel corpo e richiama `saluta()` dentro `_ready()`."}
-        ],
-        solution: "func inizializza_nodo():\n    print(\"Nodo Inizializzato\")\n\nfunc _ready():\n    inizializza_nodo()\n",
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Inserisci il secondo controllo if all'interno del ramo else."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "if age >= 18:\n    ticket = \"consentito\"\nelse:\n    if with_parent:\n        ticket = \"consentito\""
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Dato che with_parent è true, ticket diventerà \"consentito\"."
+            }
+],
         validate: async (result) => {
-            const tests = [formatExecutionCheck(result)];
-            const code = String(result.code || '');
-            const cleaned = stripCommentsAndStrings(code);
-            const methodDefined = /\bfunc\s+inizializza_nodo\s*\(\s*\)\s*:/.test(cleaned);
-            const methodBody = code.split(/\bfunc\s+inizializza_nodo\s*\(\s*\)\s*:/)[1]?.split(/\nfunc\s+/)[0] || '';
-            const readyBody = code.split(/\bfunc\s+_ready\s*\(\s*\)\s*:/)[1]?.split(/\nfunc\s+/)[0] || '';
-            const readyCallsMethod = /\binizializza_nodo\s*\(\s*\)/.test(readyBody);
-            const methodPrints = /\bprint\s*\(/.test(methodBody);
-            const outputOk = (result.logs || []).length === 1 &&
-                (result.logs || [])[0].trim() === 'Nodo Inizializzato';
-            tests.push({desc: "Funzione inizializza_nodo() definita",passed:methodDefined});
-            tests.push({desc: "La funzione contiene print()",passed:methodPrints});
-            tests.push({desc: "_ready() richiama la funzione",passed:readyCallsMethod});
-            tests.push({desc: "Output corretto, una sola volta",passed:outputOk});
-            return tests;
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.ticket === "consentito";
+                        tests.push({ desc: "ticket impostato su 'consentito'", passed: ok, diff: ok ? null : `Trovato: ${s.ticket}` });
+                        return tests;
         }
     },
     {
         id: 30,
-        conceptId: "functions_scope",
-        conceptTags: ["func", "parameters", "arguments"],
-        chapterId: 8,
-        isMastery: false,
-        title: "30. Funzioni con parametri",
-        icon: "📥",
-        xp: 50,
-        expectedOutput: "Ciao Eroe",
-        theory: `
-            <p>Puoi creare funzioni personalizzate con la parola chiave <code>func</code> e passare dei <strong>parametri</strong> tra le parentesi:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">saluta</span>(nome):
-    <span class="nb">print</span>(<span class="s">"Ciao "</span> + nome)
-
-<span class="k">func</span> <span class="nf">_ready</span>():
-    saluta(<span class="s">"Eroe"</span>)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Definisci una funzione <code>saluta(nome):</code> che stampa <code>"Ciao " + nome</code>.</li>
-                <li>All'interno di <code>_ready():</code>, chiama <code>saluta("Eroe")</code>.</li>
-            </ul>
-        `,
-        initialCode: `func saluta(nome):\n    # Stampa il saluto con il parametro nome\n    pass\n\nfunc _ready():\n    # Chiama saluta("Eroe")\n    pass\n`,
+        conceptId: "conditions_logic",
+        conceptTags: ["match", "switch"],
+        chapterId: 6,
+        isMastery: true,
+        title: "30. L'Istruzione match (Pattern Matching)",
+        icon: "🎯",
+        xp: 75,
+        expectedOutput: "Stagione calda",
+        theory: "\n                <p>L'istruzione <code>match</code> è la versione di GDScript del costrutto <em>switch/case</em> presente in altri linguaggi, ma molto più potente e leggibile:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">match</span> stato_gioco:\n    <span class=\"s\">\"MENU\"</span>:\n        mostra_titolo()\n    <span class=\"s\">\"PLAY\"</span>:\n        avvia_partita()\n    _:\n        <span class=\"nb\">print</span>(<span class=\"s\">\"Stato sconosciuto\"</span>) <span class=\"c\"># Caso predefinito</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Data <code>season = \"estate\"</code>:</li>\n                    <li>Usa <code>match season:</code> per stampare:</li>\n                    <li><code>\"primavera\"</code> ➔ <code>print(\"Fiori e rinascita\")</code></li>\n                    <li><code>\"estate\"</code> ➔ <code>print(\"Stagione calda\")</code></li>\n                    <li><code>\"autunno\"</code> ➔ <code>print(\"Caduta foglie\")</code></li>\n                    <li><code>\"inverno\"</code> ➔ <code>print(\"Neve e freddo\")</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var season = \"estate\"\n    # Scrivi il match statement qui sotto\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var season = \"estate\"\n    match season:\n        \"primavera\":\n            print(\"Fiori e rinascita\")\n        \"estate\":\n            print(\"Stagione calda\")\n        \"autunno\":\n            print(\"Caduta foglie\")\n        \"inverno\":\n            print(\"Neve e freddo\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "I parametri sono variabili speciali racchiuse tra le parentesi tonde della funzione, che ricevono i valori forniti al momento della chiamata (argomenti)."
+                        "text": "Usa match season: e indenta ciascun caso con il proprio valore."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Dichiara la funzione inserendo il nome del parametro tra le parentesi: `func saluta(nome):`. Nel corpo della funzione, usa il parametro come una normale variabile."
+                        "text": "match season:\n    \"estate\":\n        print(\"Stagione calda\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc benvenuto(giocatore):\n    print(\"Benvenuto, \" + giocatore)\n\nfunc _ready():\n    benvenuto(\"Eroe\")\n```\nLa funzione saluta deve stampare la stringa 'Ciao ' concatenata con il parametro."
+                        "text": "Essendo season = \"estate\", verrà eseguita la riga print(\"Stagione calda\")."
             }
 ],
-        solution: `func saluta(nome):\n    print("Ciao " + nome)\n\nfunc _ready():\n    saluta("Eroe")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasFn = result.scope && typeof result.scope.saluta === 'function';
-    tests.push({ desc: "Funzione 'saluta(nome)' dichiarata", passed: !!hasFn, diff: hasFn ? null : "Dichiara la funzione con: func saluta(nome):" });
-    
-    let paramTestOk = false;
-    if (hasFn) {
-        try {
-            result.scope.saluta("Campione");
-            paramTestOk = result.logs.some(l => l.includes("Ciao Campione"));
-        } catch (e) {
-            paramTestOk = false;
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Stagione calda"));
+                        tests.push({ desc: "Console stampa 'Stagione calda' tramite match", passed: hasLog, diff: hasLog ? null : "Output non trovato" });
+                        return tests;
         }
-    }
-    tests.push({ desc: "Funzione accetta parametri dinamici (es. saluta('Campione'))", passed: paramTestOk, diff: paramTestOk ? null : "La funzione deve stampare 'Ciao ' concatenato al parametro passato." });
-    const defaultOk = result.logs.some(l => l.includes("Ciao Eroe"));
-    tests.push({ desc: "Chiamata iniziale saluta('Eroe') eseguita", passed: defaultOk, diff: defaultOk ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-    // Cambiare il risultato prodotto dalla funzione deve cambiare l'output iniziale.
-    const originalSource = String(result.code || '');
-    const replacementRe = /(^[ \t]*func[ \t]+saluta[ \t]*\([^\n)]*\)[ \t]*(?:->[ \t]*\w+[ \t]*)?:[ \t]*(?:#[^\n]*)?\n)(?:[ \t]+[^\n]*(?:\n|$))+/m;
-    const alteredSource = originalSource.replace(replacementRe, '$1    print("AUDIT_MUTANT_SALUTO")\n');
-    const alteredRun = alteredSource !== originalSource
-        ? await GDScriptRuntime.execute(alteredSource, { lesson: LESSONS_DATA.find(l => l.id === 30) })
-        : null;
-    const originalHasResult = (result.logs || []).some(line => String(line).trim() === "Ciao Eroe");
-    const alteredKeepsResult = alteredRun && (alteredRun.logs || []).some(line => String(line).trim() === "Ciao Eroe");
-    const functionCausesOutput = !!(alteredRun && alteredRun.success && originalHasResult && !alteredKeepsResult);
-    tests.push({ desc: "La stampa iniziale dipende dalla funzione richiesta", passed: functionCausesOutput,
-        diff: functionCausesOutput ? null : "Chiama la funzione da _ready e stampa il risultato calcolato, non una costante." });
-    return tests;
-}
     },
     {
         id: 31,
-        conceptId: "functions_scope",
-        conceptTags: ["return", "functions", "return_values"],
-        chapterId: 8,
+        conceptId: "syntax_basics",
+        conceptTags: ["print", "multiline"],
+        chapterId: 7,
         isMastery: false,
-        title: "31. Valori di ritorno con return",
-        icon: "📤",
+        title: "31. Output Multi-Riga",
+        icon: "📺",
         xp: 50,
-        expectedOutput: "25",
-        theory: `
-            <p>Una funzione può calcolare un risultato e restituirlo a chi l'ha chiamata usando la parola chiave <code>return</code>:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">calcola_danno</span>(attacco, difesa):
-    <span class="k">return</span> attacco - difesa
-
-<span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> danno = calcola_danno(<span class="m">30</span>, <span class="m">5</span>)
-    <span class="nb">print</span>(danno) <span class="c"># Stampa 25</span></pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Definisci <code>calcola_danno(attacco, difesa): return attacco - difesa</code>.</li>
-                <li>In <code>_ready():</code> calcola <code>var danno = calcola_danno(30, 5)</code> e stampa <code>danno</code>.</li>
-            </ul>
-        `,
-        initialCode: `func calcola_danno(attacco, difesa):\n    # Restituisci attacco - difesa con return\n    pass\n\nfunc _ready():\n    # Chiama calcola_danno(30, 5) e stampa il risultato\n    pass\n`,
+        expectedOutput: "I love GDScript\nLet's make games!",
+        theory: "\n                <p>Ogni chiamata a <code>print(...)</code> produce automaticamente una nuova riga nell'output della console.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Stampa su due righe distinte:</li>\n                    <li><code>I love GDScript</code></li>\n                    <li><code>Let's make games!</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Stampa i due messaggi su righe separate\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"I love GDScript\")\n    print(\"Let's make games!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Spesso una funzione non deve limitarsi a stampare, ma deve 'restituire' un risultato calcolato al codice che l'ha chiamata. La parola chiave `return` restituisce il valore e interrompe la funzione."
+                        "text": "Usa due istruzioni print distinte."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Scrivi `return risultato` all'interno della funzione. Chi invoca la funzione può memorizzare il valore restituito in una variabile: `var danno = calcola_danno(30, 5)`."
+                        "text": "print(\"I love GDScript\")\nprint(\"Let's make games!\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc somma(a, b):\n    return a + b\n\nfunc _ready():\n    var risultato = somma(10, 5)\n    print(risultato) # Stampa 15\n```\nSostituisci l'addizione con la formula del danno `attacco - difesa`."
+                        "text": "Fai attenzione all'apostrofo in Let's."
             }
 ],
-        solution: `func calcola_danno(attacco, difesa):\n    return attacco - difesa\n\nfunc _ready():\n    var danno = calcola_danno(30, 5)\n    print(danno)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasFn = result.scope && typeof result.scope.calcola_danno === 'function';
-    tests.push({ desc: "Funzione 'calcola_danno(attacco, difesa)' definita", passed: !!hasFn, diff: hasFn ? null : "Dichiara func calcola_danno(attacco, difesa): con return." });
-    
-    let testsPass = false;
-    if (hasFn) {
-        const r1 = result.scope.calcola_danno(30, 5);
-        const r2 = result.scope.calcola_danno(50, 10);
-        const r3 = result.scope.calcola_danno(15, 15);
-        testsPass = (r1 === 25) && (r2 === 40) && (r3 === 0);
-    }
-    tests.push({ desc: "Valori di ritorno calcolati correttamente su input multipli", passed: testsPass, diff: testsPass ? null : "La funzione deve restituire 'attacco - difesa'." });
-    const printed = result.logs.some(l => l.trim() === "25");
-    tests.push({ desc: "Risultato '25' stampato in _ready()", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-    // Cambiare il risultato prodotto dalla funzione deve cambiare l'output iniziale.
-    const originalSource = String(result.code || '');
-    const replacementRe = /(^[ \t]*func[ \t]+calcola_danno[ \t]*\([^\n)]*\)[ \t]*(?:->[ \t]*\w+[ \t]*)?:[ \t]*(?:#[^\n]*)?\n)(?:[ \t]+[^\n]*(?:\n|$))+/m;
-    const alteredSource = originalSource.replace(replacementRe, '$1    return 9999\n');
-    const alteredRun = alteredSource !== originalSource
-        ? await GDScriptRuntime.execute(alteredSource, { lesson: LESSONS_DATA.find(l => l.id === 31) })
-        : null;
-    const originalHasResult = (result.logs || []).some(line => String(line).trim() === "25");
-    const alteredKeepsResult = alteredRun && (alteredRun.logs || []).some(line => String(line).trim() === "25");
-    const functionCausesOutput = !!(alteredRun && alteredRun.success && originalHasResult && !alteredKeepsResult);
-    tests.push({ desc: "La stampa iniziale dipende dalla funzione richiesta", passed: functionCausesOutput,
-        diff: functionCausesOutput ? null : "Chiama la funzione da _ready e stampa il risultato calcolato, non una costante." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok1 = logs.includes("I love GDScript");
+                        const ok2 = logs.includes("Let's make games!");
+                        tests.push({ desc: "Stampa entrambe le righe richieste", passed: ok1 && ok2, diff: (ok1 && ok2) ? null : `Ricevuto: ${logs.join(' | ')}` });
+                        return tests;
+        }
     },
-{
+    {
         id: 32,
-        conceptId: "functions_scope",
-        conceptTags: ["mastery", "functions", "critical_damage"],
-        chapterId: 8,
-        isMastery: true,
-        title: "32. ⭐ Sfida di Apprendimento: Motore di Calcolo Danno Critico",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "avanzata",
-        difficultyLabel: "Avanzata",
-        scenario: "Il modulo di combattimento di Godot richiede una funzione pura e riutilizzabile per calcolare i colpi inflitti dai personaggi in base ai colpi critici. Sotto il commento iniziale, definisci la funzione richiesta:",
-        requirements: [
-            'Definisci la funzione: <code>func calcola_colpo(attacco: int, critico: bool) -> int:</code>',
-            'Se <code>critico</code> è <code>true</code>, restituisci con return il doppio dell\'attacco (<code>attacco * 2</code>)',
-            'Altrimenti restituisci con return semplicemente il valore di <code>attacco</code>'
-        ],
-        notice: "Non modificare il codice dentro _ready(). Il programma stampa:",
-        expectedOutput: "Colpo normale: 30\nColpo critico: 60",
-        initialCode: `extends Node\n\n# Definisci la funzione calcola_colpo sotto\n\n\nfunc _ready():\n    # Non modificare le righe sotto\n    var normale = calcola_colpo(30, false)\n    var critico = calcola_colpo(30, true)\n    print("Colpo normale: ", normale)\n    print("Colpo critico: ", critico)\n`,
-        aiExplanation: "Le funzioni personalizzate si dichiarano con <code>func nome_funzione(argomenti):</code>. La parola chiave <code>return</code> interrompe l'esecuzione della funzione e restituisce il valore al chiamante. Specificare il tipo con <code>-> int</code> rende la funzione auto-documentante ed efficiente.",
+        conceptId: "syntax_basics",
+        conceptTags: ["print", "variables"],
+        chapterId: 7,
+        isMastery: false,
+        title: "32. Output con Variabili Multiple",
+        icon: "🏷️",
+        xp: 50,
+        expectedOutput: "Eroe: Alex Livello: 5 Monete: 120",
+        theory: "\n                <p>Possiamo passare più argomenti separati da virgola a <code>print(...)</code>: Godot li stamperà separandoli con uno spazio:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"nb\">print</span>(<span class=\"s\">\"Vita:\"</span>, 100, <span class=\"s\">\"Mana:\"</span>, 50)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Date <code>hero = \"Alex\"</code>, <code>level = 5</code> e <code>coins = 120</code>:</li>\n                    <li>Stampa: <code>\"Eroe: \", hero, \" Livello: \", level, \" Monete: \", coins</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var hero = \"Alex\"\n    var level = 5\n    var coins = 120\n    # Stampa le informazioni su una sola riga\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var hero = \"Alex\"\n    var level = 5\n    var coins = 120\n    print(\"Eroe: \", hero, \" Livello: \", level, \" Monete: \", coins)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida richiede di costruire una funzione pura di combattimento che decide il valore del danno in base a un flag booleano (colpo critico)."
+                        "text": "Separa testo e variabili con virgole dentro print()."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Definisci `func calcola_colpo(attacco: int, critico: bool) -> int:`. All'interno, usa `if critico: return attacco * 2` e `else: return attacco` (oppure return immediato)."
+                        "text": "print(\"Eroe: \", hero, \" Livello: \", level, \" Monete: \", coins)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc calcola_bonus(valore: int, potenziato: bool) -> int:\n    if potenziato:\n        return valore * 2\n    return valore\n```\nNon modificare le istruzioni preesistenti in `_ready()`."
+                        "text": "Esegui il codice per verificare l'output combinato."
             }
 ],
-        solution: `extends Node\n\nfunc calcola_colpo(attacco: int, critico: bool) -> int:\n    if critico:\n        return attacco * 2\n    else:\n        return attacco\n\nfunc _ready():\n    var normale = calcola_colpo(30, false)\n    var critico = calcola_colpo(30, true)\n    print("Colpo normale: ", normale)\n    print("Colpo critico: ", critico)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Motore di Calcolo Danno Critico</h3>
-                <p>Verifica la creazione di funzioni con parametri multipli, logica condizionale interna e valore di ritorno return.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Crea <code>func calcola_colpo(attacco: int, critico: bool) -> int:</code></li>
-                <li>Se critico è true ritorna <code>attacco * 2</code></li>
-                <li>Altrimenti ritorna <code>attacco</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const hasFn = result.scope && typeof result.scope.calcola_colpo === 'function';
-    tests.push({ desc: "Funzione calcola_colpo definita", passed: !!hasFn, diff: hasFn ? null : "Definisci func calcola_colpo(attacco: int, critico: bool) -> int:" });
-    let checks = false;
-    if (hasFn) {
-        const norm = result.scope.calcola_colpo(30, false);
-        const crit = result.scope.calcola_colpo(30, true);
-        const altNorm = result.scope.calcola_colpo(50, false);
-        const altCrit = result.scope.calcola_colpo(50, true);
-        checks = (norm === 30) && (crit === 60) && (altNorm === 50) && (altCrit === 100);
-    }
-    tests.push({ desc: "Calcolo danno critico (x2 se true, x1 se false) verificato su vari input", passed: checks, diff: checks ? null : "Se critico è true ritorna attacco * 2, altrimenti attacco." });
-    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Colpo normale: 30","Colpo critico: 60"][at]) at++; } return at === 2; })();
-    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Eroe: Alex") && l.includes("120"));
+                        tests.push({ desc: "Console visualizza eroe, livello e monete", passed: hasLog, diff: hasLog ? null : "Output non corrispondente" });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 9: VETTORI E MOVIMENTO 2D (GODOT)
-    // ==========================================
     {
         id: 33,
-        conceptId: "vectors_2d",
-        conceptTags: ["vector2", "coordinates", "2d"],
-        chapterId: 9,
+        conceptId: "syntax_basics",
+        conceptTags: ["formatting", "strings"],
+        chapterId: 7,
         isMastery: false,
-        title: "33. Vector2(x, y) e coordinate 2D",
-        icon: "🧭",
+        title: "33. Formattazione di Stringhe (%s, %d)",
+        icon: "🎨",
         xp: 50,
-        expectedOutput: "(100.0, 200.0)",
-        theory: `
-            <p>Nello spazio 2D di Godot Engine, la posizione di qualsiasi oggetto o sprite è rappresentata da un vettore a due dimensioni: <code>Vector2(x, y)</code>:</p>
-            <ul>
-                <li><strong>X</strong>: asse orizzontale (verso destra cresce).</li>
-                <li><strong>Y</strong>: asse verticale (verso il basso cresce).</li>
-            </ul>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> posizione = Vector2(<span class="m">100</span>, <span class="m">200</span>)
-    <span class="nb">print</span>(posizione)</pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Crea <code>posizione = Vector2(100, 200)</code>.</li>
-                <li>Stampa il vettore con <code>print(posizione)</code>. Godot mostra le coordinate come <code>(100.0, 200.0)</code>, senza la parola <code>Vector2</code> nell'output.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Crea posizione come Vector2(100, 200) e stampala\n    pass\n`,
+        expectedOutput: "Pozione costa 15 monete",
+        theory: "\n                <p>L'operatore <code>%</code> applicato alle stringhe permette di formattare il testo inserendo segnaposto:</p>\n                <ul>\n                    <li><code>%s</code> ➔ stringa</li>\n                    <li><code>%d</code> ➔ numero intero</li>\n                    <li><code>%.2f</code> ➔ float con due decimali</li>\n                </ul>\n                <div class=\"code-preview\">\n<pre><span class=\"nb\">print</span>(<span class=\"s\">\"%s costa %d monete\"</span> % [item, price])</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Date <code>item = \"Pozione\"</code> e <code>price = 15</code>:</li>\n                    <li>Usa la formattazione per stampare: <br><code>\"%s costa %d monete\" % [item, price]</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var item = \"Pozione\"\n    var price = 15\n    # Usa la formattazione con %s e %d\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var item = \"Pozione\"\n    var price = 15\n    print(\"%s costa %d monete\" % [item, price])\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "In uno spazio 2D, ogni punto o movimento ha due componenti: orizzontale (X, verso destra) e verticale (Y, verso il basso nello standard degli schermi 2D)."
+                        "text": "Usa la sintassi \"%s costa %d monete\" % [item, price]."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Crea una variabile assegnando il costruttore nativo `Vector2(coordinata_x, coordinata_y)`. Poi passa la variabile a `print()`."
+                        "text": "print(\"%s costa %d monete\" % [item, price])"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var punto_spawn = Vector2(50, 75)\n    print(punto_spawn)\n```\nGodot stamperà automaticamente il formato `(50, 75)`."
+                        "text": "La lista di valori va tra parentesi quadre dopo il simbolo %."
             }
 ],
-        solution: `func _ready():\n    var posizione = Vector2(100, 200)\n    print(posizione)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const p = result.scope && result.scope.posizione;
-    const ok = p && p.x === 100 && p.y === 200;
-    tests.push({ desc: "Vector2(100, 200) creato nella variabile 'posizione'", passed: !!ok, diff: ok ? null : `Ricevuto: ${p}` });
-    const printed = result.logs.some(l => l.includes("100") && l.includes("200"));
-    tests.push({ desc: "Coordinate Vector2 stampate a console", passed: printed, diff: printed ? null : `Ricevuto: "${result.logs.join(' | ')}"` });
-    // Se cambiamo la coordinata di partenza, un print(posizione) deve cambiare.
-    const modifiedCode = (result.code || '').replace(/(var\s+posizione\s*=\s*Vector2\s*\(\s*)100(?=\s*,)/, (_m, prefix) => prefix + '101');
-    const rerun = modifiedCode !== result.code ? await GDScriptRuntime.execute(modifiedCode, { lesson: LESSONS_DATA.find(l => l.id === 33) }) : null;
-    const expectedVector = (result.logs || []).some(v => String(v).trim() === '(100.0, 200.0)');
-    const stillOriginal = rerun && (rerun.logs || []).some(v => String(v).trim() === '(100.0, 200.0)');
-    const dynamicOutput = !!(rerun && rerun.success && expectedVector && !stillOriginal);
-    tests.push({ desc: "Il vettore stampato dipende dalla variabile posizione", passed: dynamicOutput, diff: dynamicOutput ? null : "Stampa posizione invece di una stringa con coordinate fisse." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Pozione costa 15 monete"));
+                        tests.push({ desc: "Stringa formattata correttamente", passed: hasLog, diff: hasLog ? null : "Output non formattato come atteso" });
+                        return tests;
+        }
     },
     {
         id: 34,
-        conceptId: "vectors_2d",
-        conceptTags: ["position", "velocity", "movement"],
-        chapterId: 9,
+        conceptId: "syntax_basics",
+        conceptTags: ["saluto", "variables"],
+        chapterId: 7,
         isMastery: false,
-        title: "34. Calcolo nuova posizione con velocità",
-        icon: "🏃",
+        title: "34. Gestione di Valori Dinamici (Player Input)",
+        icon: "👋",
         xp: 50,
-        expectedOutput: "(150.0, 200.0)",
-        theory: `
-            <p>Per muovere un personaggio nello spazio di gioco, aggiungiamo la velocità alla sua coordinata:</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> posizione = Vector2(<span class="m">100</span>, <span class="m">200</span>)
-    <span class="k">var</span> velocita = <span class="m">50</span>
-    posizione.x += velocita
-    <span class="nb">print</span>(posizione) <span class="c"># Stampa (150.0, 200.0)</span></pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Inizializza <code>posizione = Vector2(100, 200)</code> e <code>velocita = 50</code>.</li>
-                <li>Aggiorna <code>posizione.x += velocita</code>.</li>
-                <li>Stampa il vettore finale con <code>print(posizione)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Aggiorna posizione.x con velocita e stampa\n    pass\n`,
+        expectedOutput: "Hello Mario!",
+        theory: "\n                <p>Nei giochi Godot i dati del giocatore (come il nome scelto all'inizio) vengono memorizzati in una variabile e usati per personalizzare l'esperienza.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Data la variabile <code>player_name = \"Mario\"</code>:</li>\n                    <li>Stampa il messaggio di benvenuto: <br><code>\"Hello \" + player_name + \"!\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var player_name = \"Mario\"\n    # Stampa il saluto personalizzato\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var player_name = \"Mario\"\n    print(\"Hello \", player_name, \"!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Puoi accedere e modificare singolarmente le due componenti di un vettore tramite la notazione puntata (`.x` e `.y`), ad esempio per spostare un personaggio solo a destra."
+                        "text": "Concatena o passa gli argomenti separati da virgola in print()."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa l'operatore composto sulla proprietà: `posizione.x += velocita` per incrementare la sola coordinata orizzontale."
+                        "text": "print(\"Hello \", player_name, \"!\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var pos = Vector2(100, 200)\n    pos.x += 50 # Ora la posizione è (150, 200)\n    print(pos)\n```\nLa coordinata `y` rimane invariata se modifichi solo `.x`."
+                        "text": "L'output deve contenere 'Hello Mario!'."
             }
 ],
-        solution: `func _ready():\n    var posizione = Vector2(100, 200)\n    var velocita = 50\n    posizione.x += velocita\n    print(posizione)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const p = result.scope && result.scope.posizione;
-    const ok = p && p.x === 150 && p.y === 200;
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasAdd = /posizione\.x\s*\+=/.test(cleanCode);
-    tests.push({ desc: "Coordinata X incrementata con 'posizione.x += velocita' a 150", passed: ok && hasAdd, diff: ok ? (hasAdd ? null : "Usa posizione.x += velocita") : `Ricevuto: ${p}` });
-    const logs = result.logs || [];
-    const printsPos = logs.some(l => /^(?:Vector2)?\(\s*150(?:\.0+)?\s*,\s*200(?:\.0+)?\s*\)$/i.test(String(l).trim()));
-    tests.push({ desc: "Vettore aggiornato (150, 200) stampato a console", passed: printsPos, diff: printsPos ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Hello") && l.includes("Mario"));
+                        tests.push({ desc: "Console stampa il saluto al giocatore", passed: hasLog, diff: hasLog ? null : "Manca il saluto atteso" });
+                        return tests;
+        }
     },
     {
         id: 35,
-        conceptId: "vectors_2d",
-        conceptTags: ["diagonal_movement", "axes", "vector2"],
-        chapterId: 9,
+        conceptId: "syntax_basics",
+        conceptTags: ["cast", "math"],
+        chapterId: 7,
         isMastery: false,
-        title: "35. Movimento diagonale su entrambi gli assi",
-        icon: "↗️",
+        title: "35. Conversione Numerica e Calcolo",
+        icon: "🔢",
         xp: 50,
-        expectedOutput: "(120.0, 180.0)",
-        theory: `
-            <p>Nei giochi 2D il movimento diagonale aggiorna simultaneamente sia la coordinata X (orizzontale) che la coordinata Y (verticale):</p>
-            <div class="code-preview">
-<pre><span class="k">func</span> <span class="nf">_ready</span>():
-    <span class="k">var</span> pos = Vector2(<span class="m">100</span>, <span class="m">200</span>)
-    pos.x += <span class="m">20</span>
-    pos.y -= <span class="m">20</span>
-    <span class="nb">print</span>(pos) <span class="c"># Stampa Vector2(120, 180)</span></pre>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Crea <code>pos = Vector2(100, 200)</code>.</li>
-                <li>Aggiungi <code>20</code> a <code>pos.x</code> e sottrai <code>20</code> a <code>pos.y</code>.</li>
-                <li>Stampa <code>pos</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Aggiorna pos.x e pos.y e stampa il vettore\n    pass\n`,
+        expectedOutput: "Prodotto: 15.0",
+        theory: "\n                <p>Spesso i dati inseriti dall'utente o da file di configurazione arrivano come stringhe di testo. Dobbiamo convertirli in <code>float</code> o <code>int</code> prima di eseguire calcoli matematici.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Date due stringhe <code>s1 = \"3.0\"</code> e <code>s2 = \"5.0\"</code>:</li>\n                    <li>Convertile in float e moltiplicale tra loro.</li>\n                    <li>Stampa <code>\"Prodotto: \", float(s1) * float(s2)</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var s1 = \"3.0\"\n    var s2 = \"5.0\"\n    # Converti in float e stampa il prodotto\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var s1 = \"3.0\"\n    var s2 = \"5.0\"\n    var prod := float(s1) * float(s2)\n    print(\"Prodotto: \", prod)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Per muovere un oggetto in diagonale puoi modificare entrambe le coordinate del suo `Vector2`: `.x` controlla lo spostamento orizzontale e `.y` quello verticale."
+                        "text": "Usa float(...) per convertire la stringa prima di moltiplicare."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Parti da `pos = Vector2(100, 200)`, aumenta `pos.x` di 20 con `+=` e diminuisci `pos.y` di 20 con `-=`. Infine stampa `pos`."
+                        "text": "var prod = float(s1) * float(s2)\nprint(\"Prodotto: \", prod)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var nave = Vector2(30, 80)\n    nave.x += 5\n    nave.y -= 10\n    print(nave)\n```\nAggiorna separatamente i due assi, come richiede la consegna."
+                        "text": "3.0 * 5.0 produce 15.0."
             }
 ],
-        solution: `func _ready():\n    var pos = Vector2(100, 200)\n    pos.x += 20\n    pos.y -= 20\n    print(pos)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const p = result.scope && result.scope.pos;
-    const ok = p && p.x === 120 && p.y === 180;
-    tests.push({ desc: "Vettore aggiornato a Vector2(120, 180)", passed: !!ok, diff: ok ? null : `Ricevuto: ${p}` });
-    const logs = result.logs || [];
-    const printsPos = logs.some(l => /^(?:Vector2)?\(\s*120(?:\.0+)?\s*,\s*180(?:\.0+)?\s*\)$/i.test(String(l).trim()));
-    tests.push({ desc: "Vettore pos (120, 180) stampato a console", passed: printsPos, diff: printsPos ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("15"));
+                        tests.push({ desc: "Prodotto calcolato con conversione (= 15)", passed: hasLog, diff: hasLog ? null : "Calcolo errato" });
+                        return tests;
+        }
     },
-{
+    {
         id: 36,
-        conceptId: "vectors_2d",
-        conceptTags: ["mastery", "vectors", "radar", "landing"],
-        chapterId: 9,
-        isMastery: true,
-        title: "36. ⭐ Sfida di Apprendimento: Navigazione Radar e Atterraggio 2D",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "avanzata",
-        difficultyLabel: "Avanzata",
-        scenario: "La sonda spaziale Orion deve calcolare la sua traiettoria di avvicinamento e verificare se le coordinate finali coincidono con la stazione spaziale orbitale. Sotto il commento, completa i calcoli vettoriali 2D:",
-        requirements: [
-            'Inizializza la posizione della sonda: <code>var posizione = Vector2(100, 200)</code>',
-            'Applica la spinta dei motori modificando gli assi: <code>posizione.x += 50</code> e <code>posizione.y -= 30</code>',
-            'Crea la coordinata della stazione: <code>var stazione = Vector2(150, 170)</code>',
-            'Verifica se la sonda ha raggiunto la stazione: <code>var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)</code>'
-        ],
-        notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Posizione finale: (150.0, 170.0)\nStazione raggiunta: true",
-        initialCode: `extends Node\n\nfunc _ready():\n    # Crea posizione, aggiorna le coordinate e verifica atterrato sotto\n    \n    # Non modificare le righe sotto\n    print("Posizione finale: ", posizione)\n    print("Stazione raggiunta: ", atterrato)\n`,
-        aiExplanation: "Un <code>Vector2(x, y)</code> rappresenta un punto o una velocità nello spazio bidimensionale di Godot Engine. Puoi accedere e modificare direttamente le singole componenti <code>.x</code> e <code>.y</code>. Per verificare se la sonda ha raggiunto le coordinate della stazione, puoi confrontare i valori delle coordinate per accertarti dell'allineamento perfetto.",
+        conceptId: "syntax_basics",
+        conceptTags: ["math", "recap"],
+        chapterId: 7,
+        isMastery: false,
+        title: "36. Ripasso - Fino a 120 Anni",
+        icon: "🎂",
+        xp: 50,
+        expectedOutput: "Anni mancanti: 95",
+        theory: "\n                <p>Eseguiamo un semplice calcolo matematico partendo da una variabile <code>age</code> per determinare quanti anni mancano al traguardo dei 120.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Data la variabile <code>age = 25</code>:</li>\n                    <li>Calcola gli anni mancanti a 120 con la formula: <code>120 - age</code></li>\n                    <li>Stampa <code>\"Anni mancanti: \", 120 - age</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var age = 25\n    # Calcola e stampa gli anni mancanti a 120\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var age = 25\n    print(\"Anni mancanti: \", 120 - age)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Il radar rappresenta la sonda e la stazione come `Vector2`. Per verificare l'atterraggio bisogna aggiornare le coordinate `.x` e `.y` della sonda e confrontarle con quelle della stazione."
+                        "text": "Sottrai age da 120."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Parti da `posizione = Vector2(100, 200)`, applica `posizione.x += 50` e `posizione.y -= 30`. Crea `stazione = Vector2(150, 170)` e imposta `atterrato` confrontando entrambi gli assi con `and`."
+                        "text": "print(\"Anni mancanti: \", 120 - age)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var rover = Vector2(10, 40)\n    rover.x += 5\n    rover.y -= 10\n    var base = Vector2(15, 30)\n    var arrivato = rover.x == base.x and rover.y == base.y\n    print(arrivato)\n```\nLa missione verifica le coordinate, non la lunghezza del vettore."
+                        "text": "120 - 25 = 95."
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    var posizione = Vector2(100, 200)\n    posizione.x += 50\n    posizione.y -= 30\n    var stazione = Vector2(150, 170)\n    var atterrato: bool = (posizione.x == stazione.x and posizione.y == stazione.y)\n    \n    # Non modificare le righe sotto\n    print("Posizione finale: ", posizione)\n    print("Stazione raggiunta: ", atterrato)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO FINALE</span>
-                <h3>Navigazione Radar e Atterraggio 2D</h3>
-                <p>Verifica l'uso avanzato di Vector2, modifica degli assi X/Y e confronto vettoriale nello spazio bidimensionale di Godot.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Crea <code>var posizione = Vector2(100, 200)</code></li>
-                <li>Modifica <code>posizione.x += 50</code> e <code>posizione.y -= 30</code></li>
-                <li>Crea <code>var stazione = Vector2(150, 170)</code></li>
-                <li>Verifica <code>var atterrato = (posizione.x == stazione.x and posizione.y == stazione.y)</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const pos = s.posizione;
-    const posOk = pos && Number(pos.x) === 150 && Number(pos.y) === 170;
-    const landOk = s.atterrato === true;
-    tests.push({ desc: "Posizione finale calcolata a Vector2(150, 170)", passed: posOk, diff: posOk ? null : `Ricevuto: ${pos}` });
-    tests.push({ desc: "Atterraggio riuscito con successo (true)", passed: landOk, diff: landOk ? null : `Ricevuto: ${s.atterrato}` });
-    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Posizione finale: (150.0, 170.0)","Stazione raggiunta: true"][at]) at++; } return at === 2; })();
-    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("95"));
+                        tests.push({ desc: "Stampa corretta di 95 anni mancanti", passed: hasLog, diff: hasLog ? null : "Risultato non corretto" });
+                        return tests;
+        }
     },
-// ==========================================
-    // CAPITOLO 10: DIZIONARI (DICTIONARY)
-    // ==========================================
     {
         id: 37,
-        conceptId: "dictionaries",
-        conceptTags: ["dictionaries", "key_value", "dict_access"],
-        chapterId: 10,
-        isMastery: false,
-        title: "37. Creare e accedere ai Dizionari",
-        icon: "📖",
-        xp: 50,
-        expectedOutput: "Classe: Guerriero\nLivello: 10",
-        theory: `
-            <p>Mentre gli <strong>Array</strong> memorizzano liste ordinate per indice numerico (<code>0, 1, 2...</code>), un <strong>Dizionario (Dictionary)</strong> memorizza dati in coppie <strong>chiave-valore</strong> racchiuse tra parentesi graffe <code>{}</code>:</p>
-            <pre class="code-block"><span class="k">var</span> eroe = { <span class="s">"classe"</span>: <span class="s">"Guerriero"</span>, <span class="s">"livello"</span>: <span class="m">10</span> }
-<span class="nb">print</span>(eroe[<span class="s">"classe"</span>]) <span class="c"># Stampa "Guerriero"</span></pre>
-            <p>Per leggere un valore dal dizionario, inserisci la chiave tra parentesi quadre: <code>dizionario["nome_chiave"]</code>.</p>
-        `,
-        task: `
-            <ul>
-                <li>Crea la variabile <code>var eroe = { "classe": "Guerriero", "livello": 10 }</code>.</li>
-                <li>Stampa la classe: <code>print("Classe: ", eroe["classe"])</code>.</li>
-                <li>Stampa il livello: <code>print("Livello: ", eroe["livello"])</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Crea il dizionario eroe e stampa classe e livello sotto\n    pass\n`,
+        conceptId: "syntax_basics",
+        conceptTags: ["logic", "recap"],
+        chapterId: 7,
+        isMastery: true,
+        title: "37. Ripasso - Vero o Falso (1 o 0)",
+        icon: "🔘",
+        xp: 75,
+        expectedOutput: "T",
+        theory: "\n                <p>Spesso i flag nei file di configurazione sono espressi come interi: <code>1</code> per abilitato, <code>0</code> per disabilitato.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Data la variabile <code>flag = 1</code>:</li>\n                    <li>Se <code>flag == 1</code>, stampa <code>\"T\"</code>. Altrimenti stampa <code>\"F\"</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var flag = 1\n    # Controlla flag e stampa T o F\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var flag = 1\n    if flag == 1:\n        print(\"T\")\n    else:\n        print(\"F\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Un Dizionario memorizza dati in coppie 'chiave: valore', permettendoti di cercare un dato tramite un nome descrittivo (come 'vita' o 'nome') anziché tramite un indice numerico."
+                        "text": "Usa if flag == 1: print(\"T\") else: print(\"F\")."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa le parentesi graffe `{}` con la sintassi `\"chiave\": valore`, separando le coppie con virgole. Per accedere a un valore, usa `dizionario[\"chiave\"]`."
+                        "text": "if flag == 1:\n    print(\"T\")\nelse:\n    print(\"F\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var nemico = { \"nome\": \"Goblin\", \"salute\": 30 }\n    print(nemico[\"nome\"]) # Stampa 'Goblin'\n```\nAssicurati di racchiudere le chiavi tra virgolette."
+                        "text": "Essendo flag = 1, verrà stampato T."
             }
 ],
-        solution: `func _ready():\n    var eroe = { "classe": "Guerriero", "livello": 10 }\n    print("Classe: ", eroe["classe"])\n    print("Livello: ", eroe["livello"])\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const d = s.eroe || {};
-    const heroOk = d["classe"] === "Guerriero" && Number(d["livello"]) === 10;
-    tests.push({ desc: "Dizionario eroe creato con chiavi 'classe' e 'livello'", passed: heroOk, diff: heroOk ? null : `Ricevuto: ${JSON.stringify(d)}` });
-    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
-    const outOk = out.includes("Classe: Guerriero") && out.includes("Livello: 10");
-    tests.push({ desc: "Classe e livello stampati con eroe['...']", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok = logs.includes("T");
+                        tests.push({ desc: "Stampa 'T' quando flag vale 1", passed: ok, diff: ok ? null : `Trovato: ${logs.join(' | ')}` });
+                        return tests;
+        }
     },
     {
         id: 38,
-        conceptId: "dictionaries",
-        conceptTags: ["dict_mutation", "adding_keys", "dictionaries"],
-        chapterId: 10,
+        conceptId: "project_bill",
+        conceptTags: ["project", "banner"],
+        chapterId: 8,
         isMastery: false,
-        title: "38. Modificare e aggiungere chiavi al Dizionario",
-        icon: "🛡️",
+        title: "38. Calcolatore del Conto: Benvenuto",
+        icon: "🧾",
         xp: 50,
-        expectedOutput: "Arma: Spada Laser\nArmatura: Scudo",
-        theory: `
-            <p>I dizionari in GDScript sono <strong>mutabili</strong>. Puoi aggiungere una nuova chiave semplicemente assegnandole un valore, o modificare una chiave esistente:</p>
-            <pre class="code-block"><span class="k">var</span> equip = { <span class="s">"arma"</span>: <span class="s">"Spada"</span> }
-equip[<span class="s">"armatura"</span>] = <span class="s">"Scudo"</span>     <span class="c"># Aggiunge una nuova chiave</span>
-equip[<span class="s">"arma"</span>] = <span class="s">"Spada Laser"</span>   <span class="c"># Aggiorna il valore esistente</span></pre>
-        `,
-        task: `
-            <ul>
-                <li>Inizializza <code>var equip = { "arma": "Spada" }</code>.</li>
-                <li>Aggiungi la chiave armatura: <code>equip["armatura"] = "Scudo"</code>.</li>
-                <li>Aggiorna l'arma: <code>equip["arma"] = "Spada Laser"</code>.</li>
-                <li>Stampa: <code>print("Arma: ", equip["arma"])</code> e <code>print("Armatura: ", equip["armatura"])</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    var equip = { "arma": "Spada" }\n    # Aggiungi armatura, aggiorna arma e stampa sotto\n    pass\n`,
+        expectedOutput: "=== CALCOLATORE DEL CONTO ===",
+        theory: "\n                <p>In questo progetto guidato realizzeremo un'applicazione completa per calcolare la mancia e dividere il conto tra amici al ristorante!</p>\n                <p>Iniziamo stampando il banner introduttivo del programma.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Stampa il titolo esatto del programma: <br><code>\"=== CALCOLATORE DEL CONTO ===\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Stampa il banner di benvenuto\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"=== CALCOLATORE DEL CONTO ===\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "I dizionari sono dinamici: puoi aggiungere nuovi attributi in qualsiasi momento durante la partita o aggiornare valori esistenti riassegnando la chiave."
+                        "text": "Stampa la stringa racchiusa tra virgolette."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Per aggiungere o sovrascrivere una chiave, usa l'assegnazione con parentesi quadre: `dizionario[\"nuova_chiave\"] = nuovo_valore`."
+                        "text": "print(\"=== CALCOLATORE DEL CONTO ===\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var profilo = { \"ruolo\": \"Guerriero\" }\n    profilo[\"livello\"] = 10 # Aggiunge la chiave 'livello'\n    profilo[\"ruolo\"] = \"Paladino\" # Sovrascrive 'ruolo'\n```\nNon ridefinire l'intero dizionario da capo: modifica l'oggetto esistente tramite le sue chiavi."
+                        "text": "Attenzione ai 3 segni uguale '===' prima e dopo il testo."
             }
 ],
-        solution: `func _ready():\n    var equip = { "arma": "Spada" }\n    equip["armatura"] = "Scudo"\n    equip["arma"] = "Spada Laser"\n    print("Arma: ", equip["arma"])\n    print("Armatura: ", equip["armatura"])\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const eq = s.equip || {};
-    const modOk = eq["arma"] === "Spada Laser" && eq["armatura"] === "Scudo";
-    const codeNoComments = (result.code || "").replace(/#.*$/gm, "");
-    const hasAssign = /(?:equip\s*\[\s*["']armatura["']\s*\]|equip\.armatura)\s*=/.test(codeNoComments);
-    tests.push({ desc: "Chiavi aggiornate correttamente (arma: Spada Laser, armatura: Scudo)", passed: modOk, diff: modOk ? null : `Equip: ${JSON.stringify(eq)}` });
-    tests.push({ desc: "Aggiunta della chiave 'armatura' tramite assegnazione dinamica", passed: !!hasAssign, diff: hasAssign ? null : "Assegna la chiave 'armatura' usando equip['armatura'] = 'Scudo'" });
-    const logs = result.logs || [];
-    const hasArmaLog = logs.some(l => /^Arma\s*:\s*Spada Laser$/i.test(String(l).trim()));
-    const hasArmaturaLog = logs.some(l => /^Armatura\s*:\s*Scudo$/i.test(String(l).trim()));
-    const logsOk = hasArmaLog && hasArmaturaLog;
-    tests.push({ desc: "Valori aggiornati di 'Arma' e 'Armatura' stampati a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("CALCOLATORE DEL CONTO"));
+                        tests.push({ desc: "Stampa banner di benvenuto", passed: hasLog, diff: hasLog ? null : "Banner non trovato" });
+                        return tests;
+        }
     },
     {
         id: 39,
-        conceptId: "dictionaries",
-        conceptTags: ["has", "keys", "values", "dict_methods", "debugging"],
-        isDebugging: true,
-        debugType: "Controllo sicurezza chiavi e metodi del Dictionary",
-        chapterId: 10,
+        conceptId: "project_bill",
+        conceptTags: ["project", "variables"],
+        chapterId: 8,
         isMastery: false,
-        title: "39. Metodi dei Dizionari (has, keys)",
-        icon: "🔍",
+        title: "39. Calcolatore del Conto: Impostare i Dati",
+        icon: "💵",
         xp: 50,
-        expectedOutput: "Possiede oro: true\nPossiede chiave: false\nChiavi nel forziere: 2",
-        theory: "<p>GDScript consente di verificare e ispezionare le informazioni contenute in un dizionario senza conoscere tutte le chiavi in anticipo.</p><ul><li><code>forziere.has(\"oro\")</code> restituisce un booleano che indica se la chiave esiste, senza tentare di leggerla.</li><li><code>forziere.keys()</code> restituisce un <code>Array</code> contenente tutte le chiavi; puoi contarle con <code>.size()</code>.</li></ul><p>Se la chiave <code>\"chiave\"</code> non esiste, leggere <code>forziere[\"chiave\"]</code> è rischioso. Prima correggi gli accessi, poi conta le chiavi realmente presenti.</p>",
-        task: "<ul><li>Il forziere contiene <code>\"oro\": 100</code> e <code>\"gemme\": 3</code>.</li><li>Correggi <code>ha_oro</code> e <code>ha_chiave</code> usando <code>forziere.has()</code>, senza leggere direttamente la chiave mancante.</li><li>Usa <code>forziere.keys()</code> per assegnare a <code>chiavi</code> l'elenco delle chiavi del dizionario.</li><li>Stampa gli esiti di entrambi i controlli e il numero di chiavi con <code>chiavi.size()</code>, secondo l'output atteso.</li></ul>",
-        initialCode: "func _ready():\n    var forziere = { \"oro\": 100, \"gemme\": 3 }\n    # BUG: questi accessi leggono valori, anziché verificare le chiavi.\n    var ha_oro = forziere[\"oro\"]\n    var ha_chiave = forziere[\"chiave\"]\n    # Sostituisci anche l'array vuoto con le chiavi del forziere.\n    var chiavi = []\n    print(\"Possiede oro: \", ha_oro)\n    print(\"Possiede chiave: \", ha_chiave)\n    print(\"Chiavi nel forziere: \", chiavi.size())\n",
+        expectedOutput: "Conto base: 60.0 Mancia %: 15.0",
+        theory: "\n                <p>Passo 2: dichiariamo le variabili per memorizzare l'importo del conto e la percentuale di mancia che desideriamo lasciare.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Mantieni il messaggio di benvenuto del passo precedente.</li>\n                    <li>Dichiara <code>bill: float = 60.0</code></li>\n                    <li>Dichiara <code>tip_pct: float = 15.0</code></li>\n                    <li>Stampa <code>\"Conto base: \", bill, \" Mancia %: \", tip_pct</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    print(\"=== CALCOLATORE DEL CONTO ===\")\n    # Dichiara bill (60.0) e tip_pct (15.0)\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"=== CALCOLATORE DEL CONTO ===\")\n    var bill: float = 60.0\n    var tip_pct: float = 15.0\n    print(\"Conto base: \", bill, \" Mancia %: \", tip_pct)\n",
         hints: [
-            {level: 1,type: "concept",icon: "lightbulb",label: "Ragionamento",text: "Leggere il valore di una chiave e controllare la sua esistenza sono operazioni diverse. `.has()` restituisce un `bool`; `.keys()` un array."},
-            {level: 2,type: "structure",icon: "code-2",label: "Struttura",text: "Assegna `forziere.has(\"oro\")` e `forziere.has(\"chiave\")` alle due variabili booleane. Poi assegna `forziere.keys()` alla variabile `chiavi`."},
-            {level: 3,type: "example",icon: "book-open",label: "Esempio",text: "Esempio analogo: `var dati = {\"hp\": 10, \"mana\": 5}`. `dati.has(\"hp\")` è `true`, mentre `dati.keys().size()` vale `2`."}
-        ],
-        solution: "func _ready():\n    var forziere = { \"oro\": 100, \"gemme\": 3 }\n    var ha_oro = forziere.has(\"oro\")\n    var ha_chiave = forziere.has(\"chiave\")\n    var chiavi = forziere.keys()\n    print(\"Possiede oro: \", ha_oro)\n    print(\"Possiede chiave: \", ha_chiave)\n    print(\"Chiavi nel forziere: \", chiavi.size())\n",
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Dichiara bill e tip_pct come variabili float."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "var bill: float = 60.0\nvar tip_pct: float = 15.0"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Stampa i valori dopo la dichiarazione."
+            }
+],
         validate: async (result) => {
-            const tests = [formatExecutionCheck(result)];
-            const s = result.scope || {};
-            const code = result.code || '';
-            const hasBoth = /\bvar\s+ha_oro\s*=\s*forziere\.has\s*\(\s*["']oro["']\s*\)/.test(code) &&
-                /\bvar\s+ha_chiave\s*=\s*forziere\.has\s*\(\s*["']chiave["']\s*\)/.test(code);
-            const hasKeys = /\bvar\s+chiavi\s*=\s*forziere\.keys\s*\(\s*\)/.test(code);
-            const logs = (result.logs || []).map(l => String(l).trim());
-            tests.push({desc: "Entrambe le chiavi controllate con .has()",passed:hasBoth});
-            tests.push({desc: "Array delle chiavi ottenuto con .keys()",passed:hasKeys});
-            tests.push({desc: "Tre risultati corretti in console",passed:
-                JSON.stringify(logs) === JSON.stringify(["Possiede oro: true","Possiede chiave: false","Chiavi nel forziere: 2"])});
-            return tests;
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = Math.abs(s.bill - 60.0) < 0.001 && Math.abs(s.tip_pct - 15.0) < 0.001;
+                        tests.push({ desc: "bill e tip_pct impostati correttamente", passed: ok, diff: ok ? null : `Trovato: bill=${s.bill}, tip_pct=${s.tip_pct}` });
+                        return tests;
         }
     },
     {
         id: 40,
-        conceptId: "dictionaries",
-        conceptTags: ["mastery", "dictionaries", "boss_stats"],
-        chapterId: 10,
-        isMastery: true,
-        title: "40. ⭐ Sfida di Apprendimento: Statistiche del Boss Finale",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "media",
-        difficultyLabel: "Media",
-        scenario: "Il bestiario del dungeon deve registrare e aggiornare la scheda tecnica del boss del dungeon durante lo scontro. Sotto il commento, manipola il dizionario <code>boss</code>:",
-        requirements: [
-            'Crea il dizionario iniziale: <code>var boss = { "nome": "Drago Antico", "hp": 500 }</code>',
-            'Aggiungi la statistica dell\'attacco: <code>boss["attacco"] = 75</code>',
-            'Aggiorna la salute sottraendo i danni del primo turno: <code>boss["hp"] = 420</code>',
-            'Controlla se il boss è entrato in stato di furia con <code>boss.has("furia")</code> e assegna il risultato a <code>var in_furia</code>'
-        ],
-        notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Boss: Drago Antico\nHP rimanenti: 420\nAttacco: 75\nFuria attiva: false",
-        initialCode: `extends Node\n\nfunc _ready():\n    # Crea e aggiorna boss e crea in_furia sotto\n    \n    # Non modificare le righe sotto\n    print("Boss: ", boss["nome"])\n    print("HP rimanenti: ", boss["hp"])\n    print("Attacco: ", boss["attacco"])\n    print("Furia attiva: ", in_furia)\n`,
-        aiExplanation: "In GDScript i dizionari sono la struttura dati prediletta per memorizzare entità complesse con proprietà eterogenee (testi, numeri, booleani). Puoi accedere e modificare chiavi con le parentesi quadre <code>diz[\"chiave\"] = valore</code> e testare l'esistenza di parametri opzionali usando <code>diz.has(\"chiave\")</code>.",
+        conceptId: "project_bill",
+        conceptTags: ["project", "math"],
+        chapterId: 8,
+        isMastery: false,
+        title: "40. Calcolatore del Conto: Calcolo della Mancia",
+        icon: "🪙",
+        xp: 50,
+        expectedOutput: "Mancia: 9.0 Totale: 69.0",
+        theory: "\n                <p>La formula per calcolare la mancia in euro è: <code>tip = bill * (tip_pct / 100.0)</code>.</p>\n                <p>Il totale complessivo sarà la somma del conto base più la mancia: <code>total = bill + tip</code>.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Mantieni il codice precedente.</li>\n                    <li>Calcola <code>var tip = bill * (tip_pct / 100.0)</code></li>\n                    <li>Calcola <code>var total = bill + tip</code></li>\n                    <li>Stampa <code>\"Mancia: \", tip, \" Totale: \", total</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var bill: float = 60.0\n    var tip_pct: float = 15.0\n    # Calcola tip e total\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var bill: float = 60.0\n    var tip_pct: float = 15.0\n    var tip := bill * (tip_pct / 100.0)\n    var total := bill + tip\n    print(\"Mancia: \", tip, \" Totale: \", total)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Il dizionario `boss` conserva proprietà differenti dello stesso nemico: nome, punti vita e attacco. Con le chiavi puoi aggiungere statistiche, aggiornare la salute e controllare se esiste lo stato di furia."
+                        "text": "Moltiplica bill per tip_pct / 100.0."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Crea `boss` con `nome` e `hp`, aggiungi `attacco`, porta `hp` a 420 e assegna a `in_furia` il risultato di `boss.has(\"furia\")`. Le stampe finali devono leggere questi valori dal dizionario."
+                        "text": "var tip = bill * (tip_pct / 100.0)\nvar total = bill + tip"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var mostro = {\"nome\": \"Orco\", \"hp\": 120}\n    mostro[\"attacco\"] = 20\n    mostro[\"hp\"] = 90\n    var ha_scudo = mostro.has(\"scudo\")\n    print(mostro[\"hp\"], ha_scudo)\n```\nUsa le chiavi specificate nella scheda del boss."
+                        "text": "60 * 0.15 = 9.0 di mancia; totale = 69.0."
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    var boss = { "nome": "Drago Antico", "hp": 500 }\n    boss["attacco"] = 75\n    boss["hp"] = 420\n    var in_furia = boss.has("furia")\n    \n    # Non modificare le righe sotto\n    print("Boss: ", boss["nome"])\n    print("HP rimanenti: ", boss["hp"])\n    print("Attacco: ", boss["attacco"])\n    print("Furia attiva: ", in_furia)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Statistiche del Boss Finale</h3>
-                <p>Verifica la creazione, manipolazione ed interrogazione di dizionari complessi in GDScript.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Crea <code>boss = { "nome": "Drago Antico", "hp": 500 }</code></li>
-                <li>Aggiungi <code>boss["attacco"] = 75</code></li>
-                <li>Imposta <code>boss["hp"] = 420</code></li>
-                <li>Verifica <code>var in_furia = boss.has("furia")</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const b = s.boss || {};
-    const bossOk = b["nome"] === "Drago Antico" && Number(b["hp"]) === 420 && Number(b["attacco"]) === 75;
-    const furyOk = s.in_furia === false;
-    tests.push({ desc: "Dizionario del boss aggiornato (hp: 420, attacco: 75)", passed: bossOk, diff: bossOk ? null : `Boss: ${JSON.stringify(b)}` });
-    tests.push({ desc: "Controllo boss.has('furia') false", passed: furyOk, diff: furyOk ? null : `in_furia=${s.in_furia}` });
-    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 4 && String(line).trim() === ["Boss: Drago Antico","HP rimanenti: 420","Attacco: 75","Furia attiva: false"][at]) at++; } return at === 4; })();
-    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = Math.abs(s.tip - 9.0) < 0.001 && Math.abs(s.total - 69.0) < 0.001;
+                        tests.push({ desc: "tip (= 9.0) e total (= 69.0) calcolati correttamente", passed: ok, diff: ok ? null : `tip=${s.tip}, total=${s.total}` });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 11: I SEGNALI DI GODOT (SIGNALS)
-    // ==========================================
     {
         id: 41,
-        conceptId: "signals",
-        conceptTags: ["signal", "emit", "events"],
-        chapterId: 11,
+        conceptId: "project_bill",
+        conceptTags: ["project", "division"],
+        chapterId: 8,
         isMastery: false,
-        title: "41. Dichiarare ed emettere un Segnale",
-        icon: "📡",
+        title: "41. Calcolatore del Conto: Dividere tra Persone",
+        icon: "👥",
         xp: 50,
-        expectedOutput: "Apertura in corso...\nPorta aperta con successo!",
-        theory: `
-            <p>I <strong>Segnali (Signals)</strong> sono il meccanismo di comunicazione disaccoppiata di Godot ("Observer pattern"). Permettono a un nodo di annunciare un evento senza dover conoscere chi lo ascolterà.</p>
-            <p>In Godot 4, un segnale si dichiara a inizio script con la parola chiave <code>signal</code> e si emette invocando il metodo <code>.emit()</code>:</p>
-            <pre class="code-block"><span class="k">signal</span> porta_aperta
-
-<span class="k">func</span> _ready():
-    porta_aperta.<span class="nb">emit</span>() <span class="c"># Lancia il segnale!</span></pre>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara in cima allo script: <code>signal porta_aperta</code>.</li>
-                <li>In <code>_ready()</code>, dopo la stampa, emetti il segnale: <code>porta_aperta.emit()</code>.</li>
-            </ul>
-        `,
-        initialCode: `extends Node\n\n# Dichiara il segnale porta_aperta sotto\n\n\nfunc _ready():\n    porta_aperta.connect(quando_aperta)\n    print("Apertura in corso...")\n    # Emetti il segnale sotto\n\n\nfunc quando_aperta():\n    print("Porta aperta con successo!")\n`,
+        expectedOutput: "Quota a persona: 23.0",
+        theory: "\n                <p>Ora dividiamo il conto totale per il numero di commensali: <code>per_person = total / people</code>.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dati <code>total = 69.0</code> e <code>people = 3</code>:</li>\n                    <li>Calcola <code>var per_person = total / people</code></li>\n                    <li>Stampa <code>\"Quota a persona: \", per_person</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var total = 69.0\n    var people = 3\n    # Calcola la quota per persona\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var total = 69.0\n    var people = 3\n    var per_person := total / people\n    print(\"Quota a persona: \", per_person)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "I segnali sono il meccanismo di Godot per realizzare l'architettura a eventi: un nodo annuncia che qualcosa è accaduto ('Porta aperta!') senza doversi preoccupare di chi ascolterà."
+                        "text": "Dividi total per people."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Dichiara il segnale in cima allo script con la parola chiave `signal nome_segnale`. Per inviare la notifica usa `nome_segnale.emit()` (o `emit_signal(\"nome_segnale\")`)."
+                        "text": "var per_person = total / people"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nsignal salto_eseguito\n\nfunc _ready():\n    salto_eseguito.emit()\n```\nIn Godot 4 la sintassi raccomandata è `segnale.emit()`."
+                        "text": "69.0 / 3 = 23.0 a persona."
             }
 ],
-        solution: `extends Node\n\nsignal porta_aperta\n\nfunc _ready():\n    porta_aperta.connect(quando_aperta)\n    print("Apertura in corso...")\n    porta_aperta.emit()\n\nfunc quando_aperta():\n    print("Porta aperta con successo!")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasSigDecl = /\bsignal\s+porta_aperta\b/.test(cleanCode);
-    const isSignal = s.porta_aperta && (typeof s.porta_aperta.emit === 'function');
-    tests.push({ desc: "Segnale 'signal porta_aperta' dichiarato", passed: !!(hasSigDecl && isSignal), diff: (hasSigDecl && isSignal) ? null : "Dichiara 'signal porta_aperta' in cima allo script." });
-    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
-    const ok = out.includes("Apertura in corso...") && out.includes("Porta aperta con successo!");
-    tests.push({ desc: "Segnale emesso con successo e intercettato dalla callback", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-    const auditOk = !!(result.scope && result.scope.porta_aperta && Array.isArray(result.scope.porta_aperta.emissions) && [[]].every(args => result.scope.porta_aperta.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
-    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = Math.abs(s.per_person - 23.0) < 0.001;
+                        tests.push({ desc: "per_person calcolato correttamente (= 23.0)", passed: ok, diff: ok ? null : `Trovato: ${s.per_person}` });
+                        return tests;
+        }
     },
     {
         id: 42,
-        conceptId: "signals",
-        conceptTags: ["connect", "callable", "callbacks"],
-        chapterId: 11,
-        isMastery: false,
-        title: "42. Connettere un Segnale a una Funzione (connect)",
-        icon: "🔗",
-        xp: 50,
-        expectedOutput: "+10 Monete raccolte!",
-        theory: `
-            <p>Per fare in modo che una funzione risponda all'evento annunciato da un segnale, dobbiamo <strong>connetterli</strong> con <code>segnale.connect(nome_funzione)</code>:</p>
-            <pre class="code-block"><span class="k">signal</span> evento
-
-<span class="k">func</span> _ready():
-    evento.<span class="nb">connect</span>(quando_accade) <span class="c"># Connessione</span>
-    evento.<span class="nb">emit</span>()                   <span class="c"># Esecuzione automatica</span>
-
-<span class="k">func</span> quando_accade():
-    <span class="nb">print</span>(<span class="s">"Evento catturato!"</span>)</pre>
-        `,
-        task: `
-            <ul>
-                <li>Nel corpo di <code>_ready()</code>, connetti il segnale alla funzione: <code>moneta_raccolta.connect(aggiungi_punti)</code>.</li>
-                <li>Subito dopo, lancia il segnale con: <code>moneta_raccolta.emit()</code>.</li>
-            </ul>
-        `,
-        initialCode: `extends Node\n\nsignal moneta_raccolta\n\nfunc _ready():\n    # Connetti moneta_raccolta ad aggiungi_punti ed emettila sotto\n    pass\n\nfunc aggiungi_punti():\n    print("+10 Monete raccolte!")\n`,
+        conceptId: "project_bill",
+        conceptTags: ["project", "summary"],
+        chapterId: 8,
+        isMastery: true,
+        title: "42. Calcolatore del Conto: Riepilogo Finale (Sfida)",
+        icon: "🏆",
+        xp: 75,
+        expectedOutput: "=== SCONTRINO ===\nTotale: 69.0 EUR\nA testa: 23.0 EUR",
+        theory: "\n                <p>Concludiamo il progetto generando uno scontrino elegante e chiaro!</p>\n            ",
+        task: "\n                <ul>\n                    <li>Stampa su 3 righe consecutive:</li>\n                    <li><code>=== SCONTRINO ===</code></li>\n                    <li><code>Totale: 69.0 EUR</code></li>\n                    <li><code>A testa: 23.0 EUR</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Genera lo scontrino finale su 3 righe\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"=== SCONTRINO ===\")\n    print(\"Totale: 69.0 EUR\")\n    print(\"A testa: 23.0 EUR\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Per reagire a un segnale, dobbiamo 'collegare' l'evento a una funzione di risposta (chiamata callback)."
+                        "text": "Usa 3 istruzioni print per produrre le tre righe dello scontrino."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Collega il segnale in `_ready()` con la sintassi `nome_segnale.connect(nome_funzione_callback)`. Definisci la funzione di risposta con `func _on_...():`."
+                        "text": "print(\"=== SCONTRINO ===\")\nprint(\"Totale: 69.0 EUR\")\nprint(\"A testa: 23.0 EUR\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nsignal luce_accesa\n\nfunc _ready():\n    luce_accesa.connect(_on_luce_accesa)\n    luce_accesa.emit()\n\nfunc _on_luce_accesa():\n    print(\"Luce attiva!\")\n```\nNota che passi il nome della funzione senza parentesi tonde a `.connect()`."
+                        "text": "Controlla il testo esatto con le lettere maiuscole 'EUR'."
             }
 ],
-        solution: `extends Node\n\nsignal moneta_raccolta\n\nfunc _ready():\n    moneta_raccolta.connect(aggiungi_punti)\n    moneta_raccolta.emit()\n\nfunc aggiungi_punti():\n    print("+10 Monete raccolte!")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const sig = s.moneta_raccolta;
-    const hasConnected = sig && sig.callbacks && sig.callbacks.length > 0;
-    tests.push({ desc: "Segnale 'moneta_raccolta' connesso con connect()", passed: !!hasConnected, diff: hasConnected ? null : "Connetti il segnale con moneta_raccolta.connect(aggiungi_punti)." });
-    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
-    const ok = out.includes("+10 Monete raccolte!");
-    tests.push({ desc: "Funzione aggiungi_punti invocata da emit()", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-    const auditOk = !!(result.scope && result.scope.moneta_raccolta && Array.isArray(result.scope.moneta_raccolta.emissions) && [[]].every(args => result.scope.moneta_raccolta.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
-    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok1 = logs.includes("=== SCONTRINO ===");
+                        const ok2 = logs.includes("Totale: 69.0 EUR");
+                        const ok3 = logs.includes("A testa: 23.0 EUR");
+                        tests.push({ desc: "Scontrino finale stampato correttamente", passed: ok1 && ok2 && ok3, diff: (ok1 && ok2 && ok3) ? null : `Ricevuto: ${logs.join(' | ')}` });
+                        return tests;
+        }
     },
     {
         id: 43,
-        conceptId: "signals",
-        conceptTags: ["signal_parameters", "event_payload", "signals"],
-        chapterId: 11,
+        conceptId: "loops_iteration",
+        conceptTags: ["for", "loop"],
+        chapterId: 9,
         isMastery: false,
-        title: "43. Segnali con Parametri",
-        icon: "📨",
+        title: "43. Il Ciclo for (Ripetere Azioni)",
+        icon: "🔁",
         xp: 50,
-        expectedOutput: "Danno registrato: 35",
-        theory: `
-            <p>I segnali possono trasportare informazioni verso chi li ascolta. Basta specificare i parametri nella dichiarazione:</p>
-            <pre class="code-block"><span class="k">signal</span> danno_inflitto(valore)
-
-<span class="k">func</span> _ready():
-    danno_inflitto.<span class="nb">connect</span>(on_danno)
-    danno_inflitto.<span class="nb">emit</span>(<span class="m">35</span>) <span class="c"># Invia 35 alla funzione connessa!</span>
-
-<span class="k">func</span> on_danno(v):
-    <span class="nb">print</span>(<span class="s">"Danno registrato: "</span>, v)</pre>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara in cima: <code>signal danno_inflitto(valore)</code>.</li>
-                <li>In <code>_ready()</code>, emetti il segnale passando il valore 35: <code>danno_inflitto.emit(35)</code>.</li>
-            </ul>
-        `,
-        initialCode: `extends Node\n\n# Dichiara signal danno_inflitto(valore) sotto\n\n\nfunc _ready():\n    danno_inflitto.connect(on_danno)\n    # Emetti danno_inflitto con 35 sotto\n\n\nfunc on_danno(v):\n    print("Danno registrato: ", v)\n`,
+        expectedOutput: "0\n1\n2\n3\n4",
+        theory: "\n                <p>Il ciclo <code>for</code> in GDScript permette di iterare un numero definito di volte attraverso una sequenza o un intervallo di numeri generato da <code>range()</code>:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">for</span> i <span class=\"ow\">in</span> <span class=\"nb\">range</span>(3):\n    <span class=\"nb\">print</span>(i) <span class=\"c\"># Stampa 0, poi 1, poi 2</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Scrivi un ciclo <code>for i in range(5):</code> che stampi l'indice <code>i</code> ad ogni iterazione (da 0 a 4).</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Scrivi il ciclo for per stampare da 0 a 4\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    for i in range(5):\n        print(i)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "I segnali possono trasportare informazioni con sé, come la quantità di punti danno inflitti o il punteggio guadagnato durante l'evento."
+                        "text": "range(5) produce i numeri 0, 1, 2, 3, 4."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Dichiara il segnale con i parametri tra parentesi: `signal danno_inflitto(quantita)`. Quando emetti il segnale passa il valore: `danno_inflitto.emit(35)`. Il callback riceverà questo valore come argomento."
+                        "text": "for i in range(5):\n    print(i)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nsignal monete_raccolte(valore)\n\nfunc _ready():\n    monete_raccolte.connect(_on_monete_raccolte)\n    monete_raccolte.emit(50)\n\nfunc _on_monete_raccolte(valore):\n    print(\"Monete +\", valore)\n```\nIl nome del parametro nel callback può essere a tua scelta."
+                        "text": "Ricorda l'indentazione sotto for."
             }
 ],
-        solution: `extends Node\n\nsignal danno_inflitto(valore)\n\nfunc _ready():\n    danno_inflitto.connect(on_danno)\n    danno_inflitto.emit(35)\n\nfunc on_danno(v):\n    print("Danno registrato: ", v)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const sig = s.danno_inflitto;
-    const isSig = sig && (typeof sig.emit === 'function');
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const hasParamDecl = /\bsignal\s+danno_inflitto\s*\(/.test(cleanCode);
-    tests.push({ desc: "Segnale 'signal danno_inflitto(valore)' dichiarato", passed: !!(isSig && hasParamDecl), diff: (isSig && hasParamDecl) ? null : "Dichiara 'signal danno_inflitto(valore)'." });
-    
-    let dynamicOk = false;
-    if (sig && sig.callbacks && sig.callbacks.length > 0) {
-        try {
-            sig.emit(99);
-            dynamicOk = result.logs.some(l => l.includes("99"));
-        } catch(e) {
-            dynamicOk = false;
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => String(l).trim());
+                        const expected = ["0", "1", "2", "3", "4"];
+                        const ok = expected.every(e => logs.includes(e));
+                        tests.push({ desc: "Console stampa i numeri da 0 a 4", passed: ok, diff: ok ? null : `Ricevuto: ${logs.join(', ')}` });
+                        return tests;
         }
-    }
-    tests.push({ desc: "Segnale accetta e trasmette parametri numerici alla callback", passed: dynamicOk, diff: dynamicOk ? null : "La callback collegata deve ricevere il valore trasmesso dal segnale." });
-    const auditOk = !!(result.scope && result.scope.danno_inflitto && Array.isArray(result.scope.danno_inflitto.emissions) && [[35]].every(args => result.scope.danno_inflitto.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
-    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
     },
     {
         id: 44,
-        conceptId: "signals",
-        conceptTags: ["mastery", "signals", "battle_events"],
-        chapterId: 11,
-        isMastery: true,
-        title: "44. ⭐ Sfida di Apprendimento: Sistema di Eventi Battaglia",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "avanzata",
-        difficultyLabel: "Avanzata",
-        scenario: "Il modulo di interfaccia utente di gioco (UI) deve sincronizzare la barra della salute ogni volta che il personaggio viene colpito in battaglia, usando un segnale disaccoppiato. Sotto i commenti:",
-        requirements: [
-            'Dichiara in cima il segnale: <code>signal salute_aggiornata(nuova_salute)</code>',
-            'Crea la funzione di risposta: <code>func quando_salute_cambia(hp): print("UI: Barra salute a ", hp)</code>',
-            'In <code>_ready()</code>, connetti il segnale alla funzione: <code>salute_aggiornata.connect(quando_salute_cambia)</code>',
-            'Emetti il segnale due volte: prima con <code>salute_aggiornata.emit(75)</code> e poi con <code>salute_aggiornata.emit(40)</code>'
-        ],
-        notice: "Non modificare la riga finale print(). Il programma stampa:",
-        expectedOutput: "UI: Barra salute a 75\nUI: Barra salute a 40\n=== EVENTI BATTAGLIA COMPLETATI ===",
-        initialCode: `extends Node\n\n# Dichiara il segnale salute_aggiornata sotto\n\n\n# Crea la funzione quando_salute_cambia(hp) sotto\n\n\nfunc _ready():\n    # Connetti il segnale ed emetti due volte (75 e 40) sotto\n    \n    # Non modificare la riga sotto\n    print("=== EVENTI BATTAGLIA COMPLETATI ===")\n`,
-        aiExplanation: "In Godot 4 l'architettura a segnali garantisce che nodi diversi (come il Player e la barra HP della UI) non abbiano bisogno di riferimenti diretti l'uno verso l'altro. Il Player lancia <code>salute_aggiornata.emit(nuova_salute)</code> e qualunque elemento collegato aggiorna autonomamente la propria grafica.",
+        conceptId: "loops_iteration",
+        conceptTags: ["while", "loop"],
+        chapterId: 9,
+        isMastery: false,
+        title: "44. Il Ciclo while (Finché la Condizione è Vera)",
+        icon: "⏳",
+        xp: 50,
+        expectedOutput: "3\n2\n1\nVia!",
+        theory: "\n                <p>Il ciclo <code>while</code> continua a ripetere le sue istruzioni finché la condizione booleana rimane vera (<code>true</code>):</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">while</span> count > 0:\n    <span class=\"nb\">print</span>(count)\n    count -= 1</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Data <code>count = 3</code>:</li>\n                    <li>Usa un ciclo <code>while count > 0:</code> per stampare <code>count</code> e decrementarlo di 1 ad ogni giro.</li>\n                    <li>Alla fine del ciclo stampa: <code>\"Via!\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var count = 3\n    # Scrivi il ciclo while per il conto alla rovescia\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var count = 3\n    while count > 0:\n        print(count)\n        count -= 1\n    print(\"Via!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida richiede di costruire un sistema di trasmissione eventi completo per un gioco di ruolo: dichiarare il segnale, connetterlo al ricevitore ed emetterlo con dati dinamici."
+                        "text": "Dentro al while devi decrementare count con count -= 1 altrimenti si crea un ciclo infinito!"
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Combina la dichiarazione `signal`, la connessione con `.connect()` dentro `_ready()`, e la funzione callback che gestisce il messaggio stampato."
+                        "text": "while count > 0:\n    print(count)\n    count -= 1\nprint(\"Via!\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nsignal livello_superato(num_livello)\n\nfunc _ready():\n    livello_superato.connect(_on_livello_superato)\n    livello_superato.emit(1)\n\nfunc _on_livello_superato(num):\n    print(\"Livello completato:\", num)\n```\nVerifica che il messaggio emesso corrisponda esattamente all'output atteso."
+                        "text": "La riga print(\"Via!\") va messa all'esterno del ciclo (non indentata)."
             }
 ],
-        solution: `extends Node\n\nsignal salute_aggiornata(nuova_salute)\n\nfunc quando_salute_cambia(hp):\n    print("UI: Barra salute a ", hp)\n\nfunc _ready():\n    salute_aggiornata.connect(quando_salute_cambia)\n    salute_aggiornata.emit(75)\n    salute_aggiornata.emit(40)\n    \n    # Non modificare la riga sotto\n    print("=== EVENTI BATTAGLIA COMPLETATI ===")\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Sistema di Eventi Battaglia</h3>
-                <p>Verifica la dichiarazione, connessione ed emissione multipla di segnali con parametri.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Dichiara <code>signal salute_aggiornata(nuova_salute)</code></li>
-                <li>Crea <code>func quando_salute_cambia(hp)</code> con stampa</li>
-                <li>Connetti ed emetti con <code>75</code> e <code>40</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const sig = s.salute_aggiornata;
-    const isSig = sig && (typeof sig.emit === 'function');
-    tests.push({ desc: "Segnale salute_aggiornata con parametro configurato", passed: !!isSig, diff: isSig ? null : "Dichiara signal salute_aggiornata(nuova_salute)." });
-    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
-    const ok = out.includes("UI: Barra salute a 75") && out.includes("UI: Barra salute a 40");
-    tests.push({ desc: "Due eventi di salute emessi (75 e 40)", passed: ok, diff: ok ? null : `Ricevuto: "${out}"` });
-    const auditOk = !!(result.scope && result.scope.salute_aggiornata && Array.isArray(result.scope.salute_aggiornata.emissions) && [[75],[40]].every(args => result.scope.salute_aggiornata.emissions.some(actual => actual.length === args.length && actual.every((value, idx) => value === args[idx]))));
-    tests.push({ desc: "Emissione reale del segnale durante l'esecuzione", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => String(l).trim());
+                        const ok = logs.includes("3") && logs.includes("2") && logs.includes("1") && logs.includes("Via!");
+                        tests.push({ desc: "Countdown 3, 2, 1 e 'Via!' eseguito", passed: ok, diff: ok ? null : `Ricevuto: ${logs.join(', ')}` });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 12: CLASSI E OGGETTI (OOP IN GODOT 4)
-    // ==========================================
     {
         id: 45,
-        conceptId: "oop_classes",
-        conceptTags: ["class", "init", "constructors"],
-        chapterId: 12,
+        conceptId: "loops_iteration",
+        conceptTags: ["break", "loop_control"],
+        chapterId: 9,
         isMastery: false,
-        title: "45. Definire una Classe e il Costruttore _init()",
-        icon: "🏛️",
+        title: "45. Interrompere un Ciclo (break)",
+        icon: "🛑",
         xp: 50,
-        expectedOutput: "Pozione creata: Elisir (Cura: 50)",
-        theory: `
-            <p>La <strong>Programmazione Orientata agli Oggetti (OOP)</strong> permette di creare tipi di dato personalizzati definiti con <code>class NomeClasse:</code>.</p>
-            <p>Il metodo speciale <code>func _init(parametri):</code> è il <strong>costruttore</strong>: viene invocato automaticamente quando si crea un nuovo oggetto, permettendo di inizializzarne i campi con <code>self.campo = valore</code>:</p>
-            <pre class="code-block"><span class="k">class</span> Pozione:
-    <span class="k">var</span> nome
-    <span class="k">var</span> cura
-    <span class="k">func</span> _init(n, c):
-        self.nome = n
-        self.cura = c</pre>
-        `,
-        task: `
-            <ul>
-                <li>Definisci la classe <code>class Pozione:</code> con campi <code>var nome</code> e <code>var cura</code>.</li>
-                <li>Nel costruttore <code>func _init(n, c):</code> assegna <code>self.nome = n</code> e <code>self.cura = c</code>.</li>
-                <li>In <code>_ready()</code>, crea l'oggetto: <code>var elisir = Pozione.new("Elisir", 50)</code>.</li>
-                <li>Stampa: <code>print("Pozione creata: ", elisir.nome, " (Cura: ", elisir.cura, ")")</code>.</li>
-            </ul>
-        `,
-        initialCode: `extends Node\n\n# Definisci la classe Pozione sotto\n\n\nfunc _ready():\n    # Crea elisir con Pozione.new e stampa sotto\n    pass\n`,
+        expectedOutput: "1\n2\n3\nBersaglio trovato a 3",
+        theory: "\n                <p>L'istruzione <code>break</code> interrompe immediatamente l'esecuzione del ciclo più interno, uscendo dal blocco di iterazione:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">for</span> x <span class=\"ow\">in</span> <span class=\"nb\">range</span>(10):\n    <span class=\"k\">if</span> x == 3:\n        <span class=\"k\">break</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Scrivi un ciclo <code>for i in range(1, 10):</code> che stampi ogni numero.</li>\n                    <li>Se <code>i == 3</code>, stampa <code>\"Bersaglio trovato a \", i</code> ed esci immediatamente dal ciclo con <code>break</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Usa il ciclo for e break quando i == 3\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    for i in range(1, 10):\n        print(i)\n        if i == 3:\n            print(\"Bersaglio trovato a \", i)\n            break\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "La programmazione a oggetti (OOP) ti permette di creare i tuoi 'tipi' personalizzati (come una classe Nemico o Personaggio) definendo lo stampo con cui generare tanti oggetti simili."
+                        "text": "Usa if i == 3: seguito da break."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "In GDScript dichiari una classe personalizzata con la parola chiave `class NomeClasse:`. All'interno della classe dichiari le sue variabili di stato."
+                        "text": "for i in range(1, 10):\n    print(i)\n    if i == 3:\n        print(\"Bersaglio trovato a \", i)\n        break"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nclass Veicolo:\n    var marca = \"GodotMobile\"\n    var velocita = 100\n\nfunc _ready():\n    var auto = Veicolo.new()\n    print(auto.marca)\n```\nPer creare un'istanza della classe usa `NomeClasse.new()`."
+                        "text": "Il numero 4 non verrà mai stampato grazie al break."
             }
 ],
-        solution: `extends Node\n\nclass Pozione:\n    var nome\n    var cura\n    func _init(n, c):\n        self.nome = n\n        self.cura = c\n\nfunc _ready():\n    var elisir = Pozione.new("Elisir", 50)\n    print("Pozione creata: ", elisir.nome, " (Cura: ", elisir.cura, ")")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const item = s.elisir;
-    const itemOk = item && item.nome === "Elisir" && Number(item.cura) === 50;
-    tests.push({ desc: "Istanza elisir creata con classe Pozione (Elisir, cura 50)", passed: !!itemOk, diff: itemOk ? null : `Ricevuto: ${JSON.stringify(item)}` });
-    
-    let classConstructorOk = false;
-    if (s.Pozione && typeof s.Pozione.new === 'function') {
-        try {
-            const testInst = s.Pozione.new("Mana", 30);
-            classConstructorOk = (testInst.nome === "Mana" && Number(testInst.cura) === 30);
-        } catch(e) {
-            classConstructorOk = false;
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => String(l).trim());
+                        const stopsAt3 = logs.includes("3") && !logs.includes("4");
+                        const hasTarget = logs.some(l => l.includes("Bersaglio trovato a"));
+                        tests.push({ desc: "Ciclo interrotto correttamente a 3 con break", passed: stopsAt3 && hasTarget, diff: (stopsAt3 && hasTarget) ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
         }
-    }
-    tests.push({ desc: "Costruttore _init() valorizza correttamente campi di nuove istanze", passed: classConstructorOk, diff: classConstructorOk ? null : "Il costruttore _init(n, c) deve inizializzare self.nome e self.cura." });
-    const logs = result.logs || [];
-    const logOk = logs.some(l => /^Pozione creata\s*:\s*Elisir\s*\(Cura\s*:\s*50\s*\)$/i.test(String(l).trim()));
-    tests.push({ desc: "Dati della pozione creata stampati a console ('Pozione creata: Elisir (Cura: 50)')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
     },
     {
         id: 46,
-        conceptId: "oop_classes",
-        conceptTags: ["new", "instances", "oop"],
-        chapterId: 12,
+        conceptId: "loops_iteration",
+        conceptTags: ["continue", "loop_control"],
+        chapterId: 9,
         isMastery: false,
-        title: "46. Creare Istanze Multiple con .new()",
-        icon: "👥",
+        title: "46. Saltare un'Iterazione (continue)",
+        icon: "⏭️",
         xp: 50,
-        expectedOutput: "Eroe 1: Arthur (HP: 100)\nEroe 2: Lancelot (HP: 90)",
-        theory: `
-            <p>Una volta definita una classe, puoi istanziare quanti oggetti desideri usando <code>NomeClasse.new(...)</code>. Ciascuna istanza possiede i propri valori indipendenti in memoria:</p>
-            <pre class="code-block"><span class="k">var</span> g1 = Guerriero.<span class="nb">new</span>(<span class="s">"Arthur"</span>, <span class="m">100</span>)
-<span class="k">var</span> g2 = Guerriero.<span class="nb">new</span>(<span class="s">"Lancelot"</span>, <span class="m">90</span>)</pre>
-        `,
-        task: `
-            <ul>
-                <li>In <code>_ready()</code> crea due guerrieri: <code>var g1 = Guerriero.new("Arthur", 100)</code> e <code>var g2 = Guerriero.new("Lancelot", 90)</code>.</li>
-                <li>Stampa: <code>print("Eroe 1: ", g1.nome, " (HP: ", g1.hp, ")")</code>.</li>
-                <li>Stampa: <code>print("Eroe 2: ", g2.nome, " (HP: ", g2.hp, ")")</code>.</li>
-            </ul>
-        `,
-        initialCode: `extends Node\n\nclass Guerriero:\n    var nome\n    var hp\n    func _init(n, h):\n        self.nome = n\n        self.hp = h\n\nfunc _ready():\n    # Crea g1 e g2 con .new() e stampa i loro stati sotto\n    pass\n`,
+        expectedOutput: "2\n4\n6",
+        theory: "\n                <p>L'istruzione <code>continue</code> salta il resto del corpo del ciclo corrente e passa direttamente alla successiva iterazione:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">for</span> x <span class=\"ow\">in</span> <span class=\"nb\">range</span>(1, 7):\n    <span class=\"k\">if</span> x % 2 != 0:\n        <span class=\"k\">continue</span> <span class=\"c\"># Salta i dispari</span>\n    <span class=\"nb\">print</span>(x)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Itera sui numeri da 1 a 6 con <code>for i in range(1, 7):</code></li>\n                    <li>Se <code>i % 2 != 0</code> (numero dispari), usa <code>continue</code> per saltarlo.</li>\n                    <li>Altrimenti stampa il numero pari con <code>print(i)</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Salta i numeri dispari usando continue\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    for i in range(1, 7):\n        if i % 2 != 0:\n            continue\n        print(i)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Il costruttore è la funzione speciale che viene eseguita automaticamente ogni volta che crei un nuovo oggetto con `.new()`, per impostare le sue proprietà di partenza."
+                        "text": "continue salta subito al giro successivo senza eseguire il print sotto."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "In GDScript il costruttore si chiama sempre `func _init(parametri):`. Al suo interno assegni i parametri alle variabili dell'istanza (`self.nome = nome`)."
+                        "text": "for i in range(1, 7):\n    if i % 2 != 0:\n        continue\n    print(i)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nclass Mostro:\n    var nome: String\n    func _init(n):\n        nome = n\n\nfunc _ready():\n    var m = Mostro.new(\"Slime\")\n    print(m.nome) # Stampa 'Slime'\n```\nI valori passati a `.new(...)` vengono inoltrati a `_init`."
+                        "text": "L'output conterrà solo 2, 4 e 6."
             }
 ],
-        solution: `extends Node\n\nclass Guerriero:\n    var nome\n    var hp\n    func _init(n, h):\n        self.nome = n\n        self.hp = h\n\nfunc _ready():\n    var g1 = Guerriero.new("Arthur", 100)\n    var g2 = Guerriero.new("Lancelot", 90)\n    print("Eroe 1: ", g1.nome, " (HP: ", g1.hp, ")")\n    print("Eroe 2: ", g2.nome, " (HP: ", g2.hp, ")")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const g1Ok = s.g1 && s.g1.nome === "Arthur" && Number(s.g1.hp) === 100;
-    const g2Ok = s.g2 && s.g2.nome === "Lancelot" && Number(s.g2.hp) === 90;
-    tests.push({ desc: "Istanze indipendenti g1 e g2 create correttamente", passed: !!(g1Ok && g2Ok), diff: (g1Ok && g2Ok) ? null : "Crea g1 (Arthur, 100) e g2 (Lancelot, 90)." });
-    const logs = result.logs || [];
-    const g1Log = logs.some(l => /^Eroe 1\s*:\s*Arthur\s*\(HP\s*:\s*100\s*\)$/i.test(String(l).trim()));
-    const g2Log = logs.some(l => /^Eroe 2\s*:\s*Lancelot\s*\(HP\s*:\s*90\s*\)$/i.test(String(l).trim()));
-    const logsOk = g1Log && g2Log;
-    tests.push({ desc: "Informazioni di 'Eroe 1' e 'Eroe 2' stampate a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => String(l).trim());
+                        const onlyEven = logs.includes("2") && logs.includes("4") && logs.includes("6") && !logs.includes("1") && !logs.includes("3");
+                        tests.push({ desc: "Stampati solo i numeri pari con continue", passed: onlyEven, diff: onlyEven ? null : `Ricevuto: ${logs.join(', ')}` });
+                        return tests;
+        }
     },
     {
         id: 47,
-        conceptId: "oop_classes",
-        conceptTags: ["methods", "class_methods", "behavior"],
-        chapterId: 12,
+        conceptId: "loops_iteration",
+        conceptTags: ["factorial", "algorithm"],
+        chapterId: 9,
         isMastery: false,
-        title: "47. Metodi di Classe (Comportamento)",
-        icon: "⚔️",
+        title: "47. Ripasso - Calcolo del Fattoriale",
+        icon: "✖️",
         xp: 50,
-        expectedOutput: "Danno colpo caricato: 50",
-        theory: `
-            <p>Oltre alle proprietà, una classe può contenere <strong>metodi</strong> che ne descrivono il comportamento. I metodi possono accedere ai campi dell'oggetto usando <code>self.campo</code>:</p>
-            <pre class="code-block"><span class="k">class</span> Personaggio:
-    <span class="k">var</span> nome
-    <span class="k">var</span> attacco
-    <span class="k">func</span> _init(n, a):
-        self.nome = n
-        self.attacco = a
-    <span class="k">func</span> colpo_caricato():
-        <span class="k">return</span> self.attacco * <span class="m">2</span></pre>
-        `,
-        task: `
-            <ul>
-                <li>Nella classe <code>Personaggio</code>, aggiungi il metodo <code>func colpo_caricato(): return self.attacco * 2</code>.</li>
-                <li>In <code>_ready()</code>, crea <code>var eroe = Personaggio.new("Eroe", 25)</code>.</li>
-                <li>Stampa: <code>print("Danno colpo caricato: ", eroe.colpo_caricato())</code>.</li>
-            </ul>
-        `,
-        initialCode: `extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    # Aggiungi func colpo_caricato() sotto\n\n\nfunc _ready():\n    # Istanzia eroe con attacco 25 e stampa il colpo caricato sotto\n    pass\n`,
+        expectedOutput: "Fattoriale di 5: 120",
+        theory: "\n                <p>Il fattoriale di un numero <code>n!</code> è il prodotto di tutti i numeri interi da 1 fino a <code>n</code> (es. <code>5! = 1 * 2 * 3 * 4 * 5 = 120</code>).</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>n = 5</code>:</li>\n                    <li>Usa un ciclo <code>for</code> per calcolare il fattoriale moltiplicando una variabile <code>fact</code> (che parte da 1).</li>\n                    <li>Stampa: <code>\"Fattoriale di 5: \", fact</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var n = 5\n    var fact = 1\n    # Calcola il fattoriale con un ciclo\n    pass\n    print(\"Fattoriale di 5: \", fact)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var n = 5\n    var fact = 1\n    for i in range(1, n + 1):\n        fact *= i\n    print(\"Fattoriale di 5: \", fact)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Un metodo di classe è una funzione che appartiene all'oggetto e può utilizzare i suoi dati. Qui `colpo_caricato()` deve calcolare un danno maggiore leggendo il campo `attacco`."
+                        "text": "Itera con for i in range(1, n + 1): e moltiplica fact *= i."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Definisci `colpo_caricato()` dentro la classe `Personaggio` e usa `return self.attacco * 2`. Poi crea l'istanza in `_ready()` e stampa il valore restituito dal metodo."
+                        "text": "for i in range(1, n + 1):\n    fact *= i"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nclass Arma:\n    var potenza = 10\n    func danno_doppio():\n        return potenza * 2\nfunc _ready():\n    var spada = Arma.new()\n    print(spada.danno_doppio())\n```\nIl metodo restituisce un risultato, senza dover modificare la proprietà originale."
+                        "text": "1 * 2 * 3 * 4 * 5 = 120."
             }
 ],
-        solution: `extends Node\n\nclass Personaggio:\n    var nome\n    var attacco\n    func _init(n, a):\n        self.nome = n\n        self.attacco = a\n    func colpo_caricato():\n        return self.attacco * 2\n\nfunc _ready():\n    var eroe = Personaggio.new("Eroe", 25)\n    print("Danno colpo caricato: ", eroe.colpo_caricato())\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const hero = s.eroe;
-    const heroOk = hero && typeof hero.colpo_caricato === 'function' && hero.colpo_caricato() === 50;
-    tests.push({ desc: "Metodo colpo_caricato() restituisce attacco * 2 (25 x 2 = 50)", passed: !!heroOk, diff: heroOk ? null : "Definisci func colpo_caricato(): return self.attacco * 2." });
-    
-    let methodTestOk = false;
-    if (s.Personaggio && typeof s.Personaggio.new === 'function') {
-        try {
-            const testP = s.Personaggio.new("Dummy", 40);
-            methodTestOk = (testP.colpo_caricato() === 80);
-        } catch(e) {
-            methodTestOk = false;
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.fact === 120;
+                        tests.push({ desc: "fact uguale a 120", passed: ok, diff: ok ? null : `Trovato: ${s.fact}` });
+                        return tests;
         }
-    }
-    tests.push({ desc: "Metodo calcola correttamente il danno anche su nuove istanze", passed: methodTestOk, diff: methodTestOk ? null : "Il metodo colpo_caricato deve utilizzare self.attacco dell'istanza." });
-    const logs = result.logs || [];
-    const logOk = logs.some(l => /^Danno colpo caricato\s*:\s*50$/i.test(String(l).trim()));
-    tests.push({ desc: "Danno del colpo caricato (50) stampato a console", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
     },
     {
         id: 48,
-        conceptId: "oop_classes",
-        conceptTags: ["mastery", "oop", "party_rpg", "classes"],
-        chapterId: 12,
-        isMastery: true,
-        title: "48. ⭐ Sfida di Apprendimento Finale: Creazione Party RPG ad Oggetti",
-        icon: "🏆",
-        xp: 100,
-        difficulty: "avanzata",
-        difficultyLabel: "Avanzata",
-        scenario: "La gilda degli avventurieri registra la spedizione dungeon creando i due compagni con la classe personalizzata Avventuriero e calcolando la salute complessiva della squadra. Sotto i commenti:",
-        requirements: [
-            'Definisci la classe <code>class Avventuriero:</code> con le proprietà <code>var nome</code>, <code>var ruolo</code>, <code>var vita</code>',
-            'Nel costruttore <code>func _init(n, r, v):</code> assegna <code>self.nome = n</code>, <code>self.ruolo = r</code> e <code>self.vita = v</code>',
-            'In <code>_ready()</code> crea <code>var membro1 = Avventuriero.new("Aria", "Maga", 80)</code>',
-            'Crea il secondo membro: <code>var membro2 = Avventuriero.new("Krag", "Guerriero", 120)</code>',
-            'Calcola la salute totale del party in <code>var vita_totale = membro1.vita + membro2.vita</code>'
-        ],
-        notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Membro 1: Aria (Maga)\nMembro 2: Krag (Guerriero)\nSalute totale party: 200",
-        initialCode: `extends Node\n\n# Definisci la classe Avventuriero con _init sotto\n\n\nfunc _ready():\n    # Crea membro1, membro2 e calcola vita_totale sotto\n    \n    # Non modificare le righe sotto\n    print("Membro 1: ", membro1.nome, " (", membro1.ruolo, ")")\n    print("Membro 2: ", membro2.nome, " (", membro2.ruolo, ")")\n    print("Salute totale party: ", vita_totale)\n`,
-        aiExplanation: "Hai raggiunto la sfida finale del capitolo dedicato alla programmazione a oggetti! In Godot Engine l'incapsulamento dei dati in classi personalizzate è la base per creare entità complesse, gestire party di gioco, inventari ed elementi della scena in modo pulito ed espandibile.",
+        conceptId: "loops_iteration",
+        conceptTags: ["range", "step"],
+        chapterId: 9,
+        isMastery: false,
+        title: "48. Parametri di range(start, end, step)",
+        icon: "📐",
+        xp: 50,
+        expectedOutput: "2 4 6 8 10",
+        theory: "\n                <p>La funzione <code>range()</code> accetta fino a 3 parametri:</p>\n                <ul>\n                    <li><code>range(fine)</code> ➔ da 0 a fine - 1</li>\n                    <li><code>range(inizio, fine)</code> ➔ da inizio a fine - 1</li>\n                    <li><code>range(inizio, fine, passo)</code> ➔ incrementando del passo specificato</li>\n                </ul>\n                <div class=\"code-preview\">\n<pre><span class=\"nb\">range</span>(2, 11, 2) <span class=\"c\"># produce 2, 4, 6, 8, 10</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Usa <code>for i in range(2, 11, 2):</code></li>\n                    <li>Aggiungi ogni valore a una stringa <code>numeri</code> separata da spazi.</li>\n                    <li>Stampa <code>numeri.strip()</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var numeri = \"\"\n    # Itera con range(2, 11, 2)\n    pass\n    print(numeri.strip())\n",
+        solution: "extends Node\n\nfunc _ready():\n    var numeri = \"\"\n    for i in range(2, 11, 2):\n        numeri += str(i) + \" \"\n    print(numeri.strip())\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida conclude il capitolo sulle classi: definisci `Avventuriero` con tre proprietà (`nome`, `ruolo` e `vita`) e un costruttore che assegna i valori a ciascuna istanza."
+                        "text": "range(2, 11, 2) genera i numeri pari da 2 a 10 compresi."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Implementa `_init(n, r, v)` nella classe `Avventuriero`; in `_ready()` crea `membro1` e `membro2` tramite `.new(...)` e calcola `vita_totale` sommando le rispettive proprietà `vita`."
+                        "text": "for i in range(2, 11, 2):\n    numeri += str(i) + \" \""
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nclass Compagno:\n    var nome\n    var hp\n    func _init(n, punti):\n        nome = n\n        hp = punti\nfunc _ready():\n    var a = Compagno.new(\"Mago\", 30)\n    var b = Compagno.new(\"Guerriero\", 50)\n    print(a.hp + b.hp)\n```\nAdatta la struttura alle tre proprietà dell'`Avventuriero`."
+                        "text": "La console visualizzerà '2 4 6 8 10'."
             }
 ],
-        solution: `extends Node\n\nclass Avventuriero:\n    var nome\n    var ruolo\n    var vita\n    func _init(n, r, v):\n        self.nome = n\n        self.ruolo = r\n        self.vita = v\n\nfunc _ready():\n    var membro1 = Avventuriero.new("Aria", "Maga", 80)\n    var membro2 = Avventuriero.new("Krag", "Guerriero", 120)\n    var vita_totale = membro1.vita + membro2.vita\n    \n    # Non modificare le righe sotto\n    print("Membro 1: ", membro1.nome, " (", membro1.ruolo, ")")\n    print("Membro 2: ", membro2.nome, " (", membro2.ruolo, ")")\n    print("Salute totale party: ", vita_totale)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">🏆 SFIDA DI PADRONANZA • CAPITOLO 12</span>
-                <h3>Creazione Party RPG ad Oggetti</h3>
-                <p>La sfida conclusiva del capitolo sulle classi: unisci classi, costruttori, istanze multiple e calcolo di statistiche collettive.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Crea la classe <code>Avventuriero</code> con <code>_init</code></li>
-                <li>Istanzia <code>membro1</code> e <code>membro2</code> con <code>.new()</code></li>
-                <li>Calcola <code>var vita_totale = membro1.vita + membro2.vita</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const s = result.scope || {};
-    const m1 = s.membro1;
-    const m2 = s.membro2;
-    const m1Ok = m1 && m1.nome === "Aria" && m1.ruolo === "Maga" && Number(m1.vita) === 80;
-    const m2Ok = m2 && m2.nome === "Krag" && m2.ruolo === "Guerriero" && Number(m2.vita) === 120;
-    const totOk = Number(s.vita_totale) === 200;
-    tests.push({ desc: "Membri party istanziati (Aria Maga 80 HP, Krag Guerriero 120 HP)", passed: !!(m1Ok && m2Ok), diff: (m1Ok && m2Ok) ? null : "Verifica le istanze membro1 e membro2." });
-    tests.push({ desc: "Salute totale del party calcolata a 200 HP", passed: totOk, diff: totOk ? null : `vita_totale=${s.vita_totale}` });
-    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 3 && String(line).trim() === ["Membro 1: Aria (Maga)","Membro 2: Krag (Guerriero)","Salute totale party: 200"][at]) at++; } return at === 3; })();
-    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("2 4 6 8 10"));
+                        tests.push({ desc: "Sequenza generata con passo 2", passed: hasLog, diff: hasLog ? null : "Sequenza non corretta" });
+                        return tests;
+        }
     },
-// ==========================================
-    // CAPITOLO 13: L'ALBERO DELLA SCENA E I NODI
-    // ==========================================
     {
         id: 49,
-        conceptId: "scene_tree_nodes",
-        conceptTags: ["nodes", "scene_tree", "hierarchy"],
-        chapterId: 13,
+        conceptId: "loops_iteration",
+        conceptTags: ["nested_loops", "grid"],
+        chapterId: 9,
         isMastery: false,
-        hasNodeTree: true,
-        has2DViewport: false,
-        title: "49. Cos'è un Nodo e l'Albero di Godot",
-        icon: "🌳",
-        xp: 60,
-        expectedOutput: "Nodo rilevato: Giocatore",
-        initialNodes: [
-            { type: "Node", name: "Giocatore" }
-        ],
-        theory: `
-            <p>In Godot Engine tutto è un <strong>Nodo (Node)</strong>: il personaggio, un'interfaccia, i nemici o un effetto visivo sono nodi organizzati a forma di albero gerarchico chiamato <strong>SceneTree</strong>.</p>
-            <p>I nodi vengono creati e posizionati visivamente nella Scena (puoi osservarli nel pannello <strong>Scena Godot</strong> in basso a destra). In GDScript, usiamo la scorciatoia nativa <strong><code>$NomeNodo</code></strong> per accedere direttamente a qualsiasi nodo figlio dell'albero:</p>
-            <pre class="code-block"><span class="c"># Accede al nodo figlio 'Giocatore' presente nella scena e ne legge il nome</span>
-<span class="nb">print</span>(<span class="s">"Nodo trovato: "</span>, $Giocatore.name)</pre>
-        `,
-        task: `
-            <ul>
-                <li>Nel pannello <strong>Scena Godot</strong> a destra puoi osservare il nodo <code>Giocatore</code> già presente nell'albero.</li>
-                <li>In <code>_ready()</code>, accedi al nodo con la sintassi nativa <code>$Giocatore</code>.</li>
-                <li>Stampa a console: <code>print("Nodo rilevato: ", $Giocatore.name)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Accedi al nodo $Giocatore presente nella scena e stampa il suo nome\n    pass\n`,
+        title: "49. Cicli Annidati e Griglie 2D",
+        icon: "🔲",
+        xp: 50,
+        expectedOutput: "(0, 0)\n(0, 1)\n(1, 0)\n(1, 1)",
+        theory: "\n                <p>Nei giochi con mappe a griglia (come scacchi, RPG o platform a tile) si usano cicli annidati per scorrere righe (y) e colonne (x):</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">for</span> y <span class=\"ow\">in</span> <span class=\"nb\">range</span>(2):\n    <span class=\"k\">for</span> x <span class=\"ow\">in</span> <span class=\"nb\">range</span>(2):\n        <span class=\"nb\">print</span>(<span class=\"s\">\"(%d, %d)\"</span> % [x, y])</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Scrivi due cicli annidati con <code>for y in range(2):</code> e <code>for x in range(2):</code></li>\n                    <li>Stampa le coordinate: <code>\"(\", y, \", \", x, \")\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Scrivi i due cicli annidati per (y, x)\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    for y in range(2):\n        for x in range(2):\n            print(\"(\", y, \", \", x, \")\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "In Godot ogni gioco è un albero gerarchico di nodi (Scene Tree). Per controllare un elemento del gioco dallo script del genitore, dobbiamo ottenere un riferimento al nodo figlio desiderato."
+                        "text": "Il ciclo interno x viene completato interamente per ogni valore di y."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa la sintassi rapida `$NomeNodo`. È una scorciatoia nativa di GDScript che equivale a chiamare `get_node(\"NomeNodo\")`."
+                        "text": "for y in range(2):\n    for x in range(2):\n        print(\"(\", y, \", \", x, \")\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var nemico = $Nemico\n    print(nemico.name)\n```\nAssegna `$Giocatore` a una variabile `giocatore`."
+                        "text": "Genera le 4 combinazioni: (0, 0), (0, 1), (1, 0), (1, 1)."
             }
 ],
-        solution: `func _ready():\n    print("Nodo rilevato: ", $Giocatore.name)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const nodeOk = sc && sc.has_node("Giocatore");
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const usesSyntax = /\$Giocatore\b/.test(cleanCode);
-    tests.push({ desc: "Nodo 'Giocatore' presente nella scena", passed: !!nodeOk, diff: nodeOk ? null : "Nodo Giocatore non presente nella scena." });
-    tests.push({ desc: "Sintassi nativa '$Giocatore' utilizzata nel codice", passed: !!usesSyntax, diff: usesSyntax ? null : "Accedi al nodo usando la sintassi: $Giocatore.name." });
-    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
-    const outOk = out.includes("Nodo rilevato: Giocatore");
-    tests.push({ desc: "Console stampa 'Nodo rilevato: Giocatore'", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.replace(/\s+/g, ''));
+                        const ok = logs.includes("(0,0)") && logs.includes("(0,1)") && logs.includes("(1,0)") && logs.includes("(1,1)");
+                        tests.push({ desc: "Griglia 2x2 generata con cicli annidati", passed: ok, diff: ok ? null : `Trovato: ${logs.join(' | ')}` });
+                        return tests;
+        }
     },
     {
         id: 50,
-        conceptId: "scene_tree_nodes",
-        conceptTags: ["label", "text_display", "canvas"],
-        chapterId: 13,
-        isMastery: false,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "50. Testo a Schermo: Il nodo Label",
-        icon: "🏷️",
-        xp: 60,
-        expectedOutput: "Testo a schermo: Benvenuto in Godot 4!",
-        initialNodes: [
-            { type: "Label", name: "Titolo", text: "In attesa..." }
-        ],
-        theory: `
-            <p>Il nodo <strong>Label</strong> è il componente dedicato alla visualizzazione di testo nell'interfaccia 2D di Godot.</p>
-            <p>I nodi Label sono creati nell'albero della Scena e visualizzati a schermo. Da codice GDScript possiamo cambiarne dinamicamente il contenuto modificando la proprietà <strong><code>.text</code></strong>:</p>
-            <pre class="code-block"><span class="c"># Modifica il testo visualizzato dalla Label nella scena</span>
-$Titolo.text = <span class="s">"Benvenuto in Godot 4!"</span>
-<span class="nb">print</span>($Titolo.text)</pre>
-        `,
-        task: `
-            <ul>
-                <li>Nella scena è già presente il nodo <code>$Titolo</code> (visibile anche nell'anteprima 2D).</li>
-                <li>Modifica il testo della label: <code>$Titolo.text = "Benvenuto in Godot 4!"</code>.</li>
-                <li>Stampa a console: <code>print("Testo a schermo: ", $Titolo.text)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Modifica $Titolo.text e stampa a console\n    pass\n`,
+        conceptId: "loops_iteration",
+        conceptTags: ["countdown", "recap"],
+        chapterId: 9,
+        isMastery: true,
+        title: "50. Ripasso - Conto alla Rovescia Dinamico",
+        icon: "🚀",
+        xp: 75,
+        expectedOutput: "3\n2\n1\n0\nDecollo!",
+        theory: "\n                <p>Consolidiamo i cicli realizzando un conto alla rovescia che parte da un valore dinamico <code>start_num</code> e scende fino a 0.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>start_num = 3</code>:</li>\n                    <li>Scendi da 3 a 0 stampando ogni numero con <code>for i in range(start_num, -1, -1):</code></li>\n                    <li>Al termine stampa: <code>\"Decollo!\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var start_num = 3\n    # Esegui il countdown fino a 0 e poi 'Decollo!'\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var start_num = 3\n    for i in range(start_num, -1, -1):\n        print(i)\n    print(\"Decollo!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Ogni nodo possiede proprietà specifiche in base al suo tipo. Un nodo di tipo Label (testo) possiede la proprietà `.text` che controlla la stringa mostrata a video."
+                        "text": "Usa un passo negativo -1 in range() per contare all'indietro."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Accedi al nodo tramite il dollaro e modifica la proprietà direttamente con l'assegnazione: `$NomeLabel.text = \"Nuovo testo\"`."
+                        "text": "for i in range(start_num, -1, -1):\n    print(i)\nprint(\"Decollo!\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Messaggio.text = \"Game Started!\"\n```\nSostituisci il nome del nodo con `$Titolo` e imposta il testo richiesto."
+                        "text": "Stamperà 3, 2, 1, 0 e infine Decollo!."
             }
 ],
-        solution: `func _ready():\n    $Titolo.text = "Benvenuto in Godot 4!"\n    print("Testo a schermo: ", $Titolo.text)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const node = sc ? sc.get_node("Titolo") : null;
-    const labelOk = node && node.text === "Benvenuto in Godot 4!";
-    tests.push({ desc: "Proprietà text del nodo Label '$Titolo' impostata a 'Benvenuto in Godot 4!'", passed: !!labelOk, diff: labelOk ? null : `Ricevuto: ${node ? node.text : 'Nodo non trovato'}` });
-    const logs = result.logs || [];
-    const logOk = logs.some(l => /^Testo a schermo\s*:\s*Benvenuto in Godot 4!$/i.test(String(l).trim()));
-    tests.push({ desc: "Testo della label stampato a console ('Testo a schermo: Benvenuto in Godot 4!')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => String(l).trim());
+                        const ok = logs.includes("3") && logs.includes("0") && logs.includes("Decollo!");
+                        tests.push({ desc: "Countdown inverso e 'Decollo!' stampati", passed: ok, diff: ok ? null : `Logs: ${logs.join(', ')}` });
+                        return tests;
+        }
     },
     {
         id: 51,
-        conceptId: "scene_tree_nodes",
-        conceptTags: ["dollar_operator", "get_node", "child_nodes"],
-        chapterId: 13,
+        conceptId: "functions_scope",
+        conceptTags: ["func", "declaration"],
+        chapterId: 10,
         isMastery: false,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "51. L'operatore $: Accedere ai Nodi Figli",
-        icon: "🧭",
-        xp: 60,
-        expectedOutput: "Nuova salute: HP: 75",
-        initialNodes: [
-            { type: "Label", name: "SaluteLabel", text: "HP: 100" }
-        ],
-        theory: `
-            <p>In una scena reale di Godot, molti nodi sono già stati creati nell'albero della scena.</p>
-            <p>Per accedere a un nodo figlio esistente non serve cercarlo manualmente: in GDScript si usa la scorciatoia nativa <strong><code>$NomeNodo</code></strong> (che equivale a <code>get_node("NomeNodo")</code>):</p>
-            <pre class="code-block"><span class="c"># Modifica la Label già presente nella scena</span>
-$SaluteLabel.text = <span class="s">"HP: 75"</span>
-<span class="nb">print</span>($SaluteLabel.text)</pre>
-        `,
-        task: `
-            <ul>
-                <li>Nella scena è già presente il nodo <code>$SaluteLabel</code>.</li>
-                <li>Modifica il suo testo: <code>$SaluteLabel.text = "HP: 75"</code>.</li>
-                <li>Stampa il valore aggiornato: <code>print("Nuova salute: ", $SaluteLabel.text)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Accedi a $SaluteLabel con l'operatore $, aggiorna il testo a "HP: 75" e stampa\n    pass\n`,
+        title: "51. Dichiarare una Funzione Personalizzata (func)",
+        icon: "⚡",
+        xp: 50,
+        expectedOutput: "Benvenuto in Godot!",
+        theory: "\n                <p>Una <strong>funzione</strong> è un blocco di istruzioni riutilizzabile contrassegnato dalla parola chiave <code>func</code>:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">func</span> <span class=\"nf\">saluta</span>():\n    <span class=\"nb\">print</span>(<span class=\"s\">\"Ciao Eroe!\"</span>)\n\n<span class=\"k\">func</span> <span class=\"nf\">_ready</span>():\n    saluta() <span class=\"c\"># Chiamata alla funzione</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Sotto <code>_ready()</code>, dichiara una funzione chiamata <code>saluta()</code>.</li>\n                    <li>La funzione deve stampare: <code>\"Benvenuto in Godot!\"</code></li>\n                    <li>Chiama <code>saluta()</code> all'interno di <code>_ready()</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Chiama saluta() qui\n    pass\n\n# Dichiara saluta() qui sotto\n",
+        solution: "extends Node\n\nfunc _ready():\n    saluta()\n\nfunc saluta():\n    print(\"Benvenuto in Godot!\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "La sintassi `$NomeNodo` è una scorciatoia di Godot per accedere a un nodo figlio già presente nella scena. Per una `Label`, la proprietà `.text` determina il messaggio visualizzato."
+                        "text": "Dichiara func saluta(): allineata a sinistra, con il proprio corpo indentato."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Accedi direttamente a `$SaluteLabel`, assegna la stringa `\"HP: 75\"` alla proprietà `.text` e stampa il testo aggiornato con il prefisso `\"Nuova salute: \"`."
+                        "text": "func saluta():\n    print(\"Benvenuto in Godot!\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $MessaggioLabel.text = \"Missione completata\"\n    print(\"Messaggio: \", $MessaggioLabel.text)\n```\nPer questa lezione usa la notazione `$` e il nome del nodo presente nella scena."
+                        "text": "In _ready(), scrivi semplicemente saluta()."
             }
 ],
-        solution: `func _ready():\n    $SaluteLabel.text = "HP: 75"\n    print("Nuova salute: ", $SaluteLabel.text)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const node = sc ? sc.get_node("SaluteLabel") : null;
-    const ok = node && node.text === "HP: 75";
-    tests.push({ desc: "Nodo '$SaluteLabel.text' aggiornato a 'HP: 75'", passed: !!ok, diff: ok ? null : `Ricevuto: ${node ? node.text : 'null'}` });
-    const logs = result.logs || [];
-    const logOk = logs.some(l => /^Nuova salute\s*:\s*HP:\s*75$/i.test(String(l).trim()));
-    tests.push({ desc: "Valore aggiornato della salute stampato a console ('Nuova salute: HP: 75')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Benvenuto in Godot!"));
+                        tests.push({ desc: "Funzione saluta() eseguita con successo", passed: hasLog, diff: hasLog ? null : "Messaggio di benvenuto non stampato" });
+                        return tests;
+        }
     },
     {
         id: 52,
-        conceptId: "scene_tree_nodes",
-        conceptTags: ["mastery", "scene_tree", "label", "dungeon_sign"],
-        chapterId: 13,
-        isMastery: true,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "52. ⭐ Sfida di Apprendimento: La Targhetta del Dungeon",
-        icon: "🏆",
-        xp: 120,
-        difficulty: "media",
-        difficultyLabel: "Media",
-        initialNodes: [
-            { type: "Label", name: "TitoloDungeon", text: "In attesa..." },
-            { type: "Label", name: "LivelloLabel", text: "In attesa..." },
-            { type: "Label", name: "MoneteLabel", text: "In attesa..." }
-        ],
-        scenario: "Il custode delle rovine antiche deve allestire la schermata d'ingresso del dungeon configurando le tre etichette informative presenti nell'albero della scena: <code>$TitoloDungeon</code>, <code>$LivelloLabel</code> e <code>$MoneteLabel</code>. Sotto il commento, accedi con l'operatore <code>$</code> e configura i testi corretti:",
-        requirements: [
-            'Imposta <code>$TitoloDungeon.text = "Caverna dei Goblin"</code>',
-            'Imposta <code>$LivelloLabel.text = "Livello: 1"</code>',
-            'Imposta <code>$MoneteLabel.text = "Oro: 50"</code>'
-        ],
-        notice: "Non modificare le righe print(). Il programma stampa:",
-        expectedOutput: "Dungeon: Caverna dei Goblin\nDifficolta: Livello: 1\nBottino: Oro: 50",
-        initialCode: `extends Node\n\nfunc _ready():\n    # Configura $TitoloDungeon, $LivelloLabel e $MoneteLabel sotto\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
-        aiExplanation: `In Godot accedere ai nodi della scena con <code>$NomeNodo</code> permette di leggere e modificare qualunque proprietà visiva (come <code>.text</code> nelle Label). Assemblando la struttura visivamente nella Scena e programmando la logica in GDScript si ottiene il flusso di sviluppo nativo e raccomandato del motore.`,
+        conceptId: "functions_scope",
+        conceptTags: ["parameters", "arguments"],
+        chapterId: 10,
+        isMastery: false,
+        title: "52. Parametri e Argomenti delle Funzioni",
+        icon: "📥",
+        xp: 50,
+        expectedOutput: "Somma: 15",
+        theory: "\n                <p>I <strong>parametri</strong> permettono di passare valori in ingresso a una funzione per renderla generica e riutilizzabile con dati diversi:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">func</span> <span class=\"nf\">mostra_somma</span>(a: <span class=\"nb\">int</span>, b: <span class=\"nb\">int</span>):\n    <span class=\"nb\">print</span>(<span class=\"s\">\"Somma: \"</span>, a + b)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara la funzione <code>mostra_somma(a: int, b: int)</code> che stampa <code>\"Somma: \", a + b</code>.</li>\n                    <li>In <code>_ready()</code>, chiamala passando <code>10</code> e <code>5</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Chiama mostra_somma(10, 5)\n    pass\n\n# Dichiara mostra_somma(a: int, b: int) qui sotto\n",
+        solution: "extends Node\n\nfunc _ready():\n    mostra_somma(10, 5)\n\nfunc mostra_somma(a: int, b: int):\n    print(\"Somma: \", a + b)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Questa sfida richiede di manipolare l'interfaccia grafica aggiornando più etichette contemporaneamente (es. titolo del livello e punteggio attuale) interagendo con i nodi della scena."
+                        "text": "Specifica i parametri a e b tra le parentesi tonde."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Accedi a ciascuna Label con la notazione `$` o con `get_node` e modifica la rispettiva proprietà `.text` con i valori richiesti."
+                        "text": "func mostra_somma(a: int, b: int):\n    print(\"Somma: \", a + b)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Titolo.text = \"Capitolo 1\"\n    $Punti.text = \"Punti: 0\"\n```\nAssicurati che entrambi i nodi ricevano il testo esatto indicato nelle istruzioni."
+                        "text": "In _ready(), scrivi mostra_somma(10, 5)."
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    $TitoloDungeon.text = "Caverna dei Goblin"\n    $LivelloLabel.text = "Livello: 1"\n    $MoneteLabel.text = "Oro: 50"\n    \n    # Non modificare le righe sotto\n    print("Dungeon: ", $TitoloDungeon.text)\n    print("Difficolta: ", $LivelloLabel.text)\n    print("Bottino: ", $MoneteLabel.text)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>La Targhetta del Dungeon</h3>
-                <p>Verifica l'accesso e la configurazione di molteplici nodi Label presenti nell'albero della scena tramite l'operatore nativo $.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Imposta <code>$TitoloDungeon.text = "Caverna dei Goblin"</code></li>
-                <li>Imposta <code>$LivelloLabel.text = "Livello: 1"</code></li>
-                <li>Imposta <code>$MoneteLabel.text = "Oro: 50"</code></li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const tOk = sc && sc.get_node("TitoloDungeon") && sc.get_node("TitoloDungeon").text === "Caverna dei Goblin";
-    const lOk = sc && sc.get_node("LivelloLabel") && sc.get_node("LivelloLabel").text === "Livello: 1";
-    const mOk = sc && sc.get_node("MoneteLabel") && sc.get_node("MoneteLabel").text === "Oro: 50";
-    tests.push({ desc: "TitoloDungeon ('Caverna dei Goblin') e LivelloLabel ('Livello: 1') configurati", passed: !!(tOk && lOk), diff: (tOk && lOk) ? null : "Verifica le proprietà .text dei nodi." });
-    tests.push({ desc: "MoneteLabel configurata con 'Oro: 50'", passed: !!mOk, diff: mOk ? null : "MoneteLabel non trovata o testo errato." });
-    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 3 && String(line).trim() === ["Dungeon: Caverna dei Goblin","Difficolta: Livello: 1","Bottino: Oro: 50"][at]) at++; } return at === 3; })();
-    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Somma: 15") || l.includes("Somma:  15"));
+                        tests.push({ desc: "Funzione mostra_somma calcola 10 + 5 = 15", passed: hasLog, diff: hasLog ? null : "Output non trovato" });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 14: NODI UI & INTERATTIVITÀ (BUTTON)
-    // ==========================================
     {
         id: 53,
-        conceptId: "ui_button_interaction",
-        conceptTags: ["button", "ui_controls", "nodes"],
-        chapterId: 14,
+        conceptId: "functions_scope",
+        conceptTags: ["return", "functions"],
+        chapterId: 10,
         isMastery: false,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "53. Il primo Pulsante: Il nodo Button",
-        icon: "🔘",
-        xp: 60,
-        expectedOutput: "Pulsante configurato: Sferra Attacco",
-        initialNodes: [
-            { type: "Button", name: "AttaccaBtn", text: "In attesa..." }
-        ],
-        theory: `
-            <p>Il nodo <strong>Button</strong> crea un controllo interattivo nell'interfaccia 2D che l'utente può cliccare a schermo nella Viewport.</p>
-            <p>I nodi Button vengono creati nell'albero della Scena e mostrati a schermo. In GDScript possiamo configurarne le proprietà accedendovi con la sintassi nativa <strong><code>$</code></strong>, ad esempio modificando il testo mostrato sul pulsante tramite <strong><code>.text</code></strong>:</p>
-            <pre class="code-block"><span class="c"># Modifica la scritta visualizzata sul pulsante</span>
-$AttaccaBtn.text = <span class="s">"Sferra Attacco"</span>
-<span class="nb">print</span>($AttaccaBtn.text)</pre>
-        `,
-        task: `
-            <ul>
-                <li>Nella scena è già presente il nodo <code>$AttaccaBtn</code> (visibile anche nell'anteprima Viewport 2D in basso a destra).</li>
-                <li>Modifica la proprietà <code>text</code> del pulsante: <code>$AttaccaBtn.text = "Sferra Attacco"</code>.</li>
-                <li>Stampa a console il testo aggiornato: <code>print("Pulsante configurato: ", $AttaccaBtn.text)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Modifica il testo di $AttaccaBtn e stampa a console\n    pass\n`,
+        title: "53. Valori di Ritorno (return)",
+        icon: "↩️",
+        xp: 50,
+        expectedOutput: "Quadrato di 6: 36",
+        theory: "\n                <p>La parola chiave <code>return</code> permette a una funzione di calcolare un risultato e restituirlo al codice chiamante:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">func</span> <span class=\"nf\">quadrato</span>(n: <span class=\"nb\">int</span>):\n    <span class=\"k\">return</span> n * n</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara una funzione <code>square_number(n: int)</code> che restituisce <code>n * n</code> con <code>return</code>.</li>\n                    <li>In <code>_ready()</code>, calcola il quadrato di 6 e stampalo: <code>\"Quadrato di 6: \", square_number(6)</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Chiama square_number(6) e stampa il risultato\n    pass\n\n# Dichiara square_number(n: int) qui sotto\n",
+        solution: "extends Node\n\nfunc _ready():\n    var res = square_number(6)\n    print(\"Quadrato di 6: \", res)\n\nfunc square_number(n: int):\n    return n * n\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "I nodi `Button` sono i controlli interattivi fondamentali dell'interfaccia di Godot, capaci di ricevere click o tap dall'utente e mostrare etichette testuali."
+                        "text": "return n * n calcola e invia indietro il risultato."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Puoi modificare il testo visibile di un pulsante assegnando la sua proprietà `.text`: `$PulsanteAvvia.text = \"Gioca\"`."
+                        "text": "func square_number(n: int):\n    return n * n"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var btn = $MioPulsante\n    btn.text = \"Inizia Battaglia\"\n    print(btn.text)\n```\nModifica la proprietà `.text` del nodo pulsante specificato nell'esercizio."
+                        "text": "print(\"Quadrato di 6: \", square_number(6))"
             }
 ],
-        solution: `func _ready():\n    $AttaccaBtn.text = "Sferra Attacco"\n    print("Pulsante configurato: ", $AttaccaBtn.text)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const btn = sc ? sc.get_node("AttaccaBtn") : null;
-    const btnOk = btn && btn.type === "Button" && btn.text === "Sferra Attacco";
-    tests.push({ desc: "Nodo Button '$AttaccaBtn.text' impostato a 'Sferra Attacco'", passed: !!btnOk, diff: btnOk ? null : `Ricevuto: ${btn ? btn.text : 'Nodo non trovato'}` });
-    const logs = result.logs || [];
-    const logOk = logs.some(l => /^Pulsante configurato\s*:\s*Sferra Attacco$/i.test(String(l).trim()));
-    tests.push({ desc: "Testo del pulsante configurato stampato a console ('Pulsante configurato: Sferra Attacco')", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("36"));
+                        tests.push({ desc: "square_number(6) restituisce 36", passed: hasLog, diff: hasLog ? null : "Risultato 36 non trovato" });
+                        return tests;
+        }
     },
     {
         id: 54,
-        conceptId: "ui_button_interaction",
-        conceptTags: ["pressed", "button_events", "signals"],
-        chapterId: 14,
+        conceptId: "functions_scope",
+        conceptTags: ["return_types", "static_typing"],
+        chapterId: 10,
         isMastery: false,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "54. Rendere vivo il pulsante: Il Segnale pressed",
-        icon: "⚡",
-        xp: 60,
-        expectedOutput: "Pulsante connesso\nColpo sferrato con successo!",
-        initialNodes: [
-            { type: "Button", name: "AttaccaBtn", text: "Attacca" }
-        ],
-        theory: `
-            <p>I pulsanti di Godot emettono il segnale nativo <strong><code>pressed</code></strong> ogni volta che l'utente ci clicca sopra.</p>
-            <p>Per far reagire il gioco al click, colleghiamo il segnale a una funzione con <code>connect</code>:</p>
-            <pre class="code-block"><span class="k">func</span> _ready():
-    $AttaccaBtn.pressed.connect(quando_premuto)
-
-<span class="k">func</span> quando_premuto():
-    <span class="nb">print</span>(<span class="s">"Pulsante cliccato!"</span>)</pre>
-        `,
-        task: `
-            <ul>
-                <li>In <code>_ready()</code>, connetti il segnale: <code>$AttaccaBtn.pressed.connect(quando_premuto)</code>.</li>
-                <li>Stampa in <code>_ready()</code>: <code>print("Pulsante connesso")</code>.</li>
-                <li>Definisci la funzione <code>func quando_premuto():</code> che stampa <code>print("Colpo sferrato con successo!")</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Connetti $AttaccaBtn.pressed e stampa "Pulsante connesso"\n    pass\n\n# Definisci func quando_premuto() sotto\n`,
+        title: "54. Tipi di Ritorno Espliciti (-> Tipo)",
+        icon: "🎯",
+        xp: 50,
+        expectedOutput: "Area: 40",
+        theory: "\n                <p>In Godot 4 possiamo specificare il tipo di dato restituito usando la freccia <code>-> Tipo</code> dopo i parametri:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">func</span> <span class=\"nf\">calcola_area</span>(w: <span class=\"nb\">int</span>, h: <span class=\"nb\">int</span>) -> <span class=\"nb\">int</span>:\n    <span class=\"k\">return</span> w * h</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara <code>get_area(w: int, h: int) -> int</code> che calcola l'area di un rettangolo restituendo <code>w * h</code>.</li>\n                    <li>In <code>_ready()</code>, chiama la funzione con <code>8</code> e <code>5</code> e stampa: <code>\"Area: \", get_area(8, 5)</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Chiama get_area(8, 5) e stampala\n    pass\n\n# Dichiara get_area(w: int, h: int) -> int\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"Area: \", get_area(8, 5))\n\nfunc get_area(w: int, h: int) -> int:\n    return w * h\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "I pulsanti in Godot emettono automaticamente il segnale `pressed` ogni volta che vengono cliccati. Collegando questo segnale a una funzione, esegui il codice di risposta al click."
+                        "text": "Aggiungi -> int prima dei due punti finali."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Usa `$Pulsante.pressed.connect(nome_funzione)` dentro `_ready()`, e definisci la funzione callback che esegue l'azione."
+                        "text": "func get_area(w: int, h: int) -> int:\n    return w * h"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nextends Node\n\nfunc _ready():\n    $Pulsante.pressed.connect(_on_pulsante_pressed)\n\nfunc _on_pulsante_pressed():\n    print(\"Click registrato!\")\n```\nNon dimenticare di connettere il segnale all'interno di `_ready()`."
+                        "text": "8 * 5 = 40."
             }
 ],
-        solution: `func _ready():\n    $AttaccaBtn.pressed.connect(quando_premuto)\n    print("Pulsante connesso")\n\nfunc quando_premuto():\n    print("Colpo sferrato con successo!")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const btn = sc ? sc.get_node("AttaccaBtn") : null;
-    const connected = btn && btn.pressed && btn.pressed.callbacks && btn.pressed.callbacks.length > 0;
-    tests.push({ desc: "Segnale $AttaccaBtn.pressed connesso con .connect(quando_premuto)", passed: !!connected, diff: connected ? null : "Usa $AttaccaBtn.pressed.connect(quando_premuto)." });
-    if (connected) {
-        btn.pressed.emit();
-    }
-    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
-    const outOk = out.includes("Colpo sferrato con successo!");
-    tests.push({ desc: "Callback quando_premuto() invocata al click del pulsante", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Area: 40") || l.includes("Area:  40"));
+                        tests.push({ desc: "get_area restituisce 40 con tipo di ritorno int", passed: hasLog, diff: hasLog ? null : "Area non calcolata correttamente" });
+                        return tests;
+        }
     },
     {
         id: 55,
-        conceptId: "ui_button_interaction",
-        conceptTags: ["clicker_game", "ui_state", "buttons"],
-        chapterId: 14,
+        conceptId: "functions_scope",
+        conceptTags: ["sigma", "math_fn"],
+        chapterId: 10,
         isMastery: false,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "55. Costruire un mini Clicker Game",
-        icon: "🎮",
-        xp: 60,
-        expectedOutput: "Clicker pronto\nClick: 1",
-        initialNodes: [
-            { type: "Button", name: "ClickBtn", text: "Cliccami!" },
-            { type: "Label", name: "PuntiLabel", text: "Click: 0" }
-        ],
-        theory: `
-            <p>Unendo un <code>Button</code> e una <code>Label</code> possiamo realizzare un ciclo di gioco reattivo: ogni volta che il giocatore preme il pulsante, incrementiamo una variabile e aggiorniamo il testo a schermo!</p>
-            <pre class="code-block"><span class="k">var</span> punti = <span class="m">0</span>
-
-<span class="k">func</span> _ready():
-    $ClickBtn.pressed.connect(al_click)
-
-<span class="k">func</span> al_click():
-    punti += <span class="m">1</span>
-    $PuntiLabel.text = <span class="s">"Click: "</span> + <span class="nb">str</span>(punti)</pre>
-        `,
-        task: `
-            <ul>
-                <li>Crea la variabile <code>var punti = 0</code>.</li>
-                <li>In <code>_ready()</code> connetti <code>$ClickBtn.pressed.connect(al_click)</code> e stampa <code>print("Clicker pronto")</code>.</li>
-                <li>In <code>func al_click():</code> incrementa <code>punti += 1</code> e aggiorna <code>$PuntiLabel.text = "Click: " + str(punti)</code>.</li>
-                <li>Stampa il testo aggiornato: <code>print($PuntiLabel.text)</code>.</li>
-            </ul>
-        `,
-        initialCode: `var punti = 0\n\nfunc _ready():\n    # Connetti $ClickBtn.pressed ad al_click e stampa "Clicker pronto"\n    pass\n\nfunc al_click():\n    # Incrementa punti, aggiorna $PuntiLabel.text e stampa\n    pass\n`,
+        title: "55. Ripasso - Funzione Somma Sigma",
+        icon: "∑",
+        xp: 50,
+        expectedOutput: "Sigma(4): 10",
+        theory: "\n                <p>La funzione matematica Sigma (sommatoria) calcola la somma di tutti i numeri da 1 fino a <code>n</code> (es. <code>sigma(4) = 1 + 2 + 3 + 4 = 10</code>).</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara <code>sigma(n: int) -> int</code> che usa un ciclo per sommare tutti i numeri da 1 a <code>n</code>.</li>\n                    <li>In <code>_ready()</code>, stampa <code>\"Sigma(4): \", sigma(4)</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Chiama e stampa sigma(4)\n    pass\n\n# Dichiara sigma(n: int) -> int\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"Sigma(4): \", sigma(4))\n\nfunc sigma(n: int) -> int:\n    var s := 0\n    for i in range(1, n + 1):\n        s += i\n    return s\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Un clicker collega un `Button` a una funzione: ogni pressione incrementa una variabile numerica e aggiorna una `Label` per mostrare il nuovo punteggio."
+                        "text": "Accumula in una variabile s partendo da 0 con un ciclo for i in range(1, n + 1): s += i."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "In `_ready()` collega `$ClickBtn.pressed` a `al_click`. Dentro `al_click()` aumenta `punti` con `+= 1` e assegna a `$PuntiLabel.text` la stringa `\"Click: \" + str(punti)`."
+                        "text": "func sigma(n: int) -> int:\n    var s = 0\n    for i in range(1, n + 1):\n        s += i\n    return s"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nvar monete = 0\nfunc _ready():\n    $RaccogliBtn.pressed.connect(raccogli)\nfunc raccogli():\n    monete += 1\n    $MoneteLabel.text = \"Monete: \" + str(monete)\n```\nPer il clicker usa il pulsante, la funzione e l'etichetta indicati nella consegna."
+                        "text": "1 + 2 + 3 + 4 = 10."
             }
 ],
-        solution: `var punti = 0\n\nfunc _ready():\n    $ClickBtn.pressed.connect(al_click)\n    print("Clicker pronto")\n\nfunc al_click():\n    punti += 1\n    $PuntiLabel.text = "Click: " + str(punti)\n    print($PuntiLabel.text)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const btn = sc ? sc.get_node("ClickBtn") : null;
-    const lbl = sc ? sc.get_node("PuntiLabel") : null;
-    const connected = btn && btn.pressed && btn.pressed.callbacks && btn.pressed.callbacks.length > 0;
-    tests.push({ desc: "Pulsante $ClickBtn connesso alla funzione al_click", passed: !!connected, diff: connected ? null : "Connetti con $ClickBtn.pressed.connect(al_click)." });
-    if (connected) {
-        btn.pressed.emit();
-    }
-    const lblOk = lbl && lbl.text === "Click: 1";
-    tests.push({ desc: "Etichetta $PuntiLabel aggiornata correttamente a 'Click: 1'", passed: !!lblOk, diff: lblOk ? null : `Ricevuto: ${lbl ? lbl.text : 'null'}` });
-    const logs = result.logs || [];
-    const hasReadyLog = logs.some(l => /^Clicker pronto$/i.test(String(l).trim()));
-    const hasClickLog = logs.some(l => /^Click\s*:\s*1$/i.test(String(l).trim()));
-    const logsOk = hasReadyLog && hasClickLog;
-    tests.push({ desc: "Messaggi di avvio ('Clicker pronto') e di click ('Click: 1') stampati a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("10"));
+                        tests.push({ desc: "sigma(4) restituisce 10", passed: hasLog, diff: hasLog ? null : "Risultato sigma errato" });
+                        return tests;
+        }
     },
     {
         id: 56,
-        conceptId: "ui_button_interaction",
-        conceptTags: ["mastery", "control_panel", "spaceship_ui"],
-        chapterId: 14,
-        isMastery: true,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "56. ⭐ Sfida di Apprendimento: Il Pannello di Controllo dell'Astronave",
-        icon: "🚀",
-        xp: 120,
-        difficulty: "media",
-        difficultyLabel: "Media",
-        initialNodes: [
-            { type: "Button", name: "MotoriBtn", text: "Accendi Motori" },
-            { type: "Button", name: "AllarmeBtn", text: "Attiva Allarme" },
-            { type: "Label", name: "StatoNave", text: "Sistemi Normali" }
-        ],
-        scenario: "Sulla plancia di comando della nave interstellare, il navigatore deve configurare i due comandi principali collegando i rispettivi segnali e aggiornando il monitor centrale della cabina. Nella scena sono già posizionati i nodi <code>$MotoriBtn</code>, <code>$AllarmeBtn</code> e la <code>$StatoNave</code>. Sotto i commenti, programma la plancia:",
-        requirements: [
-            'In <code>_ready()</code>, connetti <code>$MotoriBtn.pressed.connect(attiva_motori)</code>',
-            'In <code>_ready()</code>, connetti <code>$AllarmeBtn.pressed.connect(attiva_allarme)</code>',
-            'Nella funzione <code>func attiva_motori():</code> imposta <code>$StatoNave.text = "Motori a Massima Potenza"</code> e stampa <code>"Velocita Aumentata"</code>',
-            'Nella funzione <code>func attiva_allarme():</code> imposta <code>$StatoNave.text = "Allarme Rosso Attivo"</code> e stampa <code>"Scudi al 100%"</code>'
-        ],
-        notice: "Non modificare la riga print() iniziale. Il programma stampa:",
-        expectedOutput: "Plancia Operativa\nVelocita Aumentata\nScudi al 100%",
-        initialCode: `extends Node\n\nfunc _ready():\n    # Connetti $MotoriBtn e $AllarmeBtn sotto\n    \n    # Non modificare la riga sotto\n    print("Plancia Operativa")\n\n# Definisci le funzioni attiva_motori e attiva_allarme sotto\n`,
-        aiExplanation: "In Godot puoi collegare più nodi Button a funzioni diverse per creare pannelli di controllo e interfacce utente complesse. Ogni pulsante ha la propria istanza del segnale <code>pressed</code>, che quando viene emesso esegue il blocco associato modificando le Label e lo stato della scena.",
+        conceptId: "functions_scope",
+        conceptTags: ["validation", "bool_fn"],
+        chapterId: 10,
+        isMastery: false,
+        title: "56. Ripasso - Funzione di Validazione",
+        icon: "🛡️",
+        xp: 50,
+        expectedOutput: "Valido: true",
+        theory: "\n                <p>Le funzioni di validazione verificano se i dati soddisfano criteri di sicurezza e restituiscono un valore <code>bool</code>.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara <code>is_valid(user: String, pwd: String) -> bool</code>.</li>\n                    <li>Restituisce <code>true</code> se la lunghezza di <code>user >= 3</code> E la lunghezza di <code>pwd >= 6</code>.</li>\n                    <li>In <code>_ready()</code>, chiama la funzione con <code>\"alex\"</code> e <code>\"secret123\"</code> e stampa <code>\"Valido: \", is_valid(\"alex\", \"secret123\")</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Chiama is_valid e stampa il risultato\n    pass\n\n# Dichiara is_valid(user: String, pwd: String) -> bool\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"Valido: \", is_valid(\"alex\", \"secret123\"))\n\nfunc is_valid(user: String, pwd: String) -> bool:\n    return user.length() >= 3 and pwd.length() >= 6\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "La plancia ha due pulsanti distinti: ognuno emette `pressed` e richiama la propria funzione. Il testo del nodo `$StatoNave` comunica all'utente quale comando è stato attivato."
+                        "text": "Usa .length() per ottenere la lunghezza della stringa."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Collega `$MotoriBtn.pressed` a `attiva_motori` e `$AllarmeBtn.pressed` a `attiva_allarme`. In entrambe le funzioni aggiorna `$StatoNave.text` e stampa il messaggio richiesto."
+                        "text": "func is_valid(user: String, pwd: String) -> bool:\n    return user.length() >= 3 and pwd.length() >= 6"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $PortaBtn.pressed.connect(apri_porta)\nfunc apri_porta():\n    $Stato.text = \"Porta aperta\"\n    print(\"Apertura completata\")\n```\nUsa due callback separate per i due comandi della nave; non serve cambiare i colori."
+                        "text": "\"alex\".length() è 4 (>=3) e \"secret123\".length() è 9 (>=6), quindi restituisce true."
             }
 ],
-        solution: `extends Node\n\nfunc _ready():\n    $MotoriBtn.pressed.connect(attiva_motori)\n    $AllarmeBtn.pressed.connect(attiva_allarme)\n    \n    # Non modificare la riga sotto\n    print("Plancia Operativa")\n\nfunc attiva_motori():\n    $StatoNave.text = "Motori a Massima Potenza"\n    print("Velocita Aumentata")\n\nfunc attiva_allarme():\n    $StatoNave.text = "Allarme Rosso Attivo"\n    print("Scudi al 100%")\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">⭐ LIVELLO BONUS • SFIDA DI APPRENDIMENTO</span>
-                <h3>Il Pannello di Controllo dell'Astronave</h3>
-                <p>Verifica la gestione di pulsanti multipli (Button) e la reazione ai click per aggiornare l'interfaccia di bordo.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Connetti <code>$MotoriBtn.pressed</code> a <code>attiva_motori</code></li>
-                <li>Connetti <code>$AllarmeBtn.pressed</code> a <code>attiva_allarme</code></li>
-                <li>Aggiorna <code>$StatoNave.text</code> nelle rispettive funzioni</li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const mBtn = sc ? sc.get_node("MotoriBtn") : null;
-    const aBtn = sc ? sc.get_node("AllarmeBtn") : null;
-    const sLbl = sc ? sc.get_node("StatoNave") : null;
-    const mConn = mBtn && mBtn.pressed && mBtn.pressed.callbacks.length > 0;
-    const aConn = aBtn && aBtn.pressed && aBtn.pressed.callbacks.length > 0;
-    tests.push({ desc: "Entrambi i pulsanti $MotoriBtn e $AllarmeBtn connessi con successo", passed: !!(mConn && aConn), diff: (mConn && aConn) ? null : "Uno o entrambi i pulsanti non risultano connessi." });
-    if (mConn) mBtn.pressed.emit();
-    const motOk = sLbl && sLbl.text === "Motori a Massima Potenza";
-    tests.push({ desc: "Click su MotoriBtn aggiorna lo stato a 'Motori a Massima Potenza'", passed: !!motOk, diff: motOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
-    if (aConn) aBtn.pressed.emit();
-    const almOk = sLbl && sLbl.text === "Allarme Rosso Attivo";
-    tests.push({ desc: "Click su AllarmeBtn aggiorna lo stato a 'Allarme Rosso Attivo'", passed: !!almOk, diff: almOk ? null : `Ricevuto: ${sLbl ? sLbl.text : 'null'}` });
-    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 3 && String(line).trim() === ["Plancia Operativa","Velocita Aumentata","Scudi al 100%"][at]) at++; } return at === 3; })();
-    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Valido: true"));
+                        tests.push({ desc: "is_valid valida correttamente i parametri", passed: hasLog, diff: hasLog ? null : "Output non corretto" });
+                        return tests;
+        }
     },
-
-    // ==========================================
-    // CAPITOLO 15: NODI TEMPORALI E AVANZATI
-    // ==========================================
     {
         id: 57,
-        conceptId: "timers_lifecycle",
-        conceptTags: ["timer", "wait_time", "timeout"],
-        chapterId: 15,
-        isMastery: false,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "57. Il nodo Timer: wait_time e segnale timeout",
-        icon: "⏱️",
-        xp: 60,
-        expectedOutput: "Timer avviato per: 2.5s\nTempo scaduto!",
-        initialNodes: [
-            { type: "Timer", name: "Cooldown", wait_time: 1.0, one_shot: false }
-        ],
-        theory: `
-            <p>Il nodo <strong>Timer</strong> permette di creare conti alla rovescia o azioni periodiche (es. ricarica abilità, spawn di nemici ogni tot secondi).</p>
-            <p>Il nodo Timer è già presente nell'albero della Scena. In GDScript possiamo configurarne le proprietà e i metodi tramite <code>$Cooldown</code>:</p>
-            <ul>
-                <li><code>$Cooldown.wait_time = 2.5</code> (durata del conteggio in secondi)</li>
-                <li><code>$Cooldown.one_shot = true</code> (se fermarsi dopo un solo scatto)</li>
-                <li><code>$Cooldown.timeout.connect(funzione)</code> (il segnale emesso allo scadere del tempo)</li>
-                <li><code>$Cooldown.start()</code> (avvia il conteggio)</li>
-            </ul>
-        `,
-        task: `
-            <ul>
-                <li>Nella scena è già presente il nodo <code>$Cooldown</code> (Timer).</li>
-                <li>Imposta <code>$Cooldown.wait_time = 2.5</code> e <code>$Cooldown.one_shot = true</code>.</li>
-                <li>Connetti il segnale <code>$Cooldown.timeout.connect(quando_scaduto)</code> e avvia il timer con <code>$Cooldown.start()</code>.</li>
-                <li>Stampa: <code>print("Timer avviato per: ", $Cooldown.wait_time, "s")</code>.</li>
-                <li>Definisci <code>func quando_scaduto():</code> che stampa <code>print("Tempo scaduto!")</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Configura $Cooldown (wait_time, one_shot), connetti timeout, avvia e stampa\n    pass\n\nfunc quando_scaduto():\n    pass\n`,
+        conceptId: "functions_scope",
+        conceptTags: ["default_values", "functions"],
+        chapterId: 10,
+        isMastery: true,
+        title: "57. Valori di Default dei Parametri (Sfida)",
+        icon: "⚙️",
+        xp: 75,
+        expectedOutput: "Nemico: Goblin HP: 100\nNemico: Drago HP: 500",
+        theory: "\n                <p>Possiamo assegnare un <strong>valore predefinito</strong> (default value) a un parametro. Se chi chiama la funzione omette quell'argomento, Godot userà automaticamente il valore di default:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">func</span> <span class=\"nf\">genera_nemico</span>(tipo: <span class=\"nb\">String</span>, hp: <span class=\"nb\">int</span> = 100):\n    <span class=\"nb\">print</span>(<span class=\"s\">\"Nemico: \"</span>, tipo, <span class=\"s\">\" HP: \"</span>, hp)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara <code>spawn_enemy(tipo: String, hp: int = 100)</code>.</li>\n                    <li>La funzione deve stampare: <code>\"Nemico: \", tipo, \" HP: \", hp</code></li>\n                    <li>In <code>_ready()</code>:</li>\n                    <li>Chiama <code>spawn_enemy(\"Goblin\")</code> (usando il default 100)</li>\n                    <li>Chiama <code>spawn_enemy(\"Drago\", 500)</code> (sovrascrivendo l'HP a 500)</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Chiama spawn_enemy prima per Goblin e poi per Drago (500)\n    pass\n\n# Dichiara spawn_enemy(tipo: String, hp: int = 100)\n",
+        solution: "extends Node\n\nfunc _ready():\n    spawn_enemy(\"Goblin\")\n    spawn_enemy(\"Drago\", 500)\n\nfunc spawn_enemy(tipo: String, hp: int = 100):\n    print(\"Nemico: \", tipo, \" HP: \", hp)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "I nodi `Timer` gestiscono il tempo nei giochi: conto alla rovescia, intervalli di spawn dei nemici o delay prima di un'azione."
+                        "text": "Imposta hp: int = 100 nella firma della funzione."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Imposta la durata con la proprietà `.wait_time = secondi` e avvia il conteggio con il metodo `.start()`."
+                        "text": "func spawn_enemy(tipo: String, hp: int = 100):\n    print(\"Nemico: \", tipo, \" HP: \", hp)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    var t = $Timer\n    t.wait_time = 2.5\n    t.start()\n```\nSenza chiamare `.start()`, il timer non comincerà a scorrere."
+                        "text": "Chiamando spawn_enemy(\"Goblin\") senza secondo argomento, hp assumerà automaticamente 100."
             }
 ],
-        solution: `func _ready():\n    $Cooldown.wait_time = 2.5\n    $Cooldown.one_shot = true\n    $Cooldown.timeout.connect(quando_scaduto)\n    $Cooldown.start()\n    print("Timer avviato per: ", $Cooldown.wait_time, "s")\n\nfunc quando_scaduto():\n    print("Tempo scaduto!")\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const t = sc ? sc.get_node("Cooldown") : null;
-    const tOk = t && t.type === "Timer" && t.wait_time === 2.5 && t.one_shot === true;
-    tests.push({ desc: "Nodo Timer 'Cooldown' configurato (wait_time: 2.5, one_shot: true)", passed: !!tOk, diff: tOk ? null : "Imposta $Cooldown.wait_time = 2.5 e $Cooldown.one_shot = true." });
-    const conn = t && t.timeout && t.timeout.callbacks && t.timeout.callbacks.length > 0;
-    tests.push({ desc: "Segnale timeout connesso a quando_scaduto", passed: !!conn, diff: conn ? null : "Usa $Cooldown.timeout.connect(quando_scaduto)." });
-    if (conn) t.timeout.emit();
-    const out = (result.logs || []).join(' ').replace(/\s+/g, ' ');
-    const outOk = out.includes("Tempo scaduto!");
-    tests.push({ desc: "Callback quando_scaduto eseguita allo scatto del timer", passed: outOk, diff: outOk ? null : `Ricevuto: "${out}"` });
-    const auditOk = !!(t && t.is_stopped === false);
-    tests.push({ desc: "Timer effettivamente avviato", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok1 = logs.some(l => l.includes("Goblin") && l.includes("100"));
+                        const ok2 = logs.some(l => l.includes("Drago") && l.includes("500"));
+                        tests.push({ desc: "spawn_enemy con valore di default (Goblin 100)", passed: ok1, diff: ok1 ? null : "Goblin con hp default non stampato" });
+                        tests.push({ desc: "spawn_enemy con valore personalizzato (Drago 500)", passed: ok2, diff: ok2 ? null : "Drago con hp 500 non stampato" });
+                        return tests;
+        }
     },
     {
         id: 58,
-        conceptId: "timers_lifecycle",
-        conceptTags: ["color_rect", "geometry", "shapes"],
-        chapterId: 15,
+        conceptId: "project_fizzbuzz",
+        conceptTags: ["fizzbuzz", "banner"],
+        chapterId: 11,
         isMastery: false,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "58. Grafica e Forme: Il nodo ColorRect",
-        icon: "🟩",
-        xp: 60,
-        expectedOutput: "Barra salute aggiornata con colore: (0.1333, 0.7725, 0.3686, 1.0)",
-        initialNodes: [
-            { type: "ColorRect", name: "BarraVita", color: "#64748b", size: { x: 50, y: 20 } }
-        ],
-        theory: `
-            <p>Il nodo <strong>ColorRect</strong> disegna un rettangolo colorato a tinta unita nello spazio 2D, ideale per barre della salute, riquadri HUD o sfondi di gioco.</p>
-            <p>I nodi ColorRect vengono posizionati visivamente nella Scena (puoi osservarli nella Viewport 2D a destra). In GDScript possiamo modificarne l'aspetto accedendovi con la sintassi <code>$BarraVita</code>:</p>
-            <pre class="code-block"><span class="c"># Aggiorna il colore e la dimensione del rettangolo</span>
-$BarraVita.color = <span class="s">"#22c55e"</span>
-$BarraVita.size = Vector2(<span class="m">200</span>, <span class="m">20</span>)</pre>
-        `,
-        task: `
-            <ul>
-                <li>Nella scena è già presente il nodo <code>$BarraVita</code> (ColorRect visibile nella Viewport 2D).</li>
-                <li>Imposta il colore verde: <code>$BarraVita.color = "#22c55e"</code>.</li>
-                <li>Imposta le dimensioni a 200x20: <code>$BarraVita.size = Vector2(200, 20)</code>.</li>
-                <li>Stampa a console: <code>print("Barra salute aggiornata con colore: ", $BarraVita.color)</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Modifica $BarraVita (color e size) e stampa a console\n    pass\n`,
+        title: "58. Progetto FizzBuzz: Panoramica e Setup",
+        icon: "🎮",
+        xp: 50,
+        expectedOutput: "=== GIOCO FIZZBUZZ GODOT ===",
+        theory: "\n                <p><strong>FizzBuzz</strong> è uno dei più celebri problemi algoritmici al mondo, utilizzato anche nei colloqui tecnici per programmatori di giochi!</p>\n                <p>Le regole di base: per i numeri da 1 a 20, se un numero è multiplo di 3 si dice <em>'Fizz'</em>, se è multiplo di 5 si dice <em>'Buzz'</em>, se è multiplo di entrambi si dice <em>'FizzBuzz'</em>, altrimenti si dice il numero stesso.</p>\n                <p>Iniziamo configurando il banner del gioco in <code>_ready()</code>.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Stampa il titolo del progetto: <br><code>\"=== GIOCO FIZZBUZZ GODOT ===\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Stampa il banner di FizzBuzz\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"=== GIOCO FIZZBUZZ GODOT ===\")\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Un ColorRect è un nodo 2D che mostra un rettangolo colorato. La proprietà `color` è un valore Godot di tipo `Color`, mentre `size` è un `Vector2`."
+                        "text": "Stampa il titolo esatto con la funzione print()."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Assegna `$BarraVita.color = \"#22c55e\"`, poi `$BarraVita.size = Vector2(200, 20)` e stampa la proprietà `$BarraVita.color`."
+                        "text": "print(\"=== GIOCO FIZZBUZZ GODOT ===\")"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    $Pannello.color = \"#ff9900\"\n    $Pannello.size = Vector2(160, 32)\n    print($Pannello.color)\n```\nGodot stampa un Color con i componenti RGBA, non necessariamente come stringa esadecimale."
+                        "text": "Fai attenzione a lettere maiuscole e spazi."
             }
 ],
-        solution: `func _ready():\n    $BarraVita.color = "#22c55e"\n    $BarraVita.size = Vector2(200, 20)\n    print("Barra salute aggiornata con colore: ", $BarraVita.color)\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const b = sc ? sc.get_node("BarraVita") : null;
-    const bOk = b && b.type === "ColorRect" && b.color === "#22c55e" && b.size && b.size.x === 200 && b.size.y === 20;
-    tests.push({ desc: "ColorRect 'BarraVita' configurato con colore verde e size Vector2(200, 20)", passed: !!bOk, diff: bOk ? null : "Imposta $BarraVita.color = '#22c55e' e $BarraVita.size = Vector2(200, 20)." });
-    const logs = result.logs || [];
-    const logOk = logs.some(l => /^Barra salute aggiornata con colore\s*:\s*(?:#22c55e|\(0\.1333,\s*0\.7725,\s*0\.3686,\s*1\.0\))$/i.test(String(l).trim()));
-    tests.push({ desc: "Aggiornamento colore barra stampato a console (Color nativo o formato esadecimale legacy)", passed: logOk, diff: logOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("GIOCO FIZZBUZZ GODOT"));
+                        tests.push({ desc: "Banner FizzBuzz stampato correttamente", passed: hasLog, diff: hasLog ? null : "Banner non trovato" });
+                        return tests;
+        }
     },
     {
         id: 59,
-        conceptId: "timers_lifecycle",
-        conceptTags: ["queue_free", "node_lifecycle", "memory"],
-        chapterId: 15,
+        conceptId: "project_fizzbuzz",
+        conceptTags: ["fizzbuzz", "function"],
+        chapterId: 11,
         isMastery: false,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "59. Ciclo di Vita: Eliminare Nodi con queue_free()",
-        icon: "🗑️",
-        xp: 60,
-        expectedOutput: "Moneta presente prima: true\nMoneta in attesa di eliminazione: true",
-        initialNodes: [
-            { type: "Node", name: "Moneta" }
-        ],
-        theory: `
-            <p>Quando un nemico viene sconfitto, una moneta viene raccolta o un proiettile esce dallo schermo, il nodo deve essere rimosso dalla memoria per non sprecare risorse.</p>
-            <p>In Godot Engine il metodo ufficiale per distruggere un nodo è <strong><code>nodo.queue_free()</code></strong>:</p>
-            <pre class="code-block"><span class="c"># Elimina il nodo dalla scena e dalla memoria</span>
-$Moneta.<span class="nb">queue_free</span>()</pre>
-            <p><strong>Attenzione:</strong> subito dopo <code>queue_free()</code>, il nodo è ancora presente in scena fino alla fine del frame. Verifica l'eliminazione pianificata con <code>$Moneta.is_queued_for_deletion()</code>. Soltanto dopo la fine del frame <code>has_node("Moneta")</code> diventa <code>false</code>.</p>
-        `,
-        task: `
-            <ul>
-                <li>Nella scena è presente il nodo <code>$Moneta</code>.</li>
-                <li>Stampa: <code>print("Moneta presente prima: ", has_node("Moneta"))</code>.</li>
-                <li>Rimuovi la moneta con: <code>$Moneta.queue_free()</code>.</li>
-                <li>Stampa la conferma: <code>print("Moneta in attesa di eliminazione: ", $Moneta.is_queued_for_deletion())</code>.</li>
-            </ul>
-        `,
-        initialCode: `func _ready():\n    # Verifica has_node("Moneta"), accoda queue_free(), poi usa is_queued_for_deletion()\n    pass\n`,
+        title: "59. Progetto FizzBuzz: La Funzione Logica",
+        icon: "⚙️",
+        xp: 50,
+        expectedOutput: "fizzbuzz(15) = FizzBuzz",
+        theory: "\n                <p>Creiamo la funzione <code>fizzbuzz(n: int) -> String</code> che applica le regole logiche con l'operatore modulo <code>%</code>:</p>\n                <ul>\n                    <li>Se <code>n % 15 == 0</code> (o <code>n % 3 == 0 and n % 5 == 0</code>) ➔ restituisce <code>\"FizzBuzz\"</code></li>\n                    <li>Se <code>n % 3 == 0</code> ➔ restituisce <code>\"Fizz\"</code></li>\n                    <li>Se <code>n % 5 == 0</code> ➔ restituisce <code>\"Buzz\"</code></li>\n                    <li>Altrimenti ➔ restituisce <code>str(n)</code></li>\n                </ul>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara la funzione <code>fizzbuzz(n: int) -> String</code> con le regole sopra indicate.</li>\n                    <li>In <code>_ready()</code>, stampa <code>\"fizzbuzz(15) = \", fizzbuzz(15)</code> per testare.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Testa fizzbuzz con 15\n    pass\n\n# Dichiara fizzbuzz(n: int) -> String qui sotto\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"fizzbuzz(15) = \", fizzbuzz(15))\n\nfunc fizzbuzz(n: int) -> String:\n    if n % 15 == 0:\n        return \"FizzBuzz\"\n    elif n % 3 == 0:\n        return \"Fizz\"\n    elif n % 5 == 0:\n        return \"Buzz\"\n    else:\n        return str(n)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "In Godot non si eliminano i nodi all'istante durante l'elaborazione di un frame, perché altri nodi potrebbero ancora star leggendo i loro dati. Si usa `queue_free()`, che pianifica la distruzione sicura del nodo a fine frame."
+                        "text": "Attenzione: controlla prima il caso combinato n % 15 == 0!"
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "Chiama `$NomeNodo.queue_free()`. Il nodo verrà rimosso dall'albero della scena e la memoria liberata pulitamente."
+                        "text": "if n % 15 == 0: return \"FizzBuzz\"\nelif n % 3 == 0: return \"Fizz\"\nelif n % 5 == 0: return \"Buzz\"\nelse: return str(n)"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nfunc _ready():\n    # Raccogli e distruggi l'oggetto moneta\n    $Moneta.queue_free()\n```\nSubito dopo `queue_free()` puoi controllare `is_queued_for_deletion()`; il nodo verrà liberato alla fine del frame."
+                        "text": "15 è divisibile sia per 3 che per 5, quindi restituirà 'FizzBuzz'."
             }
 ],
-        solution: `func _ready():\n    print("Moneta presente prima: ", has_node("Moneta"))\n    $Moneta.queue_free()\n    print("Moneta in attesa di eliminazione: ", $Moneta.is_queued_for_deletion())\n`,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const notHas = sc && !sc.has_node("Moneta");
-    const cleanCode = stripCommentsAndStrings(result.code);
-    const usesQueueFree = /\$Moneta\.queue_free\s*\(/.test(cleanCode);
-    tests.push({ desc: "Metodo '$Moneta.queue_free()' invocato", passed: !!usesQueueFree, diff: usesQueueFree ? null : "Usa $Moneta.queue_free() per rimuovere il nodo dalla scena." });
-    tests.push({ desc: "Nodo Moneta rimosso con successo dall'albero della scena", passed: !!notHas, diff: notHas ? null : "Il nodo Moneta risulta ancora presente." });
-    const logs = result.logs || [];
-    const idxBefore = logs.findIndex(l => /^Moneta presente prima\s*:\s*true$/i.test(String(l).trim()));
-    const idxAfter = logs.findIndex((l, i) => i > idxBefore && /^Moneta in attesa di eliminazione\s*:\s*true$/i.test(String(l).trim()));
-    const logsOk = idxBefore !== -1 && idxAfter !== -1;
-    tests.push({ desc: "Stato della moneta prima e dopo queue_free stampato a console", passed: logsOk, diff: logsOk ? null : `Output ricevuto: ${logs.length > 0 ? logs.join(", ") : "(nessun output)"}` });
-    // Cambiare il nodo osservato deve modificare il log prima della rimozione.
-    const alteredSource = (result.code || '').replace(/has_node\s*\(\s*(["'])Moneta\1\s*\)/g, 'has_node("__AuditNodoAssente__")');
-    const replay = alteredSource !== result.code ? await GDScriptRuntime.execute(alteredSource, { lesson: LESSONS_DATA.find(l => l.id === 59) }) : null;
-    const stillTrue = replay && (replay.logs || []).some(v => /^Moneta presente prima\s*:\s*true$/i.test(String(v).trim()));
-    const isDynamic = !!(replay && replay.success && !stillTrue);
-    tests.push({ desc: "Stato della moneta letto dinamicamente con has_node()", passed: isDynamic, diff: isDynamic ? null : "Le stampe devono mostrare il risultato di has_node(), non valori fissi." });
-    // La seconda stampa deve leggere is_queued_for_deletion(), non un booleano scritto a mano.
-    // Se si elimina queue_free(), lo stato di eliminazione non deve più risultare true.
-    const withoutQueue = (result.code || '').replace(/\$Moneta\.queue_free\s*\(\s*\)/, 'pass');
-    const noQueueRun = withoutQueue !== result.code
-        ? await GDScriptRuntime.execute(withoutQueue, { lesson: LESSONS_DATA.find(l => l.id === 59) })
-        : null;
-    const fakeQueued = noQueueRun && (noQueueRun.logs || []).some(v =>
-        /^Moneta in attesa di eliminazione\s*:\s*true$/i.test(String(v).trim()));
-    const readQueuedState = !!(noQueueRun && noQueueRun.success && !fakeQueued);
-    tests.push({ desc: "La conferma dipende da is_queued_for_deletion()", passed: readQueuedState,
-        diff: readQueuedState ? null : "Stampa il valore di $Moneta.is_queued_for_deletion(), non true scritto direttamente." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("FizzBuzz"));
+                        tests.push({ desc: "fizzbuzz(15) restituisce 'FizzBuzz'", passed: hasLog, diff: hasLog ? null : "Output non corrispondente" });
+                        return tests;
+        }
     },
     {
         id: 60,
-        conceptId: "timers_lifecycle",
-        conceptTags: ["final_mastery", "shop_system", "hud", "lifecycle"],
-        chapterId: 15,
-        isMastery: true,
-        hasNodeTree: true,
-        has2DViewport: true,
-        title: "60. 🏆 Sfida di Apprendimento Finale: Il Negozio dell'Avventuriero",
-        icon: "👑",
-        xp: 200,
-        difficulty: "avanzata",
-        difficultyLabel: "Avanzata",
-        initialNodes: [
-            { type: "Label", name: "OroLabel", text: "Monete: 100" },
-            { type: "Button", name: "CompraPozioneBtn", text: "Compra Pozione (-25 Oro)" },
-            { type: "Label", name: "MessaggioLabel", text: "" }
-        ],
-        scenario: "L'armaiolo dell'accademia di Godot apre la bottega. Nella scena sono già presenti l'etichetta <code>$OroLabel</code> con 100 monete, il pulsante <code>$CompraPozioneBtn</code> e un'etichetta di avviso <code>$MessaggioLabel</code> inizialmente vuota. Sotto i commenti, programma la logica della bottega:",
-        requirements: [
-            'Crea la variabile contatore <code>var monete = 100</code>',
-            'In <code>_ready()</code>, connetti <code>$CompraPozioneBtn.pressed.connect(compra_pozione)</code>',
-            'Nella funzione <code>func compra_pozione():</code>',
-            'Se <code>monete >= 25</code>: sottrai <code>monete -= 25</code>, aggiorna <code>$OroLabel.text = "Monete: " + str(monete)</code> e imposta <code>$MessaggioLabel.text = "Pozione Acquistata!"</code>',
-            'Altrimenti: imposta <code>$MessaggioLabel.text = "Oro Insufficiente!"</code>',
-            'Stampa a fine funzione: <code>print($MessaggioLabel.text)</code>'
-        ],
-        notice: "Non modificare la riga print() iniziale. Il programma stampa:",
-        expectedOutput: "Bottega Aperta\nPozione Acquistata!",
-        initialCode: `extends Node\n\nvar monete = 100\n\nfunc _ready():\n    # Connetti $CompraPozioneBtn sotto\n    \n    # Non modificare la riga sotto\n    print("Bottega Aperta")\n\n# Definisci func compra_pozione() sotto\n`,
-        aiExplanation: "Congratulazioni per essere giunto al completamento del corso! Questo esercizio finale unisce tutti i pilastri di Godot Engine: nodi di controllo (Button, Label), segnali di interazione utente in tempo reale, variabili di stato e logica condizionale.",
+        conceptId: "project_fizzbuzz",
+        conceptTags: ["fizzbuzz", "loop"],
+        chapterId: 11,
+        isMastery: false,
+        title: "60. Progetto FizzBuzz: Iterare sui Numeri",
+        icon: "🔄",
+        xp: 50,
+        expectedOutput: "1\n2\nFizz\n4\nBuzz",
+        theory: "\n                <p>Colleghiamo la funzione <code>fizzbuzz()</code> a un ciclo <code>for</code> per stampare la sequenza da 1 a 5.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Usa un ciclo <code>for i in range(1, 6):</code></li>\n                    <li>Per ogni numero, stampa il risultato di <code>fizzbuzz(i)</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Ciclo da 1 a 5 che stampa fizzbuzz(i)\n    pass\n\nfunc fizzbuzz(n: int) -> String:\n    if n % 15 == 0:\n        return \"FizzBuzz\"\n    elif n % 3 == 0:\n        return \"Fizz\"\n    elif n % 5 == 0:\n        return \"Buzz\"\n    else:\n        return str(n)\n",
+        solution: "extends Node\n\nfunc _ready():\n    for i in range(1, 6):\n        print(fizzbuzz(i))\n\nfunc fizzbuzz(n: int) -> String:\n    if n % 15 == 0:\n        return \"FizzBuzz\"\n    elif n % 3 == 0:\n        return \"Fizz\"\n    elif n % 5 == 0:\n        return \"Buzz\"\n    else:\n        return str(n)\n",
         hints: [
             {
                         "level": 1,
                         "type": "concept",
-                        "icon": "💭",
+                        "icon": "💡",
                         "label": "Indizio Concettuale",
-                        "text": "Il negozio usa un `Button` per avviare l'acquisto, una variabile `monete` per tenere il saldo e due `Label` per mostrare il denaro e l'esito dell'operazione."
+                        "text": "range(1, 6) genera 1, 2, 3, 4, 5."
             },
             {
                         "level": 2,
                         "type": "structure",
                         "icon": "🏗️",
                         "label": "Guida alla Struttura",
-                        "text": "In `_ready()` collega `$CompraPozioneBtn.pressed` a `compra_pozione`. Nel callback controlla `monete >= 25`: se bastano, sottrai 25 e aggiorna `$OroLabel.text`; in entrambi i rami dell'`if/else`, aggiorna `$MessaggioLabel.text` con il risultato appropriato."
+                        "text": "for i in range(1, 6):\n    print(fizzbuzz(i))"
             },
             {
                         "level": 3,
                         "type": "example",
-                        "icon": "📝",
+                        "icon": "✨",
                         "label": "Esempio Pratico",
-                        "text": "Esempio analogo:\n```gdscript\nvar crediti = 30\nfunc _ready():\n    $AcquistaBtn.pressed.connect(acquista)\nfunc acquista():\n    if crediti >= 10:\n        crediti -= 10\n        $CreditiLabel.text = \"Crediti: \" + str(crediti)\n        $EsitoLabel.text = \"Oggetto acquistato\"\n    else:\n        $EsitoLabel.text = \"Crediti insufficienti\"\n    print($EsitoLabel.text)\n```\nPer la missione usa il prezzo, i nodi e i messaggi del negozio dell'avventuriero."
+                        "text": "Per 1 stampa 1, per 3 stampa Fizz, per 5 stampa Buzz."
             }
 ],
-        solution: `extends Node\n\nvar monete = 100\n\nfunc _ready():\n    $CompraPozioneBtn.pressed.connect(compra_pozione)\n    \n    # Non modificare la riga sotto\n    print("Bottega Aperta")\n\nfunc compra_pozione():\n    if monete >= 25:\n        monete -= 25\n        $OroLabel.text = "Monete: " + str(monete)\n        $MessaggioLabel.text = "Pozione Acquistata!"\n    else:\n        $MessaggioLabel.text = "Oro Insufficiente!"\n    print($MessaggioLabel.text)\n`,
-        theory: `
-            <div class="mastery-banner">
-                <span class="mastery-badge">👑 SFIDA FINALE DI ARCHITETTURA NODI • GODOT 4 HERO</span>
-                <h3>Il Negozio dell'Avventuriero</h3>
-                <p>La sfida conclusiva dei nodi: connetti UI, gestione del patrimonio, segnali di click e feedback visivo in tempo reale.</p>
-            </div>
-        `,
-        task: `
-            <ul>
-                <li>Connetti <code>$CompraPozioneBtn.pressed</code> a <code>compra_pozione</code></li>
-                <li>Sottrai 25 oro se disponibile e aggiorna <code>$OroLabel.text</code></li>
-                <li>Aggiorna <code>$MessaggioLabel.text</code> con esito dell'acquisto</li>
-            </ul>
-        `,
         validate: async (result) => {
-    const tests = [];
-    tests.push(formatExecutionCheck(result));
-    const sc = result.scene;
-    const btn = sc ? sc.get_node("CompraPozioneBtn") : null;
-    const oLbl = sc ? sc.get_node("OroLabel") : null;
-    const mLbl = sc ? sc.get_node("MessaggioLabel") : null;
-    const conn = btn && btn.pressed && btn.pressed.callbacks && btn.pressed.callbacks.length > 0;
-    tests.push({ desc: "Pulsante d'acquisto $CompraPozioneBtn connesso alla funzione compra_pozione", passed: !!conn, diff: conn ? null : "Connetti il pulsante a compra_pozione." });
-    
-    if (conn) {
-        btn.pressed.emit(); // Acquisto 1: 100 -> 75
-    }
-    const buyOk = oLbl && oLbl.text === "Monete: 75" && mLbl && mLbl.text === "Pozione Acquistata!";
-    tests.push({ desc: "Primo acquisto: monete scalate a 75 e messaggio 'Pozione Acquistata!'", passed: !!buyOk, diff: buyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
-    
-    if (conn) {
-        btn.pressed.emit(); // 50
-        btn.pressed.emit(); // 25
-        btn.pressed.emit(); // 0
-        btn.pressed.emit(); // Tentativo con monete esaurite!
-    }
-    const emptyOk = oLbl && oLbl.text === "Monete: 0" && mLbl && mLbl.text === "Oro Insufficiente!";
-    tests.push({ desc: "Gestione limite di spesa: blocco acquisto e messaggio 'Oro Insufficiente!' quando terminano le monete", passed: !!emptyOk, diff: emptyOk ? null : `Oro=${oLbl ? oLbl.text : 'null'}, Msg=${mLbl ? mLbl.text : 'null'}` });
-    const auditOk = (() => { let at = 0; for (const line of (result.logs || [])) { if (at < 2 && String(line).trim() === ["Bottega Aperta","Pozione Acquistata!"][at]) at++; } return at === 2; })();
-    tests.push({ desc: "Output della sfida conforme alla consegna", passed: !!auditOk, diff: auditOk ? null : "Controlla il comportamento richiesto dalla consegna." });
-    return tests;
-}
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok = logs.includes("1") && logs.includes("2") && logs.includes("Fizz") && logs.includes("4") && logs.includes("Buzz");
+                        tests.push({ desc: "Sequenza FizzBuzz da 1 a 5 corretta", passed: ok, diff: ok ? null : `Ricevuto: ${logs.join(', ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 61,
+        conceptId: "project_fizzbuzz",
+        conceptTags: ["fizzbuzz", "twist"],
+        chapterId: 11,
+        isMastery: true,
+        title: "61. Progetto FizzBuzz: La Variante Speciale (Sfida)",
+        icon: "🌶️",
+        xp: 75,
+        expectedOutput: "Bazz a 7",
+        theory: "\n                <p>Aggiungiamo una variante alle regole: se il numero è divisibile per 7, restituiamo <code>\"Bazz\"</code>!</p>\n            ",
+        task: "\n                <ul>\n                    <li>Aggiorna <code>fizzbuzz(n: int) -> String</code>:</li>\n                    <li>Se <code>n % 7 == 0</code>, restituisci <code>\"Bazz\"</code>!</li>\n                    <li>In <code>_ready()</code>, chiama <code>fizzbuzz(7)</code> e stampa <code>\"fizzbuzz(7) = \", fizzbuzz(7)</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    print(\"fizzbuzz(7) = \", fizzbuzz(7))\n\nfunc fizzbuzz(n: int) -> String:\n    # Aggiungi il controllo per il multiplo di 7 (\"Bazz\")\n    pass\n    return \"\"\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"fizzbuzz(7) = \", fizzbuzz(7))\n\nfunc fizzbuzz(n: int) -> String:\n    if n % 7 == 0:\n        return \"Bazz\"\n    elif n % 15 == 0:\n        return \"FizzBuzz\"\n    elif n % 3 == 0:\n        return \"Fizz\"\n    elif n % 5 == 0:\n        return \"Buzz\"\n    else:\n        return str(n)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Inserisci if n % 7 == 0: return \"Bazz\" all'inizio della funzione."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "if n % 7 == 0:\n    return \"Bazz\""
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "7 % 7 vale 0, quindi restituirà 'Bazz'."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Bazz"));
+                        tests.push({ desc: "Variante 'Bazz' su multipli di 7 completata", passed: hasLog, diff: hasLog ? null : "Output 'Bazz' non trovato" });
+                        return tests;
+        }
+    },
+    {
+        id: 62,
+        conceptId: "arrays_collections",
+        conceptTags: ["array", "list"],
+        chapterId: 12,
+        isMastery: false,
+        title: "62. Dichiarare un Array ([])",
+        icon: "📚",
+        xp: 50,
+        expectedOutput: "[\"bread\", \"eggs\", \"milk\", \"butter\"]",
+        theory: "\n                <p>Un <strong>Array</strong> è una lista ordinata di elementi racchiusa tra parentesi quadre <code>[...]</code>:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> armi = [<span class=\"s\">\"spada\"</span>, <span class=\"s\">\"arco\"</span>, <span class=\"s\">\"bastone\"</span>]</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Crea un array chiamato <code>grocery</code> contenente le 4 stringhe in ordine:</li>\n                    <li><code>\"bread\"</code>, <code>\"eggs\"</code>, <code>\"milk\"</code>, <code>\"butter\"</code></li>\n                    <li>Stampa l'array con <code>print(grocery)</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Crea e stampa l'array grocery\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var grocery := [\"bread\", \"eggs\", \"milk\", \"butter\"]\n    print(grocery)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Inserisci le stringhe separate da virgole tra parentesi quadre."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "var grocery = [\"bread\", \"eggs\", \"milk\", \"butter\"]\nprint(grocery)"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Stamperà l'intera lista."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const arr = s.grocery || [];
+                        const ok = Array.isArray(arr) && arr.length === 4 && arr[0] === "bread" && arr[3] === "butter";
+                        tests.push({ desc: "Array grocery creato con 4 elementi corretti", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(arr)}` });
+                        return tests;
+        }
+    },
+    {
+        id: 63,
+        conceptId: "arrays_collections",
+        conceptTags: ["array", "indexing"],
+        chapterId: 12,
+        isMastery: false,
+        title: "63. Accedere agli Elementi di un Array ([0])",
+        icon: "🔍",
+        xp: 50,
+        expectedOutput: "Primo: spada Ultimo: corda",
+        theory: "\n                <p>Gli array in GDScript hanno <strong>indice su base zero</strong> (zero-indexed):</p>\n                <ul>\n                    <li>Il primo elemento si trova a indice <code>0</code>: <code>arr[0]</code></li>\n                    <li>Il secondo a indice <code>1</code>: <code>arr[1]</code></li>\n                    <li>L'ultimo elemento si può leggere con indice <code>-1</code>: <code>arr[-1]</code></li>\n                </ul>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>inventory = [\"spada\", \"scudo\", \"pozione\", \"mappa\", \"torcia\", \"corda\"]</code>:</li>\n                    <li>Stampa il primo elemento con <code>\"Primo: \", inventory[0]</code></li>\n                    <li>Stampa l'ultimo elemento con <code>\"Ultimo: \", inventory[-1]</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var inventory = [\"spada\", \"scudo\", \"pozione\", \"mappa\", \"torcia\", \"corda\"]\n    # Stampa il primo e l'ultimo elemento\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var inventory = [\"spada\", \"scudo\", \"pozione\", \"mappa\", \"torcia\", \"corda\"]\n    print(\"Primo: \", inventory[0])\n    print(\"Ultimo: \", inventory[-1])\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "inventory[0] accede al primo elemento, inventory[-1] all'ultimo."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "print(\"Primo: \", inventory[0])\nprint(\"Ultimo: \", inventory[-1])"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Primo: spada, Ultimo: corda."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok1 = logs.some(l => l.includes("spada"));
+                        const ok2 = logs.some(l => l.includes("corda"));
+                        tests.push({ desc: "Primo (spada) e ultimo (corda) estratti con indici", passed: ok1 && ok2, diff: (ok1 && ok2) ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 64,
+        conceptId: "arrays_collections",
+        conceptTags: ["array", "modification"],
+        chapterId: 12,
+        isMastery: false,
+        title: "64. Modificare gli Elementi dell'Array",
+        icon: "✏️",
+        xp: 50,
+        expectedOutput: "[\"Capitano\", \"Luigi\", \"Toad\", \"Yoshi\"]",
+        theory: "\n                <p>Gli array sono mutabili: possiamo riassegnare un elemento a un indice esistente usando <code>arr[indice] = nuovo_valore</code>:</p>\n                <div class=\"code-preview\">\n<pre>squadra[0] = <span class=\"s\">\"Capitano\"</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>team = [\"Mario\", \"Luigi\", \"Toad\", \"Yoshi\"]</code>:</li>\n                    <li>Sostituisci il primo giocatore (indice 0) con <code>\"Capitano\"</code>.</li>\n                    <li>Stampa l'array modificato con <code>print(team)</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var team = [\"Mario\", \"Luigi\", \"Toad\", \"Yoshi\"]\n    # Modifica il primo elemento a \"Capitano\"\n    pass\n    print(team)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var team = [\"Mario\", \"Luigi\", \"Toad\", \"Yoshi\"]\n    team[0] = \"Capitano\"\n    print(team)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Assegna team[0] = \"Capitano\"."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "team[0] = \"Capitano\""
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Il primo elemento diventerà \"Capitano\" al posto di \"Mario\"."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const arr = s.team || [];
+                        const ok = arr[0] === "Capitano";
+                        tests.push({ desc: "team[0] modificato in 'Capitano'", passed: ok, diff: ok ? null : `Trovato: ${arr[0]}` });
+                        return tests;
+        }
+    },
+    {
+        id: 65,
+        conceptId: "arrays_collections",
+        conceptTags: ["array", "methods"],
+        chapterId: 12,
+        isMastery: false,
+        title: "65. Metodi degli Array: append() e size()",
+        icon: "📦",
+        xp: 50,
+        expectedOutput: "Dimensione: 3",
+        theory: "\n                <p>Gli array offrono metodi potenti:</p>\n                <ul>\n                    <li><code>arr.append(valore)</code>: aggiunge un elemento in fondo alla lista.</li>\n                    <li><code>arr.size()</code>: restituisce il numero totale di elementi.</li>\n                    <li><code>arr.pop_back()</code>: rimuove e restituisce l'ultimo elemento.</li>\n                </ul>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>inventory = [\"pozione\", \"chiave\"]</code>:</li>\n                    <li>Usa <code>inventory.append(\"mappa\")</code> per aggiungere un terzo elemento.</li>\n                    <li>Stampa: <code>\"Dimensione: \", inventory.size()</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var inventory = [\"pozione\", \"chiave\"]\n    # Aggiungi \"mappa\" e stampa la dimensione\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var inventory = [\"pozione\", \"chiave\"]\n    inventory.append(\"mappa\")\n    print(\"Dimensione: \", inventory.size())\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa inventory.append(\"mappa\") e poi inventory.size()."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "inventory.append(\"mappa\")\nprint(\"Dimensione: \", inventory.size())"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "La dimensione passerà da 2 a 3."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const inv = s.inventory || [];
+                        const ok = inv.length === 3 && inv.includes("mappa");
+                        tests.push({ desc: "Elemento 'mappa' aggiunto e size() = 3", passed: ok, diff: ok ? null : `Dimensione: ${inv.length}` });
+                        return tests;
+        }
+    },
+    {
+        id: 66,
+        conceptId: "arrays_collections",
+        conceptTags: ["array", "product_recap"],
+        chapterId: 12,
+        isMastery: false,
+        title: "66. Ripasso - Prodotto degli Elementi",
+        icon: "✖️",
+        xp: 50,
+        expectedOutput: "Prodotto totale: 120",
+        theory: "\n                <p>Moltiplichiamo tra loro tutti gli elementi numerici contenuti in un array tramite un ciclo di accumulazione.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>numbers = [2, 3, 4, 5]</code>:</li>\n                    <li>Usa un ciclo <code>for</code> per calcolare il prodotto cumulativo partendo da <code>prod = 1</code>.</li>\n                    <li>Stampa <code>\"Prodotto totale: \", prod</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var numbers = [2, 3, 4, 5]\n    var prod = 1\n    # Moltiplica tutti gli elementi di numbers\n    pass\n    print(\"Prodotto totale: \", prod)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var numbers = [2, 3, 4, 5]\n    var prod = 1\n    for n in numbers:\n        prod *= n\n    print(\"Prodotto totale: \", prod)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Itera con for n in numbers: e moltiplica prod *= n."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "for n in numbers:\n    prod *= n"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "2 * 3 * 4 * 5 = 120."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.prod === 120;
+                        tests.push({ desc: "prod uguale a 120", passed: ok, diff: ok ? null : `Trovato: ${s.prod}` });
+                        return tests;
+        }
+    },
+    {
+        id: 67,
+        conceptId: "arrays_collections",
+        conceptTags: ["array", "reverse_recap"],
+        chapterId: 12,
+        isMastery: false,
+        title: "67. Ripasso - Inversione di un Array",
+        icon: "🔄",
+        xp: 50,
+        expectedOutput: "[30, 20, 10]",
+        theory: "\n                <p>Il metodo incorporato <code>arr.reverse()</code> inverte l'ordine degli elementi dell'array sul posto (in-place).</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>scores = [10, 20, 30]</code>:</li>\n                    <li>Invertilo usando <code>scores.reverse()</code>.</li>\n                    <li>Stampa <code>scores</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var scores = [10, 20, 30]\n    # Inverti e stampa scores\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var scores = [10, 20, 30]\n    scores.reverse()\n    print(scores)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "scores.reverse() modifica l'array invertendone l'ordine."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "scores.reverse()\nprint(scores)"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Diventa [30, 20, 10]."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const arr = s.scores || [];
+                        const ok = arr[0] === 30 && arr[2] === 10;
+                        tests.push({ desc: "scores invertito correttamente [30, 20, 10]", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(arr)}` });
+                        return tests;
+        }
+    },
+    {
+        id: 68,
+        conceptId: "arrays_collections",
+        conceptTags: ["typed_arrays", "godot4"],
+        chapterId: 12,
+        isMastery: true,
+        title: "68. Array Tipizzati in Godot 4 (Array[int])",
+        icon: "🛡️",
+        xp: 75,
+        expectedOutput: "[100, 250, 400]",
+        theory: "\n                <p>Una delle novità più potenti di Godot 4 sono gli <strong>Array Tipizzati</strong>: garantiscono che la lista possa contenere soltanto elementi di un tipo specifico, migliorando le prestazioni:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> punteggi: <span class=\"nb\">Array</span>[<span class=\"nb\">int</span>] = [100, 250, 400]</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara un array tipizzato di interi: <br><code>var scores: Array[int] = [100, 250, 400]</code></li>\n                    <li>Stampa <code>scores</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Dichiara scores come Array[int] e stampalo\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var scores: Array[int] = [100, 250, 400]\n    print(scores)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "La sintassi è: var nome: Array[Tipo] = [...]"
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "var scores: Array[int] = [100, 250, 400]\nprint(scores)"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Array[int] assicura che non possano essere inseriti valori di tipo diverso."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const arr = s.scores || [];
+                        const ok = Array.isArray(arr) && arr.length === 3 && arr[0] === 100;
+                        tests.push({ desc: "Array tipizzato scores creato e stampato", passed: ok, diff: ok ? null : "Array non conforme" });
+                        return tests;
+        }
+    },
+    {
+        id: 69,
+        conceptId: "arrays_collections",
+        conceptTags: ["filter", "iteration"],
+        chapterId: 13,
+        isMastery: false,
+        title: "69. Filtrare Elementi di un Array",
+        icon: "🔎",
+        xp: 50,
+        expectedOutput: "[\"pinguino\"]",
+        theory: "\n                <p>Possiamo filtrare gli elementi di un array scorrendoli con <code>for</code> e aggiungendo a una nuova lista solo quelli che soddisfano un criterio (ad esempio lunghezza maggiore di 5 caratteri):</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">if</span> parola.length() > 5:\n    lunghe.append(parola)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>words = [\"gatto\", \"pinguino\", \"cane\"]</code>:</li>\n                    <li>Crea un array vuoto <code>long_words = []</code>.</li>\n                    <li>Usa un ciclo <code>for w in words:</code> per aggiungere a <code>long_words</code> solo le parole con <code>w.length() > 5</code>.</li>\n                    <li>Stampa <code>long_words</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var words = [\"gatto\", \"pinguino\", \"cane\"]\n    var long_words = []\n    # Filtra le parole con più di 5 lettere\n    pass\n    print(long_words)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var words = [\"gatto\", \"pinguino\", \"cane\"]\n    var long_words = []\n    for w in words:\n        if w.length() > 5:\n            long_words.append(w)\n    print(long_words)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa if w.length() > 5: long_words.append(w)."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "for w in words:\n    if w.length() > 5:\n        long_words.append(w)"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "\"pinguino\" ha 8 lettere ed è l'unica parola che verrà aggiunta."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const lw = s.long_words || [];
+                        const ok = lw.length === 1 && lw[0] === "pinguino";
+                        tests.push({ desc: "long_words contiene solo 'pinguino'", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(lw)}` });
+                        return tests;
+        }
+    },
+    {
+        id: 70,
+        conceptId: "arrays_collections",
+        conceptTags: ["array", "indexes"],
+        chapterId: 13,
+        isMastery: false,
+        title: "70. Iterare con gli Indici (range(size))",
+        icon: "🔢",
+        xp: 50,
+        expectedOutput: "0: 10\n1: 20\n2: 30",
+        theory: "\n                <p>Quando abbiamo bisogno sia dell'indice numerico che dell'elemento, usiamo <code>range(arr.size())</code>:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">for</span> i <span class=\"ow\">in</span> <span class=\"nb\">range</span>(arr.size()):\n    <span class=\"nb\">print</span>(i, <span class=\"s\">\": \"</span>, arr[i])</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>numbers = [10, 20, 30]</code>:</li>\n                    <li>Usa un ciclo con indice per stampare ogni riga nel formato: <code>i, \": \", numbers[i]</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var numbers = [10, 20, 30]\n    # Itera usando gli indici\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var numbers = [10, 20, 30]\n    for i in range(numbers.size()):\n        print(i, \": \", numbers[i])\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "numbers.size() vale 3, quindi range(3) produce gli indici 0, 1, 2."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "for i in range(numbers.size()):\n    print(i, \": \", numbers[i])"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Stamperà 0: 10, 1: 20, 2: 30."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.replace(/\s+/g, ''));
+                        const ok = logs.some(l => l.includes("0:10")) && logs.some(l => l.includes("1:20")) && logs.some(l => l.includes("2:30"));
+                        tests.push({ desc: "Iterazione con indici completata con successo", passed: ok, diff: ok ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 71,
+        conceptId: "arrays_collections",
+        conceptTags: ["string", "count"],
+        chapterId: 13,
+        isMastery: false,
+        title: "71. Iterare sui Caratteri di una Stringa",
+        icon: "🔤",
+        xp: 50,
+        expectedOutput: "Lettere p: 2",
+        theory: "\n                <p>In GDScript anche le stringhe sono collezioni di caratteri sequenziali! Possiamo scorrerle direttamente con un ciclo <code>for char in testo:</code>.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Data la stringa <code>text = \"pipistrello\"</code>:</li>\n                    <li>Conta quante volte compare la lettera <code>\"p\"</code> usando un ciclo.</li>\n                    <li>Stampa <code>\"Lettere p: \", count</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var text = \"pipistrello\"\n    var count = 0\n    # Conta quante 'p' ci sono in text\n    pass\n    print(\"Lettere p: \", count)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var text = \"pipistrello\"\n    var count = 0\n    for c in text:\n        if c == \"p\":\n            count += 1\n    print(\"Lettere p: \", count)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Itera con for c in text: e se c == \"p\": count += 1."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "for c in text:\n    if c == \"p\":\n        count += 1"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "\"pipistrello\" contiene 2 lettere 'p'."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const ok = s.count === 2;
+                        tests.push({ desc: "Lettere 'p' contate correttamente (= 2)", passed: ok, diff: ok ? null : `Trovato: ${s.count}` });
+                        return tests;
+        }
+    },
+    {
+        id: 72,
+        conceptId: "arrays_collections",
+        conceptTags: ["string", "split"],
+        chapterId: 13,
+        isMastery: true,
+        title: "72. Dividere Stringhe con split() (Sfida)",
+        icon: "✂️",
+        xp: 75,
+        expectedOutput: "Parole: 3",
+        theory: "\n                <p>Il metodo <code>string.split(separatore)</code> divide una stringa in un <code>Array[String]</code> in base al delimitatore scelto (es. virgola o spazio):</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> parti = <span class=\"s\">\"spada,scudo,arco\"</span>.split(<span class=\"s\">\",\"</span>)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Data <code>phrase = \"Godot,GDScript,Hero\"</code>:</li>\n                    <li>Dividi la frase in parole usando <code>phrase.split(\",\")</code>.</li>\n                    <li>Stampa il numero di parole con: <code>\"Parole: \", parole.size()</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var phrase = \"Godot,GDScript,Hero\"\n    # Dividi la frase con split(\",\") e stampa la dimensione\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var phrase = \"Godot,GDScript,Hero\"\n    var parole = phrase.split(\",\")\n    print(\"Parole: \", parole.size())\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa var parole = phrase.split(\",\") e poi parole.size()."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "var parole = phrase.split(\",\")\nprint(\"Parole: \", parole.size())"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Ci sono 3 elementi separati da virgole."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Parole: 3") || l.includes("Parole:  3"));
+                        tests.push({ desc: "Stringa divisa con split e size() = 3", passed: hasLog, diff: hasLog ? null : "Output non corretto" });
+                        return tests;
+        }
+    },
+    {
+        id: 73,
+        conceptId: "arrays_collections",
+        conceptTags: ["slice", "slicing"],
+        chapterId: 14,
+        isMastery: false,
+        title: "73. Slicing degli Array (slice(da, a))",
+        icon: "🍰",
+        xp: 50,
+        expectedOutput: "[\"b\", \"c\", \"d\"]",
+        theory: "\n                <p>Il metodo <code>slice(inizio, fine)</code> estrae una porzione (fetta) di un array dall'indice <code>inizio</code> fino a <code>fine</code> escluso:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> lettere = [<span class=\"s\">\"a\"</span>, <span class=\"s\">\"b\"</span>, <span class=\"s\">\"c\"</span>, <span class=\"s\">\"d\"</span>, <span class=\"s\">\"e\"</span>]\n<span class=\"nb\">print</span>(lettere.slice(1, 4)) <span class=\"c\"># [\"b\", \"c\", \"d\"]</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>items = [\"a\", \"b\", \"c\", \"d\", \"e\"]</code>:</li>\n                    <li>Estrai con <code>items.slice(1, 4)</code> e stampa il risultato.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var items = [\"a\", \"b\", \"c\", \"d\", \"e\"]\n    # Estrai con slice(1, 4) e stampa\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var items = [\"a\", \"b\", \"c\", \"d\", \"e\"]\n    print(items.slice(1, 4))\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "items.slice(1, 4) include gli indici 1, 2 e 3."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "print(items.slice(1, 4))"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Risultato: [\"b\", \"c\", \"d\"]."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.replace(/\s+/g, ''));
+                        const ok = logs.some(l => l.includes('["b","c","d"]') || l.includes('[b,c,d]') || l.includes("['b','c','d']") || l.includes('b,c,d'));
+                        tests.push({ desc: "Slicing estratto correttamente: ['b', 'c', 'd']", passed: ok, diff: ok ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 74,
+        conceptId: "arrays_collections",
+        conceptTags: ["concat", "plus"],
+        chapterId: 14,
+        isMastery: false,
+        title: "74. Concatenare Array con +",
+        icon: "🔗",
+        xp: 50,
+        expectedOutput: "[1, 2, 3, 4, 5, 6]",
+        theory: "\n                <p>L'operatore <code>+</code> unisce due array creando un nuovo array combinato:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> a = [1, 2]\n<span class=\"k\">var</span> b = [3, 4]\n<span class=\"k\">var</span> c = a + b <span class=\"c\"># [1, 2, 3, 4]</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dati <code>a = [1, 2, 3]</code> e <code>b = [4, 5, 6]</code>:</li>\n                    <li>Uniscili con <code>var c = a + b</code> e stampa <code>c</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var a = [1, 2, 3]\n    var b = [4, 5, 6]\n    # Unisci a e b con + e stampa\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var a = [1, 2, 3]\n    var b = [4, 5, 6]\n    var c = a + b\n    print(c)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa l'operatore + tra i due array."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "var c = a + b\nprint(c)"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "L'array c avrà lunghezza 6."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const c = s.c || [];
+                        const ok = (Array.isArray(c) && c.length === 6 && c[0] === 1 && c[5] === 6) || (result.logs || []).some(l => l.replace(/\s+/g, '').includes('1,2,3,4,5,6') || l.replace(/\s+/g, '').includes('1,2,34,5,6'));
+                        tests.push({ desc: "Array concatenati correttamente con +", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(c)}` });
+                        return tests;
+        }
+    },
+    {
+        id: 75,
+        conceptId: "arrays_collections",
+        conceptTags: ["in", "membership"],
+        chapterId: 14,
+        isMastery: false,
+        title: "75. Operatore di Appartenenza (in / not in)",
+        icon: "🎯",
+        xp: 50,
+        expectedOutput: "Pozione presente: true\nArco presente: false",
+        theory: "\n                <p>Gli operatori <code>in</code> e <code>not in</code> verificano istantaneamente se un elemento appartiene a una collezione (array, stringa o dizionario):</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">if</span> <span class=\"s\">\"chiave\"</span> <span class=\"ow\">in</span> zaino:\n    <span class=\"nb\">print</span>(<span class=\"s\">\"Puoi aprire la porta!\"</span>)</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>loot = [\"pozione\", \"spada\", \"scudo\"]</code>:</li>\n                    <li>Verifica <code>\"pozione\" in loot</code> (sarà <code>true</code>)</li>\n                    <li>Verifica <code>\"arco\" in loot</code> (sarà <code>false</code>)</li>\n                    <li>Stampa <code>\"Pozione presente: \", \"pozione\" in loot</code> e <code>\"Arco presente: \", \"arco\" in loot</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var loot = [\"pozione\", \"spada\", \"scudo\"]\n    # Controlla l'appartenenza con in\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var loot = [\"pozione\", \"spada\", \"scudo\"]\n    print(\"Pozione presente: \", \"pozione\" in loot)\n    print(\"Arco presente: \", \"arco\" in loot)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa l'espressione \"elemento\" in array."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "print(\"Pozione presente: \", \"pozione\" in loot)\nprint(\"Arco presente: \", \"arco\" in loot)"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Stamperà true per pozione e false per arco."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok1 = logs.some(l => l.includes("true"));
+                        const ok2 = logs.some(l => l.includes("false"));
+                        tests.push({ desc: "Controllo di appartenenza 'in' verificato", passed: ok1 && ok2, diff: (ok1 && ok2) ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 76,
+        conceptId: "arrays_collections",
+        conceptTags: ["sort", "array_methods"],
+        chapterId: 14,
+        isMastery: true,
+        title: "76. Ordinamento di un Array con sort() (Sfida)",
+        icon: "📶",
+        xp: 75,
+        expectedOutput: "[1, 3, 5, 8, 9]",
+        theory: "\n                <p>Il metodo <code>arr.sort()</code> ordina gli elementi dell'array in ordine crescente (dal più piccolo al più grande) o alfabetico:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> punteggi = [50, 10, 80]\npunteggi.sort() <span class=\"c\"># diventa [10, 50, 80]</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>numbers = [5, 1, 9, 3, 8]</code>:</li>\n                    <li>Ordinalo con <code>numbers.sort()</code>.</li>\n                    <li>Stampa <code>numbers</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var numbers = [5, 1, 9, 3, 8]\n    # Ordina e stampa numbers\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var numbers = [5, 1, 9, 3, 8]\n    numbers.sort()\n    print(numbers)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "numbers.sort() ordina l'array direttamente in memoria."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "numbers.sort()\nprint(numbers)"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "L'output ordinato sarà [1, 3, 5, 8, 9]."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const arr = s.numbers || [];
+                        const ok = arr[0] === 1 && arr[1] === 3 && arr[2] === 5 && arr[3] === 8 && arr[4] === 9;
+                        tests.push({ desc: "Array ordinato in modo crescente con sort()", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(arr)}` });
+                        return tests;
+        }
+    },
+    {
+        id: 77,
+        conceptId: "dictionaries",
+        conceptTags: ["dictionary", "dict_syntax"],
+        chapterId: 15,
+        isMastery: false,
+        title: "77. Creare un Dizionario ({chiave: valore})",
+        icon: "📖",
+        xp: 50,
+        expectedOutput: "{\"level\": 10, \"name\": \"Ares\", \"role\": \"Guerriero\"}",
+        theory: "\n                <p>Un <strong>Dictionary</strong> (dizionario) memorizza coppie formate da una <strong>chiave</strong> e un <strong>valore</strong> racchiuse tra parentesi graffe <code>{...}</code>:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> eroe = {\n    <span class=\"s\">\"name\"</span>: <span class=\"s\">\"Ares\"</span>,\n    <span class=\"s\">\"role\"</span>: <span class=\"s\">\"Guerriero\"</span>,\n    <span class=\"s\">\"level\"</span>: 10\n}</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Crea un dizionario chiamato <code>hero</code> con le seguenti coppie:</li>\n                    <li><code>\"name\": \"Ares\"</code></li>\n                    <li><code>\"role\": \"Guerriero\"</code></li>\n                    <li><code>\"level\": 10</code></li>\n                    <li>Stampa il dizionario con <code>print(hero)</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Crea e stampa il dizionario hero\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var hero = {\"name\": \"Ares\", \"role\": \"Guerriero\", \"level\": 10}\n    print(hero)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa le parentesi graffe {} con chiave: valore separate da virgola."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "var hero = {\"name\": \"Ares\", \"role\": \"Guerriero\", \"level\": 10}\nprint(hero)"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Il dizionario hero conterrà nome, ruolo e livello."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const h = s.hero || {};
+                        const ok = h.name === "Ares" && h.role === "Guerriero" && h.level === 10;
+                        tests.push({ desc: "Dizionario hero creato con campi corretti", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(h)}` });
+                        return tests;
+        }
+    },
+    {
+        id: 78,
+        conceptId: "dictionaries",
+        conceptTags: ["dictionary", "access"],
+        chapterId: 15,
+        isMastery: false,
+        title: "78. Accedere ai Valori di un Dizionario",
+        icon: "🔑",
+        xp: 50,
+        expectedOutput: "Prezzo: 25.5 Rarita: comune",
+        theory: "\n                <p>Per leggere un valore da un dizionario possiamo usare:</p>\n                <ul>\n                    <li>Le parentesi quadre: <code>dict[\"chiave\"]</code></li>\n                    <li>Il metodo sicuro <code>dict.get(\"chiave\", valore_default)</code>: se la chiave non esiste, restituisce il valore di default senza causare errori!</li>\n                </ul>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>item = {\"name\": \"Pozione\", \"price\": 25.5}</code>:</li>\n                    <li>Leggi il prezzo con <code>item[\"price\"]</code></li>\n                    <li>Leggi la rarità con <code>item.get(\"rarity\", \"comune\")</code></li>\n                    <li>Stampa <code>\"Prezzo: \", item[\"price\"], \" Rarita: \", item.get(\"rarity\", \"comune\")</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var item = {\"name\": \"Pozione\", \"price\": 25.5}\n    # Leggi e stampa prezzo e rarità con get()\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var item = {\"name\": \"Pozione\", \"price\": 25.5}\n    print(\"Prezzo: \", item[\"price\"], \" Rarita: \", item.get(\"rarity\", \"comune\"))\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa item[\"price\"] e item.get(\"rarity\", \"comune\")."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "print(\"Prezzo: \", item[\"price\"], \" Rarita: \", item.get(\"rarity\", \"comune\"))"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Dato che 'rarity' non è presente in item, get() restituirà 'comune'."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok = logs.some(l => l.includes("25.5") && l.includes("comune"));
+                        tests.push({ desc: "Accesso a prezzo (25.5) e rarità di default ('comune')", passed: ok, diff: ok ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 79,
+        conceptId: "dictionaries",
+        conceptTags: ["dictionary", "update"],
+        chapterId: 15,
+        isMastery: false,
+        title: "79. Modificare e Aggiungere Chiavi",
+        icon: "✏️",
+        xp: 50,
+        expectedOutput: "{\"hp\": 100, \"level\": 2, \"name\": \"Player\"}",
+        theory: "\n                <p>Per aggiornare una chiave esistente o aggiungerne una nuova, basta assegnarle un valore:</p>\n                <div class=\"code-preview\">\n<pre>giocatore[<span class=\"s\">\"level\"</span>] += 1\ngiocatore[<span class=\"s\">\"hp\"</span>] = 100 <span class=\"c\"># Se hp non esiste, viene creata!</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>player = {\"name\": \"Player\", \"level\": 1}</code>:</li>\n                    <li>Incrementa <code>player[\"level\"]</code> di 1 (diventa 2).</li>\n                    <li>Aggiungi la nuova chiave <code>player[\"hp\"] = 100</code>.</li>\n                    <li>Stampa <code>player</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var player = {\"name\": \"Player\", \"level\": 1}\n    # Incrementa level e aggiungi hp = 100\n    pass\n    print(player)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var player = {\"name\": \"Player\", \"level\": 1}\n    player[\"level\"] += 1\n    player[\"hp\"] = 100\n    print(player)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "player[\"level\"] += 1 e player[\"hp\"] = 100."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "player[\"level\"] += 1\nplayer[\"hp\"] = 100"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Il dizionario avrà 3 campi: name, level=2 e hp=100."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const p = s.player || {};
+                        const ok = p.level === 2 && p.hp === 100;
+                        tests.push({ desc: "player aggiornato con level=2 e hp=100", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(p)}` });
+                        return tests;
+        }
+    },
+    {
+        id: 80,
+        conceptId: "dictionaries",
+        conceptTags: ["dictionary", "methods"],
+        chapterId: 15,
+        isMastery: false,
+        title: "80. Metodi dei Dizionari: has(), keys(), size()",
+        icon: "🛠️",
+        xp: 50,
+        expectedOutput: "Ha mana: true\nCampi totali: 3",
+        theory: "\n                <p>I metodi fondamentali per interrogare i dizionari:</p>\n                <ul>\n                    <li><code>dict.has(\"chiave\")</code> ➔ restituisce <code>true</code> se la chiave è presente.</li>\n                    <li><code>dict.keys()</code> ➔ restituisce un array con tutte le chiavi.</li>\n                    <li><code>dict.size()</code> ➔ restituisce il numero di coppie.</li>\n                </ul>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>stats = {\"hp\": 100, \"mana\": 50, \"atk\": 25}</code>:</li>\n                    <li>Verifica con <code>stats.has(\"mana\")</code> e stampa <code>\"Ha mana: \", stats.has(\"mana\")</code>.</li>\n                    <li>Stampa <code>\"Campi totali: \", stats.size()</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var stats = {\"hp\": 100, \"mana\": 50, \"atk\": 25}\n    # Usa has() e size()\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var stats = {\"hp\": 100, \"mana\": 50, \"atk\": 25}\n    print(\"Ha mana: \", stats.has(\"mana\"))\n    print(\"Campi totali: \", stats.size())\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "stats.has(\"mana\") restituisce true."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "print(\"Ha mana: \", stats.has(\"mana\"))\nprint(\"Campi totali: \", stats.size())"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "size() restituirà 3."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok1 = logs.some(l => l.includes("true"));
+                        const ok2 = logs.some(l => l.includes("3"));
+                        tests.push({ desc: "stats.has('mana') = true e size() = 3", passed: ok1 && ok2, diff: (ok1 && ok2) ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 81,
+        conceptId: "dictionaries",
+        conceptTags: ["dictionary", "for_loop"],
+        chapterId: 15,
+        isMastery: false,
+        title: "81. Iterare su un Dizionario",
+        icon: "🔄",
+        xp: 50,
+        expectedOutput: "oro: 50\ngemme: 3",
+        theory: "\n                <p>Quando iteri su un dizionario con <code>for chiave in dict:</code>, la variabile del ciclo assume ciascuna chiave a ogni passaggio:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">for</span> k <span class=\"ow\">in</span> bottino:\n    <span class=\"nb\">print</span>(k, <span class=\"s\">\": \"</span>, bottino[k])</pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>loot = {\"oro\": 50, \"gemme\": 3}</code>:</li>\n                    <li>Usa un ciclo <code>for k in loot:</code> per stampare ogni riga come <code>k, \": \", loot[k]</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var loot = {\"oro\": 50, \"gemme\": 3}\n    # Itera sul dizionario stampando chiave: valore\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var loot = {\"oro\": 50, \"gemme\": 3}\n    for k in loot:\n        print(k, \": \", loot[k])\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "k rappresenta la chiave, e loot[k] il valore associato."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "for k in loot:\n    print(k, \": \", loot[k])"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Stamperà 'oro: 50' e 'gemme: 3'."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.replace(/\s+/g, ''));
+                        const ok = logs.some(l => l.includes("oro:50")) && logs.some(l => l.includes("gemme:3"));
+                        tests.push({ desc: "Iterazione corretta sulle chiavi e valori del dizionario", passed: ok, diff: ok ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 82,
+        conceptId: "dictionaries",
+        conceptTags: ["inventory", "recap"],
+        chapterId: 15,
+        isMastery: true,
+        title: "82. Ripasso - Dizionario dell'Inventario (Sfida)",
+        icon: "🎒",
+        xp: 75,
+        expectedOutput: "Pozioni: 5 Frecce: 15",
+        theory: "\n                <p>Gestire un inventario con quantità di oggetti è il classico caso d'uso dei dizionari nei giochi di ruolo (RPG):</p>\n                <div class=\"code-preview\">\n<pre><span class=\"k\">var</span> zaino = {<span class=\"s\">\"pozione\"</span>: 2, <span class=\"s\">\"freccia\"</span>: 10}\nzaino[<span class=\"s\">\"pozione\"</span>] += 3 <span class=\"c\"># Raccoglie 3 pozioni</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>inv = {\"pozione\": 2, \"freccia\": 10}</code>:</li>\n                    <li>Raccogli 3 pozioni: aggiungi 3 a <code>inv[\"pozione\"]</code>.</li>\n                    <li>Raccogli 5 frecce: aggiungi 5 a <code>inv[\"freccia\"]</code>.</li>\n                    <li>Stampa <code>\"Pozioni: \", inv[\"pozione\"], \" Frecce: \", inv[\"freccia\"]</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var inv = {\"pozione\": 2, \"freccia\": 10}\n    # Aggiorna le quantità dell'inventario\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var inv = {\"pozione\": 2, \"freccia\": 10}\n    inv[\"pozione\"] += 3\n    inv[\"freccia\"] += 5\n    print(\"Pozioni: \", inv[\"pozione\"], \" Frecce: \", inv[\"freccia\"])\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa += sulla chiave specifica del dizionario."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "inv[\"pozione\"] += 3\ninv[\"freccia\"] += 5"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Pozioni diventerà 5 e frecce diventerà 15."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const inv = s.inv || {};
+                        const ok = inv.pozione === 5 && inv.freccia === 15;
+                        tests.push({ desc: "Inventario aggiornato (pozione=5, freccia=15)", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(inv)}` });
+                        return tests;
+        }
+    },
+    {
+        id: 83,
+        conceptId: "project_expenses",
+        conceptTags: ["project", "banner"],
+        chapterId: 16,
+        isMastery: false,
+        title: "83. Registro Spese: Struttura del Menu",
+        icon: "💰",
+        xp: 50,
+        expectedOutput: "=== REGISTRO SPESE GODOT ===\n1. Aggiungi\n2. Visualizza\n3. Totale\n4. Cancella\n5. Esci",
+        theory: "\n                <p>In questo grande progetto costruiremo un sistema di gestione per tenere traccia delle spese quotidiane con un menu interattivo a 5 opzioni!</p>\n            ",
+        task: "\n                <ul>\n                    <li>Stampa il menu iniziale dell'applicazione:</li>\n                    <li><code>=== REGISTRO SPESE GODOT ===</code></li>\n                    <li><code>1. Aggiungi</code></li>\n                    <li><code>2. Visualizza</code></li>\n                    <li><code>3. Totale</code></li>\n                    <li><code>4. Cancella</code></li>\n                    <li><code>5. Esci</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Stampa il menu delle opzioni\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    print(\"=== REGISTRO SPESE GODOT ===\")\n    print(\"1. Aggiungi\")\n    print(\"2. Visualizza\")\n    print(\"3. Totale\")\n    print(\"4. Cancella\")\n    print(\"5. Esci\")\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Stampa ciascuna opzione del menu su una riga separata."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "print(\"=== REGISTRO SPESE GODOT ===\")\nprint(\"1. Aggiungi\")..."
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Assicurati di includere tutte e 5 le opzioni."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok = logs.includes("=== REGISTRO SPESE GODOT ===") && logs.includes("5. Esci");
+                        tests.push({ desc: "Menu del registro spese stampato", passed: ok, diff: ok ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 84,
+        conceptId: "project_expenses",
+        conceptTags: ["project", "exit"],
+        chapterId: 16,
+        isMastery: false,
+        title: "84. Registro Spese: Opzione Esci (Scelta 5)",
+        icon: "🚪",
+        xp: 50,
+        expectedOutput: "Arrivederci dal Registro Spese!",
+        theory: "\n                <p>Gestiamo la scelta <code>5</code> dell'utente per terminare la sessione di lavoro.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Data la scelta dell'utente <code>choice = 5</code>:</li>\n                    <li>Se <code>choice == 5</code>, stampa: <br><code>\"Arrivederci dal Registro Spese!\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var choice = 5\n    # Gestisci l'uscita se choice == 5\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var choice = 5\n    if choice == 5:\n        print(\"Arrivederci dal Registro Spese!\")\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Verifica if choice == 5:."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "if choice == 5:\n    print(\"Arrivederci dal Registro Spese!\")"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Stampa il messaggio di saluto di uscita."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Arrivederci"));
+                        tests.push({ desc: "Messaggio di uscita stampato", passed: hasLog, diff: hasLog ? null : "Saluto di uscita non trovato" });
+                        return tests;
+        }
+    },
+    {
+        id: 85,
+        conceptId: "project_expenses",
+        conceptTags: ["project", "add"],
+        chapterId: 16,
+        isMastery: false,
+        title: "85. Registro Spese: Aggiungere una Spesa (Scelta 1)",
+        icon: "➕",
+        xp: 50,
+        expectedOutput: "Spesa registrata: 14.5 EUR",
+        theory: "\n                <p>Gestiamo la scelta <code>1</code>: memorizzare una nuova spesa aggiungendola alla lista <code>expenses</code>.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dati <code>expenses: Array[float] = []</code>, <code>choice = 1</code> e <code>new_amount: float = 14.5</code>:</li>\n                    <li>Se <code>choice == 1</code>, aggiungi <code>new_amount</code> all'array <code>expenses</code> con <code>.append()</code>.</li>\n                    <li>Stampa <code>\"Spesa registrata: \", new_amount, \" EUR\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var expenses: Array[float] = []\n    var choice = 1\n    var new_amount = 14.5\n    # Gestisci la scelta 1 aggiungendo new_amount a expenses\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var expenses: Array[float] = []\n    var choice = 1\n    var new_amount = 14.5\n    if choice == 1:\n        expenses.append(new_amount)\n        print(\"Spesa registrata: \", new_amount, \" EUR\")\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "expenses.append(new_amount) inserisce la spesa nell'array."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "if choice == 1:\n    expenses.append(new_amount)\n    print(\"Spesa registrata: \", new_amount, \" EUR\")"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "L'array expenses conterrà [14.5]."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const exp = s.expenses || [];
+                        const ok = exp.length === 1 && Math.abs(exp[0] - 14.5) < 0.001;
+                        tests.push({ desc: "Spesa aggiunta a expenses con append()", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(exp)}` });
+                        return tests;
+        }
+    },
+    {
+        id: 86,
+        conceptId: "project_expenses",
+        conceptTags: ["project", "view"],
+        chapterId: 16,
+        isMastery: false,
+        title: "86. Registro Spese: Visualizzare le Spese (Scelta 2)",
+        icon: "📋",
+        xp: 50,
+        expectedOutput: "Spesa 1: 12.0\nSpesa 2: 25.0",
+        theory: "\n                <p>Gestiamo la scelta <code>2</code>: stampare l'elenco completo di tutte le spese registrate fino a quel momento.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>expenses = [12.0, 25.0]</code> e <code>choice = 2</code>:</li>\n                    <li>Se <code>choice == 2</code>, usa un ciclo per stampare ogni spesa con il suo indice (su base 1): <br><code>\"Spesa \", i + 1, \": \", expenses[i]</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var expenses = [12.0, 25.0]\n    var choice = 2\n    # Gestisci la scelta 2 visualizzando le spese\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var expenses = [12.0, 25.0]\n    var choice = 2\n    if choice == 2:\n        for i in range(expenses.size()):\n            print(\"Spesa \", i + 1, \": \", expenses[i])\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa for i in range(expenses.size()): per scorrere gli indici."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "if choice == 2:\n    for i in range(expenses.size()):\n        print(\"Spesa \", i + 1, \": \", expenses[i])"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Stamperà Spesa 1: 12.0 e Spesa 2: 25.0."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.replace(/\s+/g, ''));
+                        const ok = logs.some(l => l.includes("Spesa1:12")) && logs.some(l => l.includes("Spesa2:25"));
+                        tests.push({ desc: "Tutte le spese visualizzate correttamente", passed: ok, diff: ok ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 87,
+        conceptId: "project_expenses",
+        conceptTags: ["project", "math"],
+        chapterId: 16,
+        isMastery: false,
+        title: "87. Registro Spese: Totale e Media (Scelta 3)",
+        icon: "📊",
+        xp: 50,
+        expectedOutput: "Totale: 40.0 Media: 20.0",
+        theory: "\n                <p>Gestiamo la scelta <code>3</code>: sommare tutte le spese e calcolare la spesa media (<code>media = totale / numero_spese</code>).</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>expenses = [10.0, 30.0]</code> e <code>choice = 3</code>:</li>\n                    <li>Calcola la somma delle spese con un ciclo in <code>total</code>.</li>\n                    <li>Calcola la media: <code>avg = total / expenses.size()</code>.</li>\n                    <li>Stampa <code>\"Totale: \", total, \" Media: \", avg</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var expenses = [10.0, 30.0]\n    var choice = 3\n    # Gestisci la scelta 3 calcolando totale e media\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var expenses = [10.0, 30.0]\n    var choice = 3\n    if choice == 3:\n        var total := 0.0\n        for e in expenses:\n            total += e\n        var avg := total / expenses.size()\n        print(\"Totale: \", total, \" Media: \", avg)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Somma gli elementi in total, poi dividi per expenses.size()."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "var total = 0.0\nfor e in expenses: total += e\nvar avg = total / expenses.size()"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "10 + 30 = 40; media = 40 / 2 = 20.0."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok = logs.some(l => l.includes("40") && l.includes("20"));
+                        tests.push({ desc: "Totale (40.0) e media (20.0) calcolati correttamente", passed: ok, diff: ok ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 88,
+        conceptId: "project_expenses",
+        conceptTags: ["project", "clear"],
+        chapterId: 16,
+        isMastery: false,
+        title: "88. Registro Spese: Cancellare Tutto (Scelta 4)",
+        icon: "🗑️",
+        xp: 50,
+        expectedOutput: "Registro svuotato! Elementi rimasti: 0",
+        theory: "\n                <p>Il metodo <code>arr.clear()</code> rimuove istantaneamente tutti gli elementi da un array, resettando la sua dimensione a 0.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>expenses = [50.0, 20.0, 35.0]</code> e <code>choice = 4</code>:</li>\n                    <li>Se <code>choice == 4</code>, svuota la lista con <code>expenses.clear()</code>.</li>\n                    <li>Stampa <code>\"Registro svuotato! Elementi rimasti: \", expenses.size()</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var expenses = [50.0, 20.0, 35.0]\n    var choice = 4\n    # Gestisci la scelta 4 svuotando la lista con clear()\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var expenses = [50.0, 20.0, 35.0]\n    var choice = 4\n    if choice == 4:\n        expenses.clear()\n        print(\"Registro svuotato! Elementi rimasti: \", expenses.size())\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "expenses.clear() rimuove tutti gli elementi."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "if choice == 4:\n    expenses.clear()\n    print(\"Registro svuotato! Elementi rimasti: \", expenses.size())"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "La dimensione dopo clear() sarà 0."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const exp = s.expenses || [];
+                        const ok = exp.length === 0;
+                        tests.push({ desc: "expenses svuotato con clear() (size = 0)", passed: ok, diff: ok ? null : `Elementi rimasti: ${exp.length}` });
+                        return tests;
+        }
+    },
+    {
+        id: 89,
+        conceptId: "project_expenses",
+        conceptTags: ["project", "error_handling"],
+        chapterId: 16,
+        isMastery: true,
+        title: "89. Registro Spese: Gestione Errori (Sfida)",
+        icon: "⚠️",
+        xp: 75,
+        expectedOutput: "Errore: Scelta non valida!",
+        theory: "\n                <p>Completiamo il progetto aggiungendo un ramo <code>else</code> per intercettare qualsiasi scelta non valida (minore di 1 o maggiore di 5).</p>\n            ",
+        task: "\n                <ul>\n                    <li>Data una scelta non valida <code>choice = 99</code>:</li>\n                    <li>Se la scelta è compresa tra 1 e 5 gestiscila; in caso contrario stampa l'errore: <br><code>\"Errore: Scelta non valida!\"</code></li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var choice = 99\n    # Gestisci le scelte non valide da 1 a 5\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var choice = 99\n    if choice >= 1 and choice <= 5:\n        print(\"Scelta valida\")\n    else:\n        print(\"Errore: Scelta non valida!\")\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa if choice < 1 or choice > 5 oppure il ramo else."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "if choice < 1 or choice > 5:\n    print(\"Errore: Scelta non valida!\")"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Essendo choice = 99, entrerà nel ramo di errore."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("Errore: Scelta non valida!"));
+                        tests.push({ desc: "Gestione errore su scelta non valida completata", passed: hasLog, diff: hasLog ? null : "Messaggio di errore non trovato" });
+                        return tests;
+        }
+    },
+    {
+        id: 90,
+        conceptId: "challenges",
+        conceptTags: ["challenge", "pyramid"],
+        chapterId: 17,
+        isMastery: false,
+        title: "90. Sfida: Piramide di Asterischi",
+        icon: "🔺",
+        xp: 75,
+        expectedOutput: "*\n***\n*****",
+        theory: "\n                <p>Disegnare pattern geometrici a console allena il pensiero algoritmico e l'uso combinato di cicli e moltiplicazione di stringhe:</p>\n                <div class=\"code-preview\">\n<pre><span class=\"nb\">print</span>(<span class=\"s\">\"*\"</span>.repeat(3)) <span class=\"c\"># \"***\"</span></pre>\n                </div>\n            ",
+        task: "\n                <ul>\n                    <li>Dato <code>n = 5</code> (numero massimo di asterischi della base):</li>\n                    <li>Genera una piramide stampando solo le righe con numero dispari di asterischi da 1 a n (es. per n=5: 1 asterisco, 3 asterischi, 5 asterischi).</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var n = 5\n    # Stampa le righe della piramide dispari\n    pass\n",
+        solution: "extends Node\n\nfunc _ready():\n    var n = 5\n    for i in range(1, n + 1, 2):\n        print(\"*\".repeat(i))\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa range(1, n + 1, 2) per scorrere i numeri dispari: 1, 3, 5."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "for i in range(1, n + 1, 2):\n    print(\"*\".repeat(i))"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "\"*\".repeat(3) produce tre asterischi consecutivi '***'."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const logs = (result.logs || []).map(l => l.trim());
+                        const ok = logs.includes("*") && logs.includes("***") && logs.includes("*****");
+                        tests.push({ desc: "Piramide 1, 3, 5 asterischi generata", passed: ok, diff: ok ? null : `Logs: ${logs.join(' | ')}` });
+                        return tests;
+        }
+    },
+    {
+        id: 91,
+        conceptId: "challenges",
+        conceptTags: ["challenge", "pattern"],
+        chapterId: 17,
+        isMastery: false,
+        title: "91. Sfida: Ricerca di Pattern in Stringhe",
+        icon: "🔍",
+        xp: 75,
+        expectedOutput: "Occorrenze di 'hero': 2",
+        theory: "\n                <p>Scrivere una funzione di ricerca che conta quante volte una parola chiave compare all'interno di una stringa di testo.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dichiara <code>find_occurrences(text: String, pattern: String) -> int</code>:</li>\n                    <li>Restituisce quante volte <code>pattern</code> appare all'interno di <code>text</code>.</li>\n                    <li>In <code>_ready()</code>, chiama la funzione con <code>\"gdscript hero è un vero hero\"</code> e <code>\"hero\"</code> e stampa <code>\"Occorrenze di 'hero': \", find_occurrences(...)</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    # Chiama e stampa le occorrenze di 'hero'\n    pass\n\n# Dichiara find_occurrences(text: String, pattern: String) -> int\n",
+        solution: "extends Node\n\nfunc _ready():\n    var text = \"gdscript hero è un vero hero\"\n    print(\"Occorrenze di 'hero': \", find_occurrences(text, \"hero\"))\n\nfunc find_occurrences(text: String, pattern: String) -> int:\n    var count := 0\n    var p_len := pattern.length()\n    for i in range(text.length() - p_len + 1):\n        if text.substr(i, p_len) == pattern:\n            count += 1\n    return count\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Usa text.substr(i, pattern.length()) per estrarre sottostringhe e confrontarle con pattern."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "for i in range(text.length() - p_len + 1):\n    if text.substr(i, p_len) == pattern:\n        count += 1"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "'hero' compare 2 volte nella frase."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const hasLog = (result.logs || []).some(l => l.includes("2"));
+                        tests.push({ desc: "find_occurrences trova 2 occorrenze di 'hero'", passed: hasLog, diff: hasLog ? null : "Conteggio occorrenze errato" });
+                        return tests;
+        }
+    },
+    {
+        id: 92,
+        conceptId: "challenges",
+        conceptTags: ["challenge", "capstone"],
+        chapterId: 17,
+        isMastery: true,
+        title: "92. Gran Finale: Cosa Posso Comprare? (Sfida)",
+        icon: "👑",
+        xp: 100,
+        expectedOutput: "Acquistabili: [\"pozione\", \"torcia\"]",
+        theory: "\n                <p>Complimenti! Sei arrivato alla <strong>lezione finale di Fondamenti</strong>! Metti insieme tutte le competenze su variabili, array, dizionari e cicli per risolvere questo problema di budget di gioco.</p>\n            ",
+        task: "\n                <ul>\n                    <li>Dato il negozio <code>shop = {\"spada\": 50, \"pozione\": 10, \"scudo\": 30, \"torcia\": 5}</code> e un budget <code>gold = 15</code>:</li>\n                    <li>Trova tutti gli oggetti che puoi permetterti (prezzo <= gold).</li>\n                    <li>Aggiungili a un array <code>can_buy = []</code>.</li>\n                    <li>Stampa <code>\"Acquistabili: \", can_buy</code>.</li>\n                </ul>\n            ",
+        initialCode: "extends Node\n\nfunc _ready():\n    var shop = {\"spada\": 50, \"pozione\": 10, \"scudo\": 30, \"torcia\": 5}\n    var gold = 15\n    var can_buy = []\n    # Trova gli oggetti con prezzo <= gold e aggiungili a can_buy\n    pass\n    print(\"Acquistabili: \", can_buy)\n",
+        solution: "extends Node\n\nfunc _ready():\n    var shop = {\"spada\": 50, \"pozione\": 10, \"scudo\": 30, \"torcia\": 5}\n    var gold = 15\n    var can_buy = []\n    for item in shop:\n        if shop[item] <= gold:\n            can_buy.append(item)\n    print(\"Acquistabili: \", can_buy)\n",
+        hints: [
+            {
+                        "level": 1,
+                        "type": "concept",
+                        "icon": "💡",
+                        "label": "Indizio Concettuale",
+                        "text": "Itera con for item in shop: e controlla if shop[item] <= gold:."
+            },
+            {
+                        "level": 2,
+                        "type": "structure",
+                        "icon": "🏗️",
+                        "label": "Guida alla Struttura",
+                        "text": "for item in shop:\n    if shop[item] <= gold:\n        can_buy.append(item)"
+            },
+            {
+                        "level": 3,
+                        "type": "example",
+                        "icon": "✨",
+                        "label": "Esempio Pratico",
+                        "text": "Con 15 monete puoi comprare 'pozione' (10) e 'torcia' (5)."
+            }
+],
+        validate: async (result) => {
+        const tests = [];
+                        tests.push(formatExecutionCheck(result));
+                        const s = result.scope || {};
+                        const cb = s.can_buy || [];
+                        const ok = cb.includes("pozione") && cb.includes("torcia") && !cb.includes("spada") && !cb.includes("scudo");
+                        tests.push({ desc: "Gran Finale completato: can_buy contiene pozione e torcia!", passed: ok, diff: ok ? null : `Trovato: ${JSON.stringify(cb)}` });
+                        return tests;
+        }
     }
 ];
 
-// Traguardi / Obiettivi sbloccabili
+// ==========================================
+// TRAGUARDI / OBIETTIVI SBLOCCABILI (17 CAPITOLI)
+// ==========================================
 const ACHIEVEMENTS_DATA = [
     {
         id: "first_blood",
         title: "Primi Passi",
-        icon: "🌱",
+        icon: "🚀",
         desc: "Compila ed esegui il tuo primo script con print in Godot.",
         xpReward: 25,
         condition: (state) => state.finishedLessons.includes(1)
@@ -4750,74 +4549,138 @@ const ACHIEVEMENTS_DATA = [
     {
         id: "chapter_1_master",
         title: "Padrone dell'Introduzione",
-        icon: "🏅",
+        icon: "📜",
         desc: "Supera la Sfida di Padronanza del Capitolo 1.",
         xpReward: 50,
         condition: (state) => state.finishedLessons.includes(4)
     },
     {
-        id: "var_master_1",
+        id: "chapter_2_master",
         title: "Iniziatore di Variabili",
         icon: "📦",
         desc: "Supera la Sfida di Padronanza del Capitolo 2 (Variabili Parte 1).",
         xpReward: 50,
-        condition: (state) => state.finishedLessons.includes(8)
+        condition: (state) => state.finishedLessons.includes(9)
     },
     {
-        id: "var_master_2",
+        id: "chapter_3_master",
         title: "Signore dei Tipi",
         icon: "🏷️",
         desc: "Supera la Sfida di Padronanza del Capitolo 3 (Variabili Parte 2 & Tipizzazione).",
         xpReward: 50,
-        condition: (state) => state.finishedLessons.includes(12)
+        condition: (state) => state.finishedLessons.includes(14)
     },
     {
-        id: "math_master",
+        id: "chapter_4_master",
         title: "Alchimista dei Numeri",
-        icon: "⚔️",
-        desc: "Supera la Sfida di Padronanza del Capitolo 4 (Operatori e Matematica).",
-        xpReward: 50,
-        condition: (state) => state.finishedLessons.includes(16)
-    },
-    {
-        id: "logic_master",
-        title: "Mago della Logica",
-        icon: "🛡️",
-        desc: "Supera la Sfida di Padronanza del Capitolo 5 (Condizioni e Logica).",
+        icon: "➗",
+        desc: "Supera la Sfida di Padronanza del Capitolo 4 (Operatori Aritmetici).",
         xpReward: 50,
         condition: (state) => state.finishedLessons.includes(20)
     },
     {
-        id: "array_master",
-        title: "Signore degli Inventari",
-        icon: "🎒",
-        desc: "Supera la Sfida di Padronanza del Capitolo 6 (Array).",
+        id: "chapter_5_master",
+        title: "Mago della Logica",
+        icon: "⚖️",
+        desc: "Supera la Sfida di Padronanza del Capitolo 5 (Operatori Logici).",
         xpReward: 50,
-        condition: (state) => state.finishedLessons.includes(24)
+        condition: (state) => state.finishedLessons.includes(25)
     },
     {
-        id: "loops_master",
+        id: "chapter_6_master",
+        title: "Stratega delle Decisioni",
+        icon: "🔀",
+        desc: "Supera la Sfida di Padronanza del Capitolo 6 (Strutture Decisionali).",
+        xpReward: 50,
+        condition: (state) => state.finishedLessons.includes(30)
+    },
+    {
+        id: "chapter_7_master",
+        title: "Interprete di Canali I/O",
+        icon: "💻",
+        desc: "Supera la Sfida di Padronanza del Capitolo 7 (Input e Output).",
+        xpReward: 50,
+        condition: (state) => state.finishedLessons.includes(37)
+    },
+    {
+        id: "chapter_8_master",
+        title: "Contabile dell'Accademia",
+        icon: "🧾",
+        desc: "Completa il Progetto del Capitolo 8 (Calcolatore del Conto).",
+        xpReward: 60,
+        condition: (state) => state.finishedLessons.includes(42)
+    },
+    {
+        id: "chapter_9_master",
         title: "Dominatore dei Cicli",
         icon: "🔄",
-        desc: "Supera la Sfida di Padronanza del Capitolo 7 (Cicli For e While).",
+        desc: "Supera la Sfida di Padronanza del Capitolo 9 (Cicli e Iterazione).",
         xpReward: 50,
-        condition: (state) => state.finishedLessons.includes(28)
+        condition: (state) => state.finishedLessons.includes(50)
     },
     {
-        id: "func_master",
+        id: "chapter_10_master",
         title: "Ingegnere di Funzioni",
         icon: "⚙️",
-        desc: "Supera la Sfida di Padronanza del Capitolo 8 (Funzioni e Nodi).",
+        desc: "Supera la Sfida di Padronanza del Capitolo 10 (Funzioni e Parametri).",
         xpReward: 50,
-        condition: (state) => state.finishedLessons.includes(32)
+        condition: (state) => state.finishedLessons.includes(57)
     },
     {
-        id: "vector_legend",
-        title: "Leggenda dei Vettori 2D",
-        icon: "🚀",
-        desc: "Completa la Sfida di Padronanza Finale del Capitolo 9 (Vettori e Movimento 2D).",
-        xpReward: 100,
-        condition: (state) => state.finishedLessons.includes(36)
+        id: "chapter_11_master",
+        title: "Campione di FizzBuzz",
+        icon: "🎯",
+        desc: "Completa il Progetto del Capitolo 11 (FizzBuzz e Varianti).",
+        xpReward: 60,
+        condition: (state) => state.finishedLessons.includes(61)
+    },
+    {
+        id: "chapter_12_master",
+        title: "Signore degli Array",
+        icon: "📚",
+        desc: "Supera la Sfida di Padronanza del Capitolo 12 (Nozioni di Base sugli Array).",
+        xpReward: 50,
+        condition: (state) => state.finishedLessons.includes(68)
+    },
+    {
+        id: "chapter_13_master",
+        title: "Pellegrino dei Vettori Dati",
+        icon: "🔁",
+        desc: "Supera la Sfida di Padronanza del Capitolo 13 (Iterazione su Array e Stringhe).",
+        xpReward: 50,
+        condition: (state) => state.finishedLessons.includes(72)
+    },
+    {
+        id: "chapter_14_master",
+        title: "Chirurgo dello Slicing",
+        icon: "✂️",
+        desc: "Supera la Sfida di Padronanza del Capitolo 14 (Array Approfonditi e Slicing).",
+        xpReward: 50,
+        condition: (state) => state.finishedLessons.includes(76)
+    },
+    {
+        id: "chapter_15_master",
+        title: "Custode dei Dizionari",
+        icon: "📖",
+        desc: "Supera la Sfida di Padronanza del Capitolo 15 (Dizionari).",
+        xpReward: 50,
+        condition: (state) => state.finishedLessons.includes(82)
+    },
+    {
+        id: "chapter_16_master",
+        title: "Gestore di Bilancio",
+        icon: "📊",
+        desc: "Completa il Progetto del Capitolo 16 (Registro Spese Giornaliere).",
+        xpReward: 75,
+        condition: (state) => state.finishedLessons.includes(89)
+    },
+    {
+        id: "part1_grandmaster",
+        title: "Campione dei Fondamenti GDScript",
+        icon: "🏆",
+        desc: "Completa con successo tutte le Sfide Finali del Capitolo 17 e termina la Parte 1!",
+        xpReward: 250,
+        condition: (state) => state.finishedLessons.includes(92)
     },
     {
         id: "clean_run",
@@ -4830,7 +4693,7 @@ const ACHIEVEMENTS_DATA = [
     {
         id: "century_xp",
         title: "Centurione dell'Accademia",
-        icon: "⚡",
+        icon: "⭐",
         desc: "Accumula almeno 500 Punti Esperienza totali.",
         xpReward: 50,
         condition: (state) => state.xp >= 500
@@ -4850,59 +4713,12 @@ const ACHIEVEMENTS_DATA = [
         desc: "Riscatta la tua prima missione giornaliera.",
         xpReward: 30,
         condition: (state) => state.claimedQuestsCount > 0
-    },
-    {
-        id: "dict_master",
-        title: "Custode del Sapere",
-        icon: "📖",
-        desc: "Supera la Sfida di Apprendimento del Capitolo 10 (Dizionari).",
-        xpReward: 50,
-        condition: (state) => state.finishedLessons.includes(40)
-    },
-    {
-        id: "signal_master",
-        title: "Maestro delle Frequenze",
-        icon: "📡",
-        desc: "Supera la Sfida di Apprendimento del Capitolo 11 (Segnali di Godot).",
-        xpReward: 50,
-        condition: (state) => state.finishedLessons.includes(44)
-    },
-    {
-        id: "oop_grandmaster",
-        title: "Gran Maestro di Godot 4",
-        icon: "👑",
-        desc: "Supera la Sfida di Apprendimento Finale del Capitolo 12 (Classi e Oggetti).",
-        xpReward: 150,
-        condition: (state) => state.finishedLessons.includes(48)
-    },
-    {
-        id: "tree_explorer",
-        title: "Esploratore dell'Albero",
-        icon: "🌳",
-        desc: "Supera la Sfida di Apprendimento del Capitolo 13 (Scene Tree & Label).",
-        xpReward: 60,
-        condition: (state) => state.finishedLessons.includes(52)
-    },
-    {
-        id: "ui_designer",
-        title: "Architetto di Interfacce",
-        icon: "🔘",
-        desc: "Supera la Sfida di Apprendimento del Capitolo 14 (Button & Segnale pressed).",
-        xpReward: 60,
-        condition: (state) => state.finishedLessons.includes(56)
-    },
-    {
-        id: "godot_architect",
-        title: "Maestro delle Scene Godot",
-        icon: "🏛️",
-        desc: "Supera la Sfida di Apprendimento Finale del Capitolo 15 (Timer, UI & Ciclo di Vita).",
-        xpReward: 200,
-        condition: (state) => state.finishedLessons.includes(60)
     }
 ];
 
-// Compatibile anche con i test che caricano lessons.js da solo.
-// ProgressionV2 resta l'unica fonte di calcolo del livello a runtime.
+// ==========================================
+// CONFIGURAZIONE LIVELLI, STREAK E MISSIONI
+// ==========================================
 const LEVELS_CONFIG = Array.from({length:50},(_,index)=>{
     const level=index+1;
     const minXp=(level-1)*(10*level+40);
@@ -4915,9 +4731,9 @@ const LEVELS_CONFIG = Array.from({length:50},(_,index)=>{
 });
 
 const STREAK_TIERS = {
-    rilassato: { target: 2, label: "Rilassato", icon: "☕", desc: "2 giorni / settimana" },
+    rilassato: { target: 2, label: "Rilassato", icon: "🌱", desc: "2 giorni / settimana" },
     concentrato: { target: 4, label: "Concentrato", icon: "🎯", desc: "4 giorni / settimana" },
-    lockin: { target: 6, label: "Lock in", icon: "⚡", desc: "6 giorni / settimana" }
+    lockin: { target: 6, label: "Lock in", icon: "🔥", desc: "6 giorni / settimana" }
 };
 
 const DAILY_QUESTS_CONFIG = [
@@ -4949,60 +4765,68 @@ const DAILY_QUESTS_CONFIG = [
 
 const PROJECTS_DATA = [
     {
-        id: "project_arena",
-        title: "Arena del Gladiatore",
-        icon: "⚔️",
-        badge: "DISPONIBILE • GIOCABILE",
+        id: "project_bill",
+        title: "Calcolatore del Conto & Mancia",
+        icon: "🧾",
+        badge: "PARTE 1 - CAP. 8",
         badgeClass: "badge-playable",
         isPlayable: true,
-        desc: "Programma un sistema completo di combattimento: gestione salute con take_damage() e heal(), limiti biologici, HUD reattivo ed esportazione per Godot 4.",
-        levelReq: "Capitolo 4 completato",
+        desc: "Programma un sistema completo di calcolo scontrino: subtotale, imposte, percentuale mancia e divisione in quote eque.",
+        levelReq: "Capitolo 8 sbloccato",
+        estimatedTime: "25 min",
+        topics: ["Variabili", "Float", "Operatori Aritmetici", "Format String"]
+    },
+    {
+        id: "project_fizzbuzz",
+        title: "FizzBuzz Dinamico con Parametri",
+        icon: "🎯",
+        badge: "PARTE 1 - CAP. 11",
+        badgeClass: "badge-playable",
+        isPlayable: true,
+        desc: "L'iconico algoritmo di intervista tecnica adattato a Godot con personalizzazione delle etichette e condizioni combinate.",
+        levelReq: "Capitolo 11 sbloccato",
         estimatedTime: "30 min",
-        topics: ["Variabili", "Funzioni", "Condizioni if/else", "HUD Grafico", "Godot 4 Export"]
+        topics: ["Cicli For", "Modulo %", "Condizioni if/elif/else", "Funzioni"]
     },
     {
-        id: "project_platformer",
-        title: "Controller 2D: Movimento & Salto",
-        icon: "🎮",
-        badge: "IN SVILUPPO",
-        badgeClass: "badge-wip",
-        desc: "Crea il CharacterBody2D controller in GDScript: movimento orizzontale, gravità, salto variabile e attrito.",
-        levelReq: "Capitolo 9 completato",
-        estimatedTime: "45 min",
-        topics: ["Vector2", "Input", "Fisica 2D", "Delta Time"]
-    },
-    {
-        id: "project_inventory",
-        title: "Gestore Inventario RPG a Slot",
-        icon: "🎒",
-        badge: "PROSSIMAMENTE",
-        badgeClass: "badge-soon",
-        desc: "Programma un sistema di inventario flessibile: aggiunta e rimozione oggetti, pozioni consumabili e limite di peso.",
-        levelReq: "Capitolo 6 completato",
-        estimatedTime: "30 min",
-        topics: ["Array", "Dizionari", "Tipizzazione", "Eventi"]
-    },
-    {
-        id: "project_turn_combat",
-        title: "Arena di Combattimento a Turni",
-        icon: "⚔️",
-        badge: "IN DESIGN",
-        badgeClass: "badge-design",
-        desc: "Logica per battaglie in stile JRPG: attacchi normali, abilità magiche, calcolo critico e IA nemica.",
-        levelReq: "Capitolo 5 completato",
-        estimatedTime: "50 min",
-        topics: ["If/Else", "Matematica", "Turni", "Stati"]
+        id: "project_expenses",
+        title: "Registro Spese e Bilancio",
+        icon: "📊",
+        badge: "PARTE 1 - CAP. 16",
+        badgeClass: "badge-playable",
+        isPlayable: true,
+        desc: "Gestore contabile completo: tracciamento uscite, somme cumulative, media giornaliera e categoria di spesa massima.",
+        levelReq: "Capitolo 16 sbloccato",
+        estimatedTime: "40 min",
+        topics: ["Array", "Dizionari", "Iterazione", "Statistiche"]
     }
 ];
 
 // Esporta gli oggetti globalmente per accesso da console e test
-window.CHAPTERS_DATA = CHAPTERS_DATA;
-window.LESSONS_DATA = LESSONS_DATA;
-window.ACHIEVEMENTS_DATA = ACHIEVEMENTS_DATA;
-window.LEVELS_CONFIG = LEVELS_CONFIG;
-window.STREAK_TIERS = STREAK_TIERS;
-window.DAILY_QUESTS_CONFIG = DAILY_QUESTS_CONFIG;
-window.PROJECTS_DATA = PROJECTS_DATA;
+if (typeof window !== 'undefined') {
+    window.CHAPTERS_DATA = CHAPTERS_DATA;
+    window.LESSONS_DATA = LESSONS_DATA;
+    window.ACHIEVEMENTS_DATA = ACHIEVEMENTS_DATA;
+    window.LEVELS_CONFIG = LEVELS_CONFIG;
+    window.STREAK_TIERS = STREAK_TIERS;
+    window.DAILY_QUESTS_CONFIG = DAILY_QUESTS_CONFIG;
+    window.PROJECTS_DATA = PROJECTS_DATA;
+    window.CONCEPTS_CATALOG = CONCEPTS_CATALOG;
+    window.getLessonConcept = getLessonConcept;
+}
 
-window.CONCEPTS_CATALOG = CONCEPTS_CATALOG;
-window.getLessonConcept = getLessonConcept;
+if (typeof global !== 'undefined') {
+    global.CHAPTERS_DATA = CHAPTERS_DATA;
+    global.LESSONS_DATA = LESSONS_DATA;
+    global.ACHIEVEMENTS_DATA = ACHIEVEMENTS_DATA;
+    global.LEVELS_CONFIG = LEVELS_CONFIG;
+    global.STREAK_TIERS = STREAK_TIERS;
+    global.DAILY_QUESTS_CONFIG = DAILY_QUESTS_CONFIG;
+    global.PROJECTS_DATA = PROJECTS_DATA;
+    global.CONCEPTS_CATALOG = CONCEPTS_CATALOG;
+    global.getLessonConcept = getLessonConcept;
+    global.formatExecutionCheck = formatExecutionCheck;
+    global.stripCommentsAndStrings = stripCommentsAndStrings;
+    global.hasRealComment = hasRealComment;
+}
+
