@@ -3165,22 +3165,28 @@ const App = {
         const validationPanel = document.getElementById('exercise-validation-panel');
         const toggleBtn = document.getElementById('btn-toggle-extra-tools');
 
-        // Se l'utente ha impostato un toggle manuale per la sessione corrente
+        // Gli strumenti si mostrano quando l'esercizio contiene davvero una
+        // scena o richiede un risultato grafico. L'ID numerico NON descrive il
+        // contenuto didattico: le lezioni 101+ sono spesso solo console.
         const manualOverride = this.state.manualToolsOverride;
+        const supportsNodeTree = !!lesson.hasNodeTree ||
+            (Array.isArray(lesson.initialNodes) && lesson.initialNodes.length > 0);
+        const supportsViewport = lesson.has2DViewport === true;
+        const hasVisualTools = supportsNodeTree || supportsViewport;
 
-        let showNodeTree = false;
-        let showViewport = false;
-
-        if (manualOverride === 'visible') {
-            showNodeTree = true;
-            showViewport = true;
-        } else if (manualOverride === 'hidden') {
-            showNodeTree = false;
-            showViewport = false;
-        } else {
-            // Logica contestuale predefinita basata sui metadati dell'esercizio
-            showNodeTree = (lesson.hasNodeTree !== undefined) ? !!lesson.hasNodeTree : (!!lesson.initialNodes && lesson.initialNodes.length > 0);
-            showViewport = (lesson.has2DViewport !== undefined) ? !!lesson.has2DViewport : (lesson.id >= 50);
+        // "Mostra strumenti" non deve mai aggiungere una viewport vuota ad
+        // un compito che usa soltanto print()/calcoli nel registro.
+        const showNodeTree = supportsNodeTree && manualOverride !== 'hidden';
+        const showViewport = supportsViewport && manualOverride !== 'hidden';
+        if (toggleBtn) {
+            toggleBtn.classList.toggle('hidden', !hasVisualTools);
+            toggleBtn.disabled = !hasVisualTools;
+            toggleBtn.setAttribute('aria-hidden', String(!hasVisualTools));
+        }
+        const mobileToolsBtn = document.getElementById('btn-mobile-toggle-tools');
+        if (mobileToolsBtn) {
+            mobileToolsBtn.classList.toggle('hidden', !hasVisualTools);
+            mobileToolsBtn.disabled = !hasVisualTools;
         }
 
         const anyActive = showNodeTree || showViewport;
