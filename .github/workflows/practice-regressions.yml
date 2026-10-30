@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'lesson_practice.js'
+      - 'practice-behavior.js'
+      - 'tests/practice_behavior.test.cjs'
       - 'practice_catalog.js'
       - 'lessons.js'
       - 'curriculum_extension.js'
@@ -15,6 +17,8 @@ on:
   pull_request:
     paths:
       - 'lesson_practice.js'
+      - 'practice-behavior.js'
+      - 'tests/practice_behavior.test.cjs'
       - 'practice_catalog.js'
       - 'lessons.js'
       - 'curriculum_extension.js'
@@ -41,3 +45,5 @@ jobs:
         run: node tests/full_course_multitask.test.cjs
       - name: Validate alternatives and reject shortcuts
         run: node tests/alternative_solutions_regression.test.cjs
+      - name: Validate behavioral scenarios and prior bypass
+        run: node tests/practice_behavior.test.cjs

@@ -56,5 +56,7 @@ const deadBranch='func _ready():\n    if false:\n        var eroe = "Lia"\n'+
 assert.equal(passes(t,deadBranch),false,'if false treated as executed code');
 const adapter=read('native/native-beta-adapter.js');
 assert.ok(adapter.includes("const valid=run.status==='executed'&&!String(run.stderr||'').trim()"));
-assert.ok(adapter.includes('const passed=valid&&checks.length>2&&checks.every(c=>c.passed)'));
+assert.ok(adapter.includes('const passed=valid&&!probeError&&checks.length>2&&checks.every(c=>c.passed)'));
+assert.ok(adapter.includes('GDHPracticeBehavior?.createProbes'));
+assert.ok(adapter.includes("verdict:probeError?'inconclusive'"));
 console.log('PASS',JSON.stringify({official,validComment,badOutput,deadMethod,variants}));

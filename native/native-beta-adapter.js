@@ -188,11 +188,37 @@
       {desc:'Nessun errore del motore',passed:!String(run.stderr||'').trim()}
     ];
     if(valid)checks.push(...window.LessonPractice.grade(task,source,run.stdout));
-    const passed=valid&&checks.length>2&&checks.every(c=>c.passed);
+    // Una soluzione deve funzionare anche dopo la variazione di un dato.
+    // Ogni variante viene eseguita sequenzialmente nel medesimo motore Godot.
+    let probeError=null;
+    if(valid&&checks.every(c=>c.passed)){
+      const lesson=window.LESSONS_DATA?.find(l=>l.id===lessonId);
+      const scenarios=window.GDHPracticeBehavior?.createProbes(lesson,task,source)||[];
+      for(const scenario of scenarios){
+        const correct=await raw(scenario.reference,{});
+        if(correct.status!=='executed'||String(correct.stderr||'').trim()){
+          probeError='La verifica del caso alternativo non è disponibile. Riprova.';
+          break;
+        }
+        const expected=String(correct.stdout||'').trimEnd();
+        // Non contare come prova un caso che non cambia il risultato.
+        if(expected===String(task.expectedOutput||'').trimEnd())continue;
+        const candidate=await raw(scenario.student,{});
+        const validCandidate=candidate.status==='executed'&&!String(candidate.stderr||'').trim();
+        const actual=String(candidate.stdout||'').trimEnd();
+        const ok=validCandidate&&actual===expected;
+        checks.push({desc:'Funzionamento con valori diversi: '+scenario.label,
+          passed:ok,diff:ok?null:validCandidate?
+          'Con dati differenti il risultato deve essere: '+(expected||'(nessun messaggio)'):
+          String(candidate.stderr||'Errore nell’esecuzione con dati differenti').trim()});
+        if(!ok)break;
+      }
+    }
+    const passed=valid&&!probeError&&checks.length>2&&checks.every(c=>c.passed);
     const feedback={
-      verdict:passed?'accepted':valid?'requirements_not_met':'invalid_code',
+      verdict:probeError?'inconclusive':passed?'accepted':valid?'requirements_not_met':'invalid_code',
       passed,checks,
-      reason:valid?null:String(run.stderr||'Codice non eseguibile in Godot').trim()
+      reason:probeError||(valid?null:String(run.stderr||'Codice non eseguibile in Godot').trim())
     };
     const execution={
       success:valid,code:source,logs:lines(run.stdout),
