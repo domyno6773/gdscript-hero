@@ -35,4 +35,24 @@ assert.equal(total,264);
 const old=fs.readFileSync(path.join(root,'index.html'),'utf8');
 assert.ok(old.indexOf('src="practice_catalog.js"')<old.indexOf('src="curriculum_drills_v2.js"'));
 assert.ok(old.indexOf('src="curriculum_drills_v2.js"')<old.indexOf('src="app.js"'));
+const oldProgress={'5':{completed:['base','p2','p3','p4'],codes:{base:'old base',p2:'old p2',p3:'old p3'}}};
+const newProgress={'5':{drillVersion:2,completed:['base','p2'],codes:{base:'new base',p2:'new p2'}}};
+const combined=catalog.mergeProgress(oldProgress,newProgress)['5'];
+assert.equal(combined.drillVersion,2);
+assert.deepEqual([...combined.completed].sort(),['base','p2']);
+assert.equal(combined.codes.p2,'new p2');
+assert.equal(combined.legacyCodes.p2,'old p2');
+assert.equal(combined.legacyCodes.p3,'old p3');
+const onlyOld=catalog.mergeProgress({},oldProgress)['5'];
+assert.deepEqual([...onlyOld.completed],['base']);
+assert.equal(onlyOld.activeIndex,1);
+assert.equal(onlyOld.codes.p2,undefined);
+assert.equal(onlyOld.legacyCodes.p2,'old p2');
+const dualModern=catalog.mergeProgress(
+  {'5':{drillVersion:2,completed:['base'],codes:{p2:'draft from device A'}}},
+  {'5':{drillVersion:2,completed:['base','p2'],codes:{p2:'draft from device B'}}}
+)['5'];
+assert.deepEqual([...dualModern.completed],['base','p2']);
+assert.equal(dualModern.codes.p2,'draft from device B');
+
 console.log('PASS: 85 lessons, 152 individualized drills, 264 tasks, unique titles and valid source checks.');
