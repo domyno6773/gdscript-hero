@@ -6,6 +6,7 @@ on:
     paths:
       - 'lesson_practice.js'
       - 'practice-behavior.js'
+      - 'curriculum_drills_v2.js'
       - 'tests/practice_behavior.test.cjs'
       - 'practice_catalog.js'
       - 'lessons.js'
@@ -18,6 +19,7 @@ on:
     paths:
       - 'lesson_practice.js'
       - 'practice-behavior.js'
+      - 'curriculum_drills_v2.js'
       - 'tests/practice_behavior.test.cjs'
       - 'practice_catalog.js'
       - 'lessons.js'
