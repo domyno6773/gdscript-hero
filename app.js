@@ -4559,10 +4559,33 @@ const App = {
             if (this.state.currentLessonId !== currentLesson.id || editor.value !== code ||
                 this.isReviewMode || this.currentPracticeTaskIndex!==practiceIndex) return;
             const result = native.execution;
-            // La gerarchia deriva dall'istanza GDScript realmente eseguita.
-            // L'output dei test con input alternativo non sovrascrive la scena principale.
-            if(window.GDHLessonScene?.isActive()&&native.original?.reply){
-                window.GDHLessonScene.applyNative(native.original.reply.lessonScene,!!result.success);
+            // I test di verifica possono eseguire varianti della soluzione.
+            // Riapre l'ORIGINALE in Godot in modalità persistente solo per la
+            // viewport; questa esecuzione non modifica il giudizio o gli XP.
+            let visualScene=native.original?.reply?.lessonScene;
+            if(showNative&&result.success&&window.GDHGodot.startLessonPreview){
+                try{
+                    const preview=await window.GDHGodot.startLessonPreview(
+                        currentLesson.id,code,practiceTask?.key||'base');
+                    if(preview&&preview.success&&Array.isArray(preview.lessonScene)){
+                        visualScene=preview.lessonScene;
+                    }else if(preview&&!preview.success&&nativeMessage){
+                        nativeMessage.textContent='Il codice è stato verificato, ma l’anteprima non è disponibile.';
+                        nativeMessage.hidden=false;
+                    }
+                }catch(previewError){
+                    console.warn('[Godot] Anteprima della lezione non disponibile',previewError);
+                    if(nativeMessage){
+                        nativeMessage.textContent='La verifica è completata, ma l’anteprima non è disponibile.';
+                        nativeMessage.hidden=false;
+                    }
+                }
+                // L'utente può aver cambiato editor o compito durante l'avvio.
+                if(this.state.currentLessonId!==currentLesson.id||editor.value!==code||
+                    this.currentPracticeTaskIndex!==practiceIndex)return;
+            }
+            if(window.GDHLessonScene?.isActive()&&Array.isArray(visualScene)){
+                window.GDHLessonScene.applyNative(visualScene,!!result.success);
             }
 
             const realOutputPre = document.getElementById('real-output-pre');
