@@ -9,14 +9,16 @@
  * Server-verified competitive rewards / paid access need server-side validation.
  */
 (() => {
-  const VERSION=1, MAX_CODE=10000, STARTUP_TIMEOUT=30000, EXEC_TIMEOUT=4500;
+  const VERSION=1, MAX_CODE=10000, STARTUP_TIMEOUT=90000, EXEC_TIMEOUT=4500;
   const RUNNER_URL=new URL('native/isolated.html',document.baseURI);
   let frame=null,session=null,ready=false,startup=null,pending=null,nextId=0;
   let queue=Promise.resolve(),fixturesPromise=null,validatorsPromise=null,lastStage='';
+  let previewHost=null,liveOutput=null,epoch=0;
   const lines=text=>String(text||'').trimEnd().split(/\r?\n/).filter(Boolean);
   const messageOf=err=>String(err?.message||err||'Errore sconosciuto').slice(0,400);
 
   const reset=reason=>{
+    epoch++;
     const error=new Error(reason);
     if(pending){const item=pending;pending=null;clearTimeout(item.timer);item.reject(error);}
     if(startup){const item=startup;startup=null;clearTimeout(item.timer);item.reject(error);}
@@ -27,6 +29,8 @@
     if(event.origin!=='null'||!frame||event.source!==frame.contentWindow)return;
     const msg=event.data;
     if(!msg||typeof msg!=='object'||msg.v!==VERSION||msg.session!==session)return;
+    if(msg.type==='stop_requested'){window.GDHSceneWorkspace?.stop();return;}
+    if(msg.type==='live_output'){liveOutput?.(String(msg.text||'').slice(0,4000),!!msg.error);return;}
     if(msg.type==='progress'){lastStage=String(msg.stage||'');return;}
     if(msg.type==='ready'){
       if(startup){const item=startup;startup=null;clearTimeout(item.timer);ready=true;item.resolve();}
@@ -43,13 +47,13 @@
   const start=()=>{
     if(ready)return Promise.resolve();
     if(startup)return startup.promise;
-    session=crypto.randomUUID();
+    session=typeof crypto.randomUUID==='function'?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('').replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/,'$1-$2-$3-$4-$5');
     const iframe=document.createElement('iframe');
     iframe.id='gdh-native-runner';
     iframe.title='Motore Godot isolato';
     iframe.setAttribute('sandbox','allow-scripts');
     iframe.referrerPolicy='no-referrer';
-    iframe.style.cssText='width:1px;height:1px;border:0;position:absolute;opacity:0;pointer-events:none';
+    iframe.style.cssText=previewHost?'width:100%;height:100%;border:0;display:block;background:#202b37':'width:1px;height:1px;border:0;position:absolute;opacity:0;pointer-events:none';
     const url=new URL(RUNNER_URL);
     url.searchParams.set('session',session);
     iframe.src=url.href;
@@ -58,14 +62,17 @@
       startup={resolve,reject,promise:null,timer:setTimeout(()=>reset('Avvio Godot scaduto'),STARTUP_TIMEOUT)};
     });
     startup.promise=promise;
-    document.body.append(iframe);
+    (previewHost||document.body).append(iframe);
     return promise;
   };
   const raw=(code,options={})=>{
+    const requestEpoch=epoch;
     const operation=async()=>{
+      if(requestEpoch!==epoch)throw new Error('Esecuzione annullata');
       lastStage='request';
       if(typeof code!=='string'||code.length>MAX_CODE)throw new Error('Codice troppo lungo: massimo 10000 caratteri');
       await start();
+      if(requestEpoch!==epoch)throw new Error('Esecuzione annullata');
       const id=++nextId;
       const result=new Promise((resolve,reject)=>{
         pending={id,resolve,reject,timer:setTimeout(()=>reset('Esecuzione Godot scaduta'),EXEC_TIMEOUT)};
@@ -77,7 +84,7 @@
         objectCalls:options.objectCalls||[],
         scene:options.scene||0,actions:options.actions||[],
         mode:options.mode||'',nodes:options.nodes||[],
-        node:options.node||'',signal:options.signal||''
+        node:options.node||'',signal:options.signal||'',frames:options.frames||1,input:options.input||[],paused:!!options.paused
       },'*'); // sandboxed iframe has an opaque origin
       return result;
     };
@@ -121,6 +128,16 @@
     actions:step.actions||lesson.actions||[]
   });
   const verifyLesson=async(id,source)=>{
+    if(window.GDHGameplayLessons?.has(id)){
+      // Chromium throttles animation frames in transparent/offscreen iframes.
+      // Physics assessments need the real engine loop, so show the running scene.
+      await start();
+      const activeFrame=frame, previousStyle=activeFrame.style.cssText;
+      activeFrame.style.cssText='position:fixed;right:12px;bottom:12px;width:min(320px, calc(100vw - 24px));height:180px;border:2px solid #478cbf;z-index:10000;background:#202b37;pointer-events:none';
+      activeFrame.title='Verifica della scena con la fisica di Godot';
+      try{return await window.GDHGameplayLessons.verify(id,source,raw);}
+      finally{if(frame===activeFrame){activeFrame.style.cssText=previousStyle;activeFrame.title='Motore Godot isolato';}}
+    }
     // Nuove lezioni del corso: sempre esecuzione nativa Godot, ID distinti dai ripassi.
     if(window.GDHCurriculumExtension?.has(id))
       return window.GDHCurriculumExtension.verify(id,source,raw);
@@ -216,11 +233,7 @@
     const reviewId=options.lesson?.id;
     const sceneId=reviewSceneIds[reviewId]||0;
     const sandboxNodes=Array.isArray(options.sandboxNodes)?options.sandboxNodes:null;
-    const nativeNodes=sandboxNodes?sandboxNodes.map(n=>({
-      name:String(n.name||''),type:String(n.type||'Node'),
-      parent:n.parent==null?null:String(n.parent),
-      text:String(n.text||'').slice(0,200)
-    })):[];
+    const nativeNodes=sandboxNodes?(window.GDHSceneModel?window.GDHSceneModel.normalize(sandboxNodes):sandboxNodes):[];
     const probeOptions={inspect:names,locals,scene:sceneId,calls:probes.map(method=>({method,args:[]})),
       mode:sandboxNodes?'sandbox_start':'',nodes:nativeNodes};
     const r=await raw(source,probeOptions);
@@ -298,7 +311,9 @@
       (run.stderr.trim()||String(run.reply?.message||'Azione Godot non riuscita')),
       native:run.reply};
   };
-  const adapter=Object.freeze({verifyLesson,verifyPracticeTask,verifyReview,executeReview,execute:executeCompat,sandboxAction,
+  const beginPreview=(host,onOutput)=>{reset('Nuova esecuzione');previewHost=host;liveOutput=onOutput;};
+  const stopPreview=()=>{reset('Scena arrestata');previewHost=null;liveOutput=null;};
+  const adapter=Object.freeze({beginPreview,stopPreview,verifyLesson,verifyPracticeTask,verifyReview,executeReview,execute:executeCompat,sandboxAction,
     runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.4.1 WebAssembly';}});
   window.GDHGodot=adapter;
   if(window.GDScriptRuntime)window.GDScriptRuntime.execute=(...args)=>executeCompat(...args);

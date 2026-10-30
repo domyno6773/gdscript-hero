@@ -230,7 +230,7 @@ async function testAllLessonCodeSamplesFit(page,width){
    return {lessonCount,sampleCount,errors:errors.slice(0,20),totalErrors:errors.length,
      xpUnchanged:App.state.xp===previousXP};
  });
- assert.equal(result.lessonCount,81,'The visual regression must scan all 81 lessons');
+ assert.equal(result.lessonCount,85,'The visual regression must scan all 85 lessons');
  assert.ok(result.sampleCount>=38,'Expected both lesson sample types: '+JSON.stringify(result));
  assert.ok(result.xpUnchanged,'Inspecting samples unexpectedly changed student XP');
  assert.equal(result.totalErrors,0,'Lesson examples escape their boundaries at '+width+'px: '+JSON.stringify(result));
@@ -454,15 +454,15 @@ async function testAccessibilityKeyboard(page,width){
   assert.equal(await page.locator('#level-popover').isHidden(),true,'Escape did not close level panel');
   assert.equal(await page.evaluate(()=>document.activeElement?.id),'btn-open-profile',
     'Closing level panel must restore focus to its launcher');
-  await profile.click();
-  await page.locator('#btn-level-full-profile').click();
+  await page.locator('#btn-open-user-menu').click();
+  await page.locator('#btn-menu-profile').click();
   assert.equal(await page.locator('#profile-modal').isVisible(),true,'Existing customization must remain accessible');
   assert.equal(await page.evaluate(()=>document.activeElement.closest('#profile-modal')!==null),true,
     'Opening profile dialog should move focus inside it');
   assert.equal(await page.locator('#btn-close-profile').getAttribute('aria-label'),'Chiudi finestra');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#profile-modal').isHidden(),true,'Escape did not close profile');
-  assert.equal(await page.evaluate(()=>document.activeElement?.id),'btn-open-profile',
+  assert.equal(await page.evaluate(()=>document.activeElement?.id),'btn-open-user-menu',
     'Full profile dialog must restore focus to its visible launcher');
   const streak=page.locator('#btn-streak-modal');
   await streak.focus();await page.keyboard.press('Space');
@@ -480,22 +480,22 @@ async function testAccessibilityKeyboard(page,width){
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#settings-modal').isHidden(),true);
 
-  // Godot's custom node picker must expose radio semantics and arrow keys.
-  await page.evaluate(()=>document.getElementById('add-node-modal').classList.remove('hidden'));
-  const picker=page.locator('#node-type-selector-grid');
-  assert.equal(await picker.getAttribute('role'),'radiogroup');
-  const selected=picker.locator('.node-type-option.selected');
-  assert.equal(await selected.getAttribute('aria-checked'),'true');
-  await selected.focus();await page.keyboard.press('ArrowRight');
-  assert.equal(await picker.locator('.node-type-option.selected').getAttribute('data-node-type'),'Label');
-  assert.equal(await picker.locator('.node-type-option.selected').getAttribute('aria-checked'),'true');
+  // The native dialog supports keyboard search, creation and cancellation.
+  await page.evaluate(()=>App.openPracticeView());
+  if(await page.locator('#modal-sandbox-welcome').isVisible())await page.locator('#btn-close-sandbox-welcome').click();
+  await page.locator('#btn-sandbox-add-node').click();
+  const picker=page.locator('dialog.scene-create-dialog');
+  assert.equal(await picker.isVisible(),true);
+  await page.locator('.scene-node-search').fill('CollisionShape2D');
+  assert.equal(await picker.locator('.scene-type-list button').count(),1);
+  await page.locator('.scene-node-search').fill('');
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('#add-node-modal').isHidden(),true);
+  await picker.waitFor({state:'detached'});
 
   // The active section and exercise split-tab are announced to screen readers.
   await page.evaluate(()=>App.openLesson(1));
-  assert.equal(await page.locator('#nav-editor-btn').getAttribute('aria-current'),'page');
-  assert.equal(await page.locator('#mob-nav-exercise').getAttribute('aria-current'),'page');
+  assert.equal(await page.locator('#nav-roadmap-btn').getAttribute('aria-current'),'page');
+  assert.equal(await page.locator('#mob-nav-roadmap').getAttribute('aria-current'),'page');
   await page.evaluate(()=>App.setMobileExerciseTab('code',false));
   assert.equal(await page.locator('#btn-tab-code').getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('#btn-tab-instructions').getAttribute('aria-pressed'),'false');
@@ -1106,8 +1106,10 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#site-welcome').isVisible(),true);
  await page.locator('#site-start-tour').click();
  assert.equal(await page.locator('#site-tour').isVisible(),true);
- for(let n=0;n<6;n++){
-   assert.equal((await page.locator('#site-tour-position').textContent()).trim(),(n+1)+' / 6');
+ const tourLength=await page.evaluate(()=>App.siteTourSteps.length);
+ assert.equal(tourLength,4);
+ for(let n=0;n<tourLength;n++){
+   assert.equal((await page.locator('#site-tour-position').textContent()).trim(),(n+1)+' / '+tourLength);
    await page.locator('#site-tour-next').click();
  }
  assert.equal(await page.locator('#site-goal-gate').isVisible(),true);
@@ -1124,7 +1126,7 @@ async function smoke(browser,url,width){
  assert.equal(await page.locator('#site-welcome').isHidden(),true);
  assert.equal(await page.locator('#site-goal-gate').isHidden(),true);
  await page.waitForFunction(()=>!!window.App&&!!window.LESSONS_DATA&&!document.getElementById('view-roadmap').classList.contains('hidden'));
- assert.equal(await page.evaluate(()=>LESSONS_DATA.length),111);
+ assert.equal(await page.evaluate(()=>LESSONS_DATA.length),115);
  assert.equal(await page.evaluate(()=>window.GDHGodot?.engine),'Godot 4.4.1 WebAssembly','Godot must be the default engine');
  // La modale di successo non deve piu' allargarsi a quasi tutto il viewport.
  await page.evaluate(()=>document.getElementById('success-modal').classList.remove('hidden'));
@@ -1163,8 +1165,7 @@ async function smoke(browser,url,width){
  await page.evaluate(()=>localStorage.setItem('sandbox_welcome_seen','true'));
  // L'Arena classificata e i progetti Premium sono in pausa, ma il progetto gratuito resta aperto.
  await page.evaluate(()=>App.openProjectsView());
- assert.equal(await page.locator('.gdh-arena-coming-soon .gdh-coming-soon-lock').count(),1);
- assert.equal((await page.locator('.gdh-arena-coming-soon .gdh-coming-soon-cover strong').textContent()).trim(),'In arrivo');
+ assert.equal(await page.locator('.gdh-arena-coming-soon').count(),0,'The paused competitive Arena has no catalog card');
  assert.equal(await page.locator('.gdh-project-coming-soon').count(),3);
  assert.equal(await page.locator('.gdh-project-coming-soon .gdh-coming-soon-lock').count(),3);
  assert.equal(await page.locator('.gdh-project-coming-soon button').count(),0,'Premium projects must not be clickable');
@@ -1276,6 +1277,8 @@ async function smoke(browser,url,width){
  assert.equal(questPaint.xpUnchanged,true,'Visual test must not award any XP');
  assert.match(questPaint.state,/Riscattato|Completata/);
 
+ // Measure the final layout, after the roadmap's entrance transform settles.
+ await page.locator('#view-roadmap').evaluate(el=>Promise.all(el.getAnimations().map(a=>a.finished.catch(()=>{}))));
  // CTA Ripasso: nessun testo sottolineato o controllo senza layout nel callout.
  const reviewCalloutStyle=await page.evaluate(()=>{
    const panel=document.getElementById('roadmap-review-callout');
@@ -1312,7 +1315,7 @@ async function smoke(browser,url,width){
  assert.equal(reviewCalloutStyle.dark.secondary.radius,'8px');
  assert.equal(reviewCalloutStyle.dark.primary.decoration,'none');
  assert.equal(reviewCalloutStyle.dark.primary.shadow,'none');
- assert.ok(reviewCalloutStyle.dark.primary.height>=39);
+ assert.ok(reviewCalloutStyle.dark.primary.height>=39,JSON.stringify(reviewCalloutStyle));
  assert.ok(reviewCalloutStyle.dark.secondary.height>=39);
  const primaryPadding=parseFloat(reviewCalloutStyle.dark.primary.padding);
  assert.ok(primaryPadding>=10,'CTA missing horizontal padding');
@@ -1330,7 +1333,8 @@ async function smoke(browser,url,width){
 
  await testNavigationPersistence(page,width);
  for(const section of ['roadmap','practice','projects','review','stats']){
-   const selector=width<821?'#mob-nav-'+section:'#nav-'+section+'-btn';
+   if(section==='stats')await page.locator('#btn-open-user-menu').click();
+   const selector=section==='stats'?'#nav-stats-btn':width<821?'#mob-nav-'+section:'#nav-'+section+'-btn';
    await page.locator(selector).click({timeout:15000});
    await viewIs(page,section);
  }
@@ -1358,8 +1362,7 @@ async function smoke(browser,url,width){
  assert.deepEqual(iconAudit.pictographs,[],'Emoji remain in Sandbox: '+JSON.stringify(iconAudit));
  for(const [open,modal,close] of [
    ['#btn-sandbox-help','#modal-sandbox-welcome','#btn-close-sandbox-welcome'],
-   ['#btn-sandbox-new-project','#modal-sandbox-new-project','#btn-cancel-sandbox-new'],
-   ['#btn-sandbox-add-node','#add-node-modal','#btn-cancel-add-node']
+   ['#btn-sandbox-new-project','#modal-sandbox-new-project','#btn-cancel-sandbox-new']
  ]){
    await page.locator(open).click({timeout:10000});
    await page.locator(modal).waitFor({state:'visible'});
@@ -1446,6 +1449,7 @@ async function smoke(browser,url,width){
  // Stesso errore reale sia negli esercizi sia nella Sandbox:
  // la guida deve spiegare la parentesi mancante, non dire solo "ricontrolla".
  const missingParenthesis='func _ready():\\n    print("Ciao"'.replace('\\n','\n');
+ await page.locator('#scene-stop').click();
  await page.locator('#sandbox-code-editor').fill(missingParenthesis);
  await page.locator('#btn-sandbox-run').click({timeout:10000});
  await page.waitForFunction(()=>
@@ -1486,7 +1490,7 @@ async function smoke(browser,url,width){
    App.addSandboxNode('Button','Button','Clicca');
  });
  // Sandbox: figli effettivamente istanziati, proprietà native e click persistenti.
- const sampleCode='extends Node2D\nvar clicks = 0\nfunc _ready():\n    $Label.text = "Nativo pronto"\n    print("SANDBOX_NODES_READY")\nfunc _on_button_pressed():\n    clicks += 1\n    $Label.text = "Click " + str(clicks)\n    print("SANDBOX_CLICK " + str(clicks))';
+ const sampleCode='extends Node2D\nvar clicks = 0\nfunc _ready():\n    $Label.text = "Nativo pronto"\n    print("SANDBOX_NODES_READY")\n    $Button.pressed.connect(_on_button_pressed)\nfunc _on_button_pressed():\n    clicks += 1\n    $Label.text = "Click " + str(clicks)\n    print("SANDBOX_CLICK " + str(clicks))';
  await page.locator('#sandbox-code-editor').fill(sampleCode);
  await page.locator('#btn-sandbox-run').click({timeout:10000});
  try {
@@ -1502,25 +1506,20 @@ async function smoke(browser,url,width){
    }));
    throw Error('Sandbox scene diagnostic: '+JSON.stringify(info));
  }
- const sceneStart=await page.evaluate(()=>{
-   const s=App.sandboxScene;
-   const label=s.children.find(x=>x.name==='Label');
-   const native=App.sandboxNativeSession;
-   const project=App.getActiveSandboxProject();
-   return {label:label?.text,native:!!native,projectLabel:project.nodes.find(x=>x.name==='Label')?.text,
-     scene:document.getElementById('sandbox-ui-overlay')?.textContent};
- });
- assert.equal(sceneStart.label,'Nativo pronto','Godot _ready must update native Label');
+ const sceneStart=await page.evaluate(()=>({
+   native:!!App.sandboxNativeSession,
+   projectLabel:App.getActiveSandboxProject().nodes.find(x=>x.name==='Label')?.text
+ }));
  assert.ok(sceneStart.native,'Godot persistent session missing');
- assert.ok(sceneStart.scene.includes('Nativo pronto'),'Viewport not synced with Godot');
+ assert.equal(await page.locator('#gdh-native-runner').isVisible(),true,'Native canvas host is visible');
  for(let click=1;click<=2;click++){
-   await page.locator('#sandbox-ui-overlay .godot-ui-btn').click({timeout:10000});
-   await page.waitForFunction(i=>document.getElementById('sandbox-console-output').textContent.includes('SANDBOX_CLICK '+i),click,{timeout:8000});
-   assert.equal(await page.evaluate(()=>App.sandboxScene.children.find(x=>x.name==='Label').text),
-     'Click '+click,'Godot instance did not persist click state');
+   const result=await page.evaluate(()=>GDHGodot.sandboxAction('Button'));
+   assert.ok(result.success);
+   assert.equal(result.native.scene.Label.text,'Click '+click,'Native signal did not retain state');
  }
  assert.equal(await page.evaluate(()=>App.getActiveSandboxProject().nodes.find(x=>x.name==='Label').text),
    sceneStart.projectLabel,'Runtime properties must not overwrite saved scene definition');
+ await page.locator('#scene-stop').click();
  // Contrasto del testo: tema scuro e tema chiaro.
  const contrast=await page.evaluate(()=>{
    const syntax=document.getElementById('sandbox-gdscript-highlight');
@@ -1585,15 +1584,15 @@ async function smoke(browser,url,width){
    const el=id=>document.getElementById(id).getBoundingClientRect();
    const viewport=document.getElementById('exercise-viewport-col');
    return {
-     feedbackAboveOutput:el('exercise-primary-feedback').top < el('expected-output-pre').top,
-     feedbackBeforeTests:el('exercise-primary-feedback').top < el('exercise-test-details').top,
+     feedbackHidden:document.getElementById('exercise-primary-feedback').classList.contains('hidden'),
+     testsHidden:document.getElementById('exercise-test-details').hidden,
      viewportHidden:getComputedStyle(viewport).display==='none',
      dockBottom:el('exercise-validation-panel').bottom,
      buttonTop:el('btn-run-code').top,
      expectedShown:getComputedStyle(document.getElementById('expected-output-pre')).display!=='none'
    };
  });
- assert.ok(initialGeometry.feedbackAboveOutput&&initialGeometry.feedbackBeforeTests,'First feedback is above outputs and tests');
+ assert.ok(initialGeometry.feedbackHidden&&initialGeometry.testsHidden,'Feedback and test results must stay hidden until verification');
  const outputLayout=await page.evaluate(()=>{
    const el=document.querySelector('#view-exercise .output-comparison-grid');
    const e=el.querySelector('.expected-box').getBoundingClientRect();
@@ -1784,43 +1783,10 @@ async function smoke(browser,url,width){
  await page.locator('#btn-run-code').click({timeout:10000});
  await page.waitForFunction(()=>!App.isValidating &&
    !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
- assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),false,
-   'First task must not complete the lesson');
- assert.equal(await page.locator('#lesson-practice-counter').textContent(),'Compito 1 di 4');
- assert.equal(await page.evaluate(()=>App.switchPracticeTask(3)),false,
-   'Cannot skip the first three tasks');
- assert.equal(await page.locator('#modal-success-title').textContent(),'COMPITO COMPLETATO!');
- assert.equal(await page.locator('#modal-xp-card').isHidden(),true,
-   'Intermediate tasks must not grant lesson XP');
- await page.locator('#btn-modal-next').click();
- for(let index=1;index<4;index++){
-   assert.equal(await page.locator('#lesson-practice-counter').textContent(),
-     'Compito '+(index+1)+' di 4');
-   if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
-   if(index===1){
-     await page.locator('#code-editor').fill('func _ready():\n    print("Bozza")');
-     await page.reload({waitUntil:'load'});
-     await page.evaluate(()=>App.openLesson(1));
-     if(width<821)await page.locator('#btn-tab-code').click({timeout:10000});
-     assert.equal(await page.locator('#lesson-practice-counter').textContent(),'Compito 2 di 4',
-       'Reload must restore current task');
-     assert.ok((await page.locator('#code-editor').inputValue()).includes('Bozza'),
-       'Reload must preserve code of the current task');
-   }
-   const solution=await page.evaluate(i=>{
-     const lesson=LESSONS_DATA.find(l=>l.id===1);
-     return LessonPractice.tasksFor(lesson)[i].solution;
-   },index);
-   await page.locator('#code-editor').fill(solution);
-   await page.locator('#btn-run-code').click({timeout:10000});
-   await page.waitForFunction(()=>!App.isValidating &&
-     !document.getElementById('success-modal').classList.contains('hidden'),null,{timeout:20000});
-   if(index<3){
-     assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),false);
-     assert.equal(await page.locator('#modal-xp-card').isHidden(),true);
-     await page.locator('#btn-modal-next').click();
-   }
- }
+ assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(1)),true,
+   'The focused exercise must complete after its own assessment');
+ assert.equal(await page.locator('#lesson-practice-progress').isHidden(),true,
+   'A single assessment must not show redundant task navigation');
  try {
    await page.waitForFunction(()=>App.state.finishedLessons.includes(1),null,{timeout:15000});
  } catch(error){

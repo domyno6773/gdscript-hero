@@ -85,7 +85,7 @@ const App = {
                 {
                     id: 'proj_default',
                     name: 'Il Mio Gioco Godot',
-                    code: `extends Node2D\n\nvar clicks = 0\n\nfunc _ready():\n    print("Benvenuto nella Sandbox di Godot 4!")\n    $Label.text = "Clicca il pulsante sotto per iniziare."\n\nfunc _on_button_pressed():\n    clicks += 1\n    print("Pulsante cliccato! Volte:", clicks)\n    $Label.text = "Bravo! Hai cliccato " + str(clicks) + " volte!"\n`,
+                    code: `extends Node2D\n\nvar clicks = 0\n\nfunc _ready():\n    print("Benvenuto nella Sandbox di Godot 4!")\n    $Button.pressed.connect(_on_button_pressed)\n    $Label.text = "Clicca il pulsante sotto per iniziare."\n\nfunc _on_button_pressed():\n    clicks += 1\n    print("Pulsante cliccato! Volte:", clicks)\n    $Label.text = "Bravo! Hai cliccato " + str(clicks) + " volte!"\n`,
                     nodes: [
                         { name: 'Main', type: 'Node2D', parent: null },
                         { name: 'Label', type: 'Label', text: 'Clicca il pulsante sotto per iniziare.', parent: 'Main' },
@@ -3337,7 +3337,7 @@ const App = {
     renderPracticeProgress(lesson,task,index){
         const panel=document.getElementById('lesson-practice-progress');
         if(!panel)return;
-        if(!task){panel.classList.add('hidden');return;}
+        if(!task||LessonPractice.tasksFor(lesson).length<2){panel.classList.add('hidden');return;}
         const tasks=LessonPractice.tasksFor(lesson),record=this.getLessonPracticeRecord(lesson);
         panel.classList.remove('hidden');
         document.getElementById('lesson-practice-counter').textContent=

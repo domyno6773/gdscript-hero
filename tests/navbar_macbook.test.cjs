@@ -128,15 +128,14 @@ async function inspect(engine, url) {
       assert.equal(result.colliding,false,'Navbar sections overlap: '+msg);
       assert.equal(result.menuOverlap,false,'Menu buttons overlap: '+msg);
       assert.deepEqual(result.labelsClipped,[],'Navigation text overflows its button: '+msg);
-      // Guard against the original 2048px screenshot's 200px+ EMPTY bands
-      // on either side of the central links. Filling the center must be
-      // intentional, not hiding unused space with overflow clipping.
-      if(w>=1600 && w<=2048){
-        assert.ok(result.whitespaceLeft<48 && result.whitespaceRight<48,
-          'Excessive unused horizontal navbar space: '+msg);
+      // Four primary destinations are centered relative to the viewport.
+      if(w>=1200){
+        const center=result.groups[1];
+        assert.ok(Math.abs((center.left+center.right)/2-result.vw/2)<2,
+          'Primary navigation must remain centered: '+msg);
       }
       if (w>=1200) {
-        assert.ok(result.labels.length>=7&&result.labels.every(l=>l.display!=='none'&&l.width>6),
+        assert.ok(result.labels.length===4&&result.labels.every(l=>l.display!=='none'&&l.width>6),
           'Desktop must show text labels beside the icons: '+msg);
       }
       assert.ok(result.logo.left >= 0 && result.logo.right <= result.vw,

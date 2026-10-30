@@ -21,6 +21,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="scene-workspace.css">
 </head>
 <body>
     <!-- Sprite SVG locale: un unico stile per le icone della Sandbox. -->
@@ -156,7 +157,7 @@
                         
 <div class="chapter-badge">Corso GDScript 4 · Godot</div>
                         <h1>Accademia di Sviluppo Godot</h1>
-                        <p class="subtitle">Percorso completo in 15 capitoli, 81 esercizi pratici e 30 quiz: dai fondamenti di programmazione ai nodi 2D, segnali, animazioni e architettura ad albero per Godot 4.</p>
+                        <p class="subtitle">16 capitoli, 85 esercizi e 30 quiz: dalle basi della programmazione alle prime scene, fino a un personaggio controllabile con collisioni e un obiettivo di gioco.</p>
                         <div class="overall-progress-bar">
                             <div class="progress-fill" id="overall-progress-fill" style="width: 0%;"></div>
                         </div>
@@ -1656,7 +1657,7 @@
                     <span class="welcome-item-icon"><svg class="ui-icon sandbox-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#gdh-icon-file"></use></svg></span>
                     <div>
                         <strong>2. Editor GDScript (Al centro)</strong>
-                        <p>Scrivi il tuo codice liberamente. Puoi accedere ai nodi della scena con <code>$NomeNodo</code> (es. <code>$Label.text = "Ciao!"</code>). Tutto quello che scrivi si salva in tempo reale sul tuo account!</p>
+                        <p>Scrivi il tuo codice liberamente. Puoi accedere ai nodi della scena con <code>$NomeNodo</code> (es. <code>$Label.text = "Ciao!"</code>). Il codice si salva nel browser; se accedi, viene sincronizzato con il tuo account.</p>
                     </div>
                 </div>
 
@@ -1672,7 +1673,7 @@
                     <span class="welcome-item-icon"><svg class="ui-icon sandbox-svg-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#gdh-icon-package"></use></svg></span>
                     <div>
                         <strong>4. Esporta su Godot Reale</strong>
-                        <p>Quando il tuo esperimento è pronto, premi <strong>Esporta Godot 4</strong> per scaricare <code>main.gd</code> e <code>main.tscn</code> pronti per l'engine ufficiale sul PC.</p>
+                        <p>Quando il tuo esperimento è pronto, premi <strong>Esporta Godot 4</strong> per scaricare un archivio ZIP con <code>project.godot</code>, <code>main.gd</code> e <code>main.tscn</code> pronti per l'engine ufficiale sul PC.</p>
                     </div>
                 </div>
             </div>
@@ -2076,6 +2077,7 @@
     <script src="supabase-config.js"></script>
     <script src="audio.js"></script>
     <script src="confetti.js"></script>
+    <script src="scene-model.js"></script>
     <script src="runtime.js"></script>
     <script src="diagnostic.js"></script>
     <script src="error-guide.js"></script>
@@ -2085,6 +2087,8 @@
     <script src="curriculum_extension.js"></script>
     <script src="practice_catalog.js"></script>
     <script src="chapter_quizzes.js"></script>
+    <script src="gameplay_lessons.js"></script>
+    <script src="curriculum_restructure.js"></script>
     <script src="code-guide.js"></script>
     <script src="inline-code-help.js"></script>
     <script src="review_variants.js"></script>
@@ -2100,6 +2104,8 @@
     <script src="quiz_engine.js"></script>
     <!-- Il motore Godot WebAssembly e' la verifica standard di tutte le lezioni. -->
     <script src="native/native-beta-adapter.js"></script>
+    <script src="scene-workspace.js"></script>
+    <script src="course-laboratory.js"></script>
     <script src="accessibility.js"></script>
     <script src="ui-refinement.js"></script>
 </body>

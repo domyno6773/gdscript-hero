@@ -230,3 +230,8 @@ pre, code, .output-pre { font-family: var(--font-mono) !important; }
   #view-exercise .validation-viewport-col:not(.hidden) { flex:0 0 240px !important; height:240px !important; width:100%; }
   #view-exercise .gdh-debug-panel { overflow-wrap:anywhere; }
 }
+
+/* On smaller laptops, reserve the real width of the profile controls. */
+@media (min-width:821px) and (max-width:1199px) {
+  .navbar { grid-template-columns:max-content minmax(0,1fr) max-content !important; }
+}

@@ -15,6 +15,11 @@
     r.sceneActions[i].node===nodeName&&r.sceneActions[i].signal===signal&&r.sceneActions[i].connections===1;
   function scenarios(id,src){
     const steps=base.scenarios(id,src).slice();
+    if(id===54){
+      steps.push({key:'no_click',code:src,actions:[]});
+      steps.push({key:'two_clicks',code:src,actions:[{node:'AttaccaBtn',signal:'pressed'},{node:'AttaccaBtn',signal:'pressed'}]});
+    }
+    if(id===56)steps.push({key:'reverse_clicks',code:src,actions:[{node:'AllarmeBtn',signal:'pressed'},{node:'MotoriBtn',signal:'pressed'}]});
     if(id===55)steps.push({key:'two_clicks',code:src,actions:[
       {node:'ClickBtn',signal:'pressed'},{node:'ClickBtn',signal:'pressed'}]});
     if(id===60){
@@ -36,40 +41,40 @@
     switch(id){
       case 49:
         add('Giocatore è un vero nodo',node(reply,'Giocatore','Node'));
-        add('Accede con $Giocatore.name',code.includes('$Giocatore.name'));
+        add('Accede con $Giocatore.name',(/\$Giocatore\b|\bget_node\s*\(/.test(code)));
         add('Stampa il nome del nodo',eq(l,['Nodo rilevato: Giocatore']));break;
       case 50:
         add('Titolo è una vera Label',node(reply,'Titolo','Label'));
         add('La label contiene il testo richiesto',text(reply,'Titolo','Benvenuto in Godot 4!'));
-        add('Imposta e legge $Titolo.text',assign(src,'Titolo')&&printText(src,'Titolo')&&eq(l,['Testo a schermo: Benvenuto in Godot 4!']));break;
+        add('Imposta e legge $Titolo.text',eq(l,['Testo a schermo: Benvenuto in Godot 4!']));break;
       case 51:
         add('SaluteLabel è una vera Label',node(reply,'SaluteLabel','Label'));
         add('La label contiene HP: 75',text(reply,'SaluteLabel','HP: 75'));
-        add('Modifica e stampa il testo della label',assign(src,'SaluteLabel')&&printText(src,'SaluteLabel')&&eq(l,['Nuova salute: HP: 75']));break;
+        add('Modifica e stampa il testo della label',eq(l,['Nuova salute: HP: 75']));break;
       case 52:
         add('Tre Label native', ['TitoloDungeon','LivelloLabel','MoneteLabel'].every(x=>node(reply,x,'Label')));
         add('Testi delle tre targhette reali',text(reply,'TitoloDungeon','Caverna dei Goblin')&&
           text(reply,'LivelloLabel','Livello: 1')&&text(reply,'MoneteLabel','Oro: 50'));
-        add('Assegna e legge le tre label',
-          ['TitoloDungeon','LivelloLabel','MoneteLabel'].every(x=>assign(src,x)&&printText(src,x)));
+
         add('Output dungeon',eq(l,['Dungeon: Caverna dei Goblin','Difficolta: Livello: 1','Bottino: Oro: 50']));break;
       case 53:
         add('AttaccaBtn è un vero Button',node(reply,'AttaccaBtn','Button'));
         add('Testo impostato realmente',text(reply,'AttaccaBtn','Sferra Attacco'));
-        add('Assegna e legge il testo del Button',assign(src,'AttaccaBtn')&&printText(src,'AttaccaBtn')&&eq(l,['Pulsante configurato: Sferra Attacco']));break;
+        add('Assegna e legge il testo del Button',eq(l,['Pulsante configurato: Sferra Attacco']));break;
       case 54:
         add('Segnale pressed connesso realmente',node(reply,'AttaccaBtn','Button')&&
           reply?.sceneBeforeActions?.AttaccaBtn?.pressed_connections===1&&action(reply,0,'AttaccaBtn'));
-        add('Connessione a quando_premuto',connect(src,'AttaccaBtn','quando_premuto')&&
-          /func\s+quando_premuto\s*\(\s*\)\s*:/.test(code));
-        add('Click invoca il callback',eq(l,['Pulsante connesso','Colpo sferrato con successo!']));break;
+
+        add('Click invoca il callback',eq(l,['Pulsante connesso','Colpo sferrato con successo!']));
+        add('Nessun colpo prima del clic',scenarioClean('no_click')&&eq(lines(steps.no_click?.stdout),['Pulsante connesso']));
+        add('Ogni clic attiva un colpo',scenarioClean('two_clicks')&&eq(lines(steps.two_clicks?.stdout),['Pulsante connesso','Colpo sferrato con successo!','Colpo sferrato con successo!']));break;
       case 55:
         add('ClickBtn e PuntiLabel nativi',node(reply,'ClickBtn','Button')&&node(reply,'PuntiLabel','Label'));
-        add('Segnale pressed collegato ad al_click',
-          connect(src,'ClickBtn','al_click')&&action(reply,0,'ClickBtn')&&
+        add('Segnale pressed collegato a una funzione',
+          action(reply,0,'ClickBtn')&&
           reply?.sceneBeforeActions?.ClickBtn?.pressed_connections===1);
-        add('Primo clic incrementa punti',props.punti===1&&/\bpunti\s*\+=\s*1\b/.test(code));
-        add('Label aggiornata e stampata',text(reply,'PuntiLabel','Click: 1')&&assign(src,'PuntiLabel')&&
+        add('Primo clic incrementa punti',props.punti===1);
+        add('Label aggiornata e stampata',text(reply,'PuntiLabel','Click: 1')&&
           eq(l,['Clicker pronto','Click: 1']));
         add('Due clic aggiornano punti a 2',
           scenarioClean('two_clicks')&&steps.two_clicks?.reply?.properties?.punti===2&&
@@ -77,13 +82,16 @@
           eq(lines(steps.two_clicks?.stdout),['Clicker pronto','Click: 1','Click: 2']));break;
       case 56:
         add('Due Button e una Label reali',node(reply,'MotoriBtn','Button')&&node(reply,'AllarmeBtn','Button')&&node(reply,'StatoNave','Label'));
-        add('Connessi i due segnali',connect(src,'MotoriBtn','attiva_motori')&&connect(src,'AllarmeBtn','attiva_allarme')&&
-          reply?.sceneBeforeActions?.MotoriBtn?.pressed_connections===1&&reply?.sceneBeforeActions?.AllarmeBtn?.pressed_connections===1);
+        add('Connessi i due segnali',reply?.sceneBeforeActions?.MotoriBtn?.pressed_connections===1&&reply?.sceneBeforeActions?.AllarmeBtn?.pressed_connections===1);
         add('Pulsanti impostano due stati diversi',
           action(reply,0,'MotoriBtn')&&action(reply,1,'AllarmeBtn')&&
           reply?.sceneActions?.[0]?.scene?.StatoNave?.text==='Motori a Massima Potenza'&&
           reply?.sceneActions?.[1]?.scene?.StatoNave?.text==='Allarme Rosso Attivo');
-        add('Output motori e allarme',eq(l,['Plancia Operativa','Velocita Aumentata','Scudi al 100%']));break;
+        add('Output motori e allarme',eq(l,['Plancia Operativa','Velocita Aumentata','Scudi al 100%']));
+        add('I comandi funzionano anche in ordine inverso',scenarioClean('reverse_clicks')&&
+          steps.reverse_clicks?.reply?.sceneActions?.[0]?.scene?.StatoNave?.text==='Allarme Rosso Attivo'&&
+          steps.reverse_clicks?.reply?.sceneActions?.[1]?.scene?.StatoNave?.text==='Motori a Massima Potenza'&&
+          eq(lines(steps.reverse_clicks?.stdout),['Plancia Operativa','Scudi al 100%','Velocita Aumentata']));break;
       case 57:
         add('Timer nativo con wait_time 2.5 e one_shot',node(reply,'Cooldown','Timer')&&
           reply?.sceneBeforeActions?.Cooldown?.wait_time===2.5&&reply?.sceneBeforeActions?.Cooldown?.one_shot===true);

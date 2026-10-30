@@ -20,6 +20,20 @@ jobs:
           mkdir /tmp/godot4
           unzip -q /tmp/godot4.zip -d /tmp/godot4
           chmod +x /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test curriculum, scene editor contract and real gameplay
+        env:
+          GODOT_BIN: /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64
+        run: |
+          node tests/scene_model.test.cjs
+          node tests/curriculum_restructure.test.cjs
+          node --test tests/roadmap-progression.test.cjs
+          node tests/native_headless_curriculum.test.cjs
+          node tests/native_headless_gameplay.test.cjs
+          node tests/native_export.test.cjs
+          "$GODOT_BIN" --headless --path . --script tests/native_godot/laboratory.gd
       - name: Test queue_free and Vector2 in native Godot
         run: |
           /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64 --headless --path tests/native_godot --script smoke.gd 2>&1 | tee /tmp/godot_native.log

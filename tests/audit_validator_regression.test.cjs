@@ -16,6 +16,9 @@ for (const file of ['runtime.js', 'lessons.js', 'review_variants.js']) {
 const runtime = context.window.GDScriptRuntime;
 const lessons = context.window.LESSONS_DATA;
 const reviews = context.window.REVIEW_VARIANTS;
+// Legacy unit-test double only. Actual native behavior is covered by the
+// headless/WASM suites; the public app never executes this JavaScript runtime.
+context.window.GDHGodot = {executeReview:(code,id)=>runtime.execute(code,{lesson:reviews.find(r=>r.id===id)})};
 
 const lessonMutations = [
     [25, s => s.replace('range(3)', 'range(0)') + '    print(0)\n    print(1)\n    print(2)\n'],
