@@ -231,8 +231,11 @@ function failures(verdict){
        fakeViewportVisible:ui?.style.display,
        addDisabled:add?.disabled};
      GDHLessonScene.change();
-     return {cases,before,after:GDHLessonScene.lastStatus,
-       resetToExpected:GDHLessonScene.lastScene.every(x=>x.name!=='StatusLabel')};
+     const after=GDHLessonScene.lastStatus;
+     const resetToExpected=GDHLessonScene.lastScene.every(x=>x.name!=='StatusLabel');
+     GDHLessonScene.open(lesson,LessonPractice.getTask(50,'p2'));
+     const dynamicStartsWithoutBaseFixture=GDHLessonScene.lastScene.every(x=>x.name!=='Titolo');
+     return {cases,before,after,resetToExpected,dynamicStartsWithoutBaseFixture};
    },nativeTree.tree);
    assert.deepEqual(classroom.cases.node,{tree:true,viewport:false});
    assert.deepEqual(classroom.cases.label,{tree:true,viewport:true});
@@ -249,6 +252,7 @@ function failures(verdict){
    assert.equal(classroom.before.addDisabled,true);
    assert.equal(classroom.after,'changed');
    assert.ok(classroom.resetToExpected);
+   assert.equal(classroom.dynamicStartsWithoutBaseFixture,true,'Supplemental dynamic task must not inherit unrelated static nodes');
    console.log('PHASE 3 REAL SCENES PASS: Node, Label, Button, ColorRect, queue_free, no fabricated nodes, lesson inspector and 8 contextual layouts.');
 
    const liveButton=await page.evaluate(async ()=>{
