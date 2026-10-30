@@ -16,7 +16,7 @@ for(let id=201;id<=230;id++)assert.ok(by(id),'Stable quiz ID '+id);
 for(const [i,l] of lessons.entries()){
  assert.equal(l.displayIndex,i+1);
  assert.ok(chapters.some(c=>c.id===l.chapterId));
- if(!l.isQuiz){const tasks=w.LessonPractice.tasksFor(l);assert.equal(tasks.length,1);assert.equal(tasks[0].key,'base');assert.equal(tasks[0].solution,l.solution);}
+ if(!l.isQuiz){const tasks=w.LessonPractice.tasksFor(l);assert.equal(tasks.length,4,'Multi-task: '+l.id);const base=tasks.find(t=>t.nativeOriginal);assert.equal(base.key,'base');assert.equal(base.solution,l.solution);assert.equal(new Set(tasks.map(t=>t.key)).size,4);if([301,302,303,304].includes(l.id))assert.ok(tasks.slice(0,3).some(t=>t.nativeGameplay),'Gameplay deve avere pratica fisica: '+l.id);}
 }
 for(const c of chapters)assert.equal(lessons.filter(l=>l.chapterId===c.id&&l.isConsolidation).length,1);
 for(const q of w.GDHChapterQuizzes.sessions)assert.equal(q.chapterId,by(q.id).chapterId);
