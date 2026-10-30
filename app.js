@@ -3320,6 +3320,21 @@ const App = {
         this.state.lessonTaskProgress ||= {};
         const tasks=LessonPractice.tasksFor(lesson);
         const record=this.state.lessonTaskProgress[lesson.id] ||= {completed:[],codes:{},activeIndex:0};
+        // Fase 2: i precedenti p2/p3 erano compiti DIVERSI. Non segnare
+        // quelli nuovi come già svolti e non caricare bozze incompatibili.
+        // Chi ha terminato la lezione conserva completamento, XP e sblocchi.
+        if(window.GDHIndividualPractice?.ids.includes(lesson.id) && record.drillVersion!==2){
+            const oldCodes=record.codes&&typeof record.codes==='object'?record.codes:{};
+            record.legacyCodes={...(record.legacyCodes||{})};
+            for(const key of ['p2','p3','p4']){
+                if(typeof oldCodes[key]==='string'&&!Object.hasOwn(record.legacyCodes,key))
+                    record.legacyCodes[key]=oldCodes[key];
+            }
+            record.codes={...(typeof oldCodes.base==='string'?{base:oldCodes.base}:{})};
+            if(!this.state.finishedLessons.includes(lesson.id))
+                record.completed=(record.completed||[]).filter(key=>key==='base');
+            record.drillVersion=2;
+        }
         const valid=new Set(tasks.map(t=>t.key));
         record.completed=[...new Set(record.completed||[])].filter(k=>valid.has(k));
         record.codes=record.codes&&typeof record.codes==='object'?record.codes:{};
