@@ -145,7 +145,7 @@ function failures(verdict){
    assert.equal(discriminating,152,'Every individual drill must react correctly to changed input');
    const cheat=await page.evaluate(async ()=>{
      const task=LessonPractice.getTask(17,'p2');
-     const hardcoded=task.solution.replace(/print\(livello >= 7\)/,"print(true)");
+     const hardcoded=task.solution.replace(/print\(livello >= 7\)/,"var controllo = livello >= 7\n    print(true)");
      const result=await GDHGodot.verifyPracticeTask(17,'p2',hardcoded);
      return {accepted:result.accepted,checks:result.feedback.checks};
    });
