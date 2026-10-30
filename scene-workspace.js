@@ -126,7 +126,27 @@ async function run(){
    running=true;editor.readOnly=true;$('scene-stop').disabled=false;$('scene-stop').textContent='■ Ferma · per modificare';$('btn-sandbox-run').disabled=true;refresh();status('Scena attiva: premi «Ferma» per modificare o eliminare i nodi.');
    const host=$('scene-game-host');host.classList.remove('hidden');$('sandbox-ui-overlay').classList.add('hidden');
    const output=$('sandbox-console-output');output.textContent='';$('sandbox-status-tag').textContent='Avvio Godot…';
-   let count=0;const append=(line,error)=>{if(ticket!==generation)return;if(++count>500)return;output.textContent=(output.textContent+'\n'+(error?'Errore: ':'')+line).slice(-20000);output.scrollTop=output.scrollHeight;};
+   let count=0,noticeCount=0;
+   const notices=$('sandbox-engine-notices'),noticeText=$('sandbox-engine-notice-text');
+   if(notices){notices.hidden=true;noticeText.textContent='';}
+   const append=(line,error)=>{
+     if(ticket!==generation)return;
+     // Questi messaggi provengono dal canale error del bootstrap Godot,
+     // non da una verifica del codice GDScript dello studente.
+     const infrastructure=/\b(?:IndexedDB|service.worker|PWA|persistent.storage|database.storage)\b/i;
+     if(error && infrastructure.test(line)){
+       noticeCount++;
+       if(notices&&noticeText){
+         notices.hidden=false;
+         notices.querySelector('summary').textContent='Avvisi tecnici del motore ('+noticeCount+') · non sono errori del tuo codice';
+         noticeText.textContent=(noticeText.textContent+'\n'+line).slice(-12000);
+       }
+       return;
+     }
+     if(++count>500)return;
+     output.textContent=(output.textContent+'\n'+(error?'Errore: ':'')+line).slice(-20000);
+     output.scrollTop=output.scrollHeight;
+   };
    window.GDHGodot.beginPreview(host,append);
    progressTimer=setInterval(()=>{if(ticket===generation)$("sandbox-status-tag").textContent=window.GDHGodot.lastStage||"Avvio Godot…";},400);
    const result=await window.GDHGodot.execute(p.code,{sandboxNodes:p.nodes});if(ticket!==generation)return;
@@ -151,6 +171,10 @@ window.addEventListener('DOMContentLoaded',()=>{
  const redo=button('Ripeti',()=>{if(!future.length||running)return;history.push(M.clone(project().nodes));project().nodes=future.pop();A.saveStorage();refresh();});redo.id='scene-redo';actions.append(undo,redo);toolbar.prepend(actions);
  const message=el('p','scene-workspace-message','Seleziona un nodo per modificarne le proprietà.');message.id='scene-workspace-message';message.setAttribute('role','status');toolbar.append(message);
  const host=el('div','scene-game-host hidden');host.id='scene-game-host';$('sandbox-ui-overlay').parentElement.append(host);
+ const notices=el('details','sandbox-engine-notices');notices.id='sandbox-engine-notices';notices.hidden=true;
+ notices.append(el('summary','','Avvisi tecnici del motore'),el('pre','',''));
+ notices.querySelector('pre').id='sandbox-engine-notice-text';
+ $('sandbox-console-output').after(notices);
  const stopButton=button('■ Ferma',stop);stopButton.id='scene-stop';stopButton.disabled=true;$('btn-sandbox-run').after(stopButton);
  $('btn-sandbox-add-node').onclick=addDialog;$('btn-sandbox-restart').onclick=run;$('btn-sandbox-restart').title='Riavvia la scena da zero';
  $('btn-sandbox-export-godot').title='Scarica un progetto Godot completo in ZIP';
