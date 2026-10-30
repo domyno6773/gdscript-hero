@@ -375,6 +375,32 @@ function failures(verdict){
      extraPassed++;
    }
    console.log('NUOVI ESERCIZI NATIVI: '+extraPassed+'/21 accettati, 21/21 starter respinti.');
+   // Drive the actual lesson UI, not just the isolated lesson renderer.
+   const classroomRun=await page.evaluate(async ()=>{
+     const lesson=LESSONS_DATA.find(l=>l.id===50);
+     App.openLesson(lesson.id);
+     const task=App.getActivePracticeTask();
+     const editor=document.getElementById('code-editor');
+     editor.value=task.solution;
+     await App.runAndValidate();
+     return {
+       treeStatus:GDHLessonScene.lastStatus,
+       label:GDHLessonScene.lastScene.find(n=>n.name==='Titolo'),
+       sceneShown:document.getElementById('exercise-viewport-wrapper')?.style.display,
+       GodotIframes:document.querySelectorAll('#exercise-native-preview iframe').length,
+       overlay:document.getElementById('exercise-ui-overlay')?.style.display,
+       addDisabled:document.getElementById('btn-open-add-node-modal')?.disabled
+     };
+   });
+   assert.equal(classroomRun.treeStatus,'verified',
+     'Real lesson tree did not refresh: '+JSON.stringify(classroomRun));
+   assert.equal(classroomRun.label?.text,'Benvenuto in Godot 4!');
+   assert.equal(classroomRun.sceneShown,'flex');
+   assert.equal(classroomRun.GodotIframes,1);
+   assert.equal(classroomRun.overlay,'none');
+   assert.equal(classroomRun.addDisabled,true);
+   console.log('PHASE 3 END-TO-END PASS: lesson editor, real Godot preview iframe, synchronized Label and read-only scene.');
+
    assert.deepEqual(browserErrors,[],'Uncaught browser errors');
    console.log('NATIVE CURRICULUM SUCCESS: '+passed+'/60 official accepted; 60/60 starters rejected; '+
      '60/60 solutions with extra comments accepted; '+variants+
