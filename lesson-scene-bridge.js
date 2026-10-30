@@ -24,11 +24,11 @@ const el=(tag,cls,value)=>{
  if(value!==undefined)x.textContent=String(value);
  return x;
 };
-function initial(lesson){
+function initial(lesson,task){
  const code=String(lesson?.solution||'');
  const base=/^\s*extends\s+(\w+)/m.exec(code)?.[1]||'Node';
  const list=[{name:'Root',path:'Root',class:base,depth:0}];
- for(const n of lesson?.initialNodes||[]){
+ for(const n of (task&&!task.nativeOriginal?[]:lesson?.initialNodes||[])){
   if(n?.name&&n?.type)list.push({name:n.name,path:'Root/'+n.name,class:n.type,depth:1,
     text:n.text,wait_time:n.wait_time});
  }
@@ -124,13 +124,13 @@ function render(){
 }
 function open(lesson,task){
  if(!lesson){active=null;return;}
- active={id:lesson.id,layout:plan(lesson,task)};
- items=active.layout.tree?initial(lesson):[];
+ active={id:lesson.id,key:task?.key||'base',layout:plan(lesson,task)};
+ items=active.layout.tree?initial(lesson,task):[];
  verified=false;status='before';selected='';render();
 }
 function change(){
  if(!active||status==='before'||status==='changed')return;
- items=active.layout.tree?initial(root.LESSONS_DATA?.find(l=>l.id===active.id)):[];
+ items=active.layout.tree?initial(root.LESSONS_DATA?.find(l=>l.id===active.id),root.LessonPractice?.getTask(active.id,active.key)):[];
  verified=false;status='changed';selected='';render();
 }
 function applyNative(scene,success){
