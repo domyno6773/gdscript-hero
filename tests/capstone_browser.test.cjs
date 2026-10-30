@@ -65,9 +65,12 @@ const server=http.createServer((req,res)=>{
    if(width===1280){
     const negatives=[
      ['missing movement',solution.replace('$Player.move_and_slide()','pass')],
+     ['missing vertical controls',solution.replace('Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")','Vector2(Input.get_axis("ui_left", "ui_right"), 0)')],
+     ['faster diagonal',solution.replace('Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")','Vector2(Input.get_axis("ui_left", "ui_right"), Input.get_axis("ui_up", "ui_down"))')],
      ['no physical collection',solution.replace('$Coin.body_entered.connect(_raccogli)','pass')],
      ['no inventory method',solution.replace('oggetti.append(nome)','pass')],
      ['no custom signal listener',solution.replace('tesoro_raccolto.connect(_aggiorna_hud)','pass')],
+     ['no custom signal emission',solution.replace('tesoro_raccolto.emit(monete)','_aggiorna_hud(monete)')],
      ['no removal',solution.replace('$Coin.queue_free()','pass')],
      ['negative HP',solution.replace('        boss["hp"] = 0','        pass')],
      ['premature victory',solution.replace('monete > 0 and boss["hp"] == 0','boss["hp"] == 0')],

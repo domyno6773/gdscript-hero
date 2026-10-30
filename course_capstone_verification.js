@@ -4,7 +4,7 @@
  const root=window;
  const snapshot=(code,nodes)=>JSON.stringify([code,nodes]);
  const isFinal=p=>p&&(p.capstoneVersion||p.name?.startsWith('Gioco finale -')||p.code?.includes('# PROGETTO FINALE:'));
- const probe='\nfunc __gdh_final_probe():\n    var a = Zaino.new()\n    var b = Zaino.new()\n    a.aggiungi("Prova")\n    return [a.oggetti, b.oggetti, tesoro_raccolto.get_connections().size()]\n';
+ const probe='\nvar __gdh_final_events: Array = []\nfunc __gdh_final_event(total):\n    __gdh_final_events.append(total)\nfunc __gdh_final_probe():\n    var a = Zaino.new()\n    var b = Zaino.new()\n    a.aggiungi("Prova")\n    var listeners = tesoro_raccolto.get_connections().size()\n    tesoro_raccolto.connect(__gdh_final_event)\n    return [a.oggetti, b.oggetti, listeners]\n';
  async function verify(code,nodes,raw=root.GDHGodot.runNative){
   const checks=[];
   let activeFrame,previousStyle;
@@ -16,7 +16,7 @@
   };
   const inventory=r=>r.properties?.zaino?.fields?.oggetti;
   const hp=r=>r.properties?.boss?.hp;
-  const collected=r=>r.properties?.monete===1&&JSON.stringify(inventory(r))==='["Moneta"]'&&r.scene?.PuntiLabel?.text==='Tesori: 1'&&r.scene?.Coin?.exists===false;
+  const collected=r=>r.properties?.monete===1&&JSON.stringify(inventory(r))==='["Moneta"]'&&JSON.stringify(r.properties?.__gdh_final_events)==='[1]'&&r.scene?.PuntiLabel?.text==='Tesori: 1'&&r.scene?.Coin?.exists===false;
   const defeated=r=>hp(r)===0;
   const won=r=>r.scene?.StatoLabel?.text==='Vittoria!';
   try{
@@ -43,6 +43,13 @@
     const idle=await observe(12),away=await observe(12,['ui_left']);
     check('Prova '+variant+': nessun premio prima del contatto',idle.properties?.monete===0&&JSON.stringify(inventory(idle))==='[]'&&hp(idle)===30&&!won(idle)&&away.properties?.monete===0&&away.scene?.Coin?.exists===true);
     check('Prova '+variant+': movimento da tastiera alla velocità richiesta',Math.abs(idle.scene?.Player?.position?.x-60)<1&&Math.abs(away.scene?.Player?.position?.x-36)<4);
+    const up=await observe(12,['ui_up']),down=await observe(12,['ui_down']);
+    check('Prova '+variant+': le frecce verticali muovono e tornano alla riga iniziale',Math.abs(up.scene?.Player?.position?.y-156)<4&&Math.abs(down.scene?.Player?.position?.y-180)<4);
+    const diagonal=await observe(12,['ui_left','ui_up']);
+    const x=diagonal.scene?.Player?.position?.x,y=diagonal.scene?.Player?.position?.y;
+    check('Prova '+variant+': la diagonale mantiene la velocità',x<36&&y<180&&Math.abs(Math.hypot(x-36,y-180)-24)<4);
+    const restored=await observe(12,['ui_right','ui_down']),stopped=await observe(12);
+    check('Prova '+variant+': rilasciare i tasti ferma il corpo',Math.abs(restored.scene?.Player?.position?.x-36)<4&&Math.abs(restored.scene?.Player?.position?.y-180)<4&&Math.abs(stopped.scene?.Player?.position?.x-restored.scene?.Player?.position?.x)<1&&Math.abs(stopped.scene?.Player?.position?.y-restored.scene?.Player?.position?.y)<1);
     const attack=async()=>{
      let state;
      for(const expected of [20,10,0,0]){
