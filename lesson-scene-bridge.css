@@ -1,0 +1,21 @@
+/* Phase 3 — classroom inspector uses genuine Godot scene snapshots. */
+.exercise-scene-source{font-size:11px;line-height:1.5;color:var(--text-muted,#91a0ac);margin:6px 10px 10px}
+#exercise-scene-tree .exercise-native-node{display:flex;align-items:center;gap:9px;min-height:33px;max-width:100%;width:100%;background:transparent;border:1px solid transparent;border-radius:6px;color:inherit;text-align:left;cursor:pointer;font:inherit;font-size:12px}
+#exercise-scene-tree .exercise-native-node:hover{background:rgba(71,140,191,.10)}
+#exercise-scene-tree .exercise-native-node.selected{background:rgba(71,140,191,.17);border-color:rgba(71,140,191,.38)}
+#exercise-scene-tree .exercise-native-node code{font-size:10px;color:#478cbf;flex:0 0 76px}
+#exercise-scene-tree .exercise-native-node span{font-weight:600;overflow:hidden;text-overflow:ellipsis}
+#exercise-scene-tree .exercise-native-node small{margin-left:auto;font-size:10px;color:#d89a62}
+.exercise-native-inspector{display:flex;flex-direction:column;gap:6px;margin:10px 8px 4px;padding:12px 4px;border-top:1px solid rgba(140,150,160,.22);font-size:11px}
+.exercise-native-inspector strong{font-size:12px}
+.exercise-native-property{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.exercise-native-property span{opacity:.75}
+.exercise-native-property code{max-width:66%;overflow-wrap:anywhere;text-align:right;font-size:11px}
+.exercise-native-inspector small{line-height:1.4;opacity:.75}
+#exercise-ui-overlay:empty{display:none!important}
+@media(max-width:760px){#exercise-scene-tree .exercise-native-node{min-height:40px;font-size:13px}.exercise-native-property{font-size:12px}}
+
+.exercise-native-action{border:1px solid rgba(71,140,191,.55);border-radius:6px;background:rgba(71,140,191,.12);color:inherit;min-height:33px;text-align:left;padding:7px 10px;cursor:pointer;font-size:11px;margin-top:4px}
+.exercise-native-action:hover{background:rgba(71,140,191,.22)}
+.exercise-native-action:disabled{opacity:.5;cursor:wait}
+.exercise-native-refresh{border-color:rgba(140,150,160,.3);background:transparent}

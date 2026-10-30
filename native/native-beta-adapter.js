@@ -340,6 +340,18 @@
       demoOnly:true};
     return {feedback,execution,accepted};
   };
+  // Start a persistent, clickable native scene AFTER validation and probes.
+  // It is only a preview: it never changes XP, completion or the verdict.
+  const startLessonPreview=async(lessonId,source,taskKey='base')=>{
+    if(!previewHost||window.GDHGameplayLessons?.has(lessonId))return null;
+    const lesson=window.LESSONS_DATA?.find(l=>l.id===lessonId);
+    const task=window.LessonPractice?.getTask(lessonId,taskKey);
+    if(!window.GDHLessonScene?.plan(lesson,task).viewport)return null;
+    const useFixtures=(taskKey==='base'&&lessonId>=49&&lessonId<=60);
+    const run=await raw(source,{mode:'sandbox_start',scene:useFixtures?lessonId:0,nodes:[]});
+    const success=run.status==='executed'&&!String(run.stderr||'').trim();
+    return {success,run,lessonScene:run.reply?.lessonScene||null};
+  };
   const sandboxAction=async(name,signal='pressed')=>{
     const run=await raw('',{mode:'sandbox_action',node:name,signal});
     const success=run.status==='executed'&&!String(run.stderr||'').trim();
@@ -349,7 +361,7 @@
   };
   const beginPreview=(host,onOutput)=>{reset('Nuova esecuzione');previewHost=host;liveOutput=onOutput;};
   const stopPreview=()=>{reset('Scena arrestata');previewHost=null;liveOutput=null;};
-  const adapter=Object.freeze({beginPreview,stopPreview,verifyLesson,verifyPracticeTask,verifyReview,executeReview,execute:executeCompat,sandboxAction,
+  const adapter=Object.freeze({beginPreview,stopPreview,verifyLesson,verifyPracticeTask,verifyReview,executeReview,execute:executeCompat,startLessonPreview,sandboxAction,
     runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.4.1 WebAssembly';}});
   window.GDHGodot=adapter;
   if(window.GDScriptRuntime)window.GDScriptRuntime.execute=(...args)=>executeCompat(...args);

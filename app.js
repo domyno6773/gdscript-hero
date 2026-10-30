@@ -3191,9 +3191,11 @@ const App = {
         // scena o richiede un risultato grafico. L'ID numerico NON descrive il
         // contenuto didattico: le lezioni 101+ sono spesso solo console.
         const manualOverride = this.state.manualToolsOverride;
-        const supportsNodeTree = !!lesson.hasNodeTree ||
+        const scenePlan = !this.isReviewMode && window.GDHLessonScene
+            ? window.GDHLessonScene.plan(lesson, this.getActivePracticeTask()) : null;
+        const supportsNodeTree = scenePlan ? scenePlan.tree : !!lesson.hasNodeTree ||
             (Array.isArray(lesson.initialNodes) && lesson.initialNodes.length > 0);
-        const supportsViewport = lesson.has2DViewport === true;
+        const supportsViewport = scenePlan ? scenePlan.viewport : lesson.has2DViewport === true;
         const hasVisualTools = supportsNodeTree || supportsViewport;
 
         // "Mostra strumenti" non deve mai aggiungere una viewport vuota ad
@@ -3421,6 +3423,8 @@ const App = {
         const record=tasks.length?this.getLessonPracticeRecord(baseLesson):null;
         const task=record?tasks[record.activeIndex]:null;
         this.currentPracticeTaskIndex=record?record.activeIndex:null;
+        window.GDHLessonScene?.open(baseLesson,task);
+        this.selectedSceneNode=null;
         const lesson=task&&!task.nativeOriginal?{
             ...baseLesson,task:task.task,initialCode:task.initialCode,
             solution:task.solution,expectedOutput:task.expectedOutput,hints:task.hints,
@@ -4547,6 +4551,7 @@ const App = {
                 this._nativeExercisePreview = true;
                 if (nativeMessage) nativeMessage.hidden = true;
             }
+            window.GDHLessonScene?.running();
             const native = practiceTask&&!practiceTask.nativeOriginal
                 ? await window.GDHGodot.verifyPracticeTask(currentLesson.id,practiceTask.key,code)
                 : await window.GDHGodot.verifyLesson(currentLesson.id,code);
@@ -4554,6 +4559,34 @@ const App = {
             if (this.state.currentLessonId !== currentLesson.id || editor.value !== code ||
                 this.isReviewMode || this.currentPracticeTaskIndex!==practiceIndex) return;
             const result = native.execution;
+            // I test di verifica possono eseguire varianti della soluzione.
+            // Riapre l'ORIGINALE in Godot in modalità persistente solo per la
+            // viewport; questa esecuzione non modifica il giudizio o gli XP.
+            let visualScene=native.original?.reply?.lessonScene;
+            if(showNative&&result.success&&window.GDHGodot.startLessonPreview){
+                try{
+                    const preview=await window.GDHGodot.startLessonPreview(
+                        currentLesson.id,code,practiceTask?.key||'base');
+                    if(preview&&preview.success&&Array.isArray(preview.lessonScene)){
+                        visualScene=preview.lessonScene;
+                    }else if(preview&&!preview.success&&nativeMessage){
+                        nativeMessage.textContent='Il codice è stato verificato, ma l’anteprima non è disponibile.';
+                        nativeMessage.hidden=false;
+                    }
+                }catch(previewError){
+                    console.warn('[Godot] Anteprima della lezione non disponibile',previewError);
+                    if(nativeMessage){
+                        nativeMessage.textContent='La verifica è completata, ma l’anteprima non è disponibile.';
+                        nativeMessage.hidden=false;
+                    }
+                }
+                // L'utente può aver cambiato editor o compito durante l'avvio.
+                if(this.state.currentLessonId!==currentLesson.id||editor.value!==code||
+                    this.currentPracticeTaskIndex!==practiceIndex)return;
+            }
+            if(window.GDHLessonScene?.isActive()&&Array.isArray(visualScene)){
+                window.GDHLessonScene.applyNative(visualScene,!!result.success);
+            }
 
             const realOutputPre = document.getElementById('real-output-pre');
             if (result.logs && result.logs.length > 0) {
@@ -7694,6 +7727,10 @@ const App = {
     },
 
     removeSceneNode(targetNode) {
+        if(window.GDHLessonScene?.isActive()){
+            this.showToast('L’albero della lezione è una lettura del vero Godot. Modifica la scena dal codice.','info');
+            return;
+        }
         const node = targetNode || this.selectedSceneNode;
         if (!node) {
             this.showToast("Seleziona prima un nodo da rimuovere!", "info");
@@ -7718,6 +7755,10 @@ const App = {
     },
 
     renderSceneDock() {
+        if(window.GDHLessonScene?.isActive()){
+            window.GDHLessonScene.render();
+            return;
+        }
         const treeContainer = document.getElementById('exercise-scene-tree');
         const countBadge = document.getElementById('scene-node-count');
         if (!treeContainer) return;
@@ -7837,6 +7878,10 @@ const App = {
     },
 
     renderViewportOverlay() {
+        if(window.GDHLessonScene?.isActive()){
+            window.GDHLessonScene.hideFake();
+            return;
+        }
         const overlay = document.getElementById('exercise-ui-overlay');
         if (!overlay) return;
 
@@ -7901,6 +7946,10 @@ const App = {
     },
 
     openAddNodeModal(context = 'exercise') {
+        if(context==='exercise'&&window.GDHLessonScene?.isActive()){
+            this.showToast('Nelle lezioni modifica i nodi dal codice. Per creare una scena liberamente usa la Sandbox.','info');
+            return;
+        }
         this.addNodeContext = context;
         const modal = document.getElementById('add-node-modal');
         if (modal) {

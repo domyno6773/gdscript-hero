@@ -154,6 +154,129 @@ function failures(verdict){
    console.log('PHASE 2 NATIVE PASS: '+verified+' solutions, '+rejectedStarters+
      ' incomplete starters rejected, '+discriminating+' discriminating data variations, bypass rejected.');
 
+   // PHASE 3: require a real post-run Godot tree, not the JavaScript scene
+   // illustration. Check dynamic children, properties, connections and queue_free.
+   const nativeTree=await page.evaluate(async ()=>{
+     const code='extends Node\n'+
+       'func on_launch():\n    pass\n'+
+       'func _ready():\n'+
+       '    var label = Label.new()\n'+
+       '    label.name = "StatusLabel"\n'+
+       '    add_child(label)\n'+
+       '    label.text = "READY"\n'+
+       '    var button = Button.new()\n'+
+       '    button.name = "Launch"\n'+
+       '    add_child(button)\n'+
+       '    button.pressed.connect(on_launch)\n'+
+       '    var color = ColorRect.new()\n'+
+       '    color.name = "Bar"\n'+
+       '    add_child(color)\n'+
+       '    color.color = Color("#22c55e")\n'+
+       '    color.size = Vector2(90, 12)\n'+
+       '    var item = Node.new()\n'+
+       '    item.name = "Disposable"\n'+
+       '    add_child(item)\n'+
+       '    item.queue_free()\n';
+     const run=await GDHGodot.runNative(code,{});
+     return {status:run.status,stderr:run.stderr,
+       tree:run.reply?.lessonScene};
+   });
+   assert.equal(nativeTree.status,'executed','Native scene instrumentation must run');
+   assert.ok(!nativeTree.stderr,'Native scene instrumentation stderr: '+nativeTree.stderr);
+   assert.ok(Array.isArray(nativeTree.tree),'Engine did not return its real node tree');
+   const lookup=new Map(nativeTree.tree.map(node=>[node.name,node]));
+   assert.equal(lookup.get('StatusLabel')?.class,'Label');
+   assert.equal(lookup.get('StatusLabel')?.text,'READY');
+   assert.equal(lookup.get('Launch')?.class,'Button');
+   assert.equal(lookup.get('Launch')?.pressed_connections,1);
+   assert.equal(lookup.get('Bar')?.class,'ColorRect');
+   assert.equal(lookup.get('Bar')?.color,'#22c55e');
+   assert.equal(lookup.get('Bar')?.size?.x,90);
+   assert.equal(lookup.get('Disposable')?.queued,true);
+   assert.ok(lookup.get('StatusLabel')?.path.includes('/'),'Nested Godot path missing');
+   const emptyTree=await page.evaluate(async ()=>{
+     const run=await GDHGodot.runNative('extends Node\nfunc _ready():\n    print("READY")\n',{});
+     return run.reply?.lessonScene||[];
+   });
+   assert.ok(emptyTree.every(x=>x.class!=='Label'),
+     'No Label should appear in the Godot tree after printing only a string');
+   const classroom=await page.evaluate(scene=>{
+     const lesson=LESSONS_DATA.find(l=>l.id===50);
+     const base=LessonPractice.getTask(50,'base');
+     const cases={
+       node:GDHLessonScene.plan(LESSONS_DATA.find(l=>l.id===49),
+         LessonPractice.getTask(49,'base')),
+       label:GDHLessonScene.plan(lesson,base),
+       timer:GDHLessonScene.plan(LESSONS_DATA.find(l=>l.id===57),
+         LessonPractice.getTask(57,'base')),
+       removal:GDHLessonScene.plan(LESSONS_DATA.find(l=>l.id===59),
+         LessonPractice.getTask(59,'base')),
+       added:GDHLessonScene.plan(LESSONS_DATA.find(l=>l.id===119),
+         LessonPractice.getTask(119,'base')),
+       button:GDHLessonScene.plan(LESSONS_DATA.find(l=>l.id===120),
+         LessonPractice.getTask(120,'base')),
+       console:GDHLessonScene.plan(LESSONS_DATA.find(l=>l.id===17),
+         LessonPractice.getTask(17,'p2')),
+       extra:GDHLessonScene.plan(lesson,LessonPractice.getTask(50,'p2'))
+     };
+     GDHLessonScene.open(lesson,base);
+     GDHLessonScene.applyNative(scene,true);
+     const buttons=[...document.querySelectorAll('#exercise-scene-tree .exercise-native-node')];
+     const ui=document.getElementById('exercise-ui-overlay');
+     const add=document.getElementById('btn-open-add-node-modal');
+     const before={status:GDHLessonScene.lastStatus,
+       treeLength:GDHLessonScene.lastScene.length,
+       label:buttons.some(x=>x.textContent.includes('StatusLabel')),
+       inspector:document.getElementById('exercise-native-inspector')?.textContent,
+       fakeViewportVisible:ui?.style.display,
+       addDisabled:add?.disabled};
+     GDHLessonScene.change();
+     const after=GDHLessonScene.lastStatus;
+     const resetToExpected=GDHLessonScene.lastScene.every(x=>x.name!=='StatusLabel');
+     GDHLessonScene.open(lesson,LessonPractice.getTask(50,'p2'));
+     const dynamicStartsWithoutBaseFixture=GDHLessonScene.lastScene.every(x=>x.name!=='Titolo');
+     return {cases,before,after,resetToExpected,dynamicStartsWithoutBaseFixture};
+   },nativeTree.tree);
+   assert.deepEqual(classroom.cases.node,{tree:true,viewport:false});
+   assert.deepEqual(classroom.cases.label,{tree:true,viewport:true});
+   assert.deepEqual(classroom.cases.timer,{tree:true,viewport:false});
+   assert.deepEqual(classroom.cases.removal,{tree:true,viewport:false});
+   assert.deepEqual(classroom.cases.added,{tree:true,viewport:false});
+   assert.deepEqual(classroom.cases.button,{tree:true,viewport:true});
+   assert.deepEqual(classroom.cases.console,{tree:false,viewport:false});
+   assert.deepEqual(classroom.cases.extra,{tree:true,viewport:true});
+   assert.equal(classroom.before.status,'verified');
+   assert.ok(classroom.before.label);
+   assert.ok(classroom.before.inspector.includes('Inspector'));
+   assert.equal(classroom.before.fakeViewportVisible,'none');
+   assert.equal(classroom.before.addDisabled,true);
+   assert.equal(classroom.after,'changed');
+   assert.ok(classroom.resetToExpected);
+   assert.equal(classroom.dynamicStartsWithoutBaseFixture,true,'Supplemental dynamic task must not inherit unrelated static nodes');
+   console.log('PHASE 3 REAL SCENES PASS: Node, Label, Button, ColorRect, queue_free, no fabricated nodes, lesson inspector and 8 contextual layouts.');
+
+   const liveButton=await page.evaluate(async ()=>{
+     const lesson=LESSONS_DATA.find(l=>l.id===54);
+     const started=await GDHGodot.runNative(lesson.solution,
+       {mode:'sandbox_start',scene:54,nodes:[]});
+     const initial=started.reply?.lessonScene?.find(n=>n.name==='AttaccaBtn');
+     const action=await GDHGodot.sandboxAction('AttaccaBtn','pressed');
+     const observed=await GDHGodot.runNative('',
+       {mode:'sandbox_observe',frames:1});
+     return {status:started.status,initial,actionSuccess:action.success,
+       clicked:action.logs,actionTree:action.native?.lessonScene,
+       observedStatus:observed.status,observedTree:observed.reply?.lessonScene};
+   });
+   assert.equal(liveButton.status,'executed');
+   assert.equal(liveButton.initial?.pressed_connections,1);
+   assert.equal(liveButton.actionSuccess,true);
+   assert.ok(liveButton.clicked.some(x=>x.includes('Colpo sferrato con successo!')),
+     'Live Godot Button did not invoke its pressed callback: '+JSON.stringify(liveButton.clicked));
+   assert.ok(liveButton.actionTree.some(x=>x.name==='AttaccaBtn'&&x.pressed_connections===1));
+   assert.equal(liveButton.observedStatus,'executed');
+   assert.ok(liveButton.observedTree.some(x=>x.name==='AttaccaBtn'));
+   console.log('PHASE 3 LIVE GODOT PASS: real pressed callback, observation and tree refresh.');
+
    // Fixture snapshots must stay synchronized with the actual 60 lessons.
    const snapshots=await page.evaluate(()=>LESSONS_DATA.filter(l=>l.id<=60).flatMap(l=>{
      const f=GDHLessonFixtures.find(x=>x.id===l.id);
@@ -256,6 +379,32 @@ function failures(verdict){
      extraPassed++;
    }
    console.log('NUOVI ESERCIZI NATIVI: '+extraPassed+'/21 accettati, 21/21 starter respinti.');
+   // Drive the actual lesson UI, not just the isolated lesson renderer.
+   const classroomRun=await page.evaluate(async ()=>{
+     const lesson=LESSONS_DATA.find(l=>l.id===50);
+     App.openLesson(lesson.id);
+     const task=App.getActivePracticeTask();
+     const editor=document.getElementById('code-editor');
+     editor.value=task.solution;
+     await App.runAndValidate();
+     return {
+       treeStatus:GDHLessonScene.lastStatus,
+       label:GDHLessonScene.lastScene.find(n=>n.name==='Titolo'),
+       sceneShown:document.getElementById('exercise-viewport-wrapper')?.style.display,
+       GodotIframes:document.querySelectorAll('#exercise-native-preview iframe').length,
+       overlay:document.getElementById('exercise-ui-overlay')?.style.display,
+       addDisabled:document.getElementById('btn-open-add-node-modal')?.disabled
+     };
+   });
+   assert.equal(classroomRun.treeStatus,'verified',
+     'Real lesson tree did not refresh: '+JSON.stringify(classroomRun));
+   assert.equal(classroomRun.label?.text,'Benvenuto in Godot 4!');
+   assert.equal(classroomRun.sceneShown,'flex');
+   assert.equal(classroomRun.GodotIframes,1);
+   assert.equal(classroomRun.overlay,'none');
+   assert.equal(classroomRun.addDisabled,true);
+   console.log('PHASE 3 END-TO-END PASS: lesson editor, real Godot preview iframe, synchronized Label and read-only scene.');
+
    assert.deepEqual(browserErrors,[],'Uncaught browser errors');
    console.log('NATIVE CURRICULUM SUCCESS: '+passed+'/60 official accepted; 60/60 starters rejected; '+
      '60/60 solutions with extra comments accepted; '+variants+
