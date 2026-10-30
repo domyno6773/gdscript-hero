@@ -80,12 +80,12 @@ function failures(verdict){
    assert.equal(failed,0,'Godot WASM rejected '+failed+' of 60 official solutions');
    assert.equal(passed,60);
 
-   // The current course has one unique assessment per exercise; chapter-wide
-   // generated drills remain covered by the legacy catalog unit tests.
-   const focused=await page.evaluate(()=>LESSONS_DATA.filter(l=>!l.isQuiz).every(l=>{
-     const tasks=LessonPractice.tasksFor(l);return tasks.length===1&&tasks[0].nativeOriginal;
+   // Ogni lezione conserva il verificatore nativo e tre attività progressive.
+   const progressive=await page.evaluate(()=>LESSONS_DATA.filter(l=>!l.isQuiz).every(l=>{
+     const tasks=LessonPractice.tasksFor(l);
+     return tasks.length===4&&tasks.filter(t=>t.nativeOriginal).length===1;
    }));
-   assert.ok(focused,'Repeated generated tasks entered the mandatory course');
+   assert.ok(progressive,'Il percorso pubblicato ha perso i quattro compiti');
    for(const id of [301,302,303,304]){
      const result=await page.evaluate(async id=>{
        const l=LESSONS_DATA.find(l=>l.id===id);
