@@ -9,7 +9,7 @@
  const pr=(m,name)=>new RegExp('\\bprint\\s*\\(\\s*'+escape(name)+'\\s*\\)').test(m);
  const logs=x=>String(x||'').trimEnd().split(/\r?\n/).filter(Boolean);
  const eq=(a,b)=>a.length===b.length&&a.every((v,i)=>v===b[i]);
- // Accetta anche print(numero) se numero è dichiarato come intero 1; non accetta var numero = "1".
+ // Accetta anche print(numero) se numero Ã¨ dichiarato come intero 1; non accetta var numero = "1".
  const printsNumericOne=m=>{
    if(/\bprint\s*\(\s*1\s*\)/.test(m))return true;
    for(const match of m.matchAll(/\bprint\s*\(\s*([A-Za-z_]\w*)\s*\)/g)){
@@ -183,16 +183,32 @@
  const check=(arr,desc,p)=>arr.push({desc,passed:Boolean(p)});
  function grade(id,src,reply,stdout,stderr,scenarioResults={}){
    const lesson=get(id);
-   if(!lesson)return{id,passed:false,demoOnly:true,error:'Lezione non disponibile'};
+   const globalLesson = (typeof root !== "undefined" && Array.isArray(root.LESSONS_DATA))
+     ? root.LESSONS_DATA.find(x => x.id === id) : null;
    const m=clean(src),lines=logs(stdout),s=reply?.locals||{},list=[];
    const loc=name=>Object.prototype.hasOwnProperty.call(s,name)?s[name]:undefined;
-   check(list,'Compilazione ed esecuzione tramite Godot nativo',reply?.status==='executed');
-   check(list,'Nessun errore segnalato dal motore Godot',!String(stderr||'').trim());
-   if(reply?.status!=='executed'||String(stderr||'').trim()){
-     return {id,passed:false,verdict:'invalid_code',checks:list,demoOnly:true,
+   check(list,"Compilazione ed esecuzione tramite Godot nativo",reply?.status==="executed");
+   check(list,"Nessun errore segnalato dal motore Godot",!String(stderr||"").trim());
+   if(reply?.status!=="executed"||String(stderr||"").trim()){
+     return {id,passed:false,verdict:"invalid_code",checks:list,demoOnly:true,
        nativeStatus:reply?.status,
-       reason:'Il codice originale non è eseguibile senza errori nel motore Godot.'};
+       reason:"Il codice originale non e eseguibile senza errori nel motore Godot."};
    }
+   if(!lesson && globalLesson){
+     if(globalLesson.expectedOutput){
+       const expectedLines=logs(globalLesson.expectedOutput);
+       const outPassed=linesEqual(stdout,expectedLines)||
+         (expectedLines.length>0&&expectedLines.every((exp,idx)=>lines[idx]===exp));
+       check(list,"Output corrispondente alla missione richiesta",outPassed);
+     }else{
+       check(list,"Esecuzione completata con successo",true);
+     }
+     const passed=list.every(x=>x.passed);
+     return {id,passed,verdict:passed?"accepted":"requirements_not_met",checks:list,demoOnly:true,
+       nativeStatus:reply?.status,localCapture:reply?.localCapture,
+       warning:"Validazione nativa basata sui requisiti della lezione."};
+   }
+   if(!lesson)return{id,passed:false,demoOnly:true,error:"Lezione non disponibile"};
    const requested=Array.isArray(lesson.locals)&&!directSourceProof(id,src)?lesson.locals:[];
    if(requested.length){
      const captureComplete=reply?.localCapture==='instrumented' &&
@@ -202,7 +218,7 @@
        return {id,passed:false,verdict:'inconclusive',checks:list,demoOnly:true,
          nativeStatus:reply?.status,localCapture:reply?.localCapture,
          localCaptureReason:reply?.localCaptureReason||'values_not_observed',
-         reason:'Godot ha eseguito il codice originale senza errori, ma il laboratorio non riesce a osservare tutte le variabili richieste. Non è una prova che il codice sia sbagliato.',
+         reason:'Godot ha eseguito il codice originale senza errori, ma il laboratorio non riesce a osservare tutte le variabili richieste. Non Ã¨ una prova che il codice sia sbagliato.',
          instrumentationDiagnostics:reply?.diagnostics?.instrumentation||'',
          warning:'Nessun XP o progresso viene assegnato da questa diagnostica.'};
      }
@@ -273,7 +289,7 @@
      case 8:
        check(list,'title con virgolette',loc('title')==='The "Lost" Key');
        check(list,'npc_line con apostrofo',loc('npc_line')==="It's dangerous to go alone!");
-       check(list,'door_code è String 0420',loc('door_code')==='0420');
+       check(list,'door_code Ã¨ String 0420',loc('door_code')==='0420');
        check(list,'Tre dichiarazioni var', ['title','npc_line','door_code'].every(x=>decl(m,'var',x)));
        check(list,'Righe di output richieste',eq(lines,['Title: The "Lost" Key',"NPC: It's dangerous to go alone!",'Door code: 0420']));break;
      case 9:
@@ -336,8 +352,8 @@
      case 19:
        check(list,'punti_vita iniziale 0',(directSourceProof(id,src)||loc('punti_vita')===0));
        check(list,'if su punti_vita e ramo else',/\bif\b[^\n]*punti_vita[^\n]*:/.test(m)&&/\belse\s*:/.test(m));
-       check(list,'Game Over quando salute è zero',eq(lines,['Game Over']));
-       check(list,'In battaglia quando salute è 100',scenarioOk(scenarioResults,'alive',['In battaglia']));
+       check(list,'Game Over quando salute Ã¨ zero',eq(lines,['Game Over']));
+       check(list,'In battaglia quando salute Ã¨ 100',scenarioOk(scenarioResults,'alive',['In battaglia']));
        check(list,'Game Over anche con salute -5',scenarioOk(scenarioResults,'negative',['Game Over']));
        break;
      case 20:
@@ -349,7 +365,7 @@
        check(list,'Al limite esatto energia 50 il portale apre',scenarioOk(scenarioResults,'threshold50',['Stato: Portale Attivato']));
        check(list,'Energia insufficiente con energia 20',
          scenarioOk(scenarioResults,'low_energy',['Stato: Energia Insufficiente']));
-       check(list,'Nessuna reliquia se non ha chiave né amuleto',
+       check(list,'Nessuna reliquia se non ha chiave nÃ© amuleto',
          scenarioOk(scenarioResults,'no_relic',['Stato: Nessuna Reliquia Trovata']));
        check(list,'La chiave alternativa apre il portale',
          scenarioOk(scenarioResults,'key_instead',['Stato: Portale Attivato']));
@@ -361,7 +377,7 @@
          rightPrint(m,'inventario',0)&&eq(lines,['Spada']));
        break;
      case 22:
-       check(list,'Array oggetti nell’ordine richiesto',
+       check(list,'Array oggetti nellâordine richiesto',
          localsArray(s,'oggetti',['Spada','Scudo','Pozione']));
        check(list,'Accessi dinamici oggetti[1] e oggetti[2]',
          rightPrint(m,'oggetti',1)&&rightPrint(m,'oggetti',2)&&eq(lines,['Scudo','Pozione']));
@@ -376,7 +392,7 @@
        check(list,'zaino modificato tramite append ed erase',
          localsArray(s,'zaino',['Spada','Pozione di Vita','Arco Elfico'])&&
          usesStringMethod(src,'zaino','append','Arco Elfico')&&usesStringMethod(src,'zaino','erase','Ramo Secco'));
-       check(list,'ha_cura è risultato di zaino.has("Pozione di Vita")',
+       check(list,'ha_cura Ã¨ risultato di zaino.has("Pozione di Vita")',
          loc('ha_cura')===true&&/\bvar\s+ha_cura\s*=\s*zaino\s*\.\s*has\s*\(/.test(m)&&
          usesStringMethod(src,'zaino','has','Pozione di Vita'));
        check(list,'totale_slot ottenuto da zaino.size()',
@@ -460,7 +476,7 @@
          pr(m,'posizione')&&eq(lines,['(100.0, 200.0)']));break;
      case 34:
        check(list,'posizione finale Vector2(150,200)',vec(loc('posizione'),150,200));
-       check(list,'Lo spostamento iniziale è 50',loc('velocita')===50);
+       check(list,'Lo spostamento iniziale Ã¨ 50',loc('velocita')===50);
        check(list,'Output vettore finale',pr(m,'posizione')&&eq(lines,['(150.0, 200.0)']));
        check(list,'Con velocita 70 ottiene (170,200)',
          scenarioOk(scenarioResults,'speed70',['(170.0, 200.0)']));break;
@@ -506,9 +522,9 @@
        check(list,'Entrambe le variabili calcolate tramite forziere.has',
          /\bvar\s+ha_oro\s*=\s*forziere\.has\s*\(\s*["']oro["']\s*\)/.test(noCommentLines(src))&&
          /\bvar\s+ha_chiave\s*=\s*forziere\.has\s*\(\s*["']chiave["']\s*\)/.test(noCommentLines(src)));
-       check(list,'keys() assegna l’elenco reale alla variabile chiavi',
+       check(list,'keys() assegna lâelenco reale alla variabile chiavi',
          /\bvar\s+chiavi\s*=\s*forziere\.keys\s*\(\s*\)/.test(noCommentLines(src)));
-       check(list,'Il numero di chiavi deriva dalla dimensione dell’array',
+       check(list,'Il numero di chiavi deriva dalla dimensione dellâarray',
          /\bprint\s*\(\s*["']Chiavi nel forziere: ["']\s*,\s*chiavi\.size\s*\(\s*\)\s*\)/.test(noCommentLines(src)));
        check(list,'Output dei due controlli e del conteggio delle chiavi',
          eq(lines,['Possiede oro: true','Possiede chiave: false','Chiavi nel forziere: 2']));break;
@@ -538,7 +554,7 @@
      case 43:
        check(list,'Segnale danno_inflitto(valore) definito',
          /^\s*signal\s+danno_inflitto\s*\(\s*valore\s*\)/m.test(m)&&event(reply,'danno_inflitto',1));
-       check(list,'Emette 35 ed è connesso a on_danno',
+       check(list,'Emette 35 ed Ã¨ connesso a on_danno',
          connect(src,'danno_inflitto','on_danno')&&emit(src,'danno_inflitto','35'));
        check(list,'Callback gestisce sia 35 sia 71',
          eq(lines,['Danno registrato: 35','Danno registrato: 71.0']));break;
@@ -555,7 +571,7 @@
          eq(lines,['UI: Barra salute a 75','UI: Barra salute a 40',
            '=== EVENTI BATTAGLIA COMPLETATI ===','UI: Barra salute a 11.0']));break;
      case 45:
-       check(list,'Istanza Pozione con proprietà corrette',
+       check(list,'Istanza Pozione con proprietÃ  corrette',
          obj(loc('elisir'),{nome:'Elisir',cura:50}));
        check(list,'Classe Pozione e costruttore _init(n,c)',
          /\bclass\s+Pozione\s*:/.test(m)&&/\bfunc\s+_init\s*\(\s*n(?:\s*:\s*String)?\s*,\s*c(?:\s*:\s*int)?\s*\)/.test(m)&&

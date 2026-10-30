@@ -132,20 +132,21 @@
     const lessonData = (typeof window !== 'undefined' && Array.isArray(window.LESSONS_DATA))
       ? window.LESSONS_DATA.find(x => x.id === id) : null;
 
-    if (lessonData && typeof lessonData.validate === 'function') {
+    if (lessonData) {
       let base;
       try {
         const r = await raw(source, { scene: 0, actions: [] });
         base = { reply: r.reply, stdout: r.stdout, stderr: r.stderr, status: r.status };
       } catch (rawErr) {
         // Fallback a GDScriptRuntime client-side se il runner Godot non risponde
-        if (window.GDScriptRuntime) {
-          const runRes = await window.GDScriptRuntime.execute(source, { lesson: lessonData });
+        const clientExec = window.GDScriptRuntime?.executeClient || window.GDScriptRuntime?.execute;
+        if (clientExec) {
+          const runRes = await clientExec.call(window.GDScriptRuntime, source, { lesson: lessonData });
           base = {
-            reply: { status: runRes.success ? 'executed' : 'error', scope: runRes.scope || {} },
-            stdout: (runRes.logs || []).join('\n'),
-            stderr: runRes.error || '',
-            status: runRes.success ? 'executed' : 'error'
+            reply: { status: runRes.success ? "executed" : "error", scope: runRes.scope || {} },
+            stdout: (runRes.logs || []).join("\n"),
+            stderr: runRes.error || "",
+            status: runRes.success ? "executed" : "error"
           };
         } else {
           throw rawErr;
@@ -153,11 +154,11 @@
       }
 
       const execution = {
-        success: base.reply?.status === 'executed' && !String(base.stderr || '').trim(),
+        success: base.reply?.status === "executed" && !String(base.stderr || "").trim(),
         code: source,
         logs: lines(base.stdout),
-        error: base.reply?.status === 'executed' && !base.stderr?.trim() ? null :
-          (base.stderr?.trim() || 'Godot non è riuscito a eseguire il codice'),
+        error: base.reply?.status === "executed" && !base.stderr?.trim() ? null :
+          (base.stderr?.trim() || "Godot non e riuscito a eseguire il codice"),
         nativeStatus: base.reply?.status,
         scope: (base.reply && base.reply.scope) ? Object.assign({}, base.reply.scope) : {}
       };
@@ -172,13 +173,33 @@
         } catch(e) {}
       }
 
-      const checks = await lessonData.validate(execution);
+      let checks;
+      if (typeof lessonData.validate === "function") {
+        checks = await lessonData.validate(execution);
+      } else {
+        checks = [];
+        checks.push({
+          desc: "Compilazione ed esecuzione in Godot",
+          passed: execution.success,
+          diff: execution.error || null
+        });
+        if (lessonData.expectedOutput) {
+          const expLines = String(lessonData.expectedOutput).trim().split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+          const actLines = (execution.logs || []).map(l => String(l).trim()).filter(Boolean);
+          const outMatch = expLines.length === 0 || (actLines.length >= expLines.length && expLines.every((e, i) => actLines[i] === e));
+          checks.push({
+            desc: "Output corretto alla console",
+            passed: outMatch,
+            diff: outMatch ? null : ("Atteso:\n" + expLines.join("\n") + "\n\nRicevuto:\n" + actLines.join("\n"))
+          });
+        }
+      }
       const passed = Array.isArray(checks) && checks.length > 0 && checks.every(c => c.passed);
       const feedback = {
-        verdict: passed ? 'accepted' : 'rejected',
+        verdict: passed ? "accepted" : "rejected",
         passed: passed,
         checks: checks,
-        reason: passed ? null : (checks.find(c => !c.passed)?.diff || 'Almeno un controllo non è stato superato')
+        reason: passed ? null : (checks.find(c => !c.passed)?.diff || "Almeno un controllo non e stato superato")
       };
       execution.nativeFeedback = feedback;
       return { feedback, execution, original: base, accepted: passed };
@@ -216,7 +237,7 @@
       success:base.reply?.status==='executed'&&!String(base.stderr||'').trim(),
       code:source,logs:lines(base.stdout),
       error:base.reply?.status==='executed'&&!base.stderr?.trim()?null:
-        (base.stderr?.trim()||'Godot non è riuscito a eseguire il codice'),
+        (base.stderr?.trim()||'Godot non ÃÂ¨ riuscito a eseguire il codice'),
       nativeStatus:base.reply?.status,
       nativeFeedback:feedback
     };
@@ -253,7 +274,7 @@
       for(const scenario of scenarios){
         const correct=await raw(scenario.reference,{});
         if(correct.status!=='executed'||String(correct.stderr||'').trim()){
-          probeError='La verifica del caso alternativo non è disponibile. Riprova.';
+          probeError='La verifica del caso alternativo non ÃÂ¨ disponibile. Riprova.';
           break;
         }
         const expected=String(correct.stdout||'').trimEnd();
@@ -266,7 +287,7 @@
         checks.push({desc:'Funzionamento con valori diversi: '+scenario.label,
           passed:ok,diff:ok?null:validCandidate?
           'Con dati differenti il risultato deve essere: '+(expected||'(nessun messaggio)'):
-          String(candidate.stderr||'Errore nell’esecuzione con dati differenti').trim()});
+          String(candidate.stderr||'Errore nellÃ¢ÂÂesecuzione con dati differenti').trim()});
         if(!ok)break;
       }
     }
@@ -370,7 +391,7 @@
     let tests=[{
       desc:'Godot 4.4.1 ha eseguito il codice senza errori',
       passed:execution.success,
-      diff:execution.success?null:(execution.error||'Il motore Godot non ha completato l’esecuzione')
+      diff:execution.success?null:(execution.error||'Il motore Godot non ha completato lÃ¢ÂÂesecuzione')
     }];
     if(execution.success){
       const reviewed=await variant.validate(execution);
@@ -392,7 +413,7 @@
       checks:tests,
       reason:accepted?'':infrastructureFailure?
         'Il motore Godot non ha potuto completare la verifica: riprova senza perdere progressi.':
-        (tests.find(check=>!check.passed)?.diff||'Uno o più requisiti non sono soddisfatti'),
+        (tests.find(check=>!check.passed)?.diff||'Uno o piÃÂ¹ requisiti non sono soddisfatti'),
       demoOnly:true};
     return {feedback,execution,accepted};
   };
@@ -420,5 +441,8 @@
   const adapter=Object.freeze({beginPreview,stopPreview,verifyLesson,verifyPracticeTask,verifyReview,executeReview,execute:executeCompat,startLessonPreview,sandboxAction,
     runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.4.1 WebAssembly';}});
   window.GDHGodot=adapter;
-  if(window.GDScriptRuntime)window.GDScriptRuntime.execute=(...args)=>executeCompat(...args);
+  if(window.GDScriptRuntime) {
+    window.GDScriptRuntime.executeClient = window.GDScriptRuntime.execute;
+    window.GDScriptRuntime.execute = (...args) => executeCompat(...args);
+  }
 })();

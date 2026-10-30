@@ -1,3 +1,57 @@
+
+const installGDPolyfills = (targetArrayProto, targetObjProto) => {
+    if (targetArrayProto) {
+        if (!targetArrayProto.append) targetArrayProto.append = function(...items) { return this.push(...items); };
+        if (!targetArrayProto.clear) targetArrayProto.clear = function() { this.length = 0; };
+        if (!targetArrayProto.size) targetArrayProto.size = function() { return this.length; };
+        if (!targetArrayProto.has) targetArrayProto.has = function(item) { return this.includes(item); };
+        if (!targetArrayProto.erase) targetArrayProto.erase = function(item) { const idx = this.indexOf(item); if (idx !== -1) this.splice(idx, 1); };
+    }
+    if (targetObjProto) {
+        if (!targetObjProto.has) {
+            Object.defineProperty(targetObjProto, 'has', {
+                value: function(key) { return Object.prototype.hasOwnProperty.call(this, key); },
+                writable: true, configurable: true
+            });
+        }
+        if (!targetObjProto.keys) {
+            Object.defineProperty(targetObjProto, 'keys', {
+                value: function() { return Object.keys(this); },
+                writable: true, configurable: true
+            });
+        }
+        if (!targetObjProto.values) {
+            Object.defineProperty(targetObjProto, 'values', {
+                value: function() { return Object.values(this); },
+                writable: true, configurable: true
+            });
+        }
+        if (!targetObjProto.clear) {
+            Object.defineProperty(targetObjProto, 'clear', {
+                value: function() { for (const k of Object.keys(this)) delete this[k]; },
+                writable: true, configurable: true
+            });
+        }
+        if (!targetObjProto.size) {
+            Object.defineProperty(targetObjProto, 'size', {
+                value: function() { return Object.keys(this).length; },
+                writable: true, configurable: true
+            });
+        }
+    }
+};
+installGDPolyfills(Array.prototype, Object.prototype);
+if (typeof global !== 'undefined' && global.Array) {
+    installGDPolyfills(global.Array.prototype, global.Object.prototype);
+}
+
+function __gd_iter(val) {
+    if (val === null || val === undefined) return [];
+    if (Array.isArray(val) || typeof val === 'string') return val;
+    if (typeof val === 'object') return Object.keys(val);
+    return [];
+}
+
 // Runtime & Interprete GDScript per GDScript Hero (Funzionamento 100% Client-Side)
 
 // Implementazione di Vector2 fedele a Godot
@@ -99,7 +153,11 @@ function __gd_format(template, args) {
     const list = Array.isArray(args) ? args : [args];
     let i = 0;
     return String(template).replace(/%[0-9.]*[sdefgdi]/g, (match) => {
-        if (i < list.length) return String(list[i++]);
+        if (i < list.length) {
+            const val = list[i++];
+            if (match.endsWith('d') || match.endsWith('i')) return String(Math.trunc(Number(val)));
+            return String(val);
+        }
         return match;
     });
 }
@@ -117,8 +175,10 @@ function __gd_add(a, b) {
 }
 
 function __gd_str(item) {
-    if (item === null) return "null";
-    if (item === undefined) return "null";
+    if (item === null || item === undefined) return "<null>";
+    if (Array.isArray(item)) {
+        return '[' + item.map(x => typeof x === 'string' ? '"' + x + '"' : (x === null ? '<null>' : String(x))).join(', ') + ']';
+    }
     return item.toString();
 }
 
@@ -669,7 +729,7 @@ const GDScriptRuntime = {
                 if (forMatch) {
                     const loopVar = forMatch[1];
                     const iterable = forMatch[2];
-                    content = `for (let ${loopVar} of ${iterable})`;
+                    content = `for (let ${loopVar} of __gd_iter(${iterable}))`;
                 }
             }
 
@@ -721,10 +781,13 @@ const GDScriptRuntime = {
             // 7. Indici negativi arr[-1] -> arr.at(-1)
             content = content.replace(/\[\s*-\s*([0-9]+)\s*\]/g, (m, n) => `.at(-${n})`);
 
-            // 8. String format "%s" % [...] (ripristinando la stringa temporaneamente per il template)
-            content = content.replace(/__STR_LIT_(\d+)__\s*%\s*(\[[^\]]*\]|[a-zA-Z0-9_]+)/g, (_, i, args) => {
-                return `__gd_format(${strTokens[Number(i)]}, ${args})`;
+                                    // 8. String format "%s" % [...]
+            content = content.replace(/__STR_LIT_(\d+)__\s*%\s*(\[[^\]]*\[[^\]]*\][^\]]*\]|\[[^\]]*\]|\([^)]*\)|[a-zA-Z0-9_.]+(?:\([^)]*\))?)/g, (match, i, args) => {
+                return `__gd_format(__STR_LIT_${i}__, ${args})`;
             });
+
+            // 8b. String repetition: "str" * count
+            content = content.replace(/(__STR_LIT_\d+__)\s*\*\s*([a-zA-Z0-9_]+)/g, '($1).repeat($2)');
 
             // 9. Ternario: val1 if cond else val2
             if (content.includes(' if ') && content.includes(' else ')) {
@@ -738,7 +801,7 @@ const GDScriptRuntime = {
             }
 
             // 11. Divisione intera: coins_per_player = total_coins / players
-            content = content.replace(/\btotal_coins\s*\/\s*players\b/g, '__gd_div(total_coins, players)');
+            content = content.replace(/([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+\(\))?)\s*\/\s*([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+\(\))?)/g, '__gd_div($1, $2)');
 
             // 12. print
             content = content.replace(/\bprint\s*\(/g, '__gd_print(');
@@ -752,6 +815,13 @@ const GDScriptRuntime = {
             content = content.replace(/\bstr\s*\(/g, '__gd_str(');
 
             // 15. Operatori logici GDScript
+            content = content.replace(/\b([a-zA-Z0-9_]+)\s*\+\s*([a-zA-Z0-9_]+)\b/g, (match, p1, p2) => {
+                if (p1.startsWith('__STR_LIT') || p2.startsWith('__STR_LIT') ||
+                    p1 === 'str' || p2 === 'str' || p1 === 'int' || p2 === 'int' || p1 === 'float' || p2 === 'float') {
+                    return match;
+                }
+                return `__gd_add(${p1}, ${p2})`;
+            });
             content = content.replace(/\band\b/g, '&&');
             content = content.replace(/\bor\b/g, '||');
             content = content.replace(/\bnot\b/g, '!');
@@ -875,7 +945,22 @@ const GDScriptRuntime = {
         const customPrint = (...args) => {
             let res = '';
             for (let i = 0; i < args.length; i++) {
-                const str = (args[i] === null || args[i] === undefined) ? "null" : (typeof args[i] === 'object' && args[i].toString ? args[i].toString() : String(args[i]));
+                let str;
+                if (args[i] === null || args[i] === undefined) {
+                    str = "<null>";
+                } else if (Array.isArray(args[i])) {
+                    str = '[' + args[i].map(x => typeof x === 'string' ? '"' + x + '"' : (x === null ? '<null>' : String(x))).join(', ') + ']';
+                } else if (typeof args[i] === 'object' && args[i] !== null) {
+                    if (args[i].constructor === Object || !args[i].constructor || args[i].constructor.name === 'Object') {
+                        str = JSON.stringify(args[i]).replace(/,/g, ', ').replace(/:/g, ': ');
+                    } else if (typeof args[i].toString === 'function' && args[i].toString !== Object.prototype.toString) {
+                        str = args[i].toString();
+                    } else {
+                        str = JSON.stringify(args[i]).replace(/,/g, ', ').replace(/:/g, ': ');
+                    }
+                } else {
+                    str = String(args[i]);
+                }
                 if (i === 0) {
                     res = str;
                 } else {
@@ -976,7 +1061,10 @@ const GDScriptRuntime = {
                 '__gd_format',
                 '__gd_div',
                 '__gd_add',
+                '__gd_iter',
+                'installGDPolyfills',
                 `return (async () => {
+                    if (typeof installGDPolyfills === 'function') installGDPolyfills(Array.prototype, Object.prototype);
                     ${transpiledCode}
                     if (typeof _ready === 'function') {
                         await _ready();
@@ -1013,7 +1101,9 @@ const GDScriptRuntime = {
                 __gd_in,
                 __gd_format,
                 __gd_div,
-                __gd_add
+                __gd_add,
+                __gd_iter,
+                installGDPolyfills
             );
 
             // La simulazione di _ready() rappresenta un frame: accoda la rimozione
