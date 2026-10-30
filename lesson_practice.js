@@ -115,9 +115,10 @@
       ['Ogni print() crea una riga.','Scrivi tre stampe nel blocco di _ready().','Controlla anche l’ordine dei messaggi.'])
   ];
   const extraFor=lesson=>custom[lesson?.id] ||
+    root.GDHGameplayLessons?.practiceTasks?.(lesson) ||
     root.GDHPracticeCatalog?.tasksFor(lesson) || [];
   const enabled=id=>Boolean(custom[id]||
-    (root.LESSONS_DATA||[]).some(l=>l.id===id && !l.isQuiz && (l.practiceMode==='focused' || (l.chapterId>=2 && l.chapterId<=15))));
+    (root.LESSONS_DATA||[]).some(l=>l.id===id && !l.isQuiz && (l.practiceMode==='focused' || l.practiceMode==='progressive' || (l.chapterId>=2 && l.chapterId<=15))));
   const tasksFor=lesson=>{
     if(!lesson||!enabled(lesson.id)||lesson.isQuiz)return [];
 
