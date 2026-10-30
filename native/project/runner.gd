@@ -323,9 +323,12 @@ func observe_sandbox(frames: int, actions: Array = []) -> Dictionary:
         if allowed.has(action):
             Input.action_press(action)
     instance.process_mode = Node.PROCESS_MODE_INHERIT
-    for frame_index in range(clampi(frames, 1, 120)):
+    for frame_index in range(clampi(frames, 1, 120) + 1):
         await get_tree().physics_frame
-    # physics_frame fires before node callbacks; wait until the frame finishes.
+    # Freeze before the next tick: a render frame can contain several physics
+    # ticks, so awaiting process_frame first would let the student move too far.
+    if is_instance_valid(instance):
+        instance.process_mode = Node.PROCESS_MODE_DISABLED
     await get_tree().process_frame
     for action in allowed:
         Input.action_release(action)
