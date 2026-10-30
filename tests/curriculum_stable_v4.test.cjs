@@ -1,18 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const html=fs.readFileSync('index.html','utf8');
-function load(v4){
- const w={},listeners={};
- const ctx=vm.createContext({window:w,console,document:{addEventListener:(event,fn)=>listeners[event]=fn}});
- const files=[...html.matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
- for(const f of files){
-  if(f==='code-guide.js')break;
-  if(!/^(lessons|lesson_practice|curriculum_|practice_catalog|chapter_quizzes|quiz_prerequisites|gameplay_lessons|course_capstone)/.test(f))continue;
-  if(!v4&&['curriculum_guidance.js','quiz_prerequisites_v4.js','curriculum_compass.js','course_capstone.js'].includes(f))continue;
-  vm.runInContext(fs.readFileSync(f,'utf8'),ctx,{filename:f});
- }
- return {w,listeners};
-}
+const load=require('./helpers/load_course.cjs');
 const baseline=load(false).w,{w,listeners}=load(true);
 const plain=x=>JSON.parse(JSON.stringify(x));
 assert.deepEqual(plain(w.LESSONS_DATA.map(l=>l.id)),plain(baseline.LESSONS_DATA.map(l=>l.id)));

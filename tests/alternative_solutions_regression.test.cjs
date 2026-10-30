@@ -1,8 +1,6 @@
 'use strict';
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const root=path.resolve(__dirname,'..'),w={},ctx=vm.createContext({window:w,console,Date});
-for(const f of ['lessons.js','lesson_practice.js','curriculum_extension.js','practice_catalog.js','curriculum_drills_v2.js','chapter_quizzes.js','gameplay_lessons.js','curriculum_restructure.js'])
- vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f});
+const root=path.resolve(__dirname,'..'),{w}=require('./helpers/load_course.cjs')();
 let accepted=0,commented=0,wrong=0;
 for(const id of w.GDHIndividualPractice.ids){
  for(const t of w.LessonPractice.tasksFor(w.LESSONS_DATA.find(l=>l.id===id)).filter(t=>!t.nativeOriginal)){

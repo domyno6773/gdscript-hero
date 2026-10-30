@@ -31,7 +31,7 @@ principiante sappia pubblicare da solo un gioco commerciale dopo il corso.
 | 13 | `for`, `while`, `break`, `continue` | Simulazione ondate |
 | 14 | Dictionary, chiavi e `get()` | Statistiche boss |
 | 15 | Segnali con e senza parametri | Eventi di battaglia |
-| 16 | Classi, istanze, metodi e stato indipendente | Party RPG e laboratorio finale facoltativo |
+| 16 | Classi, istanze, metodi e stato indipendente | Party RPG e verifica finale nel laboratorio 2D |
 
 La console non e un difetto nelle lezioni sulla sintassi. E invece necessario
 usare la scena reale quando si insegna movimento, UI, segnali di nodi e fisica.
@@ -60,8 +60,18 @@ usare la scena reale quando si insegna movimento, UI, segnali di nodi e fisica.
 - Non si azzerano XP, bozze o completamenti con la motivazione di aver migliorato
   una consegna; non si effettuano migrazioni per semplici modifiche editoriali.
 - Il progetto finale si crea soltanto premendo il pulsante e compare come
-  **nuovo** progetto nella Sandbox. Non sostituisce un progetto precedente,
-  non assegna XP ed e un esercizio autonomo senza giudizio automatico.
+  **nuovo** progetto nella Sandbox. Non sostituisce un progetto precedente
+  e non assegna XP. La verifica finale delle competenze e un esito separato
+  dai completamenti delle lezioni gia acquisiti: non revoca progressi storici.
+- Il laboratorio e un prototipo guidato, con scena e firme predisposte.
+  Lo studente completa classe, connessioni, movimento e logica. Il bersaglio
+  e rappresentato dai dati boss, non da un nemico animato.
+- Il pulsante di verifica prova il codice effettivo dello studente nel Godot
+  nativo, in due disposizioni della scena e nei due ordini delle azioni.
+  L'esito e salvato nel progetto con codice e scena a cui si riferisce;
+  modificare uno dei due richiede una nuova verifica. Sono compatibili anche
+  le copie precedenti con il pulsante UsaPozione. Non si sostituisce il codice
+  salvato per adattarlo al nuovo starter.
 
 ## Come si approvano cambiamenti futuri
 
@@ -92,10 +102,19 @@ Il test protegge anche gli indici delle risposte e la creazione di copie
 indipendenti del progetto finale.
 
 `node tests/capstone_browser.test.cjs` usa Chrome a 1280 e 390 pixel, preme
-il pulsante reale, verifica che le bozze precedenti restino intatte ed esegue
-starter e completamento nel Godot WASM. Controlla segnali reali, inventario,
-raccolta, HP mai negativi e vittoria in entrambi gli ordini delle azioni.
-Il progetto finale resta facoltativo e non assegna XP automaticamente.
+i pulsanti reali di creazione e verifica, conserva bozze e XP ed esegue
+starter e completamento nel Godot WASM. La moneta si raccoglie tramite
+movimento e sovrapposizione fisica, senza emettere body_entered dal test.
+Due disposizioni e i due ordini delle azioni verificano inventario, classi
+indipendenti, segnali, HP mai negativi, vittoria e assenza di premi duplicati.
+Il test respinge anche errori intenzionali e accetta soluzioni alternative
+e progetti precedenti. Controlla persistenza e invalidazione dell'esito.
+La larghezza ridotta resta un controllo di layout: non prova comandi touch.
+
+I test del curriculum pubblico usano `tests/helpers/load_course.cjs`, che
+legge il manifest di index.html. Conteggi, struttura, compiti, alternative
+e input variabili riguardano cosi lo stesso corso da 264 compiti. Restano
+separati i test unitari che usano intenzionalmente fixture isolate.
 
 Questi controlli sono obbligatori nelle workflow di regressione e browser.
 Un vecchio test che pretendeva _process(delta) nella consegna 121 e stato

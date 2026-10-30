@@ -30,7 +30,7 @@ jobs:
         run: node tests/curriculum_expansion.test.cjs
       - name: Offline soundscape, independent music/SFX settings and mobile gesture
         run: node tests/audio_soundscape.test.cjs
-      - name: Validate all 340 mandatory tasks in the published course
+      - name: Validate all 264 mandatory tasks in the published course
         run: node tests/current_course_regressions.test.cjs
       - name: Lesson 4 comments ignored and real output evaluated
         run: node tests/lesson4_comments_output.test.cjs

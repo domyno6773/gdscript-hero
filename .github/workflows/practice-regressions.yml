@@ -4,6 +4,13 @@ on:
   push:
     branches: [main]
     paths:
+      - 'index.html'
+      - 'tests/helpers/**'
+      - 'curriculum_guidance.js'
+      - 'curriculum_compass.js'
+      - 'curriculum_restructure.js'
+      - 'quiz_prerequisites_v4.js'
+      - 'gameplay_lessons.js'
       - 'lesson_practice.js'
       - 'practice-behavior.js'
       - 'curriculum_drills_v2.js'
@@ -17,6 +24,13 @@ on:
       - '.github/workflows/practice-regressions.yml'
   pull_request:
     paths:
+      - 'index.html'
+      - 'tests/helpers/**'
+      - 'curriculum_guidance.js'
+      - 'curriculum_compass.js'
+      - 'curriculum_restructure.js'
+      - 'quiz_prerequisites_v4.js'
+      - 'gameplay_lessons.js'
       - 'lesson_practice.js'
       - 'practice-behavior.js'
       - 'curriculum_drills_v2.js'
@@ -35,7 +49,7 @@ permissions:
 
 jobs:
   validate-practice:
-    name: Validate 324 practice tasks and alternatives
+    name: Validate 264 practice tasks and alternatives
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
