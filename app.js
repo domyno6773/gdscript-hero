@@ -4816,6 +4816,16 @@ const App = {
         const btnMobileToCode = document.getElementById('btn-mobile-to-code');
         if (btnMobileToCode) btnMobileToCode.onclick = () => this.setMobileExerciseTab('code');
 
+        // Entrambi i controlli delle introduzioni devono chiudere la stessa card.
+        for (const [id, tool] of [
+            ['btn-close-intro-viewport2d', 'viewport2d'],
+            ['btn-dismiss-intro-viewport2d', 'viewport2d'],
+            ['btn-close-intro-nodetree', 'nodetree'],
+            ['btn-dismiss-intro-nodetree', 'nodetree']
+        ]) {
+            document.getElementById(id)?.addEventListener('click', () => this.dismissToolIntro(tool));
+        }
+
         // Toolbar Caratteri Rapidi Mobile (Quick Keys)
         document.querySelectorAll('.quick-key').forEach(btn => {
             btn.onclick = (e) => {
