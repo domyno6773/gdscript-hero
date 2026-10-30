@@ -43,7 +43,11 @@ const server=http.createServer((req,res)=>{
    }
    const starter=await assess();assert.equal(starter.passed,false,'Incomplete starter accepted');
    await page.locator('#sandbox-code-editor').fill(solution);
+   await page.locator('#btn-sandbox-run').click();
+   await page.waitForFunction(()=>GDHSceneWorkspace.running&&App.sandboxNativeSession!==null);
    const completed=await assess();assert.ok(completed?.passed,JSON.stringify({checks:completed?.checks,error:completed?.error}));
+   assert.equal(await page.evaluate(()=>GDHSceneWorkspace.running),false);
+   assert.equal(await page.locator('#sandbox-code-editor').getAttribute('readonly'),null);
    assert.ok(completed.checks.every(c=>c.passed));
    assert.match(await page.locator('#capstone-assessment-status').textContent(),/Progetto finale verificato/);
    assert.equal(await page.evaluate(()=>App.state.xp),before.xp);
