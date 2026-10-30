@@ -50,6 +50,22 @@ assert.equal(validated,243,'Le soluzioni dei compiti aggiuntivi vanno controllat
 const oldChapter=lessons.find(l=>l.id===5);
 assert.equal(oldChapter.legacyChapterId,2);
 assert.equal(JSON.stringify(practice.tasksFor(oldChapter).map(t=>t.key)),JSON.stringify(['base','p2','p3','p4']));
+// Le consegne nuove devono spiegare cosa fare con valori specifici,
+// invece di ripetere un'istruzione generica in tutte le lezioni.
+const supplemental=lessons.filter(l=>l.isSupplemental);
+assert.equal(supplemental.length,21);
+for(const lesson of supplemental){
+  assert.ok(lesson.task.length>155,'Consegna troppo generica: '+lesson.id);
+  assert.doesNotMatch(lesson.task,/Scrivi il codice per ottenere il comportamento richiesto|non limitarti a stampare una risposta preconfezionata/i,
+    'La consegna non deve usare il vecchio testo generico: '+lesson.id);
+  assert.ok(lesson.task.includes('<code>'),'La consegna deve citare dati o API concreti: '+lesson.id);
+}
+const scriptReady=supplemental.find(l=>l.id===101);
+assert.match(scriptReady.task,/Avvio: OK/);
+assert.match(scriptReady.task,/Controllo: OK/);
+assert.match(scriptReady.task,/print\(\)/);
+assert.notEqual(scriptReady.has2DViewport,true); // Nessuna viewport per uno script solo console.
+
 // Il completamento di un compito non assegna automaticamente XP.
 assert.equal(practice.tasksFor(lessons.find(l=>l.id===1)).length,4);
 console.log('PASS: current course',lessons.length,'lessons,',total,
