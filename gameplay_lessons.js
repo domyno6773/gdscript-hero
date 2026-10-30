@@ -149,7 +149,7 @@
      }
      if(id===303){
        const speed={p2:80,p3:140,p4:200}[key];
-       const wall=await observe(180,['ui_right']),back=await observe(30,['ui_left']);
+       const wall=await observe(90,['ui_right']),back=await observe(30,['ui_left']);
        check('Il corpo non attraversa la parete',pos(wall).x>=155&&pos(wall).x<=160.1);
        check('Può allontanarsi dal muro alla velocità richiesta',near(pos(back).x-pos(wall).x,-speed/2));
        check('Nessun cambiamento verticale inatteso',near(pos(wall).y,180,.2));
