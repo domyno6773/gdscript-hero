@@ -57,6 +57,15 @@
   };
   const createProbes=(lesson,task,source)=>{
     if(!lesson||!task||task.nativeOriginal||task.nativeGameplay)return [];
+    if(Array.isArray(task.behaviorInputs)){
+      return task.behaviorInputs.map((item,i)=>{
+        const spec=[item.kind,item.name,item.value];
+        const reference=mutate(task.solution,spec);
+        const student=mutate(source,spec);
+        if(reference===null||reference===task.solution)return null;
+        return {label:'Scenario '+(i+1),reference,student:student===null?'':student};
+      }).filter(Boolean);
+    }
     const specs=variants[lesson.chapterId]?.[task.key]||[];
     return specs.map((spec,i)=>{
       const reference=mutate(task.solution,spec),student=mutate(source,spec);
