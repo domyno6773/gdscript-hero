@@ -80,12 +80,14 @@ function failures(verdict){
    assert.equal(failed,0,'Godot WASM rejected '+failed+' of 60 official solutions');
    assert.equal(passed,60);
 
-   // Ogni lezione conserva il verificatore nativo e tre attività progressive.
+   // Le lezioni individuali contengono l'originale e due attività uniche.
+   // Introduzione e gameplay mantengono quattro prove.
    const progressive=await page.evaluate(()=>LESSONS_DATA.filter(l=>!l.isQuiz).every(l=>{
      const tasks=LessonPractice.tasksFor(l);
-     return tasks.length===4&&tasks.filter(t=>t.nativeOriginal).length===1;
+     const count=l.chapterId===1||l.chapterId===10?4:3;
+     return tasks.length===count&&tasks.filter(t=>t.nativeOriginal).length===1;
    }));
-   assert.ok(progressive,'Il percorso pubblicato ha perso i quattro compiti');
+   assert.ok(progressive,'Il percorso deve avere tre o quattro attività coerenti');
    for(const id of [301,302,303,304]){
      const result=await page.evaluate(async id=>{
        const l=LESSONS_DATA.find(l=>l.id===id);
@@ -113,42 +115,44 @@ function failures(verdict){
      }
    }
 
-   // Phase 1: exercise the three additional tasks from all 14 chapters
-   // with behavioral probes, not merely the original official exercises.
-   const chapterSample=[5,49,9,13,17,29,53,33,57,21,25,37,41,45];
-   for(const id of chapterSample){
-     for(const key of ['p2','p3','p4']){
+   // Phase 2: exercise every individualized task in the actual Godot engine.
+   const idsV2=await page.evaluate(()=>GDHIndividualPractice.ids);
+   assert.equal(idsV2.length,76);
+   let verified=0,discriminating=0,rejectedStarters=0;
+   for(const id of idsV2){
+     for(const key of ['p2','p3']){
        const outcome=await page.evaluate(async ({id,key})=>{
          const task=LessonPractice.getTask(id,key);
-         const result=await GDHGodot.verifyPracticeTask(id,key,task.solution);
-         return {passed:result.accepted,status:result.execution.nativeStatus,
-           probes:result.feedback.checks.filter(c=>c.desc.startsWith('Funzionamento con valori diversi')),
-           failed:result.feedback.checks.filter(c=>!c.passed),reason:result.feedback.reason};
+         const correct=await GDHGodot.verifyPracticeTask(id,key,task.solution);
+         const initial=await GDHGodot.verifyPracticeTask(id,key,task.initialCode);
+         return {accepted:correct.accepted,status:correct.execution?.nativeStatus,
+           checks:correct.feedback?.checks,
+           rejectedStarter:!initial.accepted,
+           output:correct.execution?.logs,reason:correct.feedback?.reason,
+           initialChecks:initial.feedback?.checks?.filter(x=>!x.passed)};
        },{id,key});
-       assert.ok(outcome.passed&&outcome.status==='executed'&&outcome.probes.length>0,
-         'Native practice failed '+id+'/'+key+': '+JSON.stringify(outcome));
+       assert.ok(outcome.accepted&&outcome.status==='executed',
+         'Invalid lesson-specific native task '+id+'/'+key+': '+JSON.stringify(outcome));
+       assert.ok(outcome.rejectedStarter,
+         'Starter accepted without completed code: '+id+'/'+key+': '+JSON.stringify(outcome));
+       verified++;rejectedStarters++;
+       discriminating+=outcome.checks.filter(c=>c.desc.startsWith('Funzionamento con valori diversi')&&c.passed).length;
      }
+     if(verified%20===0)console.log('NATIVE PHASE2 '+verified+'/152');
    }
-   // Correct baseline output is insufficient: test three branch-cheating
-   // programs against their hidden changed-input scenarios in Godot.
-   const cheats=[
-     {id:17,key:'p2',code:'extends Node\nfunc _ready():\n    var punti = 10\n    if punti >= 10:\n        pass\n    else:\n        pass\n    print("Aperto")\n'},
-     {id:17,key:'p3',code:'extends Node\nfunc _ready():\n    var tessera = true\n    var allarme = false\n    if tessera and not allarme:\n        pass\n    print("Accesso")\n'},
-     {id:17,key:'p4',code:'extends Node\nfunc _ready():\n    var rischio = 36\n    if rischio >= 50:\n        pass\n    elif rischio >= 25:\n        pass\n    else:\n        pass\n    print("Medio")\n'}
-   ];
-   for(const item of cheats){
-     const outcome=await page.evaluate(async item=>{
-       const result=await GDHGodot.verifyPracticeTask(item.id,item.key,item.code);
-       return {accepted:result.accepted,checks:result.feedback.checks,
-         verdict:result.feedback.verdict};
-     },item);
-     assert.equal(outcome.accepted,false,
-       'Fixed-output cheat incorrectly accepted '+item.key+': '+JSON.stringify(outcome));
-     assert.ok(outcome.checks.some(c=>
-       c.desc.startsWith('Funzionamento con valori diversi')&&!c.passed),
-       'Missing behavioral rejection '+item.key+': '+JSON.stringify(outcome));
-   }
-   console.log('PASS: 42 additional tasks and 3 known bypasses checked in actual Godot WASM.');
+   // Not every exercise has different visible output under its alternate input:
+   // count true behavioral tests separately from task execution and failures.
+   assert.equal(discriminating,152,'Every individual drill must react correctly to changed input');
+   const cheat=await page.evaluate(async ()=>{
+     const task=LessonPractice.getTask(17,'p2');
+     const hardcoded=task.solution.replace(/print\(livello >= 7\)/,"var controllo = livello >= 7\n    print(true)");
+     const result=await GDHGodot.verifyPracticeTask(17,'p2',hardcoded);
+     return {accepted:result.accepted,checks:result.feedback.checks};
+   });
+   assert.equal(cheat.accepted,false,'Hard-coded correct output accepted');
+   assert.ok(cheat.checks.some(c=>c.desc.startsWith('Funzionamento con valori diversi')&&!c.passed));
+   console.log('PHASE 2 NATIVE PASS: '+verified+' solutions, '+rejectedStarters+
+     ' incomplete starters rejected, '+discriminating+' discriminating data variations, bypass rejected.');
 
    // Fixture snapshots must stay synchronized with the actual 60 lessons.
    const snapshots=await page.evaluate(()=>LESSONS_DATA.filter(l=>l.id<=60).flatMap(l=>{
