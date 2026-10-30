@@ -38,6 +38,15 @@
    [[45,'Definire una classe con _init()'],[46,'Creare piu istanze indipendenti'],[47,'Incapsulare comportamenti in metodi'],[117,'Usare tipi espliciti nei metodi'],[118,'Verificare che ogni istanza mantenga il proprio stato'],[48,'Comporre un piccolo gruppo di personaggi con classi']]]
  ];
  const lessons=window.LESSONS_DATA,chapters=window.CHAPTERS_DATA;
+ const bridges={
+  49:'Nei compiti aggiuntivi puoi interrogare il nodo dello script: <code>get_class()</code> restituisce il nome del tipo, per esempio <code>Node</code>; <code>is_inside_tree()</code> indica se è già nella scena. Il risultato <code>true</code> significa sì, <code>false</code> significa no. In <code>_ready()</code> il nodo è già nell’albero. Puoi stampare questi risultati direttamente con <code>print()</code>.',
+  50:'Per creare una Label da codice usa <code>var etichetta = Label.new()</code>, imposta <code>etichetta.text</code> e inseriscila nella scena con <code>add_child(etichetta)</code>. <code>new()</code> costruisce il nodo ma non lo aggiunge all’albero: sono due passaggi distinti. Nei compiti che chiedono una nuova Label usa questi passaggi; nel compito principale modifica invece Titolo, già presente.',
+  51:'<code>get_node("Stato")</code> è la forma esplicita di <code>$Stato</code>: entrambe restituiscono il figlio Stato. Per leggerne il testo puoi usare <code>get_node("Stato").text</code>. Il nome deve corrispondere all’albero.',
+  119:'<code>get_child_count()</code> restituisce il numero di figli diretti del nodo corrente. <code>has_node(nome)</code> restituisce true se il percorso indicato esiste, altrimenti false. Dopo <code>add_child(figlio)</code> puoi usare questi metodi per controllare che l’inserimento sia riuscito.',
+  54:'Per provare una connessione senza un clic fisico, nei compiti aggiuntivi puoi chiamare <code>pulsante.pressed.emit()</code> dopo <code>connect()</code>. È una simulazione esplicita dell’evento: la callback collegata deve eseguirsi. Nel compito principale il clic arriva invece dall’interazione con il pulsante.',
+  114:'<code>v.length()</code> misura la lunghezza del vettore. Una direzione normalizzata non nulla ha lunghezza circa 1; il vettore nullo resta di lunghezza 0. <code>is_equal_approx(a, b)</code> confronta numeri decimali tollerando piccoli errori di rappresentazione: per esempio <code>is_equal_approx(v.length(), 1.0)</code>.',
+  302:'Per un solo asse puoi usare <code>Input.get_axis("ui_left", "ui_right")</code>: restituisce -1 verso sinistra, 1 verso destra e 0 senza direzione. Moltiplicalo per la velocità e assegnalo a <code>velocity.x</code> del CharacterBody2D. Per due assi usa invece <code>Input.get_vector()</code> come nell’esempio principale.'
+ };
  if(!Array.isArray(lessons)||chapters?.length!==16)throw Error('Load curriculum restructure first');
  const ids=new Set(),sections=[];
  for(const [num,outcome,prerequisites,project,skills] of plans){
@@ -57,7 +66,7 @@
    lesson.learningProject=project;
    const context='<div class="course-learning-objective"><strong>Obiettivo della lezione</strong><span>'+
       goal+'</span><small>Prima di iniziare: '+prerequisites+'. Nel percorso: '+project+'.</small></div>';
-   lesson.theory=context+(lesson.theory||'');
+   lesson.theory=context+(lesson.theory||'')+(bridges[id]?'<p class="course-api-bridge">'+bridges[id]+'</p>':'');
   }
  }
  if(ids.size!==85||lessons.filter(l=>!l.isQuiz).length!==85)

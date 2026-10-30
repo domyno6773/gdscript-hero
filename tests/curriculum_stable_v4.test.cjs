@@ -38,6 +38,8 @@ for(const l of w.LESSONS_DATA.filter(l=>!l.isQuiz)){
 }
 assert.equal(tasks,264);assert.equal(clarified,152);
 const by=id=>w.LESSONS_DATA.find(l=>l.id===id);
+for(const [id,apis] of [[49,['get_class()','is_inside_tree()']],[50,['Label.new()','add_child']],[119,['get_child_count()','has_node']],[54,['pressed.emit()']],[114,['length()','is_equal_approx']],[302,['Input.get_axis']]])
+ for(const api of apis)assert.ok(by(id).theory.includes(api),'Explain API before practice: '+id+'/'+api);
 // Check every assessed answer and code fragment against the actual learner order.
 // Wrong alternatives can mention unknown syntax; solving must not require it.
 const concepts=[
