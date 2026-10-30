@@ -18,9 +18,9 @@
   for(const old of order)for(const lesson of groups.get(old)){
     lesson.legacyChapterId=old;
     lesson.chapterId=chapterMap.get(old);
-    // Repeating three chapter-wide templates is not evidence of a new skill.
-    // Keep existing saved code; the unique lesson is the required assessment.
-    if(!lesson.isQuiz)lesson.practiceMode='focused';
+    // Ogni lezione integra pratica progressiva; il compito originale
+    // resta la verifica nativa ufficiale, senza cambiare gli ID salvati.
+    if(!lesson.isQuiz)lesson.practiceMode='progressive';
     revised.push(lesson);
   }
   LESSONS_DATA.splice(0,LESSONS_DATA.length,...revised);
