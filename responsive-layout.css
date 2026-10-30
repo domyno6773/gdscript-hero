@@ -635,3 +635,21 @@ html, body { overflow-x:clip; }
 @media(prefers-reduced-motion:reduce) {
   .lesson-practice-segment {transition:none}
 }
+
+
+/* Regressione mobile: le schede non devono mostrare contemporaneamente
+   consegna e IDE. Specificità maggiore delle regole responsive preesistenti. */
+@media (max-width: 820px) {
+  #view-exercise #exercise-workspace-grid.show-code > .panel-lesson {
+    display: none !important;
+  }
+  #view-exercise #exercise-workspace-grid.show-code > .panel-code {
+    display: flex !important;
+  }
+  #view-exercise #exercise-workspace-grid.show-instructions > .panel-code {
+    display: none !important;
+  }
+  #view-exercise #exercise-workspace-grid.show-instructions > .panel-lesson {
+    display: flex !important;
+  }
+}
