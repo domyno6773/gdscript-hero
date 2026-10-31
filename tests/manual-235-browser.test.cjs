@@ -556,6 +556,74 @@ async function main(){
       '            if "." in row:\n'+
       '                full = false\n'+
       '        print("Pareggio" if full else "Continua a giocare")');
+    await exercise(111,
+      'extends Node\nfunc _ready():\n'+
+      '    var inventory = {\n'+
+      '        "frutta": {"mele": 12, "banane": 4},\n'+
+      '        "carne": {"manzo": 7, "pollo": 5},\n'+
+      '        "latticini": {"latte": 9, "formaggio": 2}\n'+
+      '    }\n'+
+      '    var lookups = OS.read_string_from_stdin().split(",")\n'+
+      '    for lookup in lookups:\n'+
+      '        var parts = lookup.split("/")\n'+
+      '        if inventory.has(parts[0]) and inventory[parts[0]].has(parts[1]):\n'+
+      '            print(lookup, ": ", inventory[parts[0]][parts[1]])\n'+
+      '        else:\n'+
+      '            print(lookup, ": mancante")\n'+
+      '    var total = 0\n'+
+      '    for dept in inventory:\n'+
+      '        for quantity in inventory[dept].values():\n'+
+      '            total += quantity\n'+
+      '    print("Totale inventario: ", total)');
+    await exercise(112,
+      'extends Node\nfunc _ready():\n'+
+      '    var n = int(OS.read_string_from_stdin())\n'+
+      '    var players = []\n'+
+      '    var best_name = ""\n'+
+      '    var best_score = -999999\n'+
+      '    for i in range(n):\n'+
+      '        var parts = OS.read_string_from_stdin().split(",")\n'+
+      '        var name = parts[0]\n'+
+      '        var score = int(parts[1])\n'+
+      '        players.append({"name": name, "score": score})\n'+
+      '        if score > best_score:\n'+
+      '            best_score = score\n'+
+      '            best_name = name\n'+
+      '    print(players)\n'+
+      '    print("Migliore: ", best_name, " (", best_score, ")")');
+    await exercise(113,
+      'extends Node\nfunc _ready():\n'+
+      '    var defaults = {"difficulty": "normale", "volume": "5",\n'+
+      '        "subtitles": "spento", "language": "en"}\n'+
+      '    var saved = {}\n'+
+      '    for pair in OS.read_string_from_stdin().split(",", false):\n'+
+      '        var parts = pair.split("=")\n'+
+      '        saved[parts[0]] = parts[1]\n'+
+      '    for key in defaults:\n'+
+      '        if not saved.has(key):\n'+
+      '            saved[key] = defaults[key]\n'+
+      '    print(saved)\n'+
+      '    print(defaults)');
+    await exercise(114,
+      'extends Node\nfunc _ready():\n'+
+      '    var template = {"type": "slime",\n'+
+      '        "statistiche": {"hp": 30, "speed": 2}, "loot": ["gel"]}\n'+
+      '    var n = int(OS.read_string_from_stdin())\n'+
+      '    var bonus = int(OS.read_string_from_stdin())\n'+
+      '    for i in range(1, n+1):\n'+
+      '        var enemy = template.duplicate(true)\n'+
+      '        enemy["id"] = i\n'+
+      '        enemy["statistiche"]["hp"] += bonus * i\n'+
+      '        if i == n:\n'+
+      '            enemy["loot"].append("crown")\n'+
+      '        print(enemy)\n'+
+      '    print("Template: ", template)');
+    await exercise(115,
+      'func frequency_counter(data_list: Array):\n'+
+      '    var counts = {}\n'+
+      '    for item in data_list:\n'+
+      '        counts[item] = counts.get(item, 0) + 1\n'+
+      '    return counts');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
