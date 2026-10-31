@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,175);
+    assert.equal(stats.prepared,180);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -1299,6 +1299,101 @@ async function main(){
       return result.accepted;
     });
     assert.equal(insufficient,false,'L’output fisso non supera il caso del nome vuoto');
+
+    // Proprietà, constructor e static: classi separate verificate in Godot.
+    const propertySolutions=[
+      [176,[
+        'class_name Player','extends RefCounted',
+        'var player_name: String = "Eroe"',
+        'var level: int = 1',
+        'var hp: int = 100',
+        'var inventory: Array[String] = []',
+        'func describe() -> String:',
+        '    var items = ", ".join(inventory) if not inventory.is_empty() else "nessun oggetto"',
+        '    return "%s (livello %d, %d PS): %s" % [player_name, level, hp, items]'
+      ]],
+      [177,[
+        'class_name Book','extends RefCounted',
+        'var title: String','var author: String','var pages: int',
+        'func _init(book_title: String, book_author: String, page_count: int) -> void:',
+        '    title = book_title','    author = book_author','    pages = page_count',
+        'func describe() -> String:',
+        '    return "\x27%s\x27 di %s, %d pagine" % [title, author, pages]'
+      ]],
+      [178,[
+        'class_name Calculator','extends RefCounted',
+        'var result: float = 0.0',
+        'func add(number: float) -> float:',
+        '    result += number',
+        '    return result',
+        'func subtract(number: float) -> float:',
+        '    result -= number',
+        '    return result',
+        'func multiply(number: float) -> float:',
+        '    result *= number',
+        '    return result',
+        'func divide(number: float) -> float:',
+        '    if number == 0.0:',
+        '        print("Errore: divisione per zero")',
+        '        return result',
+        '    result /= number',
+        '    return result',
+        'func clear() -> float:',
+        '    result = 0.0',
+        '    return result',
+        'func get_result() -> float:',
+        '    return result'
+      ]],
+      [179,[
+        'class_name BankAccount','extends RefCounted',
+        'static var interest_percent: int = 2',
+        'static var account_count: int = 0',
+        'var holder: String','var balance: int',
+        'func _init(account_holder: String, start_balance: int) -> void:',
+        '    holder = account_holder',
+        '    balance = start_balance',
+        '    BankAccount.account_count += 1',
+        'func describe() -> String:',
+        '    return "%s: $%d at %d%%" % [holder, balance, BankAccount.interest_percent]'
+      ]]
+    ];
+    for(const [n,lines] of propertySolutions)
+      await exercise(n,lines.join('\n'));
+    await page.evaluate(()=>App.openLesson(10180));
+    await page.locator('.manual-file-tab',{hasText:'grader.gd'}).click();
+    await page.locator('#code-editor').fill([
+      'class_name Grader','extends RefCounted',
+      'static func letter(points: int) -> String:',
+      '    if points >= 90: return "A"',
+      '    if points >= 80: return "B"',
+      '    if points >= 70: return "C"',
+      '    if points >= 60: return "D"',
+      '    return "F"',
+      'static func is_passing(points: int) -> bool:',
+      '    return points >= 60'
+    ].join('\n'));
+    await page.locator('.manual-file-tab',{hasText:'student.gd'}).click();
+    await page.locator('#code-editor').fill([
+      'class_name Student','extends RefCounted',
+      'var student_name: String','var score: int',
+      'func _init(new_name: String, new_score: int) -> void:',
+      '    student_name = new_name',
+      '    score = new_score',
+      'static func from_line(line: String) -> Student:',
+      '    var parts = line.split(" ")',
+      '    return Student.new(parts[0], int(parts[1]))',
+      'func report() -> String:',
+      '    var status = "promosso" if Grader.is_passing(score) else "non promosso"',
+      '    return "%s: %d (%s), %s" % [student_name, score, Grader.letter(score), status]'
+    ].join('\n'));
+    await page.locator('#btn-run-code').click();
+    await page.waitForFunction(()=>!App.isValidating,null,{timeout:60000});
+    const multiple=await page.evaluate(()=>({
+      finished:App.state.finishedLessons.includes(10180),
+      text:document.getElementById('real-output-pre')?.textContent,
+      error:document.getElementById('validation-result')?.textContent
+    }));
+    assert.equal(multiple.finished,true,'Lezione 180 rifiutata: '+JSON.stringify(multiple));
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);

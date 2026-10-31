@@ -45,6 +45,7 @@ jobs:
           node --check manuale235/final-challenges.js
           node --check manuale235/projects.js
           node --check manuale235/oop-foundations.js
+          node --check manuale235/oop-properties.js
           node --check manuale235/studio.js
           node --check native/isolated-runner.js
           node --check native/native-beta-adapter.js
