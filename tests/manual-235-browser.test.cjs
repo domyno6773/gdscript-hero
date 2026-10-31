@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,210);
+    assert.equal(stats.prepared,215);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -2347,6 +2347,156 @@ async function main(){
         '    return "%s attacca con %s per %d danni" % [knight_name, weapon.weapon_name, weapon.damage]'
       ]
     });
+
+    // 211: classe interna e confronto stabile dei punteggi.
+    await completeProject(211,{
+      'leaderboard.gd':[
+        'class_name Leaderboard','extends RefCounted',
+        'class Entry:',
+        '    extends RefCounted',
+        '    var player_name: String','    var score: int',
+        '    func _init(p: String, s: int) -> void:',
+        '        player_name = p',
+        '        score = s',
+        '    func _to_string() -> String:',
+        '        return "%s: %d" % [player_name, score]',
+        'var entries: Array[Entry] = []',
+        'func submit(player: String, score: int) -> void:',
+        '    for e in entries:',
+        '        if e.player_name == player:',
+        '            e.score = maxi(e.score, score)',
+        '            return',
+        '    entries.append(Entry.new(player, score))',
+        'func best() -> Entry:',
+        '    var winning: Entry = null',
+        '    for e in entries:',
+        '        if winning == null or e.score > winning.score:',
+        '            winning = e',
+        '    return winning'
+      ]
+    });
+    await completeProject(212,{
+      'part.gd':[
+        'class_name Part','extends Node',
+        'var power: int',
+        'func _init(part_name: String, new_power: int) -> void:',
+        '    name = part_name',
+        '    power = new_power',
+        'func _ready() -> void:',
+        '    print(name, " attached")'
+      ],
+      'robot.gd':[
+        'class_name Robot','extends Node',
+        'func add_part(part_name: String, power: int) -> void:',
+        '    if has_node(part_name):',
+        '        print(part_name, " è già collegato")',
+        '        return',
+        '    add_child(Part.new(part_name, power))',
+        'func total_power() -> int:',
+        '    var total = 0',
+        '    for child in get_children():',
+        '        total += (child as Part).power',
+        '    return total'
+      ]
+    });
+    await completeProject(213,{
+      'wave.gd':[
+        'class_name Wave','extends Node',
+        'func spawn(enemy_name: String, hp: int) -> void:',
+        '    if has_node(enemy_name):',
+        '        print(enemy_name, " è già presente")',
+        '        return',
+        '    add_child(Enemy.new(enemy_name, hp))',
+        'func hit(enemy_name: String, damage: int) -> void:',
+        '    var enemy = get_node_or_null(enemy_name) as Enemy',
+        '    if enemy == null:',
+        '        print("Nessun ", enemy_name, " presente")',
+        '        return',
+        '    enemy.hp -= damage',
+        '    if enemy.hp <= 0:',
+        '        print(enemy_name, " defeated")',
+        '        remove_child(enemy)',
+        '        enemy.queue_free()',
+        '    else:',
+        '        print(enemy_name, " ha ", enemy.hp, " PS")',
+        'func alive() -> int:',
+        '    return get_child_count()'
+      ]
+    });
+    // "enemy.gd" è dato dal corso e deve restare immutabile.
+    await page.getByRole('tab',{name:'enemy.gd',exact:true}).click();
+    assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
+    await completeProject(214,{
+      'potion.gd':[
+        'class_name Potion','extends RefCounted',
+        'enum Kind { HEAL, MANA, POISON }',
+        'var kind: Kind','var strength: int',
+        'func _init(potion_kind: int, potion_strength: int) -> void:',
+        '    kind = potion_kind',
+        '    strength = potion_strength',
+        'static func from_text(text: String, potion_strength: int) -> Potion:',
+        '    match text:',
+        '        "HEAL": return Potion.new(Kind.HEAL, potion_strength)',
+        '        "MANA": return Potion.new(Kind.MANA, potion_strength)',
+        '        _: return Potion.new(Kind.POISON, potion_strength)',
+        'func describe() -> String:',
+        '    var label = Kind.keys()[kind]',
+        '    var prefix = "-" if kind == Kind.POISON else "+"',
+        '    var unit = " MP" if kind == Kind.MANA else " HP"',
+        '    return "%s pozione: %s%d%s" % [label, prefix, strength, unit]'
+      ],
+      'belt.gd':[
+        'class_name Belt','extends RefCounted',
+        'var potions: Array[Potion] = []',
+        'func add(potion: Potion) -> void:',
+        '    potions.append(potion)',
+        'func summary() -> Array[String]:',
+        '    var lines: Array[String] = []',
+        '    for kind in Potion.Kind.values():',
+        '        var quantity = 0',
+        '        var strength = 0',
+        '        for potion in potions:',
+        '            if potion.kind == kind:',
+        '                quantity += 1',
+        '                strength += potion.strength',
+        '        lines.append("%s: %d (%d totali)" % [Potion.Kind.keys()[kind], quantity, strength])',
+        '    return lines'
+      ]
+    });
+    await completeProject(215,{
+      'game_facade.gd':[
+        'class_name GameFacade','extends RefCounted',
+        'var music: MusicPlayer = MusicPlayer.new()',
+        'var maps: LevelMap = LevelMap.new()',
+        'var hud: Hud = Hud.new()',
+        'func start_level(number: int, hearts: int) -> void:',
+        '    music.play("boss.ogg" if number % 5 == 0 else "level_%d.ogg" % number)',
+        '    maps.load_map(number)',
+        '    hud.show_hearts(hearts)',
+        'func quit_level() -> void:',
+        '    hud.hide()',
+        '    music.stop()'
+      ]
+    });
+    for(const name of ['music_player.gd','level_map.gd','hud.gd','main.gd']){
+      await page.getByRole('tab',{name,exact:true}).click();
+      assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'',
+        'File fornito non protetto: '+name);
+    }
+    // Il codice lasciato incompleto non supera i casi positivi e negativi.
+    const default211=await page.evaluate(async()=>{
+      App.openLesson(10211);
+      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===216);
+      const draft=GDHManualStudio.getDraft(l);
+      const original=draft.files['leaderboard.gd'];
+      try{
+        draft.files['leaderboard.gd']=l.sourceFiles['leaderboard.gd'];
+        const result=await GDHManualVerifier.verify(l.id,
+          draft.files['leaderboard.gd'],(code,options)=>GDHGodot.runNative(code,options));
+        return result.accepted;
+      }finally{draft.files['leaderboard.gd']=original;}
+    });
+    assert.equal(default211,false,'La classifica iniziale non deve completare la lezione');
     const fake191=await page.evaluate(async()=>{
       App.openLesson(10191);
       const draft=GDHManualStudio.getDraft(LESSONS_DATA[190]);
@@ -2362,14 +2512,14 @@ async function main(){
       }
     });
     assert.equal(fake191,false,'Non accettare output hardcoded nel garage');
-    const future211=await page.evaluate(async()=>{
+    const future216=await page.evaluate(async()=>{
       const l=LESSONS_DATA.find(x=>x.manualLessonNumber===211);
       return {ready:l.validationReady,
         supported:GDHManualProject.supports(l),
         accepted:(await GDHManualVerifier.verify(l.id,l.initialCode,
           ()=>{throw Error('Non eseguire Godot su una lezione non supportata');})).accepted};
     });
-    assert.deepEqual(future211,{ready:false,supported:false,accepted:false},
+    assert.deepEqual(future216,{ready:false,supported:false,accepted:false},
       'Non attribuire XP alle lezioni prive di validatore specifico');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
