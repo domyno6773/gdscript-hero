@@ -1165,7 +1165,7 @@ async function main(){
       'extends Node',
       'func analyze_text(text: String):',
       '    var content = text.to_lower()',
-      '    for punctuation in [".", ",", "!", "?", ":", ";", "\x22", "(", ")"]:',
+      '    for punctuation in [".", ",", "!", "?", ":", ";", "\\\"", "(", ")"]:',
       '        content = content.replace(punctuation, "")',
       '    var counts = {}',
       '    for word in content.split(" ", false):',
