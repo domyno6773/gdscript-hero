@@ -1,0 +1,79 @@
+name: Manuale GDScript 235 - Controlli strutturali
+on:
+  pull_request:
+    paths:
+      - 'manuale235/**'
+      - 'native/**'
+      - 'tests/manual-235-structural.test.cjs'
+      - 'tests/manual-235-browser.test.cjs'
+      - 'index.html'
+jobs:
+  manual-validation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check manuale235/data.js
+          node --check manuale235/catalog.js
+          node --check manuale235/basics.js
+          node --check manuale235/verifier.js
+          node --check manuale235/intermediate.js
+          node --check manuale235/functions-and-arrays.js
+          node --check manuale235/sequences.js
+          node --check manuale235/dictionaries.js
+          node --check manuale235/expenses.js
+          node --check manuale235/challenges.js
+          node --check manuale235/matching.js
+          node --check manuale235/patterns-collections.js
+          node --check manuale235/grids.js
+          node --check manuale235/nested-dictionaries.js
+          node --check manuale235/contact-book.js
+          node --check manuale235/sets.js
+          node --check manuale235/enums.js
+          node --check manuale235/student-records.js
+          node --check manuale235/aggregates.js
+          node --check manuale235/advanced-functions.js
+          node --check manuale235/array-methods.js
+          node --check manuale235/error-handling.js
+          node --check manuale235/inventory-project.js
+          node --check manuale235/final-challenges.js
+          node --check manuale235/projects.js
+          node --check manuale235/oop-foundations.js
+          node --check manuale235/oop-properties.js
+          node --check manuale235/oop-encapsulation.js
+          node --check manuale235/oop-inheritance.js
+          node --check manuale235/oop-polymorphism.js
+          node --check manuale235/oop-duck-typing.js
+          node --check manuale235/oop-abstract.js
+          node --check manuale235/oop-shape-calculator.js
+          node --check manuale235/oop-encapsulation-advanced.js
+          node --check manuale235/oop-virtual-and-signals.js
+          node --check manuale235/signals-health-composition.js
+          node --check manuale235/oop-components-and-patterns.js
+          node --check manuale235/studio.js
+          node --check native/isolated-runner.js
+          node --check native/native-beta-adapter.js
+      - name: Validate manual integrity and conservative grading
+        run: node tests/manual-235-structural.test.cjs
+  browser-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: npm install --no-save --no-package-lock playwright@1.56.1
+      - name: Check Chrome
+        run: google-chrome --version
+      - name: Exercise new course in actual browser and Godot runtime
+        run: node tests/manual-235-browser.test.cjs

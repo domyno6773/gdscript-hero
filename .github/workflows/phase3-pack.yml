@@ -23,15 +23,15 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Download exact Godot 4.4.1 engine
+      - name: Download exact Godot 4.5.1 engine
         run: |
-          curl --fail --location --retry 3 --silent --show-error https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip -o /tmp/godot4.zip
+          curl --fail --location --retry 3 --silent --show-error https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip -o /tmp/godot4.zip
           unzip -q /tmp/godot4.zip -d /tmp
-          chmod +x /tmp/Godot_v4.4.1-stable_linux.x86_64
+          chmod +x /tmp/Godot_v4.5.1-stable_linux.x86_64
       - name: Compile project pack without altering the production site
         run: |
-          /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --editor --path native/project --quit
-          /tmp/Godot_v4.4.1-stable_linux.x86_64 --headless --path native/project --export-pack "Web" "$PWD/native/godot-phase3.pck"
+          /tmp/Godot_v4.5.1-stable_linux.x86_64 --headless --editor --path native/project --quit
+          /tmp/Godot_v4.5.1-stable_linux.x86_64 --headless --path native/project --export-pack "Web" "$PWD/native/godot-phase3.pck"
           test -s native/godot-phase3.pck
           echo "PACK_SIZE=$(wc -c < native/godot-phase3.pck)"
       - name: Check generated Godot Web pack

@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Godot 4.4.1 is the only GDScript execution engine for the public site.
+ * Godot 4.5.1 is the only GDScript execution engine for the public site.
  * Every run takes place in a sandboxed, opaque-origin iframe.
  *
  * IMPORTANT: Browser execution is NOT a trusted authority for XP or entitlements:
@@ -84,7 +84,8 @@
         objectCalls:options.objectCalls||[],
         scene:options.scene||0,actions:options.actions||[],
         mode:options.mode||'',nodes:options.nodes||[],
-        node:options.node||'',signal:options.signal||'',frames:options.frames||1,input:options.input||[],paused:!!options.paused
+        node:options.node||'',signal:options.signal||'',frames:options.frames||1,input:options.input||[],
+        stdin:options.stdin||[],paused:!!options.paused
       },'*'); // sandboxed iframe has an opaque origin
       return result;
     };
@@ -128,6 +129,7 @@
     actions:step.actions||lesson.actions||[]
   });
   const verifyLesson=async(id,source)=>{
+    if(window.GDHManualVerifier?.has(id))return window.GDHManualVerifier.verify(id,source,raw);
     // Supporto dinamico universale per le lezioni del corso (window.LESSONS_DATA)
     const lessonData = (typeof window !== 'undefined' && Array.isArray(window.LESSONS_DATA))
       ? window.LESSONS_DATA.find(x => x.id === id) : null;
@@ -389,7 +391,7 @@
     if(!variant)throw Error('Variante di ripasso non disponibile');
     const execution=await executeReview(source,variantId);
     let tests=[{
-      desc:'Godot 4.4.1 ha eseguito il codice senza errori',
+      desc:'Godot 4.5.1 ha eseguito il codice senza errori',
       passed:execution.success,
       diff:execution.success?null:(execution.error||'Il motore Godot non ha completato lÃ¢ÂÂesecuzione')
     }];
@@ -439,7 +441,7 @@
   const beginPreview=(host,onOutput)=>{reset('Nuova esecuzione');previewHost=host;liveOutput=onOutput;};
   const stopPreview=()=>{reset('Scena arrestata');previewHost=null;liveOutput=null;};
   const adapter=Object.freeze({beginPreview,stopPreview,verifyLesson,verifyPracticeTask,verifyReview,executeReview,execute:executeCompat,startLessonPreview,sandboxAction,
-    runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.4.1 WebAssembly';}});
+    runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.5.1 WebAssembly';}});
   window.GDHGodot=adapter;
   if(window.GDScriptRuntime) {
     window.GDScriptRuntime.executeClient = window.GDScriptRuntime.execute;
