@@ -136,7 +136,7 @@ for(let n=116;n<=122;n++){
   l.initialCode=src;l.starterCode=src;
   l.sourceFiles={...l.sourceFiles,'main.gd':src};
 }
-get(119).task=get(119).task.replace(/Contact\s+aggiornato correttamente!/g,
+get(119).task=get(119).task.replace(/Contact(?:<\/p><p>|\s+)aggiornato correttamente!/g,
   'Contatto aggiornato correttamente!');
 const clean=s=>String(s).split('\n').filter(row=>!/^\s*#/.test(row)).join('\n');
 const all=(...checks)=>src=>checks.every(re=>re.test(clean(src)));
