@@ -12,6 +12,9 @@
   const MAX_OUT = 32000;
   let ready = false;
   let pending = null;
+  let stdinQueue = [];
+  // Coda di righe esplicita per gli esercizi: non è l'input dei controlli 2D.
+  window.__gdhManualReadStdin = () => String(stdinQueue.shift() ?? '');
   let stdout = '', stderr = '';
   let phase = 'original_compile';
   let diagnostics = {original_compile:'', instrumentation:'', execution:''};
@@ -75,6 +78,8 @@
             !/^[A-Za-z_]\w{0,59}$/.test(x.method) || !Array.isArray(x.args) || x.args.length>5 ||
             !x.set || typeof x.set!=='object' || Array.isArray(x.set)))) ||
        (m.scene !== undefined && (!Number.isSafeInteger(m.scene) || m.scene<0 || m.scene>63)) ||
+       (m.stdin !== undefined && (!Array.isArray(m.stdin) || m.stdin.length > 64 ||
+         m.stdin.some(x=>typeof x!=='string'||x.length>512))) ||
        (m.paused !== undefined && typeof m.paused !== 'boolean') ||
        (m.mode !== undefined && !['','sandbox_start','sandbox_action','sandbox_observe'].includes(m.mode)) ||
        (m.mode === 'sandbox_observe' && (!Number.isInteger(m.frames) || m.frames<1 || m.frames>120 || !Array.isArray(m.input) || m.input.length>4 || m.input.some(x=>!['ui_left','ui_right','ui_up','ui_down'].includes(x)))) ||
@@ -93,6 +98,7 @@
             (x.signal!=='pressed'&&x.signal!=='timeout')))) ||
        m.inspect.some(x=>typeof x!=='string'|| x.length>60))return;
     pending=m.id;
+    stdinQueue=Array.isArray(m.stdin)?m.stdin.slice():[];
     stdout=''; stderr='';
     phase='original_compile';
     diagnostics={original_compile:'', instrumentation:'', execution:''};
