@@ -1,0 +1,25 @@
+name: Manuale GDScript 235 - Controlli strutturali
+on:
+  push:
+    branches: [manuale-235-lezioni]
+  pull_request:
+    paths:
+      - 'manuale235/**'
+      - 'tests/manual-235-structural.test.cjs'
+      - 'index.html'
+jobs:
+  manual-validation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check manuale235/data.js
+          node --check manuale235/catalog.js
+      - name: Validate manual integrity and conservative grading
+        run: node tests/manual-235-structural.test.cjs
