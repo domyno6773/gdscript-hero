@@ -7,6 +7,21 @@
   const byId=id=>(window.LESSONS_DATA||[]).find(x=>x.id===id);
   const lines=s=>String(s||'').trimEnd().replace(/\r/g,'').split('\n').filter(x=>x.length>0);
   const same=(a,b)=>JSON.stringify(lines(a))===JSON.stringify(lines(b));
+  const sortValues=value=>Array.isArray(value)?value.map(sortValues):
+    value&&typeof value==='object'?Object.fromEntries(
+      Object.keys(value).sort().map(key=>[key,sortValues(value[key])])):value;
+  // Confronto semantico dei Dictionary stampati da Godot: l'ordine delle
+  // chiavi non deve determinare una bocciatura.
+  const dictionaryMatches=(stdout,expected,prefix)=>{
+    const data=lines(stdout);
+    const expectedCount=prefix===undefined?1:2;
+    if(data.length!==expectedCount)return false;
+    if(prefix!==undefined&&data[0]!==prefix)return false;
+    try{
+      const parsed=JSON.parse(data[expectedCount-1]);
+      return JSON.stringify(sortValues(parsed))===JSON.stringify(sortValues(expected));
+    }catch(_){return false;}
+  };
   const scriptOnly=s=>String(s||'').split('\n').filter(line=>!/^\s*#/.test(line)).join('\n');
   const inputCall=/OS\.read_string_from_stdin\(\)/g;
   const nativeSource=s=>String(s).replace(inputCall,'String(JavaScriptBridge.eval("window.__gdhManualReadStdin()"))');
@@ -102,10 +117,13 @@
         observed.every((entry,i)=>entry.status==='executed'&&
           entry.value===outputs[i]&&
           entry.method===testcase.calls[i].method));
-      const matches=ok&&(!cases||same(actual.stdout,testcase.output||''))&&methodMatch;
+      const printed=testcase.object!==undefined?
+        dictionaryMatches(actual.stdout,testcase.object,testcase.prefix):
+        same(actual.stdout,testcase.output||'');
+      const matches=ok&&(!cases||printed)&&methodMatch;
       checks.push({desc:testcase.name,passed:matches,diff:matches?null:
         !ok?('Errore Godot: '+(actual.stderr||actual.reply?.message||actual.status)):
-        'Risultato previsto:\n'+(testcase.output||JSON.stringify(testcase.returns))+'\nRicevuto:\n'+(testcase.returns?JSON.stringify(observed):actual.stdout)});
+        'Risultato previsto:\n'+(testcase.output||JSON.stringify(testcase.object??testcase.returns))+'\nRicevuto:\n'+(testcase.returns?JSON.stringify(observed):actual.stdout)});
       if(!ok||!matches&&cases)break;
     }
     if(hasStatic&&base){
