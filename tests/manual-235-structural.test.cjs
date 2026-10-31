@@ -90,6 +90,8 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
       methodCalls:[]}
   }));
   assert.equal(noMain.accepted,false,'Il file solo-funzione non deve includere extends Node');
+  assert.match(verify.expectedCases[60][1].output,/Fizz\\nBuzz|Fizz\\n4[\\s\\S]*Buzz/);
+  assert.notEqual(verify.expectedCases[60][0].output,verify.expectedCases[60][1].output);
   assert.equal(verify.expectedCases[61].length,4);
   assert.equal(verify.expectedCases[65].length,3);
   const unsupported=await verify.verify(10077,'',async()=>{throw Error('Non dovrebbe partire');});
