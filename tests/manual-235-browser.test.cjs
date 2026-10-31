@@ -2162,6 +2162,7 @@ async function main(){
         'class_name Bookshelf','extends RefCounted',
         'var _titles: Array[String] = []',
         'var _capacity: int',
+        'var _cursor: int = 0',
         'func _init(capacity: int) -> void:',
         '    _capacity = capacity',
         'func add(title: String) -> bool:',
@@ -2176,19 +2177,20 @@ async function main(){
         'func get_at(index: int) -> String:',
         '    return _titles[index] if index >= 0 and index < size() else ""',
         'func _iter_init(iter: Array) -> bool:',
-        '    iter[0] = 0',
+        '    _cursor = 0',
         '    return not _titles.is_empty()',
         'func _iter_next(iter: Array) -> bool:',
-        '    iter[0] += 1',
-        '    return iter[0] < _titles.size()',
+        '    _cursor += 1',
+        '    return _cursor < _titles.size()',
         'func _iter_get(position):',
-        '    return _titles[position[0]]'
+        '    return _titles[_cursor]'
       ]
     });
     await completeProject(204,{
       'custom_list.gd':[
         'class_name CustomList','extends RefCounted',
         'var _items: Array = []',
+        'var _cursor: int = 0',
         'func _init(items: Array = []) -> void:',
         '    _items = items.duplicate()',
         'func append(item) -> void:',
@@ -2213,13 +2215,13 @@ async function main(){
         'func _to_string() -> String:',
         '    return str(_items)',
         'func _iter_init(iter: Array) -> bool:',
-        '    iter[0] = 0',
+        '    _cursor = 0',
         '    return not _items.is_empty()',
         'func _iter_next(iter: Array) -> bool:',
-        '    iter[0] += 1',
-        '    return iter[0] < _items.size()',
+        '    _cursor += 1',
+        '    return _cursor < _items.size()',
         'func _iter_get(position):',
-        '    return _items[position[0]]'
+        '    return _items[_cursor]'
       ]
     });
     await completeProject(205,{
