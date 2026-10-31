@@ -1019,7 +1019,7 @@ async function main(){
     for(const [n,lines] of advancedSolutions){
       if(n===149){
         const cases=await page.evaluate(()=>GDHManualVerifier.expectedCases[149]);
-        console.log('DEBUG countdown scenarios:',JSON.stringify(cases));
+        assert.equal(cases[2].output,'3\n2\n1\n0');
       }
       await exercise(n,lines.join('\n'));
     }
