@@ -475,8 +475,7 @@ activate(200,studentCases.map((commands,i)=>({
   /\bfunc\s+add_grade\s*\(/,/\bfunc\s+course_count\s*\(/,
   /\bfunc\s+add_student\s*\(/,/\bfunc\s+remove_student\s*\(/,
   /\bfunc\s+get_student\s*\(/,/\bfunc\s+top_student\s*\(/,
-  /\bfunc\s+get_ids\s*\(/,/\breturn\b
- )(s)&&
+  /\bfunc\s+get_ids\s*\(/,/\breturn\b/)(s)&&
  (src.match(/\bget\s*:/g)||[]).length>=2&&
  /set\s*\(\s*value\s*\)/.test(src)&&
  /Dictionary/.test(src);
