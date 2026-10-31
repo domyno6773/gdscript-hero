@@ -145,7 +145,7 @@
  setup(203,{
   'bookshelf.gd':[
     'class_name Bookshelf','extends RefCounted','',
-    'var _titles: Array[String] = []','var _capacity: int','',
+    'var _titles: Array[String] = []','var _capacity: int','var _cursor: int = 0','',
     'func _init(capacity: int) -> void:',
     '    _capacity = capacity','',
     'func add(title: String) -> bool:',
@@ -157,13 +157,13 @@
     'func get_at(index: int) -> String:',
     '    return ""','',
     'func _iter_init(iter: Array) -> bool:',
-    '    # Usa iter[0] come posizione iniziale.',
+    '    # Imposta _cursor su 0 per iniziare la visita.',
     '    return false','',
     'func _iter_next(iter: Array) -> bool:',
-    '    # Passa al titolo successivo.',
+    '    # Incrementa _cursor e verifica se restano titoli.',
     '    return false','',
     'func _iter_get(position):',
-    '    # Restituisci il titolo corrente.',
+    '    # Restituisci _titles[_cursor].',
     '    return null'
   ].join('\n'),
   'main.gd':main([
@@ -206,13 +206,13 @@
      output:out.join('\n')};
  }),proof(/\bclass_name\s+Bookshelf\b/,/\bfunc\s+add\s*\(/,
   /\bfunc\s+get_at\s*\(/,/\bfunc\s+_iter_init\s*\(/,
-  /\bfunc\s+_iter_next\s*\(/,/\bfunc\s+_iter_get\s*\(/,/\biter\s*\[\s*0\s*\]/));
+  /\bfunc\s+_iter_next\s*\(/,/\bfunc\s+_iter_get\s*\(/,/\b_cursor\b/));
  get(203).task=get(203).task.replace(/\bPossiede Emma\b/g,'Contiene Emma');
 
  setup(204,{
   'custom_list.gd':[
     'class_name CustomList','extends RefCounted','',
-    'var _items: Array = []','',
+    'var _items: Array = []','var _cursor: int = 0','',
     'func _init(items: Array = []) -> void:',
     '    # Conserva una copia degli elementi, non l’Array originale.',
     '    pass','',
