@@ -235,7 +235,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     JSON.stringify(['player.gd','rock.gd','main.gd']));
   assert.ok(verify.expectedCases[192].some(c=>c.output.includes('Cassa: distrutta')));
   assert.ok(verify.expectedCases[191].some(c=>c.output.includes('Ruote totali: 18')));
-  assert.equal(lessons[200].validationReady,false,'Attività future non devono concedere XP');
+  assert.equal(lessons[205].validationReady,false,'Attività future non devono concedere XP');
 
   // Godot 4.5 supporta @abstract: il verificatore non deve falsare
   // l'astrazione con metodi finti in un runtime obsoleto.
@@ -282,9 +282,9 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     assert.throws(()=>p192.build(l,{...l.sourceFiles,'main.gd':'extends Node\nfunc _ready():\n    print("falso")'}),/modificato/);
     assert.equal(l.manualSourceCheck('class_name Fake\nextends RefCounted'),false);
   }
-  assert.ok(verify.expectedCases[201].some(c=>c.output.includes('Hand (0): empty')));
-  assert.ok(verify.expectedCases[202].some(c=>c.output.includes('Impossibile aggiungere: Dune')));
-  assert.ok(verify.expectedCases[204].some(c=>c.output.includes('Hai ricevuto un messaggio!')));
+  assert.ok(verify.expectedCases[202].some(c=>c.output.includes('Hand (0): empty')));
+  assert.ok(verify.expectedCases[203].some(c=>c.output.includes('Impossibile aggiungere: Dune')));
+  assert.ok(verify.expectedCases[205].some(c=>c.output.includes('Hai ricevuto un messaggio!')));
   const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
     status:'executed',stdout:'Ciao GDScript!\n',stderr:'',reply:{status:'executed'}
   }));
