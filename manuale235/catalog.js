@@ -97,7 +97,12 @@
     ];
   };
   const result=raw.map(item=>{
-    const files=splitFiles(item.files),n=item.id,starter=starters[n]??files['main.gd']??'';
+    const files=splitFiles(item.files),n=item.id;
+    // La revisione editoriale aveva tradotto per errore questo identificatore:
+    // la consegna parla di coins_each e il codice deve utilizzare lo stesso nome.
+    if(n===16&&files['main.gd'])
+      files['main.gd']=files['main.gd'].replace(/\bmonete_each\b/g,'coins_each');
+    const starter=starters[n]??files['main.gd']??'';
     return {
       id:10000+n, manualLessonNumber:n, displayIndex:n,
       title:n+'. '+item.title, chapterId:item.chapterId,
