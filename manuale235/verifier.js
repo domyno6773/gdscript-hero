@@ -89,13 +89,23 @@
         checks.push({desc:testcase.name,passed:false,diff:'La variabile season deve restare dichiarata nello script.'});
         break;
       }
-      const actual=await run(nativeSource(code),{stdin:testcase.stdin||[]});
+      const actual=await run(nativeSource(code),{stdin:testcase.stdin||[],
+        calls:testcase.calls||[]});
       if(!base)base=actual;
       const ok=actual.status==='executed'&&!String(actual.stderr||'').trim();
-      const matches=ok&&(!cases||same(actual.stdout,testcase.output));
+      // Le lezioni in cui Godot richiama direttamente le funzioni dello studente
+      // controllano il VALORE restituito, non il solo output della console.
+      const outputs=Array.isArray(testcase.returns)?testcase.returns:null;
+      const observed=actual.reply?.methodCalls;
+      const methodMatch=!outputs||(Array.isArray(observed)&&
+        observed.length===outputs.length&&
+        observed.every((entry,i)=>entry.status==='executed'&&
+          entry.value===outputs[i]&&
+          entry.method===testcase.calls[i].method));
+      const matches=ok&&(!cases||same(actual.stdout,testcase.output||''))&&methodMatch;
       checks.push({desc:testcase.name,passed:matches,diff:matches?null:
         !ok?('Errore Godot: '+(actual.stderr||actual.reply?.message||actual.status)):
-        'Risultato previsto:\n'+testcase.output+'\nRicevuto:\n'+actual.stdout});
+        'Risultato previsto:\n'+(testcase.output||JSON.stringify(testcase.returns))+'\nRicevuto:\n'+(testcase.returns?JSON.stringify(observed):actual.stdout)});
       if(!ok||!matches&&cases)break;
     }
     if(hasStatic&&base){
