@@ -391,6 +391,82 @@ async function main(){
       '            print("Sulla diagonale in ", x)\n'+
       '        [var x, var y]:\n'+
       '            print("Punto in (", x, ", ", y, ")")');
+    await exercise(101,
+      'extends Node\nfunc _ready():\n'+
+      '    var event = {}\n'+
+      '    for pair in OS.read_string_from_stdin().split(","):\n'+
+      '        var kv = pair.split("=")\n'+
+      '        event[kv[0]] = kv[1]\n'+
+      '    match event:\n'+
+      '        {"type": "muovi", "dir": var direction}:\n'+
+      '            print("Movimento: ", direction)\n'+
+      '        {"type": "attacca", "damage": var damage}:\n'+
+      '            print("Subisce ", damage, " danni")\n'+
+      '        {"type": "cura", ..}:\n'+
+      '            print("Cura")\n'+
+      '        {"type": var kind, ..}:\n'+
+      '            print("Evento sconosciuto: ", kind)\n'+
+      '        _:\n'+
+      '            print("Evento non valido")');
+    await exercise(102,
+      'extends Node\nfunc _ready():\n'+
+      '    var names = ["Alice", "Bob", "Charlie", "Dana"]\n'+
+      '    var grades = {"Alice": 85, "Bob": 90, "Charlie": 78}\n'+
+      '    var student = OS.read_string_from_stdin()\n'+
+      '    var grade = OS.read_string_from_stdin()\n'+
+      '    print(student, " è nella classe." if student in names else " non è nella classe.")\n'+
+      '    print(student, " ha un voto." if student in grades else " non ha voti.")\n'+
+      '    print("Qualcuno ha ottenuto " + grade + "." if int(grade) in grades.values() '+
+        'else "Nessuno ha ottenuto " + grade + ".")');
+    await exercise(103,
+      'extends Node\nfunc _ready():\n'+
+      '    const DIRECTIONS = ["nord", "sud", "est", "ovest"]\n'+
+      '    var inventory: Array[String] = []\n'+
+      '    while true:\n'+
+      '        var raw = OS.read_string_from_stdin().strip_edges().to_lower()\n'+
+      '        var words: Array[String] = []\n'+
+      '        for word in raw.split(" ", false):\n'+
+      '            words.append(word)\n'+
+      '        match words:\n'+
+      '            []:\n'+
+      '                print("Digita un comando.")\n'+
+      '            ["aiuto"]:\n'+
+      '                print("Comandi: vai, prendi, inventario, esci")\n'+
+      '            ["vai", var direction] when direction in DIRECTIONS:\n'+
+      '                print("Vai verso ", direction, ".")\n'+
+      '            ["vai", var direction]:\n'+
+      '                print("Non puoi andare verso ", direction, ".")\n'+
+      '            ["prendi", var item] when item in inventory:\n'+
+      '                print("Possiedi già ", item, ".")\n'+
+      '            ["prendi", var item]:\n'+
+      '                inventory.append(item)\n'+
+      '                print("Prendi ", item, ".")\n'+
+      '            ["inventario"]:\n'+
+      '                print("Inventario: ", ", ".join(inventory) if not inventory.is_empty() else "vuoto")\n'+
+      '            ["esci"]:\n'+
+      '                print("Arrivederci!")\n'+
+      '                break\n'+
+      '            _:\n'+
+      '                print("Comando sconosciuto.")');
+    await exercise(104,
+      'extends Node\nfunc _ready():\n'+
+      '    var level = [\n'+
+      '        [1, 1, 1, 1, 1],\n'+
+      '        [1, 0, 2, 0, 1],\n'+
+      '        [1, 0, 1, 3, 1],\n'+
+      '        [1, 1, 1, 1, 1]\n'+
+      '    ]\n'+
+      '    print("Righe: ", level.size())\n'+
+      '    print("Colonne: ", level[0].size())\n'+
+      '    for row in level:\n'+
+      '        print(row)');
+    await exercise(105,
+      'func get_tile(grid: Array, row: int, col: int):\n'+
+      '    if row < 0 or row >= grid.size():\n'+
+      '        return -1\n'+
+      '    if col < 0 or col >= grid[row].size():\n'+
+      '        return -1\n'+
+      '    return grid[row][col]');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
