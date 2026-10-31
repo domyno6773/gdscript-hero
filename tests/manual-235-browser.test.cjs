@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,140);
+    assert.equal(stats.prepared,144);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -860,6 +860,66 @@ async function main(){
         (src,opts)=>GDHGodot.runNative(src,opts));
     });
     assert.equal(noStudentWork.accepted,false,'Non approvare il solo saluto finale');
+    await exercise(141,[
+      'extends Node','func _ready():',
+      '    var sales = OS.read_string_from_stdin().split(" ", false)',
+      '    var starting_cash = int(OS.read_string_from_stdin())',
+      '    for sale in sales:',
+      '        starting_cash += int(sale)',
+      '    print("Totale: ", starting_cash)'
+    ].join('\n'));
+    await exercise(142,[
+      'extends Node','func _ready():',
+      '    var number_texts = OS.read_string_from_stdin().split(" ", false)',
+      '    var words = Array(OS.read_string_from_stdin().split(" ", false))',
+      '    var small_num = int(number_texts[0])',
+      '    var big_num = small_num',
+      '    for item in number_texts:',
+      '        small_num = min(small_num, int(item))',
+      '        big_num = max(big_num, int(item))',
+      '    var small_word = words[0]',
+      '    var big_word = words[0]',
+      '    for word in words:',
+      '        small_word = min(small_word, word)',
+      '        big_word = max(big_word, word)',
+      '    print("Numero più piccolo: ", small_num)',
+      '    print("Numero più grande: ", big_num)',
+      '    print("Parola più piccola: ", small_word)',
+      '    print("Parola più grande: ", big_word)'
+    ].join('\n'));
+    await exercise(143,[
+      'extends Node',
+      'func by_length(a: String, b: String) -> bool:',
+      '    if a.length() == b.length():',
+      '        return a < b',
+      '    return a.length() < b.length()',
+      'func _ready():',
+      '    var numbers: Array[int] = []',
+      '    for text in OS.read_string_from_stdin().split(" ", false):',
+      '        numbers.append(int(text))',
+      '    var words = Array(OS.read_string_from_stdin().split(" ", false))',
+      '    var ascending = numbers.duplicate()',
+      '    ascending.sort()',
+      '    var descending = ascending.duplicate()',
+      '    descending.reverse()',
+      '    var alphabetical = words.duplicate()',
+      '    alphabetical.sort()',
+      '    var by_size = words.duplicate()',
+      '    by_size.sort_custom(by_length)',
+      '    print("Ascending: ", ascending)',
+      '    print("Descending: ", descending)',
+      '    print("Alphabetical: ", alphabetical)',
+      '    print("Per lunghezza: ", by_size)'
+    ].join('\n'));
+    await exercise(144,[
+      'func dictionary_sorter(data: Dictionary):',
+      '    var keys = data.keys()',
+      '    keys.sort_custom(func(a, b): return data[a] < data[b])',
+      '    var ordered = {}',
+      '    for key in keys:',
+      '        ordered[key] = data[key]',
+      '    return ordered'
+    ].join('\n'));
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);

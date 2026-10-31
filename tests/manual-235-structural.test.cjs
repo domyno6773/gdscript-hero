@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const root=process.cwd();
 const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],CONCEPTS_CATALOG:{},console};
 vm.createContext(context);
-for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js','manuale235/sets.js','manuale235/enums.js','manuale235/student-records.js']){
+for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js','manuale235/sets.js','manuale235/enums.js','manuale235/student-records.js','manuale235/aggregates.js']){
   vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),context,{filename:file,timeout:3000});
 }
 const lessons=context.LESSONS_DATA,chapters=context.CHAPTERS_DATA;
@@ -19,8 +19,8 @@ assert.match(lessons[1].initialCode,/print\(""\)/);
 assert.match(lessons[2].initialCode,/print\("Arrivederci!"\)/);
 assert.ok(lessons.every(x=>x.theory&&x.task&&x.initialCode&&x.title));
 assert.ok(lessons.every(x=>typeof x.validate==='function'));
-assert.ok(lessons.slice(0,140).every(x=>x.validationReady===true));
-assert.ok(lessons.slice(140).every(x=>x.validationReady===false));
+assert.ok(lessons.slice(0,144).every(x=>x.validationReady===true));
+assert.ok(lessons.slice(144).every(x=>x.validationReady===false));
 assert.ok(lessons.slice(170).every(x=>x.sourceFiles['main.gd']));
 assert.match(lessons[8].initialCode,/^extends Node/m);
 assert.match(lessons[8].initialCode,/^    var PlayerName/m);
@@ -28,7 +28,7 @@ assert.match(lessons[170].sourceFiles['greeter.gd'],/^class_name Greeter/m);
 const stats=context.window.GDHManualMigration;
 assert.equal(stats.total,235);
 assert.equal(stats.chapters,43);
-assert.equal(stats.validated,140);
+assert.equal(stats.validated,144);
 assert.equal(stats.readyForRelease,false);
 assert.equal(context.window.GDHManualBasicsValidated,18);
 async function checks(n,logs,source=lessons[n-1].initialCode){
@@ -76,6 +76,13 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   }
   assert.match(lessons[139].initialCode,/func list_students_by_course/);
   assert.ok(verify.expectedCases[140].some(x=>x.stdin.includes('migliori 90')));
+  for(let n=141;n<=144;n++){
+    assert.equal(lessons[n-1].validationReady,true,'Lezione '+n);
+    assert.ok(verify.expectedCases[n].length>=4,'Input insufficienti '+n);
+    assert.equal(lessons[n-1].manualSourceCheck('extends Node\nfunc _ready():\n    print("Totale: 800")'),false);
+  }
+  assert.deepEqual(Array.from(verify.expectedCases[144][0].orderedKeys),['b','c','a']);
+  assert.equal(lessons[143].initialCode.includes('extends Node'),false);
   const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
     status:'executed',stdout:'Ciao GDScript!\n',stderr:'',reply:{status:'executed'}
   }));
@@ -187,8 +194,8 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.equal(verify.expectedCases[128].length,6);
   assert.match(lessons[127].initialCode,/func remove_duplicates\(numbers: Array\[int\]\) -> Array\[int\]/);
   assert.ok(verify.expectedCases[128].some(c=>c.stdin===undefined&&c.harness));
-  const unsupported=await verify.verify(10141,'',async()=>{throw Error('Non dovrebbe partire');});
+  const unsupported=await verify.verify(10145,'',async()=>{throw Error('Non dovrebbe partire');});
   assert.equal(unsupported.accepted,false,'Lezione non verificata non dà XP');
   assert.match(verify.nativeSource('print(OS.read_string_from_stdin())'),/__gdhManualReadStdin/);
-  console.log('OK: 235 lezioni, 43 capitoli, 140 validatori, stdin e test negativi');
+  console.log('OK: 235 lezioni, 43 capitoli, 144 validatori, stdin e test negativi');
 })().catch(err=>{console.error(err);process.exitCode=1});

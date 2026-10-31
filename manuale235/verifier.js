@@ -136,7 +136,20 @@
           JSON.stringify(sortValues(entry.value))===
             JSON.stringify(sortValues(outputs[i]))&&
           entry.method===testcase.calls[i].method));
-      const printed=Array.isArray(testcase.linesSpec)?
+      // Alcune attività richiedono anche l'ordine di inserimento delle chiavi.
+      // JSON.parse conserva l'ordine delle chiavi non intere in un Dictionary.
+      const printed=Array.isArray(testcase.orderedKeys)?(()=>{
+        const actualLines=lines(actual.stdout);
+        if(actualLines.length!==1)return false;
+        try{
+          const result=JSON.parse(actualLines[0]);
+          return JSON.stringify(Object.keys(result))===
+            JSON.stringify(testcase.orderedKeys)&&
+            JSON.stringify(sortValues(result))===
+            JSON.stringify(sortValues(testcase.object));
+        }catch(_){return false;}
+      })():
+        Array.isArray(testcase.linesSpec)?
         structuredLinesMatch(actual.stdout,testcase.linesSpec):
         testcase.object!==undefined?
         dictionaryMatches(actual.stdout,testcase.object,testcase.prefix):
