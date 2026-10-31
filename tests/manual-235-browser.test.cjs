@@ -49,8 +49,16 @@ async function main(){
     },null,{timeout:125000});
     const result=await page.locator('#real-output-pre').innerText();
     assert.match(result,/Ciao GDScript!/);
+    await page.waitForFunction(()=>App.state.finishedLessons.includes(10001),null,{timeout:30000});
     await page.evaluate(()=>App.openLesson(10002));
     assert.match(await page.locator('#code-editor').inputValue(),/print\(""\)/);
+    await page.locator('#btn-run-code').click();
+    await page.waitForFunction(()=>!App.isValidating,null,{timeout:30000});
+    assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(10002)),false,
+      'La seconda lezione non deve risultare superata con lo starter vuoto');
+    await page.locator('#code-editor').fill('extends Node\nfunc _ready():\n    print("Ciao mondo!")');
+    await page.locator('#btn-run-code').click();
+    await page.waitForFunction(()=>App.state.finishedLessons.includes(10002),null,{timeout:30000});
     await page.evaluate(()=>App.openLesson(10009));
     const snippet=await page.locator('#code-editor').inputValue();
     assert.match(snippet,/^extends Node/m);
