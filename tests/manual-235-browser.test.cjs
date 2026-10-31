@@ -155,7 +155,7 @@ async function main(){
         trace.push({stdin:options.stdin,output:value.stdout,ok:value.status,stderr:value.stderr});
         return value;
       });
-      return {trace,checks:verdict.feedback.checks,accepted:verdict.accepted};
+      return {trace,cases:GDHManualVerifier.expectedCases[60].map(({name,stdin,output})=>({name,stdin,output})),checks:verdict.feedback.checks,accepted:verdict.accepted};
     },fizzSolution);
     assert.equal(fizzProbe.accepted,true,
       'La funzione nativa di verifica FizzBuzz ha fallito: '+JSON.stringify(fizzProbe));
