@@ -1769,6 +1769,180 @@ async function main(){
       assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'',
         'Classe fornita modificabile: '+protectedFile);
     }
+
+    // Il runtime WebAssembly deve essere stato realmente aggiornato.
+    // L'annotazione @abstract non viene sostituita da JavaScript.
+    const engineVersion=await page.evaluate(async()=>{
+      const run=await GDHGodot.runNative(
+        'extends Node\nfunc _ready():\n    print(Engine.get_version_info().string)');
+      return {status:run.status,stdout:run.stdout,stderr:run.stderr};
+    });
+    assert.equal(engineVersion.status,'executed',
+      'Godot 4.5.1 non si avvia: '+JSON.stringify(engineVersion));
+    assert.match(engineVersion.stdout,/4\.5\.1/,
+      'La PR deve usare il nuovo runtime, non Godot 4.4');
+
+    await completeProject(193,{
+      'payment_method.gd':[
+        '@abstract',
+        'class_name PaymentMethod','extends RefCounted',
+        'var amount: float',
+        'func _init(a: float) -> void:',
+        '    amount = a',
+        '@abstract func fee() -> float',
+        '@abstract func method_name() -> String',
+        'func receipt() -> String:',
+        '    var commission = fee()',
+        '    return "%s: pagati %.2f, commissioni %.2f, totale %.2f" % [',
+        '        method_name(), amount, commission, amount + commission]'
+      ],
+      'credit_card.gd':[
+        'class_name CreditCard','extends PaymentMethod',
+        'func fee() -> float:',
+        '    return amount * 0.03',
+        'func method_name() -> String:',
+        '    return "Carta di credito"'
+      ],
+      'bank_transfer.gd':[
+        'class_name BankTransfer','extends PaymentMethod',
+        'func fee() -> float:',
+        '    return 0.0 if amount >= 100.0 else 1.5',
+        'func method_name() -> String:',
+        '    return "Bonifico"'
+      ]
+    });
+    await completeProject(194,{
+      'playable.gd':[
+        '@abstract',
+        'class_name Playable','extends RefCounted',
+        '@abstract func play() -> String',
+        '@abstract func duration() -> int'
+      ],
+      'song.gd':[
+        'class_name Song','extends Playable',
+        'var title: String','var artist: String','var seconds: int',
+        'func _init(t: String, a: String, s: int) -> void:',
+        '    title = t',
+        '    artist = a',
+        '    seconds = s',
+        'func play() -> String:',
+        '    return "Riproduzione brano: %s di %s" % [title, artist]',
+        'func duration() -> int:',
+        '    return seconds'
+      ],
+      'video.gd':[
+        'class_name Video','extends Playable',
+        'var title: String','var resolution: int','var seconds: int',
+        'func _init(t: String, r: int, s: int) -> void:',
+        '    title = t',
+        '    resolution = r',
+        '    seconds = s',
+        'func play() -> String:',
+        '    return "Riproduzione video: %s in %dp" % [title, resolution]',
+        'func duration() -> int:',
+        '    return seconds'
+      ],
+      'playlist.gd':[
+        'class_name Playlist','extends RefCounted',
+        'var items: Array[Playable] = []',
+        'func add(item: Playable) -> void:',
+        '    items.append(item)',
+        'func play_all() -> void:',
+        '    for item in items:',
+        '        print(item.play())',
+        'func total_time() -> String:',
+        '    var total = 0',
+        '    for item in items:',
+        '        total += item.duration()',
+        '    return "%d:%02d" % [int(total / 60), total % 60]'
+      ]
+    });
+    await completeProject(195,{
+      'shape.gd':[
+        '@abstract',
+        'class_name Shape','extends RefCounted',
+        '@abstract func area() -> float',
+        '@abstract func perimeter() -> float',
+        '@abstract func shape_name() -> String',
+        'func describe() -> String:',
+        '    return "%s: area %.2f, perimetro %.2f" % [',
+        '        shape_name(), area(), perimeter()]'
+      ],
+      'circle.gd':[
+        'class_name Circle','extends Shape',
+        'var radius: float',
+        'func _init(r: float) -> void:',
+        '    radius = r',
+        'func area() -> float:',
+        '    return PI * radius * radius',
+        'func perimeter() -> float:',
+        '    return 2.0 * PI * radius',
+        'func shape_name() -> String:',
+        '    return "Cerchio"'
+      ],
+      'rectangle.gd':[
+        'class_name Rectangle','extends Shape',
+        'var width: float','var height: float',
+        'func _init(w: float, h: float) -> void:',
+        '    width = w',
+        '    height = h',
+        'func area() -> float:',
+        '    return width * height',
+        'func perimeter() -> float:',
+        '    return 2.0 * (width + height)',
+        'func shape_name() -> String:',
+        '    return "Rettangolo"'
+      ],
+      'triangle.gd':[
+        'class_name Triangle','extends Shape',
+        'var a: float','var b: float','var c: float',
+        'func _init(side_a: float, side_b: float, side_c: float) -> void:',
+        '    a = side_a',
+        '    b = side_b',
+        '    c = side_c',
+        'func area() -> float:',
+        '    var semi = (a + b + c) / 2.0',
+        '    return sqrt(maxf(0.0, semi * (semi-a) * (semi-b) * (semi-c)))',
+        'func perimeter() -> float:',
+        '    return a + b + c',
+        'func shape_name() -> String:',
+        '    return "Triangolo"'
+      ],
+      'custom_shape.gd':[
+        'class_name CustomShape','extends RefCounted',
+        'var custom_name: String','var size: float',
+        'func _init(n: String, s: float) -> void:',
+        '    custom_name = n',
+        '    size = s',
+        'func area() -> float:',
+        '    return size * size',
+        'func perimeter() -> float:',
+        '    return 4.0 * size',
+        'func describe() -> String:',
+        '    return "%s: area %.2f, perimetro %.2f" % [',
+        '        custom_name, area(), perimeter()]'
+      ],
+      'shape_calculator.gd':[
+        'class_name ShapeCalculator','extends RefCounted',
+        'static func process(thing) -> String:',
+        '    if thing is Shape:',
+        '        return "[Forma] " + thing.describe()',
+        '    if thing.has_method("describe"):',
+        '        return "[Compatibile] " + thing.call("describe")',
+        '    return "Impossibile misurare questo oggetto"',
+        'static func total_area(things: Array) -> float:',
+        '    var total = 0.0',
+        '    for thing in things:',
+        '        if thing.has_method("area"):',
+        '            total += thing.call("area")',
+        '    return total'
+      ]
+    });
+    for(const n of [193,194,195]){
+      const l=await page.evaluate(num=>LESSONS_DATA.find(x=>x.manualLessonNumber===num),n);
+      assert.equal(l.validationReady,true,
+        'Non dichiarare pronte lezioni senza validazione native: '+n);
+    }
     const fake191=await page.evaluate(async()=>{
       App.openLesson(10191);
       const draft=GDHManualStudio.getDraft(LESSONS_DATA[190]);
