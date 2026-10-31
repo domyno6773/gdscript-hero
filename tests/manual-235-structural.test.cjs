@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const root=process.cwd();
 const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],CONCEPTS_CATALOG:{},console};
 vm.createContext(context);
-for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js']){
+for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js']){
   vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),context,{filename:file,timeout:3000});
 }
 const lessons=context.LESSONS_DATA,chapters=context.CHAPTERS_DATA;
@@ -19,8 +19,8 @@ assert.match(lessons[1].initialCode,/print\(""\)/);
 assert.match(lessons[2].initialCode,/print\("Arrivederci!"\)/);
 assert.ok(lessons.every(x=>x.theory&&x.task&&x.initialCode&&x.title));
 assert.ok(lessons.every(x=>typeof x.validate==='function'));
-assert.ok(lessons.slice(0,105).every(x=>x.validationReady===true));
-assert.ok(lessons.slice(105).every(x=>x.validationReady===false));
+assert.ok(lessons.slice(0,110).every(x=>x.validationReady===true));
+assert.ok(lessons.slice(110).every(x=>x.validationReady===false));
 assert.ok(lessons.slice(170).every(x=>x.sourceFiles['main.gd']));
 assert.match(lessons[8].initialCode,/^extends Node/m);
 assert.match(lessons[8].initialCode,/^    var PlayerName/m);
@@ -28,7 +28,7 @@ assert.match(lessons[170].sourceFiles['greeter.gd'],/^class_name Greeter/m);
 const stats=context.window.GDHManualMigration;
 assert.equal(stats.total,235);
 assert.equal(stats.chapters,43);
-assert.equal(stats.validated,105);
+assert.equal(stats.validated,110);
 assert.equal(stats.readyForRelease,false);
 assert.equal(context.window.GDHManualBasicsValidated,18);
 async function checks(n,logs,source=lessons[n-1].initialCode){
@@ -121,8 +121,21 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   const impossible=await verify.verify(10105,lessons[104].initialCode,
     async()=>({status:'executed',stderr:'',stdout:'6\n',reply:{status:'executed'}}));
   assert.equal(impossible.accepted,false,'Non attribuire XP allo starter di get_tile');
-  const unsupported=await verify.verify(10106,'',async()=>{throw Error('Non dovrebbe partire');});
+  assert.equal(verify.expectedCases[108][0].returns.length,4);
+  assert.deepEqual(verify.expectedCases[108][0].returns[2],[[1],[2,4],[3,6,9]]);
+  assert.equal(verify.expectedCases[110].length,7);
+  assert.match(lessons[108].task,/Diagonale principale/);
+  const triangleSource='func make_triangle(n: int):\n    var grid = []\n    for row in range(1, n+1):\n        var items = []\n        for col in range(1, row+1):\n            items.append(row * col)\n        grid.append(items)\n    return grid';
+  const expected=verify.expectedCases[108][0];
+  const triangle=await verify.verify(10108,triangleSource,async(_source,options)=>({
+    status:'executed',stderr:'',stdout:'',
+    reply:{status:'executed',methodCalls:options.calls.map((c,i)=>({
+      method:c.method,status:'executed',value:expected.returns[i]
+    }))}
+  }));
+  assert.equal(triangle.accepted,true,'Gli array restituiti devono essere confrontati per valore');
+  const unsupported=await verify.verify(10111,'',async()=>{throw Error('Non dovrebbe partire');});
   assert.equal(unsupported.accepted,false,'Lezione non verificata non dà XP');
   assert.match(verify.nativeSource('print(OS.read_string_from_stdin())'),/__gdhManualReadStdin/);
-  console.log('OK: 235 lezioni, 43 capitoli, 105 validatori, stdin e test negativi');
+  console.log('OK: 235 lezioni, 43 capitoli, 110 validatori, stdin e test negativi');
 })().catch(err=>{console.error(err);process.exitCode=1});
