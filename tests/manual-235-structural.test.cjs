@@ -267,10 +267,10 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     assert.throws(()=>p192.build(l,corrupt),/modificato/);
   }
   assert.equal(Object.keys(lessons[199].sourceFiles).length,3);
-  assert.ok(verify.expectedCases[196].some(c=>c.output.includes('Rifiutato:')));
-  assert.ok(verify.expectedCases[197].some(c=>c.output.includes('Già presente nella playlist:')));
-  assert.ok(verify.expectedCases[198].some(c=>c.output.includes('Ordine n.')));
-  assert.ok(verify.expectedCases[199].some(c=>c.output.includes('Media: 87.50')));
+  assert.ok(verify.expectedCases[197].some(c=>c.output.includes('Rifiutato:')));
+  assert.ok(verify.expectedCases[198].some(c=>c.output.includes('Già presente nella playlist:')));
+  assert.ok(verify.expectedCases[199].some(c=>c.output.includes('Ordine n.')));
+  assert.ok(verify.expectedCases[200].some(c=>c.output.includes('Media: 87.50')));
   assert.ok(lessons.slice(200).every(l=>l.validationReady===false));
   const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
     status:'executed',stdout:'Ciao GDScript!\n',stderr:'',reply:{status:'executed'}
