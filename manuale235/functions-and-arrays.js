@@ -27,9 +27,11 @@
     if(variant&&String(n).includes('3'))return 'Quasi Fizz';
     return String(n);
   };
-  const game=(limit,variant=false)=>[
-    'Benvenuto in FizzBuzz!',...Array.from({length:limit},(_,i)=>fizz(i+1,variant))
-  ].join('\n');
+  const game=(limit,variant=false)=>{
+    const rows=['Benvenuto in FizzBuzz!'];
+    for(let i=1;i<=limit;i++)rows.push(fizz(i,variant));
+    return rows.join('\n');
+  };
   const read=/OS\.read_string_from_stdin\s*\(\s*\)/;
   const functionSig=name=>new RegExp('\\bfunc\\s+'+name+'\\s*\\(');
   define(51,{
