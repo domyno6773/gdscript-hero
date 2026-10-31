@@ -21,6 +21,13 @@ async function main(){
   try{
     await page.goto('http://127.0.0.1:'+server.address().port+'/',{waitUntil:'domcontentloaded',timeout:40000});
     await page.waitForFunction(()=>window.App&&Array.isArray(window.LESSONS_DATA),{timeout:30000});
+    // Il tour del primo accesso non deve coprire i controlli del corso.
+    const introduction=page.locator('#site-welcome');
+    if(await introduction.isVisible()){
+      await page.locator('#site-skip-tour').click();
+      if(await page.locator('#site-goal-gate').isVisible())
+        await page.locator('#site-goal-gate [data-goal="rilassato"]').click();
+    }
     const stats=await page.evaluate(()=>({
       count:LESSONS_DATA.length,chapters:CHAPTERS_DATA.length,
       prepared:GDHManualMigration.validated,
