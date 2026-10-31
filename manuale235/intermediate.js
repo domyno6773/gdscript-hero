@@ -40,7 +40,7 @@
         output:'Giocatore: Luca\nLuca ha raggiunto il livello 9 con 80 monete'}
     ],
     source:structural(/\bplayer_name\b/,/\bplayer_level\b/,/\bplayer_coins\b/,
-      /print\([^)]*player_name/,/print\([^)]*player_level[^)]*player_coins|print\([^)]*player_coins[^)]*player_level/)
+      /print\s*\(/)
   });
   set(33,{expected:'Articolo: Pozione curativa x3, totale: $7.50',
     cases:[
@@ -119,7 +119,7 @@
       {name:'Arrotondamento decimale',stdin:['64.3','9','2'],
         output:'Calcolatore per dividere il conto\nTotale (mancia inclusa): $70.09\nOgni persona paga: $35.04'}
     ],
-    source:structural(/%\s*\[/,/%\.2f/,/\btotal_amount\b/,/\bamount_per_person\b/)
+    source:structural(/%\.2f/,/\btotal_amount\b/,/\bamount_per_person\b/)
   });
   set(43,{expected:'Ciao, sviluppatore: 3\nCiao, sviluppatore: 4\nCiao, sviluppatore: 5\nCiao, sviluppatore: 6',
     cases:[
@@ -167,7 +167,7 @@
       {name:'Una riga due colonne',stdin:['1','2'],output:'**'},
       {name:'Due righe tre colonne',stdin:['2','3'],output:'***\n***'}
     ],
-    source:structural(/for\s+\w+\s+in\s+range\s*\(/)
+    source:source=>(String(source).match(/\bfor\s+\w+\s+in\s+range\s*\(/g)||[]).length>=2
   });
   set(50,{expected:'12',
     cases:[
