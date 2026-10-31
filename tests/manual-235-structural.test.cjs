@@ -235,7 +235,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     JSON.stringify(['player.gd','rock.gd','main.gd']));
   assert.ok(verify.expectedCases[192].some(c=>c.output.includes('Cassa: distrutta')));
   assert.ok(verify.expectedCases[191].some(c=>c.output.includes('Ruote totali: 18')));
-  assert.equal(lessons[205].validationReady,false,'Attività future non devono concedere XP');
+  assert.equal(lessons[210].validationReady,false,'Attività future non devono concedere XP');
 
   // Godot 4.5 supporta @abstract: il verificatore non deve falsare
   // l'astrazione con metodi finti in un runtime obsoleto.
@@ -271,7 +271,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.ok(verify.expectedCases[198].some(c=>c.output.includes('Già presente nella playlist:')));
   assert.ok(verify.expectedCases[199].some(c=>c.output.includes('Ordine n.')));
   assert.ok(verify.expectedCases[200].some(c=>c.output.includes('Media: 87.50')));
-  assert.ok(lessons.slice(205).every(l=>l.validationReady===false));
+  assert.ok(lessons.slice(210).every(l=>l.validationReady===false));
   for(let n=201;n<=205;n++){
     const l=lessons[n-1];
     assert.equal(l.validationReady,true,'Lezione '+n+' non attiva');
