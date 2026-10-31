@@ -76,6 +76,26 @@ async function main(){
       'Una semplice anteprima non deve completare l’esercizio');
     await page.locator('#btn-run-code').click();
     await page.waitForFunction(()=>App.state.finishedLessons.includes(10027),null,{timeout:60000});
+    await page.evaluate(()=>App.openLesson(10034));
+    assert.equal(await page.locator('#manual-stdin-lines').inputValue(),'Ada');
+    await page.locator('#code-editor').fill(
+      'extends Node\nfunc _ready():\n    var nome = OS.read_string_from_stdin()\n    print("Ciao, ", nome)');
+    await page.locator('#btn-run-code').click();
+    await page.waitForFunction(()=>App.state.finishedLessons.includes(10034),null,{timeout:60000});
+    await page.evaluate(()=>App.openLesson(10042));
+    await page.locator('#code-editor').fill(
+      'extends Node\nfunc _ready():\n'+
+      '    print("Calcolatore per dividere il conto")\n'+
+      '    var bill_amount = float(OS.read_string_from_stdin())\n'+
+      '    var tip_percentage = float(OS.read_string_from_stdin())\n'+
+      '    var num_people = int(OS.read_string_from_stdin())\n'+
+      '    var tip_amount = (tip_percentage / 100) * bill_amount\n'+
+      '    var total_amount = bill_amount + tip_amount\n'+
+      '    var amount_per_person = total_amount / num_people\n'+
+      '    print("Totale (mancia inclusa): $%.2f" % total_amount)\n'+
+      '    print("Ogni persona paga: $%.2f" % amount_per_person)');
+    await page.locator('#btn-run-code').click();
+    await page.waitForFunction(()=>App.state.finishedLessons.includes(10042),null,{timeout:60000});
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
