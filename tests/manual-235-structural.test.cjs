@@ -122,7 +122,8 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     async()=>({status:'executed',stderr:'',stdout:'6\n',reply:{status:'executed'}}));
   assert.equal(impossible.accepted,false,'Non attribuire XP allo starter di get_tile');
   assert.equal(verify.expectedCases[108][0].returns.length,4);
-  assert.deepEqual(verify.expectedCases[108][0].returns[2],[[1],[2,4],[3,6,9]]);
+  assert.equal(JSON.stringify(verify.expectedCases[108][0].returns[2]),
+    JSON.stringify([[1],[2,4],[3,6,9]]));
   assert.equal(verify.expectedCases[110].length,7);
   assert.match(lessons[108].task,/Diagonale principale/);
   const triangleSource='func make_triangle(n: int):\n    var grid = []\n    for row in range(1, n+1):\n        var items = []\n        for col in range(1, row+1):\n            items.append(row * col)\n        grid.append(items)\n    return grid';
