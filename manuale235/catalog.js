@@ -46,7 +46,7 @@
     3:'extends Node\n\nfunc _ready():\n    print("Ciao!")\n    print("Arrivederci!")\n',
     4:'extends Node\n\nfunc _ready()\nprint("Pronto!")\nprint("Si parte!")\n',
     5:'extends Node\n\nfunc _ready():\n    # Crea qui le variabili coins e speed\n    print("coins = ", coins)\n    print("speed = ", speed)\n',
-    6:'extends Node\n\nfunc _ready():\n    # Crea qui la variabile coddy\n    print("coddy = \\"", coddy, "\\"")\n',
+    6:'extends Node\n\nfunc _ready():\n    # Crea qui la variabile coddy\n    print(\"coddy = \", char(34), coddy, char(34))\n',
     7:'extends Node\n\nfunc _ready():\n    # Crea qui le variabili is_alive e has_key\n    print("is_alive = ", is_alive)\n    print("has_key = ", has_key)\n',
     8:'extends Node\n\nfunc _ready():\n    # Crea la variabile weapon con il valore null\n    print("weapon = ", weapon)\n    # Memorizza "Spada" in weapon\n    print("weapon = ", weapon)\n'
   };
