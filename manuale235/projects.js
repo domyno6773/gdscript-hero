@@ -54,7 +54,7 @@
      const first=body.find(s=>s.trim()&&!s.trim().startsWith('#'));
      const parent=first?.trim().match(/^extends\s+([A-Za-z_]\w*)\s*$/)?.[1];
      if(!parent)throw Error('Manca extends nella classe '+className);
-     candidates.push({className,parent,body});
+     candidates.push({className,parent,body,abstractClass});
    }
    const nested=[];
    const completed=new Set();
@@ -63,7 +63,7 @@
      const index=waiting.findIndex(item=>item.parent==='RefCounted'||
        item.parent==='Node'||completed.has(item.parent));
      if(index===-1)throw Error('Classe base mancante o dipendenza circolare');
-     const {className,parent,body}=waiting.splice(index,1)[0];
+     const {className,parent,body,abstractClass}=waiting.splice(index,1)[0];
      if(parent!=='RefCounted'&&parent!=='Node'&&!names.has(parent))
        throw Error('Classe base sconosciuta per '+className);
      // Godot compila classi reali annidate, ordinate per dipendenze.
