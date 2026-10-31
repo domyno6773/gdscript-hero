@@ -84,7 +84,8 @@
         objectCalls:options.objectCalls||[],
         scene:options.scene||0,actions:options.actions||[],
         mode:options.mode||'',nodes:options.nodes||[],
-        node:options.node||'',signal:options.signal||'',frames:options.frames||1,input:options.input||[],paused:!!options.paused
+        node:options.node||'',signal:options.signal||'',frames:options.frames||1,input:options.input||[],
+        stdin:options.stdin||[],paused:!!options.paused
       },'*'); // sandboxed iframe has an opaque origin
       return result;
     };
@@ -128,6 +129,7 @@
     actions:step.actions||lesson.actions||[]
   });
   const verifyLesson=async(id,source)=>{
+    if(window.GDHManualVerifier?.has(id))return window.GDHManualVerifier.verify(id,source,raw);
     // Supporto dinamico universale per le lezioni del corso (window.LESSONS_DATA)
     const lessonData = (typeof window !== 'undefined' && Array.isArray(window.LESSONS_DATA))
       ? window.LESSONS_DATA.find(x => x.id === id) : null;
