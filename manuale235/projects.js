@@ -8,7 +8,7 @@
 (() => {
  'use strict';
  const get=n=>(window.LESSONS_DATA||[]).find(x=>x.manualLessonNumber===n);
- const supported=new Set([171,172,173,174,175]);
+ const supported=new Set([171,172,173,174,175,176,177,178,179,180]);
  const lineClean=s=>String(s).replace(/\r/g,'').split('\n').map(t=>t.replace(/\t/g,'    '));
  const safe=(files,lesson)=>{
    const expected=Object.keys(lesson.sourceFiles);
@@ -46,7 +46,7 @@
      const className=header.trim().split(/\s+/)[1];
      if(names.has(className))throw Error('Classe duplicata '+className);
      names.add(className);
-     if(!new RegExp('^'+filename.replace('.gd','')+'$','i').test(className)&&!((lesson.manualLessonNumber===175)&&className==='BankAccount'))
+     if(filename.slice(0,-3).replace(/_/g,'').toLowerCase()!==className.toLowerCase())
        throw Error('Il nome della classe non corrisponde al file '+filename);
      const body=lines.filter(s=>!/^\s*class_name\s+\w+\s*$/.test(s));
      const first=body.find(s=>s.trim()&&!s.trim().startsWith('#'));
