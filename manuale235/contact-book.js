@@ -104,7 +104,7 @@ const createReady=(n)=>{
     lines.push('        # Sostituisci la catena con match choice:, incluse le scelte errate.');
   }
   for(let x=1;x<=6;x++){
-    const allowed=x<=6&&(x===6||x<=Math.max(1,n-116));
+    const allowed=x<=6&&(x===6||x<=Math.max(1,n-117));
     if(!allowed)continue;
     const head=lines.some(line=>/^        (?:if|elif) choice/.test(line))?'elif':'if';
     lines.push('        '+head+' choice == "'+x+'":');
@@ -126,7 +126,7 @@ const starter=(n)=>{
     'extends Node','',createReady(n),'',menuSource,
     '', '# Scrivi add_contact(contact_book: Dictionary) qui.'
   ].join('\n');
-  const functions=funcs.slice(0,Math.max(2,n-115));
+  const functions=funcs.slice(0,Math.max(2,n-116));
   return ['extends Node','',createReady(n),'',...functions.flatMap((fn,i)=>i?[ '',fn ]:[fn]),
     '', '# Scrivi la funzione aggiuntiva richiesta da questa lezione.'].join('\n');
 };
