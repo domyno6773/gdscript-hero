@@ -49,6 +49,14 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   const nineWrong=await checks(9,['Giocatore: Ada','Monete: 120','Online: true'],'extends Node\nfunc _ready():\n    print("Giocatore: Ada")\n    print("Monete: 120")\n    print("Online: true")');
   assert.ok(nineWrong.some(x=>!x.passed),'Niente completamento con output hardcoded');
   const verify=context.window.GDHManualVerifier;
+  const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
+    status:'executed',stdout:'Ciao GDScript!\n',stderr:'',reply:{status:'executed'}
+  }));
+  assert.equal(firstEndToEnd.accepted,true,'La prima lezione deve superare la verifica completa');
+  const secondEndToEnd=await verify.verify(10002,lessons[1].initialCode,async()=>({
+    status:'executed',stdout:'\n',stderr:'',reply:{status:'executed'}
+  }));
+  assert.equal(secondEndToEnd.accepted,false,'print vuoto non deve essere promosso');
   const cs=verify.expectedCases[27];
   assert.equal(cs.length,6);
   const legitimate=await verify.verify(10027,'extends Node\nfunc _ready():\n    var wind=int(OS.read_string_from_stdin())',async(src,opts)=>{
