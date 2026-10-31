@@ -204,7 +204,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     assert.equal(l.validationReady,true,'Validatore mancante '+n);
     assert.ok(verify.expectedCases[n].length>=5,'Varianti insufficienti '+n);
     assert.equal(project.supports(l),true);
-    assert.deepEqual(l.readOnlyFiles,lockedExpected[n]);
+    assert.equal(JSON.stringify(l.readOnlyFiles),JSON.stringify(lockedExpected[n]));
     const assembled=project.build(l,l.sourceFiles);
     assert.match(assembled,/^extends Node/m);
     for(const locked of l.readOnlyFiles){
