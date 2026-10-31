@@ -121,9 +121,10 @@
     '',
     '# Scrivi count_down(n): stampa n e richiamati con n - 1 fino a 0.'
   ].join('\n'));
+  const countdown=n=>{let out=String(n);for(let i=n-1;i>=0;i--)out+='\n'+i;return out;};
   define(149,[0,1,3,6,10].map(n=>({
     name:'Conto alla rovescia da '+n,stdin:[String(n)],
-    output:Array.from({length:n+1},(_,i)=>String(n-i)).join('\n')
+    output:countdown(n)
   })),src=>{
     const code=active(src);
     return has(/\bfunc\s+count_down\s*\(\s*n\s*\)\s*:/,
