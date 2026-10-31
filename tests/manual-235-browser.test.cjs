@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,200);
+    assert.equal(stats.prepared,205);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -2111,6 +2111,138 @@ async function main(){
       assert.equal(data.ready,true,'Lezione non pronta '+n);
       assert.deepEqual(data.locked,['main.gd']);
     }
+
+    await completeProject(201,{
+      'counter.gd':[
+        'class_name Counter','extends RefCounted',
+        'var value: int','var step: int',
+        'func _init(start: int = 0, step_size: int = 1) -> void:',
+        '    value = start',
+        '    step = step_size',
+        'func tick() -> void:',
+        '    value += step',
+        'func plus(other: Counter) -> Counter:',
+        '    return Counter.new(value + other.value, step)',
+        'func equals(other: Counter) -> bool:',
+        '    return value == other.value'
+      ]
+    });
+    await completeProject(202,{
+      'playing_card.gd':[
+        'class_name PlayingCard','extends RefCounted',
+        'var rank: int','var suit: String',
+        'func _init(new_rank: int, new_suit: String) -> void:',
+        '    rank = new_rank',
+        '    suit = new_suit',
+        'func _to_string() -> String:',
+        '    var display = str(rank)',
+        '    match rank:',
+        '        11: display = "J"',
+        '        12: display = "Q"',
+        '        13: display = "K"',
+        '        14: display = "A"',
+        '    return display + " of " + suit'
+      ],
+      'hand.gd':[
+        'class_name Hand','extends RefCounted',
+        'var _cards: Array[PlayingCard] = []',
+        'func add(card: PlayingCard) -> void:',
+        '    _cards.append(card)',
+        'func _to_string() -> String:',
+        '    if _cards.is_empty():',
+        '        return "Hand (0): empty"',
+        '    var names: Array[String] = []',
+        '    for card in _cards:',
+        '        names.append(str(card))',
+        '    return "Hand (%d): %s" % [_cards.size(), ", ".join(names)]'
+      ]
+    });
+    await completeProject(203,{
+      'bookshelf.gd':[
+        'class_name Bookshelf','extends RefCounted',
+        'var _titles: Array[String] = []',
+        'var _capacity: int',
+        'func _init(capacity: int) -> void:',
+        '    _capacity = capacity',
+        'func add(title: String) -> bool:',
+        '    if _titles.size() >= _capacity or title in _titles:',
+        '        return false',
+        '    _titles.append(title)',
+        '    return true',
+        'func size() -> int:',
+        '    return _titles.size()',
+        'func has(title: String) -> bool:',
+        '    return title in _titles',
+        'func get_at(index: int) -> String:',
+        '    return _titles[index] if index >= 0 and index < size() else ""',
+        'func _iter_init(iter: Array) -> bool:',
+        '    iter[0] = 0',
+        '    return not _titles.is_empty()',
+        'func _iter_next(iter: Array) -> bool:',
+        '    iter[0] += 1',
+        '    return iter[0] < _titles.size()',
+        'func _iter_get(position):',
+        '    return _titles[position[0]]'
+      ]
+    });
+    await completeProject(204,{
+      'custom_list.gd':[
+        'class_name CustomList','extends RefCounted',
+        'var _items: Array = []',
+        'func _init(items: Array = []) -> void:',
+        '    _items = items.duplicate()',
+        'func append(item) -> void:',
+        '    _items.append(item)',
+        'func pop_back():',
+        '    return null if _items.is_empty() else _items.pop_back()',
+        'func get_at(index: int):',
+        '    return _items[index] if index >= 0 and index < _items.size() else null',
+        'func set_at(index: int, value) -> bool:',
+        '    if index < 0 or index >= _items.size():',
+        '        return false',
+        '    _items[index] = value',
+        '    return true',
+        'func size() -> int:',
+        '    return _items.size()',
+        'func has(item) -> bool:',
+        '    return item in _items',
+        'func clear() -> void:',
+        '    _items.clear()',
+        'func concat(other: CustomList) -> CustomList:',
+        '    return CustomList.new(_items + other._items)',
+        'func _to_string() -> String:',
+        '    return str(_items)',
+        'func _iter_init(iter: Array) -> bool:',
+        '    iter[0] = 0',
+        '    return not _items.is_empty()',
+        'func _iter_next(iter: Array) -> bool:',
+        '    iter[0] += 1',
+        '    return iter[0] < _items.size()',
+        'func _iter_get(position):',
+        '    return _items[position[0]]'
+      ]
+    });
+    await completeProject(205,{
+      'mailbox.gd':[
+        'class_name Mailbox','extends RefCounted',
+        'signal mail_arrived',
+        'var letters: int = 0',
+        'func deliver(kind: String) -> void:',
+        '    if kind == "letter":',
+        '        letters += 1',
+        '        mail_arrived.emit()'
+      ]
+    });
+    // Gli starter non devono completare la lezione, neppure con codice compilabile.
+    const starter205=await page.evaluate(async()=>{
+      App.openLesson(10205);
+      const editor=document.getElementById('code-editor');
+      editor.value=LESSONS_DATA.find(x=>x.manualLessonNumber===205).sourceFiles['mailbox.gd'];
+      const r=await GDHManualVerifier.verify(10205,editor.value,
+        (code,options)=>GDHGodot.runNative(code,options));
+      return r.accepted;
+    });
+    assert.equal(starter205,false,'La casella postale vuota non deve superare la lezione');
     const fake191=await page.evaluate(async()=>{
       App.openLesson(10191);
       const draft=GDHManualStudio.getDraft(LESSONS_DATA[190]);
@@ -2126,14 +2258,14 @@ async function main(){
       }
     });
     assert.equal(fake191,false,'Non accettare output hardcoded nel garage');
-    const future201=await page.evaluate(async()=>{
-      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===201);
+    const future206=await page.evaluate(async()=>{
+      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===206);
       return {ready:l.validationReady,
         supported:GDHManualProject.supports(l),
         accepted:(await GDHManualVerifier.verify(l.id,l.initialCode,
           ()=>{throw Error('Non eseguire Godot su una lezione non supportata');})).accepted};
     });
-    assert.deepEqual(future201,{ready:false,supported:false,accepted:false},
+    assert.deepEqual(future206,{ready:false,supported:false,accepted:false},
       'Non attribuire XP alle lezioni prive di validatore specifico');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
