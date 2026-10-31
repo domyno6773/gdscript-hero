@@ -41,6 +41,8 @@ jobs:
           node --check manuale235/advanced-functions.js
           node --check manuale235/array-methods.js
           node --check manuale235/error-handling.js
+          node --check manuale235/inventory-project.js
+          node --check manuale235/final-challenges.js
           node --check manuale235/studio.js
           node --check native/isolated-runner.js
           node --check native/native-beta-adapter.js

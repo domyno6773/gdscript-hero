@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,162);
+    assert.equal(stats.prepared,170);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -1098,6 +1098,129 @@ async function main(){
     ];
     for(const [n,lines] of errorHandlingSolutions)
       await exercise(n,lines.join('\n'));
+
+    // Ogni step dell'inventario eredita quanto già realizzato, non la
+    // propria soluzione. Il passo successivo è un riferimento positivo.
+    for(let n=163;n<=166;n++){
+      const solved=await page.evaluate(next=>
+        LESSONS_DATA.find(l=>l.manualLessonNumber===next).initialCode,n+1);
+      await exercise(n,solved);
+    }
+    let inventorySolved=await page.evaluate(()=>
+      LESSONS_DATA.find(l=>l.manualLessonNumber===167).initialCode);
+    inventorySolved=inventorySolved.replace(
+      '        # Implementa qui il ramo del nuovo comando della lezione.',
+      [
+        '        elif command == "vendi":',
+        '            var sales = {}',
+        '            for i in range(1, parts.size()):',
+        '                var fields = parts[i].split(":")',
+        '                if fields.size() != 2 or fields[0].is_empty() or not fields[1].is_valid_int():',
+        '                    print("Errore: vendita non valida \x27%s\x27." % parts[i])',
+        '                    continue',
+        '                sales[fields[0]] = int(fields[1])',
+        '            print(sales_report(inventory, sales))'
+      ].join('\n')
+    )+'\n'+[
+      'func sales_report(inventory: Dictionary, sales: Dictionary) -> String:',
+      '    var revenue = 0.0',
+      '    for item in sales:',
+      '        if not inventory.has(item):',
+      '            print("Errore: articolo \x27%s\x27 non trovato." % item)',
+      '            continue',
+      '        var qty = sales[item]',
+      '        if inventory[item]["stock"] < qty:',
+      '            print("Errore: scorte insufficienti per \x27%s\x27." % item)',
+      '            continue',
+      '        inventory[item]["stock"] -= qty',
+      '        revenue += inventory[item]["price"] * qty',
+      '    return "Ricavo totale: %.2f" % revenue'
+    ].join('\n');
+    await exercise(167,inventorySolved);
+    await exercise(168,[
+      'extends Node','func _ready():',
+      '    var n = int(OS.read_string_from_stdin())',
+      '    var emails = {}',
+      '    var phones = {}',
+      '    var count = 0',
+      '    for i in range(n):',
+      '        var parts = OS.read_string_from_stdin().split(",")',
+      '        var name = parts[0]',
+      '        var email = parts[1].to_lower()',
+      '        var phone = ""',
+      '        for digit in parts[2]:',
+      '            if "0123456789".contains(digit):',
+      '                phone += digit',
+      '        if not email.contains("@") or not email.contains(".") or email.contains(" "):',
+      '            continue',
+      '        if phone.length() != 10 or emails.has(email) or phones.has(phone):',
+      '            continue',
+      '        emails[email] = true',
+      '        phones[phone] = true',
+      '        count += 1',
+      '        print(name, " | ", email, " | ", phone)',
+      '    print("Contatti conservati: ", count, " su ", n)'
+    ].join('\n'));
+    await exercise(169,[
+      'extends Node',
+      'func analyze_text(text: String):',
+      '    var content = text.to_lower()',
+      '    for punctuation in [".", ",", "!", "?", ":", ";", "\x22", "(", ")"]:',
+      '        content = content.replace(punctuation, "")',
+      '    var counts = {}',
+      '    for word in content.split(" ", false):',
+      '        counts[word] = counts.get(word, 0) + 1',
+      '    var repeated = []',
+      '    var palindromes = []',
+      '    for word in counts:',
+      '        if counts[word] > 1:',
+      '            repeated.append(word)',
+      '        var reverse = ""',
+      '        for i in range(word.length()-1, -1, -1):',
+      '            reverse += word.substr(i, 1)',
+      '        if reverse == word:',
+      '            palindromes.append(word)',
+      '    repeated.sort()',
+      '    palindromes.sort()',
+      '    return {"unique_count": counts.size(),',
+      '        "repeated_words": repeated, "palindromes": palindromes}',
+      'func _ready():',
+      '    var text = OS.read_string_from_stdin()',
+      '    print(analyze_text(text))'
+    ].join('\n'));
+    await exercise(170,[
+      'extends Node',
+      'func _ready():',
+      '    var n = int(OS.read_string_from_stdin())',
+      '    var admitted = []',
+      '    var subjects = {}',
+      '    for i in range(n):',
+      '        var fields = OS.read_string_from_stdin().split(";")',
+      '        var grades = []',
+      '        for text in fields[1].split(","):',
+      '            grades.append(int(text))',
+      '        if not grades.all(func(grade): return grade > 70):',
+      '            continue',
+      '        var total = 0',
+      '        for grade in grades:',
+      '            total += grade',
+      '        admitted.append("%s: %.2f" % [fields[0], float(total) / grades.size()])',
+      '        for subject in fields[2].split(","):',
+      '            subjects[subject] = subjects.get(subject, 0) + 1',
+      '    print("Studenti idonei: ", admitted.size())',
+      '    for item in admitted:',
+      '        print(item)',
+      '    print("Materie:")',
+      '    for subject in subjects:',
+      '        print(subject, ": ", subjects[subject])'
+    ].join('\n'));
+    for(const n of [163,167,168,169,170]){
+      const fake=await page.evaluate(number=>
+        GDHManualVerifier.verify(10000+number,
+          'extends Node\nfunc _ready():\n    print("Arrivederci!")',
+          (code,opts)=>GDHGodot.runNative(code,opts)),n);
+      assert.equal(fake.accepted,false,'Una stampa fissa non deve superare '+n);
+    }
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
