@@ -138,17 +138,20 @@
   ].join('\n'));
   const baseline={type:'slime',statistiche:{hp:30,speed:2},loot:['gel']};
   const waves=[[2,10],[1,5],[3,0],[2,7]];
-  define(114,waves.map(([count,bonus])=>({
-    name:'Ondata '+count+' nemici, bonus '+bonus,
-    stdin:[String(count),String(bonus)],
-    linesSpec:[
-      ...Array.from({length:count},(_,i)=>({
-        object:{type:'slime',statistiche:{hp:30+bonus*(i+1),speed:2},
-          loot:i===count-1?['gel','crown']:['gel'],id:i+1}
-      })),
-      {prefix:'Template: ',object:baseline}
-    ]
-  })),requireAll(/\btemplate\.duplicate\s*\(\s*true\s*\)/,
+  define(114,waves.map(([count,bonus])=>{
+    const descriptions=[];
+    for(let i=0;i<count;i++){
+      descriptions.push({object:{
+        type:'slime',statistiche:{hp:30+bonus*(i+1),speed:2},
+        loot:i===count-1?['gel','crown']:['gel'],id:i+1
+      }});
+    }
+    descriptions.push({prefix:'Template: ',object:baseline});
+    return {
+      name:'Ondata '+count+' nemici, bonus '+bonus,
+      stdin:[String(count),String(bonus)],linesSpec:descriptions
+    };
+  }),requireAll(/\btemplate\.duplicate\s*\(\s*true\s*\)/,
     /\bfor\b|\bwhile\b/,/\bstatistiche\b/,/\bhp\b/,
     /\.append\s*\(\s*["']crown["']\s*\)/,
     /\bprint\s*\(/));
