@@ -2489,12 +2489,18 @@ async function main(){
       const l=LESSONS_DATA.find(x=>x.manualLessonNumber===211);
       const draft=GDHManualStudio.getDraft(l);
       const original=draft.files['leaderboard.gd'];
+      const editor=document.getElementById('code-editor');
+      const previous=editor.value;
       try{
         draft.files['leaderboard.gd']=l.sourceFiles['leaderboard.gd'];
+        editor.value=l.sourceFiles['leaderboard.gd'];
         const result=await GDHManualVerifier.verify(l.id,
-          draft.files['leaderboard.gd'],(code,options)=>GDHGodot.runNative(code,options));
+          editor.value,(code,options)=>GDHGodot.runNative(code,options));
         return result.accepted;
-      }finally{draft.files['leaderboard.gd']=original;}
+      }finally{
+        editor.value=previous;
+        draft.files['leaderboard.gd']=original;
+      }
     });
     assert.equal(default211,false,'La classifica iniziale non deve completare la lezione');
     const fake191=await page.evaluate(async()=>{
