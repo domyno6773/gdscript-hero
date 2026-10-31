@@ -150,7 +150,7 @@ patch(192,{
    'var count = int(OS.read_string_from_stdin())',
    'for i in count:',
    '    var hits = Explosion.hit_all(things, int(OS.read_string_from_stdin()))',
-   '    print("L\\x27esplosione %d ha colpito %d oggetti" % [i + 1, hits])',
+   "    print(\"L'esplosione %d ha colpito %d oggetti\" % [i + 1, hits])",
    'for thing in things:',
    '    print(thing.status())'
  ])
