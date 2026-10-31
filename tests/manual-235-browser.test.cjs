@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,70);
+    assert.equal(stats.prepared,76);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -101,8 +101,14 @@ async function main(){
       await page.evaluate(id=>App.openLesson(id),10000+n);
       await page.locator('#code-editor').fill(code);
       await page.locator('#btn-run-code').click();
-      await page.waitForFunction(id=>App.state.finishedLessons.includes(id),
-        10000+n,{timeout:60000});
+      await page.waitForFunction(()=>!App.isValidating,null,{timeout:60000});
+      const result=await page.evaluate(id=>({
+        finished:App.state.finishedLessons.includes(id),
+        output:document.getElementById('real-output-pre')?.textContent,
+        error:document.querySelector('#exercise-debug-area')?.textContent?.slice(0,1300),
+        explanation:document.getElementById('validation-result')?.textContent?.slice(0,1200)
+      }),10000+n);
+      assert.equal(result.finished,true,'Lezione '+n+' rifiutata: '+JSON.stringify(result));
     };
     await exercise(51,
       'extends Node\nfunc _ready():\n'+
