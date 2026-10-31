@@ -57,7 +57,7 @@
   ];
   set(74,samples74.map(([nums,n])=>({name:'Ripetizioni '+n,
     stdin:[nums.join(','),String(n)],
-    output:array(Array.from({length:n},()=>[...nums,...nums]).flat())})),
+    output:array(Array(n).fill(null).flatMap(()=>[...nums,...nums]))})),
     structural(/\bnumbers\s*\+\s*numbers\b/,/\bpattern\b/,
       /\bfor\b|\bwhile\b/,/\brepeats\b/));
   const samples75=[
