@@ -115,7 +115,8 @@
       hints:[{level:1,type:'concept',label:'Rileggi la consegna',
         text:'Segui la consegna del manuale e completa solo le parti lasciate allo studente.'}],
       sourceFiles:files,requiresMultipleFiles:Object.keys(files).length>1,
-      requiresStdin:/OS\.read_string_from_stdin\(\)/.test(item.files),
+      requiresStdin:/OS\.read_string_from_stdin\(\)/.test(item.files)||
+        /\b(?:input|leggi|leggere|acquisisci)\b/i.test(item.exercise),
       validationReady:Boolean(proof[n]),validate:validate(n)
     };
   });
