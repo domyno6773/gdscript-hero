@@ -8,7 +8,7 @@
 (() => {
  'use strict';
  const get=n=>(window.LESSONS_DATA||[]).find(x=>x.manualLessonNumber===n);
- const supported=new Set([171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192]);
+ const supported=new Set([171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195]);
  const lineClean=s=>String(s).replace(/\r/g,'').split('\n').map(t=>t.replace(/\t/g,'    '));
  const safe=(files,lesson)=>{
    const expected=Object.keys(lesson.sourceFiles);
@@ -41,14 +41,16 @@
    for(const [filename,script] of Object.entries(files)){
      if(filename==='main.gd')continue;
      const lines=lineClean(script);
-     const header=lines.find(s=>/^\s*class_name\s+\w+\s*$/.test(s));
+     const header=lines.find(s=>/^\s*(?:@abstract\s+)?class_name\s+\w+\s*$/.test(s));
      if(!header)throw Error('Manca class_name in '+filename);
-     const className=header.trim().split(/\s+/)[1];
+     const className=header.trim().split(/\s+/).at(-1);
      if(names.has(className))throw Error('Classe duplicata '+className);
      names.add(className);
      if(filename.slice(0,-3).replace(/_/g,'').toLowerCase()!==className.toLowerCase())
        throw Error('Il nome della classe non corrisponde al file '+filename);
-     const body=lines.filter(s=>!/^\s*class_name\s+\w+\s*$/.test(s));
+     const abstractClass=lines.some(s=>/^@abstract(?:\s*$|\s+class_name\b)/.test(s));
+     const body=lines.filter(s=>!/^\s*(?:@abstract\s+)?class_name\s+\w+\s*$/.test(s)&&
+       !/^@abstract\s*$/.test(s));
      const first=body.find(s=>s.trim()&&!s.trim().startsWith('#'));
      const parent=first?.trim().match(/^extends\s+([A-Za-z_]\w*)\s*$/)?.[1];
      if(!parent)throw Error('Manca extends nella classe '+className);
@@ -65,7 +67,7 @@
      if(parent!=='RefCounted'&&parent!=='Node'&&!names.has(parent))
        throw Error('Classe base sconosciuta per '+className);
      // Godot compila classi reali annidate, ordinate per dipendenze.
-     nested.push('class '+className+':\n'+body.map(line=>line?'    '+line:'').join('\n'));
+     nested.push((abstractClass?'@abstract ':'')+'class '+className+':\n'+body.map(line=>line?'    '+line:'').join('\n'));
      completed.add(className);
    }
    if(!nested.length)throw Error('Non sono presenti classi del progetto');
