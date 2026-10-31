@@ -1288,6 +1288,10 @@ async function main(){
     assert.equal(amended,true,'Il main.gd fornito non deve essere modificabile');
     const insufficient=await page.evaluate(async()=>{
       App.openLesson(10171);
+      // Dopo la prova sui file di sola lettura era selezionato main.gd:
+      // scegliere esplicitamente il file modificabile della classe.
+      const tab=[...document.querySelectorAll('.manual-file-tab')].find(x=>x.textContent==='greeter.gd');
+      tab.click();
       const editor=document.getElementById('code-editor');
       editor.value='class_name Greeter\nextends RefCounted\nstatic func greet(player_name: String) -> String:\n    return "Ciao, Ada!"';
       const result=await GDHManualVerifier.verify(10171,editor.value,
