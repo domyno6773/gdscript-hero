@@ -149,9 +149,13 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     assert.equal(verify.expectedCases[n].length,5);
     assert.equal(lesson.manualSourceCheck('extends Node\nfunc _ready():\n    print("OK")'),false);
     assert.ok(Object.keys(lesson.sourceFiles).length>=2);
-    const assembled=adapter.build(lesson,lesson.sourceFiles);
-    assert.match(assembled,/^extends Node/m);
-    assert.match(assembled,/^class \w+:/m);
+    if(n===172){
+      assert.throws(()=>adapter.build(lesson,lesson.sourceFiles),/Manca class_name/);
+    }else{
+      const assembled=adapter.build(lesson,lesson.sourceFiles);
+      assert.match(assembled,/^extends Node/m);
+      assert.match(assembled,/^class \\w+:/m);
+    }
     const broken={...lesson.sourceFiles,'main.gd':lesson.sourceFiles['main.gd']+'\nprint("falso")'};
     assert.throws(()=>adapter.build(lesson,broken),/modificato/);
   }
