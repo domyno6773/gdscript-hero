@@ -64,7 +64,7 @@
     const lesson=byId(id),number=lesson?.manualLessonNumber;
     if(!lesson||!number||number<1||number>235)return unavailable(id,source);
     if(lesson.requiresMultipleFiles)return unavailable(id,source);
-    const hasStatic=number<=26&&lesson.validationReady;
+    const hasStatic=lesson.validationReady&&!expectedCases[number];
     const cases=expectedCases[number]||null;
     if(!hasStatic&&!cases)return unavailable(id,source);
     const sourceOnly=scriptOnly(source);
@@ -79,6 +79,12 @@
       const testcase=testRuns[i];
       let code=source;
       if(testcase.seed!==undefined)code=seed(source,'season',testcase.seed);
+      if(testcase.seeds){
+        for(const [key,value] of Object.entries(testcase.seeds)){
+          if(code===null)break;
+          code=seed(code,key,value);
+        }
+      }
       if(code===null){
         checks.push({desc:testcase.name,passed:false,diff:'La variabile season deve restare dichiarata nello script.'});
         break;
@@ -100,6 +106,11 @@
         else checks.push(...score);
       }else checks.push({desc:'Esecuzione Godot',passed:false,
         diff:String(base.stderr||base.reply?.message||base.status)});
+    }
+    if(typeof lesson.manualSourceCheck==='function'){
+      const proof=lesson.manualSourceCheck(source);
+      checks.push({desc:'Operazioni richieste dalla consegna',passed:proof===true,
+        diff:proof?'':'Il codice non usa le strutture indicate dalla consegna.'});
     }
     const grade=feedback(checks);
     if(base)return wrap(base,source,grade);
