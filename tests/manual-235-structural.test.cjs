@@ -252,7 +252,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   // Lo starter non contiene accidentalmente il codice della soluzione.
   assert.doesNotMatch(lessons[192].initialCode,/@abstract\s+func\s+fee/);
   assert.doesNotMatch(lessons[194].initialCode,/@abstract\s+func\s+area/);
-  assert.ok(verify.expectedCases[193].some(x=>x.output.includes('Tempo totale: 4:38')));
+  assert.ok(verify.expectedCases[194].some(x=>x.output.includes('Tempo totale: 4:38')));
   assert.ok(verify.expectedCases[195].some(x=>x.output.includes('Area totale: 87.54')));
   const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
     status:'executed',stdout:'Ciao GDScript!\n',stderr:'',reply:{status:'executed'}
