@@ -48,6 +48,7 @@ jobs:
           node --check manuale235/oop-properties.js
           node --check manuale235/oop-encapsulation.js
           node --check manuale235/oop-inheritance.js
+          node --check manuale235/oop-polymorphism.js
           node --check manuale235/studio.js
           node --check native/isolated-runner.js
           node --check native/native-beta-adapter.js

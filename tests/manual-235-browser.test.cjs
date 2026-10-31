@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,186);
+    assert.equal(stats.prepared,190);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -1534,6 +1534,173 @@ async function main(){
       error:document.getElementById('validation-result')?.textContent
     }));
     assert.equal(superResult.finished,true,'Lezione 186 rifiutata: '+JSON.stringify(superResult));
+
+    // OOP 187-190: ereditarietà profonda, override ed array polimorfici.
+    const completeProject=async(number,files)=>{
+      await page.evaluate(id=>App.openLesson(id),10000+number);
+      for(const [name,lines] of Object.entries(files)){
+        await page.locator('.manual-file-tab',{hasText:name}).click();
+        assert.equal(await page.locator('#code-editor').getAttribute('readonly'),null,
+          'File modificabile inaspettatamente protetto: '+name);
+        await page.locator('#code-editor').fill(lines.join('\n'));
+      }
+      await page.locator('#btn-run-code').click();
+      await page.waitForFunction(()=>!App.isValidating,null,{timeout:60000});
+      const verdict=await page.evaluate(id=>({
+        finished:App.state.finishedLessons.includes(id),
+        output:document.getElementById('real-output-pre')?.textContent,
+        error:document.getElementById('validation-result')?.textContent
+      }),10000+number);
+      assert.equal(verdict.finished,true,'Lezione '+number+' rifiutata: '+JSON.stringify(verdict));
+    };
+    await completeProject(187,{
+      'circle.gd':[
+        'class_name Circle','extends Shape',
+        'var radius: int',
+        'func _init(c: String, r: int) -> void:',
+        '    super(c)',
+        '    radius = r',
+        'func area() -> float:',
+        '    return PI * radius * radius',
+        'func describe() -> String:',
+        '    return "Questo è un %s circle with radius %d" % [color, radius]'
+      ],
+      'square.gd':[
+        'class_name Square','extends Shape',
+        'var side: int',
+        'func _init(c: String, s: int) -> void:',
+        '    super(c)',
+        '    side = s',
+        'func area() -> float:',
+        '    return float(side * side)',
+        'func describe() -> String:',
+        '    return "Questo è un %s square with side %d" % [color, side]'
+      ]
+    });
+    await page.locator('.manual-file-tab',{hasText:'shape.gd'}).click();
+    assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'',
+      'La classe Shape del corso non si deve modificare');
+    await completeProject(188,{
+      'warrior.gd':[
+        'class_name Warrior','extends Character',
+        'var strength: int',
+        'func _init(n: String, h: int, s: int) -> void:',
+        '    super(n, h)',
+        '    strength = s',
+        'func describe() -> String:',
+        '    return super.describe() + ", strength %d" % strength',
+        'func attack() -> int:',
+        '    return strength'
+      ],
+      'knight.gd':[
+        'class_name Knight','extends Warrior',
+        'var armor: int',
+        'func _init(n: String, h: int, s: int, a: int) -> void:',
+        '    super(n, h, s)',
+        '    armor = a',
+        'func describe() -> String:',
+        '    return super.describe() + ", armor %d" % armor',
+        'func attack() -> int:',
+        '    return super.attack() + 5'
+      ]
+    });
+    await completeProject(189,{
+      'zoo.gd':[
+        'class_name Zoo','extends RefCounted',
+        'static func describe(a: Animal) -> String:',
+        '    if a is Penguin:',
+        '        return a.animal_name + " swims"',
+        '    if a is Bird:',
+        '        return "%s flies (wingspan %d cm)" % [a.animal_name, a.wingspan]',
+        '    return a.animal_name + " walks"',
+        'static func count_birds(animals: Array[Animal]) -> int:',
+        '    var count = 0',
+        '    for a in animals:',
+        '        if a is Bird:',
+        '            count += 1',
+        '    return count'
+      ]
+    });
+    for(const file of ['animal.gd','bird.gd','penguin.gd']){
+      await page.locator('.manual-file-tab',{hasText:file}).click();
+      assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'',
+        'File di supporto modificabile: '+file);
+    }
+    await completeProject(190,{
+      'person.gd':[
+        'class_name Person','extends RefCounted',
+        'var person_name: String','var age: int',
+        'func _init(n: String, a: int) -> void:',
+        '    person_name = n',
+        '    age = a',
+        'func introduce() -> String:',
+        '    return "Ciao, sono %s, %d anni" % [person_name, age]'
+      ],
+      'employee.gd':[
+        'class_name Employee','extends Person',
+        'var employee_id: String','var salary: int',
+        'func _init(n: String, a: int, id: String, s: int) -> void:',
+        '    super(n, a)',
+        '    employee_id = id',
+        '    salary = s',
+        'func introduce() -> String:',
+        '    return super.introduce() + ". My employee ID is " + employee_id + "."',
+        'func monthly_pay() -> float:',
+        '    return salary / 12.0'
+      ],
+      'manager.gd':[
+        'class_name Manager','extends Employee',
+        'var department: String',
+        'func _init(n: String, a: int, id: String, s: int, d: String) -> void:',
+        '    super(n, a, id, s)',
+        '    department = d',
+        'func monthly_pay() -> float:',
+        '    return super.monthly_pay() * 1.2',
+        'func manage_team() -> String:',
+        '    return "Managing the %s department." % department'
+      ],
+      'engineer.gd':[
+        'class_name Engineer','extends Employee',
+        'var language: String',
+        'func _init(n: String, a: int, id: String, s: int, l: String) -> void:',
+        '    super(n, a, id, s)',
+        '    language = l',
+        'func code() -> String:',
+        '    return "Coding in %s." % language'
+      ],
+      'payroll.gd':[
+        'class_name Payroll','extends RefCounted',
+        'static func role(p: Person) -> String:',
+        '    if p is Manager: return "Manager"',
+        '    if p is Engineer: return "Engineer"',
+        '    if p is Employee: return "Employee"',
+        '    return "Person"',
+        'static func total_monthly(people: Array[Person]) -> float:',
+        '    var total = 0.0',
+        '    for p in people:',
+        '        if p is Employee:',
+        '            total += p.monthly_pay()',
+        '    return total'
+      ]
+    });
+    // Un risultato statico non supera gli input alternativi né i tipi.
+    const wrongZoo=await page.evaluate(async()=>{
+      App.openLesson(10189);
+      const tab=[...document.querySelectorAll('.manual-file-tab')].find(x=>x.textContent==='zoo.gd');
+      tab.click();
+      document.getElementById('code-editor').value=[
+        'class_name Zoo','extends RefCounted',
+        'static func describe(a: Animal) -> String:',
+        '    return a.animal_name + " flies (wingspan 30 cm)"',
+        'static func count_birds(animals: Array[Animal]) -> int:',
+        '    return 2'
+      ].join('\n');
+      const checked=await GDHManualVerifier.verify(10189,
+        document.getElementById('code-editor').value,
+        (code,options)=>GDHGodot.runNative(code,options));
+      return checked.accepted;
+    });
+    assert.equal(wrongZoo,false,'La risposta fissa dello zoo non deve superare la prova');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
