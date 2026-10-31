@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const root=process.cwd();
 const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],CONCEPTS_CATALOG:{},console};
 vm.createContext(context);
-for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js']){
+for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js']){
   vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),context,{filename:file,timeout:3000});
 }
 const lessons=context.LESSONS_DATA,chapters=context.CHAPTERS_DATA;
@@ -19,8 +19,8 @@ assert.match(lessons[1].initialCode,/print\(""\)/);
 assert.match(lessons[2].initialCode,/print\("Arrivederci!"\)/);
 assert.ok(lessons.every(x=>x.theory&&x.task&&x.initialCode&&x.title));
 assert.ok(lessons.every(x=>typeof x.validate==='function'));
-assert.ok(lessons.slice(0,81).every(x=>x.validationReady===true));
-assert.ok(lessons.slice(81).every(x=>x.validationReady===false));
+assert.ok(lessons.slice(0,89).every(x=>x.validationReady===true));
+assert.ok(lessons.slice(89).every(x=>x.validationReady===false));
 assert.ok(lessons.slice(170).every(x=>x.sourceFiles['main.gd']));
 assert.match(lessons[8].initialCode,/^extends Node/m);
 assert.match(lessons[8].initialCode,/^    var PlayerName/m);
@@ -28,7 +28,7 @@ assert.match(lessons[170].sourceFiles['greeter.gd'],/^class_name Greeter/m);
 const stats=context.window.GDHManualMigration;
 assert.equal(stats.total,235);
 assert.equal(stats.chapters,43);
-assert.equal(stats.validated,81);
+assert.equal(stats.validated,89);
 assert.equal(stats.readyForRelease,false);
 assert.equal(context.window.GDHManualBasicsValidated,18);
 async function checks(n,logs,source=lessons[n-1].initialCode){
@@ -94,8 +94,21 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.notEqual(verify.expectedCases[60][0].output,verify.expectedCases[60][1].output);
   assert.equal(verify.expectedCases[61].length,4);
   assert.equal(verify.expectedCases[65].length,3);
-  const unsupported=await verify.verify(10082,'',async()=>{throw Error('Non dovrebbe partire');});
+  assert.match(lessons[81].task,/freccia/);
+  assert.doesNotMatch(lessons[81].task,/bombee|Used|Items:/);
+  assert.match(lessons[81].initialCode,/var inventory = \{"pozione": 2, "freccia": 10\}/);
+  assert.doesNotMatch(lessons[82].initialCode,/print\("Benvenuto/);
+  for(let n=83;n<=89;n++)assert.match(lessons[n-1].initialCode,/extends Node/);
+  const intro=await verify.verify(10083,lessons[82].initialCode,async()=>({
+    status:'executed',stdout:'',stderr:'',reply:{status:'executed'}
+  }));
+  assert.equal(intro.accepted,false,'La lezione 83 non deve superarsi eseguendo pass');
+  const commands=verify.expectedCases[89];
+  assert.equal(commands.length,3);
+  assert.ok(commands.some(c=>c.stdin.includes('0')));
+  assert.ok(verify.expectedCases[88].some(c=>c.stdin.join(',').includes('4,2,3')));
+  const unsupported=await verify.verify(10090,'',async()=>{throw Error('Non dovrebbe partire');});
   assert.equal(unsupported.accepted,false,'Lezione non verificata non dà XP');
   assert.match(verify.nativeSource('print(OS.read_string_from_stdin())'),/__gdhManualReadStdin/);
-  console.log('OK: 235 lezioni, 43 capitoli, 81 validatori, stdin e test negativi');
+  console.log('OK: 235 lezioni, 43 capitoli, 89 validatori, stdin e test negativi');
 })().catch(err=>{console.error(err);process.exitCode=1});
