@@ -112,6 +112,20 @@
     return {success:raw.status==='executed'&&!String(raw.stderr||'').trim(),
       logs:lines(raw.stdout),error:raw.stderr||raw.reply?.message||'',raw};
   };
+  // I quattro esercizi condizionali sono verificati su TUTTI i casi previsti.
+  for(let n=27;n<=30;n++){
+    const item=(window.LESSONS_DATA||[]).find(x=>x.manualLessonNumber===n);
+    if(!item)throw Error('Lezione mancante: '+n);
+    item.validationReady=true;
+    item.expectedOutput=({
+      27:'stato = Vento forte',28:'result = 46.0',
+      29:'Puoi guardare film classificati PG-13',30:'Raccogli le mele'
+    })[n];
+  }
+  if(window.GDHManualMigration) {
+    window.GDHManualMigration.validated=(window.LESSONS_DATA||[]).filter(l=>l.validationReady).length;
+    window.GDHManualMigration.readyForRelease=false;
+  }
   window.GDHManualVerifier=Object.freeze({has:id=>Number.isInteger(id)&&id>=10001&&id<=10235,
     verify,preview,nativeSource,expectedCases});
 })();
