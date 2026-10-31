@@ -35,6 +35,7 @@ jobs:
           node --check manuale235/nested-dictionaries.js
           node --check manuale235/contact-book.js
           node --check manuale235/sets.js
+          node --check manuale235/enums.js
           node --check manuale235/studio.js
           node --check native/isolated-runner.js
           node --check native/native-beta-adapter.js
