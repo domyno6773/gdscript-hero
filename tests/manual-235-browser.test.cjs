@@ -1772,7 +1772,7 @@ async function main(){
     const fake191=await page.evaluate(async()=>{
       App.openLesson(10191);
       const draft=GDHManualStudio.getDraft(LESSONS_DATA[190]);
-      draft.files['vehicle.gd']=draft.files['vehicle.gd'].replace(
+      draft.files['vehicle.gd']=LESSONS_DATA[190].sourceFiles['vehicle.gd'].replace(
         'return ""','return "Toyota: 4 ruote, Vroom"');
       try{
         const result=await GDHManualVerifier.verify(10191,
