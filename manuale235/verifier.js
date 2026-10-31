@@ -94,7 +94,8 @@
   const verify=async(id,source,run)=>{
     const lesson=byId(id),number=lesson?.manualLessonNumber;
     if(!lesson||!number||number<1||number>235)return unavailable(id,source);
-    if(lesson.requiresMultipleFiles)return unavailable(id,source);
+    if(lesson.requiresMultipleFiles && !window.GDHManualProject?.supports(lesson))
+      return unavailable(id,source);
     const hasStatic=lesson.validationReady&&!expectedCases[number];
     const cases=expectedCases[number]||null;
     if(!hasStatic&&!cases)return unavailable(id,source);
@@ -109,6 +110,14 @@
     for(let i=0;i<testRuns.length;i++){
       const testcase=testRuns[i];
       let code=source;
+      if(lesson.requiresMultipleFiles){
+        try{code=window.GDHManualProject.compile(lesson);}
+        catch(error){
+          checks.push({desc:'File del progetto',passed:false,
+            diff:String(error?.message||error)});
+          break;
+        }
+      }
       if(testcase.seed!==undefined)code=seed(source,'season',testcase.seed);
       if(testcase.seeds){
         for(const [key,value] of Object.entries(testcase.seeds)){
@@ -183,8 +192,12 @@
   };
   const preview=async(id,source,run,stdin)=>{
     const lesson=byId(id);
-    if(!lesson||lesson.requiresMultipleFiles)throw Error('Esecuzione multi-file non ancora disponibile');
-    const raw=await run(nativeSource(source),{stdin:stdin||[]});
+    if(!lesson)throw Error('Lezione non disponibile');
+    if(lesson.requiresMultipleFiles&&!window.GDHManualProject?.supports(lesson))
+      throw Error('Esecuzione del progetto non ancora disponibile');
+    const code=lesson.requiresMultipleFiles?
+      window.GDHManualProject.compile(lesson):source;
+    const raw=await run(nativeSource(code),{stdin:stdin||[]});
     return {success:raw.status==='executed'&&!String(raw.stderr||'').trim(),
       logs:lines(raw.stdout),error:raw.stderr||raw.reply?.message||'',raw};
   };

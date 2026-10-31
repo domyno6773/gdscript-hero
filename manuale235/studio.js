@@ -97,7 +97,7 @@
       warning.className='manual-verification-note';
       warning.setAttribute('role','status');
       warning.textContent=lesson.requiresMultipleFiles?
-        'Il progetto multi-file è disponibile nell’editor, ma la sua verifica Godot è ancora in preparazione.':
+        'Questo progetto richiede la verifica con le classi Godot e non attribuisce ancora progressi.':
         'Questa lezione è importata dal manuale; il verificatore completo è ancora in preparazione.';
       task.append(warning);
     }
