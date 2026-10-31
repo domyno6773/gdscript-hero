@@ -1958,15 +1958,15 @@ async function main(){
       }
     });
     assert.equal(fake191,false,'Non accettare output hardcoded nel garage');
-    const future193=await page.evaluate(async()=>{
-      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===193);
+    const future196=await page.evaluate(async()=>{
+      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===196);
       return {ready:l.validationReady,
         supported:GDHManualProject.supports(l),
         accepted:(await GDHManualVerifier.verify(l.id,l.initialCode,
           ()=>{throw Error('Non eseguire Godot su una lezione non supportata');})).accepted};
     });
-    assert.deepEqual(future193,{ready:false,supported:false,accepted:false},
-      'Non attribuire XP alle classi astratte con il runtime Godot 4.4.1');
+    assert.deepEqual(future196,{ready:false,supported:false,accepted:false},
+      'Non attribuire XP alle lezioni prive di validatore specifico');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
