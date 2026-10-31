@@ -624,6 +624,31 @@ async function main(){
       '    for item in data_list:\n'+
       '        counts[item] = counts.get(item, 0) + 1\n'+
       '    return counts');
+    await exercise(116,
+      'extends Node\nfunc _ready():\n    display_menu()\n'+
+      'func display_menu():\n'+
+      '    print("Menu della rubrica:")\n'+
+      '    print("1. Aggiungi contatto")\n'+
+      '    print("2. Visualizza contatto")\n'+
+      '    print("3. Modifica contatto")\n'+
+      '    print("4. Elimina contatto")\n'+
+      '    print("5. Elenca tutti i contatti")\n'+
+      '    print("6. Esci")');
+    const completeRubrica=await page.evaluate(
+      ()=>LESSONS_DATA.find(l=>l.manualLessonNumber===122).initialCode);
+    for(const n of [117,118,119,120,121])
+      await exercise(n,completeRubrica);
+    const matchRubrica=completeRubrica
+      .replace(/^        if choice == "1":/m,
+        '        match choice:\n            "1":')
+      .replace(/^        elif choice == "([2-6])":/gm,
+        '            "$1":')
+      .replace(/^            (add_contact|view_contact|edit_contact|delete_contact|list_all_contacts)\(contact_book\)$/gm,
+        '                $1(contact_book)')
+      .replace(/^            break$/m,'                break')
+      .replace('        # Aggiungi il pattern jolly per le scelte non valide.',
+        '            _:\n                print("Scelta non valida. Riprova.")');
+    await exercise(122,matchRubrica);
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
