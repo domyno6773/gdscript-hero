@@ -1016,8 +1016,13 @@ async function main(){
         '    return numbers.filter(func(n): return n > 0).map(func(n): return n * 2 if n % 2 == 0 else n * 3)'
       ]]
     ];
-    for(const [n,lines] of advancedSolutions)
+    for(const [n,lines] of advancedSolutions){
+      if(n===149){
+        const cases=await page.evaluate(()=>GDHManualVerifier.expectedCases[149]);
+        console.log('DEBUG countdown scenarios:',JSON.stringify(cases));
+      }
       await exercise(n,lines.join('\n'));
+    }
     // Il primo valore utile non basta: un programma statico non deve
     // superare l'intero blocco di prove alternative.
     for(const n of [146,147,149,154,155]){
