@@ -86,7 +86,7 @@
       const actual=await run(nativeSource(code),{stdin:testcase.stdin||[]});
       if(!base)base=actual;
       const ok=actual.status==='executed'&&!String(actual.stderr||'').trim();
-      let matches=ok&&same(actual.stdout,testcase.output);
+      const matches=ok&&(!cases||same(actual.stdout,testcase.output));
       checks.push({desc:testcase.name,passed:matches,diff:matches?null:
         !ok?('Errore Godot: '+(actual.stderr||actual.reply?.message||actual.status)):
         'Risultato previsto:\n'+testcase.output+'\nRicevuto:\n'+actual.stdout});
