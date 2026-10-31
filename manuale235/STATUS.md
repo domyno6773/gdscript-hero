@@ -12,7 +12,7 @@ Questo ramo NON è pronto per essere unito a `main`. Il sito pubblico non deve e
 - Gli esempi iniziali dei primi otto esercizi sono stati ricostruiti dove il PDF aveva perso righe di codice nel passaggio editoriale.
 - L'editor nel ramo di prova ora presenta tab `.gd`, i file da completare si aprono per primi e `main.gd` è protetto quando fornito.
 - Il runner isolato accetta una coda di righe stdin distinta dai controlli di gioco; l'interfaccia consente un'anteprima senza XP.
-- Le prime 195 lezioni (1–195) hanno verificatori dedicati. Le lezioni 111–115 esercitano dizionari annidati, classifiche, default, copie profonde e conteggio delle frequenze; 116–122 costruiscono progressivamente una rubrica; 123–128 esercitano insiemi e rimozione dei duplicati; 129–133 verificano enumerazioni, giorni, stati e semafori con più input; 134–140 costruiscono il registro studenti in fasi, comprese le verifiche su assenze, voti, iscrizioni e soglie. I test Playwright/Chrome con Godot WebAssembly hanno provato soluzioni corrette e casi alternativi selezionati. Questo non certifica tutte le possibili soluzioni.
+- Le prime 200 lezioni (1–200) hanno verificatori dedicati. Le lezioni 111–115 esercitano dizionari annidati, classifiche, default, copie profonde e conteggio delle frequenze; 116–122 costruiscono progressivamente una rubrica; 123–128 esercitano insiemi e rimozione dei duplicati; 129–133 verificano enumerazioni, giorni, stati e semafori con più input; 134–140 costruiscono il registro studenti in fasi, comprese le verifiche su assenze, voti, iscrizioni e soglie. I test Playwright/Chrome con Godot WebAssembly hanno provato soluzioni corrette e casi alternativi selezionati. Questo non certifica tutte le possibili soluzioni.
 
 ## Semantica richiesta
 - Lezione 1 «Il linguaggio»: lo script stampa già `Ciao GDScript!`, senza richiedere di scrivere codice. Si procede con la verifica.
@@ -22,8 +22,8 @@ Questo ramo NON è pronto per essere unito a `main`. Il sito pubblico non deve e
 
 ## Blocchi per una pubblicazione corretta
 1. Il PDF fa uso di `OS.read_string_from_stdin()` in 165 lezioni. È stato aggiunto un canale di input testuale al browser (distinto dall'input delle azioni di gioco), ma servono ancora set di casi di prova didattici per quasi tutte queste lezioni.
-2. Le lezioni 171–235 hanno file `.gd` distinti nell'editor. Le attività 171–195 ora hanno test Godot attraverso classi GDScript annidate assembleate in memoria; la verifica rifiuta qualunque modifica di `main.gd`. Questo è un adattatore didattico, non un loader generalizzato di risorse `.gd` da `res://`; le lezioni 196–235 rimangono bloccate.
-3. I primi 195 esercizi hanno un validatore didattico predisposto, gli altri 40 non attribuiscono XP. Occorrono comunque verifiche native sistematiche, test positivi, negativi e casi alternativi per ciascuna attività prima del rilascio.
+2. Le lezioni 171–235 hanno file `.gd` distinti nell'editor. Le attività 171–200 ora hanno test Godot attraverso classi GDScript annidate assembleate in memoria; la verifica rifiuta qualunque modifica di `main.gd`. Questo è un adattatore didattico, non un loader generalizzato di risorse `.gd` da `res://`; le lezioni 201–235 rimangono bloccate.
+3. I primi 200 esercizi hanno un validatore didattico predisposto, gli altri 35 non attribuiscono XP. Occorrono comunque verifiche native sistematiche, test positivi, negativi e casi alternativi per ciascuna attività prima del rilascio.
 4. Le prove di regressione precedenti fanno riferimento a ID/consegne del corso vecchio: vanno aggiornate al nuovo corpus, non silenziate.
 5. Progressione, obiettivi giornalieri, ripasso e achievement devono usare i nuovi ID e azioni prima della pubblicazione.
 6. Ricontrollare le lezioni successive con starter tronchi o senza `extends Node`, perché il PDF non garantisce l'eseguibilità del frammento fuori dal contesto originario.
@@ -37,10 +37,10 @@ Questo ramo NON è pronto per essere unito a `main`. Il sito pubblico non deve e
 - [x] Vecchio dataset rimosso dal ramo di migrazione.
 - [x] Prima lezione predisposta per sola esecuzione, seconda per modifica di `print("")`.
 - [x] Test automatici di integrità sul ramo.
-- [x] Verificatori didattici 1–195 predisposti, esiti incompleti/non funzionanti bloccati.
+- [x] Verificatori didattici 1–200 predisposti, esiti incompleti/non funzionanti bloccati.
 - [ ] Validazione comportamentale di tutte le 235 attività in Godot.
 - [ ] Input utente e varianti reali per le attività stdin.
-- [ ] Supporto Godot a progetti e risorse realmente multi-file (l'adattatore 171–195 non sostituisce il caricatore nativo).
+- [ ] Supporto Godot a progetti e risorse realmente multi-file (l'adattatore 171–200 non sostituisce il caricatore nativo).
 - [ ] Regressioni browser, mobile, salvataggi e progressione superate.
 - [ ] Pubblicazione su `main` e verifica GitHub Pages completate.
 
@@ -48,3 +48,7 @@ Non impostare `readyForRelease: true` finché tutti i gate non sono soddisfatti.
 
 ## Blocco 193–195: versione del runtime
 Le lezioni 193–195 usano `@abstract` reale, introdotto in Godot 4.5. La PR di prova contiene ora Godot 4.5.1 WebAssembly, esportato dal workflow `manual-235-godot45-preview.yml` che NON pubblica su `main`. Occorre comunque passare tutti i test browser ed eseguire l'audit di regressione prima del rilascio.
+
+## Blocco 196–200
+- Incapsulamento OOP, con incremento XP e livelli, setter validati, playlist con copie difensive, proprietà calcolate e registro studenti a due classi.
+- Il driver `main.gd` del registro è stato ricostruito poiché le righe nel PDF erano tronche e usavano comandi incoerenti (`rename`/`rinomina`, `remove`/`rimuovi`). Le attività sono sottoposte ai test con il runtime nativo.

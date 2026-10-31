@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,195);
+    assert.equal(stats.prepared,200);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -1943,6 +1943,174 @@ async function main(){
       assert.equal(l.validationReady,true,
         'Non dichiarare pronte lezioni senza validazione native: '+n);
     }
+
+    // 196: progressi e salti di livello; i nomi delle funzioni sono parte
+    // della consegna e il calcolo è verificato con XP non fissi.
+    await completeProject(196,{
+      'hero.gd':[
+        'class_name Hero','extends RefCounted',
+        'var hero_name: String',
+        'var _xp: int = 0',
+        'var _level: int = 1',
+        'func _init(new_name: String) -> void:',
+        '    hero_name = new_name',
+        'func gain_xp(amount: int) -> bool:',
+        '    var previous = _level',
+        '    _xp += amount',
+        '    _update_level()',
+        '    return _level > previous',
+        'func get_xp() -> int:',
+        '    return _xp',
+        'func get_level() -> int:',
+        '    return _level',
+        'func _update_level() -> void:',
+        '    _level = 1 + int(_xp / 100)'
+      ]
+    });
+    // 197: i setter devono rifiutare valori fuori intervallo e
+    // cancellare l'errore al prossimo comando valido.
+    await completeProject(197,{
+      'thermostat.gd':[
+        'class_name Thermostat','extends RefCounted',
+        'var last_error: String = ""',
+        'var target: int = 20:',
+        '    set(value):',
+        '        if value < 10 or value > 30:',
+        '            last_error = "Target must be between 10 and 30"',
+        '        else:',
+        '            target = value',
+        '            last_error = ""',
+        'var mode: String = "off":',
+        '    set(value):',
+        '        if value not in ["heat", "cool", "off"]:',
+        '            last_error = "Sconosciuto mode: " + value',
+        '        else:',
+        '            mode = value',
+        '            last_error = ""',
+        'func _init(start_target: int) -> void:',
+        '    target = start_target'
+      ]
+    });
+    // 198: l'array restituito deve essere una copia, altrimenti
+    // lo script fornito aggiunge Intruder e inverte l'ordine.
+    await completeProject(198,{
+      'playlist.gd':[
+        'class_name Playlist','extends RefCounted',
+        'var _songs: Array[String] = []',
+        'func add(title: String) -> bool:',
+        '    if title in _songs:',
+        '        return false',
+        '    _songs.append(title)',
+        '    return true',
+        'func remove(title: String) -> bool:',
+        '    if title not in _songs:',
+        '        return false',
+        '    _songs.erase(title)',
+        '    return true',
+        'func count() -> int:',
+        '    return _songs.size()',
+        'func get_titles() -> Array[String]:',
+        '    return _songs.duplicate()'
+      ]
+    });
+    // 199: quattro proprietà calcolate con blocco get.
+    await completeProject(199,{
+      'order.gd':[
+        'class_name Order','extends RefCounted',
+        'var _id: int',
+        'var _line_totals: Array[int] = []',
+        'var order_id: int:',
+        '    get:',
+        '        return _id',
+        'var subtotal: int:',
+        '    get:',
+        '        var result = 0',
+        '        for row in _line_totals:',
+        '            result += row',
+        '        return result',
+        'var shipping: int:',
+        '    get:',
+        '        return 0 if subtotal >= 50 else 5',
+        'var total: int:',
+        '    get:',
+        '        return subtotal + shipping',
+        'func _init(id: int) -> void:',
+        '    _id = id',
+        'func add_item(price: int, quantity: int) -> void:',
+        '    _line_totals.append(price * quantity)'
+      ]
+    });
+    // 200: due classi indipendenti per studenti e registro,
+    // incluso l'ordine di inserimento e gli spareggi.
+    await completeProject(200,{
+      'student.gd':[
+        'class_name Student','extends RefCounted',
+        'var last_error: String = ""',
+        'var _id: int',
+        'var _grades: Dictionary = {}',
+        'var student_id: int:',
+        '    get:',
+        '        return _id',
+        'var student_name: String = "":',
+        '    set(value):',
+        '        if value.length() < 2:',
+        '            last_error = "Il nome deve contenere almeno 2 caratteri"',
+        '        else:',
+        '            student_name = value',
+        '            last_error = ""',
+        'var average: float:',
+        '    get:',
+        '        if _grades.is_empty():',
+        '            return 0.0',
+        '        var total = 0.0',
+        '        for score in _grades.values():',
+        '            total += score',
+        '        return total / _grades.size()',
+        'func _init(id: int, new_name: String) -> void:',
+        '    _id = id',
+        '    student_name = new_name',
+        'func add_grade(course: String, grade: int) -> bool:',
+        '    if grade < 0 or grade > 100:',
+        '        return false',
+        '    _grades[course] = grade',
+        '    return true',
+        'func course_count() -> int:',
+        '    return _grades.size()'
+      ],
+      'student_registry.gd':[
+        'class_name StudentRegistry','extends RefCounted',
+        'var _students: Dictionary = {}',
+        'func add_student(student: Student) -> bool:',
+        '    if _students.has(student.student_id):',
+        '        return false',
+        '    _students[student.student_id] = student',
+        '    return true',
+        'func remove_student(id: int) -> bool:',
+        '    if not _students.has(id):',
+        '        return false',
+        '    _students.erase(id)',
+        '    return true',
+        'func get_student(id: int) -> Student:',
+        '    return _students.get(id, null)',
+        'func top_student() -> Student:',
+        '    var best: Student = null',
+        '    for value in _students.values():',
+        '        var student: Student = value',
+        '        if best == null or student.average > best.average:',
+        '            best = student',
+        '    return best',
+        'func get_ids() -> Array:',
+        '    return _students.keys()'
+      ]
+    });
+    for(const n of [196,197,198,199,200]){
+      const data=await page.evaluate(num=>{
+        const l=LESSONS_DATA.find(x=>x.manualLessonNumber===num);
+        return {ready:l.validationReady,locked:l.readOnlyFiles};
+      },n);
+      assert.equal(data.ready,true,'Lezione non pronta '+n);
+      assert.deepEqual(data.locked,['main.gd']);
+    }
     const fake191=await page.evaluate(async()=>{
       App.openLesson(10191);
       const draft=GDHManualStudio.getDraft(LESSONS_DATA[190]);
@@ -1958,14 +2126,14 @@ async function main(){
       }
     });
     assert.equal(fake191,false,'Non accettare output hardcoded nel garage');
-    const future196=await page.evaluate(async()=>{
-      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===196);
+    const future201=await page.evaluate(async()=>{
+      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===201);
       return {ready:l.validationReady,
         supported:GDHManualProject.supports(l),
         accepted:(await GDHManualVerifier.verify(l.id,l.initialCode,
           ()=>{throw Error('Non eseguire Godot su una lezione non supportata');})).accepted};
     });
-    assert.deepEqual(future196,{ready:false,supported:false,accepted:false},
+    assert.deepEqual(future201,{ready:false,supported:false,accepted:false},
       'Non attribuire XP alle lezioni prive di validatore specifico');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);

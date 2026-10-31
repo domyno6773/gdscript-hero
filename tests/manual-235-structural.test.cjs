@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const root=process.cwd();
 const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],CONCEPTS_CATALOG:{},console};
 vm.createContext(context);
-for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js','manuale235/sets.js','manuale235/enums.js','manuale235/student-records.js','manuale235/aggregates.js','manuale235/advanced-functions.js','manuale235/array-methods.js','manuale235/error-handling.js','manuale235/inventory-project.js','manuale235/final-challenges.js','manuale235/projects.js','manuale235/oop-foundations.js','manuale235/oop-properties.js','manuale235/oop-encapsulation.js','manuale235/oop-inheritance.js','manuale235/oop-polymorphism.js','manuale235/oop-duck-typing.js','manuale235/oop-abstract.js','manuale235/oop-shape-calculator.js']){
+for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js','manuale235/sets.js','manuale235/enums.js','manuale235/student-records.js','manuale235/aggregates.js','manuale235/advanced-functions.js','manuale235/array-methods.js','manuale235/error-handling.js','manuale235/inventory-project.js','manuale235/final-challenges.js','manuale235/projects.js','manuale235/oop-foundations.js','manuale235/oop-properties.js','manuale235/oop-encapsulation.js','manuale235/oop-inheritance.js','manuale235/oop-polymorphism.js','manuale235/oop-duck-typing.js','manuale235/oop-abstract.js','manuale235/oop-shape-calculator.js','manuale235/oop-encapsulation-advanced.js']){
   vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),context,{filename:file,timeout:3000});
 }
 const lessons=context.LESSONS_DATA,chapters=context.CHAPTERS_DATA;
@@ -19,8 +19,8 @@ assert.match(lessons[1].initialCode,/print\(""\)/);
 assert.match(lessons[2].initialCode,/print\("Arrivederci!"\)/);
 assert.ok(lessons.every(x=>x.theory&&x.task&&x.initialCode&&x.title));
 assert.ok(lessons.every(x=>typeof x.validate==='function'));
-assert.ok(lessons.slice(0,195).every(x=>x.validationReady===true));
-assert.ok(lessons.slice(195).every(x=>x.validationReady===false));
+assert.ok(lessons.slice(0,200).every(x=>x.validationReady===true));
+assert.ok(lessons.slice(200).every(x=>x.validationReady===false));
 assert.ok(lessons.slice(170).every(x=>x.sourceFiles['main.gd']));
 assert.match(lessons[8].initialCode,/^extends Node/m);
 assert.match(lessons[8].initialCode,/^    var PlayerName/m);
@@ -28,7 +28,7 @@ assert.match(lessons[170].sourceFiles['greeter.gd'],/^class_name Greeter/m);
 const stats=context.window.GDHManualMigration;
 assert.equal(stats.total,235);
 assert.equal(stats.chapters,43);
-assert.equal(stats.validated,195);
+assert.equal(stats.validated,200);
 assert.equal(stats.readyForRelease,false);
 assert.equal(context.window.GDHManualBasicsValidated,18);
 async function checks(n,logs,source=lessons[n-1].initialCode){
@@ -254,6 +254,24 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.doesNotMatch(lessons[194].initialCode,/@abstract\s+func\s+area/);
   assert.ok(verify.expectedCases[194].some(x=>x.output.includes('Tempo totale: 4:38')));
   assert.ok(verify.expectedCases[195].some(x=>x.output.includes('Area totale: 87.54')));
+  // Incapsulamento avanzato: cinque verificatori con input diversi e
+  // rispetto del driver protetto dal manuale.
+  for(let n=196;n<=200;n++){
+    const l=lessons[n-1];
+    assert.equal(l.validationReady,true,'Verifica didattica mancante '+n);
+    assert.equal(p192.supports(l),true);
+    assert.ok(verify.expectedCases[n].length>=5);
+    assert.ok(p192.build(l,l.sourceFiles).includes('extends Node'));
+    assert.equal(l.manualSourceCheck('class_name Example\nextends RefCounted'),false);
+    const corrupt={...l.sourceFiles,'main.gd':l.sourceFiles['main.gd']+'\n# errore'};
+    assert.throws(()=>p192.build(l,corrupt),/modificato/);
+  }
+  assert.equal(Object.keys(lessons[199].sourceFiles).length,3);
+  assert.ok(verify.expectedCases[196].some(c=>c.output.includes('Rifiutato:')));
+  assert.ok(verify.expectedCases[197].some(c=>c.output.includes('Già presente nella playlist:')));
+  assert.ok(verify.expectedCases[198].some(c=>c.output.includes('Ordine n.')));
+  assert.ok(verify.expectedCases[199].some(c=>c.output.includes('Media: 87.50')));
+  assert.ok(lessons.slice(200).every(l=>l.validationReady===false));
   const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
     status:'executed',stdout:'Ciao GDScript!\n',stderr:'',reply:{status:'executed'}
   }));
@@ -365,8 +383,8 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.equal(verify.expectedCases[128].length,6);
   assert.match(lessons[127].initialCode,/func remove_duplicates\(numbers: Array\[int\]\) -> Array\[int\]/);
   assert.ok(verify.expectedCases[128].some(c=>c.stdin===undefined&&c.harness));
-  const unsupported=await verify.verify(10196,'',async()=>{throw Error('Non dovrebbe partire');});
+  const unsupported=await verify.verify(10201,'',async()=>{throw Error('Non dovrebbe partire');});
   assert.equal(unsupported.accepted,false,'Lezione non verificata non dà XP');
   assert.match(verify.nativeSource('print(OS.read_string_from_stdin())'),/__gdhManualReadStdin/);
-  console.log('OK: 235 lezioni, 43 capitoli, 195 validatori, stdin e test negativi');
+  console.log('OK: 235 lezioni, 43 capitoli, 200 validatori, stdin e test negativi');
 })().catch(err=>{console.error(err);process.exitCode=1});
