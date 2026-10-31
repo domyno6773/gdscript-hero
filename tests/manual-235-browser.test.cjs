@@ -27,6 +27,8 @@ async function main(){
       await page.locator('#site-skip-tour').click();
       if(await page.locator('#site-goal-gate').isVisible())
         await page.locator('#site-goal-gate [data-goal="rilassato"]').click();
+      if(await page.locator('#streak-modal').isVisible())
+        await page.locator('#btn-close-streak').click();
     }
     const stats=await page.evaluate(()=>({
       count:LESSONS_DATA.length,chapters:CHAPTERS_DATA.length,
