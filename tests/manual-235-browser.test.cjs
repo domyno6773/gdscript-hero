@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,205);
+    assert.equal(stats.prepared,210);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -2260,14 +2260,14 @@ async function main(){
       }
     });
     assert.equal(fake191,false,'Non accettare output hardcoded nel garage');
-    const future206=await page.evaluate(async()=>{
-      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===206);
+    const future211=await page.evaluate(async()=>{
+      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===211);
       return {ready:l.validationReady,
         supported:GDHManualProject.supports(l),
         accepted:(await GDHManualVerifier.verify(l.id,l.initialCode,
           ()=>{throw Error('Non eseguire Godot su una lezione non supportata');})).accepted};
     });
-    assert.deepEqual(future206,{ready:false,supported:false,accepted:false},
+    assert.deepEqual(future211,{ready:false,supported:false,accepted:false},
       'Non attribuire XP alle lezioni prive di validatore specifico');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
