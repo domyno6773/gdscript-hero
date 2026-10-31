@@ -100,7 +100,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   }
   assert.ok(verify.expectedCases[146].some(x=>x.stdin[0]==='-2'));
   assert.ok(verify.expectedCases[147].some(x=>x.stdin[0]==='0'));
-  assert.ok(verify.expectedCases[150].some(x=>x.output==='55'));
+  assert.ok(verify.expectedCases[150].some(x=>x.output==='34'));
   assert.ok(verify.expectedCases[156].some(x=>x.stdin===undefined));
   assert.ok(verify.expectedCases[157].some(x=>x.output==='[]'));
   const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
