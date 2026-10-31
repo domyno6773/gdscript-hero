@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,190);
+    assert.equal(stats.prepared,192);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -1701,6 +1701,98 @@ async function main(){
       return checked.accepted;
     });
     assert.equal(wrongZoo,false,'La risposta fissa dello zoo non deve superare la prova');
+
+    // Ripasso override (191) e duck typing (192): i driver e le classi
+    // di supporto del corso non possono essere modificati dallo studente.
+    await completeProject(191,{
+      'vehicle.gd':[
+        'class_name Vehicle','extends RefCounted',
+        'var brand: String',
+        'func _init(b: String) -> void:',
+        '    brand = b',
+        'func wheels() -> int:',
+        '    return 0',
+        'func sound() -> String:',
+        '    return "..."',
+        'func describe() -> String:',
+        '    return "%s: %d ruote, %s" % [brand, wheels(), sound()]'
+      ],
+      'car.gd':[
+        'class_name Car','extends Vehicle',
+        'func wheels() -> int:',
+        '    return 4',
+        'func sound() -> String:',
+        '    return "Vroom"'
+      ],
+      'motorcycle.gd':[
+        'class_name Motorcycle','extends Vehicle',
+        'func wheels() -> int:',
+        '    return 2',
+        'func sound() -> String:',
+        '    return "Brrm"'
+      ],
+      'truck.gd':[
+        'class_name Truck','extends Vehicle',
+        'var trailers: int',
+        'func _init(b: String, t: int) -> void:',
+        '    super(b)',
+        '    trailers = t',
+        'func wheels() -> int:',
+        '    return 6 + trailers * 4',
+        'func sound() -> String:',
+        '    return "Honk"'
+      ]
+    });
+    await completeProject(192,{
+      'crate.gd':[
+        'class_name Crate','extends RefCounted',
+        'var broken: bool = false',
+        'func take_damage(amount: int) -> void:',
+        '    if amount >= 10:',
+        '        broken = true',
+        'func status() -> String:',
+        '    return "Cassa: distrutta" if broken else "Cassa: intatta"'
+      ],
+      'explosion.gd':[
+        'class_name Explosion','extends RefCounted',
+        'static func hit_all(things: Array, amount: int) -> int:',
+        '    var hits = 0',
+        '    for thing in things:',
+        '        if thing.has_method("take_damage"):',
+        '            thing.call("take_damage", amount)',
+        '            hits += 1',
+        '    return hits'
+      ]
+    });
+    for(const protectedFile of ['player.gd','rock.gd','main.gd']){
+      await page.locator('.manual-file-tab',{hasText:protectedFile}).click();
+      assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'',
+        'Classe fornita modificabile: '+protectedFile);
+    }
+    const fake191=await page.evaluate(async()=>{
+      App.openLesson(10191);
+      const draft=GDHManualStudio.getDraft(LESSONS_DATA[190]);
+      draft.files['vehicle.gd']=draft.files['vehicle.gd'].replace(
+        'return ""','return "Toyota: 4 ruote, Vroom"');
+      try{
+        const result=await GDHManualVerifier.verify(10191,
+          document.getElementById('code-editor').value,
+          (code,options)=>GDHGodot.runNative(code,options));
+        return result.accepted;
+      }finally{
+        draft.files['vehicle.gd']=LESSONS_DATA[190].sourceFiles['vehicle.gd'];
+      }
+    });
+    assert.equal(fake191,false,'Non accettare output hardcoded nel garage');
+    const future193=await page.evaluate(async()=>{
+      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===193);
+      return {ready:l.validationReady,
+        supported:GDHManualProject.supports(l),
+        accepted:(await GDHManualVerifier.verify(l.id,l.initialCode,
+          ()=>{throw Error('Non eseguire Godot su una lezione non supportata');})).accepted};
+    });
+    assert.deepEqual(future193,{ready:false,supported:false,accepted:false},
+      'Non attribuire XP alle classi astratte con il runtime Godot 4.4.1');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
