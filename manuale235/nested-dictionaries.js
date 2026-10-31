@@ -68,6 +68,14 @@
     /\bprint\s*\(/,/\b39\b|\btotal\b/));
 
   const l112=lesson(112);
+  // L'esempio nel PDF era rimasto troncato durante l'impaginazione: lo
+  // ricostruiamo senza cambiare l'obiettivo didattico della lezione.
+  l112.task='<p>Crea una classifica. Lo script legge un numero intero n e poi n righe, ciascuna con un nome e un punteggio separati da virgola (per esempio Mia,95).</p>'+
+    '<p>Per ogni riga aggiungi a players un dizionario con le chiavi tecniche "name" e "score", conservando il punteggio come int. Poi stampa players.</p>'+
+    '<p>Stampa infine Migliore: seguito dal nome del giocatore con il punteggio più alto e il punteggio tra parentesi. In caso di parità, scegli il primo giocatore incontrato.</p>'+
+    '<p>Esempio di input: 3, Mia,95, Leo,80, Ana,97 (una voce per riga).</p>'+
+    '<p>Risultato atteso:</p>'+
+    '<p>[{ "name": "Mia", "score": 95 }, { "name": "Leo", "score": 80 }, { "name": "Ana", "score": 97 }]<span> </span>Migliore: Ana (97)</p>';
   const start112=['extends Node','','func _ready():',
     '    var n = int(OS.read_string_from_stdin())',
     '    var players = []',
