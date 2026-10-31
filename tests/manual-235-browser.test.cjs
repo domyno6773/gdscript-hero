@@ -64,7 +64,10 @@ async function main(){
     assert.match(await page.locator('#real-output-pre').innerText(),/stato = Vento forte/);
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
-    assert.match(await page.locator('#code-editor').inputValue(),/extends Node/);
+    assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
+    assert.equal(await page.locator('#code-editor').getAttribute('readonly'),null);
+    await page.locator('.manual-file-tab', {hasText:'main.gd'}).click();
+    assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
     assert.equal(errors.length,0,'Page errors: '+errors.join(' | '));
     console.log('PASS browser: manuale 235, primo esercizio Godot, stdin e schede .gd.');
   }finally{await browser.close();}
