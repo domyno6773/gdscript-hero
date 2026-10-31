@@ -32,7 +32,11 @@
     '    # Stampa la piramide piatta: 1, 3, 5 ... fino a n asterischi.',
     '    pass'
   ].join('\n'));
-  const pyramid=n=>Array.from({length:(n+1)/2},(_,i)=>'*'.repeat(i*2+1)).join('\n');
+  const pyramid=n=>{
+    const levels=[];
+    for(let stars=1;stars<=n;stars+=2)levels.push('*'.repeat(stars));
+    return levels.join('\n');
+  };
   set(90,[1,5,7,9].map(n=>({name:'Piramide di '+n,
     stdin:[String(n)],output:pyramid(n)})),
   all(/\bfor\b|\bwhile\b/,/\*/,/OS\.read_string_from_stdin\s*\(/));
