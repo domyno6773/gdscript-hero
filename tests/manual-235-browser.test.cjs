@@ -124,6 +124,20 @@ async function main(){
       '    if username == "admin":\n        return true\n'+
       '    if username == "utente":\n        return password == "qweasd"\n'+
       '    return false');
+    // Controllo separato del protocollo stdin: lo stesso script deve leggere
+    // valori differenti in esecuzioni consecutive, senza tenere dati vecchi.
+    const stdinProbe=await page.evaluate(async()=>{
+      const src='extends Node\nfunc _ready():\n    print(OS.read_string_from_stdin())';
+      const adapted=GDHManualVerifier.nativeSource(src);
+      const values=[];
+      for(const text of ['1','7','21']){
+        const result=await GDHGodot.runNative(adapted,{stdin:[text]});
+        values.push({text,stdout:result.stdout,status:result.status,stderr:result.stderr});
+      }
+      return values;
+    });
+    assert.deepEqual(stdinProbe.map(x=>x.stdout.trim()),['1','7','21'],
+      'Input non isolato correttamente: '+JSON.stringify(stdinProbe));
     await exercise(60,
       'extends Node\nfunc _ready():\n'+
       '    print("Benvenuto in FizzBuzz!")\n'+
