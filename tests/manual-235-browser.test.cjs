@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,157);
+    assert.equal(stats.prepared,162);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -1032,6 +1032,72 @@ async function main(){
           (source,options)=>GDHGodot.runNative(source,options)),n);
       assert.equal(fraudulent.accepted,false,'Scorciatoia accettata alla lezione '+n);
     }
+
+    const errorHandlingSolutions=[
+      [158,[
+        'extends Node','func _ready():',
+        '    var inventory = ["spada", "scudo", "pozione", "arco"]',
+        '    var slot = int(OS.read_string_from_stdin())',
+        '    if slot >= 0 and slot < inventory.size():',
+        '        print("Slot ", slot, ": ", inventory[slot])',
+        '    else:',
+        '        print("La posizione ", slot, " è vuota")'
+      ]],
+      [159,[
+        'extends Node','func _ready():',
+        '    var user_input = OS.read_string_from_stdin()',
+        '    if user_input.is_valid_int():',
+        '        print("Hai inserito: ", int(user_input))',
+        '    else:',
+        '        print("Input non valido! Inserisci un numero valido.")'
+      ]],
+      [160,[
+        'func process_data(text: String):',
+        '    if not text.is_valid_int():',
+        '        return "Il valore deve essere un numero!"',
+        '    var number = int(text)',
+        '    if number == 0:',
+        '        return "Impossibile dividere per zero!"',
+        '    return "%.2f" % (100.0 / number)'
+      ]],
+      [161,[
+        'extends Node',
+        'func parse_level(text: String) -> Dictionary:',
+        '    if not text.is_valid_int():',
+        '        return {"ok": false, "error": "Valore non numerico"}',
+        '    var level = int(text)',
+        '    if level < 1 or level > 99:',
+        '        return {"ok": false, "error": "Il livello deve essere compreso tra 1 e 99"}',
+        '    return {"ok": true, "value": level}',
+        'func _ready():',
+        '    var text = OS.read_string_from_stdin()',
+        '    var result = parse_level(text)',
+        '    if result["ok"]:',
+        '        print("Livello impostato a ", result["value"])',
+        '    else:',
+        '        print("Errore: ", result["error"])'
+      ]],
+      [162,[
+        'extends Node',
+        'func safe_divide(a: float, b: float) -> Dictionary:',
+        '    if b == 0.0:',
+        '        return {"ok": false, "error": "Impossibile dividere per zero"}',
+        '    return {"ok": true, "value": a / b}',
+        'func _ready():',
+        '    var first = OS.read_string_from_stdin()',
+        '    var second = OS.read_string_from_stdin()',
+        '    if not first.is_valid_float() or not second.is_valid_float():',
+        '        print("Errore: numero non valido")',
+        '        return',
+        '    var result = safe_divide(float(first), float(second))',
+        '    if result["ok"]:',
+        '        print("Risultato della divisione: %.2f" % result["value"])',
+        '    else:',
+        '        print("Errore: ", result["error"])'
+      ]]
+    ];
+    for(const [n,lines] of errorHandlingSolutions)
+      await exercise(n,lines.join('\n'));
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
