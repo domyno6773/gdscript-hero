@@ -12,7 +12,7 @@ Questo ramo NON è pronto per essere unito a `main`. Il sito pubblico non deve e
 - Gli esempi iniziali dei primi otto esercizi sono stati ricostruiti dove il PDF aveva perso righe di codice nel passaggio editoriale.
 - L'editor nel ramo di prova ora presenta tab `.gd`, i file da completare si aprono per primi e `main.gd` è protetto quando fornito.
 - Il runner isolato accetta una coda di righe stdin distinta dai controlli di gioco; l'interfaccia consente un'anteprima senza XP.
-- Sono predisposte verifiche specifiche per 30 lezioni: 1–26 con requisiti statici + vero Godot, 27–30 con casi alternativi eseguiti in Godot.
+- Sono predisposte verifiche specifiche per 50 lezioni: 1–26 con requisiti statici e vero Godot, 27–30 con casi alternativi, 31–50 con test di I/O, formattazione, conti e cicli.
 
 ## Semantica richiesta
 - Lezione 1 «Il linguaggio»: lo script stampa già `Ciao GDScript!`, senza richiedere di scrivere codice. Si procede con la verifica.
@@ -23,7 +23,7 @@ Questo ramo NON è pronto per essere unito a `main`. Il sito pubblico non deve e
 ## Blocchi per una pubblicazione corretta
 1. Il PDF fa uso di `OS.read_string_from_stdin()` in 165 lezioni. È stato aggiunto un canale di input testuale al browser (distinto dall'input delle azioni di gioco), ma servono ancora set di casi di prova didattici per quasi tutte queste lezioni.
 2. Le lezioni 171–235 includono più file `.gd`. Ora hanno tab separati con bozze editabili; manca la compilazione nativa dell'intero progetto con classi globali, quindi la verifica non conferisce ancora XP.
-3. I primi 30 esercizi hanno un validatore didattico predisposto, gli altri 205 non attribuiscono XP. Occorrono comunque verifiche native sistematiche, test positivi, negativi e casi alternativi per ciascuna attività prima del rilascio.
+3. I primi 50 esercizi hanno un validatore didattico predisposto, gli altri 185 non attribuiscono XP. Occorrono comunque verifiche native sistematiche, test positivi, negativi e casi alternativi per ciascuna attività prima del rilascio.
 4. Le prove di regressione precedenti fanno riferimento a ID/consegne del corso vecchio: vanno aggiornate al nuovo corpus, non silenziate.
 5. Progressione, obiettivi giornalieri, ripasso e achievement devono usare i nuovi ID e azioni prima della pubblicazione.
 6. Ricontrollare le lezioni con starter tronchi o senza `extends Node`, perché il PDF non garantisce l'eseguibilità del frammento fuori dal contesto originario.
@@ -34,7 +34,7 @@ Questo ramo NON è pronto per essere unito a `main`. Il sito pubblico non deve e
 - [x] Vecchio dataset rimosso dal ramo di migrazione.
 - [x] Prima lezione predisposta per sola esecuzione, seconda per modifica di `print("")`.
 - [x] Test automatici di integrità sul ramo.
-- [x] Verificatori didattici 1–30 predisposti, esiti incompleti/non funzionanti bloccati.
+- [x] Verificatori didattici 1–50 predisposti, esiti incompleti/non funzionanti bloccati.
 - [ ] Validazione comportamentale di tutte le 235 attività in Godot.
 - [ ] Input utente e varianti reali per le attività stdin.
 - [ ] Supporto Godot nativo ai progetti multi-file.
