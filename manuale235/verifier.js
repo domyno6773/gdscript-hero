@@ -119,7 +119,10 @@
           entry.method===testcase.calls[i].method));
       const printed=testcase.object!==undefined?
         dictionaryMatches(actual.stdout,testcase.object,testcase.prefix):
-        same(actual.stdout,testcase.output||'');
+        testcase.preserveEmptyLines===true?
+          String(actual.stdout||'').replace(/\r/g,'').trimEnd()===
+            String(testcase.output||'').replace(/\r/g,'').trimEnd():
+          same(actual.stdout,testcase.output||'');
       const matches=ok&&(!cases||printed)&&methodMatch;
       checks.push({desc:testcase.name,passed:matches,diff:matches?null:
         !ok?('Errore Godot: '+(actual.stderr||actual.reply?.message||actual.status)):
