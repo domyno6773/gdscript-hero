@@ -182,7 +182,12 @@
         diff:String(base.stderr||base.reply?.message||base.status)});
     }
     if(typeof lesson.manualSourceCheck==='function'){
-      const proof=lesson.manualSourceCheck(source);
+      const files=lesson.requiresMultipleFiles?
+        window.GDHManualProject?.currentFiles(lesson):null;
+      const proofSource=files?
+        Object.entries(files).filter(([name])=>name!=='main.gd')
+          .map(([,code])=>code).join('\n\n'):source;
+      const proof=lesson.manualSourceCheck(proofSource);
       checks.push({desc:'Operazioni richieste dalla consegna',passed:proof===true,
         diff:proof?'':'Il codice non usa le strutture indicate dalla consegna.'});
     }
