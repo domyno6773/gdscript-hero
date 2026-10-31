@@ -9,7 +9,7 @@
   const current=()=>lookup(window.App?.state?.currentLessonId);
   const getDraft=lesson=>{
     if(!drafts.has(lesson.id))drafts.set(lesson.id,{
-      files:{...lesson.sourceFiles},selected:Object.keys(lesson.sourceFiles).find(name=>name!=='main.gd')||Object.keys(lesson.sourceFiles)[0],
+      files:{...lesson.sourceFiles},selected:Object.keys(lesson.sourceFiles).find(name=>!(lesson.readOnlyFiles||['main.gd']).includes(name))||Object.keys(lesson.sourceFiles)[0],
       stdin:(window.GDHManualExamples?.[lesson.manualLessonNumber]||[]).join('\n')
     });
     return drafts.get(lesson.id);
@@ -48,7 +48,7 @@
         button.onclick=()=>{
           saveVisible();draft.selected=file;
           editor.value=draft.files[file]||'';
-          editor.readOnly=lesson.requiresMultipleFiles&&file==='main.gd';
+          editor.readOnly=lesson.requiresMultipleFiles&&(lesson.readOnlyFiles||['main.gd']).includes(file);
           editor.setAttribute('aria-readonly',String(editor.readOnly));
           editor.dispatchEvent(new Event('input',{bubbles:true}));
           group.querySelectorAll('button').forEach(b=>{
@@ -60,7 +60,7 @@
       }
       wrapper.before(group);
       editor.value=draft.files[draft.selected]||'';
-      editor.readOnly=draft.selected==='main.gd';
+      editor.readOnly=(lesson.readOnlyFiles||['main.gd']).includes(draft.selected);
       editor.setAttribute('aria-readonly',String(editor.readOnly));
       editor.dispatchEvent(new Event('input',{bubbles:true}));
     }

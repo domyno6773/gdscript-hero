@@ -8,7 +8,7 @@
 (() => {
  'use strict';
  const get=n=>(window.LESSONS_DATA||[]).find(x=>x.manualLessonNumber===n);
- const supported=new Set([171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186]);
+ const supported=new Set([171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190]);
  const lineClean=s=>String(s).replace(/\r/g,'').split('\n').map(t=>t.replace(/\t/g,'    '));
  const safe=(files,lesson)=>{
    const expected=Object.keys(lesson.sourceFiles);
@@ -17,7 +17,7 @@
      Object.prototype.hasOwnProperty.call(files,f)&&
      typeof files[f]==='string'&&
      files[f].length<8000&&
-     (f!=='main.gd'||files[f]===lesson.sourceFiles[f]));
+     ((lesson.readOnlyFiles||['main.gd']).includes(f)?files[f]===lesson.sourceFiles[f]:true));
  };
  const currentFiles=lesson=>{
    const draft=window.GDHManualStudio?.getDraft(lesson);
@@ -26,7 +26,7 @@
    if(window.App?.state?.currentLessonId===lesson.id){
      const selected=draft.selected;
      const editor=document.getElementById('code-editor');
-     if(selected&&editor&&selected!=='main.gd')files[selected]=editor.value;
+     if(selected&&editor&&!(lesson.readOnlyFiles||['main.gd']).includes(selected))files[selected]=editor.value;
    }
    return files;
  };
