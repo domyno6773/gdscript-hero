@@ -88,11 +88,12 @@
     '            print("'+cleared+'")'
   ];
   const makeStarter=n=>{
-    const src=['extends Node','','func _ready():',...linesForMenu];
     if(n===83){
-      src.push('    # Completa il messaggio iniziale e il menu.','    pass');
-      return src.join('\n');
+      return ['extends Node','','func _ready():',
+        '    # Stampa il benvenuto, una riga vuota e il menu a cinque voci.',
+        '    pass'].join('\n');
     }
+    const src=['extends Node','','func _ready():',...linesForMenu];
     if(n===84){
       src.push('    # Aggiungi qui il ciclo while, la lettura e il controllo per uscire.');
       return src.join('\n');
