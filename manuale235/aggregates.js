@@ -36,13 +36,15 @@
    /\bint\s*\(/,/\bprint\s*\(/));
 
  const l142=get(142);
- l142.task=l142.task.replaceAll('Smallest word:','Parola più piccola:')
+ l142.task=l142.task.replace('usando min() e max()',
+     'usando min() e max() sui numeri e String.casecmp_to() sulle parole')
+   .replaceAll('Smallest word:','Parola più piccola:')
    .replaceAll('Largest word:','Parola più grande:');
  patch(142,[
    'extends Node','','func _ready():',
    '    var number_texts = OS.read_string_from_stdin().split(" ", false)',
    '    var words = Array(OS.read_string_from_stdin().split(" ", false))',
-   '    # Converti number_texts in numeri; usa min e max per entrambi i tipi.',
+   '    # Usa min/max per i numeri, String.casecmp_to() per le parole.',
    '    pass'
  ].join('\n'));
  const extrema=[
