@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const root=process.cwd();
 const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],CONCEPTS_CATALOG:{},console};
 vm.createContext(context);
-for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js']){
+for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js']){
   vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),context,{filename:file,timeout:3000});
 }
 const lessons=context.LESSONS_DATA,chapters=context.CHAPTERS_DATA;
@@ -19,8 +19,8 @@ assert.match(lessons[1].initialCode,/print\(""\)/);
 assert.match(lessons[2].initialCode,/print\("Arrivederci!"\)/);
 assert.ok(lessons.every(x=>x.theory&&x.task&&x.initialCode&&x.title));
 assert.ok(lessons.every(x=>typeof x.validate==='function'));
-assert.ok(lessons.slice(0,50).every(x=>x.validationReady===true));
-assert.ok(lessons.slice(50).every(x=>x.validationReady===false));
+assert.ok(lessons.slice(0,70).every(x=>x.validationReady===true));
+assert.ok(lessons.slice(70).every(x=>x.validationReady===false));
 assert.ok(lessons.slice(170).every(x=>x.sourceFiles['main.gd']));
 assert.match(lessons[8].initialCode,/^extends Node/m);
 assert.match(lessons[8].initialCode,/^    var PlayerName/m);
@@ -28,7 +28,7 @@ assert.match(lessons[170].sourceFiles['greeter.gd'],/^class_name Greeter/m);
 const stats=context.window.GDHManualMigration;
 assert.equal(stats.total,235);
 assert.equal(stats.chapters,43);
-assert.equal(stats.validated,50);
+assert.equal(stats.validated,70);
 assert.equal(stats.readyForRelease,false);
 assert.equal(context.window.GDHManualBasicsValidated,18);
 async function checks(n,logs,source=lessons[n-1].initialCode){
@@ -68,8 +68,32 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     status:'executed',stdout:'stato = Vento forte',stderr:'',reply:{status:'executed'}
   }));
   assert.equal(shortcut.accepted,false,'Una sola stringa fissa non copre il comportamento');
-  const unsupported=await verify.verify(10051,'',async()=>{throw Error('Non dovrebbe partire');});
+  // Le funzioni prive di _ready() vengono invocate direttamente nel vero motore:
+  // simula qui solo il formato del risultato per collaudare il comparatore.
+  const functionCalls=verify.expectedCases[55];
+  assert.equal(functionCalls.length,2);
+  assert.equal(functionCalls[0].calls.length,4);
+  const sigma='func sigma(n: int):\n    var somma = 0\n    for i in range(1, n + 1):\n        somma += i\n    return somma';
+  const functionResult=await verify.verify(10055,sigma,async(_,args)=>{
+    const values=args.calls.map(c=>({status:'executed',method:c.method,
+      value:c.args[0]*(c.args[0]+1)/2}));
+    return {status:'executed',stdout:'',stderr:'',reply:{status:'executed',methodCalls:values}};
+  });
+  assert.equal(functionResult.accepted,true,'sigma deve usare i valori restituiti');
+  const fakeResult=await verify.verify(10055,sigma,async(_,args)=>({
+    status:'executed',stdout:'',stderr:'',reply:{status:'executed',
+      methodCalls:args.calls.map(c=>({status:'executed',method:c.method,value:15}))}
+  }));
+  assert.equal(fakeResult.accepted,false,'Un valore restituito costante non supera sigma');
+  const noMain=await verify.verify(10055,'extends Node\n'+sigma,async()=>({
+    status:'executed',stdout:'',stderr:'',reply:{status:'executed',
+      methodCalls:[]}
+  }));
+  assert.equal(noMain.accepted,false,'Il file solo-funzione non deve includere extends Node');
+  assert.equal(verify.expectedCases[61].length,4);
+  assert.equal(verify.expectedCases[65].length,3);
+  const unsupported=await verify.verify(10071,'',async()=>{throw Error('Non dovrebbe partire');});
   assert.equal(unsupported.accepted,false,'Lezione non verificata non dà XP');
   assert.match(verify.nativeSource('print(OS.read_string_from_stdin())'),/__gdhManualReadStdin/);
-  console.log('OK: 235 lezioni, 43 capitoli, 50 validatori, stdin e test negativi');
+  console.log('OK: 235 lezioni, 43 capitoli, 70 validatori, stdin e test negativi');
 })().catch(err=>{console.error(err);process.exitCode=1});
