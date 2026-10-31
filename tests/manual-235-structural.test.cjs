@@ -172,8 +172,8 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.equal(verify.expectedCases[128].length,6);
   assert.match(lessons[127].initialCode,/func remove_duplicates\(numbers: Array\[int\]\) -> Array\[int\]/);
   assert.ok(verify.expectedCases[128].some(c=>c.stdin===undefined&&c.harness));
-  const unsupported=await verify.verify(10129,'',async()=>{throw Error('Non dovrebbe partire');});
+  const unsupported=await verify.verify(10134,'',async()=>{throw Error('Non dovrebbe partire');});
   assert.equal(unsupported.accepted,false,'Lezione non verificata non dà XP');
   assert.match(verify.nativeSource('print(OS.read_string_from_stdin())'),/__gdhManualReadStdin/);
-  console.log('OK: 235 lezioni, 43 capitoli, 128 validatori, stdin e test negativi');
+  console.log('OK: 235 lezioni, 43 capitoli, 133 validatori, stdin e test negativi');
 })().catch(err=>{console.error(err);process.exitCode=1});
