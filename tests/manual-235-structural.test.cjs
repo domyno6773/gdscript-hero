@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const root=process.cwd();
 const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],CONCEPTS_CATALOG:{},console};
 vm.createContext(context);
-for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js','manuale235/sets.js']){
+for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js','manuale235/sets.js','manuale235/enums.js']){
   vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),context,{filename:file,timeout:3000});
 }
 const lessons=context.LESSONS_DATA,chapters=context.CHAPTERS_DATA;
@@ -19,8 +19,8 @@ assert.match(lessons[1].initialCode,/print\(""\)/);
 assert.match(lessons[2].initialCode,/print\("Arrivederci!"\)/);
 assert.ok(lessons.every(x=>x.theory&&x.task&&x.initialCode&&x.title));
 assert.ok(lessons.every(x=>typeof x.validate==='function'));
-assert.ok(lessons.slice(0,128).every(x=>x.validationReady===true));
-assert.ok(lessons.slice(128).every(x=>x.validationReady===false));
+assert.ok(lessons.slice(0,133).every(x=>x.validationReady===true));
+assert.ok(lessons.slice(133).every(x=>x.validationReady===false));
 assert.ok(lessons.slice(170).every(x=>x.sourceFiles['main.gd']));
 assert.match(lessons[8].initialCode,/^extends Node/m);
 assert.match(lessons[8].initialCode,/^    var PlayerName/m);
@@ -28,7 +28,7 @@ assert.match(lessons[170].sourceFiles['greeter.gd'],/^class_name Greeter/m);
 const stats=context.window.GDHManualMigration;
 assert.equal(stats.total,235);
 assert.equal(stats.chapters,43);
-assert.equal(stats.validated,128);
+assert.equal(stats.validated,133);
 assert.equal(stats.readyForRelease,false);
 assert.equal(context.window.GDHManualBasicsValidated,18);
 async function checks(n,logs,source=lessons[n-1].initialCode){
@@ -49,6 +49,18 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   const nineWrong=await checks(9,['Giocatore: Ada','Monete: 120','Online: true'],'extends Node\nfunc _ready():\n    print("Giocatore: Ada")\n    print("Monete: 120")\n    print("Online: true")');
   assert.ok(nineWrong.some(x=>!x.passed),'Niente completamento con output hardcoded');
   const verify=context.window.GDHManualVerifier;
+
+  // Le cinque enumerazioni vanno oltre una singola uscita prefissata.
+  for (let n=129;n<=133;n++){
+    assert.equal(lessons[n-1].validationReady,true,'Lezione '+n+' attiva');
+    assert.ok(verify.expectedCases[n]?.length>=4,'Mancano scenari '+n);
+    assert.ok(typeof lessons[n-1].manualSourceCheck==='function');
+    assert.ok(!lessons[n-1].manualSourceCheck('extends Node\nfunc _ready():\n    print("Attesa totale: 88 secondi")'),
+      'Non approvare stampe fisse nella lezione '+n);
+  }
+  assert.equal(verify.expectedCases[129].length,4);
+  assert.ok(verify.expectedCases[131].some(x=>x.stdin[0]==='VENERDÌ'));
+  assert.ok(verify.expectedCases[133].some(x=>x.stdin[0]==='YELLOW'));
   const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
     status:'executed',stdout:'Ciao GDScript!\n',stderr:'',reply:{status:'executed'}
   }));
