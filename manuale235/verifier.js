@@ -101,9 +101,11 @@
         }
       }
       if(code===null){
-        checks.push({desc:testcase.name,passed:false,diff:'La variabile season deve restare dichiarata nello script.'});
+        checks.push({desc:testcase.name,passed:false,diff:'Il codice iniziale non contiene le variabili attese.'});
         break;
       }
+      if(typeof testcase.harness==='string'&&testcase.harness.length)
+        code=code.trimEnd()+'\n\n'+testcase.harness;
       const actual=await run(nativeSource(code),{stdin:testcase.stdin||[],
         calls:testcase.calls||[]});
       if(!base)base=actual;
@@ -115,7 +117,8 @@
       const methodMatch=!outputs||(Array.isArray(observed)&&
         observed.length===outputs.length&&
         observed.every((entry,i)=>entry.status==='executed'&&
-          entry.value===outputs[i]&&
+          JSON.stringify(sortValues(entry.value))===
+            JSON.stringify(sortValues(outputs[i]))&&
           entry.method===testcase.calls[i].method));
       const printed=testcase.object!==undefined?
         dictionaryMatches(actual.stdout,testcase.object,testcase.prefix):
