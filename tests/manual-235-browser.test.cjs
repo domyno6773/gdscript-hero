@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,50);
+    assert.equal(stats.prepared,70);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -96,6 +96,48 @@ async function main(){
       '    print("Ogni persona paga: $%.2f" % amount_per_person)');
     await page.locator('#btn-run-code').click();
     await page.waitForFunction(()=>App.state.finishedLessons.includes(10042),null,{timeout:60000});
+    // Esercizi su funzioni, chiamate dirette, cicli e array con il vero Godot.
+    const exercise=async(n,code)=>{
+      await page.evaluate(id=>App.openLesson(id),10000+n);
+      await page.locator('#code-editor').fill(code);
+      await page.locator('#btn-run-code').click();
+      await page.waitForFunction(id=>App.state.finishedLessons.includes(id),
+        10000+n,{timeout:60000});
+    };
+    await exercise(51,
+      'extends Node\nfunc _ready():\n'+
+      '    var n = int(OS.read_string_from_stdin())\n'+
+      '    for i in range(n):\n        print_large_number()\n'+
+      'func print_large_number():\n    print(50005000)');
+    // Questo esercizio non usa _ready: il motore deve chiamare sigma(n).
+    await exercise(55,
+      'func sigma(n: int):\n    var total = 0\n'+
+      '    for i in range(1, n + 1):\n        total += i\n    return total');
+    await exercise(56,
+      'func is_valid(username: String, password: String):\n'+
+      '    if username == "admin":\n        return true\n'+
+      '    if username == "utente":\n        return password == "qweasd"\n'+
+      '    return false');
+    await exercise(60,
+      'extends Node\nfunc _ready():\n'+
+      '    print("Benvenuto in FizzBuzz!")\n'+
+      '    var limit = int(OS.read_string_from_stdin())\n'+
+      '    for i in range(1, limit + 1):\n        print(fizzbuzz(i))\n'+
+      'func fizzbuzz(number: int) -> String:\n'+
+      '    if number % 21 == 0:\n        return "FizzBuzz"\n'+
+      '    if number % 3 == 0:\n        return "Fizz"\n'+
+      '    if number % 7 == 0:\n        return "Buzz"\n'+
+      '    return str(number)');
+    await exercise(67,
+      'extends Node\nfunc _ready():\n'+
+      '    var count = int(OS.read_string_from_stdin())\n'+
+      '    var numbers = []\n'+
+      '    for i in range(count):\n'+
+      '        numbers.append(int(OS.read_string_from_stdin()))\n'+
+      '    var reversed_numbers = []\n'+
+      '    for i in range(numbers.size() - 1, -1, -1):\n'+
+      '        reversed_numbers.append(numbers[i])\n'+
+      '    print(reversed_numbers)');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
@@ -103,7 +145,7 @@ async function main(){
     await page.locator('.manual-file-tab', {hasText:'main.gd'}).click();
     assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
     assert.equal(errors.length,0,'Page errors: '+errors.join(' | '));
-    console.log('PASS browser: manuale 235, primo esercizio Godot, stdin e schede .gd.');
+    console.log('PASS browser: 70 lezioni predisposte, funzioni, array, FizzBuzz e editor.');
   }finally{await browser.close();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>server.close());
