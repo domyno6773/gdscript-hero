@@ -38,6 +38,8 @@ jobs:
           node --check manuale235/enums.js
           node --check manuale235/student-records.js
           node --check manuale235/aggregates.js
+          node --check manuale235/advanced-functions.js
+          node --check manuale235/array-methods.js
           node --check manuale235/studio.js
           node --check native/isolated-runner.js
           node --check native/native-beta-adapter.js

@@ -74,7 +74,7 @@
     output:String(a*b*c)
   })),has(/\bvar\s+multiply\s*=\s*func\s*\(\s*x\s*,\s*y\s*,\s*z\s*\)/,
     /\bx\s*\*\s*y\s*\*\s*z\b|\b[x-z]\s*\*\s*[x-z]\s*\*\s*[x-z]\b/,
-    /\bmultiply\s*\(/,/\bprint\s*\(/));
+    /\bmultiply(?:\s*\(|\.call\s*\()/,/\bprint\s*\(/));
 
   patch(147,[
     'extends Node','','func _ready():',
@@ -87,7 +87,7 @@
     output:number<0?'Negative':number>0?'Positive':'Zero'
   })),has(/\bvar\s+categorize_number\s*=\s*func\s*\(/,
     /\bnumber\b/,/\bPositive\b/,/\bNegative\b/,/\bZero\b/,
-    /\bcategorize_number\s*\(/,/\bprint\s*\(/));
+    /\bcategorize_number(?:\s*\(|\.call\s*\()/,/\bprint\s*\(/));
 
   patch(148,[
     'func sort_pairs(data: Array):',

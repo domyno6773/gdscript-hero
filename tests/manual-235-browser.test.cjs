@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,144);
+    assert.equal(stats.prepared,157);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -922,6 +922,111 @@ async function main(){
       '        ordered[key] = data[key]',
       '    return ordered'
     ].join('\n'));
+
+    // Funzioni avanzate: soluzioni di riferimento testate nel Godot reale.
+    const advancedSolutions=[
+      [145,[
+        'extends Node','func _ready():',
+        '    var info = get_student_info()',
+        '    var student_name = info[0]',
+        '    var student_age = info[1]',
+        '    var student_major = info[2]',
+        '    print(student_name)','    print(student_age)','    print(student_major)',
+        'func get_student_info() -> Array:',
+        '    return ["Bob", 20, "Computer Scienze"]'
+      ]],
+      [146,[
+        'extends Node','func _ready():',
+        '    var a = int(OS.read_string_from_stdin())',
+        '    var b = int(OS.read_string_from_stdin())',
+        '    var c = int(OS.read_string_from_stdin())',
+        '    var multiply = func(x, y, z): return x * y * z',
+        '    print(multiply.call(a, b, c))'
+      ]],
+      [147,[
+        'extends Node','func _ready():',
+        '    var number = int(OS.read_string_from_stdin())',
+        '    var categorize_number = func(n):',
+        '        if n > 0: return "Positive"',
+        '        if n == 0: return "Zero"',
+        '        return "Negative"',
+        '    print(categorize_number.call(number))'
+      ]],
+      [148,[
+        'func sort_pairs(data: Array):',
+        '    data.sort_custom(func(a, b): return (a[1] < b[1]) if a[1] != b[1] else (str(a[0]).casecmp_to(str(b[0])) < 0))',
+        '    return data'
+      ]],
+      [149,[
+        'extends Node','func _ready():',
+        '    var n = int(OS.read_string_from_stdin())',
+        '    count_down(n)',
+        'func count_down(n):',
+        '    print(n)',
+        '    if n > 0: count_down(n - 1)'
+      ]],
+      [150,[
+        'func fibonacci(n: int):',
+        '    if n == 1: return 0',
+        '    if n == 2: return 1',
+        '    return fibonacci(n - 1) + fibonacci(n - 2)'
+      ]],
+      [151,[
+        'func sum_nested(nested_array: Array):',
+        '    var total = 0',
+        '    for element in nested_array:',
+        '        if element is Array:',
+        '            total += sum_nested(element)',
+        '        else:',
+        '            total += element',
+        '    return total'
+      ]],
+      [152,[
+        'func convert_to_uppercase(strings: Array[String]):',
+        '    return strings.map(func(s): return s.to_upper())'
+      ]],
+      [153,[
+        'func get_long_strings(strings: Array[String]):',
+        '    return strings.filter(func(s): return s.length() > 5)'
+      ]],
+      [154,[
+        'extends Node','func _ready():',
+        '    var numbers = []',
+        '    for part in OS.read_string_from_stdin().split(","):',
+        '        numbers.append(int(part))',
+        '    print(numbers.reduce(func(acc, n): return acc + n, 0))',
+        '    print(numbers.reduce(func(acc, n): return acc * n, 1))',
+        '    print(numbers.reduce(func(acc, n): return n if n > acc else acc, numbers[0]))'
+      ]],
+      [155,[
+        'extends Node','func _ready():',
+        '    var numbers = []',
+        '    for part in OS.read_string_from_stdin().split(","):',
+        '        numbers.append(int(part))',
+        '    print("Almeno uno perfetto: ", numbers.any(func(n): return n == 100))',
+        '    print("Tutti promossi: ", numbers.all(func(n): return n >= 50))'
+      ]],
+      [156,[
+        'func clean_email_list(emails: Array[String]):',
+        '    var cleaned = emails.map(func(email): return email.strip_edges().to_lower())',
+        '    return cleaned.filter(func(email): return email.count("@") == 1 and email.find("@") > 0 and email.find("@") < email.length() - 1)'
+      ]],
+      [157,[
+        'func process_numbers(numbers: Array[int]):',
+        '    return numbers.filter(func(n): return n > 0).map(func(n): return n * 2 if n % 2 == 0 else n * 3)'
+      ]]
+    ];
+    for(const [n,lines] of advancedSolutions)
+      await exercise(n,lines.join('\n'));
+    // Il primo valore utile non basta: un programma statico non deve
+    // superare l'intero blocco di prove alternative.
+    for(const n of [146,147,149,154,155]){
+      const fraudulent=await page.evaluate(async number=>
+        GDHManualVerifier.verify(10000+number,
+          'extends Node\nfunc _ready():\n    print("Positive")',
+          (source,options)=>GDHGodot.runNative(source,options)),n);
+      assert.equal(fraudulent.accepted,false,'Scorciatoia accettata alla lezione '+n);
+    }
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
