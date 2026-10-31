@@ -12,6 +12,22 @@
       Object.keys(value).sort().map(key=>[key,sortValues(value[key])])):value;
   // Confronto semantico dei Dictionary stampati da Godot: l'ordine delle
   // chiavi non deve determinare una bocciatura.
+  const structuredLinesMatch=(stdout,items)=>{
+    const actual=lines(stdout);
+    if(!Array.isArray(items)||items.length!==actual.length)return false;
+    return items.every((wanted,i)=>{
+      const line=actual[i];
+      if(typeof wanted==='string')return line===wanted;
+      if(!wanted||typeof wanted!=='object')return false;
+      const prefix=String(wanted.prefix||'');
+      if(!line.startsWith(prefix))return false;
+      try{
+        const object=JSON.parse(line.slice(prefix.length));
+        return JSON.stringify(sortValues(object))===
+          JSON.stringify(sortValues(wanted.object));
+      }catch(_){return false;}
+    });
+  };
   const dictionaryMatches=(stdout,expected,prefix)=>{
     const data=lines(stdout);
     const expectedCount=prefix===undefined?1:2;
@@ -120,7 +136,9 @@
           JSON.stringify(sortValues(entry.value))===
             JSON.stringify(sortValues(outputs[i]))&&
           entry.method===testcase.calls[i].method));
-      const printed=testcase.object!==undefined?
+      const printed=Array.isArray(testcase.linesSpec)?
+        structuredLinesMatch(actual.stdout,testcase.linesSpec):
+        testcase.object!==undefined?
         dictionaryMatches(actual.stdout,testcase.object,testcase.prefix):
         testcase.preserveEmptyLines===true?
           String(actual.stdout||'').replace(/\r/g,'').trimEnd()===
