@@ -233,7 +233,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   }
   assert.equal(JSON.stringify(lessons[191].readOnlyFiles),
     JSON.stringify(['player.gd','rock.gd','main.gd']));
-  assert.ok(verify.expectedCases[191].some(c=>c.output.includes('Cassa: distrutta')));
+  assert.ok(verify.expectedCases[192].some(c=>c.output.includes('Cassa: distrutta')));
   assert.ok(verify.expectedCases[190].some(c=>c.output.includes('Ruote totali: 18')));
   assert.equal(lessons[192].validationReady,false,'L’astrazione Godot 4.5 è ancora da implementare');
   const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
