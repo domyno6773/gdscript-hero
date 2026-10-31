@@ -1,7 +1,5 @@
 name: Manuale GDScript 235 - Controlli strutturali
 on:
-  push:
-    branches: [manuale-235-lezioni]
   pull_request:
     paths:
       - 'manuale235/**'
