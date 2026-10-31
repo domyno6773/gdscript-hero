@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,133);
+    assert.equal(stats.prepared,140);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -833,6 +833,33 @@ async function main(){
         (src,options)=>GDHGodot.runNative(src,options));
     });
     assert.equal(fakeEnum.accepted,false);
+    // I passaggi del registro degli studenti devono usare davvero Godot.
+    // Lo starter del passaggio successivo contiene il lavoro già concluso
+    // nel precedente e funge da soluzione di riferimento regressiva.
+    for(let n=134;n<=139;n++){
+      const source=await page.evaluate(next=>
+        LESSONS_DATA.find(l=>l.manualLessonNumber===next).initialCode,n+1);
+      await exercise(n,source);
+    }
+    const completedRecords=await page.evaluate(()=>
+      LESSONS_DATA.find(l=>l.manualLessonNumber===140).initialCode);
+    const recordSolution=completedRecords.replace(
+      '            # Aggiungi qui il nuovo ramo del match per la lezione.',
+      '            ["migliori", var threshold]:\n'+
+      '                print(filter_top_students(float(threshold)))'
+    )+'\nfunc filter_top_students(threshold: float) -> Array:\n'+
+      '    var names = []\n'+
+      '    for student_name in student_records:\n'+
+      '        if calculate_average_grade(student_name) > threshold:\n'+
+      '            names.append(student_name)\n'+
+      '    return names';
+    await exercise(140,recordSolution);
+    const noStudentWork=await page.evaluate(async()=>{
+      return GDHManualVerifier.verify(10140,
+        'extends Node\nfunc _ready():\n    print("Arrivederci!")',
+        (src,opts)=>GDHGodot.runNative(src,opts));
+    });
+    assert.equal(noStudentWork.accepted,false,'Non approvare il solo saluto finale');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
