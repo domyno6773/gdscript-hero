@@ -358,6 +358,39 @@ async function main(){
       '    if name.length() > 0:\n'+
       '        ok = ok and not "0123456789".contains(name.substr(0, 1))\n'+
       '    print("ok: " + name if ok else "non valido")');
+    await exercise(98,
+      'extends Node\nfunc _ready():\n'+
+      '    const SECRET = 42\n'+
+      '    var guess = int(OS.read_string_from_stdin())\n'+
+      '    match guess:\n'+
+      '        SECRET:\n            print("Corretto!")\n'+
+      '        0:\n            print("Hai rinunciato.")\n'+
+      '        var attempt:\n            print(attempt, " non è il numero cercato.")');
+    await exercise(99,
+      'extends Node\nfunc _ready():\n'+
+      '    var age = int(OS.read_string_from_stdin())\n'+
+      '    match age:\n'+
+      '        var n when n >= 0 and n <= 12:\n'+
+      '            print("Bambino")\n'+
+      '        var n when n >= 13 and n <= 19:\n'+
+      '            print("Adolescente")\n'+
+      '        var n when n >= 20 and n <= 64:\n'+
+      '            print("Adulto")\n'+
+      '        var n when n >= 65 and n <= 120:\n'+
+      '            print("Anziano")\n'+
+      '        _:\n            print("Età non valida")');
+    await exercise(100,
+      'extends Node\nfunc _ready():\n'+
+      '    var parts = OS.read_string_from_stdin().split(",")\n'+
+      '    var point = [int(parts[0]), int(parts[1])]\n'+
+      '    match point:\n'+
+      '        [0, 0]:\n            print("Origine")\n'+
+      '        [0, var y]:\n            print("Sull’asse y in y=", y)\n'+
+      '        [var x, 0]:\n            print("Sull’asse x in x=", x)\n'+
+      '        [var x, var y] when x == y:\n'+
+      '            print("Sulla diagonale in ", x)\n'+
+      '        [var x, var y]:\n'+
+      '            print("Punto in (", x, ", ", y, ")")');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
