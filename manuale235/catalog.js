@@ -127,6 +127,8 @@
       CONCEPTS_CATALOG[id]={id,name,chapterId:i+1,desc:'Lezioni e prove del manuale revisionato.'};
     });
   }
+  window.LESSONS_DATA=LESSONS_DATA;
+  window.CHAPTERS_DATA=CHAPTERS_DATA;
   window.GDHManualMigration={
     total:result.length,chapters:chapters.length,
     validated:result.filter(x=>x.validationReady).length,
