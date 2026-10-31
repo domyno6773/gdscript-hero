@@ -2513,7 +2513,7 @@ async function main(){
     });
     assert.equal(fake191,false,'Non accettare output hardcoded nel garage');
     const future216=await page.evaluate(async()=>{
-      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===211);
+      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===216);
       return {ready:l.validationReady,
         supported:GDHManualProject.supports(l),
         accepted:(await GDHManualVerifier.verify(l.id,l.initialCode,
