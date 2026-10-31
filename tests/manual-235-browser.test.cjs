@@ -72,6 +72,10 @@ async function main(){
     await page.locator('.manual-preview-btn').click();
     await page.waitForFunction(()=>!document.querySelector('.manual-preview-btn')?.disabled,null,{timeout:30000});
     assert.match(await page.locator('#real-output-pre').innerText(),/stato = Vento forte/);
+    assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(10027)),false,
+      'Una semplice anteprima non deve completare l’esercizio');
+    await page.locator('#btn-run-code').click();
+    await page.waitForFunction(()=>App.state.finishedLessons.includes(10027),null,{timeout:60000});
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
