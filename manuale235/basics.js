@@ -45,7 +45,7 @@
     15:[/\bvar\s+a\s*(?::\s*float\s*)?(?:=|:=)\s*5\.2\b/,
       /\bvar\s+b\s*(?::\s*float\s*)?(?:=|:=)\s*2\.6\b/,
       /\bvar\s+c\s*(?::\s*float\s*)?(?:=|:=)\s*a\s*\/\s*b\b/],
-    16:[/\bvar\s+monete_each\b[^=\n]*=\s*total_coins\s*\/\s*players\b/,
+    16:[/\bvar\s+coins_each\b[^=\n]*=\s*total_coins\s*\/\s*players\b/,
       /\bvar\s+exact_share\b[^=\n]*=\s*float\s*\(\s*total_coins\s*\)\s*\/\s*players\b/],
     17:[/\bvar\s+a\b[^=\n]*=\s*9\b/,/\bvar\s+b\b[^=\n]*=\s*2\b/,
       /\bvar\s+c\b[^=\n]*=\s*11\b/,/\bvar\s+d\b[^=\n]*=\s*a\s*%\s*2\b/,
