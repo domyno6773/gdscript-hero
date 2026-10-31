@@ -177,5 +177,12 @@
     ],
     source:structural(/OS\.read_string_from_stdin\s*\(/,/\bfor\b|\bwhile\b/,/\b0\b/)
   });
+  window.GDHManualExamples=Object.freeze({
+    ...window.GDHManualExamples,
+    34:['Ada'],35:['2','4.5'],36:['25'],37:['1'],
+    39:['64.3','9.0'],40:['64.3','9.0'],41:['64.3','9.0','2'],
+    42:['100','5','2'],43:['6'],44:['15'],47:['5'],
+    48:['1','10','2'],49:['3','4'],50:['3','1','5','6']
+  });
   window.GDHManualMigration.validated=course.filter(l=>l.validationReady).length;
 })();
