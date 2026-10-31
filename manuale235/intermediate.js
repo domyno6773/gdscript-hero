@@ -175,7 +175,7 @@
       {name:'Elenco vuoto',stdin:['0'],output:'0'},
       {name:'Numeri con segno',stdin:['4','-1','8','0','3'],output:'10'}
     ],
-    source:structural(/OS\.read_string_from_stdin\s*\(/,/\bfor\b|\bwhile\b/,\b0\b)
+    source:structural(/OS\.read_string_from_stdin\s*\(/,/\bfor\b|\bwhile\b/,/\b0\b/)
   });
   window.GDHManualMigration.validated=course.filter(l=>l.validationReady).length;
 })();
