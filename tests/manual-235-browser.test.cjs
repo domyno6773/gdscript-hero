@@ -158,6 +158,25 @@ async function main(){
       '    for i in range(numbers.size() - 1, -1, -1):\n'+
       '        reversed_numbers.append(numbers[i])\n'+
       '    print(reversed_numbers)');
+    await exercise(71,
+      'extends Node\nfunc _ready():\n'+
+      '    var text = OS.read_string_from_stdin()\n'+
+      '    var count = 0\n'+
+      '    for letter in text.to_lower():\n'+
+      '        if letter == "p":\n            count += 1\n'+
+      '    print(count)');
+    await exercise(76,
+      'extends Node\nfunc _ready():\n'+
+      '    var parts = OS.read_string_from_stdin().split(",")\n'+
+      '    var numbers: Array[int] = []\n'+
+      '    for part in parts:\n        numbers.append(int(part))\n'+
+      '    var ascending = numbers.duplicate()\n'+
+      '    ascending.sort()\n'+
+      '    var descending = ascending.duplicate()\n'+
+      '    descending.reverse()\n'+
+      '    print("Original: ", numbers)\n'+
+      '    print("Ascending: ", ascending)\n'+
+      '    print("Descending: ", descending)');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
