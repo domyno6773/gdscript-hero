@@ -147,7 +147,7 @@
       const matches=ok&&(!cases||printed)&&methodMatch;
       checks.push({desc:testcase.name,passed:matches,diff:matches?null:
         !ok?('Errore Godot: '+(actual.stderr||actual.reply?.message||actual.status)):
-        'Risultato previsto:\n'+(testcase.output||JSON.stringify(testcase.object??testcase.returns))+'\nRicevuto:\n'+(testcase.returns?JSON.stringify(observed):actual.stdout)});
+        'Risultato previsto:\n'+(testcase.output||JSON.stringify(testcase.linesSpec??testcase.object??testcase.returns))+'\nRicevuto:\n'+(testcase.returns?JSON.stringify(observed):actual.stdout)});
       if(!ok||!matches&&cases)break;
     }
     if(hasStatic&&base){
