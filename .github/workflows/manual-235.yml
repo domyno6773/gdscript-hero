@@ -27,6 +27,7 @@ jobs:
           node --check manuale235/functions-and-arrays.js
           node --check manuale235/sequences.js
           node --check manuale235/dictionaries.js
+          node --check manuale235/expenses.js
           node --check manuale235/studio.js
           node --check native/isolated-runner.js
           node --check native/native-beta-adapter.js
