@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,192);
+    assert.equal(stats.prepared,195);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);

@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Godot 4.4.1 is the only GDScript execution engine for the public site.
+ * Godot 4.5.1 is the only GDScript execution engine for the public site.
  * Every run takes place in a sandboxed, opaque-origin iframe.
  *
  * IMPORTANT: Browser execution is NOT a trusted authority for XP or entitlements:
@@ -391,7 +391,7 @@
     if(!variant)throw Error('Variante di ripasso non disponibile');
     const execution=await executeReview(source,variantId);
     let tests=[{
-      desc:'Godot 4.4.1 ha eseguito il codice senza errori',
+      desc:'Godot 4.5.1 ha eseguito il codice senza errori',
       passed:execution.success,
       diff:execution.success?null:(execution.error||'Il motore Godot non ha completato lÃ¢ÂÂesecuzione')
     }];
@@ -441,7 +441,7 @@
   const beginPreview=(host,onOutput)=>{reset('Nuova esecuzione');previewHost=host;liveOutput=onOutput;};
   const stopPreview=()=>{reset('Scena arrestata');previewHost=null;liveOutput=null;};
   const adapter=Object.freeze({beginPreview,stopPreview,verifyLesson,verifyPracticeTask,verifyReview,executeReview,execute:executeCompat,startLessonPreview,sandboxAction,
-    runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.4.1 WebAssembly';}});
+    runNative:raw,get lastStage(){return lastStage;},get engine(){return 'Godot 4.5.1 WebAssembly';}});
   window.GDHGodot=adapter;
   if(window.GDScriptRuntime) {
     window.GDScriptRuntime.executeClient = window.GDScriptRuntime.execute;
