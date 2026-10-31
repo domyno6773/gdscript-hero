@@ -9,7 +9,7 @@
   const current=()=>lookup(window.App?.state?.currentLessonId);
   const getDraft=lesson=>{
     if(!drafts.has(lesson.id))drafts.set(lesson.id,{
-      files:{...lesson.sourceFiles},selected:lesson.sourceFiles['main.gd']?'main.gd':Object.keys(lesson.sourceFiles)[0],
+      files:{...lesson.sourceFiles},selected:Object.keys(lesson.sourceFiles).find(name=>name!=='main.gd')||Object.keys(lesson.sourceFiles)[0],
       stdin:(window.GDHManualExamples?.[lesson.manualLessonNumber]||[]).join('\n')
     });
     return drafts.get(lesson.id);
@@ -33,6 +33,8 @@
     if(!editor||!wrapper||!task)return;
     document.querySelectorAll('.manual-file-bar,.manual-input-panel,.manual-verification-note').forEach(el=>el.remove());
     const draft=getDraft(lesson);
+    editor.readOnly=false;
+    editor.setAttribute('aria-readonly','false');
     active={lessonId:lesson.id};
     // Quando un progetto contiene più script, ciascun file ha una propria bozza.
     if(lesson.requiresMultipleFiles){
@@ -46,6 +48,8 @@
         button.onclick=()=>{
           saveVisible();draft.selected=file;
           editor.value=draft.files[file]||'';
+          editor.readOnly=lesson.requiresMultipleFiles&&file==='main.gd';
+          editor.setAttribute('aria-readonly',String(editor.readOnly));
           editor.dispatchEvent(new Event('input',{bubbles:true}));
           group.querySelectorAll('button').forEach(b=>{
             b.classList.toggle('is-active',b===button);
@@ -56,6 +60,8 @@
       }
       wrapper.before(group);
       editor.value=draft.files[draft.selected]||'';
+      editor.readOnly=draft.selected==='main.gd';
+      editor.setAttribute('aria-readonly',String(editor.readOnly));
       editor.dispatchEvent(new Event('input',{bubbles:true}));
     }
     if(lesson.requiresStdin){
