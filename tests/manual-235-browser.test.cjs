@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,180);
+    assert.equal(stats.prepared,184);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -1394,6 +1394,91 @@ async function main(){
       error:document.getElementById('validation-result')?.textContent
     }));
     assert.equal(multiple.finished,true,'Lezione 180 rifiutata: '+JSON.stringify(multiple));
+
+    const encapsulationSolutions=[
+      [181,[
+        'class_name Player','extends RefCounted',
+        'var max_health: int = 100',
+        'var health: int = 100:',
+        '    set(value):',
+        '        var previous = health',
+        '        health = clampi(value, 0, max_health)',
+        '        if health == 0 and previous > 0:',
+        '            print("Il giocatore è stato sconfitto!")'
+      ]],
+      [182,[
+        'class_name Temperature','extends RefCounted',
+        'var celsius: float = 0.0',
+        'var fahrenheit: float:',
+        '    get:',
+        '        return celsius * 9.0 / 5.0 + 32.0',
+        '    set(value):',
+        '        celsius = (value - 32.0) * 5.0 / 9.0',
+        'var kelvin: float:',
+        '    get:',
+        '        return celsius + 273.15'
+      ]],
+      [183,[
+        'class_name User','extends RefCounted',
+        'var _password: String',
+        'func _init(start_password: String) -> void:',
+        '    _password = start_password',
+        'func check_password(attempt: String) -> bool:',
+        '    return attempt == _password',
+        'func change_password(old_password: String, new_password: String) -> bool:',
+        '    if not check_password(old_password) or not _is_strong(new_password):',
+        '        return false',
+        '    _password = new_password',
+        '    return true',
+        'func _is_strong(candidate: String) -> bool:',
+        '    return candidate.length() >= 6'
+      ]],
+      [184,[
+        'class_name BankAccount','extends RefCounted',
+        'static var interest_percent: int = 2',
+        'var _owner_name: String',
+        'var _balance: int = 0',
+        'var owner_name: String:',
+        '    get:',
+        '        return _owner_name',
+        'var balance: int:',
+        '    get:',
+        '        return _balance',
+        '    set(value):',
+        '        if value < 0:',
+        '            print("Il saldo non può essere negativo")',
+        '            return',
+        '        _balance = value',
+        'func _init(account_owner: String, start_balance: int) -> void:',
+        '    _owner_name = account_owner',
+        '    balance = start_balance',
+        'func deposit(amount: int) -> bool:',
+        '    if amount <= 0:',
+        '        print("L\x27importo del deposito deve essere positivo")',
+        '        return false',
+        '    balance += amount',
+        '    return true',
+        'func withdraw(amount: int) -> bool:',
+        '    if amount <= 0:',
+        '        print("L\x27importo del prelievo deve essere positivo")',
+        '        return false',
+        '    if amount > balance:',
+        '        print("Fondi insufficienti")',
+        '        return false',
+        '    balance -= amount',
+        '    return true',
+        'func apply_interest() -> int:',
+        '    var interest = int(float(_balance) * interest_percent / 100.0)',
+        '    balance += interest',
+        '    return interest',
+        'func display_info() -> void:',
+        '    print("Titolare del conto: ", owner_name)',
+        '    print("Saldo: $", balance)',
+        '    print("Tasso di interesse: ", interest_percent, "%")'
+      ]]
+    ];
+    for(const [n,lines] of encapsulationSolutions)
+      await exercise(n,lines.join('\n'));
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
