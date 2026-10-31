@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,184);
+    assert.equal(stats.prepared,186);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -1479,6 +1479,61 @@ async function main(){
     ];
     for(const [n,lines] of encapsulationSolutions)
       await exercise(n,lines.join('\n'));
+
+    // Ereditarietà: due classi in due schede modificabili, compilate e
+    // istanziate dal Godot reale, senza modificare main.gd.
+    await page.evaluate(()=>App.openLesson(10185));
+    await page.locator('.manual-file-tab',{hasText:'vehicle.gd'}).click();
+    await page.locator('#code-editor').fill([
+      'class_name Vehicle','extends RefCounted',
+      'var brand: String','var model: String',
+      'func _init(b: String, m: String) -> void:',
+      '    brand = b','    model = m',
+      'func info() -> String:',
+      '    return "Veicolo: %s %s" % [brand, model]'
+    ].join('\n'));
+    await page.locator('.manual-file-tab',{hasText:'car.gd'}).click();
+    await page.locator('#code-editor').fill([
+      'class_name Car','extends Vehicle',
+      'func honk() -> String:',
+      '    return "%s %s fa Bip bip!" % [brand, model]'
+    ].join('\n'));
+    await page.locator('#btn-run-code').click();
+    await page.waitForFunction(()=>!App.isValidating,null,{timeout:60000});
+    const inherited=await page.evaluate(()=>({
+      finished:App.state.finishedLessons.includes(10185),
+      output:document.getElementById('real-output-pre')?.textContent,
+      error:document.getElementById('validation-result')?.textContent
+    }));
+    assert.equal(inherited.finished,true,'Lezione 185 rifiutata: '+JSON.stringify(inherited));
+    await page.evaluate(()=>App.openLesson(10186));
+    await page.locator('.manual-file-tab',{hasText:'person.gd'}).click();
+    await page.locator('#code-editor').fill([
+      'class_name Person','extends RefCounted',
+      'var person_name: String','var age: int',
+      'func _init(n: String, a: int) -> void:',
+      '    person_name = n','    age = a',
+      'func introduce() -> String:',
+      '    return "Ciao, sono %s e ho %d anni" % [person_name, age]'
+    ].join('\n'));
+    await page.locator('.manual-file-tab',{hasText:'employee.gd'}).click();
+    await page.locator('#code-editor').fill([
+      'class_name Employee','extends Person',
+      'var job: String',
+      'func _init(n: String, a: int, j: String) -> void:',
+      '    super(n, a)',
+      '    job = j',
+      'func introduce() -> String:',
+      '    return super.introduce() + ". Lavoro come " + job'
+    ].join('\n'));
+    await page.locator('#btn-run-code').click();
+    await page.waitForFunction(()=>!App.isValidating,null,{timeout:60000});
+    const superResult=await page.evaluate(()=>({
+      finished:App.state.finishedLessons.includes(10186),
+      output:document.getElementById('real-output-pre')?.textContent,
+      error:document.getElementById('validation-result')?.textContent
+    }));
+    assert.equal(superResult.finished,true,'Lezione 186 rifiutata: '+JSON.stringify(superResult));
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
