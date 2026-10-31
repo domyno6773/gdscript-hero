@@ -284,6 +284,80 @@ async function main(){
       '        else:\n'+
       '            print("Scelta non valida. Riprova.")';
     for(const n of [85,86,87,88,89])await exercise(n,completeExpense);
+    await exercise(90,
+      'extends Node\nfunc _ready():\n'+
+      '    var n = int(OS.read_string_from_stdin())\n'+
+      '    for i in range(1, n + 1, 2):\n'+
+      '        print("*".repeat(i))');
+    await exercise(91,
+      'extends Node\nfunc find_occurrences(text, pattern):\n'+
+      '    var positions = []\n'+
+      '    for i in range(text.length() - pattern.length() + 1):\n'+
+      '        if text.substr(i, pattern.length()) == pattern:\n'+
+      '            positions.append(i)\n'+
+      '    return [not positions.is_empty(), positions.size(), positions]\n'+
+      'func _ready():\n'+
+      '    var text = OS.read_string_from_stdin()\n'+
+      '    var pattern = OS.read_string_from_stdin()\n'+
+      '    print(find_occurrences(text, pattern))');
+    await exercise(92,
+      'extends Node\nfunc _ready():\n'+
+      '    var prices: Array[int] = []\n'+
+      '    for price in OS.read_string_from_stdin().split(","):\n'+
+      '        prices.append(int(price))\n'+
+      '    var items = OS.read_string_from_stdin().split(",")\n'+
+      '    var budget_per_item = int(OS.read_string_from_stdin())\n'+
+      '    var affordable_items: Array[String] = []\n'+
+      '    var cant_afford = 0\n'+
+      '    var total_needed = 0\n'+
+      '    for i in range(prices.size()):\n'+
+      '        if prices[i] <= budget_per_item:\n'+
+      '            affordable_items.append(items[i])\n'+
+      '            total_needed += prices[i]\n'+
+      '        else:\n'+
+      '            cant_afford += 1\n'+
+      '    print("Può acquistare: ", affordable_items)\n'+
+      '    print("Budget totale necessario: ", total_needed)\n'+
+      '    print("Acquisto non possibile: ", cant_afford)');
+    await exercise(94,
+      'extends Node\nfunc _ready():\n'+
+      '    var email = OS.read_string_from_stdin()\n'+
+      '    var low = email.to_lower()\n'+
+      '    var valid = email.count("@") == 1 and not email.begins_with("@") '+ 
+      'and not email.contains(" ") and '+ 
+      '(low.ends_with(".com") or low.ends_with(".org") or low.ends_with(".tech"))\n'+
+      '    print("valido" if valid else "non valido")');
+    await exercise(95,
+      'extends Node\nfunc _ready():\n'+
+      '    var title = OS.read_string_from_stdin()\n'+
+      '    var slug = title.strip_edges().to_lower().replace(" ", "-")\n'+
+      '    slug = slug.replace("!", "").replace("?", "").replace(".", "")\n'+
+      '    slug = slug.replace("è", "e")\n'+
+      '    print(slug)');
+    await exercise(96,
+      'extends Node\nfunc _ready():\n'+
+      '    var line = OS.read_string_from_stdin()\n'+
+      '    var parts = line.split(",")\n'+
+      '    var words: PackedStringArray = []\n'+
+      '    var longest = ""\n'+
+      '    for part in parts:\n'+
+      '        var word = part.strip_edges()\n'+
+      '        words.append(word.to_upper())\n'+
+      '        if word.length() > longest.length():\n'+
+      '            longest = word\n'+
+      '    print(words.size())\n'+
+      '    print(" > ".join(words))\n'+
+      '    print(longest)');
+    await exercise(97,
+      'extends Node\nfunc _ready():\n'+
+      '    var raw = OS.read_string_from_stdin()\n'+
+      '    var name = raw.strip_edges().to_lower()\n'+
+      '    var ok = name.length() >= 3 and name.length() <= 16\n'+
+      '    ok = ok and not name.contains(" ") and not name.contains("!")\n'+
+      '    ok = ok and not name.contains("?") and not name.contains(".")\n'+
+      '    if name.length() > 0:\n'+
+      '        ok = ok and not "0123456789".contains(name.substr(0, 1))\n'+
+      '    print("ok: " + name if ok else "non valido")');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
