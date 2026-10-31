@@ -10,7 +10,7 @@ const server=http.createServer((req,res)=>{
   if(!filename.startsWith(root+path.sep))return res.writeHead(403).end();
   fs.readFile(filename,(err,data)=>{if(err)return res.writeHead(404).end();
     res.writeHead(200,{'Content-Type':mime[path.extname(filename)]||'application/octet-stream',
-      'Cache-Control':'no-store'}).end(data);
+      'Cache-Control':'no-store','Access-Control-Allow-Origin':'*'}).end(data);
   });
 });
 async function main(){
