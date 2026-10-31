@@ -2245,6 +2245,108 @@ async function main(){
       return r.accepted;
     });
     assert.equal(starter205,false,'La casella postale vuota non deve superare la lezione');
+
+    await completeProject(206,{'bomb.gd':[
+      'class_name Bomb','extends RefCounted',
+      'signal beeped','signal exploded','var fuse: int',
+      'func _init(start_fuse: int) -> void:','    fuse = start_fuse',
+      'func tick() -> void:',
+      '    if fuse <= 0: return',
+      '    fuse -= 1',
+      '    if fuse > 0: beeped.emit()',
+      '    else: exploded.emit()'
+    ]});
+    await completeProject(207,{'score_board.gd':[
+      'class_name ScoreBoard','extends RefCounted',
+      'var points: int = 0',
+      'func watch(target: Target) -> void:',
+      '    if not target.hit.is_connected(_on_target_hit):',
+      '        target.hit.connect(_on_target_hit)',
+      'func ignore(target: Target) -> void:',
+      '    if target.hit.is_connected(_on_target_hit):',
+      '        target.hit.disconnect(_on_target_hit)',
+      'func _on_target_hit() -> void:',
+      '    points += 10',
+      '    print("Hit! Punteggio: ", points)'
+    ]});
+    await completeProject(208,{'wallet.gd':[
+      'class_name Wallet','extends RefCounted',
+      'signal balance_changed(old_balance: int, new_balance: int)',
+      'signal purchase_failed(price: int, missing: int)',
+      'var balance: int = 0',
+      'func add(amount: int) -> void:',
+      '    var old = balance',
+      '    balance += amount',
+      '    balance_changed.emit(old, balance)',
+      'func buy(price: int) -> void:',
+      '    if price > balance:',
+      '        purchase_failed.emit(price, price - balance)',
+      '        return',
+      '    var old = balance',
+      '    balance -= price',
+      '    balance_changed.emit(old, balance)'
+    ]});
+    await completeProject(209,{
+      'health.gd':[
+        'class_name Health','extends RefCounted',
+        'signal damaged(amount: int, hp: int)',
+        'signal healed(amount: int, hp: int)',
+        'signal died',
+        'var max_hp: int','var hp: int',
+        'func _init(start_hp: int) -> void:',
+        '    max_hp = start_hp',
+        '    hp = start_hp',
+        'func take_damage(amount: int) -> void:',
+        '    if hp <= 0 or amount <= 0: return',
+        '    var prev = hp',
+        '    hp = maxi(0, hp - amount)',
+        '    damaged.emit(prev - hp, hp)',
+        '    if hp == 0: died.emit()',
+        'func heal(amount: int) -> void:',
+        '    if hp <= 0 or amount <= 0: return',
+        '    var prev = hp',
+        '    hp = mini(max_hp, hp + amount)',
+        '    if hp != prev: healed.emit(hp - prev, hp)'
+      ],
+      'health_bar.gd':[
+        'class_name HealthBar','extends RefCounted',
+        'var maximum: int',
+        'func watch(health: Health) -> void:',
+        '    maximum = health.max_hp',
+        '    health.damaged.connect(_on_damaged)',
+        '    health.healed.connect(_on_healed)',
+        '    health.died.connect(_on_died)',
+        'func _on_damaged(amount: int, hp: int) -> void:',
+        '    print("-%d HP [%d/%d]" % [amount, hp, maximum])',
+        'func _on_healed(amount: int, hp: int) -> void:',
+        '    print("+%d HP [%d/%d]" % [amount, hp, maximum])',
+        'func _on_died() -> void:',
+        '    print("Partita terminata")'
+      ]
+    });
+    await completeProject(210,{
+      'weapon.gd':[
+        'class_name Weapon','extends RefCounted',
+        'var weapon_name: String','var damage: int',
+        'func _init(new_name: String, new_damage: int) -> void:',
+        '    weapon_name = new_name',
+        '    damage = new_damage'
+      ],
+      'knight.gd':[
+        'class_name Knight','extends RefCounted',
+        'var knight_name: String','var weapon: Weapon = null',
+        'func _init(new_name: String) -> void:',
+        '    knight_name = new_name',
+        'func equip(new_weapon: Weapon) -> void:',
+        '    weapon = new_weapon',
+        'func drop() -> void:',
+        '    weapon = null',
+        'func attack() -> String:',
+        '    if weapon == null:',
+        '        return knight_name + " non ha armi"',
+        '    return "%s attacca con %s per %d danni" % [knight_name, weapon.weapon_name, weapon.damage]'
+      ]
+    });
     const fake191=await page.evaluate(async()=>{
       App.openLesson(10191);
       const draft=GDHManualStudio.getDraft(LESSONS_DATA[190]);
