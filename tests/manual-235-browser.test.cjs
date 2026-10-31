@@ -649,6 +649,96 @@ async function main(){
       .replace('        # Aggiungi il pattern jolly per le scelte non valide.',
         '            _:\n                print("Scelta non valida. Riprova.")');
     await exercise(122,matchRubrica);
+    await exercise(123,
+      'extends Node\nfunc _ready():\n'+
+      '    var badges = {}\n'+
+      '    for i in range(4):\n'+
+      '        var badge = OS.read_string_from_stdin()\n'+
+      '        badges[badge] = true\n'+
+      '    print("Medaglie diverse: ", badges.size())\n'+
+      '    print(badges.keys())');
+    await exercise(124,
+      'extends Node\nfunc _ready():\n'+
+      '    var guest_list = OS.read_string_from_stdin().split(" ", false)\n'+
+      '    var arrivals = OS.read_string_from_stdin().split(" ", false)\n'+
+      '    var guests = {}\n'+
+      '    for name in guest_list:\n'+
+      '        guests[name] = true\n'+
+      '    print("Ospiti nell’elenco: ", guests.size())\n'+
+      '    for name in arrivals:\n'+
+      '        print(name, ": benvenuto" if guests.has(name) else ": non presente nell’elenco")');
+    await exercise(125,
+      'extends Node\nfunc _ready():\n'+
+      '    var inventory = {}\n'+
+      '    while true:\n'+
+      '        var command = OS.read_string_from_stdin()\n'+
+      '        if command == "fine":\n'+
+      '            break\n'+
+      '        var parts = command.split(" ")\n'+
+      '        var action = parts[0]\n'+
+      '        var item = parts[1]\n'+
+      '        if action == "aggiungi":\n'+
+      '            if inventory.has(item):\n'+
+      '                print("Già presente ", item)\n'+
+      '            else:\n'+
+      '                inventory[item] = true\n'+
+      '                print("Aggiunto ", item)\n'+
+      '        elif action == "rimuovi":\n'+
+      '            if inventory.has(item):\n'+
+      '                inventory.erase(item)\n'+
+      '                print("Rimosso ", item)\n'+
+      '            else:\n'+
+      '                print("Nessuna ", item, " da rimuovere")\n'+
+      '    print("Inventario: ", ", ".join(PackedStringArray(inventory.keys())) '+ 
+      'if not inventory.is_empty() else "vuoto")');
+    await exercise(126,
+      'extends Node\nfunc _ready():\n'+
+      '    var first = {}\n'+
+      '    for skill in OS.read_string_from_stdin().split(" ", false):\n'+
+      '        first[skill] = true\n'+
+      '    var second = {}\n'+
+      '    for skill in OS.read_string_from_stdin().split(" ", false):\n'+
+      '        second[skill] = true\n'+
+      '    var union = first.keys()\n'+
+      '    for skill in second:\n'+
+      '        if not first.has(skill):\n'+
+      '            union.append(skill)\n'+
+      '    var shared = []\n'+
+      '    for skill in first:\n'+
+      '        if second.has(skill):\n'+
+      '            shared.append(skill)\n'+
+      '    print("Tutte le abilità: ", ", ".join(PackedStringArray(union)))\n'+
+      '    print("Abilità condivise: ", ", ".join(PackedStringArray(shared)) '+ 
+      'if shared.size() > 0 else "nessuna")');
+    await exercise(127,
+      'extends Node\nfunc _ready():\n'+
+      '    var needed = {}\n'+
+      '    for item in OS.read_string_from_stdin().split(" ", false):\n'+
+      '        needed[item] = true\n'+
+      '    var packed = {}\n'+
+      '    for item in OS.read_string_from_stdin().split(" ", false):\n'+
+      '        packed[item] = true\n'+
+      '    var missing = []\n'+
+      '    for item in needed:\n'+
+      '        if not packed.has(item):\n'+
+      '            missing.append(item)\n'+
+      '    var extra = []\n'+
+      '    for item in packed:\n'+
+      '        if not needed.has(item):\n'+
+      '            extra.append(item)\n'+
+      '    print("Mancano: ", ", ".join(PackedStringArray(missing)) '+
+      'if missing.size() > 0 else "nessuno")\n'+
+      '    print("Extra: ", ", ".join(PackedStringArray(extra)) '+
+      'if extra.size() > 0 else "nessuno")');
+    await exercise(128,
+      'func remove_duplicates(numbers: Array[int]) -> Array[int]:\n'+
+      '    var seen = {}\n'+
+      '    var result: Array[int] = []\n'+
+      '    for number in numbers:\n'+
+      '        if not seen.has(number):\n'+
+      '            seen[number] = true\n'+
+      '            result.append(number)\n'+
+      '    return result');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
