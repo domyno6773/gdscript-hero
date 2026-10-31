@@ -112,7 +112,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.match(lessons[89].initialCode,/var n = int\(OS\.read_string_from_stdin\(\)\)/);
   assert.match(lessons[91].initialCode,/var prices: Array\[int\]/);
   assert.ok(verify.expectedCases[91].length>=5,'Lezione 91: sovrapposizioni');
-  assert.ok(verify.expectedCases[94].some(c=>c.stdin[0].includes('è')));
+  assert.ok(verify.expectedCases[95].some(c=>c.stdin[0].includes('è')));
   const unsupported=await verify.verify(10098,'',async()=>{throw Error('Non dovrebbe partire');});
   assert.equal(unsupported.accepted,false,'Lezione non verificata non dà XP');
   assert.match(verify.nativeSource('print(OS.read_string_from_stdin())'),/__gdhManualReadStdin/);
