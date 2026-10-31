@@ -2486,7 +2486,7 @@ async function main(){
     // Il codice lasciato incompleto non supera i casi positivi e negativi.
     const default211=await page.evaluate(async()=>{
       App.openLesson(10211);
-      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===216);
+      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===211);
       const draft=GDHManualStudio.getDraft(l);
       const original=draft.files['leaderboard.gd'];
       try{
