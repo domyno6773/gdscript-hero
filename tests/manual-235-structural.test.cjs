@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const root=process.cwd();
 const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],CONCEPTS_CATALOG:{},console};
 vm.createContext(context);
-for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js']){
+for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js']){
   vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),context,{filename:file,timeout:3000});
 }
 const lessons=context.LESSONS_DATA,chapters=context.CHAPTERS_DATA;
@@ -19,8 +19,8 @@ assert.match(lessons[1].initialCode,/print\(""\)/);
 assert.match(lessons[2].initialCode,/print\("Arrivederci!"\)/);
 assert.ok(lessons.every(x=>x.theory&&x.task&&x.initialCode&&x.title));
 assert.ok(lessons.every(x=>typeof x.validate==='function'));
-assert.ok(lessons.slice(0,115).every(x=>x.validationReady===true));
-assert.ok(lessons.slice(115).every(x=>x.validationReady===false));
+assert.ok(lessons.slice(0,122).every(x=>x.validationReady===true));
+assert.ok(lessons.slice(122).every(x=>x.validationReady===false));
 assert.ok(lessons.slice(170).every(x=>x.sourceFiles['main.gd']));
 assert.match(lessons[8].initialCode,/^extends Node/m);
 assert.match(lessons[8].initialCode,/^    var PlayerName/m);
@@ -28,7 +28,7 @@ assert.match(lessons[170].sourceFiles['greeter.gd'],/^class_name Greeter/m);
 const stats=context.window.GDHManualMigration;
 assert.equal(stats.total,235);
 assert.equal(stats.chapters,43);
-assert.equal(stats.validated,115);
+assert.equal(stats.validated,122);
 assert.equal(stats.readyForRelease,false);
 assert.equal(context.window.GDHManualBasicsValidated,18);
 async function checks(n,logs,source=lessons[n-1].initialCode){
@@ -145,8 +145,19 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
       reply:{status:'executed'}
   }));
   assert.equal(sim.accepted,false,'Non supera tutti i test con un risultato fisso');
-  const unsupported=await verify.verify(10116,'',async()=>{throw Error('Non dovrebbe partire');});
+  assert.match(lessons[115].initialCode,/func display_menu\(\):/);
+  assert.doesNotMatch(lessons[115].initialCode,/print\("Menu della rubrica/);
+  assert.doesNotMatch(lessons[116].initialCode,/func add_contact/);
+  assert.doesNotMatch(lessons[117].initialCode,/func view_contact/);
+  assert.doesNotMatch(lessons[118].initialCode,/func edit_contact/);
+  assert.doesNotMatch(lessons[119].initialCode,/func delete_contact/);
+  assert.doesNotMatch(lessons[120].initialCode,/func list_all_contacts/);
+  assert.match(lessons[121].initialCode,/func list_all_contacts/);
+  assert.doesNotMatch(lessons[121].initialCode,/match choice:/);
+  assert.equal(verify.expectedCases[122].length,3);
+  assert.match(lessons[118].task,/Contatto aggiornato correttamente/);
+  const unsupported=await verify.verify(10123,'',async()=>{throw Error('Non dovrebbe partire');});
   assert.equal(unsupported.accepted,false,'Lezione non verificata non dà XP');
   assert.match(verify.nativeSource('print(OS.read_string_from_stdin())'),/__gdhManualReadStdin/);
-  console.log('OK: 235 lezioni, 43 capitoli, 115 validatori, stdin e test negativi');
+  console.log('OK: 235 lezioni, 43 capitoli, 122 validatori, stdin e test negativi');
 })().catch(err=>{console.error(err);process.exitCode=1});
