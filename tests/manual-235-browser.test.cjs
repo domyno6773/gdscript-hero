@@ -467,6 +467,95 @@ async function main(){
       '    if col < 0 or col >= grid[row].size():\n'+
       '        return -1\n'+
       '    return grid[row][col]');
+    await exercise(106,
+      'extends Node\nfunc _ready():\n'+
+      '    var rows = int(OS.read_string_from_stdin())\n'+
+      '    var cols = int(OS.read_string_from_stdin())\n'+
+      '    var player_row = int(OS.read_string_from_stdin())\n'+
+      '    var player_col = int(OS.read_string_from_stdin())\n'+
+      '    var grid = []\n'+
+      '    for r in range(rows):\n'+
+      '        var line: PackedStringArray = []\n'+
+      '        for c in range(cols):\n'+
+      '            line.append(".")\n'+
+      '        grid.append(line)\n'+
+      '    grid[player_row][player_col] = "P"\n'+
+      '    for line in grid:\n'+
+      '        print("".join(line))');
+    await exercise(107,
+      'func grid_stats(grid: Array):\n'+
+      '    var total = 0\n'+
+      '    var largest = grid[0][0]\n'+
+      '    var even = 0\n'+
+      '    for row in grid:\n'+
+      '        for value in row:\n'+
+      '            total += value\n'+
+      '            if value > largest:\n'+
+      '                largest = value\n'+
+      '            if value % 2 == 0:\n'+
+      '                even += 1\n'+
+      '    return [total, largest, even]');
+    await exercise(108,
+      'func make_triangle(n: int):\n'+
+      '    var grid = []\n'+
+      '    for row in range(1, n + 1):\n'+
+      '        var cells = []\n'+
+      '        for col in range(1, row + 1):\n'+
+      '            cells.append(row * col)\n'+
+      '        grid.append(cells)\n'+
+      '    return grid');
+    await exercise(109,
+      'func print_patterns(grid: Array):\n'+
+      '    var n = grid.size()\n'+
+      '    var main: PackedStringArray = []\n'+
+      '    var second: PackedStringArray = []\n'+
+      '    var top: PackedStringArray = []\n'+
+      '    var bottom: PackedStringArray = []\n'+
+      '    var left: PackedStringArray = []\n'+
+      '    var right: PackedStringArray = []\n'+
+      '    for i in range(n):\n'+
+      '        main.append(str(grid[i][i]))\n'+
+      '        second.append(str(grid[i][n-1-i]))\n'+
+      '        top.append(str(grid[0][i]))\n'+
+      '        bottom.append(str(grid[n-1][i]))\n'+
+      '        left.append(str(grid[i][0]))\n'+
+      '        right.append(str(grid[i][n-1]))\n'+
+      '    print("Diagonale principale: ", " ".join(main))\n'+
+      '    print("Diagonale secondaria: ", " ".join(second))\n'+
+      '    print("Prima riga: ", " ".join(top))\n'+
+      '    print("Ultima riga: ", " ".join(bottom))\n'+
+      '    print("Prima colonna: ", " ".join(left))\n'+
+      '    print("Ultima colonna: ", " ".join(right))');
+    await exercise(110,
+      'extends Node\nfunc _ready():\n'+
+      '    var board = []\n'+
+      '    for r in range(3):\n'+
+      '        var row = []\n'+
+      '        var line = OS.read_string_from_stdin()\n'+
+      '        for c in range(3):\n'+
+      '            row.append(line.substr(c, 1))\n'+
+      '        board.append(row)\n'+
+      '    var winner = ""\n'+
+      '    for i in range(3):\n'+
+      '        if board[i][0] != "." and board[i][0] == board[i][1] '+ 
+      'and board[i][1] == board[i][2]:\n'+
+      '            winner = board[i][0]\n'+
+      '        if board[0][i] != "." and board[0][i] == board[1][i] '+
+      'and board[1][i] == board[2][i]:\n'+
+      '            winner = board[0][i]\n'+
+      '    if board[1][1] != ".":\n'+
+      '        if board[0][0] == board[1][1] and board[1][1] == board[2][2]:\n'+
+      '            winner = board[1][1]\n'+
+      '        if board[0][2] == board[1][1] and board[1][1] == board[2][0]:\n'+
+      '            winner = board[1][1]\n'+
+      '    if winner != "":\n'+
+      '        print("Vince ", winner)\n'+
+      '    else:\n'+
+      '        var full = true\n'+
+      '        for row in board:\n'+
+      '            if "." in row:\n'+
+      '                full = false\n'+
+      '        print("Pareggio" if full else "Continua a giocare")');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
