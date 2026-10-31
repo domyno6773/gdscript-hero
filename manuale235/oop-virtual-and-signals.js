@@ -327,7 +327,7 @@
   /\bfunc\s+clear\s*\(/,/\bfunc\s+concat\s*\(/,
   /\bfunc\s+_to_string\s*\(/,/\bfunc\s+_iter_init\s*\(/,
   /\bfunc\s+_iter_next\s*\(/,/\bfunc\s+_iter_get\s*\(/,
-  /\.duplicate\s*\(/));
+  /\.duplicate\s*\(/)(s));
  const custom=get(204);
  custom.task=custom.task.replace(/append N/g,'aggiungi N')
    .replace(/\bpop\b/g,'estrai')
