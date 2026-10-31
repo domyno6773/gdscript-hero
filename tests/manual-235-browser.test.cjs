@@ -1539,7 +1539,7 @@ async function main(){
     const completeProject=async(number,files)=>{
       await page.evaluate(id=>App.openLesson(id),10000+number);
       for(const [name,lines] of Object.entries(files)){
-        await page.locator('.manual-file-tab',{hasText:name}).click();
+        await page.getByRole('tab',{name,exact:true}).click();
         assert.equal(await page.locator('#code-editor').getAttribute('readonly'),null,
           'File modificabile inaspettatamente protetto: '+name);
         await page.locator('#code-editor').fill(lines.join('\n'));
