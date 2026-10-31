@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,128);
+    assert.equal(stats.prepared,133);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -739,6 +739,100 @@ async function main(){
       '            seen[number] = true\n'+
       '            result.append(number)\n'+
       '    return result');
+    // Lezioni 129–133: verifiche reali con input alternativi nel runtime Godot.
+    await exercise(129,[
+      'extends Node',
+      'enum Weather { SUNNY, CLOUDY, RAINY, SNOWY }',
+      'func _ready():',
+      '    var weather = int(OS.read_string_from_stdin())',
+      '    match weather:',
+      '        Weather.SUNNY: print("Wear sunglasses")',
+      '        Weather.CLOUDY: print("Porta una giacca")',
+      '        Weather.RAINY: print("Take an umbrella")',
+      '        Weather.SNOWY: print("Costruisci un pupazzo di neve")'
+    ].join('\n'));
+    await exercise(130,[
+      'extends Node',
+      'enum Difficulty { EASY = 1, NORMAL, HARD, NIGHTMARE = 10 }',
+      'func _ready():',
+      '    var base_damage = int(OS.read_string_from_stdin())',
+      '    print("EASY: ", base_damage * Difficulty.EASY)',
+      '    print("NORMAL: ", base_damage * Difficulty.NORMAL)',
+      '    print("HARD: ", base_damage * Difficulty.HARD)',
+      '    print("NIGHTMARE: ", base_damage * Difficulty.NIGHTMARE)'
+    ].join('\n'));
+    await exercise(131,[
+      'extends Node',
+      'enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }',
+      'func _ready():',
+      '    var day_name = OS.read_string_from_stdin()',
+      '    var days = int(OS.read_string_from_stdin())',
+      '    var lookup = {"LUNEDÌ": Day.MONDAY, "MARTEDÌ": Day.TUESDAY,',
+      '        "MERCOLEDÌ": Day.WEDNESDAY, "GIOVEDÌ": Day.THURSDAY,',
+      '        "VENERDÌ": Day.FRIDAY, "SABATO": Day.SATURDAY, "DOMENICA": Day.SUNDAY}',
+      '    var names = ["LUNEDÌ", "MARTEDÌ", "MERCOLEDÌ", "GIOVEDÌ",',
+      '        "VENERDÌ", "SABATO", "DOMENICA"]',
+      '    var current = lookup[day_name]',
+      '    print(day_name, " ha valore ", current)',
+      '    print("Tra ", days, " giorni: ", names[(current + days) % 7])'
+    ].join('\n'));
+    await exercise(132,[
+      'extends Node',
+      'enum State { IDLE, WALK, RUN, JUMP, FALL }',
+      'func describe(state: State):',
+      '    match state:',
+      '        State.IDLE: return "Fermo"',
+      '        State.WALK, State.RUN: return "In movimento"',
+      '        State.JUMP, State.FALL: return "In aria"',
+      '    return ""',
+      'func _ready():',
+      '    var names = OS.read_string_from_stdin().split(" ", false)',
+      '    for state_name in names:',
+      '        print(state_name, ": ", describe(State[state_name]))'
+    ].join('\n'));
+    await exercise(133,[
+      'extends Node',
+      'enum TrafficLight { RED, YELLOW, GREEN }',
+      'func get_driver_action(light):',
+      '    match light:',
+      '        TrafficLight.RED: return "Fermati"',
+      '        TrafficLight.YELLOW: return "Attenzione"',
+      '        TrafficLight.GREEN: return "Procedi"',
+      '    return ""',
+      'func get_wait_time(light):',
+      '    match light:',
+      '        TrafficLight.RED: return 30',
+      '        TrafficLight.YELLOW: return 3',
+      '        TrafficLight.GREEN: return 25',
+      '    return 0',
+      'func get_next_light(light):',
+      '    match light:',
+      '        TrafficLight.RED: return TrafficLight.GREEN',
+      '        TrafficLight.GREEN: return TrafficLight.YELLOW',
+      '        TrafficLight.YELLOW: return TrafficLight.RED',
+      '    return TrafficLight.RED',
+      'func _ready():',
+      '    var first = OS.read_string_from_stdin()',
+      '    var count = int(OS.read_string_from_stdin())',
+      '    var labels = {TrafficLight.RED: "ROSSO",',
+      '        TrafficLight.YELLOW: "GIALLO", TrafficLight.GREEN: "VERDE"}',
+      '    var light = TrafficLight[first]',
+      '    var total = 0',
+      '    for i in range(count):',
+      '        var wait = get_wait_time(light)',
+      '        print(labels[light], ": ", get_driver_action(light), " per ", wait, " secondi")',
+      '        total += wait',
+      '        light = get_next_light(light)',
+      '    print("")',
+      '    print("Attesa totale: ", total, " secondi")'
+    ].join('\n'));
+    // Controllo negativo nel vero Godot: stampa fissa non equivale a enum.
+    const fakeEnum=await page.evaluate(async()=>{
+      return await GDHManualVerifier.verify(10129,
+        'extends Node\nfunc _ready():\n    print("Take an umbrella")',
+        (src,options)=>GDHGodot.runNative(src,options));
+    });
+    assert.equal(fakeEnum.accepted,false);
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
