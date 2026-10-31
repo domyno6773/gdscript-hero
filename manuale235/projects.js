@@ -8,7 +8,7 @@
 (() => {
  'use strict';
  const get=n=>(window.LESSONS_DATA||[]).find(x=>x.manualLessonNumber===n);
- const supported=new Set([171,172,173,174,175,176,177,178,179,180,181,182,183,184]);
+ const supported=new Set([171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186]);
  const lineClean=s=>String(s).replace(/\r/g,'').split('\n').map(t=>t.replace(/\t/g,'    '));
  const safe=(files,lesson)=>{
    const expected=Object.keys(lesson.sourceFiles);
@@ -36,7 +36,7 @@
    let main=files['main.gd'];
    const mainLines=lineClean(main);
    if(!/^\s*extends Node\s*$/m.test(main))throw Error('La scena principale deve estendere Node');
-   const nested=[];
+   const candidates=[];
    const names=new Set();
    for(const [filename,script] of Object.entries(files)){
      if(filename==='main.gd')continue;
@@ -50,11 +50,23 @@
        throw Error('Il nome della classe non corrisponde al file '+filename);
      const body=lines.filter(s=>!/^\s*class_name\s+\w+\s*$/.test(s));
      const first=body.find(s=>s.trim()&&!s.trim().startsWith('#'));
-     if(!first||!/^extends\s+RefCounted\s*$/.test(first.trim()))
-       throw Error('La classe '+className+' deve estendere RefCounted');
-     // Ogni classe conserva i propri metodi e proprietà in un namespace
-     // distinto; il compilatore nativo risolve i tipi e le istanze.
-     nested.push('class '+className+':\n'+body.map(s=>s?'    '+s:'').join('\n'));
+     const parent=first?.trim().match(/^extends\s+([A-Za-z_]\w*)\s*$/)?.[1];
+     if(!parent)throw Error('Manca extends nella classe '+className);
+     candidates.push({className,parent,body});
+   }
+   const nested=[];
+   const completed=new Set();
+   const waiting=candidates.slice();
+   while(waiting.length){
+     const index=waiting.findIndex(item=>item.parent==='RefCounted'||
+       item.parent==='Node'||completed.has(item.parent));
+     if(index===-1)throw Error('Classe base mancante o dipendenza circolare');
+     const {className,parent,body}=waiting.splice(index,1)[0];
+     if(parent!=='RefCounted'&&parent!=='Node'&&!names.has(parent))
+       throw Error('Classe base sconosciuta per '+className);
+     // Godot compila classi reali annidate, ordinate per dipendenze.
+     nested.push('class '+className+':\n'+body.map(line=>line?'    '+line:'').join('\n'));
+     completed.add(className);
    }
    if(!nested.length)throw Error('Non sono presenti classi del progetto');
    let mainBody=mainLines.filter(s=>!/^\s*extends Node\s*$/.test(s)).join('\n');
