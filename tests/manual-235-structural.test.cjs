@@ -154,7 +154,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     }else{
       const assembled=adapter.build(lesson,lesson.sourceFiles);
       assert.match(assembled,/^extends Node/m);
-      assert.match(assembled,/^class \\w+:/m);
+      assert.match(assembled,/^class \w+:/m);
     }
     const broken={...lesson.sourceFiles,'main.gd':lesson.sourceFiles['main.gd']+'\nprint("falso")'};
     assert.throws(()=>adapter.build(lesson,broken),/modificato/);
