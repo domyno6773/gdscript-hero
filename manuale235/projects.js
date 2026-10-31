@@ -8,7 +8,7 @@
 (() => {
  'use strict';
  const get=n=>(window.LESSONS_DATA||[]).find(x=>x.manualLessonNumber===n);
- const supported=new Set([171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190]);
+ const supported=new Set([171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192]);
  const lineClean=s=>String(s).replace(/\r/g,'').split('\n').map(t=>t.replace(/\t/g,'    '));
  const safe=(files,lesson)=>{
    const expected=Object.keys(lesson.sourceFiles);
