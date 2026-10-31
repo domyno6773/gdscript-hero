@@ -210,6 +210,80 @@ async function main(){
       '    var counts = {}\n'+
       '    for item in loot:\n        counts[item] = counts.get(item, 0) + 1\n'+
       '    for item in counts:\n        print(item, ": ", counts[item])');
+    // Il registro spese è un progetto progressivo: ogni fase deve funzionare
+    // con una sequenza di scelte differente, non solo con l'esempio del manuale.
+    await exercise(82,
+      'extends Node\nfunc _ready():\n'+
+      '    var item = OS.read_string_from_stdin()\n'+
+      '    var amount = int(OS.read_string_from_stdin())\n'+
+      '    var used = OS.read_string_from_stdin()\n'+
+      '    var inventory = {"pozione": 2, "freccia": 10}\n'+
+      '    inventory[item] = inventory.get(item, 0) + amount\n'+
+      '    if inventory.has(used):\n'+
+      '        inventory[used] -= 1\n'+
+      '        print("Usato ", used)\n'+
+      '        if inventory[used] == 0:\n'+
+      '            inventory.erase(used)\n'+
+      '    else:\n'+
+      '        print("Non possiedi ", used)\n'+
+      '    print("Articoli: ", inventory.size())\n'+
+      '    for key in inventory:\n'+
+      '        print(key, ": ", inventory[key])');
+    await page.evaluate(()=>App.openLesson(10083));
+    assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(10083)),false);
+    assert.doesNotMatch(await page.locator('#code-editor').inputValue(),
+      /print\("Benvenuto nel registro giornaliero/);
+    const expensesMenu=(
+      '    print("Benvenuto nel registro giornaliero delle spese!")\n'+
+      '    print("\\nMenu:")\n'+
+      '    print("1. Aggiungi una nuova spesa")\n'+
+      '    print("2. Visualizza tutte le spese")\n'+
+      '    print("3. Calcola totale e media delle spese")\n'+
+      '    print("4. Cancella tutte le spese")\n'+
+      '    print("5. Esci")\n'
+    );
+    await exercise(83,'extends Node\nfunc _ready():\n'+expensesMenu);
+    await exercise(84,'extends Node\nfunc _ready():\n'+expensesMenu+
+      '    while true:\n'+
+      '        var choice = OS.read_string_from_stdin()\n'+
+      '        if choice == "5":\n'+
+      '            print("Chiusura del registro delle spese. Arrivederci!")\n'+
+      '            break');
+    const completeExpense=
+      'extends Node\nfunc _ready():\n'+expensesMenu+
+      '    var expenses: Array[float] = []\n'+
+      '    while true:\n'+
+      '        var choice = OS.read_string_from_stdin()\n'+
+      '        if choice == "1":\n'+
+      '            var amount = float(OS.read_string_from_stdin())\n'+
+      '            expenses.append(amount)\n'+
+      '            print("Spesa aggiunta correttamente!")\n'+
+      '        elif choice == "2":\n'+
+      '            if expenses.is_empty():\n'+
+      '                print("Nessuna spesa registrata.")\n'+
+      '            else:\n'+
+      '                print("Le tue spese:")\n'+
+      '                for i in range(expenses.size()):\n'+
+      '                    print(i + 1, ". ", expenses[i])\n'+
+      '        elif choice == "3":\n'+
+      '            if expenses.is_empty():\n'+
+      '                print("Nessuna spesa registrata.")\n'+
+      '            else:\n'+
+      '                var total = 0.0\n'+
+      '                for expense in expenses:\n'+
+      '                    total += expense\n'+
+      '                var average = total / expenses.size()\n'+
+      '                print("Totale delle spese: ", total)\n'+
+      '                print("Spesa media: ", average)\n'+
+      '        elif choice == "4":\n'+
+      '            expenses.clear()\n'+
+      '            print("Tutte le spese sono state cancellate.")\n'+
+      '        elif choice == "5":\n'+
+      '            print("Chiusura del registro delle spese. Arrivederci!")\n'+
+      '            break\n'+
+      '        else:\n'+
+      '            print("Scelta non valida. Riprova.")';
+    for(const n of [85,86,87,88,89])await exercise(n,completeExpense);
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
