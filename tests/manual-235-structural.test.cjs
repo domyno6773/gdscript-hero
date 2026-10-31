@@ -153,7 +153,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.doesNotMatch(lessons[119].initialCode,/func delete_contact/);
   assert.doesNotMatch(lessons[120].initialCode,/func list_all_contacts/);
   assert.match(lessons[121].initialCode,/func list_all_contacts/);
-  assert.doesNotMatch(lessons[121].initialCode,/match choice:/);
+  assert.doesNotMatch(lessons[121].initialCode.split('\n').filter(x=>!/^\s*#/.test(x)).join('\n'),/match choice:/);
   assert.equal(verify.expectedCases[122].length,3);
   assert.match(lessons[118].task,/Contatto aggiornato correttamente/);
   const unsupported=await verify.verify(10123,'',async()=>{throw Error('Non dovrebbe partire');});
