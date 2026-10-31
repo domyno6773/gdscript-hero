@@ -189,6 +189,27 @@ async function main(){
       '    print("Original: ", numbers)\n'+
       '    print("Ascending: ", ascending)\n'+
       '    print("Descending: ", descending)');
+    await exercise(77,
+      'extends Node\nfunc _ready():\n'+
+      '    var hero_name = OS.read_string_from_stdin()\n'+
+      '    var role = OS.read_string_from_stdin()\n'+
+      '    var level = int(OS.read_string_from_stdin())\n'+
+      '    var hero = {"name": hero_name, "role": role, "level": level}\n'+
+      '    print(hero)');
+    await exercise(78,
+      'extends Node\nfunc _ready():\n'+
+      '    var item_name = OS.read_string_from_stdin()\n'+
+      '    var price = float(OS.read_string_from_stdin())\n'+
+      '    var stock = int(OS.read_string_from_stdin())\n'+
+      '    var key = OS.read_string_from_stdin()\n'+
+      '    var item = {"name": item_name, "price": price, "stock": stock}\n'+
+      '    print(item.get(key, "Non trovato"))');
+    await exercise(81,
+      'extends Node\nfunc _ready():\n'+
+      '    var loot = OS.read_string_from_stdin().split(",")\n'+
+      '    var counts = {}\n'+
+      '    for item in loot:\n        counts[item] = counts.get(item, 0) + 1\n'+
+      '    for item in counts:\n        print(item, ": ", counts[item])');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
