@@ -138,7 +138,7 @@ async function main(){
     });
     assert.deepEqual(stdinProbe.map(x=>x.stdout.trim()),['1','7','21'],
       'Input non isolato correttamente: '+JSON.stringify(stdinProbe));
-    await exercise(60,
+    const fizzSolution =
       'extends Node\nfunc _ready():\n'+
       '    print("Benvenuto in FizzBuzz!")\n'+
       '    var limit = int(OS.read_string_from_stdin())\n'+
@@ -147,7 +147,19 @@ async function main(){
       '    if number % 21 == 0:\n        return "FizzBuzz"\n'+
       '    if number % 3 == 0:\n        return "Fizz"\n'+
       '    if number % 7 == 0:\n        return "Buzz"\n'+
-      '    return str(number)');
+      '    return str(number)';
+    const fizzProbe=await page.evaluate(async code=>{
+      const trace=[];
+      const verdict=await GDHManualVerifier.verify(10060,code,async(source,options)=>{
+        const value=await GDHGodot.runNative(source,options);
+        trace.push({stdin:options.stdin,output:value.stdout,ok:value.status,stderr:value.stderr});
+        return value;
+      });
+      return {trace,checks:verdict.feedback.checks,accepted:verdict.accepted};
+    },fizzSolution);
+    assert.equal(fizzProbe.accepted,true,
+      'La funzione nativa di verifica FizzBuzz ha fallito: '+JSON.stringify(fizzProbe));
+    await exercise(60,fizzSolution);
     await exercise(67,
       'extends Node\nfunc _ready():\n'+
       '    var count = int(OS.read_string_from_stdin())\n'+
