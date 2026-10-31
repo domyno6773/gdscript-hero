@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,170);
+    assert.equal(stats.prepared,175);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -1221,6 +1221,80 @@ async function main(){
           (code,opts)=>GDHGodot.runNative(code,opts)),n);
       assert.equal(fake.accepted,false,'Una stampa fissa non deve superare '+n);
     }
+
+    // Esercizi OOP: ogni classe viene compilata dal motore Godot,
+    // senza consentire l'editing di main.gd e con test su input alternativi.
+    const oopSolutions=[
+      [171,[
+        'class_name Greeter','extends RefCounted','',
+        'static func greet(player_name: String) -> String:',
+        '    if player_name.is_empty():',
+        '        return "Ciao, friend!"',
+        '    return "Ciao, %s!" % player_name'
+      ]],
+      [172,[
+        'class_name Car','extends RefCounted','',
+        'var brand: String = "Generic"',
+        'var ruote: int = 4'
+      ]],
+      [173,[
+        'class_name Student','extends RefCounted','',
+        'const SCHOOL = "Godot High School"',
+        'var student_name: String',
+        'var grade: String = "N/A"'
+      ]],
+      [174,[
+        'class_name Car','extends RefCounted',
+        'var year: int = 0','var make: String = ""','var model: String = ""',
+        'func set_info(year: int, make: String, model: String) -> void:',
+        '    self.year = year',
+        '    self.make = make',
+        '    self.model = model',
+        'func describe() -> String:',
+        '    return "Questa auto è una %d %s %s" % [year, make, model]'
+      ]],
+      [175,[
+        'class_name BankAccount','extends RefCounted',
+        'var balance: int = 0',
+        'func deposit(amount: int) -> void:',
+        '    balance += amount',
+        'func withdraw(amount: int) -> bool:',
+        '    if amount > balance:',
+        '        return false',
+        '    balance -= amount',
+        '    return true',
+        'func get_balance() -> int:',
+        '    return balance'
+      ]]
+    ];
+    for(const [n,lines] of oopSolutions){
+      await page.evaluate(id=>App.openLesson(id),10000+n);
+      const file=await page.locator('.manual-file-tab.is-active').innerText();
+      assert.notEqual(file,'main.gd','La lezione si deve aprire sul file da scrivere');
+      assert.equal(await page.locator('#code-editor').getAttribute('readonly'),null);
+      await exercise(n,lines.join('\n'));
+      // Il progetto fornito è conservato separatamente e non può essere
+      // riscritto in modo invisibile dal file dell'allievo.
+      await page.locator('.manual-file-tab',{hasText:'main.gd'}).click();
+      assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
+    }
+    const amended=await page.evaluate(()=>{
+      const lesson=LESSONS_DATA.find(l=>l.manualLessonNumber===171);
+      const corrupt={...GDHManualStudio.getDraft(lesson).files,
+        'main.gd':'extends Node\nfunc _ready():\n    print("barare")'};
+      try{GDHManualProject.build(lesson,corrupt);return false;}
+      catch(error){return /modificato/.test(error.message);}
+    });
+    assert.equal(amended,true,'Il main.gd fornito non deve essere modificabile');
+    const insufficient=await page.evaluate(async()=>{
+      App.openLesson(10171);
+      const editor=document.getElementById('code-editor');
+      editor.value='class_name Greeter\nextends RefCounted\nstatic func greet(player_name: String) -> String:\n    return "Ciao, Ada!"';
+      const result=await GDHManualVerifier.verify(10171,editor.value,
+        (code,options)=>GDHGodot.runNative(code,options));
+      return result.accepted;
+    });
+    assert.equal(insufficient,false,'L’output fisso non supera il caso del nome vuoto');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
