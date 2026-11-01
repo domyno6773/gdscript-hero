@@ -6,6 +6,9 @@ on:
       - 'native/**'
       - 'tests/manual-235-structural.test.cjs'
       - 'tests/manual-235-browser.test.cjs'
+      - 'tests/manual-design-patterns-native.test.cjs'
+      - 'tests/manual-finale-native.test.cjs'
+      - 'tests/helpers/manual-*.cjs'
       - 'index.html'
 jobs:
   manual-validation:
@@ -57,6 +60,7 @@ jobs:
           node --check manuale235/signals-health-composition.js
           node --check manuale235/oop-components-and-patterns.js
           node --check manuale235/design-patterns.js
+          node --check manuale235/course-finale.js
           node --check manuale235/studio.js
           node --check native/isolated-runner.js
           node --check native/native-beta-adapter.js
@@ -78,3 +82,24 @@ jobs:
         run: google-chrome --version
       - name: Exercise new course in actual browser and Godot runtime
         run: node tests/manual-235-browser.test.cjs
+
+  finale-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Godot 4.5.1
+        run: |
+          curl --fail --location --retry 3 --silent --show-error https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip -o /tmp/godot-finale.zip
+          unzip -q /tmp/godot-finale.zip -d /tmp/godot-finale
+      - name: Check patterns and final projects in native Godot
+        env:
+          GODOT_BIN: /tmp/godot-finale/Godot_v4.5.1-stable_linux.x86_64
+        run: |
+          node tests/manual-design-patterns-native.test.cjs
+          node tests/manual-finale-native.test.cjs

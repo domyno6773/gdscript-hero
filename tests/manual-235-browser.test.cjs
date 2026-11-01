@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,220);
+    assert.equal(stats.prepared,235);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -2567,14 +2567,43 @@ async function main(){
       },number);
       assert.equal(accepted,false,'Starter accettato: '+number);
     }
-    const future221=await page.evaluate(async()=>{
-      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===221);
-      return {ready:l.validationReady,supported:GDHManualProject.supports(l),
-        accepted:(await GDHManualVerifier.verify(l.id,l.initialCode,
-          ()=>{throw Error('Non eseguire Godot su una lezione non supportata');})).accepted};
-    });
-    assert.deepEqual(future221,{ready:false,supported:false,accepted:false},
-      'Non attribuire XP alle lezioni prive di validatore specifico');
+    const finale=require('./helpers/manual-finale-solutions.cjs');
+    for(const [number,files] of Object.entries(finale)){
+      await completeProject(Number(number),files);
+      const protection=await page.evaluate(number=>LESSONS_DATA.find(x=>x.manualLessonNumber===number).readOnlyFiles,Number(number));
+      for(const name of protection){
+        await page.getByRole('tab',{name,exact:true}).click();
+        assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
+      }
+    }
+    for(const [number,filename,from,to] of require('./helpers/manual-finale-mutations.cjs')){
+      const accepted=await page.evaluate(async({number,filename,from,to})=>{
+        App.openLesson(10000+number);
+        const l=LESSONS_DATA.find(x=>x.manualLessonNumber===number),draft=GDHManualStudio.getDraft(l);
+        const previous=draft.files[filename],editor=document.getElementById('code-editor'),editorBefore=editor.value;
+        if(!previous.includes(from))throw Error('Mutazione assente '+number);
+        draft.files[filename]=previous.replace(from,to);
+        if(draft.selected===filename)editor.value=draft.files[filename];
+        try{return (await GDHManualVerifier.verify(l.id,editor.value,
+          (code,options)=>GDHGodot.runNative(code,options))).accepted;}
+        finally{draft.files[filename]=previous;editor.value=editorBefore;}
+      },{number,filename,from,to});
+      assert.equal(accepted,false,'Mutazione accettata: '+number+' '+from);
+    }
+    for(let number=221;number<=235;number++){
+      const accepted=await page.evaluate(async number=>{
+        App.openLesson(10000+number);
+        const l=LESSONS_DATA.find(x=>x.manualLessonNumber===number),draft=GDHManualStudio.getDraft(l);
+        const previous={...draft.files},editor=document.getElementById('code-editor'),editorBefore=editor.value;
+        Object.assign(draft.files,l.sourceFiles);editor.value=l.sourceFiles[draft.selected];
+        try{return (await GDHManualVerifier.verify(l.id,editor.value,
+          (code,options)=>GDHGodot.runNative(code,options))).accepted;}
+        finally{Object.assign(draft.files,previous);editor.value=editorBefore;}
+      },number);
+      assert.equal(accepted,false,'Starter accettato: '+number);
+    }
+    assert.equal(await page.evaluate(()=>GDHManualMigration.readyForRelease),false,
+      'Terminare i verificatori non rimuove i gate di pubblicazione');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
     assert.match(await page.locator('#code-editor').inputValue(),/class_name Greeter/);
@@ -2582,7 +2611,7 @@ async function main(){
     await page.locator('.manual-file-tab', {hasText:'main.gd'}).click();
     assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
     assert.equal(errors.length,0,'Page errors: '+errors.join(' | '));
-    console.log('PASS browser: 220 lezioni predisposte, Godot reale, progetti e pattern.');
+    console.log('PASS browser: 235 lezioni predisposte, Godot reale, progetti e pattern.');
   }finally{await browser.close();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>server.close());

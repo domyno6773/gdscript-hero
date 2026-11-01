@@ -21,17 +21,22 @@ func _initialize():
     if script == null:
         quit(1)
         return
+    create_timer(1.0).timeout.connect(func(): quit(2))
     root.add_child.call_deferred(script.new())
 `);
 let runs=0;
 function execute(l,files,testcase){
  const src=project.build(l,files).replace(/OS\.read_string_from_stdin\(\)/g,'__read_test_input()');
- const script=src+'\n    print("__GDH_DONE__")\n    get_tree().quit()\n\n'+
+ const ready=src.indexOf('\nfunc _ready(');
+ const next=src.indexOf('\nfunc ',ready+1);
+ const stop=next<0?src.length:next;
+ const executable=src.slice(0,stop)+'\n    print("__GDH_DONE__")\n    get_tree().quit()\n'+src.slice(stop);
+ const script=executable+'\n'+
  'var __test_input = '+JSON.stringify(testcase.stdin)+'\n'+
  'func __read_test_input() -> String:\n    return str(__test_input.pop_front())\n';
  fs.writeFileSync(path.join(dir,'student.gd'),script);
  const r=spawnSync(bin,['--headless','--path',dir,'--script','res://boot.gd'],{
-  encoding:'utf8',timeout:12000,env:{...process.env,GODOT_SILENCE_ROOT_WARNING:'1'}});
+  encoding:'utf8',timeout:5000,env:{...process.env,GODOT_SILENCE_ROOT_WARNING:'1'}});
  runs++;
  const stdout=(r.stdout||'').replace(/^Godot Engine[^\n]*\n\n?/,'');
  const success=r.status===0&&stdout.includes('__GDH_DONE__')&&!/SCRIPT ERROR|Parse Error|ERROR:/.test(r.stderr||'');
@@ -39,6 +44,7 @@ function execute(l,files,testcase){
 }
 try{
  for(let n=216;n<=220;n++){
+  console.log('Godot nativo: lezione '+n);
   const l=context.LESSONS_DATA[n-1];
   const solved={...l.sourceFiles,...Object.fromEntries(Object.entries(solutions[n]).map(([f,lines])=>[f,lines.join('\n')]))};
   for(const testcase of context.window.GDHManualVerifier.expectedCases[n]){
