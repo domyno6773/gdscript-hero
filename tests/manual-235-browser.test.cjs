@@ -1552,6 +1552,10 @@ async function main(){
         error:document.getElementById('validation-result')?.textContent
       }),10000+number);
       assert.equal(verdict.finished,true,'Lezione '+number+' rifiutata: '+JSON.stringify(verdict));
+      // Il successo viene mostrato dopo 300 ms. Chiudilo come un utente prima
+      // di ispezionare le schede o passare al prossimo progetto.
+      await page.locator('#success-modal').waitFor({state:'visible',timeout:5000});
+      await page.locator('#btn-modal-stay').click();
     };
     await completeProject(187,{
       'circle.gd':[
