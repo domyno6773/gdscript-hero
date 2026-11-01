@@ -56,6 +56,7 @@ jobs:
           node --check manuale235/oop-virtual-and-signals.js
           node --check manuale235/signals-health-composition.js
           node --check manuale235/oop-components-and-patterns.js
+          node --check manuale235/design-patterns.js
           node --check manuale235/studio.js
           node --check native/isolated-runner.js
           node --check native/native-beta-adapter.js

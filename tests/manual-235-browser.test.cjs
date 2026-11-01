@@ -37,7 +37,7 @@ async function main(){
     }));
     assert.equal(stats.count,235);
     assert.equal(stats.chapters,43);
-    assert.equal(stats.prepared,215);
+    assert.equal(stats.prepared,220);
     await page.evaluate(()=>App.openLesson(10001));
     assert.match(await page.locator('#code-editor').inputValue(),/print\("Ciao GDScript!"\)/);
     assert.match(await page.locator('#btn-run-code').innerText(),/Esegui codice/);
@@ -2518,14 +2518,62 @@ async function main(){
       }
     });
     assert.equal(fake191,false,'Non accettare output hardcoded nel garage');
-    const future216=await page.evaluate(async()=>{
-      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===216);
-      return {ready:l.validationReady,
-        supported:GDHManualProject.supports(l),
+    const patterns=require('./helpers/manual-design-pattern-solutions.cjs');
+    for(const [number,files] of Object.entries(patterns)){
+      await completeProject(Number(number),files);
+      const protection=await page.evaluate(number=>{
+        const l=LESSONS_DATA.find(x=>x.manualLessonNumber===number);
+        return l.readOnlyFiles;
+      },Number(number));
+      for(const name of protection){
+        await page.getByRole('tab',{name,exact:true}).click();
+        assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
+      }
+    }
+    // Mutazioni compilabili: ciascun pattern deve dimostrare il suo comportamento.
+    const mutations=[
+      [216,'score_manager.gd','if instance == null:','if true:'],
+      [217,'enemy_factory.gd','match kind.to_lower():','match kind:'],
+      [218,'weather_station.gd','if temperature_changed.is_connected(display.on_temperature_changed):','if false and temperature_changed.is_connected(display.on_temperature_changed):'],
+      [219,'fixed_off.gd','return maxi(0, total - amount)','return total - amount'],
+      [220,'command_history.gd','done.pop_back()','done.pop_front()']
+    ];
+    for(const [number,filename,from,to] of mutations){
+      const accepted=await page.evaluate(async({number,filename,from,to})=>{
+        App.openLesson(10000+number);
+        const l=LESSONS_DATA.find(x=>x.manualLessonNumber===number);
+        const draft=GDHManualStudio.getDraft(l);
+        const previous=draft.files[filename];
+        const editor=document.getElementById('code-editor');
+        const selected=draft.selected,editorBefore=editor.value;
+        draft.files[filename]=previous.replace(from,to);
+        if(selected===filename)editor.value=draft.files[filename];
+        try{return (await GDHManualVerifier.verify(l.id,editor.value,
+          (code,options)=>GDHGodot.runNative(code,options))).accepted;}
+        finally{draft.files[filename]=previous;editor.value=editorBefore;}
+      },{number,filename,from,to});
+      assert.equal(accepted,false,'Mutazione accettata: '+number+' '+from);
+    }
+    for(let number=216;number<=220;number++){
+      const accepted=await page.evaluate(async number=>{
+        App.openLesson(10000+number);
+        const l=LESSONS_DATA.find(x=>x.manualLessonNumber===number);
+        const draft=GDHManualStudio.getDraft(l),previous={...draft.files};
+        const editor=document.getElementById('code-editor'),editorBefore=editor.value;
+        Object.assign(draft.files,l.sourceFiles);editor.value=l.sourceFiles[draft.selected];
+        try{return (await GDHManualVerifier.verify(l.id,editor.value,
+          (code,options)=>GDHGodot.runNative(code,options))).accepted;}
+        finally{Object.assign(draft.files,previous);editor.value=editorBefore;}
+      },number);
+      assert.equal(accepted,false,'Starter accettato: '+number);
+    }
+    const future221=await page.evaluate(async()=>{
+      const l=LESSONS_DATA.find(x=>x.manualLessonNumber===221);
+      return {ready:l.validationReady,supported:GDHManualProject.supports(l),
         accepted:(await GDHManualVerifier.verify(l.id,l.initialCode,
           ()=>{throw Error('Non eseguire Godot su una lezione non supportata');})).accepted};
     });
-    assert.deepEqual(future216,{ready:false,supported:false,accepted:false},
+    assert.deepEqual(future221,{ready:false,supported:false,accepted:false},
       'Non attribuire XP alle lezioni prive di validatore specifico');
     await page.evaluate(()=>App.openLesson(10171));
     assert.ok(await page.locator('.manual-file-tab').count()>=2);
@@ -2534,7 +2582,7 @@ async function main(){
     await page.locator('.manual-file-tab', {hasText:'main.gd'}).click();
     assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
     assert.equal(errors.length,0,'Page errors: '+errors.join(' | '));
-    console.log('PASS browser: 70 lezioni predisposte, funzioni, array, FizzBuzz e editor.');
+    console.log('PASS browser: 220 lezioni predisposte, Godot reale, progetti e pattern.');
   }finally{await browser.close();}
 }
 main().catch(error=>{console.error(error);process.exitCode=1}).finally(()=>server.close());

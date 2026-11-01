@@ -3,7 +3,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const root=process.cwd();
 const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],CONCEPTS_CATALOG:{},console};
 vm.createContext(context);
-for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js','manuale235/sets.js','manuale235/enums.js','manuale235/student-records.js','manuale235/aggregates.js','manuale235/advanced-functions.js','manuale235/array-methods.js','manuale235/error-handling.js','manuale235/inventory-project.js','manuale235/final-challenges.js','manuale235/projects.js','manuale235/oop-foundations.js','manuale235/oop-properties.js','manuale235/oop-encapsulation.js','manuale235/oop-inheritance.js','manuale235/oop-polymorphism.js','manuale235/oop-duck-typing.js','manuale235/oop-abstract.js','manuale235/oop-shape-calculator.js','manuale235/oop-encapsulation-advanced.js','manuale235/oop-virtual-and-signals.js','manuale235/signals-health-composition.js','manuale235/oop-components-and-patterns.js']){
+for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js','manuale235/sets.js','manuale235/enums.js','manuale235/student-records.js','manuale235/aggregates.js','manuale235/advanced-functions.js','manuale235/array-methods.js','manuale235/error-handling.js','manuale235/inventory-project.js','manuale235/final-challenges.js','manuale235/projects.js','manuale235/oop-foundations.js','manuale235/oop-properties.js','manuale235/oop-encapsulation.js','manuale235/oop-inheritance.js','manuale235/oop-polymorphism.js','manuale235/oop-duck-typing.js','manuale235/oop-abstract.js','manuale235/oop-shape-calculator.js','manuale235/oop-encapsulation-advanced.js','manuale235/oop-virtual-and-signals.js','manuale235/signals-health-composition.js','manuale235/oop-components-and-patterns.js','manuale235/design-patterns.js']){
   vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),context,{filename:file,timeout:3000});
 }
 const lessons=context.LESSONS_DATA,chapters=context.CHAPTERS_DATA;
@@ -19,8 +19,8 @@ assert.match(lessons[1].initialCode,/print\(""\)/);
 assert.match(lessons[2].initialCode,/print\("Arrivederci!"\)/);
 assert.ok(lessons.every(x=>x.theory&&x.task&&x.initialCode&&x.title));
 assert.ok(lessons.every(x=>typeof x.validate==='function'));
-assert.ok(lessons.slice(0,215).every(x=>x.validationReady===true));
-assert.ok(lessons.slice(215).every(x=>x.validationReady===false));
+assert.ok(lessons.slice(0,220).every(x=>x.validationReady===true));
+assert.ok(lessons.slice(220).every(x=>x.validationReady===false));
 assert.ok(lessons.slice(170).every(x=>x.sourceFiles['main.gd']));
 assert.match(lessons[8].initialCode,/^extends Node/m);
 assert.match(lessons[8].initialCode,/^    var PlayerName/m);
@@ -28,7 +28,7 @@ assert.match(lessons[170].sourceFiles['greeter.gd'],/^class_name Greeter/m);
 const stats=context.window.GDHManualMigration;
 assert.equal(stats.total,235);
 assert.equal(stats.chapters,43);
-assert.equal(stats.validated,215);
+assert.equal(stats.validated,220);
 assert.equal(stats.readyForRelease,false);
 assert.equal(context.window.GDHManualBasicsValidated,18);
 async function checks(n,logs,source=lessons[n-1].initialCode){
@@ -235,7 +235,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     JSON.stringify(['player.gd','rock.gd','main.gd']));
   assert.ok(verify.expectedCases[192].some(c=>c.output.includes('Cassa: distrutta')));
   assert.ok(verify.expectedCases[191].some(c=>c.output.includes('Ruote totali: 18')));
-  assert.equal(lessons[215].validationReady,false,'Attività future non devono concedere XP');
+  assert.equal(lessons[220].validationReady,false,'Attività future non devono concedere XP');
 
   // Godot 4.5 supporta @abstract: il verificatore non deve falsare
   // l'astrazione con metodi finti in un runtime obsoleto.
@@ -271,7 +271,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.ok(verify.expectedCases[198].some(c=>c.output.includes('Già presente nella playlist:')));
   assert.ok(verify.expectedCases[199].some(c=>c.output.includes('Ordine n.')));
   assert.ok(verify.expectedCases[200].some(c=>c.output.includes('Media: 87.50')));
-  assert.ok(lessons.slice(215).every(l=>l.validationReady===false));
+  assert.ok(lessons.slice(220).every(l=>l.validationReady===false));
   for(let n=201;n<=205;n++){
     const l=lessons[n-1];
     assert.equal(l.validationReady,true,'Lezione '+n+' non attiva');
@@ -322,6 +322,26 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   assert.ok(verify.expectedCases[213].some(x=>x.output.includes('Goblin defeated')));
   assert.ok(verify.expectedCases[214].some(x=>x.output.includes('POISON: 1 (5 totali)')));
   assert.ok(verify.expectedCases[215].some(x=>x.output.includes('boss.ogg')));
+  const patternSolutions=require('./helpers/manual-design-pattern-solutions.cjs');
+  for(let n=216;n<=220;n++){
+    const l=lessons[n-1];
+    assert.equal(l.validationReady,true);
+    assert.equal(project.supports(l),true);
+    assert.equal(verify.expectedCases[n].length,6);
+    const solved={...l.sourceFiles,...Object.fromEntries(Object.entries(patternSolutions[n]).map(([f,lines])=>[f,lines.join('\n')]))};
+    assert.match(project.build(l,solved),/^extends Node/m);
+    assert.equal(l.manualSourceCheck(Object.values(solved).join('\n')),true);
+    assert.equal(l.manualSourceCheck(Object.values(l.sourceFiles).join('\n')),false);
+    for(const f of l.readOnlyFiles)
+      assert.throws(()=>project.build(l,{...solved,[f]:solved[f]+'\n# modifica'}),/modificato/);
+  }
+  assert.doesNotMatch(lessons[215].task,/manager created/);
+  assert.doesNotMatch(lessons[218].task,/percent(?:\s|<span> <\/span>)+N/);
+  assert.doesNotMatch(lessons[219].task,/undo -&gt;/);
+  assert.ok(verify.expectedCases[216].some(c=>c.stdin[0]==='0'));
+  assert.ok(verify.expectedCases[218].some(c=>c.output.includes('C: 12.5 C')));
+  assert.ok(verify.expectedCases[219].some(c=>c.output.includes('Subtotale 15, sconto 33%, da pagare 11')));
+  assert.ok(verify.expectedCases[220].some(c=>c.output.includes('Nessuna operazione da annullare')));
   const firstEndToEnd=await verify.verify(10001,lessons[0].initialCode,async()=>({
     status:'executed',stdout:'Ciao GDScript!\n',stderr:'',reply:{status:'executed'}
   }));
@@ -436,5 +456,5 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
   const unsupported=await verify.verify(10216,'',async()=>{throw Error('Non dovrebbe partire');});
   assert.equal(unsupported.accepted,false,'Lezione non verificata non dà XP');
   assert.match(verify.nativeSource('print(OS.read_string_from_stdin())'),/__gdhManualReadStdin/);
-  console.log('OK: 235 lezioni, 43 capitoli, 215 validatori, stdin e test negativi');
+  console.log('OK: 235 lezioni, 43 capitoli, 220 validatori, stdin e test negativi');
 })().catch(err=>{console.error(err);process.exitCode=1});
