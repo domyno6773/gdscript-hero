@@ -17,6 +17,8 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
     await page.evaluate(()=>{App.state.devAllUnlocked=false;App.ensureUnlockedConsistency();App.openLesson(10001)});
     await page.locator('#btn-tab-code').click();
     assert.ok(await page.locator('#code-editor').isVisible());
+    assert.equal(await page.locator('#btn-tab-code').getAttribute('aria-pressed'),'true');
+    assert.equal(await page.locator('#btn-tab-instructions').getAttribute('aria-pressed'),'false');
     await page.locator('#btn-run-code').click();
     await page.waitForFunction(()=>App.state.finishedLessons.includes(10001),null,{timeout:120000});
     await page.locator('#success-modal').waitFor({state:'visible'});await page.locator('#btn-modal-stay').click();
@@ -114,6 +116,15 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
     await page.reload();await page.waitForFunction(()=>window.GDHManualStudio);await host.welcome(page);
     assert.equal(await page.evaluate(()=>App.state.xp),0,'Il reset non persiste al reload');
     await page.evaluate(()=>{App.openLesson(10171);ConfettiFX.particles=[]});await page.locator('#btn-tab-code').click();
+    const tabs=await page.evaluate(()=>({
+      code:document.getElementById('btn-tab-code').getAttribute('aria-pressed'),
+      instructions:document.getElementById('btn-tab-instructions').getAttribute('aria-pressed'),
+      codeActive:document.getElementById('btn-tab-code').classList.contains('active'),
+      workspace:document.getElementById('exercise-workspace-grid').className
+    }));
+    assert.equal(tabs.code,'true',JSON.stringify(tabs));assert.equal(tabs.instructions,'false',JSON.stringify(tabs));
+    assert.equal(tabs.codeActive,true,JSON.stringify(tabs));
+    assert.ok(await page.locator('#code-editor').isVisible());
     assert.deepEqual(errors,[]);
     fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/'+name+'.png',fullPage:true});
     console.log('PASS mobile '+name+': schede, Godot, XP, reload, backup e isolamento account.');
