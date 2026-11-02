@@ -41,7 +41,7 @@ assert.equal(requirement.category,'requirement');
 assert.equal(requirement.steps.length,2);
 assert.equal(requirement.line,null);
 assert.match(requirement.requirement,/Atteso 10/);
-assert.match(requirement.hint,/Confronta/);
+assert.match(requirement.why,/Atteso 10, ottenuto 5/,'Il motivo del controllo fallito va spiegato subito');
 
 // Il runner Web indica gli script effimeri con gdscript://, non res://.
 const typo=guide.diagnose({
@@ -135,4 +135,33 @@ const multilineString=guide.diagnose({
 });
 assert.doesNotMatch(multilineString.title,/chiusura/i,
   'Delimiters inside a multiline string must not be parsed as code');
-console.log('PASS: Godot error guide parses exact lines, fallback hints and requirement failures');
+const {w}=require('./helpers/load_course.cjs')();
+assert.equal(w.LESSONS_DATA.length,235);
+for(const lesson of w.LESSONS_DATA){
+ assert.equal(lesson.hints.length,2,'Indizi mancanti: '+lesson.id);
+ assert.ok(lesson.hints.every(h=>h.text.trim().length>40&&h.label));
+ assert.ok(lesson.hints.every(h=>!/Segui la consegna del manuale|Parti dalla consegna:|Rileggi la consegna/.test(h.text)));
+}
+assert.equal(new Set(w.LESSONS_DATA.map(l=>l.hints[0].text)).size,235,'Niente primo indizio identico fra attività diverse');
+const comments=w.LESSONS_DATA[2];
+const emptySource='extends Node\n\nfunc _ready():\n    # print("Ciao!")\n    # print("Arrivederci!")';
+const emptyError='SCRIPT ERROR: Parse Error: Expected indented block after function declaration.\n at: GDScript::reload (gdscript://-123.gd:3)';
+const empty=guide.diagnose({source:emptySource,error:emptyError,lesson:comments});
+assert.match(empty.title,/_ready\(\).*vuota/);assert.match(empty.why,/commenti/);assert.match(empty.hint,/pass/);
+assert.equal(empty.message,emptyError.split('\n')[0]);assert.equal(empty.sourceLine,'func _ready():');assert.equal(empty.line,3);
+const unindented=guide.diagnose({source:'extends Node\nfunc _ready():\nprint("Ciao!")',error:emptyError.replace('.gd:3','.gd:2')});
+assert.match(unindented.title,/non è dentro/);assert.match(unindented.why,/print/);
+const wrongComment=guide.diagnose({source:'extends Node\nfunc _ready():\n    # print("Ciao!")\n    print("Arrivederci!")',lesson:comments,failedTest:{desc:'Output della lezione',diff:'Output errato'},output:'Arrivederci!',expectedOutput:'Ciao!'});
+assert.equal(wrongComment.kind,'requirement');assert.match(wrongComment.title,/Arrivederci/);assert.match(wrongComment.hint,/Lascia attiva print\("Ciao!"\)/);
+const deleted=guide.diagnose({source:'extends Node\nfunc _ready():\n    print("Ciao!")',lesson:comments,failedTest:{desc:'Commento conservato',diff:'Manca la riga commentata'},output:'Ciao!',expectedOutput:'Ciao!'});
+assert.match(deleted.why,/Cancellarla/);
+const mismatch=guide.diagnose({source:'',lesson:w.LESSONS_DATA[34],output:'9',expectedOutput:'9.0',failedTest:{desc:'Output'}});
+assert.match(mismatch.why,/"9.0"/);assert.match(mismatch.why,/"9"/);assert.equal(mismatch.raw,'');
+const laterCase=guide.diagnose({source:'',output:'caso iniziale corretto',expectedOutput:'caso iniziale corretto',failedTest:{desc:'Caso alternativo',diff:'Risultato previsto:\n3.5\nRicevuto:\n3'}});
+assert.match(laterCase.why,/"3.5"/);assert.match(laterCase.why,/"3"/,'Usa il caso fallito, non l’output del primo caso passato');
+const projectFiles={'main.gd':'extends Node\nfunc _ready():\n    pass','greeter.gd':'class_name Greeter\nextends RefCounted\nstatic func greet(name):\n    return unknown_name'};
+const otherFile=guide.diagnose({source:projectFiles['main.gd'],filename:'main.gd',files:projectFiles,error:'SCRIPT ERROR: Parse Error: Identifier "unknown_name" not declared in the current scope.\n at: GDScript::reload (res://__gdh_project_9/greeter.gd:4)'});
+assert.equal(otherFile.file,'greeter.gd');assert.equal(otherFile.line,4);assert.match(otherFile.sourceLine,/unknown_name/);
+const similarName=guide.diagnose({source:'extends Node\nfunc _ready():\n    var player_name = "Ada"\n    print(playerName)',error:'Parse Error: Identifier "playerName" not declared in the current scope. at res://main.gd:4'});
+assert.match(similarName.why,/player_name/);assert.match(similarName.why,/playerName/);
+console.log('PASS: 235 indizi specifici, commenti e funzioni vuote, messaggi Godot, output e posizione multifile');

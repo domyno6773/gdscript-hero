@@ -182,5 +182,10 @@
   });
   window.addEventListener('pagehide',()=>{saveVisible();window.App.saveStorage({localOnly:true});});
   const resetSession=()=>{clearTimeout(saveTimer);active=null;};
-  window.GDHManualStudio=Object.freeze({inputLines,attach,getDraft,saveVisible,showSolution,resetFile,resetSession});
+  const selectFile=name=>{
+    const lesson=current();if(!lesson)return false;
+    const draft=getDraft(lesson);if(!Object.hasOwn(draft.files,name))return false;
+    saveVisible();draft.selected=name;attach(lesson.id);window.App.saveStorage();return true;
+  };
+  window.GDHManualStudio=Object.freeze({inputLines,attach,getDraft,saveVisible,showSolution,resetFile,resetSession,selectFile});
 })();

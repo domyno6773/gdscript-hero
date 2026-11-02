@@ -171,13 +171,96 @@
       ]
     };
   }
-  function diagnose({source = '', error = '', failedTest = null, verdict = ''} = {}) {
+  const literal = value => JSON.stringify(String(value ?? ''));
+  function concreteAdvice(message, source, line, lesson) {
+    const rows=String(source).split('\n');
+    if(/expected.*indented block after.*(?:function|function declaration)/i.test(message)){
+      let index=(line||rows.length)-1;
+      while(index>=0&&!/^\s*(?:static\s+)?func\s+/.test(rows[index]))index--;
+      if(index>=0){
+        const name=rows[index].match(/func\s+(\w+)/)?.[1]||'questa funzione';
+        const indent=rows[index].match(/^\s*/)[0].length;
+        const body=[];let outside=null;
+        for(let i=index+1;i<rows.length;i++){
+          if(!rows[i].trim()||/^\s*#/.test(rows[i]))continue;
+          if(rows[i].match(/^\s*/)[0].length<=indent){outside=rows[i];break;}
+          body.push(rows[i]);
+        }
+        if(!body.length&&outside&&/^\s*(?:print\s*\(|return\b|if\b|for\b|while\b)/.test(outside))return {
+          title:'L’istruzione non è dentro '+name+'()',why:'Dopo la dichiarazione della funzione, la riga '+literal(outside.trim())+' non ha un livello di rientro aggiuntivo. Godot la legge fuori dalla funzione e non trova il corpo richiesto.',
+          hint:'Rientra l’istruzione sotto func '+name+'(): di un livello, come le altre istruzioni appartenenti alla funzione.',
+          steps:['Usa quattro spazi oppure una tabulazione coerente per il livello interno, senza mescolare i due sistemi.','Le righe che appartengono allo stesso blocco devono partire dalla stessa colonna. I commenti da soli non formano un corpo eseguibile.']};
+        if(!body.length)return {title:'La funzione '+name+'() è rimasta vuota',
+          why:'Dopo '+name+'() Godot si aspetta almeno un’istruzione rientrata. Le righe che iniziano con # sono commenti: non vengono eseguite e non formano il corpo della funzione.',
+          hint:'Controlla le righe sotto func '+name+'():. Lascia attiva almeno l’istruzione che deve essere eseguita; se vuoi una funzione volutamente vuota, usa pass con un livello di rientro.',
+          steps:['Una riga come # print("Ciao!") non stampa nulla: il simbolo # esclude tutta la riga.',
+            lesson?.manualLessonNumber===3?'In questa lezione deve restare attiva la stampa di Ciao!; va commentata soltanto quella di Arrivederci!.':'Inserisci il corpo richiesto dalla funzione. pass evita l’errore di sintassi in una funzione vuota, ma non realizza il comportamento richiesto dalla consegna.']};
+      }
+    }
+    if(/tabs and spaces|mixed.*(?:tabs|spaces)|used.*(?:tabs|spaces).*indent/i.test(message))return {title:'Il rientro mescola tabulazioni e spazi',why:'Due righe possono sembrare allineate ma usare caratteri diversi per il rientro. Godot richiede uno stile coerente nello stesso blocco.',hint:'Cancella il rientro della riga segnalata e reinseriscilo con lo stesso tipo di caratteri delle righe vicine.',steps:['Non inserire una tabulazione davanti a spazi già presenti.','Allinea le istruzioni dello stesso blocco e aumenta il rientro solo dopo una riga che apre un nuovo blocco con :.']};
+    const operands=message.match(/Invalid operands ["']([^"']+)["'] and ["']([^"']+)["'] for ["']([^"']+)["']/i);
+    if(operands)return {title:'L’operatore '+operands[3]+' riceve tipi incompatibili',why:'Godot sta applicando '+operands[3]+' a un valore '+operands[1]+' e a un valore '+operands[2]+'. Questa combinazione non è ammessa per l’operatore indicato.',hint:'Controlla da dove arrivano i due valori. stdin restituisce testo: per un calcolo usa int() o float(); per comporre un messaggio converti il numero con str() o usa la formattazione.',steps:['Non basta che una stringa contenga cifre: "12" resta un testo finché non viene convertita.','Esegui la conversione prima dell’operazione, scegliendo il tipo in base a ciò che la riga deve fare.']};
+    const identifier=message.match(/Identifier\s+["']([^"']+)["'].*not declared/i);
+    if(identifier){
+      const name=identifier[1];
+      const declarations=[...source.matchAll(/^\s*(?:var|const|func)\s+([A-Za-z_]\w*)/gm)].map(m=>m[1]);
+      const similar=declarations.find(n=>n!==name&&n.replace(/_/g,'').toLowerCase()===name.replace(/_/g,'').toLowerCase());
+      return {title:'Il nome '+literal(name)+' non è dichiarato',
+        why:'Nella riga indicata usi '+literal(name)+', ma Godot non trova una variabile, un parametro o una funzione con questo nome nel blocco corrente.'+(similar?' Nel tuo script è invece dichiarato '+literal(similar)+'. Maiuscole, minuscole e underscore fanno parte del nome.':''),
+        hint:similar?'Confronta '+literal(name)+' con '+literal(similar)+': usa lo stesso identificatore nella dichiarazione e nel suo utilizzo.':'Cerca la dichiarazione di '+name+' prima della riga che lo usa. Se è dentro un altro blocco, potrebbe non essere visibile qui.',
+        steps:['Dichiarare una variabile significa introdurla con var, oppure riceverla come parametro di una funzione. Un’assegnazione a un nome inesistente non lo dichiara.',
+          'Una variabile creata dentro un if o una funzione resta locale a quel blocco. Se deve essere usata fuori, dichiarala nel blocco che contiene entrambi i punti.']};
+    }
+    const bounds=message.match(/(?:out of bounds|out of range).*?(?:index\s*)?(-?\d+)/i)||message.match(/index\s+(-?\d+).*out of bounds/i);
+    if(bounds)return {title:'L’indice non corrisponde a un elemento dell’array',why:'Godot ha rifiutato l’accesso a un indice fuori dai limiti dell’array. Gli indici partono da 0: l’ultimo indice non negativo è size() - 1.',hint:'Prima di leggere l’elemento, controlla l’indice e la dimensione dell’array usato nella riga indicata.',steps:['Se un array contiene 4 elementi, gli indici non negativi validi sono 0, 1, 2 e 3; l’indice 4 è già fuori limite.','In un ciclo sugli indici usa range(array.size()). Negli esercizi che definiscono slot non negativi, rifiuta anche gli indici minori di 0.']};
+    if(/division by zero|divide by zero|modulo by zero/i.test(message))return {title:'Il divisore è zero',why:'L’operazione indicata usa 0 come divisore. La divisione o il resto con divisore zero non possono produrre il risultato richiesto.',hint:'Controlla il valore del divisore prima dell’operazione, anche dopo aver convertito l’input in numero.',steps:['Il controllo va eseguito prima della divisione: un if successivo non impedisce l’errore.','Nel ramo con divisore 0 restituisci o stampa il messaggio previsto dalla consegna; esegui il calcolo soltanto nell’altro ramo.']};
+    const nil=message.match(/(?:Invalid (?:get|set).*?["']([^"']+)["']|Nonexistent function ["']([^"']+)["']).*(?:Nil|null)/i);
+    if(nil)return {title:'Stai usando un riferimento nullo',why:'L’oggetto su cui tenti di usare '+literal(nil[1]||nil[2])+' vale null: non c’è un’istanza da cui leggere la proprietà o chiamare il metodo.',hint:'Risali alla riga che assegna questo oggetto: la ricerca potrebbe non aver trovato un elemento, oppure l’istanza non è stata creata.',steps:['Una variabile dichiarata senza un oggetto valido non mette automaticamente a disposizione proprietà e metodi.','Se una ricerca può restituire null, controlla il risultato prima di accedervi e gestisci il caso “non trovato” previsto dall’esercizio.']};
+    return null;
+  }
+  function requirementAdvice(lesson, source, failedTest, output, expected) {
+    const hints=(lesson?.hints||[]).map(h=>typeof h==='string'?h:h.text).filter(Boolean);
+    const n=lesson?.manualLessonNumber;
+    if(n===3){
+      const farewell=/^\s*print\s*\(\s*["']Arrivederci!["']\s*\)/m.test(source);
+      const commented=/^\s*#\s*print\s*\(\s*["']Arrivederci!["']\s*\)/m.test(source);
+      return {title:farewell?'La stampa di Arrivederci! è ancora attiva':'Devi conservare la riga come commento',
+        why:farewell?'Il tuo codice esegue ancora print("Arrivederci!"). La consegna richiede che questa riga resti nel file, ma non venga eseguita; l’unico messaggio deve essere Ciao!.':!commented?'La riga originale che stampa Arrivederci! non risulta conservata come commento. Cancellarla non soddisfa l’obiettivo: qui devi esercitarti con il simbolo #.':'La stampa di Arrivederci! è commentata: controlla che quella di Ciao! sia ancora attiva e produca esattamente il messaggio richiesto.',
+        hint:'Lascia attiva print("Ciao!") e aggiungi # davanti alla sola riga print("Arrivederci!"). Non commentare entrambe le stampe.',steps:hints};
+    }
+    const diff=String(failedTest?.diff||'');
+    const pair=diff.match(/(?:Risultato previsto|Atteso):\n([\s\S]*?)\nRicevuto:\n([\s\S]*)/);
+    const wanted=pair?pair[1]:expected,actual=pair?pair[2]:output;
+    if(wanted!==undefined&&actual!==undefined&&String(wanted).trimEnd()!==String(actual).trimEnd()){
+      const a=String(actual).replace(/\r/g,'').trimEnd().split('\n'),b=String(wanted).replace(/\r/g,'').trimEnd().split('\n');
+      let i=0;while(i<Math.max(a.length,b.length)&&a[i]===b[i])i++;
+      return {title:'L’output differisce alla riga '+(i+1),
+        why:'Il programma è stato eseguito. '+(b[i]===undefined?'Non è richiesta un’altra riga di output.':'Alla riga '+(i+1)+' è richiesto '+literal(b[i])+'.')+' '+(a[i]===undefined?'Il tuo programma non ha prodotto questa riga.':'Il tuo codice ha prodotto '+literal(a[i])+'.')+(failedTest?.desc?' Controllo: '+failedTest.desc+'.':''),
+        hint:hints[0]||'Controlla l’istruzione che produce questa riga: verifica il valore usato e il testo stampato, compresi spazi e maiuscole.',
+        steps:hints.length?hints:[failedTest?.desc||'Esamina il controllo non superato.',diff||'Correggi l’istruzione che produce la riga diversa.']};
+    }
+    return {title:failedTest?.desc||'Un requisito della consegna non è soddisfatto',
+      why:diff||'Il controllo «'+(failedTest?.desc||'requisito della lezione')+'» non è superato. Un output corretto da solo non dimostra che sia stata usata la struttura richiesta.',
+      hint:hints[0]||'Controlla il requisito riportato sopra e l’istruzione che dovrebbe realizzarlo.',steps:hints.length?hints:[failedTest?.desc,diff].filter(Boolean)};
+  }
+  function diagnose({source = '', error = '', failedTest = null, verdict = '', lesson = null, files = null, filename = null, output, expectedOutput} = {}) {
     const raw = cut(error);
     const failure = cut(failedTest?.diff || failedTest?.desc || '', 800);
     if (!raw && !failure) return null;
 
     const engine = Boolean(raw);
+    let file=filename;
     let line = engine ? lineOf(raw, source) : null;
+    if(engine&&files){
+      const positions=Object.keys(files).map(name=>{
+        const escaped=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        const match=raw.match(new RegExp('(?:^|[\\s(/])'+escaped+':(\\d+)','m'));
+        return match?{name,line:Number(match[1]),index:match.index}:null;
+      }).filter(Boolean).sort((a,b)=>a.index-b.index);
+      const location=positions[0];
+      if(location){file=location.name;source=files[file];line=location.line<=source.split('\n').length?location.line:null;}
+      else {file=null;line=null;}
+    }
     const infra = engine && /failed to fetch|networkerror|motore godot non disponibile|failed to load.*wasm|webassembly.*failed/i.test(raw);
     const timedOut = engine && !infra && (verdict === 'timeout' || /timed out|timeout|time limit exceeded/i.test(raw));
     const syntax = engine && !infra && !timedOut &&
@@ -224,7 +307,7 @@
           : 'Rileggi l’istruzione dalla prima apertura e controlla che i delimitatori siano chiusi nell’ordine corretto.'
       ];
     } else if (engine) {
-      const match = functionAdvice(raw) || classBodyAdvice(raw) || rules.find(rule => rule.pattern.test(raw));
+      const match = concreteAdvice(raw,source,line,lesson) || functionAdvice(raw) || classBodyAdvice(raw) || rules.find(rule => rule.pattern.test(raw));
       if (match) ({title, why, hint, steps} = match);
       else if (syntax) {
         title = 'Godot non riesce a leggere un’istruzione';
@@ -244,18 +327,13 @@
         ];
       }
     } else {
-      title = 'Il programma funziona, ma manca un requisito';
-      why = 'Godot ha eseguito il programma, ma il risultato non corrisponde ancora a tutti i requisiti della consegna.';
-      hint = 'Confronta un requisito alla volta con ciò che il programma produce realmente.';
-      steps = [
-        'Parti dalla consegna: quali valori, testi oppure comportamenti sono richiesti? Confrontali con ciò che ottieni, senza modificare più istruzioni insieme.',
-        'Se ci sono stampe, controlla anche l’ordine delle righe, gli spazi e i simboli. Se il compito richiede un comportamento, verifica quando accade e con quali valori.'
-      ];
+      ({title,why,hint,steps}=requirementAdvice(lesson,source,failedTest,output,expectedOutput));
     }
     return Object.freeze({
       kind: engine ? 'engine' : 'requirement',
       category, title, why, hint, steps: Object.freeze([...(steps || [])]), line,
-      raw: engine ? raw : '', requirement: failure, exact: line !== null
+      raw: engine ? raw : '', message:engine?raw.split('\n').find(s=>s.trim()&&!/^\s*(?:at:|at |GDScript backtrace)/.test(s))||raw:'',
+      file, sourceLine:line?String(source).split('\n')[line-1]||'':'',requirement: failure, exact: line !== null
     });
   }
   function clear(container) {
@@ -285,6 +363,17 @@
     top.append(tag, heading);
     card.append(top);
 
+    if(diagnosis.message){
+      const original=document.createElement('div');original.className='gdh-debug-original';
+      const title=document.createElement('strong');title.textContent='Messaggio di Godot';
+      const message=document.createElement('pre');message.textContent=diagnosis.message;
+      original.append(title,message);card.append(original);
+    }
+    if(diagnosis.sourceLine){
+      const excerpt=document.createElement('pre');excerpt.className='gdh-debug-source';
+      excerpt.textContent=(diagnosis.file?diagnosis.file+':':'Riga ')+diagnosis.line+'  '+diagnosis.sourceLine;card.append(excerpt);
+    }
+
     const label = document.createElement('strong');
     label.className = 'gdh-debug-section-label';
     label.textContent = 'Che cosa significa';
@@ -297,8 +386,8 @@
       const jump = document.createElement('button');
       jump.type = 'button';
       jump.className = 'gdh-debug-jump';
-      jump.textContent = 'Vai alla riga ' + diagnosis.line;
-      jump.addEventListener('click', () => onLine(diagnosis.line));
+      jump.textContent = 'Vai '+(diagnosis.file?'a '+diagnosis.file+', ':'alla ')+'riga ' + diagnosis.line;
+      jump.addEventListener('click', () => onLine(diagnosis.line,diagnosis.file));
       card.append(jump);
     } else if (diagnosis.kind === 'engine' && diagnosis.category !== 'system') {
       const where = document.createElement('small');

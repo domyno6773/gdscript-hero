@@ -23,6 +23,8 @@ jobs:
         run: google-chrome --version
       - name: Native manual projects and real Godot behavior
         run: node tests/capstone_browser.test.cjs
+      - name: Specific lesson hints and authentic Godot diagnostics
+        run: node tests/manual-guidance-browser.test.cjs
       - name: Install WebKit and Linux libraries for Safari compatibility
         run: npx playwright install --with-deps webkit
       - name: Test manual on mobile Chrome and Safari
