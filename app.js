@@ -7760,9 +7760,10 @@ const App = {
         // mai una mappa con buchi nelle spunte di completamento.
         this.ensureUnlockedConsistency({persist:false});
         const exercise=document.getElementById('view-exercise');
-        const lesson=this.getCurrentActiveLessonOrVariant();
-        if(exercise&&!exercise.classList.contains('hidden')&&lesson?.manualLessonNumber)
-            window.GDHManualStudio?.attach(lesson.id);
+        if(exercise&&!exercise.classList.contains('hidden')){
+            const lesson=this.getCurrentActiveLessonOrVariant();
+            if(lesson?.manualLessonNumber)window.GDHManualStudio?.attach(lesson.id);
+        }
         this.saveStorage();
         this.updateStatsUI();
         this.applyProfileUI();
