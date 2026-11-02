@@ -1,68 +1,49 @@
-# Migrazione del manuale italiano in GDScript Hero
+# Manuale italiano: stato del corso e del rilascio
 
-Questo ramo NON è pronto per essere unito a `main`. Il sito pubblico non deve essere sostituito finché le verifiche non sono realmente funzionanti.
+Aggiornamento: 2 novembre 2026. Ramo di lavoro: `manuale-235-lezioni`, PR [#12](https://github.com/domyno6773/gdscript-hero/pull/12).
 
-## Fonte e struttura
-- Documento di origine: `GDScript_Manuale_Italiano_Revisionato.pdf` fornito nella conversazione.
-- 235 lezioni in sequenza, titoli identici al manuale, 43 capitoli.
-- Il vecchio array `LESSONS_DATA` di `lessons.js` è stato rimosso su questo ramo.
-- `manuale235/data.js` contiene testo, consegna e sezioni `.gd` delle 235 lezioni.
-- `manuale235/catalog.js` prepara i dati per l'interfaccia e conserva i file per l'evoluzione dell'editor.
-- Gli ID interni delle nuove attività sono `10001…10235`: i progressi delle lezioni precedenti NON devono completare automaticamente attività diverse.
-- Gli esempi iniziali dei primi otto esercizi sono stati ricostruiti dove il PDF aveva perso righe di codice nel passaggio editoriale.
-- L'editor nel ramo di prova ora presenta tab `.gd`, i file da completare si aprono per primi e `main.gd` è protetto quando fornito.
-- Il runner isolato accetta una coda di righe stdin distinta dai controlli di gioco; l'interfaccia consente un'anteprima senza XP.
-- Tutte le 235 lezioni hanno verificatori dedicati. Le lezioni 111–115 esercitano dizionari annidati, classifiche, default, copie profonde e conteggio delle frequenze; 116–122 costruiscono progressivamente una rubrica; 123–128 esercitano insiemi e rimozione dei duplicati; 129–133 verificano enumerazioni, giorni, stati e semafori con più input; 134–140 costruiscono il registro studenti in fasi, comprese le verifiche su assenze, voti, iscrizioni e soglie. I test Playwright/Chrome con Godot WebAssembly hanno provato soluzioni corrette e casi alternativi selezionati. Questo non certifica tutte le possibili soluzioni.
+Le **235 lezioni, i 43 capitoli e tutti i verificatori sono implementati**. Il sito pubblico e `main` non sono stati modificati. La PR rimane in bozza; `readyForRelease` resta `false` fino alla decisione di pubblicazione.
 
-## Semantica richiesta
-- Lezione 1 «Il linguaggio»: lo script stampa già `Ciao GDScript!`, senza richiedere di scrivere codice. Si procede con la verifica.
-- Lezione 2 «Ciao mondo!»: lo script contiene `print("")`, quindi lo studente deve inserire `Ciao mondo!`.
-- Lezione 3 «Commenti»: lo studente deve commentare e NON cancellare `print("Arrivederci!")`.
-- Lezione 4 «Struttura di base di un programma»: lo starter contiene volutamente errori di sintassi/indentazione da correggere.
+## Fonte e comportamento
 
-## Blocchi per una pubblicazione corretta
-1. Il PDF fa uso di `OS.read_string_from_stdin()` in 165 lezioni. È stato aggiunto un canale di input testuale al browser (distinto dall'input delle azioni di gioco), ma servono ancora set di casi di prova didattici per quasi tutte queste lezioni.
-2. Le lezioni 171–235 hanno file `.gd` distinti nell'editor. Le attività 171–235 ora hanno test Godot attraverso classi GDScript annidate assembleate in memoria; la verifica rifiuta qualunque modifica di `main.gd`. Questo è un adattatore didattico, non un loader generalizzato di risorse `.gd` da `res://`; tutti i progetti hanno ora verificatori, ma il gate del caricatore nativo resta aperto.
-3. Tutti i 235 esercizi hanno un validatore didattico predisposto. Occorrono comunque verifiche native sistematiche, test positivi, negativi e casi alternativi per ciascuna attività prima del rilascio.
-4. Le prove di regressione precedenti fanno riferimento a ID/consegne del corso vecchio: vanno aggiornate al nuovo corpus, non silenziate.
-5. Progressione, obiettivi giornalieri, ripasso e achievement devono usare i nuovi ID e azioni prima della pubblicazione.
-6. Ricontrollare le lezioni successive con starter tronchi o senza `extends Node`, perché il PDF non garantisce l'eseguibilità del frammento fuori dal contesto originario.
-8. I casi con funzioni senza `_ready()` delle lezioni 105, 107, 109, 115 e 128 vengono testati senza aggiungere obblighi allo studente: si usa un harness Godot temporaneo. Le chiamate native confrontano array per contenuto.
-9. Sono stati riallineati nel catalogo i nomi dei prodotti della lezione 111, i default della 113, l'esempio troncato della 112 e l'output progressivo della rubrica. Il PDF originale non è stato sovrascritto.
-7. Le incongruenze note individuate tra lezioni 82 e 110 sono state corrette nel catalogo del sito (in particolare `arrow` / `freccia`, refuso `bombee`, messaggi inglesi per `match`, slug con «è», output delle matrici). La fonte PDF rimane conservata; non sono stati modificati gli identificatori tecnici.
+- Fonte: `GDScript_Manuale_Italiano_Revisionato.pdf` fornito nella conversazione. Ordine, titoli e obiettivi delle 235 attività conservati; frammenti e driver corrotti dall'impaginazione ricostruiti nel catalogo del sito.
+- ID delle attività: `10001…10235`. I completamenti del vecchio corso non completano automaticamente esercizi differenti. Gli XP storici sono conservati.
+- Lezione 1: esecuzione dello script già pronto. Lezione 2: modifica del messaggio vuoto. Lezione 3: commentare l'istruzione senza cancellarla. Lezione 4: correggere sintassi e indentazione.
+- Lezioni con stdin: input riga per riga, più scenari di verifica e anteprima che non assegna completamenti o XP.
+- Lezioni 171–235: file `.gd` indipendenti caricati da Godot 4.5.1 come risorse native, con `class_name`, tipi, ereditarietà, segnali e classi astratte reali. L'assemblaggio in classi annidate è stato sostituito.
+- `main.gd` e gli altri script forniti sono protetti. Ripristino e soluzione agiscono sui file modificabili; le bozze comprendono tutti i file, la selezione e l'input.
+- Ripasso disponibile per le attività già completate, in bozze separate dal corso, con premio settimanale idempotente e limite esistente.
 
-## Gate di pubblicazione
-- [x] Tutte le 235 lezioni importate senza omissioni.
-- [x] 43 capitoli e ordine del PDF mantenuti.
-- [x] Vecchio dataset rimosso dal ramo di migrazione.
-- [x] Prima lezione predisposta per sola esecuzione, seconda per modifica di `print("")`.
-- [x] Test automatici di integrità sul ramo.
-- [x] Verificatori didattici 1–235 predisposti, esiti incompleti/non funzionanti bloccati.
-- [ ] Validazione comportamentale di tutte le 235 attività in Godot.
-- [ ] Input utente e varianti reali per le attività stdin.
-- [ ] Supporto Godot a progetti e risorse realmente multi-file (l'adattatore 171–235 non sostituisce il caricatore nativo).
-- [ ] Regressioni browser, mobile, salvataggi e progressione superate.
-- [ ] Pubblicazione su `main` e verifica GitHub Pages completate.
+## Verifiche di rilascio
 
-Non impostare `readyForRelease: true` finché tutti i gate non sono soddisfatti.
+| Controllo | Esito |
+| --- | --- |
+| Integrità: 235 attività, 43 capitoli, verificatori e file protetti | Superato |
+| Tutte le 235 soluzioni in Godot nativo 4.5.1 | Superato: 2.113 scenari, 254 controlli negativi |
+| Tutte le 235 soluzioni in Chrome con Godot WebAssembly | Superato: anche 15 mutazioni comportamentali respinte |
+| Classi astratte, ereditarietà e riferimenti fra file | Superato su tutto il corso |
+| Regressioni riallineate al corso attivo, engine e gameplay conservati | Superato |
+| Sblocchi, vecchi ID, XP, missioni e fusione fra dispositivi | Superato |
+| Bozze multifile, backup, conflitti e isolamento degli account | Superato nei test automatici |
+| Supabase reale: round-trip, revisioni concorrenti e RLS | Superato in transazione annullata |
+| Browser mobile Chrome/WebKit e navigazione desktop | Superato; quattro viewport mobile e 23 larghezze di navigazione |
+| Pubblicazione e verifica del sito pubblico | Non eseguite |
 
-## Blocco 193–195: versione del runtime
-Le lezioni 193–195 usano `@abstract` reale, introdotto in Godot 4.5. La PR di prova contiene ora Godot 4.5.1 WebAssembly, esportato dal workflow `manual-235-godot45-preview.yml` che NON pubblica su `main`. Occorre comunque passare tutti i test browser ed eseguire l'audit di regressione prima del rilascio.
+I 254 controlli negativi comprendono i 234 starter incompleti (la prima lezione è volutamente eseguibile) e 20 mutazioni compilabili nei design pattern e nei progetti finali. Sono provate anche soluzioni alternative selezionate; i test non dimostrano la correttezza di tutte le implementazioni possibili.
 
-## Blocco 196–200
-- Incapsulamento OOP, con incremento XP e livelli, setter validati, playlist con copie difensive, proprietà calcolate e registro studenti a due classi.
-- Il driver `main.gd` del registro è stato ricostruito poiché le righe nel PDF erano tronche e usavano comandi incoerenti (`rename`/`rinomina`, `remove`/`rimuovi`). Le attività sono sottoposte ai test con il runtime nativo.
+I traguardi richiedono il completamento effettivo dei 43 capitoli; i premi delle lezioni e dei traguardi si fondono senza duplicazioni. Il reset completo elimina anche bozze multifile, ripassi e registri dei premi. Backup e cloud aggiornano l’editor senza riutilizzare il testo precedente.
 
-## Blocco 216–220
-- Singleton con identità condivisa e inizializzazione pigra; Factory con nomi indipendenti dalle maiuscole e tipi sconosciuti; Observer con collegamenti idempotenti, disconnessione e riordino degli ascoltatori; Strategy con sconti interi e limite a zero; Command con annullamento LIFO e cronologia vuota.
-- Sei sequenze per attività, starter incompleti respinti, file forniti protetti e mutazioni comportamentali nelle prove browser. I comandi degli esempi sono stati allineati ai driver italiani e ricostruiti i frammenti troncati senza modificare gli obiettivi.
-- Verifica locale Godot 4.5.1: 30 scenari corretti, cinque starter respinti e cinque mutazioni comportamentali respinte (41 esecuzioni). Controlli strutturali e browser con Godot reale superati su GitHub nel commit 13d5849.
+Il rapporto [AUDIT_RELEASE.md](AUDIT_RELEASE.md) descrive correzioni, prove e limiti. Il supporto riguarda i file GDScript previsti dal corso, non l'importazione di qualsiasi progetto Godot con asset o plugin arbitrari.
 
-## Blocco finale 221–235
-- Adapter, Decorator, Template Method, State e Composite: sei sequenze per ciascuno, compresi parità, temperature negative, ordine dei decorator, hook vuoti, transizioni rifiutate e cartelle annidate.
-- Biblioteca 226–231: progetto incrementale con metodi precedenti forniti, prestiti con precedenza degli errori, ricerca senza distinzione fra maiuscole/minuscole, statistiche e restituzioni singole/multiple. Book e User sono protetti quando non costituiscono la consegna del passo corrente.
-- Progetti 232–235: piattaforma e-learning, banca, personaggi RPG e noleggio veicoli. Testati capacità, doppie iscrizioni, completamenti, docenti, saldi limite, trasferimenti rifiutati, storico, progressione e mana, segnale di sconfitta, disponibilità e noleggi ripetuti.
-- I quattro progetti finali hanno anche una verifica dei VALORI RESTITUITI dai metodi tramite chiamate native, oltre al confronto dell'output e dello stato.
-- Godot nativo 4.5.1: 94 scenari corretti, 15 starter incompleti respinti e 15 mutazioni comportamentali respinte (140 esecuzioni). Tutti i controlli strutturali passano. La CI esegue anche le prove browser per il nuovo blocco; il risultato verificato è riportato nella PR #12.
-- Ricostruiti i driver corrotti dall'impaginazione del PDF e allineati i comandi delle consegne, conservando titoli, obiettivi e ordine delle 235 attività.
-- `readyForRelease` rimane `false`. Restano da risolvere le regressioni del vecchio corso e da verificare progressi, XP, salvataggi, ripasso, mobile, accessibilità e risorse Godot multi-file native prima della pubblicazione.
+## Riproduzione
+
+- `node tests/manual-235-structural.test.cjs`
+- `node tests/manual-release-regressions.test.cjs`
+- `GODOT_BIN=/percorso/Godot_v4.5.1-stable_linux.x86_64 node tests/manual-course-native.test.cjs`
+- `node tests/manual-course-browser.test.cjs` con Playwright 1.56.1 e Chrome installati.
+- `node tests/manual-mobile-browser.test.cjs` con Chrome, WebKit e relative librerie di sistema.
+- Le workflow di regressione, curriculum, parità nativa, riproducibilità del pack e browser eseguono anche i controlli conservati su cloud, account, quest, Arena, scene e gameplay.
+
+## Pubblicazione
+
+Il completamento tecnico dell'audit non pubblica il corso. Per il rilascio occorrono una decisione esplicita, l'unione della PR e la verifica del deployment GitHub Pages. Non vengono modificati utenti o salvataggi reali come parte della pubblicazione di questo ramo.

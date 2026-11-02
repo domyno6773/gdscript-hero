@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const root=process.cwd();
-const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],CONCEPTS_CATALOG:{},console};
+const context={window:{},CHAPTERS_DATA:[],LESSONS_DATA:[],ACHIEVEMENTS_DATA:[],CONCEPTS_CATALOG:{},console};
 vm.createContext(context);
 for(const file of ['manuale235/data.js','manuale235/catalog.js','manuale235/basics.js','manuale235/verifier.js','manuale235/intermediate.js','manuale235/functions-and-arrays.js','manuale235/sequences.js','manuale235/dictionaries.js','manuale235/expenses.js','manuale235/challenges.js','manuale235/matching.js','manuale235/patterns-collections.js','manuale235/grids.js','manuale235/nested-dictionaries.js','manuale235/contact-book.js','manuale235/sets.js','manuale235/enums.js','manuale235/student-records.js','manuale235/aggregates.js','manuale235/advanced-functions.js','manuale235/array-methods.js','manuale235/error-handling.js','manuale235/inventory-project.js','manuale235/final-challenges.js','manuale235/projects.js','manuale235/oop-foundations.js','manuale235/oop-properties.js','manuale235/oop-encapsulation.js','manuale235/oop-inheritance.js','manuale235/oop-polymorphism.js','manuale235/oop-duck-typing.js','manuale235/oop-abstract.js','manuale235/oop-shape-calculator.js','manuale235/oop-encapsulation-advanced.js','manuale235/oop-virtual-and-signals.js','manuale235/signals-health-composition.js','manuale235/oop-components-and-patterns.js','manuale235/design-patterns.js','manuale235/course-finale.js']){
   vm.runInContext(fs.readFileSync(root+'/'+file,'utf8'),context,{filename:file,timeout:3000});

@@ -127,6 +127,26 @@
       desc:part+' • Programma del manuale GDScript',icon:''};
   }));
   LESSONS_DATA.splice(0,LESSONS_DATA.length,...result);
+  // I traguardi del vecchio corso mantengono lo storico nei salvataggi,
+  // ma le attività nuove hanno requisiti e identificativi propri.
+  const generalAchievements=ACHIEVEMENTS_DATA.filter(a=>!a.id.startsWith('chapter_')&&a.id!=='part1_grandmaster');
+  const first=generalAchievements.find(a=>a.id==='first_blood');
+  if(first)first.condition=state=>(state.finishedLessons||[]).includes(result[0].id);
+  const completed=(state,ids)=>{
+    const finished=new Set(state.finishedLessons||[]);
+    return ids.every(id=>finished.has(id));
+  };
+  ACHIEVEMENTS_DATA.splice(0,ACHIEVEMENTS_DATA.length,...generalAchievements,
+    ...CHAPTERS_DATA.map(chapter=>{
+      const ids=result.filter(l=>l.chapterId===chapter.id).map(l=>l.id);
+      return {id:'manual_chapter_'+chapter.id+'_complete',
+        title:'Capitolo '+chapter.id+' completato',icon:'📘',xpReward:50,
+        desc:'Completa tutte le attività di «'+chapters[chapter.id-1]+'».',
+        condition:state=>completed(state,ids)};
+    }),
+    {id:'manual_course_complete',title:'Manuale GDScript completato',icon:'🏆',xpReward:250,
+      desc:'Completa tutte le 235 lezioni del manuale italiano.',
+      condition:state=>completed(state,result.map(l=>l.id))});
   if(typeof CONCEPTS_CATALOG!=='undefined'){
     Object.keys(CONCEPTS_CATALOG).forEach(k=>delete CONCEPTS_CATALOG[k]);
     chapters.forEach((name,i)=>{

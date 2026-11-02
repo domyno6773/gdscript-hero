@@ -34,7 +34,7 @@
   };
   const saveVisible=()=>{
     const l=current(),editor=document.getElementById('code-editor');
-    if(!l||!editor||!active||active.lessonId!==l.id)return;
+    if(!l||!editor||!active||active.lessonId!==l.id||active.owner!==window.App._saveOwner)return;
     const d=getDraft(l);
     if(d.selected&&(!l.requiresMultipleFiles||!(l.readOnlyFiles||['main.gd']).includes(d.selected))&&d.files[d.selected]!==editor.value){
       d.files[d.selected]=editor.value;d.updatedAt=Date.now();
@@ -59,7 +59,9 @@
     const draft=getDraft(lesson);
     editor.readOnly=false;
     editor.setAttribute('aria-readonly','false');
-    active={lessonId:lesson.id};
+    active={lessonId:lesson.id,owner:window.App._saveOwner};
+    const filename=document.querySelector('#view-exercise .file-name');
+    if(filename)filename.textContent=draft.selected;
     // Quando un progetto contiene più script, ciascun file ha una propria bozza.
     if(lesson.requiresMultipleFiles){
       const group=document.createElement('div');group.className='manual-file-bar';
@@ -72,6 +74,7 @@
         button.onclick=()=>{
           saveVisible();draft.selected=file;
           editor.value=draft.files[file]||'';
+          if(filename)filename.textContent=file;
           editor.readOnly=lesson.requiresMultipleFiles&&(lesson.readOnlyFiles||['main.gd']).includes(file);
           editor.setAttribute('aria-readonly',String(editor.readOnly));
           editor.dispatchEvent(new Event('input',{bubbles:true}));
@@ -178,5 +181,6 @@
     }
   });
   window.addEventListener('pagehide',()=>{saveVisible();window.App.saveStorage({localOnly:true});});
-  window.GDHManualStudio=Object.freeze({inputLines,attach,getDraft,saveVisible,showSolution,resetFile});
+  const resetSession=()=>{clearTimeout(saveTimer);active=null;};
+  window.GDHManualStudio=Object.freeze({inputLines,attach,getDraft,saveVisible,showSolution,resetFile,resetSession});
 })();

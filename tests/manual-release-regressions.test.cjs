@@ -54,6 +54,36 @@ const tests={
   const merged=auth.mergeProgress(a,b);assert.equal(merged.xp,200);assert.equal(auth.mergeProgress(merged,a).xp,200);
   const c={xp:50,lessonRewardsV1:{10001:50},rewardsV2:P.createRewards(0)};
   assert.equal(auth.mergeProgress(c,c).xp,50);
+  const achA={xp:75,lessonRewardsV1:{10001:50},achievementRewardsV1:{first_blood:25}};
+  const achB={xp:100,lessonRewardsV1:{10001:50},achievementRewardsV1:{manual_chapter_2_complete:50}};
+  const achievements=auth.mergeProgress(achA,achB);
+  assert.equal(achievements.xp,125);assert.equal(auth.mergeProgress(achievements,achA).xp,125);
+  assert.equal(achievements.achievementRewardsV1.first_blood,25);
+  assert.equal(achievements.achievementRewardsV1.manual_chapter_2_complete,50);
+  const legacy={xp:125,unlockedAchievements:['first_blood']};
+  assert.equal(auth.mergeProgress(legacy,{xp:25,achievementRewardsV1:{first_blood:25},unlockedAchievements:['first_blood']}).xp,125,'Il traguardo storico non viene pagato di nuovo durante la migrazione');
+ },
+ achievements(){
+  const all=Array.from(w.LESSONS_DATA,l=>l.id);
+  assert.equal(w.ACHIEVEMENTS_DATA.filter(a=>a.id.startsWith('manual_chapter_')).length,43);
+  const first=w.ACHIEVEMENTS_DATA.find(a=>a.id==='first_blood');
+  assert.equal(first.condition({finishedLessons:[1]}),false);
+  assert.equal(first.condition({finishedLessons:[10001]}),true);
+  for(const ch of w.CHAPTERS_DATA){
+   const ids=Array.from(w.LESSONS_DATA.filter(l=>l.chapterId===ch.id),l=>l.id);
+   const ach=w.ACHIEVEMENTS_DATA.find(a=>a.id==='manual_chapter_'+ch.id+'_complete');
+   assert.equal(ach.condition({finishedLessons:ids}),true);
+   assert.equal(ach.condition({finishedLessons:ids.slice(1)}),false,'Capitolo incompleto '+ch.id);
+  }
+  const final=w.ACHIEVEMENTS_DATA.find(a=>a.id==='manual_course_complete');
+  assert.equal(final.condition({finishedLessons:all.slice(1)}),false);assert.equal(final.condition({finishedLessons:all}),true);
+  const app=loadApp();Object.assign(app,{saveStorage(){},updateStatsUI(){},showToast(){}});ctx.SoundFX.playSuccess=()=>{};
+  app.state.finishedLessons=[10001];app.checkAchievements({hintsUsed:1});
+  assert.equal(app.state.xp,25);assert.equal(app.state.achievementRewardsV1.first_blood,25);
+  app.checkAchievements({hintsUsed:1});assert.equal(app.state.xp,25);
+  app.state.unlockedAchievements=[];app.checkAchievements({hintsUsed:1});assert.equal(app.state.xp,25,'Registro dei premi idempotente');
+  const auth=loadAuth(),backup=auth.parseBackupString(JSON.stringify(auth.createBackupPayload(app.state)));
+  assert.equal(backup.data.achievementRewardsV1.first_blood,25);
  },
  drafts(){
   const auth=loadAuth();
@@ -62,9 +92,10 @@ const tests={
   const m=auth.mergeProgress(a,b);assert.equal(m.manualDrafts[10171].files['a.gd'],'local A');assert.equal(m.manualDrafts[10171].files['b.gd'],'remote B');
   const stdinOnly={xp:0,manualDrafts:{10171:{files:{'a.gd':'base A'},stdin:'nuovo input',updatedAt:99,fileUpdatedAt:{}}}};
   assert.equal(auth.mergeProgress(a,stdinOnly).manualDrafts[10171].files['a.gd'],'local A','Modificare stdin non deve sovrascrivere il codice su un altro dispositivo');
-  const backup=auth.createBackupPayload({...m,lessonRewardsV1:{10001:50}});
+  const backup=auth.createBackupPayload({...m,lessonRewardsV1:{10001:50},achievementRewardsV1:{first_blood:25}});
   const parsed=auth.parseBackupString(JSON.stringify(backup)).data;
   assert.equal(JSON.stringify(parsed.manualDrafts),JSON.stringify(m.manualDrafts));assert.equal(parsed.lessonRewardsV1[10001],50);
+  assert.equal(parsed.achievementRewardsV1.first_blood,25);
   const app=loadApp();
   vm.runInContext(fs.readFileSync('manuale235/studio.js','utf8'),ctx);
   assert.equal(typeof w.GDHManualStudio.showSolution,'function');

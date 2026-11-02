@@ -33,7 +33,13 @@ const solutions=require('../manuale235/solutions.json');
    },{n,file,from,to});
    assert.equal(accepted,false,'Mutazione accettata '+n);
   }
+  for(const p of require('./helpers/manual-resource-probes.cjs')){
+   const actual=await page.evaluate(p=>GDHGodot.runNative(p.files['main.gd'],{project:p.project}),p);
+   if(p.rejected)assert.equal(actual.status,'compile_error',p.name);
+   else {assert.equal(actual.status,'executed',JSON.stringify(actual));assert.equal(actual.reply.nativeMultifile,true);assert.equal(actual.stdout.trim(),p.output,p.name);}
+  }
   assert.deepEqual(errors,[]);
   console.log('PASS browser: 235 soluzioni, progetti nativi, 15 mutazioni respinte.');
+  console.log('PASS loader WASM: preload res://, percorso della risorsa, ricaricamento e isolamento delle classi.');
  }finally{await browser.close();await h.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});

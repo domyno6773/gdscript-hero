@@ -22,6 +22,7 @@ const App = {
         userCode: {},
         manualDrafts: {},
         lessonRewardsV1: {},
+        achievementRewardsV1: {},
         lessonTaskProgress: {},
         hintsRevealed: 0,
         activeHintLevel: 1,
@@ -317,6 +318,7 @@ const App = {
                 this.state.streak = parsed.streak || 1;
                 this.state.finishedLessons = parsed.finishedLessons || [];
                 this.state.lessonRewardsV1 = parsed.lessonRewardsV1 || {};
+                this.state.achievementRewardsV1 = parsed.achievementRewardsV1 || {};
                 this.state.completedLessons = parsed.completedLessons || [1];
                 // In ambiente locale permette la modalità sblocco rapido, online forza false
                 if (this.isLocalEnvironment()) {
@@ -518,6 +520,7 @@ const App = {
             userCode: this.state.userCode,
             manualDrafts: this.state.manualDrafts || {},
             lessonRewardsV1: this.state.lessonRewardsV1 || {},
+            achievementRewardsV1: this.state.achievementRewardsV1 || {},
             lessonTaskProgress: this.state.lessonTaskProgress || {},
             profile: this.state.profile,
             profileCustomized: this.state.profileCustomized,
@@ -2170,6 +2173,7 @@ const App = {
     },
 
     resetAllData() {
+        window.GDHManualStudio?.resetSession?.();
         try {
             localStorage.removeItem('gdscript_hero_save_v4');
             localStorage.removeItem('gdscript_hero_save_v3');
@@ -2187,9 +2191,15 @@ const App = {
         this.state.finishedLessons = [];
         this.state.completedLessons = [LESSONS_DATA[0]?.id || 1];
         this.state.unlockedAchievements = [];
-        this.state.currentLessonId = 1;
+        this.state.currentLessonId = LESSONS_DATA[0]?.id || 1;
         this.state.userCode = {};
+        this.state.manualDrafts = {};
+        this.state.lessonRewardsV1 = {};
+        this.state.achievementRewardsV1 = {};
         this.state.lessonTaskProgress = {};
+        this.state.reviewProgress = {completedVariants:[],variantHistory:{}};
+        this.isReviewMode = false;
+        this.currentReviewVariant = null;
         this.currentPracticeTaskIndex = null;
         try {
             const owner=String(this._saveOwner||'guest');
@@ -2541,7 +2551,8 @@ const App = {
         // Badge contatore traguardi
         const countBadge = document.getElementById('achievements-count-badge');
         if (countBadge) {
-            countBadge.innerText = `${this.state.unlockedAchievements.length}/${ACHIEVEMENTS_DATA.length}`;
+            const visible=ACHIEVEMENTS_DATA.filter(a=>this.state.unlockedAchievements.includes(a.id)).length;
+            countBadge.innerText = `${visible}/${ACHIEVEMENTS_DATA.length}`;
         }
 
         // Solo un'azione che assegna XP può celebrare il nuovo livello.
@@ -2594,14 +2605,17 @@ const App = {
             if (!this.state.unlockedAchievements.includes(ach.id)) {
                 if (ach.condition(this.state, meta)) {
                     this.state.unlockedAchievements.push(ach.id);
-                    this.state.xp += ach.xpReward;
+                    this.state.achievementRewardsV1 ||= {};
+                    const earned=Object.hasOwn(this.state.achievementRewardsV1,ach.id)?0:ach.xpReward;
+                    if(!Object.hasOwn(this.state.achievementRewardsV1,ach.id))this.state.achievementRewardsV1[ach.id]=earned;
+                    this.state.xp += earned;
                     unlockedAny = true;
 
                     this.showToast({
                         icon: ach.icon,
                         tag: "TRAGUARDO SBLOCCATO!",
                         title: ach.title,
-                        desc: `${ach.desc} (+${ach.xpReward} XP)`
+                        desc: `${ach.desc} (+${earned} XP)`
                     });
 
                     SoundFX.playSuccess();
@@ -7411,7 +7425,7 @@ const App = {
                             <span class="stat-sub-level">Livello ${u.level || 1}</span>
                         </td>
                         <td>
-                            <strong>${u.finishedLessons || 0}</strong> / 36
+                            <strong>${u.finishedLessons || 0}</strong> completate
                         </td>
                         <td class="last-seen-cell">${lastActiveDate}</td>
                     `;
@@ -7440,7 +7454,7 @@ const App = {
     refreshBackupExportInfo() {
         const summary = document.getElementById('export-stat-summary');
         if (summary) {
-            summary.innerText = `Riepilogo: ${this.state.xp} XP • ${this.state.finishedLessons.length}/36 lezioni completate • Livello ${this.getCurrentLevelInfo().tier.level}`;
+            summary.innerText = `Riepilogo: ${this.state.xp} XP • ${this.state.finishedLessons.length}/${LESSONS_DATA.length} lezioni completate • Livello ${this.getCurrentLevelInfo().tier.level}`;
         }
         const exportCodeTextarea = document.getElementById('export-code-textarea');
         if (exportCodeTextarea && window.AuthManager) {
@@ -7640,6 +7654,7 @@ const App = {
         return result;
     },
     async integrateCloudSave(cloudSave){
+        window.GDHManualStudio?.saveVisible?.();
         let snapshot=this.state;
         const baseline=this.getCloudBaseline();
         const auth=window.AuthManager;
@@ -7689,6 +7704,9 @@ const App = {
 
     applyImportedState(data, notify = true) {
         if (!data) return;
+        // Il contenuto dell'editor uscente non deve sovrascrivere la bozza
+        // appena ripristinata dal backup o ricevuta dal cloud.
+        window.GDHManualStudio?.resetSession?.();
 
         if (data.xp !== undefined) this.state.xp = data.xp;
         this.state.rewardsV2 = ProgressionV2.normalizeRewards(data.rewardsV2,this.state.xp,data.dailyQuests);
@@ -7706,6 +7724,7 @@ const App = {
         if (data.userCode) this.state.userCode = data.userCode;
         if(data.manualDrafts)this.state.manualDrafts=data.manualDrafts;
         if(data.lessonRewardsV1)this.state.lessonRewardsV1=data.lessonRewardsV1;
+        if(data.achievementRewardsV1)this.state.achievementRewardsV1=data.achievementRewardsV1;
         if(data.lessonTaskProgress)this.state.lessonTaskProgress=data.lessonTaskProgress;
         if (data.projectInterests) this.state.projectInterests = data.projectInterests;
         if (data.soundEnabled !== undefined) SoundFX.enabled = !!data.soundEnabled;
@@ -7740,6 +7759,10 @@ const App = {
         // Normalizza PRIMA del primo salvataggio/import cloud: non esportare
         // mai una mappa con buchi nelle spunte di completamento.
         this.ensureUnlockedConsistency({persist:false});
+        const exercise=document.getElementById('view-exercise');
+        const lesson=this.getCurrentActiveLessonOrVariant();
+        if(exercise&&!exercise.classList.contains('hidden')&&lesson?.manualLessonNumber)
+            window.GDHManualStudio?.attach(lesson.id);
         this.saveStorage();
         this.updateStatsUI();
         this.applyProfileUI();

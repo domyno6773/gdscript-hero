@@ -58,6 +58,9 @@ async function run({numbers=null,negative=true}={}){
    return observed(l,c);
   });
  }
+ const scenarioCount=requests.length;
+ const probes=require('./helpers/manual-resource-probes.cjs');
+ for(const p of probes)requests.push({key:'resource/'+p.name,code:p.files['main.gd'],options:{project:p.project}});
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'gdh-all-'));
  try{
   const input=path.join(dir,'cases.json');fs.writeFileSync(input,JSON.stringify(requests));
@@ -77,7 +80,13 @@ async function run({numbers=null,negative=true}={}){
    if(result.accepted!==accepted)failures.push({lesson:l.manualLessonNumber,label,expected:accepted,checks:result.feedback?.checks?.filter(c=>!c.passed)});
   }
   if(failures.length){console.error(JSON.stringify(failures,null,2));process.exitCode=1;return;}
-  console.log('PASS: '+lessons.length+' soluzioni, '+requests.length+' scenari, '+plans.filter(p=>!p.accepted).length+' controlli negativi; risorse native multifile.');
+  for(const p of probes){
+   const actual=outputs['resource/'+p.name];assert.ok(actual,p.name);
+   if(p.rejected)assert.equal(actual.status,'compile_error',p.name+': una classe assente non deve trapelare dal progetto precedente');
+   else {assert.equal(actual.status,'executed',JSON.stringify(actual));assert.equal(actual.reply.nativeMultifile,true);assert.equal(actual.stdout.trim(),p.output,p.name);}
+  }
+  console.log('PASS: '+lessons.length+' soluzioni, '+scenarioCount+' scenari, '+plans.filter(p=>!p.accepted).length+' controlli negativi; risorse native multifile.');
+  console.log('PASS loader: preload res://, percorso della risorsa, ricaricamento e isolamento delle classi.');
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 }
 module.exports=run;

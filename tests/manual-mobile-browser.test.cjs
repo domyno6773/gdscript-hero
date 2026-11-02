@@ -36,8 +36,10 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
     await page.locator('#manual-stdin-lines').fill('1\nAda');
     await page.locator('#btn-tab-code').click();
     await page.getByRole('tab',{name:'main.gd',exact:true}).click();
+    assert.equal(await page.locator('#view-exercise .file-name').textContent(),'main.gd');
     assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
     await page.getByRole('tab',{name:'greeter.gd',exact:true}).click();
+    assert.equal(await page.locator('#view-exercise .file-name').textContent(),'greeter.gd');
     assert.equal(await page.locator('#code-editor').inputValue(),edited);
     await page.evaluate(()=>App.saveStorage());
     await page.reload();await page.waitForFunction(()=>window.GDHManualStudio);await host.welcome(page);
@@ -64,6 +66,15 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
     // Backup includes every file; account switches must never reuse cached drafts.
     const saved=await page.evaluate(()=>AuthManager.createBackupPayload(App.getSavePayload()));
     assert.equal(saved.data.manualDrafts[10171].files['greeter.gd'],edited);
+    await page.evaluate(()=>App.refreshBackupExportInfo());
+    assert.match(await page.locator('#export-stat-summary').textContent(),/\/235 lezioni completate/);
+    const restored=structuredClone(saved.data);
+    restored.manualDrafts[10171].files['greeter.gd']+='\n# ricevuto dal backup';
+    await page.evaluate(data=>App.applyImportedState(data,false),restored);
+    assert.equal(await page.locator('#code-editor').inputValue(),restored.manualDrafts[10171].files['greeter.gd'],'Il vecchio editor sovrascrive il backup importato');
+    assert.equal(await page.evaluate(()=>App.getSavePayload().manualDrafts[10171].files['greeter.gd']),restored.manualDrafts[10171].files['greeter.gd']);
+    await page.evaluate(data=>App.applyImportedState(data,false),saved.data);
+    assert.equal(await page.locator('#code-editor').inputValue(),edited);
     await page.evaluate(()=>{App.switchSaveOwner({id:'audit-account',isGuest:false});App.openLesson(10171)});
     assert.notEqual(await page.locator('#code-editor').inputValue(),edited,'Bozza di un altro account');
     await page.evaluate(()=>{App.switchSaveOwner({isGuest:true});App.openLesson(10171)});
@@ -88,6 +99,21 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
     assert.equal(await page.evaluate(()=>App.state.xp),paidXp,'XP ripasso duplicati');
     await page.evaluate(()=>App.openLesson(10171));await page.locator('#btn-tab-code').click();
     assert.equal(await page.locator('#code-editor').inputValue(),courseDraft,'Il ripasso sovrascrive la bozza del corso');
+    // The first lesson has the same ID in a fresh account: stale editor text
+    // must not be saved into that account before its first lesson is opened.
+    await page.evaluate(()=>App.openLesson(10001));await page.locator('#btn-tab-code').click();
+    const firstDraft=await page.locator('#code-editor').inputValue()+'\n# proprietario ospite';
+    await page.locator('#code-editor').fill(firstDraft);
+    await page.evaluate(()=>App.switchSaveOwner({id:'audit-account-first',isGuest:false}));
+    assert.equal(await page.evaluate(()=>Object.values(App.state.manualDrafts).some(d=>Object.values(d.files||{}).some(s=>s.includes('proprietario ospite')))),false,'Bozza della prima lezione passata al nuovo account');
+    await page.evaluate(()=>{App.switchSaveOwner({isGuest:true});App.openLesson(10001)});await page.locator('#btn-tab-code').click();
+    assert.equal(await page.locator('#code-editor').inputValue(),firstDraft);
+    assert.equal(await page.evaluate(()=>App.state.achievementRewardsV1.first_blood),25);
+    await page.evaluate(()=>App.resetAllData());
+    assert.deepEqual(await page.evaluate(()=>({xp:App.state.xp,finished:App.state.finishedLessons,drafts:App.state.manualDrafts,rewards:App.state.lessonRewardsV1,achievements:App.state.achievementRewardsV1,reviews:App.state.reviewProgress.completedVariants,current:App.state.currentLessonId})),{xp:0,finished:[],drafts:{},rewards:{},achievements:{},reviews:[],current:10001});
+    await page.reload();await page.waitForFunction(()=>window.GDHManualStudio);await host.welcome(page);
+    assert.equal(await page.evaluate(()=>App.state.xp),0,'Il reset non persiste al reload');
+    await page.evaluate(()=>{App.openLesson(10171);ConfettiFX.particles=[]});await page.locator('#btn-tab-code').click();
     assert.deepEqual(errors,[]);
     fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/'+name+'.png',fullPage:true});
     console.log('PASS mobile '+name+': schede, Godot, XP, reload, backup e isolamento account.');
