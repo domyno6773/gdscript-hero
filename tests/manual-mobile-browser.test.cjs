@@ -6,9 +6,10 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
  try{
   for(const [name,engine,width] of [['chrome-small',chromium,360],['chrome-phone',chromium,390],['chrome-tablet',chromium,820],['safari-phone',webkit,390]]){
    const browser=await engine.launch({...(engine===chromium?{channel:'chrome',args:['--no-sandbox']}:{})});
+   let page;
    try{
     const context=await browser.newContext({viewport:{width,height:844},isMobile:true,hasTouch:true,locale:'it-IT'});
-    const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+    page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
     await page.route(/^https:\/\//,r=>r.abort());
     await page.goto(h.url);await page.waitForFunction(()=>window.App&&window.GDHManualStudio);
     await host.welcome(page);
@@ -31,6 +32,9 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
     await page.locator('#btn-tab-code').click();
     const edited=solutions[171]['greeter.gd']+'\n# bozza mobile';
     await page.locator('#code-editor').fill(edited);
+    await page.locator('#btn-tab-instructions').click();
+    await page.locator('#manual-stdin-lines').fill('1\nAda');
+    await page.locator('#btn-tab-code').click();
     await page.getByRole('tab',{name:'main.gd',exact:true}).click();
     assert.equal(await page.locator('#code-editor').getAttribute('readonly'),'');
     await page.getByRole('tab',{name:'greeter.gd',exact:true}).click();
@@ -39,6 +43,14 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
     await page.reload();await page.waitForFunction(()=>window.GDHManualStudio);await host.welcome(page);
     await page.evaluate(()=>App.openLesson(10171));await page.locator('#btn-tab-code').click();
     assert.equal(await page.locator('#code-editor').inputValue(),edited,'Bozza persa al reload');
+    await page.locator('#btn-tab-instructions').click();
+    assert.equal(await page.locator('#manual-stdin-lines').inputValue(),'1\nAda');
+    await page.locator('.manual-preview-btn').click();
+    await page.waitForFunction(()=>!document.querySelector('.manual-preview-btn')?.disabled,null,{timeout:120000});
+    assert.match(await page.locator('#real-output-pre').textContent(),/Ciao, Ada!/);
+    assert.equal(await page.evaluate(()=>App.state.finishedLessons.includes(10171)),false,'Anteprima assegna completamento');
+    await page.locator('#btn-tab-code').click();
+
     await page.locator('#btn-run-code').click();await page.waitForFunction(()=>App.state.finishedLessons.includes(10171),null,{timeout:120000});
     await page.locator('#success-modal').waitFor({state:'visible'});await page.locator('#btn-modal-stay').click();
     const overflow=await page.evaluate(()=>({doc:document.documentElement.scrollWidth,width:innerWidth,editor:document.querySelector('#view-exercise .editor-wrapper').getBoundingClientRect().right}));
@@ -58,7 +70,7 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
     assert.equal(await page.locator('#code-editor').inputValue(),edited);
     await page.evaluate(()=>App.openLesson(10171));await page.locator('#btn-tab-code').click();
     page.once('dialog',d=>d.accept());
-    await page.locator('#btn-reset-code').click();
+    await page.locator('#btn-mobile-reset-code:visible, #btn-reset-code:visible').first().click();
     assert.notEqual(await page.locator('#code-editor').inputValue(),edited);
     await page.evaluate(()=>GDHManualStudio.showSolution(LESSONS_DATA[170]));
     assert.match(await page.locator('#code-editor').inputValue(),/static func greet/);
@@ -79,6 +91,10 @@ const host=require('./helpers/browser_host.cjs'),solutions=require('../manuale23
     assert.deepEqual(errors,[]);
     fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/'+name+'.png',fullPage:true});
     console.log('PASS mobile '+name+': schede, Godot, XP, reload, backup e isolamento account.');
+   }catch(error){
+    fs.mkdirSync('test-artifacts',{recursive:true});
+    if(page)await page.screenshot({path:'test-artifacts/'+name+'-failure.png',fullPage:true}).catch(()=>{});
+    throw error;
    }finally{await browser.close();}
   }
  }finally{await h.close();}

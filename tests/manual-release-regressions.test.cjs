@@ -60,6 +60,8 @@ const tests={
   const a={xp:0,manualDrafts:{10171:{files:{'a.gd':'local A','b.gd':'base B'},fileUpdatedAt:{'a.gd':20,'b.gd':1},updatedAt:20}}};
   const b={xp:0,manualDrafts:{10171:{files:{'a.gd':'base A','b.gd':'remote B'},fileUpdatedAt:{'a.gd':1,'b.gd':30},updatedAt:30}}};
   const m=auth.mergeProgress(a,b);assert.equal(m.manualDrafts[10171].files['a.gd'],'local A');assert.equal(m.manualDrafts[10171].files['b.gd'],'remote B');
+  const stdinOnly={xp:0,manualDrafts:{10171:{files:{'a.gd':'base A'},stdin:'nuovo input',updatedAt:99,fileUpdatedAt:{}}}};
+  assert.equal(auth.mergeProgress(a,stdinOnly).manualDrafts[10171].files['a.gd'],'local A','Modificare stdin non deve sovrascrivere il codice su un altro dispositivo');
   const backup=auth.createBackupPayload({...m,lessonRewardsV1:{10001:50}});
   const parsed=auth.parseBackupString(JSON.stringify(backup)).data;
   assert.equal(JSON.stringify(parsed.manualDrafts),JSON.stringify(m.manualDrafts));assert.equal(parsed.lessonRewardsV1[10001],50);

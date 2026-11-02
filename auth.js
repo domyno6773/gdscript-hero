@@ -1062,9 +1062,9 @@ const AuthManager = {
                 const files={...remote.files,...local.files};
                 const times={...remote.fileUpdatedAt,...local.fileUpdatedAt};
                 for(const [name,text] of Object.entries(remote.files||{})){
-                    if(Number(remote.fileUpdatedAt?.[name]||remote.updatedAt||0) >
-                       Number(local.fileUpdatedAt?.[name]||local.updatedAt||0)){
-                        files[name]=text;times[name]=remote.fileUpdatedAt?.[name]||remote.updatedAt;
+                    if(Number(remote.fileUpdatedAt?remote.fileUpdatedAt[name]||0:remote.updatedAt||0) >
+                       Number(local.fileUpdatedAt?local.fileUpdatedAt[name]||0:local.updatedAt||0)){
+                        files[name]=text;times[name]=remote.fileUpdatedAt?remote.fileUpdatedAt[name]||0:remote.updatedAt||0;
                     }
                 }
                 merged.manualDrafts[id]={...(Number(remote.updatedAt||0)>Number(local.updatedAt||0)?remote:local),files,fileUpdatedAt:times};
