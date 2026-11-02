@@ -18,7 +18,7 @@ const host=require('./helpers/browser_host.cjs');
   await page.locator('.gdh-debug-next-hint').click();await page.locator('.gdh-debug-next-hint').click();
   await page.locator('#btn-toggle-hint').click();await page.locator('#btn-toggle-hint').click();
   assert.match(await page.locator('#hint-toggle-text').innerText(),/1\/2/,'Il debugger non sblocca gli indizi della lezione');
-  await page.locator('#btn-next-hint').click();assert.match(await page.locator('#hint-text').innerText(),/Non commentare entrambe/);
+  await page.locator('#btn-next-hint').click();assert.match(await page.locator('#hint-text').innerText(),/commenti entrambe le righe.*_ready\(\) resta senza istruzioni eseguibili/);
   await run('extends Node\n\nfunc _ready():\n    # print("Ciao!")\n    # print("Arrivederci!")');
   assert.match(await page.locator('.gdh-debug-original').innerText(),/Expected indented block/);
   assert.match(await page.locator('.gdh-debug-explanation').innerText(),/commenti/);
