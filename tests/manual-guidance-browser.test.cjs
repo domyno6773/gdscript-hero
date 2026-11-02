@@ -1,0 +1,43 @@
+'use strict';
+const assert=require('assert/strict'),fs=require('fs'),{chromium}=require('playwright');
+const host=require('./helpers/browser_host.cjs');
+(async()=>{
+ const h=await host(),browser=await chromium.launch({channel:'chrome',args:['--no-sandbox']});
+ try{
+  const page=await browser.newPage({viewport:{width:1365,height:900}}),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));await page.route(/^https:\/\//,r=>r.abort());
+  await page.goto(h.url);await host.welcome(page);
+  await page.evaluate(()=>App.openLesson(10003));
+  await page.locator('#btn-toggle-hint').click();
+  assert.match(await page.locator('#hint-text').innerText(),/seconda stampa/);
+  assert.match(await page.locator('#hint-toggle-text').innerText(),/1\/2/);
+  const run=async code=>{await page.locator('#code-editor').fill(code);await page.locator('#btn-run-code').click();await page.waitForFunction(()=>!App.isValidating,null,{timeout:120000});};
+  await run('extends Node\n\nfunc _ready():\n    # print("Ciao!")\n    print("Arrivederci!")');
+  assert.match(await page.locator('#exercise-debug-area').innerText(),/stampa di Arrivederci! è ancora attiva/);
+  assert.equal(await page.locator('.gdh-debug-original').count(),0,'Non inventare un errore Godot per un requisito');
+  await page.locator('.gdh-debug-next-hint').click();await page.locator('.gdh-debug-next-hint').click();
+  await page.locator('#btn-toggle-hint').click();await page.locator('#btn-toggle-hint').click();
+  assert.match(await page.locator('#hint-toggle-text').innerText(),/1\/2/,'Il debugger non sblocca gli indizi della lezione');
+  await page.locator('#btn-next-hint').click();assert.match(await page.locator('#hint-text').innerText(),/Non commentare entrambe/);
+  await run('extends Node\n\nfunc _ready():\n    # print("Ciao!")\n    # print("Arrivederci!")');
+  assert.match(await page.locator('.gdh-debug-original').innerText(),/Expected indented block/);
+  assert.match(await page.locator('.gdh-debug-explanation').innerText(),/commenti/);
+  assert.match(await page.locator('.gdh-debug-top').innerText(),/rimasta vuota/);
+  assert.match(await page.locator('.gdh-debug-source').innerText(),/func _ready/);
+  fs.mkdirSync('test-artifacts',{recursive:true});await page.screenshot({path:'test-artifacts/guidance-empty-function.png',fullPage:true});
+  await run('extends Node\nfunc _ready():\n    var player_name = "Ada"\n    print(playerName)');
+  assert.match(await page.locator('.gdh-debug-explanation').innerText(),/player_name/);
+  await page.evaluate(()=>App.openLesson(10171));
+  await page.locator('#code-editor').fill('class_name Greeter\nextends RefCounted\nstatic func greet(player_name: String) -> String:\n    return unknown_name');
+  await page.getByRole('tab',{name:'main.gd',exact:true}).click();
+  await page.locator('#btn-run-code').click();await page.waitForFunction(()=>!App.isValidating,null,{timeout:120000});
+  const debug=await page.locator('#exercise-debug-area').innerText();
+  assert.match(debug,/greeter.gd/);assert.match(debug,/unknown_name/);
+  await page.locator('.gdh-debug-jump').click();
+  assert.equal(await page.getByRole('tab',{name:'greeter.gd',exact:true}).getAttribute('aria-selected'),'true');
+  assert.match(await page.locator('#code-editor').inputValue(),/unknown_name/);
+  assert.notEqual(await page.locator('#code-editor').getAttribute('readonly'),'');
+  assert.deepEqual(errors,[]);await page.screenshot({path:'test-artifacts/guidance-multifile.png',fullPage:true});
+  console.log('PASS guidance browser: messaggi Godot autentici, consigli specifici, contatori separati e navigazione multifile.');
+ }finally{await browser.close();await h.close();}
+})().catch(e=>{console.error(e);process.exitCode=1});

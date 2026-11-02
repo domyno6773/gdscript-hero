@@ -25,6 +25,7 @@ const App = {
         achievementRewardsV1: {},
         lessonTaskProgress: {},
         hintsRevealed: 0,
+        debugHintsRevealed: 0,
         activeHintLevel: 1,
         autocompleteList: [],
 
@@ -3471,6 +3472,7 @@ const App = {
 
         this.state.currentLessonId = lessonId;
         this.state.hintsRevealed = 0;
+        this.state.debugHintsRevealed = 0;
         this.state.activeHintLevel = 1;
         this.hideAutocomplete();
 
@@ -4450,7 +4452,11 @@ const App = {
         const host = sandbox ? '#sandbox-debug-area' : '#exercise-debug-area';
         const editor = document.getElementById(sandbox ? 'sandbox-code-editor' : 'code-editor');
         const failed = Array.isArray(tests) ? tests.find(t => !t.passed) : null;
-        const error = result?.error || '';
+        const lesson=sandbox?null:this.getCurrentActiveLessonOrVariant();
+        const draft=lesson?.requiresMultipleFiles?window.GDHManualStudio?.getDraft(lesson):null;
+        const isRequirement=lesson?.manualLessonNumber&&result?.nativeFeedback&&!result?.nativeStatus&&
+            !/SCRIPT ERROR|Parse Error|Runtime Error|timed out|failed to fetch/i.test(result?.error||'');
+        const error = isRequirement?'':result?.error || '';
         if (!error && !failed) {
             GDHErrorGuide.clearMark(editor);
             GDHErrorGuide.clear(host);
@@ -4460,14 +4466,19 @@ const App = {
         const diagnosis = GDHErrorGuide.diagnose({
             source: editor?.value || '',
             error, failedTest: failed,
-            verdict: result?.nativeFeedback?.verdict || ''
+            verdict: result?.nativeFeedback?.verdict || '',
+            lesson,files:draft?.files,filename:draft?.selected,
+            output:result?.logs?.join('\n'),expectedOutput:lesson?.expectedOutput
         });
-        GDHErrorGuide.mark(editor, diagnosis?.kind === 'engine' ? diagnosis.line : null);
-        GDHErrorGuide.render(host, diagnosis, line => GDHErrorGuide.jump(editor, line), level => {
+        GDHErrorGuide.mark(editor, diagnosis?.kind === 'engine'&&(!draft||diagnosis.file===draft.selected) ? diagnosis.line : null);
+        GDHErrorGuide.render(host, diagnosis, (line,file) => {
+            if(file&&draft&&file!==draft.selected)window.GDHManualStudio.selectFile(file);
+            GDHErrorGuide.jump(editor,line);
+        }, level => {
             // Solo gli indizi aperti volontariamente contano come aiuti.
             // Anche il debugger rispetta quindi la missione "senza suggerimenti".
             if (sandbox || !level) return;
-            this.state.hintsRevealed = Math.max(this.state.hintsRevealed || 0, level);
+            this.state.debugHintsRevealed = Math.max(this.state.debugHintsRevealed || 0, level);
             if (this.isReviewMode && this.currentReviewVariant) {
                 if (typeof ReviewEngine !== 'undefined') {
                     ReviewEngine.recordVariantHintOpened(this.currentReviewVariant.id, level, this.state);
@@ -4775,7 +4786,7 @@ const App = {
                 // Controllo sblocco traguardi
                 this.checkAchievements({
                     lessonId: currentLesson.id,
-                    hintsUsed: this.state.hintsRevealed
+                    hintsUsed: Math.max(this.state.hintsRevealed||0,this.state.debugHintsRevealed||0)
                 });
 
                 const nextBtnHeader = document.getElementById('btn-header-next');
@@ -5457,6 +5468,9 @@ const App = {
     renderHintBox(lesson) {
         if (!lesson || !lesson.hints) return;
         const totalHints = lesson.hints.length;
+        if(!totalHints)return;
+        this.state.hintsRevealed=Math.min(this.state.hintsRevealed||0,totalHints);
+        this.state.activeHintLevel=Math.min(this.state.activeHintLevel||1,totalHints);
         if (this.state.hintsRevealed === 0) {
             this.state.hintsRevealed = 1;
         }
@@ -5716,7 +5730,7 @@ const App = {
 
             // Registra esito del tentativo di ripasso (ReviewEngine gestisce in modo esclusivo daily_activity e telemetria varianti)
             if (typeof ReviewEngine !== 'undefined' && native.feedback.verdict !== 'inconclusive') {
-                ReviewEngine.recordVariantAttempt(variant.id, allPassed, this.state.hintsRevealed, this.state);
+                ReviewEngine.recordVariantAttempt(variant.id, allPassed, Math.max(this.state.hintsRevealed||0,this.state.debugHintsRevealed||0), this.state);
             }
 
             const resultsContainer = document.getElementById('test-results-view');
@@ -6101,6 +6115,7 @@ const App = {
 
         // Reimposta i suggerimenti per la variante
         this.state.hintsRevealed = 0;
+        this.state.debugHintsRevealed = 0;
         this.state.activeHintLevel = 1;
         const hintBox = document.getElementById('hint-box');
         if (hintBox) hintBox.classList.add('hidden');

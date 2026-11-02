@@ -235,3 +235,10 @@ pre, code, .output-pre { font-family: var(--font-mono) !important; }
 @media (min-width:821px) and (max-width:1199px) {
   .navbar { grid-template-columns:max-content minmax(0,1fr) max-content !important; }
 }
+/* Il messaggio autentico e l'estratto non devono allargare il dock su mobile. */
+.gdh-debug-original, .gdh-debug-source { min-width: 0; margin: 10px 0; }
+.gdh-debug-original pre, .gdh-debug-source {
+  white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%;
+  padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg-panel); font-size: .85rem;
+}
