@@ -171,7 +171,9 @@
   };
   function resetFile(lesson){
     const draft=getDraft(lesson),name=draft.selected;
-    draft.files[name]=lesson.sourceFiles[name]??lesson.initialCode;
+    // Nei file singoli initialCode è lo starter revisionato mostrato all'apertura;
+    // sourceFiles può ancora contenere il vecchio frammento importato dal PDF.
+    draft.files[name]=lesson.requiresMultipleFiles?lesson.sourceFiles[name]:lesson.initialCode;
     draft.updatedAt=Date.now();(draft.fileUpdatedAt||={})[name]=draft.updatedAt;
     attach(lesson.id);window.App.saveStorage();
   }

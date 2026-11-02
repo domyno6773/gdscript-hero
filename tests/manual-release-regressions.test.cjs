@@ -110,6 +110,32 @@ const tests={
   const conflict={xp:0,manualDrafts:{10171:{files:{'a.gd':'other A'},updatedAt:40}}};
   assert.equal(app.hasOverlappingCloudDrafts(a,conflict),true);
  },
+ reset(){
+  const app=loadApp();app.saveStorage=()=>{};
+  ctx.document.querySelector=()=>null;
+  vm.runInContext(fs.readFileSync('manuale235/studio.js','utf8'),ctx);
+  app.state.xp=175;app.state.finishedLessons=[10001,10002];
+  for(const lesson of [...w.LESSONS_DATA,...w.REVIEW_VARIANTS]){
+   app.isReviewMode=Boolean(lesson.manualLessonId);
+   app.currentReviewVariant=app.isReviewMode?lesson:null;
+   const draft=w.GDHManualStudio.getDraft(lesson),initial={...draft.files};
+   if(!lesson.requiresMultipleFiles)assert.equal(initial['main.gd'],lesson.initialCode,'Primo avvio '+lesson.id);
+   for(const name of Object.keys(initial)){
+    const editable=Object.keys(initial).filter(f=>!lesson.requiresMultipleFiles||!(lesson.readOnlyFiles||['main.gd']).includes(f));
+    for(const f of editable)draft.files[f]=initial[f]+'\n# tentativo su '+f;
+    draft.stdin='input da conservare';draft.selected=name;
+    const before={...draft.files};
+    w.GDHManualStudio.resetFile(lesson);
+    assert.equal(draft.files[name],initial[name],'Ripristino identico al primo avvio: '+lesson.id+'/'+name);
+    for(const f of editable.filter(f=>f!==name))assert.equal(draft.files[f],before[f],'Altro file modificato: '+lesson.id+'/'+f);
+    assert.equal(draft.stdin,'input da conservare');assert.equal(draft.selected,name);
+    w.GDHManualStudio.resetFile(lesson);
+    assert.equal(draft.files[name],initial[name],'Ripristino ripetuto: '+lesson.id+'/'+name);
+   }
+  }
+  assert.equal(app.state.xp,175);assert.deepEqual(app.state.finishedLessons,[10001,10002]);
+  assert.notEqual(app.state.manualDrafts[10003],app.state.manualDrafts.manual_review_10003,'Bozze corso e ripasso separate');
+ },
  async grading(){
   for(const l of w.LESSONS_DATA.slice(0,170)){
    const r=await w.GDHManualVerifier.verify(l.id,'extends Node\nfunc _ready():\n    print("sbagliato")',async()=>({status:'executed',stdout:'sbagliato',stderr:'',reply:{status:'executed'}}));
