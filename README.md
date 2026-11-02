@@ -6,7 +6,7 @@
 
 GDScript Hero è una piattaforma didattica **gratuita e in italiano** per imparare GDScript e familiarizzare con Godot 4, direttamente dal browser. Il progetto è indipendente, in sviluppo attivo, e non è un prodotto ufficiale di Godot Engine.
 
-> **Stato: ottobre 2026.** Il corso, l'editor, la Sandbox, il ripasso, le statistiche, il primo progetto e tre **sfide dimostrative gratuite con Godot** sono disponibili. L'**Archivio Premium** appare come sezione chiusa, ma non esistono ancora abbonamenti acquistabili o contenuti storici. Le **classifiche ufficiali** non sono attive: lo schema server non è stato ancora distribuito.
+> **Stato: novembre 2026.** Il corso italiano comprende **235 lezioni in 43 capitoli**, tutte verificate con Godot reale. Editor, Sandbox, ripasso, statistiche e progetti didattici sono disponibili. L'**Archivio Premium** appare come sezione chiusa, ma non esistono ancora abbonamenti acquistabili o contenuti storici. Le **classifiche ufficiali** non sono attive.
 
 > **Sviluppo in pausa:** Arena classificata, classifiche ufficiali e backend competitivo rimangono nel repository come lavoro preparatorio, ma non saranno sviluppati o distribuiti per ora. Il corso e il progetto didattico Arena del Gladiatore restano disponibili.
 
@@ -14,13 +14,13 @@ GDScript Hero è una piattaforma didattica **gratuita e in italiano** per impara
 
 | Sezione | Stato | Descrizione |
 | --- | --- | --- |
-| **Corso gratuito** | Disponibile | **85 esercizi pratici e 30 quiz in 16 capitoli**, con teoria, esempi, indizi e verifiche tramite Godot |
+| **Corso gratuito** | Disponibile | **235 lezioni in 43 capitoli**, con teoria, esempi, indizi e verifiche tramite Godot |
 | **Editor GDScript** | Disponibile | Sintassi colorata, numeri di riga, completamento contestuale e comandi rapidi |
 | **Risultati e diagnostica** | Disponibile | Output atteso/ottenuto, errori in evidenza e dettagli dei test |
 | **Sandbox** | Disponibile | Sperimentazione con codice, nodi, scena e viewport 2D |
 | **Progetti** | In espansione | **Arena del Gladiatore** è giocabile; altre proposte sono segnalate come future |
 | **Arena Classificata** | Demo disponibile | Tre sfide gratuite con Godot reale; l'interfaccia per stagioni e classifiche è pronta ma inattiva senza Supabase e il backend affidabile |
-| **Ripasso** | Disponibile | Esercizi alternativi, varianti e percorsi di consolidamento |
+| **Ripasso** | Disponibile | Ripetizione delle lezioni già completate, con bozze separate e premi settimanali senza duplicazioni |
 | **Statistiche** | Disponibile | Progressione, autonomia, tentativi e aree da approfondire |
 | **Gamification** | Disponibile | XP, livelli, traguardi, missioni e mappa del percorso |
 | **Salvataggi e account** | Disponibile | Modalità ospite, dati locali, backup e integrazione Supabase |
@@ -36,11 +36,11 @@ Nelle **Impostazioni → Audio ed effetti sonori** sono presenti interruttori e 
 
 ## Corso e apprendimento
 
-Il corso comprende **16 capitoli, 85 esercizi pratici e 30 quiz di comprensione**. Si parte dalle basi (output, variabili, operatori, condizioni) per arrivare a strutture dati, cicli, funzioni e meccaniche tipiche di Godot. Ogni livello offre un obiettivo concreto, test di verifica e aiuti progressivi.
+Il corso comprende **235 lezioni in 43 capitoli**, nello stesso ordine del manuale italiano. Si parte da output, variabili e operatori per arrivare a strutture dati, funzioni, classi, segnali, design pattern e progetti completi. Ogni attività ha una consegna e un verificatore dedicati.
 
-Nodi e Label arrivano nel terzo capitolo. Le ripetizioni generate per interi capitoli non sono più obbligatorie: ogni esercizio del percorso ha un obiettivo proprio. Gli ID storici e le ricompense già ottenute restano invariati.
+Le lezioni 171–235 usano file `.gd` distinti caricati come risorse native da **Godot 4.5.1**, conservando tipi, ereditarietà, classi astratte e riferimenti fra script. I file forniti sono protetti; gli esercizi con input consentono un'anteprima senza assegnare progressi o XP.
 
-Il capitolo sul gameplay verifica `_physics_process(delta)`, input, `move_and_slide()`, collisioni e `Area2D` facendo avanzare realmente la simulazione. Le scene possono essere copiate nel laboratorio e scaricate in ZIP come progetti Godot completi. I primi esercizi visivi separano teoria, obiettivo e soluzione negli indizi; i controlli ammettono sintassi equivalenti dove conta il comportamento.
+Gli ID del manuale sono `10001…10235`: i completamenti del corso precedente non promuovono automaticamente attività differenti, mentre gli XP storici vengono conservati. Bozze multifile, input e premi seguono account, salvataggio locale, backup e sincronizzazione cloud. I risultati dell'audit sono descritti in [manuale235/AUDIT_RELEASE.md](manuale235/AUDIT_RELEASE.md).
 
 **L'obiettivo è mantenere il corso principale gratuito.** Le eventuali funzioni aggiuntive a pagamento non dovranno impedire di completarlo.
 
