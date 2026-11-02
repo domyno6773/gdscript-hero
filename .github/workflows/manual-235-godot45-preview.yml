@@ -1,0 +1,76 @@
+name: Manuale 235 - Godot 4.5.1 Web preview (solo branch)
+
+on:
+  push:
+    branches:
+      - manuale-235-lezioni
+    paths:
+      - '.github/workflows/manual-235-godot45-preview.yml'
+      - 'native/project/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: manuale-235-godot45-preview
+  cancel-in-progress: false
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+          ref: manuale-235-lezioni
+      - name: Download Godot 4.5.1 official editor and Web template
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 5 \
+            -o /tmp/godot-linux.zip \
+            https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip
+          unzip -q /tmp/godot-linux.zip -d /tmp
+          chmod +x /tmp/Godot_v4.5.1-stable_linux.x86_64
+          curl -fL -C - --retry 5 --retry-all-errors --retry-delay 8 \
+            -o /tmp/godot-templates.tpz \
+            https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz
+          unzip -p /tmp/godot-templates.tpz templates/web_nothreads_release.zip \
+            > /tmp/web_nothreads_release.zip
+          test -s /tmp/web_nothreads_release.zip
+      - name: Export on feature branch only
+        run: |
+          set -euo pipefail
+          cd native/project
+          sed -i 's|custom_template/release=""|custom_template/release="/tmp/web_nothreads_release.zip"|' export_presets.cfg
+          /tmp/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --editor --quit
+          /tmp/Godot_v4.5.1-stable_linux.x86_64 --headless --path . --export-release Web ../godot.html
+          test -s ../godot.wasm && test -s ../godot.pck && test -s ../godot.js
+          test -s ../godot.audio.worklet.js && test -s ../godot.audio.position.worklet.js
+          du -h ../godot.wasm ../godot.pck ../godot.js
+      - name: Commit preview assets to feature branch, never main
+        run: |
+          set -euo pipefail
+          test "$(git branch --show-current)" = "manuale-235-lezioni"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f native/godot.js native/godot.wasm native/godot.pck \
+            native/godot.audio.worklet.js native/godot.audio.position.worklet.js
+          if git diff --cached --quiet; then
+            echo "No native asset changes"
+            exit 0
+          fi
+          git commit -m "build(manuale): Godot 4.5.1 preview WebAssembly"
+          git reset --hard HEAD
+          for attempt in 1 2 3; do
+            git fetch origin manuale-235-lezioni
+            git rebase origin/manuale-235-lezioni
+            if git push origin HEAD:manuale-235-lezioni; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Unable to update preview branch" >&2
+          exit 1

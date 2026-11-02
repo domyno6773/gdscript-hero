@@ -7,9 +7,9 @@ module.exports=function loadCourse(v4=true){
  const w={},listeners={};
  const ctx=vm.createContext({window:w,console,Date,document:{addEventListener:(event,fn)=>listeners[event]=fn}});
  const files=[];
- for(const [,f] of fs.readFileSync(path.join(root,'index.html'),'utf8').matchAll(/<script src="([^"]+)"/g)){
-  if(f==='code-guide.js')break;
-  if(!/^(lessons|lesson_practice|practice-behavior|curriculum_|practice_catalog|chapter_quizzes|quiz_prerequisites|gameplay_lessons|course_capstone)/.test(f))continue;
+ for(const [,f] of fs.readFileSync(path.join(root,'index.html'),'utf8').replace(/<!--[\s\S]*?-->/g,'').matchAll(/<script src="([^"]+)"/g)){
+  if(f==='app.js')break;
+  if(!/^(manuale235\/|lessons|lesson_practice|practice-behavior|curriculum_|practice_catalog|chapter_quizzes|quiz_prerequisites|gameplay_lessons|course_capstone)/.test(f))continue;
   if(!v4&&['curriculum_guidance.js','quiz_prerequisites_v4.js','curriculum_compass.js','course_capstone.js'].includes(f))continue;
   vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f});files.push(f);
  }

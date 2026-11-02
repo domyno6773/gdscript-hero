@@ -1,0 +1,13 @@
+/* Manuale revisionato: file multipli e input da console, senza layout a card annidate. */
+.manual-file-bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:var(--bg-surface,#1c2632);border-bottom:1px solid var(--border-color,#425163);}
+.manual-file-tab{background:transparent;border:1px solid #536378;color:inherit;border-radius:6px;padding:5px 10px;font:500 12px 'JetBrains Mono',monospace;cursor:pointer;}
+.manual-file-tab.is-active{background:#2d4b65;border-color:#478cbf;color:#f0f7fe;}
+.manual-file-tab:focus-visible,.manual-preview-btn:focus-visible{outline:2px solid #82bbeb;outline-offset:2px;}
+.manual-input-panel{display:flex;flex-direction:column;gap:8px;margin:12px 0 0;max-width:100%;}
+.manual-input-panel label{font-size:13px;font-weight:650;}
+.manual-input-panel textarea{display:block;width:100%;box-sizing:border-box;min-height:78px;resize:vertical;padding:9px 12px;color:var(--text-primary,#eef4f9);background:var(--bg-surface,#182533);border:1px solid #5a6a7a;border-radius:7px;font:13px/1.5 'JetBrains Mono',monospace;}
+.manual-preview-btn{align-self:flex-start;border-radius:7px;padding:8px 12px;border:1px solid #478cbf;background:transparent;color:inherit;font-weight:600;cursor:pointer;}
+.manual-preview-btn:hover{background:rgba(71,140,191,.12);}
+.manual-preview-btn:disabled{opacity:.6;cursor:wait;}
+.manual-verification-note{margin:12px 0 0;font-size:13px;line-height:1.5;color:var(--text-secondary,#c8d2dd);}
+@media(max-width:820px){.manual-file-bar{padding:8px;}.manual-input-panel textarea{font-size:16px}.manual-preview-btn{max-width:100%;}}

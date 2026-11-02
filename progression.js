@@ -103,6 +103,16 @@ const ProgressionV2 = (() => {
         }
         return output;
     }
+    // Stable lesson and achievement claims merge without losing rewards
+    // earned independently on two devices. Historical XP stays a baseline.
+    function mergePersonalXp(left,right,lessonClaims,rewards,date=new Date()) {
+        const total=o=>Object.values(o||{}).reduce((n,v)=>n+(Number.isFinite(Number(v))?Math.max(0,Number(v)):0),0);
+        const recurring=s=>total(normalizeRewards(s.rewardsV2,0,null,date).totals);
+        const achievements={...(left.achievementRewardsV1||{})};
+        for(const [id,value] of Object.entries(right.achievementRewardsV1||{}))achievements[id]=Math.max(Number(achievements[id])||0,Number(value)||0);
+        const baseline=s=>Math.max(0,(Number(s.xp)||0)-total(s.lessonRewardsV1)-total(s.achievementRewardsV1)-recurring(s));
+        return Math.max(baseline(left),baseline(right))+total(lessonClaims)+total(achievements)+total(rewards?.totals);
+    }
     function gradeIcon(grade) {
         if (!grade) return '';
         const paths={
@@ -115,7 +125,7 @@ const ProgressionV2 = (() => {
         return '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[grade.icon]+'</svg>';
     }
     return Object.freeze({GRADES,CAPS,threshold,levelFromXp,dateKey,weekKey,
-        createRewards,normalizeRewards,grantRecurring,mergeRewards,gradeIcon});
+        createRewards,normalizeRewards,grantRecurring,mergeRewards,mergePersonalXp,gradeIcon});
 })();
 if(typeof window!=='undefined') window.ProgressionV2=ProgressionV2;
 if(typeof module!=='undefined' && module.exports) module.exports=ProgressionV2;

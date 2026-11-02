@@ -21,12 +21,12 @@ jobs:
         run: npm install --no-save --no-package-lock playwright@1.56.1
       - name: Check system Chrome
         run: google-chrome --version
-      - name: Final project launch and real Godot behaviors on desktop and mobile
+      - name: Native manual projects and real Godot behavior
         run: node tests/capstone_browser.test.cjs
-      - name: Test guest mode in Chrome desktop/mobile
-        run: E2E_SCREENSHOTS=1 node tests/browser_smoke.test.cjs
       - name: Install WebKit and Linux libraries for Safari compatibility
         run: npx playwright install --with-deps webkit
+      - name: Test manual on mobile Chrome and Safari
+        run: node tests/manual-mobile-browser.test.cjs
       - name: Test MacBook navigation in Chromium and Safari/WebKit
         run: E2E_SCREENSHOTS=1 node tests/navbar_macbook.test.cjs
       - name: Upload visual previews
