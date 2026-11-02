@@ -1,10 +1,5 @@
-/* Esecuzione didattica dei progetti OOP in Godot WebAssembly.
- * Ogni .gd resta distinto nella bozza; per la verifica il codice delle
- * classi locali viene assemblato in classi GDScript annidate. Ciò permette
- * di usare il compilatore Godot senza modificare il pack WASM, ma NON
- * sostituisce ancora un caricatore nativo di file res:// indipendenti.
- * I casi che non si possono assemblare fedelmente rimangono bloccati.
- */
+/* Progetti del manuale: file distinti inviati al caricatore nativo Godot.
+ * class_name, annotazioni e gerarchie restano nei rispettivi script. */
 (() => {
  'use strict';
  const get=n=>(window.LESSONS_DATA||[]).find(x=>x.manualLessonNumber===n);
@@ -56,29 +51,24 @@
      if(!parent)throw Error('Manca extends nella classe '+className);
      candidates.push({className,parent,body,abstractClass});
    }
-   const nested=[];
-   const completed=new Set();
+   // Check inheritance cycles without assembling or rewriting any class.
+   const completed=new Set(['RefCounted','Node']);
    const waiting=candidates.slice();
    while(waiting.length){
-     const index=waiting.findIndex(item=>item.parent==='RefCounted'||
-       item.parent==='Node'||completed.has(item.parent));
-     if(index===-1)throw Error('Classe base mancante o dipendenza circolare');
-     const {className,parent,body,abstractClass}=waiting.splice(index,1)[0];
-     if(parent!=='RefCounted'&&parent!=='Node'&&!names.has(parent))
-       throw Error('Classe base sconosciuta per '+className);
-     // Godot compila classi reali annidate, ordinate per dipendenze.
-     nested.push((abstractClass?'@abstract ':'')+'class '+className+':\n'+body.map(line=>line?'    '+line:'').join('\n'));
-     completed.add(className);
+     const index=waiting.findIndex(item=>completed.has(item.parent));
+     if(index<0)throw Error('Classe base mancante o dipendenza circolare');
+     completed.add(waiting.splice(index,1)[0].className);
    }
-   if(!nested.length)throw Error('Non sono presenti classi del progetto');
-   let mainBody=mainLines.filter(s=>!/^\s*extends Node\s*$/.test(s)).join('\n');
-   const source='extends Node\n\n'+nested.join('\n\n')+'\n\n'+mainBody+'\n';
-   if(source.length>9500)throw Error('Progetto troppo lungo');
-   return source;
+   return main;
+ };
+ const prepare=(lesson,files)=>{
+   build(lesson,files);
+   if(Object.values(files).reduce((n,s)=>n+s.length,0)>96000)throw Error('Progetto troppo lungo');
+   return {entry:'main.gd',files:{...files}};
  };
  const supports=lesson=>Boolean(lesson&&supported.has(lesson.manualLessonNumber));
- const compile=lesson=>build(lesson,currentFiles(lesson));
- window.GDHManualProject=Object.freeze({supports,currentFiles,build,compile});
+ const compile=lesson=>prepare(lesson,currentFiles(lesson));
+ window.GDHManualProject=Object.freeze({supports,currentFiles,build,prepare,compile});
  for(let n of supported){
    const l=get(n);
    if(!l||!l.requiresMultipleFiles)throw Error('Configurazione multi-file incompleta '+n);

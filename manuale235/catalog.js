@@ -102,14 +102,15 @@
     // la consegna parla di coins_each e il codice deve utilizzare lo stesso nome.
     if(n===16&&files['main.gd'])
       files['main.gd']=files['main.gd'].replace(/\bmonete_each\b/g,'coins_each');
-    const starter=starters[n]??files['main.gd']??'';
+    const rawStarter=starters[n]??files['main.gd']??'';
+    const starter=n===24?rawStarter.replace(/^        (?=print|# Non modificare)/gm,'    '):rawStarter;
     return {
       id:10000+n, manualLessonNumber:n, displayIndex:n,
       title:n+'. '+item.title, chapterId:item.chapterId,
       conceptId:'manual_chapter_'+item.chapterId,
       conceptTags:['manual_235','chapter_'+item.chapterId],
       icon:'', xp:50,isMastery:false,isQuiz:false,practiceMode:'focused',
-      theory:paragraphs(item.theory),task:paragraphs(item.exercise),
+      theory:paragraphs(item.theory),task:paragraphs(item.exercise)+(n===47?'<pre>120</pre>':''),
       initialCode:starter,starterCode:starter,solution:'',
       expectedOutput:expected[n]||'',
       hints:[{level:1,type:'concept',label:'Rileggi la consegna',

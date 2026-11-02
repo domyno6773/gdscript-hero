@@ -20,6 +20,8 @@ const App = {
         currentWeekId: "",
         lastActiveDate: null,
         userCode: {},
+        manualDrafts: {},
+        lessonRewardsV1: {},
         lessonTaskProgress: {},
         hintsRevealed: 0,
         activeHintLevel: 1,
@@ -314,6 +316,7 @@ const App = {
                 this.state.rewardsV2 = ProgressionV2.normalizeRewards(parsed.rewardsV2,this.state.xp,parsed.dailyQuests);
                 this.state.streak = parsed.streak || 1;
                 this.state.finishedLessons = parsed.finishedLessons || [];
+                this.state.lessonRewardsV1 = parsed.lessonRewardsV1 || {};
                 this.state.completedLessons = parsed.completedLessons || [1];
                 // In ambiente locale permette la modalità sblocco rapido, online forza false
                 if (this.isLocalEnvironment()) {
@@ -332,6 +335,7 @@ const App = {
                 this.state.currentWeekId = parsed.currentWeekId || this.getWeekId();
                 this.state.lastActiveDate = parsed.lastActiveDate || null;
                 this.state.userCode = parsed.userCode || {};
+                this.state.manualDrafts = parsed.manualDrafts && typeof parsed.manualDrafts === 'object' ? parsed.manualDrafts : {};
                 this.state.lessonTaskProgress = parsed.lessonTaskProgress || {};
                 
                 // Pulisce eventuale codice legacy con Node.new salvato in localStorage per le lezioni aggiornate
@@ -490,6 +494,7 @@ const App = {
     },
 
     getSavePayload() {
+        window.GDHManualStudio?.saveVisible?.();
         return {
             theme: this.state.theme,
             xp: this.state.xp,
@@ -511,6 +516,8 @@ const App = {
             musicEnabled: SoundFX.musicEnabled,
             musicVolume: SoundFX.musicVolume,
             userCode: this.state.userCode,
+            manualDrafts: this.state.manualDrafts || {},
+            lessonRewardsV1: this.state.lessonRewardsV1 || {},
             lessonTaskProgress: this.state.lessonTaskProgress || {},
             profile: this.state.profile,
             profileCustomized: this.state.profileCustomized,
@@ -2178,7 +2185,7 @@ const App = {
         this.state.streakWeeks = 0;
         this.state.activeDaysThisWeek = [];
         this.state.finishedLessons = [];
-        this.state.completedLessons = [1];
+        this.state.completedLessons = [LESSONS_DATA[0]?.id || 1];
         this.state.unlockedAchievements = [];
         this.state.currentLessonId = 1;
         this.state.userCode = {};
@@ -2562,6 +2569,14 @@ const App = {
         badge.style.color = completed ? 'var(--text-muted)' : '';
     },
 
+    creditLessonXp(lesson) {
+        this.state.lessonRewardsV1 ||= {};
+        if(Object.hasOwn(this.state.lessonRewardsV1,lesson.id))return 0;
+        const gain=Math.max(0,Number(lesson.xp)||0);
+        this.state.lessonRewardsV1[lesson.id]=gain;
+        this.state.xp+=gain;
+        return gain;
+    },
     // La modale mostra SOLO gli XP realmente ottenuti per l'attività completata.
     // Se l'attività non assegna XP, il riquadro premio scompare del tutto.
     setSuccessModalReward(earnedXp) {
@@ -2694,7 +2709,8 @@ const App = {
         if(!this.isLocalEnvironment())this.state.devAllUnlocked=false;
         let furthest=-1;
         for(const id of finishedSet)furthest=Math.max(furthest,indexById.get(id));
-        if(!this.state.devAllUnlocked&&furthest>=0)
+        const manual=ordered.every(l=>l.manualLessonNumber);
+        if(!manual&&!this.state.devAllUnlocked&&furthest>=0)
             for(let index=0;index<=furthest;index++)
                 finishedSet.add(ordered[index].id);
 
@@ -2706,10 +2722,11 @@ const App = {
 
         // Se l'ultima tappa superata e' k, l'attivita' k+1 dev'essere
         // disponibile. Questo vale per i quiz e per le lezioni ordinarie.
+        let contiguous=-1;
+        while(contiguous+1<ordered.length&&finishedSet.has(ordered[contiguous+1].id))contiguous++;
         const reached=this.state.devAllUnlocked?ordered.length-1:
-            Math.min(furthest+1,ordered.length-1);
-        const reachable=ordered.slice(0,Math.max(1,reached+1))
-            .map(lesson=>lesson.id);
+            Math.min((manual?contiguous:furthest)+1,ordered.length-1);
+        const reachable=ordered.filter((l,i)=>i<=Math.max(0,reached)||finishedSet.has(l.id)).map(l=>l.id);
         const previous=Array.isArray(this.state.completedLessons)
             ? this.state.completedLessons : [];
         const unlockChanged=previous.length!==reachable.length||
@@ -2728,6 +2745,7 @@ const App = {
         // Il tag CONTINUA punta alla prossima tappa dopo il livello più
         // avanzato completato, non a currentLessonId rimasto su una lezione
         // che l'utente ha riaperto per rivederla.
+        if(LESSONS_DATA.every(l=>l.manualLessonNumber))return LESSONS_DATA.find(l=>available.has(l.id)&&!finished.has(l.id))?.id??null;
         let lastFinished=-1;
         LESSONS_DATA.forEach((lesson,index)=>{
             if(finished.has(lesson.id))lastFinished=index;
@@ -2754,7 +2772,7 @@ const App = {
             this.showToast({
                 icon: '🔓',
                 tag: 'MODALITÀ VERIFICA (LOCALE)',
-                title: 'Tutti i 60 Livelli Sbloccati',
+                title: 'Tutte le '+LESSONS_DATA.length+' lezioni sbloccate',
                 desc: 'Ora puoi selezionare e testare qualsiasi esercizio o sfida in locale!'
             });
         }
@@ -2762,7 +2780,7 @@ const App = {
 
     lockToStandardProgression(notify = false) {
         this.state.devAllUnlocked = false;
-        this.state.completedLessons = [1];
+        this.state.completedLessons = [LESSONS_DATA[0]?.id || 1];
         this.ensureUnlockedConsistency();
         this.saveStorage();
         this.renderRoadmap();
@@ -4692,10 +4710,10 @@ const App = {
                 }
                 document.getElementById('btn-modal-next').textContent='Prossima lezione';
                 const isFirstTime = !this.state.finishedLessons.includes(currentLesson.id);
-                const earnedLessonXp = isFirstTime ? currentLesson.xp : 0;
+                const earnedLessonXp = isFirstTime ? this.creditLessonXp(currentLesson) : 0;
                 if (isFirstTime) {
                     this.state.finishedLessons.push(currentLesson.id);
-                    this.state.xp += earnedLessonXp;
+
 
                     const isCore = !currentLesson.isMastery;
                     const chapterLessons = LESSONS_DATA.filter(l => l.chapterId === currentLesson.chapterId);
@@ -5064,7 +5082,11 @@ const App = {
         document.getElementById('btn-reset-code').onclick = () => {
             SoundFX.playClick();
             const currentLesson = this.getCurrentActiveLessonOrVariant();
-            if (currentLesson && confirm("Vuoi ripristinare il codice iniziale e la scena di questo esercizio?")) {
+            if (currentLesson && confirm(currentLesson.manualLessonNumber?"Vuoi ripristinare il file selezionato?":"Vuoi ripristinare il codice iniziale e la scena di questo esercizio?")) {
+                if(currentLesson.manualLessonNumber){
+                    window.GDHManualStudio.resetFile(currentLesson);
+                    this.resetExerciseFeedback();return;
+                }
                 document.getElementById('code-editor').value =
                     this.isReviewMode ? currentLesson.starterCode : currentLesson.initialCode;
                 this.updateLineNumbers();
@@ -5567,7 +5589,7 @@ const App = {
 
         const btnRevealSolution = document.getElementById('btn-reveal-solution');
         if (btnRevealSolution) {
-            btnRevealSolution.onclick = () => {
+            btnRevealSolution.onclick = async () => {
                 const currentLesson = this.getCurrentActiveLessonOrVariant();
                 if (!currentLesson) return;
                 if (confirm("Vuoi visualizzare la soluzione completa?")) {
@@ -5580,6 +5602,11 @@ const App = {
                         this.state.hintsRevealed = currentLesson.hints.length;
                     } else {
                         this.recordHintOpened(this.state.currentLessonId, 3);
+                    }
+                    if(currentLesson.manualLessonNumber){
+                        try{await window.GDHManualStudio.showSolution(currentLesson);}
+                        catch(error){this.showToast({tag:'SOLUZIONE',title:'Caricamento non riuscito',desc:String(error.message||error)});}
+                        return;
                     }
                     document.getElementById('code-editor').value = currentLesson.solution;
                     this.updateLineNumbers();
@@ -5704,7 +5731,10 @@ const App = {
                 badge.style.color = '#10b981';
 
                 let gainXp = 0;
-                if (isFirstTime) {
+                if(variant.manualLessonId){
+                    this.state.rewardsV2=ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp);
+                    gainXp=ProgressionV2.grantRecurring(this.state.rewardsV2,'reviews','variant:'+variant.id,5);
+                } else if (isFirstTime) {
                     if (!this.state.reviewProgress.completedVariants.includes(variant.id)) {
                         this.state.reviewProgress.completedVariants.push(variant.id);
                     }
@@ -5741,6 +5771,7 @@ const App = {
                         : (gainXp ? "Ottimo lavoro! Hai ricevuto +5 XP per il ripasso settimanale." :
                             "Ripasso superato! Il premio settimanale per questa variante è già stato ottenuto oppure hai raggiunto il limite.");
                 }
+                if(variant.manualLessonId&&modalSubtitle)modalSubtitle.innerText=gainXp?`Ripasso superato: +${gainXp} XP.`:'Ripasso superato. Premio settimanale già ottenuto o limite raggiunto.';
                 this.setSuccessModalReward(gainXp);
 
                 setTimeout(() => {
@@ -5946,7 +5977,7 @@ const App = {
                         </div>
                     </div>
                     <button type="button" class="btn-start-variant ${isDone ? 'btn-subtle' : 'btn-primary'}" onclick="App.openReviewVariant('${v.id}')">
-                        ${isDone ? 'Ripeti (+0 XP)' : 'Inizia (+10 XP)'}
+                        ${isDone ? 'Ripeti' : 'Inizia'} (+${v.manualLessonId?this.manualReviewReward(v.id):(isDone?0:v.xpReward||10)} XP)
                     </button>
                 </div>
             `;
@@ -5974,10 +6005,14 @@ const App = {
         return card;
     },
 
+    manualReviewReward(id){
+        const rewards=ProgressionV2.normalizeRewards(this.state.rewardsV2,this.state.xp);
+        return !Object.hasOwn(rewards.claims,'reviews:variant:'+id)&&rewards.totals.reviews<ProgressionV2.CAPS.reviews?5:0;
+    },
     openReviewVariant(variantId) {
         if (typeof REVIEW_VARIANTS === 'undefined') return;
         const variant = REVIEW_VARIANTS.find(v => v.id === variantId);
-        if (!variant) return;
+        if (!variant || (variant.manualLessonId&&!this.state.finishedLessons.includes(variant.manualLessonId))) return;
 
         SoundFX.playClick();
         this.isReviewMode = true;
@@ -6011,7 +6046,7 @@ const App = {
             </div>
             <div id="lesson-theory" class="theory-body">
                 <div class="review-scenario-box">
-                    <span class="scenario-badge">SCENARIO ALTERNATIVO</span>
+                    <span class="scenario-badge">${variant.manualLessonId?'ESERCIZIO DI RIPASSO':'SCENARIO ALTERNATIVO'}</span>
                     <p>${this.escapeHtml(variant.scenario)}</p>
                 </div>
             </div>
@@ -6045,7 +6080,7 @@ const App = {
         const xpBadge = document.getElementById('lesson-xp-badge');
         const isDone = this.state.reviewProgress?.completedVariants?.includes(variant.id);
         if (xpBadge) {
-            xpBadge.innerText = isDone ? "Già Completato (+0 XP)" : `+${variant.xpReward} XP Ripasso`;
+            xpBadge.innerText = variant.manualLessonId?`+${this.manualReviewReward(variant.id)} XP Ripasso`:(isDone ? "Già Completato (+0 XP)" : `+${variant.xpReward} XP Ripasso`);
             xpBadge.style.background = isDone ? 'rgba(148, 163, 184, 0.2)' : 'rgba(16, 185, 129, 0.2)';
             xpBadge.style.color = isDone ? '#94a3b8' : '#34d399';
         }
@@ -7524,6 +7559,8 @@ const App = {
             });
         };
         if(overlap(local.userCode,remote.userCode,base?.userCode,true))return true;
+        const manualFiles=data=>Object.fromEntries(Object.entries(data?.manualDrafts||{}).flatMap(([id,draft])=>Object.entries(draft.files||{}).map(([file,code])=>[id+':'+file,code])));
+        if(overlap(manualFiles(local),manualFiles(remote),manualFiles(base)))return true;
         // Anche i codici dei singoli compiti sono bozze indipendenti:
         // due modifiche concorrenti non devono sovrascriversi in silenzio.
         const taskDrafts=progress=>Object.fromEntries(
@@ -7567,6 +7604,11 @@ const App = {
         };
         result.userCode={...(result.userCode||{})};
         preserveEdits(result.userCode,local.userCode,remote.userCode,base.userCode);
+        result.manualDrafts={...(result.manualDrafts||{})};
+        for(const [id,draft] of Object.entries(local.manualDrafts||{})){
+            const target=result.manualDrafts[id];
+            if(target){target.files={...target.files};preserveEdits(target.files,draft.files,remote.manualDrafts?.[id]?.files,base.manualDrafts?.[id]?.files);}
+        }
         result.lessonTaskProgress={...(result.lessonTaskProgress||{})};
         for(const [id,record] of Object.entries(local.lessonTaskProgress||{})){
             const remoteRecord=remote.lessonTaskProgress?.[id];
@@ -7662,6 +7704,8 @@ const App = {
         if (data.completedLessons) this.state.completedLessons = data.completedLessons;
         if (data.unlockedAchievements) this.state.unlockedAchievements = data.unlockedAchievements;
         if (data.userCode) this.state.userCode = data.userCode;
+        if(data.manualDrafts)this.state.manualDrafts=data.manualDrafts;
+        if(data.lessonRewardsV1)this.state.lessonRewardsV1=data.lessonRewardsV1;
         if(data.lessonTaskProgress)this.state.lessonTaskProgress=data.lessonTaskProgress;
         if (data.projectInterests) this.state.projectInterests = data.projectInterests;
         if (data.soundEnabled !== undefined) SoundFX.enabled = !!data.soundEnabled;

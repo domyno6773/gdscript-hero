@@ -34,7 +34,7 @@
   set(72,samples72.map(([text,joiner])=>({name:'Separatore e spazi',
     stdin:[text,joiner],output:text.trim().split(/\s+/).filter(Boolean).join(joiner)})),
     structural(/\btext\b/,/\bseparator\b/,/\.split\s*\(/,
-      /\.join\s*\(/,/\bfor\b|\bfilter\b|\bstrip_edges\b/));
+      /\.join\s*\(/,/\bfor\b|\bfilter\b|\bstrip_edges\b|\.split\s*\([^\n]*,\s*false\s*\)/));
   const centered=a=>{
     if(a.length%2===0)return a.slice(a.length/2-1,a.length/2+1);
     const mid=Math.floor(a.length/2);return a.slice(Math.max(0,mid-1),mid+2);

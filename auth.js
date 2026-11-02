@@ -887,6 +887,8 @@ const AuthManager = {
                 claimedQuestsCount: appState.claimedQuestsCount || 0,
                 projectInterests: appState.projectInterests || {},
                 userCode: appState.userCode || {},
+                manualDrafts: appState.manualDrafts || {},
+                lessonRewardsV1: appState.lessonRewardsV1 || {},
                 lessonTaskProgress: appState.lessonTaskProgress || {},
                 // Questi dati erano già salvati localmente, ma mancavano dal backup.
                 arenaProject: appState.arenaProject ?? null,
@@ -1005,6 +1007,12 @@ const AuthManager = {
         merged.rewardsV2 = window.ProgressionV2
             ? window.ProgressionV2.mergeRewards(current.rewardsV2,imported.rewardsV2,merged.xp)
             : (current.rewardsV2 || imported.rewardsV2 || null);
+        merged.lessonRewardsV1={...(current.lessonRewardsV1||{})};
+        for(const [key,value] of Object.entries(imported.lessonRewardsV1||{})){
+            if(Number.isFinite(Number(value)))merged.lessonRewardsV1[key]=Math.max(Number(merged.lessonRewardsV1[key])||0,Math.max(0,Number(value)));
+        }
+        if(window.ProgressionV2?.mergePersonalXp&&(current.lessonRewardsV1||imported.lessonRewardsV1))
+            merged.xp=window.ProgressionV2.mergePersonalXp(current,imported,merged.lessonRewardsV1,merged.rewardsV2);
         merged.streak = Math.max(current.streak || 1, imported.streak || 1);
         merged.streakWeeks = Math.max(current.streakWeeks || 0, imported.streakWeeks || 0);
         // Una nuova registrazione importa anche il ritmo gia' selezionato
@@ -1045,6 +1053,23 @@ const AuthManager = {
         const achSet = new Set([...(current.unlockedAchievements || []), ...(imported.unlockedAchievements || [])]);
         merged.unlockedAchievements = Array.from(achSet);
 
+        // Le bozze non sono progressi sommabili: conserva ogni file più recente.
+        merged.manualDrafts = {...(current.manualDrafts||{})};
+        for(const [id,remote] of Object.entries(imported.manualDrafts||{})){
+            const local=merged.manualDrafts[id];
+            if(!local)merged.manualDrafts[id]=remote;
+            else if(local && remote){
+                const files={...remote.files,...local.files};
+                const times={...remote.fileUpdatedAt,...local.fileUpdatedAt};
+                for(const [name,text] of Object.entries(remote.files||{})){
+                    if(Number(remote.fileUpdatedAt?.[name]||remote.updatedAt||0) >
+                       Number(local.fileUpdatedAt?.[name]||local.updatedAt||0)){
+                        files[name]=text;times[name]=remote.fileUpdatedAt?.[name]||remote.updatedAt;
+                    }
+                }
+                merged.manualDrafts[id]={...(Number(remote.updatedAt||0)>Number(local.updatedAt||0)?remote:local),files,fileUpdatedAt:times};
+            }
+        }
         merged.userCode = { ...(current.userCode || {}), ...(imported.userCode || {}) };
         merged.lessonTaskProgress=window.LessonPractice?.mergeProgress
             ? window.LessonPractice.mergeProgress(

@@ -7,6 +7,7 @@ var _captured_objects: Dictionary = {}
 # Runtime Sandbox tenuto vivo tra l'esecuzione e le interazioni con i nodi.
 var _sandbox_instance: Node = null
 var _sandbox_specs: Array = []
+var _manual_loader = preload("manual-project.gd").new()
 
 func __gdh_normalize(value: Variant, depth: int = 0) -> Variant:
     if value is Vector2:
@@ -77,6 +78,8 @@ func _on_js_request(args: Array) -> void:
         reply = await observe_sandbox(int(request.get("frames", 1)), request.get("input", []))
     elif str(request.get("mode", "")) == "sandbox_action":
         reply = _sandbox_action(str(request.get("node", "")), str(request.get("signal", "")))
+    elif request.get("project") is Dictionary:
+        reply = run_project(request.project.files,request.project.get("entry","main.gd"),request.get("calls",[]))
     else:
         reply = run_candidate(str(request.get("code", "")), request.get("inspect", []), request.get("locals", []), request.get("calls", []), request.get("emissions", []), request.get("objectCalls", []), request.get("scene", null), request.get("actions", []), request.get("nodes", []), str(request.get("mode", "")) == "sandbox_start")
     if bool(request.get("paused", false)) and is_instance_valid(_sandbox_instance):
@@ -405,7 +408,18 @@ func _sandbox_action(node_name: String, signal_name: String) -> Dictionary:
         return {"status": "invalid_action", "message": "Azione non supportata per questo nodo"}
     return {"status": "executed", "scene": _sandbox_snapshot(), "lessonScene": _lesson_scene_tree(_sandbox_instance)}
 
-func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = [], method_calls: Variant = [], signal_emissions: Variant = [], object_calls: Variant = [], scene_lesson: Variant = null, scene_actions: Variant = [], scene_nodes: Variant = [], sandbox_live: bool = false) -> Dictionary:
+func run_project(files: Dictionary, entry: String = "main.gd", method_calls: Array = []) -> Dictionary:
+    __gdh_phase("original_compile")
+    var prepared: Dictionary = _manual_loader.prepare(files,entry)
+    if prepared.status != "prepared":
+        return prepared
+    var result := run_candidate(str(files[entry]), [], [], method_calls, [], [], null, [], [], false, prepared.script)
+    result["nativeMultifile"] = true
+    result["projectEntry"] = prepared.entry
+    result["projectFiles"] = prepared.files
+    return result
+
+func run_candidate(source: String, inspect: Variant = [], capture_names: Variant = [], method_calls: Variant = [], signal_emissions: Variant = [], object_calls: Variant = [], scene_lesson: Variant = null, scene_actions: Variant = [], scene_nodes: Variant = [], sandbox_live: bool = false, native_script: GDScript = null) -> Dictionary:
     if source.length() > 10000:
         return {"status": "rejected", "message": "Superati 10000 caratteri"}
     var extends_regex := RegEx.new()
@@ -414,9 +428,10 @@ func run_candidate(source: String, inspect: Variant = [], capture_names: Variant
         source = "extends Node\n" + source
     # The ORIGINAL source is compiled first, without any modified student code.
     __gdh_phase("original_compile")
-    var candidate := GDScript.new()
-    candidate.source_code = source
-    var err := candidate.reload()
+    var candidate: GDScript = native_script if native_script != null else GDScript.new()
+    if native_script == null:
+        candidate.source_code = source
+    var err := candidate.reload() if native_script == null else OK
     if err != OK:
         return {"status": "compile_error", "code": int(err)}
     if not candidate.can_instantiate() or not (candidate.get_instance_base_type() == "Node" or ClassDB.is_parent_class(candidate.get_instance_base_type(), "Node")):

@@ -107,7 +107,7 @@
     output:[titleCase(name),[...name].reverse().join(''),name.slice(0,3).toUpperCase(),
       score.padStart(6,'0')].join('\n')
   })),all(/\.capitalize\s*\(/,/\.reverse\s*\(/,
-    /\.to_upper\s*\(/,/\.lpad\s*\(/));
+    /\.to_upper\s*\(/,/\.(?:lpad|pad_zeros)\s*\(/));
 
   const validEmail=s=>(s.split('@').length===2&&!s.startsWith('@')&&!s.includes(' ')&&
     ['.com','.org','.tech'].some(x=>s.toLowerCase().endsWith(x)));

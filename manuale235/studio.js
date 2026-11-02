@@ -3,21 +3,45 @@
  */
 (() => {
   'use strict';
-  const drafts=new Map();
+  let saveTimer=null;
   let active=null;
-  const lookup=id=>(window.LESSONS_DATA||[]).find(l=>l.id===id&&l.manualLessonNumber);
-  const current=()=>lookup(window.App?.state?.currentLessonId);
+  const lookup=id=>(window.LESSONS_DATA||[]).find(l=>l.id===id&&l.manualLessonNumber)||(window.REVIEW_VARIANTS||[]).find(v=>v.id===id&&v.manualLessonId);
+  const current=()=>window.App?.isReviewMode&&window.App.currentReviewVariant?.manualLessonId?window.App.currentReviewVariant:lookup(window.App?.state?.currentLessonId);
   const getDraft=lesson=>{
-    if(!drafts.has(lesson.id))drafts.set(lesson.id,{
-      files:{...lesson.sourceFiles},selected:Object.keys(lesson.sourceFiles).find(name=>!(lesson.readOnlyFiles||['main.gd']).includes(name))||Object.keys(lesson.sourceFiles)[0],
-      stdin:(window.GDHManualExamples?.[lesson.manualLessonNumber]||[]).join('\n')
-    });
-    return drafts.get(lesson.id);
+    if(window.App.isReviewMode&&window.App.currentReviewVariant?.manualLessonId===lesson.id)lesson=window.App.currentReviewVariant;
+    const state=window.App.state;
+    state.manualDrafts ||= {};
+  const original=lesson.requiresMultipleFiles?lesson.sourceFiles:{'main.gd':state.userCode?.[lesson.id]??lesson.initialCode};
+    let draft=state.manualDrafts[lesson.id];
+    if(!draft || !draft.files || typeof draft.files!=='object'||Array.isArray(draft.files)){
+      draft={files:{...original},selected:Object.keys(original).find(name=>
+        !lesson.requiresMultipleFiles||!(lesson.readOnlyFiles||['main.gd']).includes(name)),
+        stdin:(window.GDHManualExamples?.[lesson.manualLessonNumber]||[]).join('\n'),fileUpdatedAt:{},updatedAt:0};
+      state.manualDrafts[lesson.id]=draft;
+    }
+    for(const [name,source] of Object.entries(original)){
+      if(typeof draft.files[name]!=='string'||draft.files[name].length>16000||
+        lesson.requiresMultipleFiles&&(lesson.readOnlyFiles||['main.gd']).includes(name))draft.files[name]=source;
+    }
+    for(const name of Object.keys(draft.files))if(!Object.hasOwn(original,name))delete draft.files[name];
+    if(!Object.hasOwn(original,draft.selected))draft.selected=Object.keys(original)[0];
+    if(typeof draft.stdin!=='string')draft.stdin='';
+    return draft;
+  };
+  const scheduleSave=()=>{
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>window.App.saveStorage(),400);
   };
   const saveVisible=()=>{
     const l=current(),editor=document.getElementById('code-editor');
     if(!l||!editor||!active||active.lessonId!==l.id)return;
-    const d=getDraft(l);if(d.selected)d.files[d.selected]=editor.value;
+    const d=getDraft(l);
+    if(d.selected&&(!l.requiresMultipleFiles||!(l.readOnlyFiles||['main.gd']).includes(d.selected))&&d.files[d.selected]!==editor.value){
+      d.files[d.selected]=editor.value;d.updatedAt=Date.now();
+      (d.fileUpdatedAt||={})[d.selected]=d.updatedAt;
+    }
+    const stdin=document.getElementById('manual-stdin-lines');
+    if(stdin&&d.stdin!==stdin.value){d.stdin=stdin.value;d.updatedAt=Date.now();}
   };
   const inputLines=()=>{
     const l=current();if(!l)return [];
@@ -51,6 +75,7 @@
           editor.readOnly=lesson.requiresMultipleFiles&&(lesson.readOnlyFiles||['main.gd']).includes(file);
           editor.setAttribute('aria-readonly',String(editor.readOnly));
           editor.dispatchEvent(new Event('input',{bubbles:true}));
+          window.App.saveStorage();
           group.querySelectorAll('button').forEach(b=>{
             b.classList.toggle('is-active',b===button);
             b.setAttribute('aria-selected',String(b===button));
@@ -64,6 +89,7 @@
       editor.setAttribute('aria-readonly',String(editor.readOnly));
       editor.dispatchEvent(new Event('input',{bubbles:true}));
     }
+    if(!lesson.requiresMultipleFiles){editor.value=draft.files['main.gd'];editor.dispatchEvent(new Event('input',{bubbles:true}));}
     if(lesson.requiresStdin){
       const section=document.createElement('section');section.className='manual-input-panel';
       const label=document.createElement('label');label.htmlFor='manual-stdin-lines';
@@ -72,7 +98,7 @@
       area.id='manual-stdin-lines';area.rows=4;area.spellcheck=false;
       area.placeholder='Inserisci una riga di input per volta';
       area.value=draft.stdin;
-      area.oninput=()=>{draft.stdin=area.value;};
+      area.oninput=()=>{draft.stdin=area.value;draft.updatedAt=Date.now();scheduleSave();};
       const btn=document.createElement('button');btn.type='button';btn.className='manual-preview-btn';
       btn.textContent='Prova con questi dati (senza completare)';
       btn.onclick=async()=>{
@@ -108,6 +134,24 @@
       const text=btn.querySelector('.run-text');if(text)text.textContent='Verifica il codice';
     }
   }
+  let references;
+  async function showSolution(lesson){
+    const owner=window.App._saveOwner,id=lesson.id;
+    if(!references)references=fetch(new URL('manuale235/solutions.json',document.baseURI))
+      .then(r=>{if(!r.ok)throw Error('Soluzione non disponibile');return r.json();})
+      .catch(error=>{references=null;throw error;});
+    const solved=(await references)[lesson.manualLessonNumber];
+    if(window.App._saveOwner!==owner||current()?.id!==id)return;
+    if(!solved)throw Error('Soluzione non disponibile');
+    saveVisible();
+    const draft=getDraft(lesson),now=Date.now();
+    for(const [name,text] of Object.entries(solved)){
+      if(Object.hasOwn(draft.files,name)&&(!lesson.requiresMultipleFiles||!(lesson.readOnlyFiles||['main.gd']).includes(name))){
+        draft.files[name]=text;(draft.fileUpdatedAt||={})[name]=now;
+      }
+    }
+    draft.updatedAt=now;attach(id);window.App.saveStorage();
+  }
   const original=window.App?.openLesson;
   if(typeof original!=='function')throw Error('App.openLesson non disponibile');
   window.App.openLesson=function(id){
@@ -116,5 +160,23 @@
     if(lookup(id))attach(id);
     return result;
   };
-  window.GDHManualStudio=Object.freeze({inputLines,attach,getDraft,saveVisible});
+  const originalReview=window.App.openReviewVariant;
+  window.App.openReviewVariant=function(id){
+    saveVisible();const result=originalReview.call(this,id);
+    if(this.isReviewMode&&lookup(id))attach(id);
+    return result;
+  };
+  function resetFile(lesson){
+    const draft=getDraft(lesson),name=draft.selected;
+    draft.files[name]=lesson.sourceFiles[name]??lesson.initialCode;
+    draft.updatedAt=Date.now();(draft.fileUpdatedAt||={})[name]=draft.updatedAt;
+    attach(lesson.id);window.App.saveStorage();
+  }
+  document.addEventListener('input',event=>{
+    if(event.target?.id==='code-editor'&&current()){
+      saveVisible();scheduleSave();
+    }
+  });
+  window.addEventListener('pagehide',()=>{saveVisible();window.App.saveStorage({localOnly:true});});
+  window.GDHManualStudio=Object.freeze({inputLines,attach,getDraft,saveVisible,showSolution,resetFile});
 })();

@@ -49,7 +49,7 @@ permissions:
 
 jobs:
   validate-practice:
-    name: Validate 264 practice tasks and alternatives
+    name: Validate manual grading and behavioral scenarios
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

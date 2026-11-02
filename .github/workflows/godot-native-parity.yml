@@ -14,39 +14,40 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Download Godot 4.4.1 Linux
+      - name: Download Godot 4.5.1 Linux
         run: |
-          curl --fail --location --retry 3 --silent --show-error https://github.com/godotengine/godot-builds/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip -o /tmp/godot4.zip
+          curl --fail --location --retry 3 --silent --show-error https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip -o /tmp/godot4.zip
           mkdir /tmp/godot4
           unzip -q /tmp/godot4.zip -d /tmp/godot4
-          chmod +x /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64
+          chmod +x /tmp/godot4/Godot_v4.5.1-stable_linux.x86_64
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Test curriculum, scene editor contract and real gameplay
         env:
-          GODOT_BIN: /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64
+          GODOT_BIN: /tmp/godot4/Godot_v4.5.1-stable_linux.x86_64
         run: |
           node tests/scene_model.test.cjs
           node tests/curriculum_restructure.test.cjs
           node --test tests/roadmap-progression.test.cjs
           node tests/native_headless_curriculum.test.cjs
+          node tests/manual-course-native.test.cjs
           node tests/native_headless_gameplay.test.cjs
           node tests/native_export.test.cjs
           "$GODOT_BIN" --headless --path . --script tests/native_godot/laboratory.gd
       - name: Test queue_free and Vector2 in native Godot
         run: |
-          /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64 --headless --path tests/native_godot --script smoke.gd 2>&1 | tee /tmp/godot_native.log
+          /tmp/godot4/Godot_v4.5.1-stable_linux.x86_64 --headless --path tests/native_godot --script smoke.gd 2>&1 | tee /tmp/godot_native.log
           grep -F "NATIVE_INITIAL: true" /tmp/godot_native.log
           grep -F "NATIVE_IMMEDIATE_PRESENT: true" /tmp/godot_native.log
           grep -F "NATIVE_QUEUED: true" /tmp/godot_native.log
           grep -F "NATIVE_AFTER_FRAME_PRESENT: false" /tmp/godot_native.log
           grep -F "NATIVE_VECTOR2: (100.0, 200.0)" /tmp/godot_native.log
-      - name: Exercise isolated Arena headless grader with actual Godot 4.4.1
+      - name: Exercise isolated Arena headless grader with actual Godot 4.5.1
         run: |
           sudo mkdir -p /work
           sudo chmod 755 /work
           printf 'extends Node\nfunc double_value(n: int) -> int:\n    return n * 2\n' | sudo tee /work/student.gd >/dev/null
           printf '%s\n' '{"method":"double_value","args":[7]}' | sudo tee /work/input.json >/dev/null
-          /tmp/godot4/Godot_v4.4.1-stable_linux.x86_64 --headless --path server/arena/godot --script res://grader.gd -- /work/student.gd /work/input.json 2>&1 | tee /tmp/gdh-arena-grader.log
+          /tmp/godot4/Godot_v4.5.1-stable_linux.x86_64 --headless --path server/arena/godot --script res://grader.gd -- /work/student.gd /work/input.json 2>&1 | tee /tmp/gdh-arena-grader.log
           grep -F 'GDH_VERDICT:{"status":"executed","value":14}' /tmp/gdh-arena-grader.log

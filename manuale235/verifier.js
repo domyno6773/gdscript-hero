@@ -109,9 +109,9 @@
     const testRuns=cases||[{name:'Esecuzione',stdin:readInput()}];
     for(let i=0;i<testRuns.length;i++){
       const testcase=testRuns[i];
-      let code=source;
+      let code=source, project=null;
       if(lesson.requiresMultipleFiles){
-        try{code=window.GDHManualProject.compile(lesson);}
+        try{project=window.GDHManualProject.compile(lesson);code=project.files[project.entry];}
         catch(error){
           checks.push({desc:'File del progetto',passed:false,
             diff:String(error?.message||error)});
@@ -131,8 +131,12 @@
       }
       if(typeof testcase.harness==='string'&&testcase.harness.length)
         code=code.trimEnd()+'\n\n'+testcase.harness;
+      if(project){
+        project.files[project.entry]=code;
+        project.files=Object.fromEntries(Object.entries(project.files).map(([f,s])=>[f,nativeSource(s)]));
+      }
       const actual=await run(nativeSource(code),{stdin:testcase.stdin||[],
-        calls:testcase.calls||[]});
+        calls:testcase.calls||[],...(project?{project}:{})});
       if(!base)base=actual;
       const ok=actual.status==='executed'&&!String(actual.stderr||'').trim();
       // Le lezioni in cui Godot richiama direttamente le funzioni dello studente
@@ -200,9 +204,10 @@
     if(!lesson)throw Error('Lezione non disponibile');
     if(lesson.requiresMultipleFiles&&!window.GDHManualProject?.supports(lesson))
       throw Error('Esecuzione del progetto non ancora disponibile');
-    const code=lesson.requiresMultipleFiles?
-      window.GDHManualProject.compile(lesson):source;
-    const raw=await run(nativeSource(code),{stdin:stdin||[]});
+    const project=lesson.requiresMultipleFiles?window.GDHManualProject.compile(lesson):null;
+    if(project)project.files=Object.fromEntries(Object.entries(project.files).map(([f,s])=>[f,nativeSource(s)]));
+    const code=project?project.files[project.entry]:source;
+    const raw=await run(nativeSource(code),{stdin:stdin||[],...(project?{project}:{})});
     return {success:raw.status==='executed'&&!String(raw.stderr||'').trim(),
       logs:lines(raw.stdout),error:raw.stderr||raw.reply?.message||'',raw};
   };

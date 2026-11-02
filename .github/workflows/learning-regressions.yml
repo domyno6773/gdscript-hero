@@ -18,11 +18,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Stable course contracts and prerequisites for all 90 questions
+      - name: 235 manual lessons, order and current contracts
         run: node tests/curriculum_stable_v4.test.cjs
       - name: Didactic and native fixture consistency
         run: node tests/didactic_consistency_regression.test.cjs
-      - name: Learning validators and 29 negative examples
+      - name: Reject fixed-output shortcuts and modified support files
         run: node tests/audit_validator_regression.test.cjs
       - name: Instructions and progressive hints match lesson objectives
         run: node tests/lesson_content_alignment.test.cjs
@@ -30,11 +30,11 @@ jobs:
         run: node tests/curriculum_expansion.test.cjs
       - name: Offline soundscape, independent music/SFX settings and mobile gesture
         run: node tests/audio_soundscape.test.cjs
-      - name: Validate all 264 mandatory tasks in the published course
+      - name: Progress, lesson XP and multifile draft persistence
         run: node tests/current_course_regressions.test.cjs
       - name: Lesson 4 comments ignored and real output evaluated
         run: node tests/lesson4_comments_output.test.cjs
-      - name: Chapter 1 multi-task lesson structure and persistence
+      - name: Legacy practice engine isolated unit contracts
         run: node tests/lesson_practice.test.cjs
       - name: Streak and accurate multi-task completion telemetry
         run: node tests/activity_tracking.test.cjs

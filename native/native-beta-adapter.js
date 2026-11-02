@@ -85,7 +85,7 @@
         scene:options.scene||0,actions:options.actions||[],
         mode:options.mode||'',nodes:options.nodes||[],
         node:options.node||'',signal:options.signal||'',frames:options.frames||1,input:options.input||[],
-        stdin:options.stdin||[],paused:!!options.paused
+        stdin:options.stdin||[],project:options.project||null,paused:!!options.paused
       },'*'); // sandboxed iframe has an opaque origin
       return result;
     };
@@ -389,6 +389,10 @@
   const verifyReview=async(variantId,source)=>{
     const variant=window.REVIEW_VARIANTS?.find(v=>v.id===variantId);
     if(!variant)throw Error('Variante di ripasso non disponibile');
+    if(variant.manualLessonId){
+      window.GDHManualStudio.saveVisible();
+      return window.GDHManualVerifier.verify(variant.manualLessonId,source,raw);
+    }
     const execution=await executeReview(source,variantId);
     let tests=[{
       desc:'Godot 4.5.1 ha eseguito il codice senza errori',

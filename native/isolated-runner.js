@@ -29,6 +29,7 @@
     if(pending !== null && Object.hasOwn(diagnostics,next))phase=next;
   };
   const append = (name,text) => {
+    text=String(text).replace(/res:\/\/__gdh_project_\d+\//g,'');
     if(name === 'stderr'){
       diagnostics[phase]=(diagnostics[phase]+text+'\n').slice(0,MAX_OUT);
       if(phase !== 'instrumentation')stderr=(stderr+text+'\n').slice(0,MAX_OUT);
@@ -62,6 +63,11 @@
     const m=e.data;
     if(!m || typeof m!=='object' || m.v!==VERSION || m.type!=='run' || m.session!==session ||
        !Number.isSafeInteger(m.id) || m.id<1 || typeof m.code!=='string' || m.code.length>10000 ||
+       (m.project != null && (!m.project || typeof m.project!=='object' || m.project.entry!=='main.gd' ||
+         !m.project.files || typeof m.project.files!=='object' || Array.isArray(m.project.files) ||
+         Object.keys(m.project.files).length>16 || !Object.hasOwn(m.project.files,'main.gd') ||
+         Object.entries(m.project.files).some(([name,code])=>!/^[a-zA-Z_]\w*\.gd$/.test(name)||typeof code!=='string'||code.length>16000) ||
+         Object.values(m.project.files).reduce((n,s)=>n+s.length,0)>96000)) ||
        !Array.isArray(m.inspect) || m.inspect.length>20 ||
        (m.calls !== undefined && (!Array.isArray(m.calls) || m.calls.length>8 ||
           m.calls.some(c=>!c || typeof c.method!=='string' || !/^[A-Za-z_]\w{0,59}$/.test(c.method) ||
@@ -102,7 +108,7 @@
     stdout=''; stderr='';
     phase='original_compile';
     diagnostics={original_compile:'', instrumentation:'', execution:''};
-    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[],emissions:m.emissions||[],objectCalls:m.objectCalls||[],scene:m.scene||0,actions:m.actions||[],mode:m.mode||'',nodes:m.nodes||[],node:m.node||'',signal:m.signal||'',frames:m.frames||1,input:m.input||[],paused:!!m.paused})); }
+    try { window.gdhReceive(JSON.stringify({id:m.id,code:m.code,project:m.project||null,inspect:m.inspect,locals:m.locals||[],calls:m.calls||[],emissions:m.emissions||[],objectCalls:m.objectCalls||[],scene:m.scene||0,actions:m.actions||[],mode:m.mode||'',nodes:m.nodes||[],node:m.node||'',signal:m.signal||'',frames:m.frames||1,input:m.input||[],paused:!!m.paused})); }
     catch(e) { append('stderr',String(e));window.gdhResult(JSON.stringify({status:'bridge_error'})); }
   });
   if (typeof Engine !== 'function') { notify({type:'error',message:'Export Godot mancante'}); return; }

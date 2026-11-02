@@ -6,11 +6,10 @@ const {spawnSync}=require('node:child_process');
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),w={};
 const ctx=vm.createContext({window:w,console});
-for(const f of ['lessons.js','curriculum_extension.js','chapter_quizzes.js','gameplay_lessons.js','curriculum_restructure.js','native/lesson-fixtures.js','native/lesson-validation.js','native/lesson-validation-native-scenes.js'])vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f});
+for(const f of ['native/lesson-fixtures.js','native/lesson-validation.js','native/lesson-validation-native-scenes.js'])vm.runInContext(fs.readFileSync(path.join(root,f),'utf8'),ctx,{filename:f});
 const lab=w.GDHLessonLab,entries=[];
 for(const fixture of w.GDHLessonFixtures.filter(x=>x.id<=60)){
-  const lesson=w.LESSONS_DATA.find(l=>l.id===fixture.id);
-  entries.push({fixture,code:lesson.solution,name:String(lesson.id)});
+  entries.push({fixture,code:fixture.solution,name:String(fixture.id)});
 }
 const alt=(id,change)=>{const fixture=w.GDHLessonFixtures.find(x=>x.id===id);entries.push({fixture,code:change(fixture.solution),name:id+'-alternative'});};
 alt(34,s=>s.replace('posizione.x += velocita','posizione += Vector2(velocita, 0)'));

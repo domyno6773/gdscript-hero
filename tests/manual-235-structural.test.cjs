@@ -154,7 +154,7 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     }else{
       const assembled=adapter.build(lesson,lesson.sourceFiles);
       assert.match(assembled,/^extends Node/m);
-      assert.match(assembled,/^class \w+:/m);
+      assert.equal(adapter.prepare(lesson,lesson.sourceFiles).files['main.gd'],assembled);
     }
     const broken={...lesson.sourceFiles,'main.gd':lesson.sourceFiles['main.gd']+'\nprint("falso")'};
     assert.throws(()=>adapter.build(lesson,broken),/modificato/);
@@ -187,9 +187,9 @@ async function checks(n,logs,source=lessons[n-1].initialCode){
     assert.ok(verify.expectedCases[n].length>=5);
     assert.equal(context.window.GDHManualProject.supports(lesson),true);
     const code=context.window.GDHManualProject.build(lesson,lesson.sourceFiles);
-    assert.match(code,/^class \w+:/m);
-    assert.match(code,/extends RefCounted/);
-    assert.match(code,/extends (Vehicle|Person)/);
+    const nativeFiles=context.window.GDHManualProject.prepare(lesson,lesson.sourceFiles).files;
+    assert.match(Object.values(nativeFiles).join('\n'),/extends RefCounted/);
+    assert.match(Object.values(nativeFiles).join('\n'),/extends (Vehicle|Person)/);
   }
   // Le classi di supporto sono immutabili, non solo main.gd.
   const project=context.window.GDHManualProject;
